@@ -1,0 +1,7 @@
+export 'bloc/dashboard_bloc.dart';
+export 'bloc/dashboard_event.dart';
+export 'bloc/dashboard_state.dart';
+export 'pages/dashboard_page.dart';
+export 'widgets/summary_card.dart';
+export 'widgets/category_breakdown_widget.dart';
+export 'widgets/recent_transactions_list.dart';

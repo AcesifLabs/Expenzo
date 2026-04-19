@@ -1,0 +1,103 @@
+import 'package:flutter_sms_inbox/flutter_sms_inbox.dart' as fsms;
+import '../../domain/entities/sms_message.dart';
+
+abstract class SmsLocalDatasource {
+  Future<List<SmsMessage>> getAllSms();
+  Future<List<SmsMessage>> getSmsFromDateRange(DateTime start, DateTime end);
+  Future<List<SmsMessage>> getSmsFromAddress(String address);
+  Future<List<SmsMessage>> getSmsBatched({
+    int start = 0,
+    int count = 100,
+    String? address,
+  });
+}
+
+class SmsLocalDatasourceImpl implements SmsLocalDatasource {
+  final fsms.SmsQuery _smsQuery;
+
+  SmsLocalDatasourceImpl() : _smsQuery = fsms.SmsQuery();
+
+  @override
+  Future<List<SmsMessage>> getAllSms() async {
+    try {
+      final messages = await _smsQuery.getAllSms;
+      return messages.map(_mapToEntity).toList();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  @override
+  Future<List<SmsMessage>> getSmsFromDateRange(
+    DateTime start,
+    DateTime end,
+  ) async {
+    try {
+      final messages = await _smsQuery.getAllSms;
+      return messages
+          .where(
+            (m) =>
+                m.date != null &&
+                m.date!.isAfter(start) &&
+                m.date!.isBefore(end),
+          )
+          .map(_mapToEntity)
+          .toList();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  @override
+  Future<List<SmsMessage>> getSmsFromAddress(String address) async {
+    try {
+      final messages = await _smsQuery.querySms(address: address);
+      return messages.map(_mapToEntity).toList();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  @override
+  Future<List<SmsMessage>> getSmsBatched({
+    int start = 0,
+    int count = 100,
+    String? address,
+  }) async {
+    try {
+      final messages = await _smsQuery.querySms(
+        start: start,
+        count: count,
+        address: address,
+        kinds: [fsms.SmsQueryKind.inbox],
+      );
+      return messages.map(_mapToEntity).toList();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  SmsMessage _mapToEntity(fsms.SmsMessage message) {
+    return SmsMessage(
+      id: message.id?.toString() ?? '',
+      address: message.address ?? '',
+      body: message.body ?? '',
+      date: message.date ?? DateTime.now(),
+      read: message.read ?? false,
+      type: _mapSmsKind(message.kind),
+    );
+  }
+
+  SmsType _mapSmsKind(fsms.SmsMessageKind? kind) {
+    switch (kind) {
+      case fsms.SmsMessageKind.received:
+        return SmsType.received;
+      case fsms.SmsMessageKind.sent:
+        return SmsType.sent;
+      case fsms.SmsMessageKind.draft:
+        return SmsType.draft;
+      default:
+        return SmsType.received;
+    }
+  }
+}

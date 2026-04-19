@@ -1,0 +1,48 @@
+import 'package:equatable/equatable.dart';
+
+class ParsedTransaction extends Equatable {
+  final String rawMessage;
+  final double? amount;
+  final DateTime? date;
+  final String? description;
+  final String? categoryId;
+  final String sourceType;
+  final String sourceId;
+  final double confidenceScore;
+  final String? matchedRuleId;
+  final bool parseFailed;
+  final String? parseError;
+
+  const ParsedTransaction({
+    required this.rawMessage,
+    this.amount,
+    this.date,
+    this.description,
+    this.categoryId,
+    required this.sourceType,
+    required this.sourceId,
+    required this.confidenceScore,
+    this.matchedRuleId,
+    required this.parseFailed,
+    this.parseError,
+  });
+
+  bool isHighConfidence() => confidenceScore >= 0.9;
+  bool isMediumConfidence() => confidenceScore >= 0.7;
+  bool isLowConfidence() => confidenceScore < 0.7;
+
+  @override
+  List<Object?> get props => [
+    rawMessage,
+    amount,
+    date,
+    description,
+    categoryId,
+    sourceType,
+    sourceId,
+    confidenceScore,
+    matchedRuleId,
+    parseFailed,
+    parseError,
+  ];
+}
