@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'core/di/injection_container.dart' as di;
 import 'core/theme/app_theme.dart';
+import 'core/utils/navigation_utils.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
 import 'features/categories/presentation/bloc/category_bloc.dart';
@@ -12,6 +13,7 @@ import 'features/categories/presentation/pages/category_list_page.dart';
 import 'features/expenses/presentation/bloc/expense_bloc.dart';
 import 'features/expenses/presentation/bloc/expense_event.dart';
 import 'features/expenses/presentation/pages/expense_list_page.dart';
+import 'features/expenses/presentation/pages/expense_form_page.dart';
 import 'features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
 import 'shared/presentation/pages/scan_page.dart';
 import 'shared/presentation/widgets/lazy_indexed_stack.dart';
@@ -91,8 +93,8 @@ class _AppLoaderState extends State<AppLoader> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
-                  LucideIcons.alertCircle,
+                Icon(
+                  PhosphorIcons.warningCircle(PhosphorIconsStyle.regular),
                   color: Colors.red,
                   size: 64,
                 ),
@@ -179,7 +181,7 @@ class _SplashIconState extends State<_SplashIcon> with SingleTickerProviderState
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            LucideIcons.wallet,
+            PhosphorIcons.wallet(PhosphorIconsStyle.regular),
             size: 64,
             color: Theme.of(context).colorScheme.primary,
           ),
@@ -245,32 +247,49 @@ class _AppShellState extends State<AppShell> {
           SettingsView(),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        type: BottomNavigationBarType.fixed,
-        onTap: (index) => setState(() => _currentIndex = index),
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(_currentIndex == 0 ? LucideIcons.receipt : LucideIcons.receipt),
-            activeIcon: const Icon(Icons.receipt_long),
-            label: 'Expenses',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(_currentIndex == 1 ? LucideIcons.tag : LucideIcons.tag),
-            activeIcon: const Icon(Icons.sell),
-            label: 'Categories',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(_currentIndex == 2 ? LucideIcons.scan : LucideIcons.scan),
-            activeIcon: const Icon(Icons.document_scanner),
-            label: 'Scan',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(_currentIndex == 3 ? LucideIcons.settings : LucideIcons.settings),
-            activeIcon: const Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _navigateToForm(context),
+        shape: const CircleBorder(),
+        child: Icon(PhosphorIcons.plus(PhosphorIconsStyle.regular)),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: BottomAppBar(
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 8.0,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _buildNavItem(0, PhosphorIcons.invoice(PhosphorIconsStyle.regular), 'Expenses'),
+            _buildNavItem(1, PhosphorIcons.tag(PhosphorIconsStyle.regular), 'Categories'),
+            const SizedBox(width: 40),
+            _buildNavItem(2, PhosphorIcons.listMagnifyingGlass(PhosphorIconsStyle.regular), 'Scan'),
+            _buildNavItem(3, PhosphorIcons.faders(PhosphorIconsStyle.regular), 'Settings'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(int index, IconData icon, String label) {
+    final isSelected = _currentIndex == index;
+    return IconButton(
+      icon: Icon(icon, color: isSelected ? Theme.of(context).colorScheme.primary : Colors.grey),
+      onPressed: () => setState(() => _currentIndex = index),
+      tooltip: label,
+    );
+  }
+
+  void _navigateToForm(BuildContext context) {
+    Navigator.push(
+      context,
+      SlidePageRoute(
+        builder: (_) => MultiBlocProvider(
+          providers: [
+            BlocProvider.value(value: di.getIt<ExpenseBloc>()),
+            BlocProvider.value(value: di.getIt<CategoryBloc>()),
+          ],
+          child: ExpenseFormPage(expense: null),
+        ),
       ),
     );
   }

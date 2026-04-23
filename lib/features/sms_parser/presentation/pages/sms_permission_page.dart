@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../bloc/sms_permission_bloc.dart';
 import '../bloc/sms_permission_event.dart';
@@ -34,8 +34,8 @@ class SmsPermissionPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Spacer(),
-                  const Icon(
-                    LucideIcons.messageSquare,
+                  Icon(
+                    PhosphorIcons.chat(PhosphorIconsStyle.regular),
                     size: 80,
                     color: AppColors.primary,
                   ),
@@ -53,21 +53,21 @@ class SmsPermissionPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
                   _buildInfoCard(
-                    icon: LucideIcons.lock,
+                    icon: PhosphorIcons.lock(PhosphorIconsStyle.regular),
                     title: 'Your Privacy Protected',
                     description:
                         'All SMS data is processed locally on your device. We never upload your messages to any server.',
                   ),
                   const SizedBox(height: 12),
                   _buildInfoCard(
-                    icon: LucideIcons.database,
+                    icon: PhosphorIcons.database(PhosphorIconsStyle.regular),
                     title: 'Local Storage Only',
                     description:
                         'Detected expenses are stored locally. No personal messages are saved.',
                   ),
                   const SizedBox(height: 12),
                   _buildInfoCard(
-                    icon: LucideIcons.sliders,
+                    icon: PhosphorIcons.slidersHorizontal(PhosphorIconsStyle.regular),
                     title: 'You\'re in Control',
                     description:
                         'Choose which SMS to convert to expenses. You can always edit or delete them.',
@@ -106,14 +106,14 @@ class SmsPermissionPage extends StatelessWidget {
                         color: AppColors.warning.withAlpha(51),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Column(
+                      child: Column(
                         children: [
                           Icon(
-                            LucideIcons.alertTriangle,
+                            PhosphorIcons.warning(PhosphorIconsStyle.regular),
                             color: AppColors.warning,
                           ),
-                          SizedBox(height: 8),
-                          Text(
+                          const SizedBox(height: 8),
+                          const Text(
                             'SMS permission was permanently denied. Please enable it in app settings.',
                             textAlign: TextAlign.center,
                           ),
@@ -134,18 +134,18 @@ class SmsPermissionPage extends StatelessWidget {
                     ),
                   ],
                   if (state is SmsPermissionTimeout) ...[
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
                     Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: AppColors.error.withAlpha(51),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Column(
+                      child: Column(
                         children: [
-                          Icon(LucideIcons.alertCircle, color: AppColors.error),
-                          SizedBox(height: 8),
-                          Text(
+                          Icon(PhosphorIcons.warningCircle(PhosphorIconsStyle.regular), color: AppColors.error),
+                          const SizedBox(height: 8),
+                          const Text(
                             'Permission request timed out. Please try again.',
                             textAlign: TextAlign.center,
                           ),

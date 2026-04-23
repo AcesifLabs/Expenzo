@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/database/daos/pending_recurring_dao.dart';
 import '../bloc/recurring_bloc.dart';
@@ -44,7 +44,7 @@ class _PendingRecurringSectionState extends State<PendingRecurringSection> {
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
-                    const Icon(LucideIcons.clock, color: Colors.orange),
+                    Icon(PhosphorIcons.clock(PhosphorIconsStyle.regular), color: Colors.orange),
                     const SizedBox(width: 8),
                     const Text(
                       'Pending Recurring',
@@ -74,8 +74,8 @@ class _PendingRecurringSectionState extends State<PendingRecurringSection> {
                   return ListTile(
                     leading: CircleAvatar(
                       backgroundColor: Colors.orange.withAlpha(51),
-                      child: const Icon(
-                        LucideIcons.calendar,
+                      child: Icon(
+                        PhosphorIcons.calendar(PhosphorIconsStyle.regular),
                         color: Colors.orange,
                       ),
                     ),
@@ -84,7 +84,7 @@ class _PendingRecurringSectionState extends State<PendingRecurringSection> {
                       '\$${item.amount.toStringAsFixed(2)} - Due: ${dateFormat.format(item.dueDate)}',
                     ),
                     trailing: IconButton(
-                      icon: const Icon(LucideIcons.checkCircle2),
+                      icon: Icon(PhosphorIcons.checkCircle(PhosphorIconsStyle.regular)),
                       color: Colors.green,
                       onPressed: () async {
                         await _pendingDao.markAsProcessed(item.id);

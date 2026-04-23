@@ -1,115 +1,115 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 /// Centralized icon helper for Lucide Icons integration
 class AppIcons {
   AppIcons._();
 
   // ============ NAVIGATION ICONS ============
-  static IconData get home => LucideIcons.home;
-  static IconData get dashboard => LucideIcons.layoutDashboard;
-  static IconData get scan => LucideIcons.scan;
-  static IconData get search => LucideIcons.search;
-  static IconData get settings => LucideIcons.settings;
+  static IconData get home => PhosphorIcons.house(PhosphorIconsStyle.regular);
+  static IconData get dashboard => PhosphorIcons.squaresFour(PhosphorIconsStyle.regular);
+  static IconData get scan => PhosphorIcons.listMagnifyingGlass(PhosphorIconsStyle.regular);
+  static IconData get search => PhosphorIcons.magnifyingGlass(PhosphorIconsStyle.regular);
+  static IconData get settings => PhosphorIcons.faders(PhosphorIconsStyle.regular);
 
   // ============ ACTION ICONS ============
-  static IconData get add => LucideIcons.plus;
-  static IconData get delete => LucideIcons.trash2;
-  static IconData get edit => LucideIcons.edit;
-  static IconData get check => LucideIcons.check;
-  static IconData get close => LucideIcons.x;
-  static IconData get menu => LucideIcons.menu;
-  static IconData get filter => LucideIcons.filter;
-  static IconData get refresh => LucideIcons.refreshCcw;
-  static IconData get save => LucideIcons.save;
-  static IconData get share => LucideIcons.share;
-  static IconData get download => LucideIcons.download;
-  static IconData get upload => LucideIcons.upload;
+  static IconData get add => PhosphorIcons.plus(PhosphorIconsStyle.regular);
+  static IconData get delete => PhosphorIcons.trash(PhosphorIconsStyle.regular);
+  static IconData get edit => PhosphorIcons.pencilSimple(PhosphorIconsStyle.regular);
+  static IconData get check => PhosphorIcons.check(PhosphorIconsStyle.regular);
+  static IconData get close => PhosphorIcons.x(PhosphorIconsStyle.regular);
+  static IconData get menu => PhosphorIcons.list(PhosphorIconsStyle.regular);
+  static IconData get filter => PhosphorIcons.funnel(PhosphorIconsStyle.regular);
+  static IconData get refresh => PhosphorIcons.arrowsClockwise(PhosphorIconsStyle.regular);
+  static IconData get save => PhosphorIcons.floppyDisk(PhosphorIconsStyle.regular);
+  static IconData get share => PhosphorIcons.shareNetwork(PhosphorIconsStyle.regular);
+  static IconData get download => PhosphorIcons.downloadSimple(PhosphorIconsStyle.regular);
+  static IconData get upload => PhosphorIcons.uploadSimple(PhosphorIconsStyle.regular);
 
   // ============ STATUS ICONS ============
-  static IconData get warning => LucideIcons.alertTriangle;
-  static IconData get error => LucideIcons.alertCircle;
-  static IconData get success => LucideIcons.checkCircle;
-  static IconData get info => LucideIcons.info;
-  static IconData get help => LucideIcons.helpCircle;
+  static IconData get warning => PhosphorIcons.warning(PhosphorIconsStyle.regular);
+  static IconData get error => PhosphorIcons.warningCircle(PhosphorIconsStyle.regular);
+  static IconData get success => PhosphorIcons.checkCircle(PhosphorIconsStyle.regular);
+  static IconData get info => PhosphorIcons.info(PhosphorIconsStyle.regular);
+  static IconData get help => PhosphorIcons.question(PhosphorIconsStyle.regular);
 
   // ============ NAVIGATION ARROWS ============
-  static IconData get back => LucideIcons.arrowLeft;
-  static IconData get forward => LucideIcons.arrowRight;
-  static IconData get chevronRight => LucideIcons.chevronRight;
-  static IconData get chevronDown => LucideIcons.chevronDown;
+  static IconData get back => PhosphorIcons.arrowLeft(PhosphorIconsStyle.regular);
+  static IconData get forward => PhosphorIcons.arrowRight(PhosphorIconsStyle.regular);
+  static IconData get chevronRight => PhosphorIcons.caretRight(PhosphorIconsStyle.regular);
+  static IconData get chevronDown => PhosphorIcons.caretDown(PhosphorIconsStyle.regular);
 
   // ============ FINANCE ICONS ============
-  static IconData get wallet => LucideIcons.wallet;
-  static IconData get money => LucideIcons.dollarSign;
-  static IconData get receipt => LucideIcons.receipt;
-  static IconData get card => LucideIcons.creditCard;
-  static IconData get trendingUp => LucideIcons.trendingUp;
-  static IconData get trendingDown => LucideIcons.trendingDown;
-  static IconData get chart => LucideIcons.barChart3;
-  static IconData get pieChart => LucideIcons.pieChart;
+  static IconData get wallet => PhosphorIcons.wallet(PhosphorIconsStyle.regular);
+  static IconData get money => PhosphorIcons.currencyDollar(PhosphorIconsStyle.regular);
+  static IconData get receipt => PhosphorIcons.invoice(PhosphorIconsStyle.regular);
+  static IconData get card => PhosphorIcons.creditCard(PhosphorIconsStyle.regular);
+  static IconData get trendingUp => PhosphorIcons.trendUp(PhosphorIconsStyle.regular);
+  static IconData get trendingDown => PhosphorIcons.trendDown(PhosphorIconsStyle.regular);
+  static IconData get chart => PhosphorIcons.chartBar(PhosphorIconsStyle.regular);
+  static IconData get pieChart => PhosphorIcons.chartPie(PhosphorIconsStyle.regular);
 
   // ============ CATEGORY ICONS ============
-  static IconData get category => LucideIcons.tag;
-  static IconData get food => LucideIcons.utensils;
-  static IconData get grocery => LucideIcons.shoppingCart;
-  static IconData get shopping => LucideIcons.shoppingBag;
-  static IconData get transport => LucideIcons.car;
-  static IconData get entertainment => LucideIcons.ticket;
-  static IconData get health => LucideIcons.heartPulse;
-  static IconData get utilities => LucideIcons.zap;
-  static IconData get education => LucideIcons.bookOpen;
-  static IconData get travel => LucideIcons.rocket; // airplane alternative
-  static IconData get cafe => LucideIcons.coffee;
-  static IconData get gift => LucideIcons.gift;
-  static IconData get other => LucideIcons.tag;
+  static IconData get category => PhosphorIcons.tag(PhosphorIconsStyle.regular);
+  static IconData get food => PhosphorIcons.forkKnife(PhosphorIconsStyle.regular);
+  static IconData get grocery => PhosphorIcons.shoppingCart(PhosphorIconsStyle.regular);
+  static IconData get shopping => PhosphorIcons.bag(PhosphorIconsStyle.regular);
+  static IconData get transport => PhosphorIcons.car(PhosphorIconsStyle.regular);
+  static IconData get entertainment => PhosphorIcons.ticket(PhosphorIconsStyle.regular);
+  static IconData get health => PhosphorIcons.heartbeat(PhosphorIconsStyle.regular);
+  static IconData get utilities => PhosphorIcons.lightning(PhosphorIconsStyle.regular);
+  static IconData get education => PhosphorIcons.bookOpen(PhosphorIconsStyle.regular);
+  static IconData get travel => PhosphorIcons.airplane(PhosphorIconsStyle.regular);
+  static IconData get cafe => PhosphorIcons.coffee(PhosphorIconsStyle.regular);
+  static IconData get gift => PhosphorIcons.gift(PhosphorIconsStyle.regular);
+  static IconData get other => PhosphorIcons.tag(PhosphorIconsStyle.regular);
 
   // ============ SOURCE ICONS ============
-  static IconData get sms => LucideIcons.messageSquare;
-  static IconData get email => LucideIcons.mail;
-  static IconData get manual => LucideIcons.edit3;
-  static IconData get sync => LucideIcons.refreshCcw;
+  static IconData get sms => PhosphorIcons.chat(PhosphorIconsStyle.regular);
+  static IconData get email => PhosphorIcons.envelope(PhosphorIconsStyle.regular);
+  static IconData get manual => PhosphorIcons.pencilSimpleLine(PhosphorIconsStyle.regular);
+  static IconData get sync => PhosphorIcons.arrowsClockwise(PhosphorIconsStyle.regular);
 
   // ============ TIME ICONS ============
-  static IconData get calendar => LucideIcons.calendar;
-  static IconData get clock => LucideIcons.clock;
-  static IconData get schedule => LucideIcons.calendarClock;
-  static IconData get history => LucideIcons.history;
-  static IconData get repeat => LucideIcons.repeat;
+  static IconData get calendar => PhosphorIcons.calendar(PhosphorIconsStyle.regular);
+  static IconData get clock => PhosphorIcons.clock(PhosphorIconsStyle.regular);
+  static IconData get schedule => PhosphorIcons.calendarBlank(PhosphorIconsStyle.regular);
+  static IconData get history => PhosphorIcons.clockCounterClockwise(PhosphorIconsStyle.regular);
+  static IconData get repeat => PhosphorIcons.arrowsCounterClockwise(PhosphorIconsStyle.regular);
 
   // ============ USER ICONS ============
-  static IconData get user => LucideIcons.user;
-  static IconData get profile => LucideIcons.userCircle;
+  static IconData get user => PhosphorIcons.user(PhosphorIconsStyle.regular);
+  static IconData get profile => PhosphorIcons.userCircle(PhosphorIconsStyle.regular);
 
   // ============ NOTIFICATION ICONS ============
-  static IconData get notification => LucideIcons.bell;
-  static IconData get cloudDone => LucideIcons.cloud;
-  static IconData get cloudOff => LucideIcons.cloudOff;
+  static IconData get notification => PhosphorIcons.bell(PhosphorIconsStyle.regular);
+  static IconData get cloudDone => PhosphorIcons.cloud(PhosphorIconsStyle.regular);
+  static IconData get cloudOff => PhosphorIcons.cloudX(PhosphorIconsStyle.regular);
 
   // ============ DEVICE/COMM ICONS ============
-  static IconData get phone => LucideIcons.phone;
-  static IconData get location => LucideIcons.mapPin;
-  static IconData get image => LucideIcons.image;
-  static IconData get link => LucideIcons.link;
-  static IconData get wifi => LucideIcons.wifi;
-  static IconData get printer => LucideIcons.printer;
+  static IconData get phone => PhosphorIcons.phone(PhosphorIconsStyle.regular);
+  static IconData get location => PhosphorIcons.mapPin(PhosphorIconsStyle.regular);
+  static IconData get image => PhosphorIcons.image(PhosphorIconsStyle.regular);
+  static IconData get link => PhosphorIcons.link(PhosphorIconsStyle.regular);
+  static IconData get wifi => PhosphorIcons.wifiHigh(PhosphorIconsStyle.regular);
+  static IconData get printer => PhosphorIcons.printer(PhosphorIconsStyle.regular);
 
   // ============ SECURITY ICONS ============
-  static IconData get lock => LucideIcons.lock;
-  static IconData get unlock => LucideIcons.unlock;
-  static IconData get security => LucideIcons.shield;
-  static IconData get visibility => LucideIcons.eye;
-  static IconData get visibilityOff => LucideIcons.eyeOff;
+  static IconData get lock => PhosphorIcons.lock(PhosphorIconsStyle.regular);
+  static IconData get unlock => PhosphorIcons.lockOpen(PhosphorIconsStyle.regular);
+  static IconData get security => PhosphorIcons.shield(PhosphorIconsStyle.regular);
+  static IconData get visibility => PhosphorIcons.eye(PhosphorIconsStyle.regular);
+  static IconData get visibilityOff => PhosphorIcons.eyeClosed(PhosphorIconsStyle.regular);
 
   // ============ MISC ICONS ============
-  static IconData get empty => LucideIcons.inbox;
-  static IconData get apps => LucideIcons.layoutGrid;
-  static IconData get copy => LucideIcons.copy;
-  static IconData get document => LucideIcons.fileText;
-  static IconData get folder => LucideIcons.folder;
-  static IconData get star => LucideIcons.star;
-  static IconData get heart => LucideIcons.heart;
-  static IconData get globe => LucideIcons.globe;
+  static IconData get empty => PhosphorIcons.empty(PhosphorIconsStyle.regular);
+  static IconData get apps => PhosphorIcons.squaresFour(PhosphorIconsStyle.regular);
+  static IconData get copy => PhosphorIcons.copy(PhosphorIconsStyle.regular);
+  static IconData get document => PhosphorIcons.fileText(PhosphorIconsStyle.regular);
+  static IconData get folder => PhosphorIcons.folder(PhosphorIconsStyle.regular);
+  static IconData get star => PhosphorIcons.star(PhosphorIconsStyle.regular);
+  static IconData get heart => PhosphorIcons.heart(PhosphorIconsStyle.regular);
+  static IconData get globe => PhosphorIcons.globe(PhosphorIconsStyle.regular);
 
   // ============ CATEGORY EMOJI MAPPING ============
   /// Maps category names to icons
@@ -339,134 +339,5 @@ class AppIcons {
       default:
         return Icons.help_outline;
     }
-  }
-}
-
-/// Extension to convert Material Icons to Lucide Icons
-extension MaterialToLucideIcon on IconData {
-  IconData toLucide() {
-    final iconName = toString().toLowerCase();
-
-    // Map common Material icons to Lucide
-    if (iconName.contains('home')) return AppIcons.home;
-    if (iconName.contains('dashboard') || iconName.contains('layout'))
-      return AppIcons.dashboard;
-    if (iconName.contains('scan') || iconName.contains('qr'))
-      return AppIcons.scan;
-    if (iconName.contains('search')) return AppIcons.search;
-    if (iconName.contains('settings')) return AppIcons.settings;
-    if (iconName.contains('add') || iconName.contains('plus'))
-      return AppIcons.add;
-    if (iconName.contains('delete') || iconName.contains('trash'))
-      return AppIcons.delete;
-    if (iconName.contains('edit') || iconName.contains('pencil'))
-      return AppIcons.edit;
-    if (iconName.contains('check')) return AppIcons.check;
-    if (iconName.contains('close') ||
-        iconName.contains('cancel') ||
-        iconName.contains('x'))
-      return AppIcons.close;
-    if (iconName.contains('menu')) return AppIcons.menu;
-    if (iconName.contains('filter')) return AppIcons.filter;
-    if (iconName.contains('refresh') || iconName.contains('sync'))
-      return AppIcons.refresh;
-    if (iconName.contains('save')) return AppIcons.save;
-    if (iconName.contains('share')) return AppIcons.share;
-    if (iconName.contains('download')) return AppIcons.download;
-    if (iconName.contains('upload')) return AppIcons.upload;
-    if (iconName.contains('warning') || iconName.contains('alert'))
-      return AppIcons.warning;
-    if (iconName.contains('error')) return AppIcons.error;
-    if (iconName.contains('info')) return AppIcons.info;
-    if (iconName.contains('arrow_left') || iconName.contains('back'))
-      return AppIcons.back;
-    if (iconName.contains('arrow_right') || iconName.contains('forward'))
-      return AppIcons.forward;
-    if (iconName.contains('chevron')) return AppIcons.chevronRight;
-    if (iconName.contains('trending_up')) return AppIcons.trendingUp;
-    if (iconName.contains('trending_down')) return AppIcons.trendingDown;
-    if (iconName.contains('wallet') || iconName.contains('account_balance'))
-      return AppIcons.wallet;
-    if (iconName.contains('money') || iconName.contains('dollar'))
-      return AppIcons.money;
-    if (iconName.contains('receipt')) return AppIcons.receipt;
-    if (iconName.contains('chart') || iconName.contains('pie'))
-      return AppIcons.chart;
-    if (iconName.contains('category') || iconName.contains('tag'))
-      return AppIcons.category;
-    if (iconName.contains('sms') || iconName.contains('message'))
-      return AppIcons.sms;
-    if (iconName.contains('email') || iconName.contains('mail'))
-      return AppIcons.email;
-    if (iconName.contains('calendar') || iconName.contains('date'))
-      return AppIcons.calendar;
-    if (iconName.contains('clock') ||
-        iconName.contains('schedule') ||
-        iconName.contains('time'))
-      return AppIcons.clock;
-    if (iconName.contains('history')) return AppIcons.history;
-    if (iconName.contains('repeat')) return AppIcons.repeat;
-    if (iconName.contains('person') || iconName.contains('user'))
-      return AppIcons.user;
-    if (iconName.contains('bell') || iconName.contains('notification'))
-      return AppIcons.notification;
-    if (iconName.contains('cloud')) return AppIcons.cloudDone;
-    if (iconName.contains('phone')) return AppIcons.phone;
-    if (iconName.contains('location') || iconName.contains('map'))
-      return AppIcons.location;
-    if (iconName.contains('image') || iconName.contains('photo'))
-      return AppIcons.image;
-    if (iconName.contains('link')) return AppIcons.link;
-    if (iconName.contains('lock')) return AppIcons.lock;
-    if (iconName.contains('unlock')) return AppIcons.unlock;
-    if (iconName.contains('visibility') && !iconName.contains('off'))
-      return AppIcons.visibility;
-    if (iconName.contains('visibility_off')) return AppIcons.visibilityOff;
-    if (iconName.contains('security') || iconName.contains('shield'))
-      return AppIcons.security;
-    if (iconName.contains('car') || iconName.contains('drive'))
-      return AppIcons.transport;
-    if (iconName.contains('hospital') ||
-        iconName.contains('health') ||
-        iconName.contains('heart'))
-      return AppIcons.health;
-    if (iconName.contains('book') || iconName.contains('school'))
-      return AppIcons.education;
-    if (iconName.contains('airplane') || iconName.contains('flight'))
-      return AppIcons.travel;
-    if (iconName.contains('shop') || iconName.contains('cart'))
-      return AppIcons.shopping;
-    if (iconName.contains('gift')) return AppIcons.gift;
-    if (iconName.contains('ticket')) return AppIcons.entertainment;
-    if (iconName.contains('flash') ||
-        iconName.contains('electric') ||
-        iconName.contains('zap'))
-      return AppIcons.utilities;
-    if (iconName.contains('star') || iconName.contains('favorite'))
-      return AppIcons.star;
-    if (iconName.contains('heart') && !iconName.contains('health'))
-      return AppIcons.heart;
-    if (iconName.contains('printer')) return AppIcons.printer;
-    if (iconName.contains('globe') ||
-        iconName.contains('earth') ||
-        iconName.contains('world'))
-      return AppIcons.globe;
-    if (iconName.contains('copy')) return AppIcons.copy;
-    if (iconName.contains('document') || iconName.contains('file'))
-      return AppIcons.document;
-    if (iconName.contains('folder')) return AppIcons.folder;
-    if (iconName.contains('wifi') || iconName.contains('signal'))
-      return AppIcons.wifi;
-    if (iconName.contains('credit') || iconName.contains('card'))
-      return AppIcons.card;
-    if (iconName.contains('utensils') ||
-        iconName.contains('food') ||
-        iconName.contains('restaurant'))
-      return AppIcons.food;
-    if (iconName.contains('coffee') || iconName.contains('cafe'))
-      return AppIcons.cafe;
-
-    // Return original if no mapping found
-    return this;
   }
 }

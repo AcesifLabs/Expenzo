@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class SmsPermissionGate extends StatefulWidget {
   final Widget child;
@@ -83,7 +83,7 @@ class _SmsPermissionGateState extends State<SmsPermissionGate> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(LucideIcons.alertCircle, size: 80, color: Colors.grey),
+            Icon(PhosphorIcons.warningCircle(PhosphorIconsStyle.regular), size: 80, color: Colors.grey),
             const SizedBox(height: 24),
             const Text(
               'SMS Access Required',
@@ -99,7 +99,7 @@ class _SmsPermissionGateState extends State<SmsPermissionGate> {
             ),
             const SizedBox(height: 32),
             ElevatedButton.icon(
-              icon: const Icon(LucideIcons.check),
+              icon: Icon(PhosphorIcons.check(PhosphorIconsStyle.regular)),
               label: const Text('Grant Access', style: TextStyle(fontSize: 18)),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(

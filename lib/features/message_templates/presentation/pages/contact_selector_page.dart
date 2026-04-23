@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../core/utils/navigation_utils.dart';
 import '../bloc/contact_selector_bloc.dart';
 import '../bloc/contact_selector_event.dart';
@@ -81,7 +81,7 @@ class _ContactSelectorViewState extends State<ContactSelectorView> {
             child: TextField(
               decoration: InputDecoration(
                 hintText: 'Search contacts...',
-                prefixIcon: const Icon(LucideIcons.search),
+                prefixIcon: Icon(PhosphorIcons.magnifyingGlass(PhosphorIconsStyle.regular)),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -151,8 +151,8 @@ class _ContactSelectorViewState extends State<ContactSelectorView> {
                             leading: CircleAvatar(
                               child: Icon(
                                 contact.sourceType == 'sms'
-                                    ? LucideIcons.messageSquare
-                                    : LucideIcons.mail,
+                                    ? PhosphorIcons.chat(PhosphorIconsStyle.regular)
+                                    : PhosphorIcons.envelope(PhosphorIconsStyle.regular),
                               ),
                             ),
                             title: Row(
@@ -198,7 +198,7 @@ class _ContactSelectorViewState extends State<ContactSelectorView> {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            trailing: const Icon(LucideIcons.chevronRight),
+                            trailing: Icon(PhosphorIcons.caretRight(PhosphorIconsStyle.regular)),
                             onTap: () {
                               final source =
                                   existingSource ??

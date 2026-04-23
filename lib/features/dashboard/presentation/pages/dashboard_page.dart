@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../domain/entities/date_range.dart';
 import '../bloc/dashboard_bloc.dart';
 import '../bloc/dashboard_event.dart';
@@ -20,7 +20,7 @@ class DashboardPage extends StatelessWidget {
         title: const Text('Dashboard'),
         actions: [
           IconButton(
-            icon: const Icon(LucideIcons.refreshCcw),
+            icon: const Icon(PhosphorIcons.regular.arrowsClockwise),
             onPressed: () {
               context.read<DashboardBloc>().add(RefreshDashboard());
             },
@@ -109,7 +109,7 @@ class DashboardPage extends StatelessWidget {
               child: Column(
                 children: [
                   const Icon(
-                    LucideIcons.alertCircle,
+                    PhosphorIcons.warningCircle(PhosphorIconsStyle.regular),
                     color: Colors.red,
                     size: 48,
                   ),

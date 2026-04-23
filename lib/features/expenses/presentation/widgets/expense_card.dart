@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/expense.dart';
 import 'source_badge.dart';
@@ -34,7 +34,7 @@ class ExpenseCard extends StatelessWidget {
         color: AppColors.error,
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 16),
-        child: const Icon(LucideIcons.trash2, color: Colors.white),
+        child: Icon(PhosphorIcons.trash(PhosphorIconsStyle.regular), color: Colors.white),
       ),
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
