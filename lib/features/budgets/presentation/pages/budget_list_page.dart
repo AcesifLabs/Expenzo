@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/utils/navigation_utils.dart';
 import '../../domain/entities/budget.dart';
@@ -77,7 +77,7 @@ class _BudgetListPageContent extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToCreate(context),
-        child: const Icon(LucideIcons.plus),
+        child: const Icon(PhosphorIcons.plus(PhosphorIconsStyle.regular)),
       ),
     );
   }

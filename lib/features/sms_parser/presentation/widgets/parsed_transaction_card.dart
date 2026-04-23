@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../parsing_rules/domain/entities/parsed_transaction.dart';
 import '../../../parsing_rules/presentation/widgets/confidence_badge.dart';
 
@@ -52,8 +52,8 @@ class ParsedTransactionCard extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        const Icon(
-                          LucideIcons.messageSquare,
+                        Icon(
+                          PhosphorIcons.chat(PhosphorIconsStyle.regular),
                           size: 16,
                           color: Colors.grey,
                         ),

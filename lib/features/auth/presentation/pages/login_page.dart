@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/di/injection_container.dart' as di;
@@ -43,7 +43,7 @@ class LoginPage extends StatelessWidget {
                   children: [
                     const Spacer(),
                     const Icon(
-                      LucideIcons.wallet,
+                      PhosphorIcons.wallet(PhosphorIconsStyle.regular),
                       size: 80,
                       color: AppColors.primary,
                     ),

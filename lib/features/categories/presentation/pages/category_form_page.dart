@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/category.dart';
 import '../bloc/category_bloc.dart';
@@ -142,7 +142,7 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: isSelected
-                        ? const Icon(LucideIcons.check, color: Colors.white)
+                        ? Icon(PhosphorIcons.check(PhosphorIconsStyle.regular), color: Colors.white)
                         : null,
                   ),
                 );

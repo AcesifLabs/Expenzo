@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/presentation/widgets/shimmer_box.dart';
 import '../../../categories/presentation/bloc/category_bloc.dart';
@@ -86,8 +86,8 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
                 prefixText: '৳ ',
                 hintText: '0.00',
                 suffixIcon: _showNegativeWarning
-                    ? const Icon(
-                        LucideIcons.alertTriangle,
+                    ? Icon(
+                        PhosphorIcons.warning(PhosphorIconsStyle.regular),
                         color: AppColors.warning,
                       )
                     : null,
@@ -115,7 +115,7 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
                 child: Row(
                   children: [
                     Icon(
-                      LucideIcons.alertTriangle,
+                      PhosphorIcons.warning(PhosphorIconsStyle.regular),
                       color: AppColors.warning,
                       size: 16,
                     ),
@@ -157,7 +157,7 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
                 }
                 if (state is CategoryLoaded) {
                   return DropdownButtonFormField<int>(
-                    value: _selectedCategoryId,
+                    initialValue: _selectedCategoryId,
                     decoration: const InputDecoration(labelText: 'Category'),
                     items: [
                       const DropdownMenuItem<int>(
@@ -193,7 +193,7 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
               contentPadding: EdgeInsets.zero,
               title: const Text('Date'),
               subtitle: Text(_dateFormat.format(_selectedDate)),
-              trailing: const Icon(LucideIcons.calendar),
+              trailing: Icon(PhosphorIcons.calendar(PhosphorIconsStyle.regular)),
               onTap: _selectDate,
             ),
             const Divider(),

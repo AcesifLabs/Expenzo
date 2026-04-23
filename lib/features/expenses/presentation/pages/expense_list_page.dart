@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/navigation_utils.dart';
 import '../../domain/entities/expense.dart';
@@ -68,7 +68,7 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
                 ),
               ),
               ListTile(
-                leading: const Icon(LucideIcons.history),
+                leading: Icon(PhosphorIcons.clockCounterClockwise(PhosphorIconsStyle.regular)),
                 title: const Text('Last 7 Days'),
                 onTap: () {
                   Navigator.pop(bottomSheetContext);
@@ -79,7 +79,7 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
                 },
               ),
               ListTile(
-                leading: const Icon(LucideIcons.calendarDays),
+                leading: Icon(PhosphorIcons.calendar(PhosphorIconsStyle.regular)),
                 title: const Text('Last 30 Days'),
                 onTap: () {
                   Navigator.pop(bottomSheetContext);
@@ -90,7 +90,7 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
                 },
               ),
               ListTile(
-                leading: const Icon(LucideIcons.calendarRange),
+                leading: Icon(PhosphorIcons.calendarDots(PhosphorIconsStyle.regular)),
                 title: const Text('Last 3 Months'),
                 onTap: () {
                   Navigator.pop(bottomSheetContext);
@@ -101,7 +101,7 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
                 },
               ),
               ListTile(
-                leading: const Icon(LucideIcons.infinity),
+                leading: Icon(PhosphorIcons.infinity(PhosphorIconsStyle.regular)),
                 title: const Text('All Time'),
                 onTap: () {
                   Navigator.pop(bottomSheetContext);
@@ -140,20 +140,20 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
       appBar: AppBar(
         title: const Text('Expenses'),
         actions: [
-          IconButton(icon: const Icon(LucideIcons.filter), onPressed: () {}),
+          IconButton(icon: Icon(PhosphorIcons.funnel(PhosphorIconsStyle.regular)), onPressed: () {}),
           PopupMenuButton<String>(
-            icon: const Icon(LucideIcons.settings),
+            icon: Icon(PhosphorIcons.faders(PhosphorIconsStyle.regular)),
             onSelected: (value) {
               if (value == 'scan') {
                 _showScanOptions(context);
               }
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'scan',
                 child: Row(
                   children: [
-                    Icon(LucideIcons.scan, size: 20),
+                    Icon(PhosphorIcons.listMagnifyingGlass(PhosphorIconsStyle.regular), size: 20),
                     SizedBox(width: 8),
                     Text('Scan previous expenses from SMS'),
                   ],
@@ -205,7 +205,7 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(LucideIcons.receipt, size: 64, color: Colors.grey[400]),
+                  Icon(PhosphorIcons.invoice(PhosphorIconsStyle.regular), size: 64, color: Colors.grey[400]),
                   const SizedBox(height: 16),
                   Text(
                     'No expenses yet',
@@ -246,7 +246,7 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToForm(context, null),
-        child: const Icon(LucideIcons.plus),
+        child: Icon(PhosphorIcons.plus(PhosphorIconsStyle.regular)),
       ),
     );
   }

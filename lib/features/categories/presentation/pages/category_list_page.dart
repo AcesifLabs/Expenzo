@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/navigation_utils.dart';
 import '../../../../shared/presentation/widgets/shimmer_box.dart';
@@ -21,7 +21,7 @@ class CategoryListPage extends StatelessWidget {
         title: const Text('Categories'),
         actions: [
           IconButton(
-            icon: const Icon(LucideIcons.plus),
+            icon: Icon(PhosphorIcons.plus(PhosphorIconsStyle.regular)),
             onPressed: () => _navigateToForm(context, null),
           ),
         ],
