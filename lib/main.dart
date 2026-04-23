@@ -17,7 +17,6 @@ import 'features/expenses/presentation/pages/expense_form_page.dart';
 import 'features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
 import 'shared/presentation/pages/scan_page.dart';
 import 'shared/presentation/widgets/lazy_indexed_stack.dart';
-import 'shared/presentation/widgets/app_icons.dart';
 
 import 'package:google_fonts/google_fonts.dart';
 
@@ -259,23 +258,33 @@ class _AppShellState extends State<AppShell> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildNavItem(0, PhosphorIcons.invoice(PhosphorIconsStyle.regular), 'Expenses'),
-            _buildNavItem(1, PhosphorIcons.tag(PhosphorIconsStyle.regular), 'Categories'),
-            const SizedBox(width: 40),
-            _buildNavItem(2, PhosphorIcons.listMagnifyingGlass(PhosphorIconsStyle.regular), 'Scan'),
-            _buildNavItem(3, PhosphorIcons.faders(PhosphorIconsStyle.regular), 'Settings'),
+            _buildNavItem(0, PhosphorIcons.invoice(PhosphorIconsStyle.regular), PhosphorIcons.invoice(PhosphorIconsStyle.fill), 'Expenses'),
+            _buildNavItem(1, PhosphorIcons.tag(PhosphorIconsStyle.regular), PhosphorIcons.tag(PhosphorIconsStyle.fill), 'Categories'),
+            const SizedBox(width: 40), // Space for FAB
+            _buildNavItem(2, PhosphorIcons.listMagnifyingGlass(PhosphorIconsStyle.regular), PhosphorIcons.listMagnifyingGlass(PhosphorIconsStyle.fill), 'Scan'),
+            _buildNavItem(3, PhosphorIcons.faders(PhosphorIconsStyle.regular), PhosphorIcons.faders(PhosphorIconsStyle.fill), 'Settings'),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildNavItem(int index, IconData icon, String label) {
+  Widget _buildNavItem(int index, IconData icon, IconData activeIcon, String label) {
     final isSelected = _currentIndex == index;
-    return IconButton(
-      icon: Icon(icon, color: isSelected ? Theme.of(context).colorScheme.primary : Colors.grey),
-      onPressed: () => setState(() => _currentIndex = index),
-      tooltip: label,
+    final color = isSelected ? Theme.of(context).colorScheme.primary : Colors.grey;
+    return InkWell(
+    onTap: () => setState(() => _currentIndex = index),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(isSelected ? activeIcon : icon, color: color),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(color: color, fontSize: 12),
+          ),
+        ],
+      ),
     );
   }
 
