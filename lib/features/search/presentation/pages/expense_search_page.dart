@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/search_filters.dart';
 import '../bloc/search_bloc.dart';
@@ -69,7 +70,7 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.search, size: 64, color: Colors.grey[400]),
+          Icon(LucideIcons.search, size: 64, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
             'Search for expenses',
@@ -91,7 +92,7 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.search_off, size: 64, color: Colors.grey[400]),
+            Icon(LucideIcons.searchX, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
               'No results found',
@@ -159,7 +160,7 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error_outline, size: 64, color: Colors.red[400]),
+          Icon(LucideIcons.alertCircle, size: 64, color: Colors.red[400]),
           const SizedBox(height: 16),
           Text(
             'Error',

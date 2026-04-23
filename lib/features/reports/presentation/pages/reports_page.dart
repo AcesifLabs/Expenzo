@@ -14,6 +14,9 @@ import '../bloc/reports_state.dart';
 import '../widgets/spending_trend_chart.dart';
 import '../widgets/category_pie_chart.dart';
 import '../widgets/insights_card.dart';
+import '../widgets/skeletons/chart_skeleton.dart';
+import '../widgets/skeletons/pie_chart_skeleton.dart';
+import '../widgets/skeletons/insights_skeleton.dart';
 
 class ReportsPage extends StatelessWidget {
   const ReportsPage({super.key});
@@ -72,7 +75,14 @@ class _ReportsPageContentState extends State<_ReportsPageContent>
             current is ReportsLoading,
         builder: (context, state) {
           if (state is ReportsLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return TabBarView(
+              controller: _tabController,
+              children: const [
+                ChartSkeleton(),
+                PieChartSkeleton(),
+                InsightsSkeleton(),
+              ],
+            );
           }
 
           if (state is ReportsError) {

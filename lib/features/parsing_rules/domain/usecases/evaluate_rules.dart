@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/error/usecase.dart';
@@ -8,6 +9,21 @@ import '../entities/parsed_transaction.dart';
 import '../repositories/parsing_rules_repository.dart';
 import '../../../message_templates/domain/repositories/message_template_repository.dart';
 import '../../../message_templates/domain/entities/expense_template.dart';
+import '../../../message_templates/domain/entities/message_source.dart';
+
+/// Pre-fetched context to avoid N+1 database queries during batch scanning.
+/// Fetch all data once before scanning and pass this context to each evaluation.
+class ParsingContext {
+  final List<ParsingRule> rules;
+  final List<ExpenseTemplate> templates;
+  final List<MessageSource> sources;
+
+  const ParsingContext({
+    required this.rules,
+    required this.templates,
+    required this.sources,
+  });
+}
 
 class EvaluateRulesUseCase
     implements UseCase<ParsedTransaction?, EvaluateRulesParams> {
@@ -16,100 +32,115 @@ class EvaluateRulesUseCase
 
   EvaluateRulesUseCase(this.rulesRepository, this.templateRepository);
 
-  @override
-  Future<Either<Failure, ParsedTransaction?>> call(
-    EvaluateRulesParams params,
-  ) async {
-    // First check user-defined templates
+  /// Pre-fetches all rules, templates, and sources needed for batch scanning.
+  /// Call this ONCE before scanning multiple messages, then pass the context
+  /// to [evaluateWithPreloadedContext] for each message.
+  Future<ParsingContext> loadContext() async {
+    final rulesResult = await rulesRepository.getRules(isEnabled: true);
     final templatesResult = await templateRepository.getAllTemplates();
     final sourcesResult = await templateRepository.getMessageSources();
 
-    // If templates exist and contact matches
-    if (templatesResult.isRight() && sourcesResult.isRight()) {
-      final templates = templatesResult.getOrElse(() => []);
-      final sources = sourcesResult.getOrElse(() => []);
+    final rules = rulesResult.getOrElse(() => []);
+    final templates = templatesResult.getOrElse(() => []);
+    final sources = sourcesResult.getOrElse(() => []);
 
-      // Check if this contact/address is monitored
-      final monitoredSource = sources.cast<dynamic>().firstWhere(
-        (s) => s.contactId == params.address && s.isMonitored,
-        orElse: () => null,
-      );
+    // Pre-sort rules by priority (highest first) once
+    rules.sort((a, b) => b.priority.compareTo(a.priority));
 
-      if (monitoredSource != null) {
-        final contactTemplates = templates
-            .where((t) => t.sourceId == monitoredSource.id)
-            .toList();
+    return ParsingContext(rules: rules, templates: templates, sources: sources);
+  }
 
-        for (final template in contactTemplates) {
-          // Explicitly check for the triggerWord the user selected
-          if (params.rawMessage.toLowerCase().contains(
-            template.triggerWord.toLowerCase(),
-          )) {
-            final candidate = await _evaluateTemplate(template, params);
-            if (candidate != null) {
-              return Right(candidate);
-            }
+  /// Evaluates a single message using pre-loaded context (no DB queries).
+  /// Use this during batch scanning for O(1) per-message overhead.
+  ParsedTransaction? evaluateWithPreloadedContext(
+    ParsingContext context,
+    EvaluateRulesParams params,
+  ) {
+    // 1. Check all user-defined templates across all monitored sources
+    final monitoredSources = context.sources.cast<dynamic>().where((s) => s.isMonitored).toList();
+
+    for (final source in monitoredSources) {
+      final contactTemplates = context.templates
+          .where((t) => t.sourceId == source.id)
+          .toList();
+
+      for (final template in contactTemplates) {
+        final matchesTrigger = params.rawMessage.toLowerCase().contains(
+          template.triggerWord.toLowerCase(),
+        );
+        debugPrint(
+          'Checking template ${template.id} for source ${source.id}: '
+          'Trigger: "${template.triggerWord}", Match: $matchesTrigger',
+        );
+
+        if (matchesTrigger) {
+          final candidate = _evaluateTemplateSync(
+            template,
+            params,
+            source,
+          );
+          if (candidate != null) {
+            debugPrint('Template ${template.id} matched successfully!');
+            return candidate;
+          } else {
+            debugPrint('Template ${template.id} trigger matched, but amount/pattern failed.');
           }
-        }
-
-        // If source has templates configured, only use those - no global rules fallback
-        if (contactTemplates.isNotEmpty) {
-          return const Right(null);
         }
       }
     }
 
-    // Fall back to global parsing rules ONLY if source has no templates
-    final rulesResult = await rulesRepository.getRules(
-      sourceType: params.sourceType == 'sms'
-          ? SourceType.sms
-          : params.sourceType == 'email'
-          ? SourceType.email
-          : null,
-      isEnabled: true,
-    );
-
-    return rulesResult.fold((failure) => Left(failure), (rules) async {
-      rules.sort((a, b) => b.priority.compareTo(a.priority));
-
-      for (final rule in rules) {
-        if (rule.sourceType == SourceType.sms && params.sourceType != 'sms') {
-          continue;
-        }
-        if (rule.sourceType == SourceType.email &&
-            params.sourceType != 'email') {
-          continue;
-        }
-
-        if (!rule.matchesTriggerWord(params.rawMessage)) {
-          continue;
-        }
-
-        final candidate = await _evaluateRule(rule, params);
-        if (candidate != null) {
-          return Right(candidate);
-        }
+    // 2. Fall back to global parsing rules (already sorted by priority)
+    for (final rule in context.rules) {
+      if (rule.sourceType == SourceType.sms && params.sourceType != 'sms') {
+        continue;
+      }
+      if (rule.sourceType == SourceType.email && params.sourceType != 'email') {
+        continue;
       }
 
-      return const Right(null);
-    });
+      final matchesTrigger = rule.matchesTriggerWord(params.rawMessage);
+      debugPrint('Checking global rule ${rule.id}: Trigger: ${rule.triggerWords}, Match: $matchesTrigger');
+
+      if (!matchesTrigger) {
+        continue;
+      }
+
+      final candidate = _evaluateRuleSync(rule, params);
+      if (candidate != null) {
+        debugPrint('Global rule ${rule.id} matched successfully!');
+        return candidate;
+      } else {
+        debugPrint('Global rule ${rule.id} trigger matched, but amount/pattern failed.');
+      }
+    }
+
+    return null;
+  }
+
+  @override
+  Future<Either<Failure, ParsedTransaction?>> call(
+    EvaluateRulesParams params,
+  ) async {
+    // Legacy path: loads context on each call (used for single-message evaluation)
+    try {
+      final context = await loadContext();
+      final result = evaluateWithPreloadedContext(context, params);
+      return Right(result);
+    } catch (e) {
+      return Left(CacheFailure(message: e.toString()));
+    }
   }
 
   static String _normalizeAmountForComparison(String amount) {
     return amount.replaceAll(RegExp(r'[^\d.]'), '');
   }
 
-  Future<ParsedTransaction?> _evaluateTemplate(
+  /// Synchronous template evaluation using pre-loaded context data.
+  ParsedTransaction? _evaluateTemplateSync(
     ExpenseTemplate template,
     EvaluateRulesParams params,
-  ) async {
-    final sourcesResult = await templateRepository.getMessageSources();
-    final sources = sourcesResult.getOrElse(() => []);
-    final monitoredSource = sources.cast<dynamic>().firstWhere(
-      (s) => s.id == template.sourceId,
-      orElse: () => null,
-    );
-
+    dynamic monitoredSource,
+  ) {
     try {
       final timedRegex = TimedRegex(
         pattern: template.amountPattern,
@@ -124,11 +155,8 @@ class EvaluateRulesUseCase
         final targetNormalized = _normalizeAmountForComparison(
           template.selectedAmount!,
         );
-        // Try to find a match with the same numeric value as selectedAmount
-        // This helps disambiguate when multiple amounts exist in a message
         Match? exactMatch;
         for (final m in allMatches) {
-          // Group 2 is the numeric portion (without currency prefix) if pattern has 2 groups
           final numericPortion = m.group(2) ?? m.group(0) ?? '';
           if (_normalizeAmountForComparison(numericPortion) ==
               targetNormalized) {
@@ -136,8 +164,6 @@ class EvaluateRulesUseCase
             break;
           }
         }
-        // Use the exact match if found, otherwise fall back to first match
-        // (selectedAmount is a hint, not a strict filter - the pattern should generalize)
         amountMatch = exactMatch ?? allMatches.first;
       } else if (allMatches.isNotEmpty) {
         amountMatch = allMatches.first;
@@ -170,7 +196,7 @@ class EvaluateRulesUseCase
         categoryId: template.categoryId,
         sourceType: params.sourceType,
         sourceId: params.sourceId,
-        confidenceScore: 0.95, // High confidence for custom templates
+        confidenceScore: 0.95,
         matchedRuleId: template.id,
         parseFailed: false,
         parseError: null,
@@ -180,10 +206,11 @@ class EvaluateRulesUseCase
     }
   }
 
-  Future<ParsedTransaction?> _evaluateRule(
+  /// Synchronous rule evaluation (no DB queries).
+  ParsedTransaction? _evaluateRuleSync(
     ParsingRule rule,
     EvaluateRulesParams params,
-  ) async {
+  ) {
     try {
       final timedRegex = TimedRegex(
         pattern: rule.amountPattern,

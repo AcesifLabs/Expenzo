@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/di/injection_container.dart';
+import '../../../../core/utils/navigation_utils.dart';
 import '../../domain/entities/budget.dart';
 import '../bloc/budget_bloc.dart';
 import '../bloc/budget_event.dart';
 import '../bloc/budget_state.dart';
 import '../widgets/budget_progress_card.dart';
+import '../widgets/skeletons/budget_list_skeleton.dart';
 import 'budget_form_page.dart';
 
 class BudgetListPage extends StatelessWidget {
@@ -41,7 +44,7 @@ class _BudgetListPageContent extends StatelessWidget {
         },
         builder: (context, state) {
           if (state is BudgetLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const BudgetListSkeleton();
           }
 
           if (state is BudgetError) {
@@ -74,7 +77,7 @@ class _BudgetListPageContent extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToCreate(context),
-        child: const Icon(Icons.add),
+        child: const Icon(LucideIcons.plus),
       ),
     );
   }
@@ -82,7 +85,7 @@ class _BudgetListPageContent extends StatelessWidget {
   void _navigateToCreate(BuildContext context) async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const BudgetFormPage()),
+      SlidePageRoute(builder: (_) => const BudgetFormPage()),
     );
 
     if (result == true && context.mounted) {
@@ -93,7 +96,7 @@ class _BudgetListPageContent extends StatelessWidget {
   void _navigateToEdit(BuildContext context, Budget budget) async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => BudgetFormPage(budget: budget)),
+      SlidePageRoute(builder: (_) => BudgetFormPage(budget: budget)),
     );
 
     if (result == true && context.mounted) {

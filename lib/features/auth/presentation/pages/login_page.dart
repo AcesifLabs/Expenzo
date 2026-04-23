@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/di/injection_container.dart' as di;
+import '../../../../shared/presentation/widgets/app_icons.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -40,7 +43,7 @@ class LoginPage extends StatelessWidget {
                   children: [
                     const Spacer(),
                     const Icon(
-                      Icons.account_balance_wallet,
+                      LucideIcons.wallet,
                       size: 80,
                       color: AppColors.primary,
                     ),
@@ -92,14 +95,17 @@ class LoginPage extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
-      child: const Row(
+      child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.g_mobiledata, size: 24),
-          SizedBox(width: 12),
+          const Icon(Icons.g_mobiledata, size: 24),
+          const SizedBox(width: 12),
           Text(
             'Sign in with Google',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            style: AppTypography.labelLarge.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
         ],
       ),

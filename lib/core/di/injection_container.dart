@@ -39,11 +39,7 @@ import '../../features/parsing_rules/domain/repositories/parsing_rules_repositor
 import '../../features/sms_parser/data/datasources/sms_local_datasource.dart';
 import '../../features/sms_parser/domain/usecases/scan_sms_usecase.dart';
 import '../../features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
-import '../../features/email_parser/data/datasources/gmail_api_datasource.dart';
-import '../../features/email_parser/data/repositories/gmail_service_impl.dart';
-import '../../features/email_parser/domain/services/gmail_service.dart';
-import '../../features/email_parser/domain/usecases/scan_emails_usecase.dart';
-import '../../features/email_parser/presentation/bloc/email_scanner_bloc.dart';
+import '../../features/parsing_rules/domain/services/parsing_isolate_service.dart';
 import '../../features/parsing_rules/domain/usecases/evaluate_rules.dart';
 import '../../features/parsing_rules/data/datasources/parsing_rules_local_datasource.dart';
 import '../../features/parsing_rules/data/repositories/parsing_rules_repository_impl.dart';
@@ -76,7 +72,14 @@ import '../../features/budgets/presentation/bloc/budget_bloc.dart';
 
 final getIt = GetIt.instance;
 
-Future<void> initDependencies() async {
+/// Tracks whether feature-level dependencies have been registered.
+bool _featureDependenciesRegistered = false;
+
+/// Registers ONLY the dependencies needed for the first visible screen
+/// (Auth + Database + Categories + Expenses). Returns immediately so
+/// the splash screen can render without waiting for the full DI graph.
+Future<void> initCriticalDependencies() async {
+  // ── Core Infrastructure ──
   getIt.registerLazySingleton<GoogleSignIn>(
     () => GoogleSignIn(
       scopes: [
@@ -89,8 +92,10 @@ Future<void> initDependencies() async {
   getIt.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
   getIt.registerLazySingleton<http.Client>(() => http.Client());
 
+  // Database uses NativeDatabase.createInBackground — non-blocking
   getIt.registerLazySingleton<AppDatabase>(() => AppDatabase());
 
+  // DAOs
   getIt.registerFactory<ExpenseDao>(() => ExpenseDao(getIt<AppDatabase>()));
   getIt.registerFactory<CategoryDao>(() => CategoryDao(getIt<AppDatabase>()));
   getIt.registerFactory<PendingRecurringDao>(
@@ -100,22 +105,20 @@ Future<void> initDependencies() async {
     () => MessageTemplateDao(getIt<AppDatabase>()),
   );
 
+  // ── Auth ──
   getIt.registerLazySingleton<AuthRemoteDatasource>(
     () => AuthRemoteDatasourceImpl(
       googleSignIn: getIt<GoogleSignIn>(),
       firebaseAuth: getIt<FirebaseAuth>(),
     ),
   );
-
   getIt.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(remoteDatasource: getIt<AuthRemoteDatasource>()),
   );
-
   getIt.registerLazySingleton(() => SignInWithGoogle(getIt<AuthRepository>()));
   getIt.registerLazySingleton(() => SignOut(getIt<AuthRepository>()));
   getIt.registerLazySingleton(() => GetCurrentUser(getIt<AuthRepository>()));
   getIt.registerLazySingleton(() => DeleteAccount(getIt<AuthRepository>()));
-
   getIt.registerFactory<AuthBloc>(
     () => AuthBloc(
       signInWithGoogle: getIt<SignInWithGoogle>(),
@@ -124,16 +127,15 @@ Future<void> initDependencies() async {
     ),
   );
 
+  // ── Categories (needed on first screen) ──
   getIt.registerLazySingleton<CategoryLocalDatasource>(
     () => CategoryLocalDatasourceImpl(categoryDao: getIt<CategoryDao>()),
   );
-
   getIt.registerLazySingleton<CategoryRepository>(
     () => CategoryRepositoryImpl(
       localDatasource: getIt<CategoryLocalDatasource>(),
     ),
   );
-
   getIt.registerLazySingleton(() => GetCategories(getIt<CategoryRepository>()));
   getIt.registerLazySingleton(
     () => CreateCategory(getIt<CategoryRepository>()),
@@ -144,7 +146,6 @@ Future<void> initDependencies() async {
   getIt.registerLazySingleton(
     () => DeleteCategory(getIt<CategoryRepository>()),
   );
-
   getIt.registerFactory<CategoryBloc>(
     () => CategoryBloc(
       getCategories: getIt<GetCategories>(),
@@ -154,66 +155,64 @@ Future<void> initDependencies() async {
     ),
   );
 
+  // ── Expenses (needed on first screen) ──
   getIt.registerLazySingleton<ExpenseLocalDatasource>(
     () => ExpenseLocalDatasourceImpl(expenseDao: getIt<ExpenseDao>()),
   );
-
   getIt.registerLazySingleton<ExpenseRepository>(
     () =>
         ExpenseRepositoryImpl(localDatasource: getIt<ExpenseLocalDatasource>()),
   );
-
   getIt.registerLazySingleton(() => GetExpenses(getIt<ExpenseRepository>()));
   getIt.registerLazySingleton(() => AddExpense(getIt<ExpenseRepository>()));
   getIt.registerLazySingleton(() => UpdateExpense(getIt<ExpenseRepository>()));
   getIt.registerLazySingleton(() => DeleteExpense(getIt<ExpenseRepository>()));
-
   getIt.registerLazySingleton(
     () => CreateExpenseFromParsed(getIt<ExpenseRepository>()),
   );
   getIt.registerLazySingleton(
     () => CreateExpensesFromParsedList(getIt<CreateExpenseFromParsed>()),
   );
-
   getIt.registerFactory<ExpenseBloc>(
     () => ExpenseBloc(
       getExpenses: getIt<GetExpenses>(),
       addExpense: getIt<AddExpense>(),
       updateExpense: getIt<UpdateExpense>(),
       deleteExpense: getIt<DeleteExpense>(),
+      expenseRepository: getIt<ExpenseRepository>(),
     ),
   );
+}
 
+/// Registers feature-level dependencies (Scan, Email, Parsing, Reports,
+/// Budgets, Templates). Called in the background after the first frame
+/// renders. Safe to call multiple times — will only register once.
+Future<void> initFeatureDependencies() async {
+  if (_featureDependenciesRegistered) return;
+  _featureDependenciesRegistered = true;
+
+  // ── Parsing Rules ──
+  getIt.registerLazySingleton<ParsingIsolateService>(() => ParsingIsolateService());
   getIt.registerLazySingleton<ParsingRuleDao>(
     () => ParsingRuleDao(getIt<AppDatabase>()),
   );
-
   getIt.registerLazySingleton<ParsingRulesLocalDatasource>(
     () => ParsingRulesLocalDatasourceImpl(getIt<ParsingRuleDao>()),
   );
-
   getIt.registerLazySingleton<ParsingRulesRepository>(
     () => ParsingRulesRepositoryImpl(
       localDatasource: getIt<ParsingRulesLocalDatasource>(),
     ),
   );
 
-  getIt.registerLazySingleton(
-    () => EvaluateRulesUseCase(
-      getIt<ParsingRulesRepository>(),
-      getIt<MessageTemplateRepository>(),
-    ),
-  );
-
+  // ── Message Templates ──
   getIt.registerLazySingleton<MessageTemplateLocalDatasource>(
     () => MessageTemplateLocalDatasourceImpl(getIt<MessageTemplateDao>()),
   );
-
   getIt.registerLazySingleton<MessageTemplateRepository>(
     () =>
         MessageTemplateRepositoryImpl(getIt<MessageTemplateLocalDatasource>()),
   );
-
   getIt.registerLazySingleton(
     () => GetMessageSources(getIt<MessageTemplateRepository>()),
   );
@@ -226,22 +225,18 @@ Future<void> initDependencies() async {
   getIt.registerLazySingleton(
     () => SaveTemplate(getIt<MessageTemplateRepository>()),
   );
-
   getIt.registerFactory<MessageSourcesBloc>(
     () => MessageSourcesBloc(
       getMessageSources: getIt<GetMessageSources>(),
       saveMessageSource: getIt<SaveMessageSource>(),
     ),
   );
-
   getIt.registerFactory<ContactSelectorBloc>(
     () => ContactSelectorBloc(smsDatasource: getIt<SmsLocalDatasource>()),
   );
-
   getIt.registerFactory<SampleAnalyzerBloc>(
     () => SampleAnalyzerBloc(smsDatasource: getIt<SmsLocalDatasource>()),
   );
-
   getIt.registerFactory<TemplateEditorBloc>(
     () => TemplateEditorBloc(
       saveTemplateUseCase: getIt<SaveTemplate>(),
@@ -249,50 +244,35 @@ Future<void> initDependencies() async {
     ),
   );
 
+  // ── Evaluate Rules (shared between SMS & Email) ──
+  getIt.registerLazySingleton(
+    () => EvaluateRulesUseCase(
+      getIt<ParsingRulesRepository>(),
+      getIt<MessageTemplateRepository>(),
+    ),
+  );
+
+  // ── SMS Scanner ──
   getIt.registerLazySingleton<SmsLocalDatasource>(
     () => SmsLocalDatasourceImpl(),
   );
-
   getIt.registerLazySingleton(
     () => ScanSmsUseCase(
       smsDatasource: getIt<SmsLocalDatasource>(),
       evaluateRules: getIt<EvaluateRulesUseCase>(),
     ),
   );
-
   getIt.registerFactory<SmsScannerBloc>(
     () => SmsScannerBloc(
       scanSmsUseCase: getIt<ScanSmsUseCase>(),
-      getExpenses: getIt<GetExpenses>(),
+      expenseRepository: getIt<ExpenseRepository>(),
     ),
   );
 
-  getIt.registerLazySingleton<GmailApiDatasource>(
-    () => GmailApiDatasourceImpl(
-      googleSignIn: getIt<GoogleSignIn>(),
-      httpClient: getIt(),
-    ),
-  );
-
-  getIt.registerLazySingleton<GmailService>(
-    () => GmailServiceImpl(datasource: getIt<GmailApiDatasource>()),
-  );
-
-  getIt.registerLazySingleton(
-    () => ScanEmailsUseCase(
-      gmailService: getIt<GmailService>(),
-      evaluateRules: getIt<EvaluateRulesUseCase>(),
-    ),
-  );
-
-  getIt.registerFactory<EmailScannerBloc>(
-    () => EmailScannerBloc(scanEmailsUseCase: getIt<ScanEmailsUseCase>()),
-  );
-
+  // ── Reports ──
   getIt.registerLazySingleton<ReportsRepository>(
     () => ReportsRepositoryImpl(appDatabase: getIt<AppDatabase>()),
   );
-
   getIt.registerLazySingleton(
     () => GetSpendingTrend(repository: getIt<ReportsRepository>()),
   );
@@ -302,7 +282,6 @@ Future<void> initDependencies() async {
   getIt.registerLazySingleton(
     () => GetSpendingInsights(repository: getIt<ReportsRepository>()),
   );
-
   getIt.registerFactory<ReportsBloc>(
     () => ReportsBloc(
       getSpendingTrend: getIt<GetSpendingTrend>(),
@@ -314,16 +293,14 @@ Future<void> initDependencies() async {
     ),
   );
 
+  // ── Budgets ──
   getIt.registerLazySingleton<BudgetDao>(() => BudgetDao(getIt<AppDatabase>()));
-
   getIt.registerLazySingleton<BudgetLocalDatasource>(
     () => BudgetLocalDatasourceImpl(budgetDao: getIt<BudgetDao>()),
   );
-
   getIt.registerLazySingleton<BudgetRepository>(
     () => BudgetRepositoryImpl(localDatasource: getIt<BudgetLocalDatasource>()),
   );
-
   getIt.registerLazySingleton(
     () => GetBudgets(repository: getIt<BudgetRepository>()),
   );
@@ -336,7 +313,6 @@ Future<void> initDependencies() async {
   getIt.registerLazySingleton(
     () => DeleteBudget(repository: getIt<BudgetRepository>()),
   );
-
   getIt.registerFactory<BudgetBloc>(
     () => BudgetBloc(
       getBudgets: getIt<GetBudgets>(),
@@ -345,4 +321,11 @@ Future<void> initDependencies() async {
       deleteBudget: getIt<DeleteBudget>(),
     ),
   );
+}
+
+/// Backwards-compatible call that registers everything at once.
+/// Used by integration tests or scenarios where layered init isn't needed.
+Future<void> initDependencies() async {
+  await initCriticalDependencies();
+  await initFeatureDependencies();
 }

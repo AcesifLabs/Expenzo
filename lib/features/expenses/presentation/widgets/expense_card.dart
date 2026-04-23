@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/expense.dart';
 import 'source_badge.dart';
@@ -9,6 +10,9 @@ class ExpenseCard extends StatelessWidget {
   final String? categoryEmoji;
   final VoidCallback onTap;
   final VoidCallback onDelete;
+
+  // Memoized formatters — created once, reused across all ExpenseCard instances
+  static final _dateFormat = DateFormat('MMM dd, yyyy');
 
   const ExpenseCard({
     super.key,
@@ -20,7 +24,6 @@ class ExpenseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dateFormat = DateFormat('MMM dd, yyyy');
     final isNegative = expense.amount < 0;
 
     return Dismissible(
@@ -31,7 +34,7 @@ class ExpenseCard extends StatelessWidget {
         color: AppColors.error,
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 16),
-        child: const Icon(Icons.delete, color: Colors.white),
+        child: const Icon(LucideIcons.trash2, color: Colors.white),
       ),
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -78,7 +81,7 @@ class ExpenseCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        dateFormat.format(expense.date),
+                        _dateFormat.format(expense.date),
                         style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
                     ],

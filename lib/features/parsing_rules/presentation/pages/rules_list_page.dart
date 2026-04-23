@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/utils/navigation_utils.dart';
 import '../../data/datasources/default_rules_templates.dart';
 import '../../domain/entities/parsing_rule.dart';
 import '../bloc/parsing_rules_bloc.dart';
@@ -23,7 +24,7 @@ class RulesListPage extends StatelessWidget {
             tooltip: 'Add templates',
             onPressed: () {
               Navigator.of(context).push(
-                MaterialPageRoute(
+                SlidePageRoute(
                   builder: (_) => BlocProvider.value(
                     value: context.read<ParsingRulesBloc>(),
                     child: const AddTemplatesPage(),
@@ -36,7 +37,7 @@ class RulesListPage extends StatelessWidget {
             icon: const Icon(Icons.add),
             onPressed: () {
               Navigator.of(context).push(
-                MaterialPageRoute(
+                SlidePageRoute(
                   builder: (_) => BlocProvider.value(
                     value: context.read<ParsingRulesBloc>(),
                     child: const RuleEditorPage(),
@@ -99,7 +100,7 @@ class RulesListPage extends StatelessWidget {
                         label: const Text('Add Rule'),
                         onPressed: () {
                           Navigator.of(context).push(
-                            MaterialPageRoute(
+                            SlidePageRoute(
                               builder: (_) => BlocProvider.value(
                                 value: context.read<ParsingRulesBloc>(),
                                 child: const RuleEditorPage(),
@@ -132,7 +133,7 @@ class RulesListPage extends StatelessWidget {
                     },
                     onTap: () {
                       Navigator.of(context).push(
-                        MaterialPageRoute(
+                        SlidePageRoute(
                           builder: (_) => BlocProvider.value(
                             value: context.read<ParsingRulesBloc>(),
                             child: RuleEditorPage(rule: rule),

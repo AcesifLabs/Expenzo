@@ -22,4 +22,7 @@ abstract class ExpenseRepository {
   Future<Either<CacheFailure, Unit>> deleteExpense(int id);
   Stream<List<Expense>> watchExpenses();
   Future<Either<CacheFailure, bool>> expenseExistsBySourceId(String sourceId);
+  Future<Either<CacheFailure, Set<String>>> getExistingSourceIds(
+    List<String> sourceIds,
+  );
 }

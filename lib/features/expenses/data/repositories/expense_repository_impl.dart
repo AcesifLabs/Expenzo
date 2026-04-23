@@ -89,4 +89,16 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
       return Left(e.toFailure());
     }
   }
+
+  @override
+  Future<Either<CacheFailure, Set<String>>> getExistingSourceIds(
+    List<String> sourceIds,
+  ) async {
+    try {
+      final existing = await localDatasource.getExistingSourceIds(sourceIds);
+      return Right(existing);
+    } on CacheException catch (e) {
+      return Left(e.toFailure());
+    }
+  }
 }

@@ -42,6 +42,15 @@ class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
     return into(expenses).insert(expense);
   }
 
+  /// Bulk insert with transaction for efficiency on low-end storage.
+  Future<void> insertExpensesBatch(List<ExpensesCompanion> companions) async {
+    await transaction(() async {
+      for (final companion in companions) {
+        await into(expenses).insert(companion);
+      }
+    });
+  }
+
   Future<bool> updateExpense(ExpensesCompanion expense) {
     return update(
       expenses,
@@ -69,5 +78,21 @@ class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
     final result = await query.getSingle();
     final cnt = result.read(count) ?? 0;
     return cnt > 0;
+  }
+
+  /// Batch lookup: returns the set of sourceIds that already exist in the DB.
+  /// Uses a single SQL query with IN clause instead of N individual queries.
+  Future<Set<String>> getExistingSourceIds(List<String> sourceIds) async {
+    if (sourceIds.isEmpty) return {};
+
+    final query = selectOnly(expenses)
+      ..addColumns([expenses.sourceId])
+      ..where(expenses.sourceId.isIn(sourceIds));
+
+    final results = await query.get();
+    return results
+        .map((row) => row.read(expenses.sourceId))
+        .whereType<String>()
+        .toSet();
   }
 }

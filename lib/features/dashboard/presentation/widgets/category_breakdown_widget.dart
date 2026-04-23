@@ -6,6 +6,9 @@ class CategoryBreakdownWidget extends StatelessWidget {
   final List<CategoryAmount> categories;
   final String currencySymbol;
 
+  // Memoized formatter — created once per currency symbol
+  static final _currencyFormats = <String, NumberFormat>{};
+
   const CategoryBreakdownWidget({
     super.key,
     required this.categories,
@@ -26,32 +29,48 @@ class CategoryBreakdownWidget extends StatelessWidget {
       );
     }
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Spending by Category',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            ...categories.map((cat) => _buildCategoryRow(context, cat)),
-          ],
+    final currencyFormat = _currencyFormats.putIfAbsent(
+      '$currencySymbol#0',
+      () => NumberFormat.currency(symbol: currencySymbol, decimalDigits: 0),
+    );
+
+    return RepaintBoundary(
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Spending by Category',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              ...categories.map(
+                (cat) =>
+                    _CategoryRow(category: cat, currencyFormat: currencyFormat),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildCategoryRow(BuildContext context, CategoryAmount category) {
+/// Extracted widget that receives a pre-built formatter to avoid
+/// repeated NumberFormat allocation per category row.
+class _CategoryRow extends StatelessWidget {
+  final CategoryAmount category;
+  final NumberFormat currencyFormat;
+
+  const _CategoryRow({required this.category, required this.currencyFormat});
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final currencyFormat = NumberFormat.currency(
-      symbol: currencySymbol,
-      decimalDigits: 0,
-    );
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),

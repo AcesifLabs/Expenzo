@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../../parsing_rules/domain/entities/parsed_transaction.dart';
 import '../../../parsing_rules/presentation/widgets/confidence_badge.dart';
 
@@ -51,7 +52,11 @@ class ParsedTransactionCard extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        const Icon(Icons.sms, size: 16, color: Colors.grey),
+                        const Icon(
+                          LucideIcons.messageSquare,
+                          size: 16,
+                          color: Colors.grey,
+                        ),
                         const SizedBox(width: 4),
                         Text('SMS', style: theme.textTheme.bodySmall),
                       ],

@@ -1,71 +1,47 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppTypography {
   AppTypography._();
 
-  static const TextStyle headlineLarge = TextStyle(
-    fontSize: 32,
-    fontWeight: FontWeight.bold,
-  );
+  // Lato for body text - Light 300 for normal, Regular 400 for emphasis
+  // Using Google Fonts which automatically handles loading and caching
+  static final _latoLight = GoogleFonts.lato(fontWeight: FontWeight.w300);
+  static final _latoRegular = GoogleFonts.lato(fontWeight: FontWeight.w400);
+  static final _latoMedium = GoogleFonts.lato(fontWeight: FontWeight.w500);
+  static final _latoBold = GoogleFonts.lato(fontWeight: FontWeight.w700);
 
-  static const TextStyle headlineMedium = TextStyle(
-    fontSize: 28,
-    fontWeight: FontWeight.bold,
-  );
+  // Headlines - Lato Bold
+  static TextStyle get headlineLarge => _latoBold.copyWith(fontSize: 32);
 
-  static const TextStyle headlineSmall = TextStyle(
-    fontSize: 24,
-    fontWeight: FontWeight.w600,
-  );
+  static TextStyle get headlineMedium => _latoBold.copyWith(fontSize: 28);
 
-  static const TextStyle titleLarge = TextStyle(
-    fontSize: 22,
-    fontWeight: FontWeight.w600,
-  );
+  static TextStyle get headlineSmall => _latoBold.copyWith(fontSize: 24);
 
-  static const TextStyle titleMedium = TextStyle(
-    fontSize: 16,
-    fontWeight: FontWeight.w500,
-  );
+  // Titles - Lato Bold
+  static TextStyle get titleLarge => _latoBold.copyWith(fontSize: 22);
 
-  static const TextStyle titleSmall = TextStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.w500,
-  );
+  static TextStyle get titleMedium => _latoBold.copyWith(fontSize: 16);
 
-  static const TextStyle bodyLarge = TextStyle(
-    fontSize: 16,
-    fontWeight: FontWeight.normal,
-  );
+  static TextStyle get titleSmall => _latoBold.copyWith(fontSize: 14);
 
-  static const TextStyle bodyMedium = TextStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.normal,
-  );
+  // Body - Lato Light 300 for normal text
+  static TextStyle get bodyLarge => _latoLight.copyWith(fontSize: 16);
 
-  static const TextStyle bodySmall = TextStyle(
-    fontSize: 12,
-    fontWeight: FontWeight.normal,
-  );
+  static TextStyle get bodyMedium => _latoLight.copyWith(fontSize: 14);
 
-  static const TextStyle labelLarge = TextStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.w500,
-  );
+  static TextStyle get bodySmall => _latoLight.copyWith(fontSize: 12);
 
-  static const TextStyle labelMedium = TextStyle(
-    fontSize: 12,
-    fontWeight: FontWeight.w500,
-  );
+  // Labels - Lato Medium
+  static TextStyle get labelLarge => _latoMedium.copyWith(fontSize: 14);
 
-  static const TextStyle labelSmall = TextStyle(
-    fontSize: 11,
-    fontWeight: FontWeight.w500,
-  );
+  static TextStyle get labelMedium => _latoMedium.copyWith(fontSize: 12);
 
-  static const TextStyle currency = TextStyle(
+  static TextStyle get labelSmall => _latoMedium.copyWith(fontSize: 11);
+
+  // Currency - Bold for readability
+  static TextStyle get currency => _latoBold.copyWith(
     fontSize: 18,
-    fontWeight: FontWeight.w600,
-    fontFeatures: [FontFeature.tabularFigures()],
+    fontFeatures: const [FontFeature.tabularFigures()],
   );
 }

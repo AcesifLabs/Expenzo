@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../domain/entities/spending_insights.dart';
 
 class InsightsCard extends StatelessWidget {
@@ -12,7 +13,7 @@ class InsightsCard extends StatelessWidget {
     return ListView(
       children: [
         _buildInsightTile(
-          icon: Icons.trending_up,
+          icon: LucideIcons.trendingUp,
           title: 'Highest Spending Day',
           value: insights.highestDayDate != null
               ? DateFormat('dd MMM yyyy').format(insights.highestDayDate!)
@@ -21,21 +22,21 @@ class InsightsCard extends StatelessWidget {
           color: Colors.orange,
         ),
         _buildInsightTile(
-          icon: Icons.show_chart,
+          icon: LucideIcons.activity,
           title: 'Average Daily Spending',
           value: '৳${insights.avgDailySpending.toStringAsFixed(2)}',
           subtitle: 'Per day in selected period',
           color: Colors.blue,
         ),
         _buildInsightTile(
-          icon: Icons.receipt_long,
+          icon: LucideIcons.receipt,
           title: 'Total Transactions',
           value: insights.totalTransactionCount.toString(),
           subtitle: 'In selected period',
           color: Colors.green,
         ),
         _buildInsightTile(
-          icon: Icons.account_balance_wallet,
+          icon: LucideIcons.wallet,
           title: 'Total Spent',
           value: '৳${insights.totalSpent.toStringAsFixed(2)}',
           subtitle: 'In selected period',

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../bloc/sms_permission_bloc.dart';
 import '../bloc/sms_permission_event.dart';
@@ -33,7 +34,11 @@ class SmsPermissionPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Spacer(),
-                  const Icon(Icons.sms, size: 80, color: AppColors.primary),
+                  const Icon(
+                    LucideIcons.messageSquare,
+                    size: 80,
+                    color: AppColors.primary,
+                  ),
                   const SizedBox(height: 24),
                   Text(
                     'Enable SMS Scanning',
@@ -48,21 +53,21 @@ class SmsPermissionPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
                   _buildInfoCard(
-                    icon: Icons.lock_outline,
+                    icon: LucideIcons.lock,
                     title: 'Your Privacy Protected',
                     description:
                         'All SMS data is processed locally on your device. We never upload your messages to any server.',
                   ),
                   const SizedBox(height: 12),
                   _buildInfoCard(
-                    icon: Icons.storage,
+                    icon: LucideIcons.database,
                     title: 'Local Storage Only',
                     description:
                         'Detected expenses are stored locally. No personal messages are saved.',
                   ),
                   const SizedBox(height: 12),
                   _buildInfoCard(
-                    icon: Icons.tune,
+                    icon: LucideIcons.sliders,
                     title: 'You\'re in Control',
                     description:
                         'Choose which SMS to convert to expenses. You can always edit or delete them.',
@@ -103,7 +108,10 @@ class SmsPermissionPage extends StatelessWidget {
                       ),
                       child: const Column(
                         children: [
-                          Icon(Icons.warning, color: AppColors.warning),
+                          Icon(
+                            LucideIcons.alertTriangle,
+                            color: AppColors.warning,
+                          ),
                           SizedBox(height: 8),
                           Text(
                             'SMS permission was permanently denied. Please enable it in app settings.',
@@ -135,7 +143,7 @@ class SmsPermissionPage extends StatelessWidget {
                       ),
                       child: const Column(
                         children: [
-                          Icon(Icons.error, color: AppColors.error),
+                          Icon(LucideIcons.alertCircle, color: AppColors.error),
                           SizedBox(height: 8),
                           Text(
                             'Permission request timed out. Please try again.',

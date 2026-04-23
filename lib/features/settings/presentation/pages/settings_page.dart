@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../bloc/settings_bloc.dart';
 import '../bloc/settings_event.dart';
@@ -153,7 +154,7 @@ class SettingsPage extends StatelessWidget {
         Card(
           color: AppColors.error.withOpacity(0.1),
           child: ListTile(
-            leading: const Icon(Icons.delete_forever, color: AppColors.error),
+            leading: const Icon(LucideIcons.trash2, color: AppColors.error),
             title: const Text(
               'Delete Account',
               style: TextStyle(color: AppColors.error),

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/presentation/widgets/shimmer_box.dart';
 import '../../../categories/presentation/bloc/category_bloc.dart';
 import '../../../categories/presentation/bloc/category_event.dart';
 import '../../../categories/presentation/bloc/category_state.dart';
@@ -65,10 +67,11 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
     }
   }
 
+  // Memoized formatter — created once per instance instead of per build
+  static final _dateFormat = DateFormat('MMM dd, yyyy');
+
   @override
   Widget build(BuildContext context) {
-    final dateFormat = DateFormat('MMM dd, yyyy');
-
     return Scaffold(
       appBar: AppBar(title: Text(_isEditing ? 'Edit Expense' : 'New Expense')),
       body: Form(
@@ -83,7 +86,10 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
                 prefixText: '৳ ',
                 hintText: '0.00',
                 suffixIcon: _showNegativeWarning
-                    ? const Icon(Icons.warning, color: AppColors.warning)
+                    ? const Icon(
+                        LucideIcons.alertTriangle,
+                        color: AppColors.warning,
+                      )
                     : null,
               ),
               keyboardType: const TextInputType.numberWithOptions(
@@ -108,7 +114,11 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
                 padding: const EdgeInsets.only(top: 8),
                 child: Row(
                   children: [
-                    Icon(Icons.warning, color: AppColors.warning, size: 16),
+                    Icon(
+                      LucideIcons.alertTriangle,
+                      color: AppColors.warning,
+                      size: 16,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       'Negative amount - this is a refund or income',
@@ -135,8 +145,12 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
             const SizedBox(height: 16),
             BlocBuilder<CategoryBloc, CategoryState>(
               builder: (context, state) {
-                if (state is CategoryLoading) {
-                  return const Center(child: CircularProgressIndicator());
+                if (state is CategoryLoading || state is CategoryInitial) {
+                  return ShimmerBox.rectangle(
+                    width: double.infinity,
+                    height: 56,
+                    borderRadius: 12,
+                  );
                 }
                 if (state is CategoryError) {
                   return Text('Error: ${state.message}');
@@ -178,8 +192,8 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
             ListTile(
               contentPadding: EdgeInsets.zero,
               title: const Text('Date'),
-              subtitle: Text(dateFormat.format(_selectedDate)),
-              trailing: const Icon(Icons.calendar_today),
+              subtitle: Text(_dateFormat.format(_selectedDate)),
+              trailing: const Icon(LucideIcons.calendar),
               onTap: _selectDate,
             ),
             const Divider(),

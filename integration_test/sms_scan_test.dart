@@ -11,14 +11,14 @@ import 'package:expense_tracker/features/parsing_rules/domain/usecases/evaluate_
     as eval;
 import 'package:expense_tracker/features/sms_parser/domain/usecases/scan_sms_usecase.dart';
 import 'package:dartz/dartz.dart';
-import 'package:expense_tracker/features/expenses/domain/usecases/get_expenses.dart';
+import 'package:expense_tracker/features/expenses/domain/repositories/expense_repository.dart';
 
 class MockSmsLocalDatasource extends Mock implements SmsLocalDatasource {}
 
 class MockEvaluateRulesUseCase extends Mock
     implements eval.EvaluateRulesUseCase {}
 
-class MockGetExpenses extends Mock implements GetExpenses {}
+class MockGetExpenses extends Mock implements ExpenseRepository {}
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -26,21 +26,21 @@ void main() {
   group('SMS Scan Integration Tests', () {
     late MockSmsLocalDatasource mockSmsDatasource;
     late MockEvaluateRulesUseCase mockEvaluateRules;
-    late MockGetExpenses mockGetExpenses;
+    late MockGetExpenses mockExpenseRepository;
     late ScanSmsUseCase scanSmsUseCase;
     late SmsScannerBloc smsScannerBloc;
 
     setUp(() {
       mockSmsDatasource = MockSmsLocalDatasource();
       mockEvaluateRules = MockEvaluateRulesUseCase();
-      mockGetExpenses = MockGetExpenses();
+      mockExpenseRepository = MockGetExpenses();
       scanSmsUseCase = ScanSmsUseCase(
         smsDatasource: mockSmsDatasource,
         evaluateRules: mockEvaluateRules,
       );
       smsScannerBloc = SmsScannerBloc(
         scanSmsUseCase: scanSmsUseCase,
-        getExpenses: mockGetExpenses,
+        expenseRepository: mockExpenseRepository,
       );
     });
 

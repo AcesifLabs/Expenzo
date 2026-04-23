@@ -19,6 +19,7 @@ abstract class ExpenseLocalDatasource {
   Future<void> deleteExpense(int id);
   Stream<List<Expense>> watchExpenses();
   Future<bool> expenseExistsBySourceId(String sourceId);
+  Future<Set<String>> getExistingSourceIds(List<String> sourceIds);
 }
 
 class ExpenseLocalDatasourceImpl implements ExpenseLocalDatasource {
@@ -128,6 +129,15 @@ class ExpenseLocalDatasourceImpl implements ExpenseLocalDatasource {
   Future<bool> expenseExistsBySourceId(String sourceId) async {
     try {
       return await expenseDao.existsBySourceId(sourceId);
+    } catch (e) {
+      throw CacheException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<Set<String>> getExistingSourceIds(List<String> sourceIds) async {
+    try {
+      return await expenseDao.getExistingSourceIds(sourceIds);
     } catch (e) {
       throw CacheException(message: e.toString());
     }

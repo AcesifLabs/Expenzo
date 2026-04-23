@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/database/daos/pending_recurring_dao.dart';
 import '../bloc/recurring_bloc.dart';
@@ -43,7 +44,7 @@ class _PendingRecurringSectionState extends State<PendingRecurringSection> {
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
-                    const Icon(Icons.pending_actions, color: Colors.orange),
+                    const Icon(LucideIcons.clock, color: Colors.orange),
                     const SizedBox(width: 8),
                     const Text(
                       'Pending Recurring',
@@ -73,14 +74,17 @@ class _PendingRecurringSectionState extends State<PendingRecurringSection> {
                   return ListTile(
                     leading: CircleAvatar(
                       backgroundColor: Colors.orange.withAlpha(51),
-                      child: const Icon(Icons.schedule, color: Colors.orange),
+                      child: const Icon(
+                        LucideIcons.calendar,
+                        color: Colors.orange,
+                      ),
                     ),
                     title: Text(item.description),
                     subtitle: Text(
                       '\$${item.amount.toStringAsFixed(2)} - Due: ${dateFormat.format(item.dueDate)}',
                     ),
                     trailing: IconButton(
-                      icon: const Icon(Icons.check_circle_outline),
+                      icon: const Icon(LucideIcons.checkCircle2),
                       color: Colors.green,
                       onPressed: () async {
                         await _pendingDao.markAsProcessed(item.id);

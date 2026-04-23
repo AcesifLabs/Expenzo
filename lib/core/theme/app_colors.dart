@@ -3,34 +3,65 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  static const Color primary = Color(0xFF2196F3);
-  static const Color secondary = Color(0xFFFF9800);
-  static const Color error = Color(0xFFF44336);
-  static const Color success = Color(0xFF4CAF50);
-  static const Color warning = Color(0xFFFFC107);
+  // ── Primary Palette ──
+  // Deep Sage - Primary brand color (buttons, FAB, links)
+  static const Color primary = Color(0xFF5A7863);
+  // Muted Sage - Secondary (chips, badges, accents)
+  static const Color secondary = Color(0xFF90AB8B);
+  // Pale Sage - Background for light theme
+  static const Color backgroundLight = Color(0xFFEBF4DD);
+  // Dark Blue-Grey - Background for dark theme
+  static const Color backgroundDark = Color(0xFF3B4953);
 
-  static const Color backgroundLight = Color(0xFFFAFAFA);
-  static const Color backgroundDark = Color(0xFF121212);
+  // ── Surface Colors ──
   static const Color surfaceLight = Color(0xFFFFFFFF);
-  static const Color surfaceDark = Color(0xFF1E1E1E);
+  // Rich dark for dark theme surface (darker than background for layering)
+  static const Color surfaceDark = Color(0xFF25343D);
 
-  static const Color textPrimaryLight = Color(0xFF212121);
-  static const Color textPrimaryDark = Color(0xFFFFFFFF);
-  static const Color textSecondaryLight = Color(0xFF757575);
-  static const Color textSecondaryDark = Color(0xFFB0B0B0);
+  // ── Text Colors ──
+  static const Color textPrimaryLight = Color(0xFF3B4953);
+  static const Color textPrimaryDark = Color(0xFFEBF4DD);
+  static const Color textSecondaryLight = Color(0xFF5A7863);
+  static const Color textSecondaryDark = Color(0xFF90AB8B);
 
+  // ── Semantic Colors ──
+  // Error: Warm Red (financial alerts, overspending)
+  static const Color error = Color(0xFFD9534F);
+  static const Color errorDark = Color(0xFFE57373);
+  // Success: Primary Sage (income, goals met)
+  static const Color success = Color(0xFF5A7863);
+  static const Color successDark = Color(0xFF90AB8B);
+  // Warning: Orange/Amber (budget warnings, pending)
+  static const Color warning = Color(0xFFF0B429);
+  static const Color warningDark = Color(0xFFF0B429);
+
+  // ── Financial Colors ──
+  // Income: Primary Sage (positive amounts)
+  static const Color income = Color(0xFF5A7863);
+  static const Color incomeDark = Color(0xFF90AB8B);
+  // Expense: Error Red (negative amounts)
+  static const Color expense = Color(0xFFD9534F);
+  static const Color expenseDark = Color(0xFFE57373);
+
+  // ── Category Colors (Sage/Earth Tones) ──
   static const List<Color> categoryColors = [
-    Color(0xFFE53935),
-    Color(0xFFD81B60),
-    Color(0xFF8E24AA),
-    Color(0xFF5E35B1),
-    Color(0xFF3949AB),
-    Color(0xFF1E88E5),
-    Color(0xFF00ACC1),
-    Color(0xFF00897B),
-    Color(0xFF43A047),
-    Color(0xFF7CB342),
-    Color(0xFFFDD835),
-    Color(0xFFFFB300),
+    Color(0xFF5A7863), // Deep Sage
+    Color(0xFF90AB8B), // Muted Sage
+    Color(0xFFD4A574), // Warm Sand
+    Color(0xFF8B7355), // Earth Brown
+    Color(0xFF6B8E7A), // Soft Green
+    Color(0xFFA8C4B8), // Light Sage
+    Color(0xFFD9A86C), // Amber Gold
+    Color(0xFF7A6B5A), // Taupe
+    Color(0xFF5A6B7A), // Ocean Sage
+    Color(0xFFB8A890), // Stone
+    Color(0xFF8B9A6B), // Olive
+    Color(0xFF6B7A8B), // Teal
   ];
+
+  // ── Aliases for convenience ──
+  static const Color primaryLight = backgroundLight;
+  static const Color surface = surfaceLight;
+  static const Color onPrimary = Colors.white;
+  static const Color onSecondary = Colors.white;
 }

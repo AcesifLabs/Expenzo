@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class SearchBarWidget extends StatefulWidget {
   final TextEditingController controller;
@@ -47,7 +48,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
       ),
       child: Row(
         children: [
-          const Icon(Icons.search, color: Colors.grey),
+          const Icon(LucideIcons.search, color: Colors.grey),
           const SizedBox(width: 12),
           Expanded(
             child: TextField(
@@ -62,14 +63,14 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
           ),
           if (_showClear)
             IconButton(
-              icon: const Icon(Icons.clear, size: 20),
+              icon: const Icon(LucideIcons.x, size: 20),
               onPressed: () {
                 widget.controller.clear();
                 widget.onClear();
               },
             ),
           IconButton(
-            icon: const Icon(Icons.tune, size: 20),
+            icon: const Icon(LucideIcons.sliders, size: 20),
             onPressed: widget.onFilterTap,
           ),
         ],

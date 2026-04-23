@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/utils/navigation_utils.dart';
 import '../bloc/sample_analyzer_bloc.dart';
 import '../../domain/entities/message_source.dart';
 import 'template_editor_page.dart';
@@ -75,7 +76,7 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
                 onTap: () {
                   Navigator.pop(bottomSheetContext);
                   Navigator.of(context).push(
-                    MaterialPageRoute(
+                    SlidePageRoute(
                       builder: (_) => TemplateEditorPage(
                         source: widget.source,
                         sampleMessage: msg,
@@ -185,7 +186,7 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
                           child: InkWell(
                             onTap: () {
                               Navigator.of(context).push(
-                                MaterialPageRoute(
+                                SlidePageRoute(
                                   builder: (_) => TemplateEditorPage(
                                     source: widget.source,
                                     sampleMessage: msg,
@@ -222,7 +223,7 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
                                       label: const Text('Use as Template'),
                                       onPressed: () {
                                         Navigator.of(context).push(
-                                          MaterialPageRoute(
+                                          SlidePageRoute(
                                             builder: (_) => TemplateEditorPage(
                                               source: widget.source,
                                               sampleMessage: msg,

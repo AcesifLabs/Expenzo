@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import '../../../../core/utils/navigation_utils.dart';
 import '../bloc/contact_selector_bloc.dart';
 import '../bloc/contact_selector_event.dart';
 import '../bloc/contact_selector_state.dart';
@@ -10,6 +12,7 @@ import '../bloc/message_sources_state.dart';
 import '../../domain/entities/message_source.dart';
 import 'sample_analyzer_page.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
+import '../../../parsing_rules/presentation/widgets/transaction_list_skeleton.dart';
 
 class ContactSelectorPage extends StatelessWidget {
   const ContactSelectorPage({super.key});
@@ -78,7 +81,7 @@ class _ContactSelectorViewState extends State<ContactSelectorView> {
             child: TextField(
               decoration: InputDecoration(
                 hintText: 'Search contacts...',
-                prefixIcon: const Icon(Icons.search),
+                prefixIcon: const Icon(LucideIcons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -100,7 +103,7 @@ class _ContactSelectorViewState extends State<ContactSelectorView> {
                 return BlocBuilder<ContactSelectorBloc, ContactSelectorState>(
                   builder: (context, state) {
                     if (state is ContactSelectorLoading) {
-                      return const Center(child: CircularProgressIndicator());
+                      return const TransactionListSkeleton(itemCount: 8);
                     }
                     if (state is ContactSelectorError) {
                       return Center(child: Text(state.message));
@@ -148,8 +151,8 @@ class _ContactSelectorViewState extends State<ContactSelectorView> {
                             leading: CircleAvatar(
                               child: Icon(
                                 contact.sourceType == 'sms'
-                                    ? Icons.sms
-                                    : Icons.email,
+                                    ? LucideIcons.messageSquare
+                                    : LucideIcons.mail,
                               ),
                             ),
                             title: Row(
@@ -195,7 +198,7 @@ class _ContactSelectorViewState extends State<ContactSelectorView> {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            trailing: const Icon(Icons.chevron_right),
+                            trailing: const Icon(LucideIcons.chevronRight),
                             onTap: () {
                               final source =
                                   existingSource ??
@@ -209,11 +212,12 @@ class _ContactSelectorViewState extends State<ContactSelectorView> {
 
                               Navigator.of(context)
                                   .push(
-                                    MaterialPageRoute(
+                                    SlidePageRoute(
                                       builder: (_) =>
                                           SampleAnalyzerPage(source: source),
                                     ),
                                   )
+
                                   .then((_) {
                                     if (context.mounted) {
                                       context.read<MessageSourcesBloc>().add(

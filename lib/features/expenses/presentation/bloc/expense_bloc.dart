@@ -1,4 +1,7 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../domain/entities/expense.dart';
+import '../../domain/repositories/expense_repository.dart';
 import '../../domain/usecases/add_expense.dart';
 import '../../domain/usecases/delete_expense.dart';
 import '../../domain/usecases/get_expenses.dart';
@@ -13,12 +16,16 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
   final AddExpense addExpense;
   final UpdateExpense updateExpense;
   final DeleteExpense deleteExpense;
+  final ExpenseRepository expenseRepository;
+
+  StreamSubscription<List<Expense>>? _expensesSubscription;
 
   ExpenseBloc({
     required this.getExpenses,
     required this.addExpense,
     required this.updateExpense,
     required this.deleteExpense,
+    required this.expenseRepository,
   }) : super(const ExpenseInitial()) {
     on<LoadExpenses>(_onLoadExpenses);
     on<LoadMoreExpenses>(_onLoadMoreExpenses);
@@ -26,6 +33,7 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
     on<UpdateExpenseEvent>(_onUpdateExpense);
     on<DeleteExpenseEvent>(_onDeleteExpense);
     on<RefreshExpenses>(_onRefreshExpenses);
+    on<_ExpensesUpdated>(_onExpensesUpdated);
   }
 
   Future<void> _onLoadExpenses(
@@ -33,6 +41,18 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
     Emitter<ExpenseState> emit,
   ) async {
     emit(const ExpenseLoading());
+
+    // Start listening to the reactive stream — DB changes auto-propagate
+    await _expensesSubscription?.cancel();
+    _expensesSubscription = expenseRepository.watchExpenses().listen((
+      expenses,
+    ) {
+      if (!isClosed) {
+        add(_ExpensesUpdated(expenses));
+      }
+    });
+
+    // Also do a manual fetch for the initial page load
     final result = await getExpenses(const GetExpensesParams(limit: _pageSize));
     result.fold(
       (failure) => emit(ExpenseError(failure.message)),
@@ -46,16 +66,43 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
     );
   }
 
+  /// Handles reactive stream updates — when DB changes (add/update/delete),
+  /// this fires automatically without needing explicit reloads.
+  Future<void> _onExpensesUpdated(
+    _ExpensesUpdated event,
+    Emitter<ExpenseState> emit,
+  ) async {
+    final expenses = event.expenses;
+
+    // If paginated, take only the first page
+    if (expenses.length > _pageSize) {
+      emit(
+        ExpenseLoaded(
+          expenses: expenses.sublist(0, _pageSize),
+          total: expenses.length,
+          hasMore: true,
+        ),
+      );
+    } else {
+      emit(
+        ExpenseLoaded(
+          expenses: expenses,
+          total: expenses.length,
+          hasMore: false,
+        ),
+      );
+    }
+  }
+
   Future<void> _onLoadMoreExpenses(
     LoadMoreExpenses event,
     Emitter<ExpenseState> emit,
   ) async {
     final currentState = state;
     if (currentState is! ExpenseLoaded || currentState.hasMore == false) {
-      return; // Nothing more to load
+      return;
     }
 
-    // Emit loading state with current expenses
     emit(
       ExpenseLoadingMore(
         currentExpenses: currentState.expenses,
@@ -88,7 +135,8 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
     final result = await addExpense(event.expense);
     result.fold(
       (failure) => emit(ExpenseError(failure.message)),
-      (_) => add(const LoadExpenses()), // Reload from beginning
+      // No manual reload needed — stream will auto-trigger _ExpensesUpdated
+      (_) {},
     );
   }
 
@@ -99,7 +147,8 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
     final result = await updateExpense(event.expense);
     result.fold(
       (failure) => emit(ExpenseError(failure.message)),
-      (_) => add(const LoadExpenses()), // Reload from beginning
+      // No manual reload needed — stream will auto-trigger _ExpensesUpdated
+      (_) {},
     );
   }
 
@@ -110,7 +159,8 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
     final result = await deleteExpense(event.id);
     result.fold(
       (failure) => emit(ExpenseError(failure.message)),
-      (_) => add(const LoadExpenses()), // Reload from beginning
+      // No manual reload needed — stream will auto-trigger _ExpensesUpdated
+      (_) {},
     );
   }
 
@@ -118,6 +168,22 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
     RefreshExpenses event,
     Emitter<ExpenseState> emit,
   ) async {
+    // Re-trigger initial load (which also re-subscribes to the stream)
     add(const LoadExpenses());
   }
+
+  @override
+  Future<void> close() {
+    _expensesSubscription?.cancel();
+    return super.close();
+  }
+}
+
+/// Internal event fired by the reactive stream subscription.
+class _ExpensesUpdated extends ExpenseEvent {
+  final List<Expense> expenses;
+  const _ExpensesUpdated(this.expenses);
+
+  @override
+  List<Object?> get props => [expenses];
 }

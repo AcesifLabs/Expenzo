@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/di/injection_container.dart' as di;
+import '../../../../core/utils/navigation_utils.dart';
 import '../../domain/entities/recurring_transaction.dart';
 import '../bloc/recurring_bloc.dart';
 import '../bloc/recurring_event.dart';
@@ -55,7 +57,7 @@ class _RecurringListPageState extends State<RecurringListPage> {
           title: const Text('Recurring Transactions'),
           actions: [
             IconButton(
-              icon: const Icon(Icons.refresh),
+              icon: const Icon(LucideIcons.refreshCcw),
               onPressed: () => _bloc.add(const ProcessRecurring()),
               tooltip: 'Process pending',
             ),
@@ -84,7 +86,7 @@ class _RecurringListPageState extends State<RecurringListPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Icon(
-                      Icons.error_outline,
+                      LucideIcons.alertCircle,
                       size: 48,
                       color: Colors.red,
                     ),
@@ -108,7 +110,11 @@ class _RecurringListPageState extends State<RecurringListPage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.repeat, size: 64, color: Colors.grey[400]),
+                      Icon(
+                        LucideIcons.repeat,
+                        size: 64,
+                        color: Colors.grey[400],
+                      ),
                       const SizedBox(height: 16),
                       Text(
                         'No recurring transactions',
@@ -146,7 +152,7 @@ class _RecurringListPageState extends State<RecurringListPage> {
                               ? Colors.orange.withAlpha(51)
                               : Colors.grey.withAlpha(26),
                           child: Icon(
-                            Icons.repeat,
+                            LucideIcons.repeat,
                             color: isDue ? Colors.orange : Colors.grey,
                           ),
                         ),
@@ -191,7 +197,7 @@ class _RecurringListPageState extends State<RecurringListPage> {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () => _navigateToForm(context, null),
-          child: const Icon(Icons.add),
+          child: const Icon(LucideIcons.plus),
         ),
       ),
     );
@@ -200,7 +206,7 @@ class _RecurringListPageState extends State<RecurringListPage> {
   void _navigateToForm(BuildContext context, RecurringTransaction? recurring) {
     Navigator.push(
       context,
-      MaterialPageRoute(
+      SlidePageRoute(
         builder: (_) => BlocProvider.value(
           value: _bloc,
           child: RecurringFormPage(recurring: recurring),

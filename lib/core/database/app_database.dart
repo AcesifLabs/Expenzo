@@ -41,12 +41,8 @@ class AppDatabase extends _$AppDatabase {
     return MigrationStrategy(
       onCreate: (Migrator m) async {
         await m.createAll();
-        await customStatement('''
-          CREATE VIRTUAL TABLE IF NOT EXISTS expense_fts USING fts5(
-            expense_id UNINDEXED,
-            description
-          )
-        ''');
+        await _createFtsTable(customStatement);
+        await _createFtsTriggers(customStatement);
       },
       onUpgrade: (Migrator m, int from, int to) async {
         if (from < 2) {
@@ -57,15 +53,47 @@ class AppDatabase extends _$AppDatabase {
           await m.createTable(budgets);
         }
         if (from < 5) {
-          await customStatement('''
-            CREATE VIRTUAL TABLE IF NOT EXISTS expense_fts USING fts5(
-              expense_id UNINDEXED,
-              description
-            )
-          ''');
+          await _createFtsTable(customStatement);
+          await _createFtsTriggers(customStatement);
         }
       },
     );
+  }
+
+  Future<void> _createFtsTable(Future<void> Function(String) executor) async {
+    await executor('''
+      CREATE VIRTUAL TABLE IF NOT EXISTS expense_fts USING fts5(
+        expense_id UNINDEXED,
+        description
+      )
+    ''');
+  }
+
+  Future<void> _createFtsTriggers(
+    Future<void> Function(String) executor,
+  ) async {
+    // INSERT Trigger
+    await executor('''
+      CREATE TRIGGER IF NOT EXISTS expenses_ai AFTER INSERT ON expenses BEGIN
+        INSERT INTO expense_fts(expense_id, description) 
+        VALUES (new.id, new.description);
+      END;
+    ''');
+
+    // DELETE Trigger
+    await executor('''
+      CREATE TRIGGER IF NOT EXISTS expenses_ad AFTER DELETE ON expenses BEGIN
+        DELETE FROM expense_fts WHERE expense_id = old.id;
+      END;
+    ''');
+
+    // UPDATE Trigger
+    await executor('''
+      CREATE TRIGGER IF NOT EXISTS expenses_au AFTER UPDATE ON expenses BEGIN
+        UPDATE expense_fts SET description = new.description 
+        WHERE expense_id = old.id;
+      END;
+    ''');
   }
 }
 

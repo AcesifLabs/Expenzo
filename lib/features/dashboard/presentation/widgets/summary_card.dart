@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class SummaryCard extends StatelessWidget {
   final String title;
@@ -7,6 +8,9 @@ class SummaryCard extends StatelessWidget {
   final double? percentChange;
   final String currencySymbol;
   final bool isLoading;
+
+  // Memoized formatters — created once per currency symbol
+  static final _currencyFormats = <String, NumberFormat>{};
 
   const SummaryCard({
     super.key,
@@ -20,58 +24,62 @@ class SummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final currencyFormat = NumberFormat.currency(
-      symbol: currencySymbol,
-      decimalDigits: 2,
+    final currencyFormat = _currencyFormats.putIfAbsent(
+      currencySymbol,
+      () => NumberFormat.currency(symbol: currencySymbol, decimalDigits: 2),
     );
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: Colors.grey[600],
-              ),
-            ),
-            const SizedBox(height: 8),
-            if (isLoading)
-              const SizedBox(
-                height: 32,
-                child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
-              )
-            else
+    return RepaintBoundary(
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
               Text(
-                currencyFormat.format(amount),
-                style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                title,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: Colors.grey[600],
                 ),
               ),
-            if (percentChange != null && !isLoading) ...[
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  Icon(
-                    percentChange! >= 0
-                        ? Icons.trending_up
-                        : Icons.trending_down,
-                    size: 16,
-                    color: percentChange! >= 0 ? Colors.red : Colors.green,
+              const SizedBox(height: 8),
+              if (isLoading)
+                const SizedBox(
+                  height: 32,
+                  child: Center(
+                    child: CircularProgressIndicator(strokeWidth: 2),
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${percentChange!.abs().toStringAsFixed(1)}% vs last period',
-                    style: theme.textTheme.bodySmall?.copyWith(
+                )
+              else
+                Text(
+                  currencyFormat.format(amount),
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              if (percentChange != null && !isLoading) ...[
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(
+                      percentChange! >= 0
+                          ? LucideIcons.trendingUp
+                          : LucideIcons.trendingDown,
+                      size: 16,
                       color: percentChange! >= 0 ? Colors.red : Colors.green,
                     ),
-                  ),
-                ],
-              ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${percentChange!.abs().toStringAsFixed(1)}% vs last period',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: percentChange! >= 0 ? Colors.red : Colors.green,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

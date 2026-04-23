@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../../categories/presentation/bloc/category_bloc.dart';
 import '../../../categories/presentation/bloc/category_event.dart';
 import '../../domain/entities/recurring_transaction.dart';
@@ -155,7 +156,7 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
                   contentPadding: EdgeInsets.zero,
                   title: const Text('Start Date'),
                   subtitle: Text(dateFormat.format(_startDate)),
-                  trailing: const Icon(Icons.calendar_today),
+                  trailing: const Icon(LucideIcons.calendar),
                   onTap: _selectStartDate,
                 ),
                 ListTile(
@@ -171,10 +172,10 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
                     children: [
                       if (_endDate != null)
                         IconButton(
-                          icon: const Icon(Icons.clear),
+                          icon: const Icon(LucideIcons.x),
                           onPressed: () => setState(() => _endDate = null),
                         ),
-                      const Icon(Icons.calendar_today),
+                      const Icon(LucideIcons.calendar),
                     ],
                   ),
                   onTap: _selectEndDate,

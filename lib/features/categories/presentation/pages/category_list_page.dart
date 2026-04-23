@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/navigation_utils.dart';
+import '../../../../shared/presentation/widgets/shimmer_box.dart';
 import '../../domain/entities/category.dart';
 import '../bloc/category_bloc.dart';
 import '../bloc/category_event.dart';
@@ -18,7 +21,7 @@ class CategoryListPage extends StatelessWidget {
         title: const Text('Categories'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add),
+            icon: const Icon(LucideIcons.plus),
             onPressed: () => _navigateToForm(context, null),
           ),
         ],
@@ -26,8 +29,18 @@ class CategoryListPage extends StatelessWidget {
       body: BlocBuilder<CategoryBloc, CategoryState>(
         builder: (context, state) {
           if (state is CategoryLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return ShimmerList(
+              itemCount: 6,
+              itemBuilder: (context, index) => Card(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: ListTile(
+                  leading: ShimmerBox.circle(size: 40),
+                  title: ShimmerBox.textLine(width: 150),
+                ),
+              ),
+            );
           }
+
           if (state is CategoryError) {
             return Center(child: Text(state.message));
           }
@@ -70,7 +83,7 @@ class CategoryListPage extends StatelessWidget {
   void _navigateToForm(BuildContext context, Category? category) {
     Navigator.push(
       context,
-      MaterialPageRoute(
+      SlidePageRoute(
         builder: (_) => BlocProvider.value(
           value: context.read<CategoryBloc>(),
           child: CategoryFormPage(category: category),

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import '../../../../core/utils/navigation_utils.dart';
 import '../bloc/sms_scanner_bloc.dart';
 import '../bloc/sms_scanner_event.dart';
 import '../bloc/sms_scanner_state.dart';
 import '../widgets/parsed_transaction_card.dart';
+import '../../../parsing_rules/presentation/widgets/transaction_list_skeleton.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import '../../../expenses/domain/usecases/create_expenses_from_parsed_list.dart';
 
@@ -31,7 +34,7 @@ class SmsScanPage extends StatelessWidget {
                 _buildResultsSummary(context, state),
                 const SizedBox(height: 16),
                 ElevatedButton.icon(
-                  icon: const Icon(Icons.refresh),
+                  icon: const Icon(LucideIcons.refreshCcw),
                   label: const Text('Scan Again'),
                   onPressed: () {
                     context.read<SmsScannerBloc>().add(const StartScan());
@@ -39,11 +42,11 @@ class SmsScanPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 OutlinedButton.icon(
-                  icon: const Icon(Icons.visibility),
+                  icon: const Icon(LucideIcons.eye),
                   label: Text('View ${state.results.length} Results'),
                   onPressed: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(
+                      SlidePageRoute(
                         builder: (_) => BlocProvider.value(
                           value: context.read<SmsScannerBloc>(),
                           child: const SmsScanResultsPage(),
@@ -73,7 +76,7 @@ class SmsScanPage extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            const Icon(Icons.schedule, size: 20),
+            const Icon(LucideIcons.calendarClock, size: 20),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
@@ -178,7 +181,7 @@ class SmsScanPage extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            const Icon(Icons.error, color: Colors.red, size: 48),
+            const Icon(LucideIcons.alertCircle, color: Colors.red, size: 48),
             const SizedBox(height: 8),
             Text('Scan Error', style: Theme.of(context).textTheme.titleMedium),
             Text(state.message),
@@ -201,7 +204,7 @@ class SmsScanPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.sms, size: 64, color: Colors.grey),
+            const Icon(LucideIcons.messageSquare, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
             const Text(
               'No scan performed yet',
@@ -214,7 +217,7 @@ class SmsScanPage extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              icon: const Icon(Icons.search),
+              icon: const Icon(LucideIcons.scan),
               label: const Text('Scan SMS'),
               onPressed: () {
                 context.read<SmsScannerBloc>().add(const StartScan());
@@ -227,8 +230,45 @@ class SmsScanPage extends StatelessWidget {
   }
 }
 
-class SmsScanResultsPage extends StatelessWidget {
-  const SmsScanResultsPage({super.key});
+class SmsScanResultsPage extends StatefulWidget {
+  final bool filterDuplicates;
+
+  const SmsScanResultsPage({super.key, this.filterDuplicates = true});
+
+  @override
+  State<SmsScanResultsPage> createState() => _SmsScanResultsPageState();
+}
+
+class _SmsScanResultsPageState extends State<SmsScanResultsPage> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.offset;
+    if (currentScroll >= (maxScroll * 0.9)) {
+      final state = context.read<SmsScannerBloc>().state;
+      if (state is SmsScannerScanComplete &&
+          !state.hasReachedMax &&
+          !state.isLoadingMore) {
+        context.read<SmsScannerBloc>().add(
+          LoadMoreScanResults(filterDuplicates: widget.filterDuplicates),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -264,7 +304,9 @@ class SmsScanResultsPage extends StatelessWidget {
       ),
       body: BlocBuilder<SmsScannerBloc, SmsScannerState>(
         buildWhen: (previous, current) =>
-            current is SmsScannerScanComplete || current is SmsScannerScanning,
+            current is SmsScannerScanComplete ||
+            current is SmsScannerScanning ||
+            current is SmsScannerInitial,
         builder: (context, state) {
           if (state is SmsScannerScanComplete) {
             if (state.results.isEmpty) {
@@ -272,7 +314,11 @@ class SmsScanResultsPage extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.check_circle, size: 64, color: Colors.green),
+                    Icon(
+                      LucideIcons.checkCircle,
+                      size: 64,
+                      color: Colors.green,
+                    ),
                     SizedBox(height: 16),
                     Text(
                       'No new expenses found',
@@ -289,9 +335,15 @@ class SmsScanResultsPage extends StatelessWidget {
             }
 
             return ListView.builder(
+              controller: _scrollController,
               padding: const EdgeInsets.symmetric(vertical: 8),
-              itemCount: state.results.length,
+              itemCount: state.results.length + (state.isLoadingMore ? 10 : 0),
               itemBuilder: (context, index) {
+                // Show skeleton items at the bottom while loading more
+                if (index >= state.results.length) {
+                  return const TransactionCardSkeleton();
+                }
+
                 final transaction = state.results[index];
                 return ParsedTransactionCard(
                   transaction: transaction,
@@ -306,7 +358,7 @@ class SmsScanResultsPage extends StatelessWidget {
             );
           }
 
-          return const Center(child: CircularProgressIndicator());
+          return const TransactionListSkeleton(itemCount: 10);
         },
       ),
       bottomNavigationBar: BlocBuilder<SmsScannerBloc, SmsScannerState>(

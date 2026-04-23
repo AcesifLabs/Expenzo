@@ -17,6 +17,15 @@ class StartScan extends SmsScannerEvent {
   List<Object?> get props => [since, filterDuplicates];
 }
 
+class LoadMoreScanResults extends SmsScannerEvent {
+  final bool filterDuplicates;
+
+  const LoadMoreScanResults({this.filterDuplicates = false});
+
+  @override
+  List<Object?> get props => [filterDuplicates];
+}
+
 class ClearResults extends SmsScannerEvent {}
 
 class ToggleSelection extends SmsScannerEvent {

@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/utils/navigation_utils.dart';
 import '../../domain/entities/expense.dart';
 import '../bloc/expense_bloc.dart';
 import '../bloc/expense_event.dart';
 import '../bloc/expense_state.dart';
 import '../widgets/expense_card.dart';
+import '../widgets/skeletons/expense_list_skeleton.dart';
+import '../../../../shared/presentation/widgets/shimmer_box.dart';
 import 'expense_form_page.dart';
+import '../../../categories/presentation/bloc/category_bloc.dart';
 import '../../../sms_parser/presentation/bloc/sms_scanner_bloc.dart';
 import '../../../sms_parser/presentation/bloc/sms_scanner_event.dart';
 import '../../../sms_parser/presentation/pages/sms_scan_page.dart';
@@ -63,7 +68,7 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
                 ),
               ),
               ListTile(
-                leading: const Icon(Icons.history),
+                leading: const Icon(LucideIcons.history),
                 title: const Text('Last 7 Days'),
                 onTap: () {
                   Navigator.pop(bottomSheetContext);
@@ -74,7 +79,7 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.date_range),
+                leading: const Icon(LucideIcons.calendarDays),
                 title: const Text('Last 30 Days'),
                 onTap: () {
                   Navigator.pop(bottomSheetContext);
@@ -85,7 +90,7 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.calendar_month),
+                leading: const Icon(LucideIcons.calendarRange),
                 title: const Text('Last 3 Months'),
                 onTap: () {
                   Navigator.pop(bottomSheetContext);
@@ -96,7 +101,7 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.all_inclusive),
+                leading: const Icon(LucideIcons.infinity),
                 title: const Text('All Time'),
                 onTap: () {
                   Navigator.pop(bottomSheetContext);
@@ -116,7 +121,7 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
 
     Navigator.of(context)
         .push(
-          MaterialPageRoute(
+          SlidePageRoute(
             builder: (_) => BlocProvider.value(
               value: smsBloc,
               child: const SmsScanResultsPage(),
@@ -135,9 +140,9 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
       appBar: AppBar(
         title: const Text('Expenses'),
         actions: [
-          IconButton(icon: const Icon(Icons.filter_list), onPressed: () {}),
+          IconButton(icon: const Icon(LucideIcons.filter), onPressed: () {}),
           PopupMenuButton<String>(
-            icon: const Icon(Icons.settings),
+            icon: const Icon(LucideIcons.settings),
             onSelected: (value) {
               if (value == 'scan') {
                 _showScanOptions(context);
@@ -148,7 +153,7 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
                 value: 'scan',
                 child: Row(
                   children: [
-                    Icon(Icons.sms_failed_outlined, size: 20),
+                    Icon(LucideIcons.scan, size: 20),
                     SizedBox(width: 8),
                     Text('Scan previous expenses from SMS'),
                   ],
@@ -166,7 +171,17 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
             current is ExpenseLoadingMore,
         builder: (context, state) {
           if (state is ExpenseLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return ShimmerList(
+              itemCount: 6,
+              itemBuilder: (context, index) => Card(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: ListTile(
+                  leading: ShimmerBox.circle(size: 40),
+                  title: ShimmerBox.textLine(width: 150),
+                  subtitle: ShimmerBox.textLine(width: 100),
+                ),
+              ),
+            );
           }
           if (state is ExpenseError) {
             return Center(child: Text(state.message));
@@ -190,7 +205,7 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.receipt_long, size: 64, color: Colors.grey[400]),
+                  Icon(LucideIcons.receipt, size: 64, color: Colors.grey[400]),
                   const SizedBox(height: 16),
                   Text(
                     'No expenses yet',
@@ -231,7 +246,7 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToForm(context, null),
-        child: const Icon(Icons.add),
+        child: const Icon(LucideIcons.plus),
       ),
     );
   }
@@ -249,9 +264,12 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
   void _navigateToForm(BuildContext context, Expense? expense) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => BlocProvider.value(
-          value: context.read<ExpenseBloc>(),
+      SlidePageRoute(
+        builder: (_) => MultiBlocProvider(
+          providers: [
+            BlocProvider.value(value: context.read<ExpenseBloc>()),
+            BlocProvider.value(value: context.read<CategoryBloc>()),
+          ],
           child: ExpenseFormPage(expense: expense),
         ),
       ),
