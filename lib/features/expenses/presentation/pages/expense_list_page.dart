@@ -244,10 +244,6 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateToForm(context, null),
-        child: Icon(PhosphorIcons.plus(PhosphorIconsStyle.regular)),
-      ),
     );
   }
 
