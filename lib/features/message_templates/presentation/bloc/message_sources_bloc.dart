@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/entities/message_source.dart';
 import '../../domain/usecases/get_message_sources.dart';
 import '../../domain/usecases/save_message_source.dart';
 import '../../../../core/error/usecase.dart';

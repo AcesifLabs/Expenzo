@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart' hide Category;
 import '../../../../core/error/failures.dart';
 import '../../../features/expenses/domain/entities/expense.dart';
 import '../../../features/categories/domain/entities/category.dart' as entities;

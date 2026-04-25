@@ -68,7 +68,7 @@ class _PendingRecurringSectionState extends State<PendingRecurringSection> {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: pendingItems.length,
-                separatorBuilder: (_, __) => const Divider(height: 1),
+                separatorBuilder: (_, _) => const Divider(height: 1),
                 itemBuilder: (context, index) {
                   final item = pendingItems[index];
                   return ListTile(

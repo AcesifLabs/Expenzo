@@ -1,5 +1,4 @@
 import 'package:workmanager/workmanager.dart';
-import 'package:flutter/foundation.dart';
 import '../../core/di/injection_container.dart' as di;
 import '../../features/sms_parser/domain/usecases/scan_sms_usecase.dart';
 import 'notification_service.dart';

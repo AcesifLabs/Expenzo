@@ -8,7 +8,6 @@ import '../bloc/expense_bloc.dart';
 import '../bloc/expense_event.dart';
 import '../bloc/expense_state.dart';
 import '../widgets/expense_card.dart';
-import '../widgets/skeletons/expense_list_skeleton.dart';
 import '../../../../shared/presentation/widgets/shimmer_box.dart';
 import 'expense_form_page.dart';
 import '../../../categories/presentation/bloc/category_bloc.dart';

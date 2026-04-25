@@ -1,12 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/expense_template.dart';
 import '../../domain/entities/message_source.dart';
-import '../bloc/template_editor_bloc.dart';
-import '../bloc/template_editor_event.dart';
-import '../bloc/template_editor_state.dart';
-import '../../../sms_parser/domain/entities/sms_message.dart';
-import 'package:expense_tracker/core/di/injection_container.dart' as di;
 
 class RetroactiveScanDialog extends StatefulWidget {
   final MessageSource source;

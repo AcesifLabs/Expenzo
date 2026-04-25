@@ -125,7 +125,7 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<RecurringFrequency>(
-                  value: _frequency,
+                  initialValue: _frequency,
                   decoration: const InputDecoration(labelText: 'Frequency'),
                   items: const [
                     DropdownMenuItem(
