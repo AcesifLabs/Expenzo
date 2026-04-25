@@ -43,7 +43,6 @@ import '../../features/parsing_rules/domain/services/parsing_isolate_service.dar
 import '../../features/parsing_rules/domain/usecases/evaluate_rules.dart';
 import '../../features/parsing_rules/data/datasources/parsing_rules_local_datasource.dart';
 import '../../features/parsing_rules/data/repositories/parsing_rules_repository_impl.dart';
-import '../../features/message_templates/domain/entities/expense_template.dart';
 import '../../features/message_templates/domain/repositories/message_template_repository.dart';
 import '../../features/message_templates/data/datasources/message_template_local_datasource.dart';
 import '../../features/message_templates/data/repositories/message_template_repository_impl.dart';

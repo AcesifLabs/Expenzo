@@ -1,7 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:drift/drift.dart';
 import '../../../../core/database/app_database.dart';
-import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/date_amount.dart';
 import '../../domain/entities/category_amount.dart';

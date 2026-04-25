@@ -1,13 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection_container.dart';
-import '../../domain/entities/date_amount.dart';
-import '../../domain/entities/category_amount.dart';
-import '../../domain/entities/spending_insights.dart';
 import '../../domain/repositories/reports_repository.dart';
-import '../../domain/usecases/get_spending_trend.dart';
-import '../../domain/usecases/get_category_breakdown.dart';
-import '../../domain/usecases/get_spending_insights.dart';
 import '../bloc/reports_bloc.dart';
 import '../bloc/reports_event.dart';
 import '../bloc/reports_state.dart';

@@ -9,7 +9,6 @@ import '../../../sms_parser/domain/entities/sms_message.dart';
 import '../widgets/retroactive_scan_dialog.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import '../bloc/message_sources_bloc.dart';
-import '../bloc/message_sources_event.dart';
 
 class TemplateEditorPage extends StatelessWidget {
   final MessageSource source;

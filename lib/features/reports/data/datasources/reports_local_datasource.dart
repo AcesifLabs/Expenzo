@@ -1,6 +1,5 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
-import '../../../expenses/domain/entities/expense.dart';
 
 enum Granularity { daily, weekly, monthly }
 

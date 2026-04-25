@@ -272,8 +272,10 @@ class _AppShellState extends State<AppShell> {
   Widget _buildNavItem(int index, IconData icon, IconData activeIcon, String label) {
     final isSelected = _currentIndex == index;
     final color = isSelected ? Theme.of(context).colorScheme.primary : Colors.grey;
-    return InkWell(
-    onTap: () => setState(() => _currentIndex = index),
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => setState(() => _currentIndex = index),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -287,7 +289,6 @@ class _AppShellState extends State<AppShell> {
       ),
     );
   }
-
   void _navigateToForm(BuildContext context) {
     Navigator.push(
       context,

@@ -91,7 +91,7 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
 
                   // Period
                   DropdownButtonFormField<BudgetPeriod>(
-                    value: _selectedPeriod,
+                    initialValue: _selectedPeriod,
                     decoration: const InputDecoration(
                       labelText: 'Period',
                       border: OutlineInputBorder(),

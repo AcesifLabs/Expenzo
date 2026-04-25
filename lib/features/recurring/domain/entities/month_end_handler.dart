@@ -23,7 +23,7 @@ class MonthEndHandler {
     final lastDayOfNextMonth = getLastDayOfMonth(nextYear, nextMonth);
 
     // If dayOfMonth exceeds the days in the next month, use the last day
-    final effectiveDay = dayOfMonth != null && dayOfMonth > lastDayOfNextMonth
+    final effectiveDay = dayOfMonth > lastDayOfNextMonth
         ? lastDayOfNextMonth
         : (dayOfMonth ?? current.day);
 
