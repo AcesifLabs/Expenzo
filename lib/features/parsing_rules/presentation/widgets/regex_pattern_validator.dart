@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../core/utils/regex_utils.dart';
+import 'package:expense_tracker/core/utils/regex_utils.dart';
 
 class RegexPatternValidator extends StatelessWidget {
   final String pattern;

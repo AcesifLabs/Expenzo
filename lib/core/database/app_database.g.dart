@@ -487,7 +487,7 @@ class $CategoriesTable extends Categories
       'emoji', aliasedName, false,
       type: DriftSqlType.string,
       requiredDuringInsert: false,
-      defaultValue: const Constant('📦'));
+      defaultValue: const Constant('package'));
   static const VerificationMeta _colorMeta = const VerificationMeta('color');
   @override
   late final GeneratedColumn<String> color = GeneratedColumn<String>(
@@ -4151,6 +4151,16 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $RecurringTransactionsTable(this);
   late final $ExpenseFtsTableTable expenseFtsTable =
       $ExpenseFtsTableTable(this);
+  late final ExpenseDao expenseDao = ExpenseDao(this as AppDatabase);
+  late final CategoryDao categoryDao = CategoryDao(this as AppDatabase);
+  late final RecurringDao recurringDao = RecurringDao(this as AppDatabase);
+  late final BudgetDao budgetDao = BudgetDao(this as AppDatabase);
+  late final PendingRecurringDao pendingRecurringDao =
+      PendingRecurringDao(this as AppDatabase);
+  late final ParsingRuleDao parsingRuleDao =
+      ParsingRuleDao(this as AppDatabase);
+  late final MessageTemplateDao messageTemplateDao =
+      MessageTemplateDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();

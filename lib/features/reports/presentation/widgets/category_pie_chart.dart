@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_icons.dart';
 import '../../domain/entities/category_amount.dart';
 
 class CategoryPieChart extends StatefulWidget {
@@ -98,10 +99,9 @@ class _CategoryPieChartState extends State<CategoryPieChart> {
               ),
             ),
             const SizedBox(width: 4),
-            Text(
-              '${item.emoji} ${item.categoryName}',
-              style: const TextStyle(fontSize: 12),
-            ),
+            Icon(AppIcons.getCategoryIcon(item.emoji), size: 12),
+            const SizedBox(width: 4),
+            Text(item.categoryName, style: const TextStyle(fontSize: 12)),
           ],
         );
       }).toList(),

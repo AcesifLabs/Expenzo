@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import '../../../../core/error/failures.dart';
+import 'package:expense_tracker/core/error/failures.dart';
 import '../repositories/budget_repository.dart';
 
 class DeleteBudget {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import '../../../../core/utils/navigation_utils.dart';
+import 'package:expense_tracker/core/utils/navigation_utils.dart';
 import '../bloc/sample_analyzer_bloc.dart';
 import '../../domain/entities/message_source.dart';
 import 'template_editor_page.dart';

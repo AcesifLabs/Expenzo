@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
-import '../../../../core/error/failures.dart';
-import '../../../../core/error/usecase.dart';
+import 'package:expense_tracker/core/error/failures.dart';
+import 'package:expense_tracker/core/error/usecase.dart';
 import '../entities/expense.dart';
-import '../entities/expense_source.dart';
+import "package:expense_tracker/core/constants/source_types.dart";
 import '../repositories/expense_repository.dart';
 import '../../../parsing_rules/domain/entities/parsed_transaction.dart';
 

@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
-import '../../../../core/database/app_database.dart';
-import '../../../../core/database/daos/budget_dao.dart';
+import 'package:expense_tracker/core/database/app_database.dart';
+import 'package:expense_tracker/core/database/daos/budget_dao.dart';
 import '../../domain/entities/budget.dart' as domain;
 
 abstract class BudgetLocalDatasource {
@@ -19,12 +19,14 @@ class BudgetLocalDatasourceImpl implements BudgetLocalDatasource {
 
   @override
   Future<List<domain.Budget>> getBudgets() async {
-    return budgetDao.getAllBudgets();
+    final budgets = await budgetDao.getAllBudgets();
+    return budgets.map(_mapToEntity).toList();
   }
 
   @override
   Future<domain.Budget?> getBudgetById(String id) async {
-    return budgetDao.getBudgetById(id);
+    final budget = await budgetDao.getBudgetById(id);
+    return budget != null ? _mapToEntity(budget) : null;
   }
 
   @override
@@ -74,6 +76,34 @@ class BudgetLocalDatasourceImpl implements BudgetLocalDatasource {
 
   @override
   Stream<List<domain.Budget>> watchBudgets() {
-    return budgetDao.watchAllBudgets();
+    return budgetDao.watchAllBudgets().map(
+      (budgets) => budgets.map(_mapToEntity).toList(),
+    );
+  }
+
+  domain.Budget _mapToEntity(Budget b) {
+    return domain.Budget(
+      id: b.id,
+      categoryId: b.categoryId,
+      amount: b.amount,
+      period: _parsePeriod(b.period),
+      startDate: b.startDate,
+      rolloverEnabled: b.rolloverEnabled,
+      rolloverAmount: b.rolloverAmount,
+      isEnabled: b.isEnabled,
+    );
+  }
+
+  domain.BudgetPeriod _parsePeriod(String period) {
+    switch (period) {
+      case 'weekly':
+        return domain.BudgetPeriod.weekly;
+      case 'monthly':
+        return domain.BudgetPeriod.monthly;
+      case 'yearly':
+        return domain.BudgetPeriod.yearly;
+      default:
+        return domain.BudgetPeriod.monthly;
+    }
   }
 }

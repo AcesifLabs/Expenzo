@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
-import '../../../../core/error/failures.dart';
-import '../../../../core/error/usecase.dart';
-import '../../../../core/error/exceptions.dart';
+import 'package:expense_tracker/core/error/failures.dart';
+import 'package:expense_tracker/core/error/usecase.dart';
+import 'package:expense_tracker/core/error/exceptions.dart';
 import '../repositories/category_repository.dart';
 
 class DeleteCategory extends UseCase<Unit, int> {

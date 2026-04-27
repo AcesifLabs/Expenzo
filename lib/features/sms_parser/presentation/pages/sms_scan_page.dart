@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import '../../../../core/utils/navigation_utils.dart';
+import 'package:expense_tracker/core/utils/navigation_utils.dart';
 import '../bloc/sms_scanner_bloc.dart';
 import '../bloc/sms_scanner_event.dart';
 import '../bloc/sms_scanner_state.dart';
@@ -34,7 +34,9 @@ class SmsScanPage extends StatelessWidget {
                 _buildResultsSummary(context, state),
                 const SizedBox(height: 16),
                 ElevatedButton.icon(
-                  icon: Icon(PhosphorIcons.arrowsClockwise(PhosphorIconsStyle.regular)),
+                  icon: Icon(
+                    PhosphorIcons.arrowsClockwise(PhosphorIconsStyle.regular),
+                  ),
                   label: const Text('Scan Again'),
                   onPressed: () {
                     context.read<SmsScannerBloc>().add(const StartScan());
@@ -76,7 +78,10 @@ class SmsScanPage extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Icon(PhosphorIcons.calendarBlank(PhosphorIconsStyle.regular), size: 20),
+            Icon(
+              PhosphorIcons.calendarBlank(PhosphorIconsStyle.regular),
+              size: 20,
+            ),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
@@ -181,7 +186,11 @@ class SmsScanPage extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Icon(PhosphorIcons.warningCircle(PhosphorIconsStyle.regular), color: Colors.red, size: 48),
+            Icon(
+              PhosphorIcons.warningCircle(PhosphorIconsStyle.regular),
+              color: Colors.red,
+              size: 48,
+            ),
             const SizedBox(height: 8),
             Text('Scan Error', style: Theme.of(context).textTheme.titleMedium),
             Text(state.message),
@@ -204,7 +213,11 @@ class SmsScanPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(PhosphorIcons.chat(PhosphorIconsStyle.regular), size: 64, color: Colors.grey),
+            Icon(
+              PhosphorIcons.chat(PhosphorIconsStyle.regular),
+              size: 64,
+              color: Colors.grey,
+            ),
             const SizedBox(height: 16),
             const Text(
               'No scan performed yet',
@@ -217,7 +230,9 @@ class SmsScanPage extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              icon: Icon(PhosphorIcons.listMagnifyingGlass(PhosphorIconsStyle.regular)),
+              icon: Icon(
+                PhosphorIcons.listMagnifyingGlass(PhosphorIconsStyle.regular),
+              ),
               label: const Text('Scan SMS'),
               onPressed: () {
                 context.read<SmsScannerBloc>().add(const StartScan());
@@ -373,41 +388,10 @@ class _SmsScanResultsPageState extends State<SmsScanResultsPage> {
                       .where((t) => state.selectedIds.contains(t.sourceId))
                       .toList();
 
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Creating ${selectedTransactions.length} expenses...',
-                      ),
-                    ),
+                  context.read<SmsScannerBloc>().add(
+                    CreateSelectedExpenses(transactions: selectedTransactions),
                   );
-
-                  final createExpenses = di
-                      .getIt<CreateExpensesFromParsedList>();
-                  final result = await createExpenses(selectedTransactions);
-
-                  if (context.mounted) {
-                    result.fold(
-                      (failure) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Failed: ${failure.message}'),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                      },
-                      (creationResult) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'Successfully created ${creationResult.createdCount} expenses!',
-                            ),
-                          ),
-                        );
-                        context.read<SmsScannerBloc>().add(ClearResults());
-                        Navigator.of(context).pop();
-                      },
-                    );
-                  }
+                  Navigator.of(context).pop();
                 },
                 child: Text('Create ${state.selectedIds.length} Selected'),
               ),

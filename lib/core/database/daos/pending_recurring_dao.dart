@@ -28,8 +28,4 @@ class PendingRecurringDao extends DatabaseAccessor<AppDatabase>
   Future<int> removePending(int id) {
     return (delete(pendingRecurring)..where((t) => t.id.equals(id))).go();
   }
-
-  Future<int> markAsProcessed(int id) {
-    return removePending(id);
-  }
 }

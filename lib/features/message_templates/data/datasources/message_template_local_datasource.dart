@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
-import '../../../../core/database/app_database.dart';
-import '../../../../core/database/daos/message_template_dao.dart';
+import 'package:expense_tracker/core/database/app_database.dart';
+import 'package:expense_tracker/core/database/daos/message_template_dao.dart';
 import '../../domain/entities/message_source.dart' as domain;
 import '../../domain/entities/expense_template.dart' as domain;
 

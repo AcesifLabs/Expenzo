@@ -1,23 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import '../../../../core/theme/app_colors.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_icons.dart';
+import 'package:expense_tracker/core/theme/app_colors.dart';
 import '../../domain/entities/expense.dart';
 import 'source_badge.dart';
 
 class ExpenseCard extends StatelessWidget {
   final Expense expense;
   final String? categoryEmoji;
+  final String? categoryName;
+  final String? categoryColor;
   final VoidCallback onTap;
   final VoidCallback onDelete;
 
-  // Memoized formatters — created once, reused across all ExpenseCard instances
   static final _dateFormat = DateFormat('MMM dd, yyyy');
 
   const ExpenseCard({
     super.key,
     required this.expense,
     this.categoryEmoji,
+    this.categoryName,
+    this.categoryColor,
     required this.onTap,
     required this.onDelete,
   });
@@ -34,7 +39,10 @@ class ExpenseCard extends StatelessWidget {
         color: AppColors.error,
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 16),
-        child: Icon(PhosphorIcons.trash(PhosphorIconsStyle.regular), color: Colors.white),
+        child: Icon(
+          PhosphorIcons.trash(PhosphorIconsStyle.regular),
+          color: Colors.white,
+        ),
       ),
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -53,9 +61,10 @@ class ExpenseCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Center(
-                    child: Text(
-                      categoryEmoji ?? '📦',
-                      style: const TextStyle(fontSize: 24),
+                    child: Icon(
+                      AppIcons.getCategoryIcon(categoryEmoji ?? 'package'),
+                      size: 24,
+                      color: Colors.white,
                     ),
                   ),
                 ),
@@ -64,20 +73,11 @@ class ExpenseCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              expense.description,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w500,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          SourceBadge(source: expense.source),
-                        ],
+                      Text(
+                        expense.description,
+                        style: const TextStyle(fontWeight: FontWeight.w500),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -88,13 +88,26 @@ class ExpenseCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  '${isNegative ? '-' : ''}৳${expense.amount.abs().toStringAsFixed(2)}',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: isNegative ? AppColors.error : AppColors.success,
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${isNegative ? '-' : ''}৳${expense.amount.abs().toStringAsFixed(2)}',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: isNegative ? AppColors.error : AppColors.success,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    SourceBadge(
+                      source: expense.source,
+                      categoryName: categoryName,
+                      categoryIconName: categoryEmoji,
+                      categoryColor: categoryColor,
+                    ),
+                  ],
                 ),
               ],
             ),

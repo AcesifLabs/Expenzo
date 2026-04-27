@@ -1,3 +1,4 @@
+import 'package:expense_tracker/core/constants/source_types.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -5,171 +6,198 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 class AppIcons {
   AppIcons._();
 
+  static IconData _reg(IconData Function(PhosphorIconsStyle) icon) =>
+      icon(PhosphorIconsStyle.regular);
+
   // ============ NAVIGATION ICONS ============
-  static IconData get home => PhosphorIcons.house(PhosphorIconsStyle.regular);
-  static IconData get dashboard => PhosphorIcons.squaresFour(PhosphorIconsStyle.regular);
-  static IconData get scan => PhosphorIcons.listMagnifyingGlass(PhosphorIconsStyle.regular);
-  static IconData get search => PhosphorIcons.magnifyingGlass(PhosphorIconsStyle.regular);
-  static IconData get settings => PhosphorIcons.faders(PhosphorIconsStyle.regular);
+  static IconData get home => _reg(PhosphorIcons.house);
+  static IconData get dashboard => _reg(PhosphorIcons.squaresFour);
+  static IconData get scan => _reg(PhosphorIcons.listMagnifyingGlass);
+  static IconData get search => _reg(PhosphorIcons.magnifyingGlass);
+  static IconData get settings => _reg(PhosphorIcons.faders);
 
   // ============ ACTION ICONS ============
-  static IconData get add => PhosphorIcons.plus(PhosphorIconsStyle.regular);
-  static IconData get delete => PhosphorIcons.trash(PhosphorIconsStyle.regular);
-  static IconData get edit => PhosphorIcons.pencilSimple(PhosphorIconsStyle.regular);
-  static IconData get check => PhosphorIcons.check(PhosphorIconsStyle.regular);
-  static IconData get close => PhosphorIcons.x(PhosphorIconsStyle.regular);
-  static IconData get menu => PhosphorIcons.list(PhosphorIconsStyle.regular);
-  static IconData get filter => PhosphorIcons.funnel(PhosphorIconsStyle.regular);
-  static IconData get refresh => PhosphorIcons.arrowsClockwise(PhosphorIconsStyle.regular);
-  static IconData get save => PhosphorIcons.floppyDisk(PhosphorIconsStyle.regular);
-  static IconData get share => PhosphorIcons.shareNetwork(PhosphorIconsStyle.regular);
-  static IconData get download => PhosphorIcons.downloadSimple(PhosphorIconsStyle.regular);
-  static IconData get upload => PhosphorIcons.uploadSimple(PhosphorIconsStyle.regular);
+  static IconData get add => _reg(PhosphorIcons.plus);
+  static IconData get delete => _reg(PhosphorIcons.trash);
+  static IconData get edit => _reg(PhosphorIcons.pencilSimple);
+  static IconData get check => _reg(PhosphorIcons.check);
+  static IconData get close => _reg(PhosphorIcons.x);
+  static IconData get menu => _reg(PhosphorIcons.list);
+  static IconData get filter => _reg(PhosphorIcons.funnel);
+  static IconData get refresh => _reg(PhosphorIcons.arrowsClockwise);
+  static IconData get save => _reg(PhosphorIcons.floppyDisk);
+  static IconData get share => _reg(PhosphorIcons.shareNetwork);
+  static IconData get download => _reg(PhosphorIcons.downloadSimple);
+  static IconData get upload => _reg(PhosphorIcons.uploadSimple);
 
   // ============ STATUS ICONS ============
-  static IconData get warning => PhosphorIcons.warning(PhosphorIconsStyle.regular);
-  static IconData get error => PhosphorIcons.warningCircle(PhosphorIconsStyle.regular);
-  static IconData get success => PhosphorIcons.checkCircle(PhosphorIconsStyle.regular);
-  static IconData get info => PhosphorIcons.info(PhosphorIconsStyle.regular);
-  static IconData get help => PhosphorIcons.question(PhosphorIconsStyle.regular);
+  static IconData get warning => _reg(PhosphorIcons.warning);
+  static IconData get error => _reg(PhosphorIcons.warningCircle);
+  static IconData get success => _reg(PhosphorIcons.checkCircle);
+  static IconData get info => _reg(PhosphorIcons.info);
+  static IconData get help => _reg(PhosphorIcons.question);
 
   // ============ NAVIGATION ARROWS ============
-  static IconData get back => PhosphorIcons.arrowLeft(PhosphorIconsStyle.regular);
-  static IconData get forward => PhosphorIcons.arrowRight(PhosphorIconsStyle.regular);
-  static IconData get chevronRight => PhosphorIcons.caretRight(PhosphorIconsStyle.regular);
-  static IconData get chevronDown => PhosphorIcons.caretDown(PhosphorIconsStyle.regular);
+  static IconData get back =>
+      PhosphorIcons.arrowLeft(PhosphorIconsStyle.regular);
+  static IconData get forward =>
+      PhosphorIcons.arrowRight(PhosphorIconsStyle.regular);
+  static IconData get chevronRight =>
+      PhosphorIcons.caretRight(PhosphorIconsStyle.regular);
+  static IconData get chevronDown =>
+      PhosphorIcons.caretDown(PhosphorIconsStyle.regular);
 
   // ============ FINANCE ICONS ============
-  static IconData get wallet => PhosphorIcons.wallet(PhosphorIconsStyle.regular);
-  static IconData get money => PhosphorIcons.currencyDollar(PhosphorIconsStyle.regular);
-  static IconData get receipt => PhosphorIcons.invoice(PhosphorIconsStyle.regular);
-  static IconData get card => PhosphorIcons.creditCard(PhosphorIconsStyle.regular);
-  static IconData get trendingUp => PhosphorIcons.trendUp(PhosphorIconsStyle.regular);
-  static IconData get trendingDown => PhosphorIcons.trendDown(PhosphorIconsStyle.regular);
-  static IconData get chart => PhosphorIcons.chartBar(PhosphorIconsStyle.regular);
-  static IconData get pieChart => PhosphorIcons.chartPie(PhosphorIconsStyle.regular);
+  static IconData get wallet =>
+      PhosphorIcons.wallet(PhosphorIconsStyle.regular);
+  static IconData get money =>
+      PhosphorIcons.currencyDollar(PhosphorIconsStyle.regular);
+  static IconData get receipt =>
+      PhosphorIcons.invoice(PhosphorIconsStyle.regular);
+  static IconData get card =>
+      PhosphorIcons.creditCard(PhosphorIconsStyle.regular);
+  static IconData get trendingUp =>
+      PhosphorIcons.trendUp(PhosphorIconsStyle.regular);
+  static IconData get trendingDown =>
+      PhosphorIcons.trendDown(PhosphorIconsStyle.regular);
+  static IconData get chart =>
+      PhosphorIcons.chartBar(PhosphorIconsStyle.regular);
+  static IconData get pieChart =>
+      PhosphorIcons.chartPie(PhosphorIconsStyle.regular);
 
   // ============ CATEGORY ICONS ============
+  static const Map<String, IconData Function(PhosphorIconsStyle)>
+  _categoryIconMap = {
+    'package': PhosphorIcons.package,
+    'shoppingCart': PhosphorIcons.shoppingCart,
+    'forkKnife': PhosphorIcons.forkKnife,
+    'car': PhosphorIcons.car,
+    'house': PhosphorIcons.house,
+    'heartbeat': PhosphorIcons.heartbeat,
+    'gameController': PhosphorIcons.gameController,
+    'deviceMobile': PhosphorIcons.deviceMobile,
+    'airplane': PhosphorIcons.airplane,
+    'graduationCap': PhosphorIcons.graduationCap,
+    'currencyDollar': PhosphorIcons.currencyDollar,
+    'gift': PhosphorIcons.gift,
+  };
+
+  /// Resolves an icon identifier (stored in Category.emoji) to Phosphor IconData.
+  /// Falls back to package icon for unknown names or legacy emoji data.
+  static IconData getCategoryIcon(String iconName) {
+    final iconFn = _categoryIconMap[iconName];
+    if (iconFn != null) return iconFn(PhosphorIconsStyle.regular);
+    return PhosphorIcons.package(PhosphorIconsStyle.regular);
+  }
+
   static IconData get category => PhosphorIcons.tag(PhosphorIconsStyle.regular);
-  static IconData get food => PhosphorIcons.forkKnife(PhosphorIconsStyle.regular);
-  static IconData get grocery => PhosphorIcons.shoppingCart(PhosphorIconsStyle.regular);
+  static IconData get food =>
+      PhosphorIcons.forkKnife(PhosphorIconsStyle.regular);
+  static IconData get grocery =>
+      PhosphorIcons.shoppingCart(PhosphorIconsStyle.regular);
   static IconData get shopping => PhosphorIcons.bag(PhosphorIconsStyle.regular);
-  static IconData get transport => PhosphorIcons.car(PhosphorIconsStyle.regular);
-  static IconData get entertainment => PhosphorIcons.ticket(PhosphorIconsStyle.regular);
-  static IconData get health => PhosphorIcons.heartbeat(PhosphorIconsStyle.regular);
-  static IconData get utilities => PhosphorIcons.lightning(PhosphorIconsStyle.regular);
-  static IconData get education => PhosphorIcons.bookOpen(PhosphorIconsStyle.regular);
-  static IconData get travel => PhosphorIcons.airplane(PhosphorIconsStyle.regular);
+  static IconData get transport =>
+      PhosphorIcons.car(PhosphorIconsStyle.regular);
+  static IconData get entertainment =>
+      PhosphorIcons.ticket(PhosphorIconsStyle.regular);
+  static IconData get health =>
+      PhosphorIcons.heartbeat(PhosphorIconsStyle.regular);
+  static IconData get utilities =>
+      PhosphorIcons.lightning(PhosphorIconsStyle.regular);
+  static IconData get education =>
+      PhosphorIcons.bookOpen(PhosphorIconsStyle.regular);
+  static IconData get travel =>
+      PhosphorIcons.airplane(PhosphorIconsStyle.regular);
   static IconData get cafe => PhosphorIcons.coffee(PhosphorIconsStyle.regular);
   static IconData get gift => PhosphorIcons.gift(PhosphorIconsStyle.regular);
   static IconData get other => PhosphorIcons.tag(PhosphorIconsStyle.regular);
+  static IconData get package =>
+      PhosphorIcons.package(PhosphorIconsStyle.regular);
+  static IconData get house => PhosphorIcons.house(PhosphorIconsStyle.regular);
+  static IconData get gameController =>
+      PhosphorIcons.gameController(PhosphorIconsStyle.regular);
+  static IconData get deviceMobile =>
+      PhosphorIcons.deviceMobile(PhosphorIconsStyle.regular);
+  static IconData get graduationCap =>
+      PhosphorIcons.graduationCap(PhosphorIconsStyle.regular);
 
   // ============ SOURCE ICONS ============
   static IconData get sms => PhosphorIcons.chat(PhosphorIconsStyle.regular);
-  static IconData get email => PhosphorIcons.envelope(PhosphorIconsStyle.regular);
-  static IconData get manual => PhosphorIcons.pencilSimpleLine(PhosphorIconsStyle.regular);
-  static IconData get sync => PhosphorIcons.arrowsClockwise(PhosphorIconsStyle.regular);
+  static IconData get email =>
+      PhosphorIcons.envelope(PhosphorIconsStyle.regular);
+  static IconData get manual =>
+      PhosphorIcons.pencilSimpleLine(PhosphorIconsStyle.regular);
+  static IconData get repeat =>
+      PhosphorIcons.arrowsClockwise(PhosphorIconsStyle.regular);
 
   // ============ TIME ICONS ============
-  static IconData get calendar => PhosphorIcons.calendar(PhosphorIconsStyle.regular);
+  static IconData get calendar =>
+      PhosphorIcons.calendar(PhosphorIconsStyle.regular);
   static IconData get clock => PhosphorIcons.clock(PhosphorIconsStyle.regular);
-  static IconData get schedule => PhosphorIcons.calendarBlank(PhosphorIconsStyle.regular);
-  static IconData get history => PhosphorIcons.clockCounterClockwise(PhosphorIconsStyle.regular);
-  static IconData get repeat => PhosphorIcons.arrowsCounterClockwise(PhosphorIconsStyle.regular);
+  static IconData get schedule =>
+      PhosphorIcons.calendarBlank(PhosphorIconsStyle.regular);
+  static IconData get history =>
+      PhosphorIcons.clockCounterClockwise(PhosphorIconsStyle.regular);
 
   // ============ USER ICONS ============
   static IconData get user => PhosphorIcons.user(PhosphorIconsStyle.regular);
-  static IconData get profile => PhosphorIcons.userCircle(PhosphorIconsStyle.regular);
+  static IconData get profile =>
+      PhosphorIcons.userCircle(PhosphorIconsStyle.regular);
 
   // ============ NOTIFICATION ICONS ============
-  static IconData get notification => PhosphorIcons.bell(PhosphorIconsStyle.regular);
-  static IconData get cloudDone => PhosphorIcons.cloud(PhosphorIconsStyle.regular);
-  static IconData get cloudOff => PhosphorIcons.cloudX(PhosphorIconsStyle.regular);
+  static IconData get notification =>
+      PhosphorIcons.bell(PhosphorIconsStyle.regular);
+  static IconData get cloudDone =>
+      PhosphorIcons.cloud(PhosphorIconsStyle.regular);
+  static IconData get cloudOff =>
+      PhosphorIcons.cloudX(PhosphorIconsStyle.regular);
 
   // ============ DEVICE/COMM ICONS ============
   static IconData get phone => PhosphorIcons.phone(PhosphorIconsStyle.regular);
-  static IconData get location => PhosphorIcons.mapPin(PhosphorIconsStyle.regular);
+  static IconData get location =>
+      PhosphorIcons.mapPin(PhosphorIconsStyle.regular);
   static IconData get image => PhosphorIcons.image(PhosphorIconsStyle.regular);
   static IconData get link => PhosphorIcons.link(PhosphorIconsStyle.regular);
-  static IconData get wifi => PhosphorIcons.wifiHigh(PhosphorIconsStyle.regular);
-  static IconData get printer => PhosphorIcons.printer(PhosphorIconsStyle.regular);
+  static IconData get wifi =>
+      PhosphorIcons.wifiHigh(PhosphorIconsStyle.regular);
+  static IconData get printer =>
+      PhosphorIcons.printer(PhosphorIconsStyle.regular);
 
   // ============ SECURITY ICONS ============
   static IconData get lock => PhosphorIcons.lock(PhosphorIconsStyle.regular);
-  static IconData get unlock => PhosphorIcons.lockOpen(PhosphorIconsStyle.regular);
-  static IconData get security => PhosphorIcons.shield(PhosphorIconsStyle.regular);
-  static IconData get visibility => PhosphorIcons.eye(PhosphorIconsStyle.regular);
-  static IconData get visibilityOff => PhosphorIcons.eyeClosed(PhosphorIconsStyle.regular);
+  static IconData get unlock =>
+      PhosphorIcons.lockOpen(PhosphorIconsStyle.regular);
+  static IconData get security =>
+      PhosphorIcons.shield(PhosphorIconsStyle.regular);
+  static IconData get visibility =>
+      PhosphorIcons.eye(PhosphorIconsStyle.regular);
+  static IconData get visibilityOff =>
+      PhosphorIcons.eyeClosed(PhosphorIconsStyle.regular);
 
   // ============ MISC ICONS ============
   static IconData get empty => PhosphorIcons.empty(PhosphorIconsStyle.regular);
-  static IconData get apps => PhosphorIcons.squaresFour(PhosphorIconsStyle.regular);
+  static IconData get apps =>
+      PhosphorIcons.squaresFour(PhosphorIconsStyle.regular);
   static IconData get copy => PhosphorIcons.copy(PhosphorIconsStyle.regular);
-  static IconData get document => PhosphorIcons.fileText(PhosphorIconsStyle.regular);
-  static IconData get folder => PhosphorIcons.folder(PhosphorIconsStyle.regular);
+  static IconData get document =>
+      PhosphorIcons.fileText(PhosphorIconsStyle.regular);
+  static IconData get folder =>
+      PhosphorIcons.folder(PhosphorIconsStyle.regular);
   static IconData get star => PhosphorIcons.star(PhosphorIconsStyle.regular);
   static IconData get heart => PhosphorIcons.heart(PhosphorIconsStyle.regular);
   static IconData get globe => PhosphorIcons.globe(PhosphorIconsStyle.regular);
 
-  // ============ CATEGORY EMOJI MAPPING ============
-  /// Maps category names to icons
-  static IconData getCategoryIcon(String category) {
-    switch (category.toLowerCase()) {
-      case 'food':
-        return food;
-      case 'grocery':
-        return grocery;
-      case 'shopping':
-        return shopping;
-      case 'transport':
-      case 'transportation':
-        return transport;
-      case 'entertainment':
-        return entertainment;
-      case 'health':
-      case 'medical':
-        return health;
-      case 'utilities':
-      case 'bills':
-        return utilities;
-      case 'education':
-      case 'learning':
-        return education;
-      case 'travel':
-      case 'flight':
-        return travel;
-      case 'cafe':
-      case 'coffee':
-        return cafe;
-      case 'gift':
-      case 'gifts':
-        return gift;
-      case 'salary':
-      case 'income':
-        return money;
-      case 'investment':
-        return trendingUp;
-      case 'other':
-      case 'misc':
-        return other;
-      default:
-        return other;
-    }
-  }
-
-  /// Maps source names to icons
-  static IconData getSourceIcon(String source) {
-    switch (source.toLowerCase()) {
-      case 'sms':
+  /// Maps source enum to icons
+  static IconData getSourceIcon(ExpenseSource source) {
+    switch (source) {
+      case ExpenseSource.sms:
         return sms;
-      case 'email':
+      case ExpenseSource.email:
         return email;
-      case 'manual':
+      case ExpenseSource.manual:
         return manual;
-      case 'recurring':
+      case ExpenseSource.recurring:
         return repeat;
-      default:
-        return manual;
     }
   }
 

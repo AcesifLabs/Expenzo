@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/usecases/get_message_sources.dart';
 import '../../domain/usecases/save_message_source.dart';
-import '../../../../core/error/usecase.dart';
+import 'package:expense_tracker/core/error/usecase.dart';
 import 'message_sources_event.dart';
 import 'message_sources_state.dart';
 

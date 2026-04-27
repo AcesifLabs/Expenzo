@@ -5,6 +5,7 @@ import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/entities/parsing_rule.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/repositories/parsing_rules_repository.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/usecases/evaluate_rules.dart';
+import 'package:expense_tracker/features/parsing_rules/domain/entities/parsing_types.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/usecases/get_rules.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/usecases/update_rule.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/usecases/delete_rule.dart';

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_colors.dart';
+import 'package:expense_tracker/core/theme/app_colors.dart';
 
 enum NotificationType {
   budgetAlert,

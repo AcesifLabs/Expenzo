@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import '../../../../core/error/failures.dart';
+import 'package:expense_tracker/core/error/failures.dart';
 import '../entities/recurring_transaction.dart';
 
 abstract class RecurringRepository {
@@ -10,6 +10,9 @@ abstract class RecurringRepository {
   );
   Future<Either<Failure, RecurringTransaction>> updateRecurring(
     RecurringTransaction recurring,
+  );
+  Future<Either<Failure, void>> updateRecurringBatch(
+    List<RecurringTransaction> transactions,
   );
   Future<Either<Failure, Unit>> deleteRecurring(String id);
   Stream<List<RecurringTransaction>> watchRecurringList();

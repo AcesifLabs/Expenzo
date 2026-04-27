@@ -15,6 +15,14 @@ import 'tables/budgets_table.dart';
 import 'tables/recurring_table.dart';
 import 'tables/expense_fts_table.dart';
 
+import 'daos/expense_dao.dart';
+import 'daos/category_dao.dart';
+import 'daos/recurring_dao.dart';
+import 'daos/budget_dao.dart';
+import 'daos/pending_recurring_dao.dart';
+import 'daos/parsing_rule_dao.dart';
+import 'daos/message_template_dao.dart';
+
 part 'app_database.g.dart';
 
 @DriftDatabase(
@@ -28,6 +36,15 @@ part 'app_database.g.dart';
     Budgets,
     RecurringTransactions,
     ExpenseFtsTable,
+  ],
+  daos: [
+    ExpenseDao,
+    CategoryDao,
+    RecurringDao,
+    BudgetDao,
+    PendingRecurringDao,
+    ParsingRuleDao,
+    MessageTemplateDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {

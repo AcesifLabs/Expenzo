@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import '../../../../core/constants/app_constants.dart';
-import '../../../../core/utils/navigation_utils.dart';
+import 'package:expense_tracker/core/constants/app_constants.dart';
+import 'package:expense_tracker/core/utils/navigation_utils.dart';
+import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
+import 'package:expense_tracker/features/categories/presentation/bloc/category_state.dart';
 import '../../domain/entities/expense.dart';
 import '../bloc/expense_bloc.dart';
 import '../bloc/expense_event.dart';
@@ -67,7 +69,11 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
                 ),
               ),
               ListTile(
-                leading: Icon(PhosphorIcons.clockCounterClockwise(PhosphorIconsStyle.regular)),
+                leading: Icon(
+                  PhosphorIcons.clockCounterClockwise(
+                    PhosphorIconsStyle.regular,
+                  ),
+                ),
                 title: const Text('Last 7 Days'),
                 onTap: () {
                   Navigator.pop(bottomSheetContext);
@@ -78,7 +84,9 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
                 },
               ),
               ListTile(
-                leading: Icon(PhosphorIcons.calendar(PhosphorIconsStyle.regular)),
+                leading: Icon(
+                  PhosphorIcons.calendar(PhosphorIconsStyle.regular),
+                ),
                 title: const Text('Last 30 Days'),
                 onTap: () {
                   Navigator.pop(bottomSheetContext);
@@ -89,7 +97,9 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
                 },
               ),
               ListTile(
-                leading: Icon(PhosphorIcons.calendarDots(PhosphorIconsStyle.regular)),
+                leading: Icon(
+                  PhosphorIcons.calendarDots(PhosphorIconsStyle.regular),
+                ),
                 title: const Text('Last 3 Months'),
                 onTap: () {
                   Navigator.pop(bottomSheetContext);
@@ -100,7 +110,9 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
                 },
               ),
               ListTile(
-                leading: Icon(PhosphorIcons.infinity(PhosphorIconsStyle.regular)),
+                leading: Icon(
+                  PhosphorIcons.infinity(PhosphorIconsStyle.regular),
+                ),
                 title: const Text('All Time'),
                 onTap: () {
                   Navigator.pop(bottomSheetContext);
@@ -139,7 +151,10 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
       appBar: AppBar(
         title: const Text('Expenses'),
         actions: [
-          IconButton(icon: Icon(PhosphorIcons.funnel(PhosphorIconsStyle.regular)), onPressed: () {}),
+          IconButton(
+            icon: Icon(PhosphorIcons.funnel(PhosphorIconsStyle.regular)),
+            onPressed: () {},
+          ),
           PopupMenuButton<String>(
             icon: Icon(PhosphorIcons.faders(PhosphorIconsStyle.regular)),
             onSelected: (value) {
@@ -152,7 +167,12 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
                 value: 'scan',
                 child: Row(
                   children: [
-                    Icon(PhosphorIcons.listMagnifyingGlass(PhosphorIconsStyle.regular), size: 20),
+                    Icon(
+                      PhosphorIcons.listMagnifyingGlass(
+                        PhosphorIconsStyle.regular,
+                      ),
+                      size: 20,
+                    ),
                     SizedBox(width: 8),
                     Text('Scan previous expenses from SMS'),
                   ],
@@ -204,7 +224,11 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(PhosphorIcons.invoice(PhosphorIconsStyle.regular), size: 64, color: Colors.grey[400]),
+                  Icon(
+                    PhosphorIcons.invoice(PhosphorIconsStyle.regular),
+                    size: 64,
+                    color: Colors.grey[400],
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     'No expenses yet',
@@ -220,25 +244,44 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
             );
           }
 
-          return RefreshIndicator(
-            onRefresh: () async {
-              context.read<ExpenseBloc>().add(const RefreshExpenses());
-            },
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              itemCount: expenses.length + (hasMore ? 1 : 0),
-              itemBuilder: (context, index) {
-                if (index >= expenses.length) {
-                  return _buildLoadMoreIndicator(isLoadingMore);
-                }
-                final expense = expenses[index];
-                return ExpenseCard(
-                  expense: expense,
-                  onTap: () => _navigateToForm(context, expense),
-                  onDelete: () => _handleDelete(context, expense),
-                );
+          return RepaintBoundary(
+            child: RefreshIndicator(
+              onRefresh: () async {
+                context.read<ExpenseBloc>().add(const RefreshExpenses());
               },
+              child: ListView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                itemCount: expenses.length + (hasMore ? 1 : 0),
+                itemBuilder: (context, index) {
+                  if (index >= expenses.length) {
+                    return _buildLoadMoreIndicator(isLoadingMore);
+                  }
+                  final expense = expenses[index];
+                  final catState = context.read<CategoryBloc>().state;
+                  String? catName;
+                  String? catEmoji;
+                  String? catColor;
+                  if (catState is CategoryLoaded) {
+                    final cat = catState.categories.where(
+                      (c) => c.id == expense.categoryId,
+                    );
+                    if (cat.isNotEmpty) {
+                      catName = cat.first.name;
+                      catEmoji = cat.first.emoji;
+                      catColor = cat.first.color;
+                    }
+                  }
+                  return ExpenseCard(
+                    expense: expense,
+                    categoryName: catName,
+                    categoryEmoji: catEmoji,
+                    categoryColor: catColor,
+                    onTap: () => _navigateToForm(context, expense),
+                    onDelete: () => _handleDelete(context, expense),
+                  );
+                },
+              ),
             ),
           );
         },

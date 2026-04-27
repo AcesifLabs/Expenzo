@@ -1,5 +1,4 @@
 export 'entities/expense.dart';
-export 'entities/expense_source.dart';
 export 'repositories/expense_repository.dart';
 export 'usecases/get_expenses.dart';
 export 'usecases/get_expense_by_id.dart';

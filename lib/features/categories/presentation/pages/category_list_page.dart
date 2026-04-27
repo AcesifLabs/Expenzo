@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/utils/navigation_utils.dart';
+import 'package:expense_tracker/core/theme/app_colors.dart';
+import 'package:expense_tracker/core/utils/navigation_utils.dart';
 import '../../../../shared/presentation/widgets/shimmer_box.dart';
 import '../../domain/entities/category.dart';
 import '../bloc/category_bloc.dart';

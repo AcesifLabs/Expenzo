@@ -49,7 +49,7 @@ class BackgroundTaskService {
       frequency: const Duration(hours: 24),
       initialDelay: const Duration(minutes: 15),
       constraints: Constraints(
-        networkType: NetworkType.connected,
+        networkType: NetworkType.notRequired,
         requiresBatteryNotLow: true,
       ),
     );

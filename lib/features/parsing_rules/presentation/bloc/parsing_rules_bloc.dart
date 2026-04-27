@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:equatable/equatable.dart';
 import '../../domain/entities/parsing_rule.dart';
 import '../../domain/usecases/get_rules.dart';
 import '../../domain/usecases/update_rule.dart';
@@ -25,6 +26,7 @@ class ParsingRulesBloc extends Bloc<ParsingRulesEvent, ParsingRulesState> {
     on<RefreshRules>(_onRefreshRules);
     on<ToggleRule>(_onToggleRule);
     on<DeleteRuleRequested>(_onDeleteRule);
+    on<_RulesUpdated>(_onRulesUpdated);
   }
 
   Future<void> _onLoadRules(
@@ -36,7 +38,7 @@ class ParsingRulesBloc extends Bloc<ParsingRulesEvent, ParsingRulesState> {
     await _rulesSubscription?.cancel();
     _rulesSubscription = repository.watchRules().listen((rules) {
       if (!isClosed) {
-        add(RefreshRules());
+        add(_RulesUpdated(rules));
       }
     });
 
@@ -45,6 +47,13 @@ class ParsingRulesBloc extends Bloc<ParsingRulesEvent, ParsingRulesState> {
       (failure) => emit(ParsingRulesError(message: failure.message)),
       (rules) => emit(ParsingRulesLoaded(rules: rules)),
     );
+  }
+
+  Future<void> _onRulesUpdated(
+    _RulesUpdated event,
+    Emitter<ParsingRulesState> emit,
+  ) async {
+    emit(ParsingRulesLoaded(rules: event.rules));
   }
 
   Future<void> _onRefreshRules(
@@ -98,4 +107,13 @@ class ParsingRulesBloc extends Bloc<ParsingRulesEvent, ParsingRulesState> {
     _rulesSubscription?.cancel();
     return super.close();
   }
+}
+
+/// Internal event fired by the reactive stream subscription.
+class _RulesUpdated extends ParsingRulesEvent {
+  final List<ParsingRule> rules;
+  const _RulesUpdated(this.rules);
+
+  @override
+  List<Object?> get props => [rules];
 }

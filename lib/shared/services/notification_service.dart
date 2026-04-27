@@ -60,7 +60,9 @@ class NotificationService {
         ?.createNotificationChannel(androidChannel);
 
     _isInitialized = true;
-    debugPrint('NotificationService initialized');
+    if (kDebugMode) {
+      print('NotificationService initialized');
+    }
   }
 
   static void _onNotificationTapped(NotificationResponse response) {
@@ -70,11 +72,15 @@ class NotificationService {
         final data = jsonDecode(payload) as Map<String, dynamic>;
         final deepLink = data['deepLink'] as String?;
         if (deepLink != null) {
-          debugPrint('Notification tapped with deep link: $deepLink');
+          if (kDebugMode) {
+            print('Notification tapped with deep link: $deepLink');
+          }
           // TODO: Navigate to deep link
         }
       } catch (e) {
-        debugPrint('Failed to parse notification payload: $e');
+        if (kDebugMode) {
+          print('Failed to parse notification payload: $e');
+        }
       }
     }
   }

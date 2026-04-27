@@ -1,6 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import '../../../../core/error/exceptions.dart';
+import 'package:expense_tracker/core/error/exceptions.dart';
 import '../../domain/entities/user_settings.dart';
 
 abstract class SettingsLocalDatasource {

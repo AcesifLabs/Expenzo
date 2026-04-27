@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../../../../core/utils/regex_utils.dart';
+import 'package:expense_tracker/core/utils/regex_utils.dart';
 import 'confidence_badge.dart';
 
 class RegexTesterWidget extends StatefulWidget {

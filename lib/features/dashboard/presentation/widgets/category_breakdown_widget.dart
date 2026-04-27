@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_icons.dart';
 import '../../domain/entities/dashboard_summary.dart';
 
 class CategoryBreakdownWidget extends StatelessWidget {
@@ -78,7 +79,7 @@ class _CategoryRow extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text(category.emoji, style: const TextStyle(fontSize: 20)),
+              Icon(AppIcons.getCategoryIcon(category.emoji), size: 20),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(

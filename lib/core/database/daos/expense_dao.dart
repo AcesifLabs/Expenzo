@@ -8,10 +8,10 @@ part 'expense_dao.g.dart';
 class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
   ExpenseDao(super.db);
 
-  Stream<List<Expense>> watchExpenses() {
-    return (select(
-      expenses,
-    )..orderBy([(t) => OrderingTerm.desc(t.date)])).watch();
+  Stream<List<Expense>> watchExpenses({int? limit, int? offset}) {
+    var query = select(expenses)..orderBy([(t) => OrderingTerm.desc(t.date)]);
+    if (limit != null) query = query..limit(limit, offset: offset);
+    return query.watch();
   }
 
   Future<List<Expense>> getAllExpenses({int? limit, int? offset}) {
@@ -94,5 +94,26 @@ class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
         .map((row) => row.read(expenses.sourceId))
         .whereType<String>()
         .toSet();
+  }
+
+  Future<List<TypedResult>> getCategoryBreakdown(DateTime start, DateTime end) {
+    final amountSum = expenses.amount.sum();
+    final query = selectOnly(expenses)
+      ..addColumns([expenses.categoryId, amountSum])
+      ..where(expenses.date.isBetweenValues(start, end))
+      ..groupBy([expenses.categoryId]);
+    return query.get();
+  }
+
+  Future<List<TypedResult>> getSpendingTrend(DateTime start, DateTime end) {
+    // Note: Drift doesn't have a built-in date_trunc, so we group by date
+    // and aggregate in Dart for different granularities, or use custom SQL.
+    // For now, we'll fetch aggregated daily totals from SQL.
+    final amountSum = expenses.amount.sum();
+    final query = selectOnly(expenses)
+      ..addColumns([expenses.date, amountSum])
+      ..where(expenses.date.isBetweenValues(start, end))
+      ..groupBy([expenses.date]);
+    return query.get();
   }
 }

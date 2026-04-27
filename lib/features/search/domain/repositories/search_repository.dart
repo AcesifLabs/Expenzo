@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import '../../../../core/error/failures.dart';
+import 'package:expense_tracker/core/error/failures.dart';
 import '../entities/search_filters.dart';
 import '../entities/search_result.dart';
 

@@ -1,6 +1,6 @@
-import '../../../../core/error/either.dart';
-import '../../../../core/error/failures.dart';
-import '../../../../core/error/usecase.dart';
+import 'package:dartz/dartz.dart';
+import 'package:expense_tracker/core/error/failures.dart';
+import 'package:expense_tracker/core/error/usecase.dart';
 import '../entities/user.dart';
 import '../repositories/auth_repository.dart';
 

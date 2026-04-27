@@ -15,10 +15,8 @@ import 'features/expenses/presentation/bloc/expense_event.dart';
 import 'features/expenses/presentation/pages/expense_list_page.dart';
 import 'features/expenses/presentation/pages/expense_form_page.dart';
 import 'features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
-import 'shared/presentation/pages/scan_page.dart';
-import 'shared/presentation/widgets/lazy_indexed_stack.dart';
-
-import 'package:google_fonts/google_fonts.dart';
+import 'features/message_templates/presentation/pages/contact_selector_page.dart';
+import 'shared/presentation/widgets/app_shell.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -134,9 +132,7 @@ class _AppLoaderState extends State<AppLoader> {
   Widget _buildSplash(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      body: const Center(
-        child: _SplashIcon(),
-      ),
+      body: const Center(child: _SplashIcon()),
     );
   }
 }
@@ -148,7 +144,8 @@ class _SplashIcon extends StatefulWidget {
   State<_SplashIcon> createState() => _SplashIconState();
 }
 
-class _SplashIconState extends State<_SplashIcon> with SingleTickerProviderStateMixin {
+class _SplashIconState extends State<_SplashIcon>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -159,10 +156,11 @@ class _SplashIconState extends State<_SplashIcon> with SingleTickerProviderState
       vsync: this,
       duration: const Duration(milliseconds: 1000),
     )..repeat(reverse: true);
-    
-    _animation = Tween<double>(begin: 0.9, end: 1.1).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+
+    _animation = Tween<double>(
+      begin: 0.9,
+      end: 1.1,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -187,9 +185,7 @@ class _SplashIconState extends State<_SplashIcon> with SingleTickerProviderState
           const SizedBox(height: 16),
           Text(
             'Expenzo',
-            style: GoogleFonts.lato(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
               color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
@@ -211,7 +207,7 @@ class _InitialDataLoaderState extends State<_InitialDataLoader> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await Future.delayed(const Duration(milliseconds: 800));
+      await di.featureDependenciesReady;
       if (mounted) {
         context.read<AuthBloc>().add(const AuthCheckRequested());
         context.read<CategoryBloc>().add(const LoadCategories());
@@ -222,97 +218,4 @@ class _InitialDataLoaderState extends State<_InitialDataLoader> {
 
   @override
   Widget build(BuildContext context) => const AppShell();
-}
-
-class AppShell extends StatefulWidget {
-  const AppShell({super.key});
-
-  @override
-  State<AppShell> createState() => _AppShellState();
-}
-
-class _AppShellState extends State<AppShell> {
-  int _currentIndex = 0;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: LazyIndexedStack(
-        index: _currentIndex,
-        children: const [
-          ExpenseListPage(),
-          CategoryListPage(),
-          ScanPage(),
-          SettingsView(),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateToForm(context),
-        shape: const CircleBorder(),
-        child: Icon(PhosphorIcons.plus(PhosphorIconsStyle.regular)),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 8.0,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildNavItem(0, PhosphorIcons.invoice(PhosphorIconsStyle.regular), PhosphorIcons.invoice(PhosphorIconsStyle.fill), 'Expenses'),
-            _buildNavItem(1, PhosphorIcons.tag(PhosphorIconsStyle.regular), PhosphorIcons.tag(PhosphorIconsStyle.fill), 'Categories'),
-            const SizedBox(width: 40), // Space for FAB
-            _buildNavItem(2, PhosphorIcons.listMagnifyingGlass(PhosphorIconsStyle.regular), PhosphorIcons.listMagnifyingGlass(PhosphorIconsStyle.fill), 'Scan'),
-            _buildNavItem(3, PhosphorIcons.faders(PhosphorIconsStyle.regular), PhosphorIcons.faders(PhosphorIconsStyle.fill), 'Settings'),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavItem(int index, IconData icon, IconData activeIcon, String label) {
-    final isSelected = _currentIndex == index;
-    final color = isSelected ? Theme.of(context).colorScheme.primary : Colors.grey;
-
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () => setState(() => _currentIndex = index),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(isSelected ? activeIcon : icon, color: color),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(color: color, fontSize: 12),
-          ),
-        ],
-      ),
-    );
-  }
-  void _navigateToForm(BuildContext context) {
-    Navigator.push(
-      context,
-      SlidePageRoute(
-        builder: (_) => MultiBlocProvider(
-          providers: [
-            BlocProvider.value(value: di.getIt<ExpenseBloc>()),
-            BlocProvider.value(value: di.getIt<CategoryBloc>()),
-          ],
-          child: ExpenseFormPage(expense: null),
-        ),
-      ),
-    );
-  }
-}
-
-class SettingsView extends StatelessWidget {
-  const SettingsView({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
-      body: const Center(child: Text('Settings - Coming soon')),
-    );
-  }
 }

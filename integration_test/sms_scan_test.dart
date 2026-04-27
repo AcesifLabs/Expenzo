@@ -7,11 +7,13 @@ import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanne
 import 'package:expense_tracker/features/sms_parser/domain/entities/sms_message.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/entities/parsed_transaction.dart';
 import 'package:expense_tracker/features/sms_parser/data/datasources/sms_local_datasource.dart';
+import 'package:expense_tracker/features/parsing_rules/domain/entities/parsing_types.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/usecases/evaluate_rules.dart'
     as eval;
 import 'package:expense_tracker/features/sms_parser/domain/usecases/scan_sms_usecase.dart';
 import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/features/expenses/domain/repositories/expense_repository.dart';
+import 'package:expense_tracker/features/expenses/domain/usecases/create_expenses_from_parsed_list.dart';
 
 class MockSmsLocalDatasource extends Mock implements SmsLocalDatasource {}
 
@@ -20,6 +22,8 @@ class MockEvaluateRulesUseCase extends Mock
 
 class MockGetExpenses extends Mock implements ExpenseRepository {}
 
+class MockCreateExpenses extends Mock implements CreateExpensesFromParsedList {}
+
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -27,6 +31,7 @@ void main() {
     late MockSmsLocalDatasource mockSmsDatasource;
     late MockEvaluateRulesUseCase mockEvaluateRules;
     late MockGetExpenses mockExpenseRepository;
+    late MockCreateExpenses mockCreateExpenses;
     late ScanSmsUseCase scanSmsUseCase;
     late SmsScannerBloc smsScannerBloc;
 
@@ -34,6 +39,7 @@ void main() {
       mockSmsDatasource = MockSmsLocalDatasource();
       mockEvaluateRules = MockEvaluateRulesUseCase();
       mockExpenseRepository = MockGetExpenses();
+      mockCreateExpenses = MockCreateExpenses();
       scanSmsUseCase = ScanSmsUseCase(
         smsDatasource: mockSmsDatasource,
         evaluateRules: mockEvaluateRules,
@@ -41,6 +47,7 @@ void main() {
       smsScannerBloc = SmsScannerBloc(
         scanSmsUseCase: scanSmsUseCase,
         expenseRepository: mockExpenseRepository,
+        createExpensesFromParsedList: mockCreateExpenses,
       );
     });
 
@@ -251,8 +258,7 @@ void main() {
         () => mockSmsDatasource.getSmsFromDateRange(any(), any()),
       ).thenAnswer((_) async => []);
       when(() => mockEvaluateRules.call(any())).thenAnswer((invocation) async {
-        final param =
-            invocation.positionalArguments[0] as eval.EvaluateRulesParams;
+        final param = invocation.positionalArguments[0] as EvaluateRulesParams;
         final found = testParsedTransactions.where(
           (t) => t.sourceId == param.sourceId,
         );
@@ -302,8 +308,7 @@ void main() {
         () => mockSmsDatasource.getSmsFromDateRange(any(), any()),
       ).thenAnswer((_) async => []);
       when(() => mockEvaluateRules.call(any())).thenAnswer((invocation) async {
-        final param =
-            invocation.positionalArguments[0] as eval.EvaluateRulesParams;
+        final param = invocation.positionalArguments[0] as EvaluateRulesParams;
         final found = testParsedTransactions.where(
           (t) => t.sourceId == param.sourceId,
         );

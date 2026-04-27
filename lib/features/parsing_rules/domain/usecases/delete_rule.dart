@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
-import '../../../../core/error/failures.dart';
-import '../../../../core/error/usecase.dart';
+import 'package:expense_tracker/core/error/failures.dart';
+import 'package:expense_tracker/core/error/usecase.dart';
 import '../repositories/parsing_rules_repository.dart';
 
 class DeleteRule implements UseCase<Unit, String> {

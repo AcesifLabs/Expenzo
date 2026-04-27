@@ -1,6 +1,5 @@
 import 'package:drift/drift.dart';
-
-enum ExpenseSource { manual, sms, email, recurring }
+import '../../constants/source_types.dart';
 
 class ParsingRules extends Table {
   TextColumn get id => text()();

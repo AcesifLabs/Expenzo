@@ -1,9 +1,10 @@
 import 'package:drift/drift.dart';
-import '../../../../core/error/exceptions.dart';
-import '../../../../core/database/app_database.dart' hide Category, Expense;
-import '../../../../core/database/daos/expense_dao.dart';
+import 'package:expense_tracker/core/error/exceptions.dart';
+import 'package:expense_tracker/core/database/app_database.dart'
+    hide Category, Expense;
+import 'package:expense_tracker/core/database/daos/expense_dao.dart';
 import '../../domain/entities/expense.dart';
-import '../../domain/entities/expense_source.dart';
+import "package:expense_tracker/core/constants/source_types.dart";
 import '../../domain/repositories/expense_repository.dart';
 
 abstract class ExpenseLocalDatasource {
@@ -17,9 +18,10 @@ abstract class ExpenseLocalDatasource {
   Future<Expense> addExpense(Expense expense);
   Future<Expense> updateExpense(Expense expense);
   Future<void> deleteExpense(int id);
-  Stream<List<Expense>> watchExpenses();
+  Stream<List<Expense>> watchExpenses({int? limit, int? offset});
   Future<bool> expenseExistsBySourceId(String sourceId);
   Future<Set<String>> getExistingSourceIds(List<String> sourceIds);
+  Future<void> addExpensesBatch(List<Expense> expenses);
 }
 
 class ExpenseLocalDatasourceImpl implements ExpenseLocalDatasource {
@@ -119,10 +121,10 @@ class ExpenseLocalDatasourceImpl implements ExpenseLocalDatasource {
   }
 
   @override
-  Stream<List<Expense>> watchExpenses() {
-    return expenseDao.watchExpenses().map(
-      (expenses) => expenses.map(_mapToEntity).toList(),
-    );
+  Stream<List<Expense>> watchExpenses({int? limit, int? offset}) {
+    return expenseDao
+        .watchExpenses(limit: limit, offset: offset)
+        .map((expenses) => expenses.map(_mapToEntity).toList());
   }
 
   @override
@@ -138,6 +140,28 @@ class ExpenseLocalDatasourceImpl implements ExpenseLocalDatasource {
   Future<Set<String>> getExistingSourceIds(List<String> sourceIds) async {
     try {
       return await expenseDao.getExistingSourceIds(sourceIds);
+    } catch (e) {
+      throw CacheException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<void> addExpensesBatch(List<Expense> expenses) async {
+    try {
+      final now = DateTime.now().toUtc();
+      final companions = expenses.map((expense) {
+        return ExpensesCompanion(
+          amount: Value(expense.amount),
+          description: Value(expense.description),
+          date: Value(expense.date),
+          categoryId: Value(expense.categoryId),
+          source: Value(expense.source.name),
+          sourceId: Value(expense.sourceId),
+          createdAt: Value(now),
+          updatedAt: Value(now),
+        );
+      }).toList();
+      await expenseDao.insertExpensesBatch(companions);
     } catch (e) {
       throw CacheException(message: e.toString());
     }

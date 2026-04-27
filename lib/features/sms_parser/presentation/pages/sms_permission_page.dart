@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import '../../../../core/theme/app_colors.dart';
+import 'package:expense_tracker/core/theme/app_colors.dart';
 import '../bloc/sms_permission_bloc.dart';
 import '../bloc/sms_permission_event.dart';
 import '../bloc/sms_permission_state.dart';

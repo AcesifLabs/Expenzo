@@ -29,7 +29,11 @@ class SyncStatusIndicator extends StatelessWidget {
   Widget _buildIcon() {
     switch (status) {
       case SyncStatus.idle:
-        return const Icon(PhosphorIcons.regular.cloud, size: 18, color: Colors.grey);
+        return Icon(
+          PhosphorIcons.cloud(PhosphorIconsStyle.regular),
+          size: 18,
+          color: Colors.grey,
+        );
       case SyncStatus.syncing:
         return const SizedBox(
           width: 18,
@@ -37,9 +41,17 @@ class SyncStatusIndicator extends StatelessWidget {
           child: CircularProgressIndicator(strokeWidth: 2),
         );
       case SyncStatus.success:
-        return const Icon(PhosphorIcons.regular.cloud, size: 18, color: Colors.green);
+        return Icon(
+          PhosphorIcons.cloud(PhosphorIconsStyle.regular),
+          size: 18,
+          color: Colors.green,
+        );
       case SyncStatus.error:
-        return const Icon(PhosphorIcons.regular.cloudOff, size: 18, color: Colors.red);
+        return Icon(
+          PhosphorIcons.cloudSlash(PhosphorIconsStyle.regular),
+          size: 18,
+          color: Colors.red,
+        );
     }
   }
 }

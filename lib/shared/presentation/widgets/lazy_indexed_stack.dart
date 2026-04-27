@@ -32,14 +32,18 @@ class _LazyIndexedStackState extends State<LazyIndexedStack> {
   void initState() {
     super.initState();
     _activated = List.filled(widget.children.length, false);
-    _activated[widget.index] = true;
+    if (widget.index >= 0 && widget.index < _activated.length) {
+      _activated[widget.index] = true;
+    }
   }
 
   @override
   void didUpdateWidget(LazyIndexedStack oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.index != oldWidget.index) {
-      _activated[widget.index] = true;
+      if (widget.index >= 0 && widget.index < _activated.length) {
+        _activated[widget.index] = true;
+      }
     }
   }
 
