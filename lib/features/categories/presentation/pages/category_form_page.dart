@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import '../../../../core/theme/app_colors.dart';
+import 'package:expense_tracker/core/theme/app_colors.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_icons.dart';
 import '../../domain/entities/category.dart';
 import '../bloc/category_bloc.dart';
 import '../bloc/category_event.dart';
@@ -18,22 +19,22 @@ class CategoryFormPage extends StatefulWidget {
 class _CategoryFormPageState extends State<CategoryFormPage> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
-  String _selectedEmoji = '📦';
+  String _selectedEmoji = 'package';
   String _selectedColor = '#2196F3';
 
-  static const List<String> _emojis = [
-    '📦',
-    '🛒',
-    '🍔',
-    '🚗',
-    '🏠',
-    '💊',
-    '🎮',
-    '📱',
-    '✈️',
-    '🎓',
-    '💰',
-    '🎁',
+  static const List<String> _iconNames = [
+    'package',
+    'shoppingCart',
+    'forkKnife',
+    'car',
+    'house',
+    'heartbeat',
+    'gameController',
+    'deviceMobile',
+    'airplane',
+    'graduationCap',
+    'currencyDollar',
+    'gift',
   ];
 
   static const List<String> _colors = [
@@ -94,15 +95,15 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
               },
             ),
             const SizedBox(height: 24),
-            const Text('Emoji', style: TextStyle(fontSize: 16)),
+            const Text('Icon', style: TextStyle(fontSize: 16)),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: _emojis.map((emoji) {
-                final isSelected = emoji == _selectedEmoji;
+              children: _iconNames.map((name) {
+                final isSelected = name == _selectedEmoji;
                 return GestureDetector(
-                  onTap: () => setState(() => _selectedEmoji = emoji),
+                  onTap: () => setState(() => _selectedEmoji = name),
                   child: Container(
                     width: 48,
                     height: 48,
@@ -114,7 +115,11 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Center(
-                      child: Text(emoji, style: const TextStyle(fontSize: 24)),
+                      child: Icon(
+                        AppIcons.getCategoryIcon(name),
+                        size: 24,
+                        color: isSelected ? AppColors.primary : Colors.grey,
+                      ),
                     ),
                   ),
                 );
@@ -142,7 +147,10 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: isSelected
-                        ? Icon(PhosphorIcons.check(PhosphorIconsStyle.regular), color: Colors.white)
+                        ? Icon(
+                            PhosphorIcons.check(PhosphorIconsStyle.regular),
+                            color: Colors.white,
+                          )
                         : null,
                   ),
                 );

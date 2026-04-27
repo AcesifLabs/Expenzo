@@ -1,16 +1,19 @@
 import 'package:dartz/dartz.dart';
 import 'package:drift/drift.dart';
-import '../../../../core/database/app_database.dart';
-import '../../../../core/error/failures.dart';
+import 'package:expense_tracker/core/database/app_database.dart';
+import 'package:expense_tracker/core/database/daos/expense_dao.dart';
+import 'package:expense_tracker/core/database/daos/category_dao.dart';
+import 'package:expense_tracker/core/error/failures.dart';
 import '../../domain/entities/date_amount.dart';
 import '../../domain/entities/category_amount.dart';
 import '../../domain/entities/spending_insights.dart';
 import '../../domain/repositories/reports_repository.dart';
 
 class ReportsRepositoryImpl implements ReportsRepository {
-  final AppDatabase appDatabase;
+  final ExpenseDao expenseDao;
+  final CategoryDao categoryDao;
 
-  ReportsRepositoryImpl({required this.appDatabase});
+  ReportsRepositoryImpl({required this.expenseDao, required this.categoryDao});
 
   @override
   Future<Either<Failure, List<DateAmount>>> getSpendingTrend({
@@ -19,12 +22,29 @@ class ReportsRepositoryImpl implements ReportsRepository {
     required Granularity granularity,
   }) async {
     try {
-      final results = await _querySpendingTrend(
-        startDate,
-        endDate,
-        granularity,
-      );
-      return Right(results);
+      final results = await expenseDao.getSpendingTrend(startDate, endDate);
+
+      final Map<String, double> grouped = {};
+      for (final row in results) {
+        final date = row.read(expenseDao.expenses.date)!;
+        final amount = row.read(expenseDao.expenses.amount.sum()) ?? 0.0;
+
+        final key = _getDateKey(date, granularity);
+        grouped[key] = (grouped[key] ?? 0.0) + amount.abs();
+      }
+
+      final List<DateAmount> trend = [];
+      for (final entry in grouped.entries) {
+        trend.add(
+          DateAmount(
+            date: _parseDateKey(entry.key, granularity),
+            amount: entry.value,
+          ),
+        );
+      }
+
+      trend.sort((a, b) => a.date.compareTo(b.date));
+      return Right(trend);
     } catch (e) {
       return Left(CacheFailure(message: e.toString()));
     }
@@ -36,8 +56,43 @@ class ReportsRepositoryImpl implements ReportsRepository {
     required DateTime endDate,
   }) async {
     try {
-      final results = await _queryCategoryBreakdown(startDate, endDate);
-      return Right(results);
+      final results = await expenseDao.getCategoryBreakdown(startDate, endDate);
+      final allCategories = await categoryDao.getAllCategories();
+
+      final categoryMap = <String, Category>{};
+      for (final cat in allCategories) {
+        categoryMap[cat.id.toString()] = cat;
+      }
+
+      double totalAmount = 0;
+      final List<MapEntry<String, double>> totals = [];
+      for (final row in results) {
+        final catId =
+            row.read(expenseDao.expenses.categoryId)?.toString() ?? '';
+        final amount = row.read(expenseDao.expenses.amount.sum()) ?? 0.0;
+        totalAmount += amount.abs();
+        totals.add(MapEntry(catId, amount.abs()));
+      }
+
+      final List<CategoryAmount> breakdown = [];
+      for (final entry in totals) {
+        final cat = categoryMap[entry.key];
+        final percentage = totalAmount > 0
+            ? (entry.value / totalAmount) * 100
+            : 0.0;
+        breakdown.add(
+          CategoryAmount(
+            categoryId: entry.key,
+            categoryName: cat?.name ?? 'Uncategorized',
+            emoji: cat?.emoji ?? '📌',
+            amount: entry.value,
+            percentage: percentage,
+          ),
+        );
+      }
+
+      breakdown.sort((a, b) => b.amount.compareTo(a.amount));
+      return Right(breakdown);
     } catch (e) {
       return Left(CacheFailure(message: e.toString()));
     }
@@ -49,52 +104,70 @@ class ReportsRepositoryImpl implements ReportsRepository {
     required DateTime endDate,
   }) async {
     try {
-      final results = await _querySpendingInsights(startDate, endDate);
-      return Right(results);
+      // For insights, we still need the full list to find highest day and average
+      // but we could also do this with more specific SQL queries.
+      // For now, let's keep it as is but using the DAO.
+      final expenses = await expenseDao.getExpensesByDateRange(
+        startDate,
+        endDate,
+      );
+
+      if (expenses.isEmpty) {
+        return const Right(
+          SpendingInsights(
+            highestDayAmount: 0,
+            avgDailySpending: 0,
+            totalTransactionCount: 0,
+            totalSpent: 0,
+          ),
+        );
+      }
+
+      double totalSpent = 0;
+      final Map<String, double> dailyTotals = {};
+      for (final expense in expenses) {
+        final amount = expense.amount.abs();
+        totalSpent += amount;
+
+        final key =
+            '${expense.date.year}-${expense.date.month}-${expense.date.day}';
+        dailyTotals[key] = (dailyTotals[key] ?? 0.0) + amount;
+      }
+
+      double highestAmount = 0;
+      String? highestDayKey;
+      for (final entry in dailyTotals.entries) {
+        if (entry.value > highestAmount) {
+          highestAmount = entry.value;
+          highestDayKey = entry.key;
+        }
+      }
+
+      DateTime? highestDayDate;
+      if (highestDayKey != null) {
+        final parts = highestDayKey.split('-');
+        highestDayDate = DateTime(
+          int.parse(parts[0]),
+          int.parse(parts[1]),
+          int.parse(parts[2]),
+        );
+      }
+
+      final daysDiff = endDate.difference(startDate).inDays + 1;
+      final avgDaily = daysDiff > 0 ? totalSpent / daysDiff : 0.0;
+
+      return Right(
+        SpendingInsights(
+          highestDayDate: highestDayDate,
+          highestDayAmount: highestAmount,
+          avgDailySpending: avgDaily,
+          totalTransactionCount: expenses.length,
+          totalSpent: totalSpent,
+        ),
+      );
     } catch (e) {
       return Left(CacheFailure(message: e.toString()));
     }
-  }
-
-  Future<List<DateAmount>> _querySpendingTrend(
-    DateTime startDate,
-    DateTime endDate,
-    Granularity granularity,
-  ) async {
-    final db = appDatabase;
-
-    // Get all expenses in date range ordered by date
-    final query = db.select(db.expenses)
-      ..where(
-        (e) =>
-            e.date.isBiggerOrEqualValue(startDate) &
-            e.date.isSmallerOrEqualValue(endDate),
-      )
-      ..orderBy([(e) => OrderingTerm.asc(e.date)]);
-
-    final expenses = await query.get();
-
-    // Group by granularity
-    final Map<String, double> grouped = {};
-
-    for (final expense in expenses) {
-      final key = _getDateKey(expense.date, granularity);
-      grouped[key] = (grouped[key] ?? 0.0) + expense.amount.abs();
-    }
-
-    // Convert to list of DateAmount
-    final List<DateAmount> result = [];
-    for (final entry in grouped.entries) {
-      result.add(
-        DateAmount(
-          date: _parseDateKey(entry.key, granularity),
-          amount: entry.value,
-        ),
-      );
-    }
-
-    result.sort((a, b) => a.date.compareTo(b.date));
-    return result;
   }
 
   String _getDateKey(DateTime date, Granularity granularity) {
@@ -102,7 +175,6 @@ class ReportsRepositoryImpl implements ReportsRepository {
       case Granularity.daily:
         return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
       case Granularity.weekly:
-        // Get start of week (Monday)
         final startOfWeek = date.subtract(Duration(days: date.weekday - 1));
         return '${startOfWeek.year}-${startOfWeek.month.toString().padLeft(2, '0')}-${startOfWeek.day.toString().padLeft(2, '0')}';
       case Granularity.monthly:
@@ -123,134 +195,5 @@ class ReportsRepositoryImpl implements ReportsRepository {
       case Granularity.monthly:
         return DateTime(int.parse(parts[0]), int.parse(parts[1]), 1);
     }
-  }
-
-  Future<List<CategoryAmount>> _queryCategoryBreakdown(
-    DateTime startDate,
-    DateTime endDate,
-  ) async {
-    final db = appDatabase;
-
-    // Get expenses in date range
-    final expenseQuery = db.select(db.expenses)
-      ..where(
-        (e) =>
-            e.date.isBiggerOrEqualValue(startDate) &
-            e.date.isSmallerOrEqualValue(endDate),
-      );
-    final expenses = await expenseQuery.get();
-
-    // Get all categories
-    final allCategories = await db.select(db.categories).get();
-
-    // Build a map of category id -> category
-    final categoryMap = <String, Category>{};
-    for (final cat in allCategories) {
-      categoryMap[cat.id.toString()] = cat;
-    }
-
-    // Group by category
-    final Map<String, double> categoryTotals = {};
-    double totalAmount = 0;
-
-    for (final expense in expenses) {
-      final catId = expense.categoryId?.toString() ?? '';
-      categoryTotals[catId] =
-          (categoryTotals[catId] ?? 0.0) + expense.amount.abs();
-      totalAmount += expense.amount.abs();
-    }
-
-    // Convert to CategoryAmount with percentages
-    final List<CategoryAmount> result = [];
-    for (final entry in categoryTotals.entries) {
-      final cat = categoryMap[entry.key];
-      final percentage = totalAmount > 0
-          ? (entry.value / totalAmount) * 100
-          : 0.0;
-      result.add(
-        CategoryAmount(
-          categoryId: entry.key,
-          categoryName: cat?.name ?? 'Uncategorized',
-          emoji: cat?.emoji ?? '📌',
-          amount: entry.value,
-          percentage: percentage.toDouble(),
-        ),
-      );
-    }
-
-    // Sort by amount descending
-    result.sort((a, b) => b.amount.compareTo(a.amount));
-    return result;
-  }
-
-  Future<SpendingInsights> _querySpendingInsights(
-    DateTime startDate,
-    DateTime endDate,
-  ) async {
-    final db = appDatabase;
-
-    final query = db.select(db.expenses)
-      ..where(
-        (e) =>
-            e.date.isBiggerOrEqualValue(startDate) &
-            e.date.isSmallerOrEqualValue(endDate),
-      )
-      ..orderBy([(e) => OrderingTerm.asc(e.date)]);
-
-    final expenses = await query.get();
-
-    if (expenses.isEmpty) {
-      return const SpendingInsights(
-        highestDayAmount: 0,
-        avgDailySpending: 0,
-        totalTransactionCount: 0,
-        totalSpent: 0,
-      );
-    }
-
-    // Calculate total
-    double totalSpent = 0;
-    for (final expense in expenses) {
-      totalSpent += expense.amount.abs();
-    }
-
-    // Group by day to find highest
-    final Map<String, double> dailyTotals = {};
-    for (final expense in expenses) {
-      final key =
-          '${expense.date.year}-${expense.date.month.toString().padLeft(2, '0')}-${expense.date.day.toString().padLeft(2, '0')}';
-      dailyTotals[key] = (dailyTotals[key] ?? 0.0) + expense.amount.abs();
-    }
-
-    String? highestDayKey;
-    double highestAmount = 0;
-    for (final entry in dailyTotals.entries) {
-      if (entry.value > highestAmount) {
-        highestAmount = entry.value;
-        highestDayKey = entry.key;
-      }
-    }
-
-    DateTime? highestDayDate;
-    if (highestDayKey != null) {
-      final parts = highestDayKey.split('-');
-      highestDayDate = DateTime(
-        int.parse(parts[0]),
-        int.parse(parts[1]),
-        int.parse(parts[2]),
-      );
-    }
-
-    // Calculate average daily spending
-    final daysDiff = endDate.difference(startDate).inDays + 1;
-    final avgDaily = daysDiff > 0 ? totalSpent / daysDiff : 0.0;
-
-    return SpendingInsights(
-      highestDayDate: highestDayDate,
-      highestDayAmount: highestAmount,
-      avgDailySpending: avgDaily,
-      totalTransactionCount: expenses.length,
-      totalSpent: totalSpent,
-    );
   }
 }

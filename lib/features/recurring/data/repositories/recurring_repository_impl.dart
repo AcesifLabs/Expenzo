@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
-import '../../../../core/error/exceptions.dart';
-import '../../../../core/error/failures.dart';
+import 'package:expense_tracker/core/error/exceptions.dart';
+import 'package:expense_tracker/core/error/failures.dart';
 import '../../domain/entities/recurring_transaction.dart';
 import '../../domain/repositories/recurring_repository.dart';
 import '../datasources/recurring_local_datasource.dart';
@@ -56,6 +56,18 @@ class RecurringRepositoryImpl implements RecurringRepository {
     try {
       await localDatasource.updateRecurring(recurring);
       return Right(recurring);
+    } on CacheException catch (e) {
+      return Left(e.toFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> updateRecurringBatch(
+    List<RecurringTransaction> transactions,
+  ) async {
+    try {
+      await localDatasource.updateRecurringBatch(transactions);
+      return const Right(null);
     } on CacheException catch (e) {
       return Left(e.toFailure());
     }

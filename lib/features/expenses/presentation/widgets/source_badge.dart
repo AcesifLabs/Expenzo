@@ -1,11 +1,21 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../domain/entities/expense_source.dart';
+import 'package:expense_tracker/core/theme/app_colors.dart';
+import "package:expense_tracker/core/constants/source_types.dart";
+import 'package:expense_tracker/shared/presentation/widgets/app_icons.dart';
 
 class SourceBadge extends StatelessWidget {
   final ExpenseSource source;
+  final String? categoryName;
+  final String? categoryIconName;
+  final String? categoryColor;
 
-  const SourceBadge({super.key, required this.source});
+  const SourceBadge({
+    super.key,
+    required this.source,
+    this.categoryName,
+    this.categoryIconName,
+    this.categoryColor,
+  });
 
   static const _colorMap = {
     ExpenseSource.manual: AppColors.textSecondaryLight,
@@ -16,26 +26,46 @@ class SourceBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = _colorMap[source] ?? AppColors.textSecondaryLight;
+    final isManualOverride =
+        source == ExpenseSource.manual && categoryName != null;
+
+    final Color baseColor;
+    if (isManualOverride && categoryColor != null) {
+      baseColor = Color(int.parse(categoryColor!.replaceFirst('#', '0xFF')));
+    } else {
+      baseColor = _colorMap[source] ?? AppColors.textSecondaryLight;
+    }
+
+    final Color bgTint = baseColor.withAlpha(40);
+    final Color borderTint = baseColor.withAlpha(80);
+
+    final label = isManualOverride ? categoryName! : source.displayName;
+    final iconWidget = isManualOverride
+        ? Icon(
+            AppIcons.getCategoryIcon(categoryIconName ?? 'package'),
+            size: 12,
+            color: Colors.white,
+          )
+        : Text(source.icon, style: TextStyle(fontSize: 10, color: baseColor));
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: bgColor.withAlpha(40),
+        color: bgTint,
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: bgColor.withAlpha(80)),
+        border: Border.all(color: borderTint),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(source.icon, style: TextStyle(fontSize: 10, color: bgColor)),
+          iconWidget,
           const SizedBox(width: 2),
           Text(
-            source.displayName,
+            label,
             style: TextStyle(
-              fontSize: 10,
-              color: bgColor,
-              fontWeight: FontWeight.w500,
+              fontSize: 12,
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],

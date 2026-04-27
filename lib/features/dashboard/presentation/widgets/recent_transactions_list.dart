@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../expenses/domain/entities/expense.dart';
-import '../../../expenses/domain/entities/expense_source.dart';
+import "package:expense_tracker/core/constants/source_types.dart";
 
 class RecentTransactionsList extends StatelessWidget {
   final List<Expense> transactions;

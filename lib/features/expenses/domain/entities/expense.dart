@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'expense_source.dart';
+import "package:expense_tracker/core/constants/source_types.dart";
 
 class Expense extends Equatable {
   final int? id;

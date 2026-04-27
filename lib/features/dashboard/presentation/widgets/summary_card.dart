@@ -63,8 +63,8 @@ class SummaryCard extends StatelessWidget {
                   children: [
                     Icon(
                       percentChange! >= 0
-                          ? PhosphorIcons.regular.trendUp
-                          : PhosphorIcons.regular.trendDown,
+                          ? PhosphorIcons.trendUp(PhosphorIconsStyle.regular)
+                          : PhosphorIcons.trendDown(PhosphorIconsStyle.regular),
                       size: 16,
                       color: percentChange! >= 0 ? Colors.red : Colors.green,
                     ),

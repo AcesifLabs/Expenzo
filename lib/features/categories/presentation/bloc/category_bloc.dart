@@ -1,5 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/error/usecase.dart';
+import 'package:expense_tracker/core/error/usecase.dart';
 import '../../domain/usecases/create_category.dart';
 import '../../domain/usecases/delete_category.dart';
 import '../../domain/usecases/get_categories.dart';

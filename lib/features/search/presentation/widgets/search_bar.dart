@@ -48,7 +48,10 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
       ),
       child: Row(
         children: [
-          const Icon(PhosphorIcons.regular.magnifyingGlass, color: Colors.grey),
+          Icon(
+            PhosphorIcons.magnifyingGlass(PhosphorIconsStyle.regular),
+            color: Colors.grey,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: TextField(
@@ -63,14 +66,17 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
           ),
           if (_showClear)
             IconButton(
-              icon: const Icon(PhosphorIcons.regular.x, size: 20),
+              icon: Icon(PhosphorIcons.x(PhosphorIconsStyle.regular), size: 20),
               onPressed: () {
                 widget.controller.clear();
                 widget.onClear();
               },
             ),
           IconButton(
-            icon: const Icon(PhosphorIcons.regular.slidersHorizontal, size: 20),
+            icon: Icon(
+              PhosphorIcons.slidersHorizontal(PhosphorIconsStyle.regular),
+              size: 20,
+            ),
             onPressed: widget.onFilterTap,
           ),
         ],

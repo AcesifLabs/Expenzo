@@ -3,17 +3,19 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/error/failures.dart';
-import '../../../features/expenses/domain/entities/expense.dart';
-import '../../../features/categories/domain/entities/category.dart' as entities;
 import 'sync_status.dart';
-import 'conflict_resolver.dart';
 import 'sync_queue_service.dart';
 
 abstract class FirestoreSyncService {
-  Future<Either<Failure, void>> syncExpense(Expense expense);
-  Future<Either<Failure, void>> syncCategory(entities.Category category);
-  Future<Either<Failure, void>> deleteExpenseSync(String expenseId);
-  Future<Either<Failure, void>> deleteCategorySync(String categoryId);
+  Future<Either<Failure, void>> syncData({
+    required String collection,
+    required String id,
+    required Map<String, dynamic> data,
+  });
+  Future<Either<Failure, void>> deleteSync({
+    required String collection,
+    required String id,
+  });
   Stream<SyncStatus> watchSyncStatus();
   Future<Either<Failure, void>> pullChanges();
   Future<Either<Failure, void>> pushChanges();
@@ -24,7 +26,6 @@ class FirestoreSyncServiceImpl implements FirestoreSyncService {
   final FirebaseFirestore firestore;
   final FirebaseAuth auth;
   final SyncQueueService syncQueueService;
-  final ConflictResolver conflictResolver;
 
   final _syncStatusController = StreamController<SyncStatus>.broadcast();
   SyncStatus _currentStatus = SyncStatus.idle;
@@ -33,7 +34,6 @@ class FirestoreSyncServiceImpl implements FirestoreSyncService {
     required this.firestore,
     required this.auth,
     required this.syncQueueService,
-    required this.conflictResolver,
   });
 
   String? get _userId => auth.currentUser?.uid;
@@ -57,7 +57,11 @@ class FirestoreSyncServiceImpl implements FirestoreSyncService {
   Stream<SyncStatus> watchSyncStatus() => _syncStatusController.stream;
 
   @override
-  Future<Either<Failure, void>> syncExpense(Expense expense) async {
+  Future<Either<Failure, void>> syncData({
+    required String collection,
+    required String id,
+    required Map<String, dynamic> data,
+  }) async {
     try {
       if (_userId == null) {
         return const Left(
@@ -69,10 +73,10 @@ class FirestoreSyncServiceImpl implements FirestoreSyncService {
       }
       _setStatus(SyncStatus.syncing);
       await _userCollection
-          .doc('expenses')
+          .doc(collection)
           .collection('items')
-          .doc(expense.id?.toString())
-          .set(_expenseToMap(expense));
+          .doc(id)
+          .set(data);
       _setStatus(SyncStatus.success);
       return const Right(null);
     } catch (e) {
@@ -82,7 +86,10 @@ class FirestoreSyncServiceImpl implements FirestoreSyncService {
   }
 
   @override
-  Future<Either<Failure, void>> syncCategory(entities.Category category) async {
+  Future<Either<Failure, void>> deleteSync({
+    required String collection,
+    required String id,
+  }) async {
     try {
       if (_userId == null) {
         return const Left(
@@ -94,59 +101,9 @@ class FirestoreSyncServiceImpl implements FirestoreSyncService {
       }
       _setStatus(SyncStatus.syncing);
       await _userCollection
-          .doc('categories')
+          .doc(collection)
           .collection('items')
-          .doc(category.id?.toString())
-          .set(_categoryToMap(category));
-      _setStatus(SyncStatus.success);
-      return const Right(null);
-    } catch (e) {
-      _setStatus(SyncStatus.error);
-      return Left(ServerFailure(message: e.toString()));
-    }
-  }
-
-  @override
-  Future<Either<Failure, void>> deleteExpenseSync(String expenseId) async {
-    try {
-      if (_userId == null) {
-        return const Left(
-          AuthFailure(
-            message: 'User not authenticated',
-            errorCode: 'AUTH_NOT_AUTHENTICATED',
-          ),
-        );
-      }
-      _setStatus(SyncStatus.syncing);
-      await _userCollection
-          .doc('expenses')
-          .collection('items')
-          .doc(expenseId)
-          .delete();
-      _setStatus(SyncStatus.success);
-      return const Right(null);
-    } catch (e) {
-      _setStatus(SyncStatus.error);
-      return Left(ServerFailure(message: e.toString()));
-    }
-  }
-
-  @override
-  Future<Either<Failure, void>> deleteCategorySync(String categoryId) async {
-    try {
-      if (_userId == null) {
-        return const Left(
-          AuthFailure(
-            message: 'User not authenticated',
-            errorCode: 'AUTH_NOT_AUTHENTICATED',
-          ),
-        );
-      }
-      _setStatus(SyncStatus.syncing);
-      await _userCollection
-          .doc('categories')
-          .collection('items')
-          .doc(categoryId)
+          .doc(id)
           .delete();
       _setStatus(SyncStatus.success);
       return const Right(null);
@@ -158,92 +115,18 @@ class FirestoreSyncServiceImpl implements FirestoreSyncService {
 
   @override
   Future<Either<Failure, void>> pullChanges() async {
-    try {
-      if (_userId == null) {
-        return const Left(
-          AuthFailure(
-            message: 'User not authenticated',
-            errorCode: 'AUTH_NOT_AUTHENTICATED',
-          ),
-        );
-      }
-      _setStatus(SyncStatus.syncing);
-      // Pull changes from Firestore would be implemented here
-      // This is a simplified version - full implementation would fetch and merge
-      _setStatus(SyncStatus.success);
-      return const Right(null);
-    } catch (e) {
-      _setStatus(SyncStatus.error);
-      return Left(ServerFailure(message: e.toString()));
-    }
+    throw UnimplementedError('pullChanges() not implemented yet');
   }
 
   @override
   Future<Either<Failure, void>> pushChanges() async {
-    try {
-      if (_userId == null) {
-        return const Left(
-          AuthFailure(
-            message: 'User not authenticated',
-            errorCode: 'AUTH_NOT_AUTHENTICATED',
-          ),
-        );
-      }
-      _setStatus(SyncStatus.syncing);
-      // Push changes would be implemented here
-      _setStatus(SyncStatus.success);
-      return const Right(null);
-    } catch (e) {
-      _setStatus(SyncStatus.error);
-      return Left(ServerFailure(message: e.toString()));
-    }
+    throw UnimplementedError('pushChanges() not implemented yet');
   }
 
   @override
   Future<Either<Failure, void>> processQueue() async {
-    try {
-      _setStatus(SyncStatus.syncing);
-      final queueResult = await syncQueueService.getQueue();
-      return queueResult.fold((failure) => Left(failure), (queue) async {
-        for (final item in queue) {
-          switch (item.entityType) {
-            case 'expense':
-              // Process expense queue item
-              break;
-            case 'category':
-              // Process category queue item
-              break;
-          }
-          await syncQueueService.removeFromQueue(item.id);
-        }
-        _setStatus(SyncStatus.success);
-        return const Right(null);
-      });
-    } catch (e) {
-      _setStatus(SyncStatus.error);
-      return Left(ServerFailure(message: e.toString()));
-    }
+    throw UnimplementedError('processQueue() not implemented yet');
   }
-
-  Map<String, dynamic> _expenseToMap(Expense expense) => {
-    'amount': expense.amount,
-    'description': expense.description,
-    'date': expense.date.toIso8601String(),
-    'categoryId': expense.categoryId,
-    'source': expense.source.name,
-    'sourceId': expense.sourceId,
-    'createdAt': expense.createdAt.toIso8601String(),
-    'updatedAt': expense.updatedAt.toIso8601String(),
-  };
-
-  Map<String, dynamic> _categoryToMap(entities.Category category) => {
-    'name': category.name,
-    'emoji': category.emoji,
-    'color': category.color,
-    'isDefault': category.isDefault,
-    'createdAt': category.createdAt.toIso8601String(),
-    'updatedAt': category.updatedAt.toIso8601String(),
-  };
 
   void dispose() {
     _syncStatusController.close();

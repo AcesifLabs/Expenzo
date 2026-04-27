@@ -156,7 +156,9 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
                   contentPadding: EdgeInsets.zero,
                   title: const Text('Start Date'),
                   subtitle: Text(dateFormat.format(_startDate)),
-                  trailing: const Icon(PhosphorIcons.regular.calendar),
+                  trailing: Icon(
+                    PhosphorIcons.calendar(PhosphorIconsStyle.regular),
+                  ),
                   onTap: _selectStartDate,
                 ),
                 ListTile(
@@ -172,10 +174,12 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
                     children: [
                       if (_endDate != null)
                         IconButton(
-                          icon: const Icon(PhosphorIcons.regular.x),
+                          icon: Icon(
+                            PhosphorIcons.x(PhosphorIconsStyle.regular),
+                          ),
                           onPressed: () => setState(() => _endDate = null),
                         ),
-                      const Icon(PhosphorIcons.regular.calendar),
+                      Icon(PhosphorIcons.calendar(PhosphorIconsStyle.regular)),
                     ],
                   ),
                   onTap: _selectEndDate,

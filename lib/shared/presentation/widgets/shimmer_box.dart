@@ -68,11 +68,13 @@ class ShimmerBox extends StatelessWidget {
         ? AppColors.surfaceDark
         : AppColors.backgroundLight;
 
-    return Shimmer.fromColors(
-      baseColor: baseColor,
-      highlightColor: highlightColor,
-      period: const Duration(milliseconds: 1200),
-      child: child,
+    return RepaintBoundary(
+      child: Shimmer.fromColors(
+        baseColor: baseColor,
+        highlightColor: highlightColor,
+        period: const Duration(milliseconds: 1200),
+        child: child,
+      ),
     );
   }
 }

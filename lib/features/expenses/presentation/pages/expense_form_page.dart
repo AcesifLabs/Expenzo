@@ -3,13 +3,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import '../../../../core/theme/app_colors.dart';
+import 'package:expense_tracker/core/theme/app_colors.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_icons.dart';
 import '../../../../shared/presentation/widgets/shimmer_box.dart';
 import '../../../categories/presentation/bloc/category_bloc.dart';
 import '../../../categories/presentation/bloc/category_event.dart';
 import '../../../categories/presentation/bloc/category_state.dart';
 import '../../domain/entities/expense.dart';
-import '../../domain/entities/expense_source.dart';
+import "package:expense_tracker/core/constants/source_types.dart";
 import '../bloc/expense_bloc.dart';
 import '../bloc/expense_event.dart';
 
@@ -169,9 +170,9 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
                           value: cat.id,
                           child: Row(
                             children: [
-                              Text(
-                                cat.emoji,
-                                style: const TextStyle(fontSize: 18),
+                              Icon(
+                                AppIcons.getCategoryIcon(cat.emoji),
+                                size: 18,
                               ),
                               const SizedBox(width: 8),
                               Text(cat.name),
@@ -193,7 +194,9 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
               contentPadding: EdgeInsets.zero,
               title: const Text('Date'),
               subtitle: Text(_dateFormat.format(_selectedDate)),
-              trailing: Icon(PhosphorIcons.calendar(PhosphorIconsStyle.regular)),
+              trailing: Icon(
+                PhosphorIcons.calendar(PhosphorIconsStyle.regular),
+              ),
               onTap: _selectDate,
             ),
             const Divider(),

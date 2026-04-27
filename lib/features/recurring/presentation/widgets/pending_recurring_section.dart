@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import '../../../../core/di/injection_container.dart' as di;
-import '../../../../core/database/daos/pending_recurring_dao.dart';
+import 'package:expense_tracker/core/di/injection_container.dart' as di;
+import 'package:expense_tracker/core/database/daos/pending_recurring_dao.dart';
 import '../bloc/recurring_bloc.dart';
 import '../bloc/recurring_event.dart';
 
@@ -44,7 +44,10 @@ class _PendingRecurringSectionState extends State<PendingRecurringSection> {
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
-                    Icon(PhosphorIcons.clock(PhosphorIconsStyle.regular), color: Colors.orange),
+                    Icon(
+                      PhosphorIcons.clock(PhosphorIconsStyle.regular),
+                      color: Colors.orange,
+                    ),
                     const SizedBox(width: 8),
                     const Text(
                       'Pending Recurring',
@@ -84,10 +87,12 @@ class _PendingRecurringSectionState extends State<PendingRecurringSection> {
                       '\$${item.amount.toStringAsFixed(2)} - Due: ${dateFormat.format(item.dueDate)}',
                     ),
                     trailing: IconButton(
-                      icon: Icon(PhosphorIcons.checkCircle(PhosphorIconsStyle.regular)),
+                      icon: Icon(
+                        PhosphorIcons.checkCircle(PhosphorIconsStyle.regular),
+                      ),
                       color: Colors.green,
                       onPressed: () async {
-                        await _pendingDao.markAsProcessed(item.id);
+                        await _pendingDao.removePending(item.id);
                       },
                     ),
                   );

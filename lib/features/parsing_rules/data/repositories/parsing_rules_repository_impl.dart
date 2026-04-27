@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import '../../../../core/error/failures.dart';
+import 'package:expense_tracker/core/error/failures.dart';
 import '../../domain/entities/parsing_rule.dart';
 import '../../domain/repositories/parsing_rules_repository.dart';
 import '../datasources/parsing_rules_local_datasource.dart';

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_colors.dart';
+import 'package:expense_tracker/core/theme/app_colors.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_icons.dart';
 import '../../domain/entities/category.dart';
 
 class CategoryCard extends StatelessWidget {
@@ -27,7 +28,11 @@ class CategoryCard extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(category.emoji, style: const TextStyle(fontSize: 32)),
+            Icon(
+              AppIcons.getCategoryIcon(category.emoji),
+              size: 32,
+              color: Colors.white,
+            ),
             const SizedBox(height: 8),
             Text(
               category.name,

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import '../../../../core/di/injection_container.dart' as di;
-import '../../../../core/utils/navigation_utils.dart';
+import 'package:expense_tracker/core/di/injection_container.dart' as di;
+import 'package:expense_tracker/core/utils/navigation_utils.dart';
 import '../../domain/entities/recurring_transaction.dart';
 import '../bloc/recurring_bloc.dart';
 import '../bloc/recurring_event.dart';
@@ -57,7 +57,9 @@ class _RecurringListPageState extends State<RecurringListPage> {
           title: const Text('Recurring Transactions'),
           actions: [
             IconButton(
-              icon: const Icon(PhosphorIcons.regular.arrowsClockwise),
+              icon: Icon(
+                PhosphorIcons.arrowsClockwise(PhosphorIconsStyle.regular),
+              ),
               onPressed: () => _bloc.add(const ProcessRecurring()),
               tooltip: 'Process pending',
             ),
@@ -85,7 +87,7 @@ class _RecurringListPageState extends State<RecurringListPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(
+                    Icon(
                       PhosphorIcons.warningCircle(PhosphorIconsStyle.regular),
                       size: 48,
                       color: Colors.red,
@@ -111,7 +113,9 @@ class _RecurringListPageState extends State<RecurringListPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        PhosphorIcons.regular.arrowsCounterClockwise,
+                        PhosphorIcons.arrowsCounterClockwise(
+                          PhosphorIconsStyle.regular,
+                        ),
                         size: 64,
                         color: Colors.grey[400],
                       ),
@@ -152,7 +156,9 @@ class _RecurringListPageState extends State<RecurringListPage> {
                               ? Colors.orange.withAlpha(51)
                               : Colors.grey.withAlpha(26),
                           child: Icon(
-                            PhosphorIcons.regular.arrowsCounterClockwise,
+                            PhosphorIcons.arrowsCounterClockwise(
+                              PhosphorIconsStyle.regular,
+                            ),
                             color: isDue ? Colors.orange : Colors.grey,
                           ),
                         ),
@@ -197,7 +203,7 @@ class _RecurringListPageState extends State<RecurringListPage> {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () => _navigateToForm(context, null),
-          child: const Icon(PhosphorIcons.plus(PhosphorIconsStyle.regular)),
+          child: Icon(PhosphorIcons.plus(PhosphorIconsStyle.regular)),
         ),
       ),
     );

@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
-import '../../../../core/error/exceptions.dart';
-import '../../../../core/error/failures.dart';
+import 'package:expense_tracker/core/error/exceptions.dart';
+import 'package:expense_tracker/core/error/failures.dart';
 import '../../domain/entities/expense.dart';
 import '../../domain/repositories/expense_repository.dart';
 import '../datasources/expense_local_datasource.dart';
@@ -74,8 +74,8 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
   }
 
   @override
-  Stream<List<Expense>> watchExpenses() {
-    return localDatasource.watchExpenses();
+  Stream<List<Expense>> watchExpenses({int? limit, int? offset}) {
+    return localDatasource.watchExpenses(limit: limit, offset: offset);
   }
 
   @override
@@ -97,6 +97,18 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
     try {
       final existing = await localDatasource.getExistingSourceIds(sourceIds);
       return Right(existing);
+    } on CacheException catch (e) {
+      return Left(e.toFailure());
+    }
+  }
+
+  @override
+  Future<Either<CacheFailure, void>> addExpensesBatch(
+    List<Expense> expenses,
+  ) async {
+    try {
+      await localDatasource.addExpensesBatch(expenses);
+      return const Right(null);
     } on CacheException catch (e) {
       return Left(e.toFailure());
     }

@@ -30,3 +30,10 @@ enum ExpenseSource {
     }
   }
 }
+
+class AppSourceType {
+  static const String sms = 'sms';
+  static const String email = 'email';
+  static const String manual = 'manual';
+  static const String recurring = 'recurring';
+}

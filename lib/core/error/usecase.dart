@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'either.dart';
+import 'package:dartz/dartz.dart';
 import 'failures.dart';
 
 abstract class UseCase<T, P> {

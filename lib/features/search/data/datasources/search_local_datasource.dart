@@ -1,10 +1,10 @@
 import 'package:drift/drift.dart';
-import '../../../../core/error/exceptions.dart';
-import '../../../../core/database/app_database.dart' hide Category, Expense;
+import 'package:expense_tracker/core/error/exceptions.dart';
+import 'package:expense_tracker/core/database/app_database.dart' hide Category, Expense;
 import '../../domain/entities/search_filters.dart';
 import '../../domain/entities/search_result.dart';
 import '../../../expenses/domain/entities/expense.dart';
-import '../../../expenses/domain/entities/expense_source.dart';
+import "package:expense_tracker/core/constants/source_types.dart";
 
 abstract class SearchLocalDatasource {
   Future<List<SearchResult>> searchExpenses(SearchFilters filters);
@@ -117,13 +117,11 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
     try {
       await db.customStatement('DELETE FROM expense_fts');
 
-      final expenses = await db.select(db.expenses).get();
-      for (final expense in expenses) {
-        await db.customStatement(
-          'INSERT INTO expense_fts (expense_id, description) VALUES (?, ?)',
-          [expense.id, expense.description],
-        );
-      }
+      // Single INSERT...SELECT — no per-row round-trips
+      await db.customStatement('''
+        INSERT INTO expense_fts (expense_id, description)
+        SELECT id, description FROM expenses
+      ''');
     } catch (e) {
       throw CacheException(message: e.toString());
     }

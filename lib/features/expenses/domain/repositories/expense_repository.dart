@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import '../../../../core/error/failures.dart';
+import 'package:expense_tracker/core/error/failures.dart';
 import '../entities/expense.dart';
 
 class DateTimeRange {
@@ -20,9 +20,10 @@ abstract class ExpenseRepository {
   Future<Either<CacheFailure, Expense>> addExpense(Expense expense);
   Future<Either<CacheFailure, Expense>> updateExpense(Expense expense);
   Future<Either<CacheFailure, Unit>> deleteExpense(int id);
-  Stream<List<Expense>> watchExpenses();
+  Stream<List<Expense>> watchExpenses({int? limit, int? offset});
   Future<Either<CacheFailure, bool>> expenseExistsBySourceId(String sourceId);
   Future<Either<CacheFailure, Set<String>>> getExistingSourceIds(
     List<String> sourceIds,
   );
+  Future<Either<CacheFailure, void>> addExpensesBatch(List<Expense> expenses);
 }

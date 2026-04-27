@@ -44,13 +44,13 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
 
     // Start listening to the reactive stream — DB changes auto-propagate
     await _expensesSubscription?.cancel();
-    _expensesSubscription = expenseRepository.watchExpenses().listen((
-      expenses,
-    ) {
-      if (!isClosed) {
-        add(_ExpensesUpdated(expenses));
-      }
-    });
+    _expensesSubscription = expenseRepository
+        .watchExpenses(limit: _pageSize)
+        .listen((expenses) {
+          if (!isClosed) {
+            add(_ExpensesUpdated(expenses));
+          }
+        });
 
     // Also do a manual fetch for the initial page load
     final result = await getExpenses(const GetExpensesParams(limit: _pageSize));
@@ -74,24 +74,13 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
   ) async {
     final expenses = event.expenses;
 
-    // If paginated, take only the first page
-    if (expenses.length > _pageSize) {
-      emit(
-        ExpenseLoaded(
-          expenses: expenses.sublist(0, _pageSize),
-          total: expenses.length,
-          hasMore: true,
-        ),
-      );
-    } else {
-      emit(
-        ExpenseLoaded(
-          expenses: expenses,
-          total: expenses.length,
-          hasMore: false,
-        ),
-      );
-    }
+    emit(
+      ExpenseLoaded(
+        expenses: expenses,
+        total: expenses.length,
+        hasMore: expenses.length >= _pageSize,
+      ),
+    );
   }
 
   Future<void> _onLoadMoreExpenses(

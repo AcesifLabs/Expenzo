@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import '../../../../core/theme/app_colors.dart';
+import 'package:expense_tracker/core/theme/app_colors.dart';
 import '../../domain/entities/search_filters.dart';
 import '../bloc/search_bloc.dart';
 import '../bloc/search_event.dart';
@@ -70,7 +70,11 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(PhosphorIcons.regular.magnifyingGlass, size: 64, color: Colors.grey[400]),
+          Icon(
+            PhosphorIcons.magnifyingGlass(PhosphorIconsStyle.regular),
+            size: 64,
+            color: Colors.grey[400],
+          ),
           const SizedBox(height: 16),
           Text(
             'Search for expenses',
@@ -92,7 +96,11 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(PhosphorIcons.regular.magnifyingGlassX, size: 64, color: Colors.grey[400]),
+            Icon(
+              PhosphorIcons.magnifyingGlass(PhosphorIconsStyle.regular),
+              size: 64,
+              color: Colors.grey[400],
+            ),
             const SizedBox(height: 16),
             Text(
               'No results found',
@@ -160,7 +168,11 @@ class _ExpenseSearchPageState extends State<ExpenseSearchPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(PhosphorIcons.warningCircle(PhosphorIconsStyle.regular), size: 64, color: Colors.red[400]),
+          Icon(
+            PhosphorIcons.warningCircle(PhosphorIconsStyle.regular),
+            size: 64,
+            color: Colors.red[400],
+          ),
           const SizedBox(height: 16),
           Text(
             'Error',

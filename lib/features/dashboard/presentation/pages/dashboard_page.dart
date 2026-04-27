@@ -20,7 +20,9 @@ class DashboardPage extends StatelessWidget {
         title: const Text('Dashboard'),
         actions: [
           IconButton(
-            icon: const Icon(PhosphorIcons.regular.arrowsClockwise),
+            icon: Icon(
+              PhosphorIcons.arrowsClockwise(PhosphorIconsStyle.regular),
+            ),
             onPressed: () {
               context.read<DashboardBloc>().add(RefreshDashboard());
             },
@@ -108,7 +110,7 @@ class DashboardPage extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  const Icon(
+                  Icon(
                     PhosphorIcons.warningCircle(PhosphorIconsStyle.regular),
                     color: Colors.red,
                     size: 48,

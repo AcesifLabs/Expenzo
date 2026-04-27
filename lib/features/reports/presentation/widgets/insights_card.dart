@@ -13,7 +13,7 @@ class InsightsCard extends StatelessWidget {
     return ListView(
       children: [
         _buildInsightTile(
-          icon: PhosphorIcons.regular.trendUp,
+          icon: PhosphorIcons.trendUp(PhosphorIconsStyle.regular),
           title: 'Highest Spending Day',
           value: insights.highestDayDate != null
               ? DateFormat('dd MMM yyyy').format(insights.highestDayDate!)
@@ -22,7 +22,7 @@ class InsightsCard extends StatelessWidget {
           color: Colors.orange,
         ),
         _buildInsightTile(
-          icon: PhosphorIcons.regular.activity,
+          icon: PhosphorIcons.chartLineUp(PhosphorIconsStyle.regular),
           title: 'Average Daily Spending',
           value: '৳${insights.avgDailySpending.toStringAsFixed(2)}',
           subtitle: 'Per day in selected period',

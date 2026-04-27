@@ -1,6 +1,6 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../../../../core/error/exceptions.dart';
+import 'package:expense_tracker/core/error/exceptions.dart';
 import '../../domain/entities/user_settings.dart';
 
 abstract class SettingsRemoteDatasource {

@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:drift/drift.dart';
-import '../../../../core/database/app_database.dart';
-import '../../../../core/database/daos/parsing_rule_dao.dart';
+import 'package:expense_tracker/core/database/app_database.dart';
+import 'package:expense_tracker/core/database/daos/parsing_rule_dao.dart';
 import '../../domain/entities/parsing_rule.dart' as domain;
 
 abstract class ParsingRulesLocalDatasource {

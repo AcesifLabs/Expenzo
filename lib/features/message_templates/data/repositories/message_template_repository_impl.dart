@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import '../../../../core/error/failures.dart';
+import 'package:expense_tracker/core/error/failures.dart';
 import '../../domain/entities/expense_template.dart';
 import '../../domain/entities/message_source.dart';
 import '../../domain/repositories/message_template_repository.dart';

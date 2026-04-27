@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
-import '../../../../core/error/exceptions.dart';
-import '../../../../core/database/app_database.dart' hide Category;
-import '../../../../core/database/daos/category_dao.dart';
+import 'package:expense_tracker/core/error/exceptions.dart';
+import 'package:expense_tracker/core/database/app_database.dart' hide Category;
+import 'package:expense_tracker/core/database/daos/category_dao.dart';
 import '../../domain/entities/category.dart';
 
 abstract class CategoryLocalDatasource {
