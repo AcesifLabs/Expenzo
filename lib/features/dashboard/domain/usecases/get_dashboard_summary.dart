@@ -1,55 +1,55 @@
 import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
-import '../../../expenses/domain/entities/expense.dart';
-import '../../../expenses/domain/repositories/expense_repository.dart';
+import '../../../records/domain/entities/record.dart';
+import '../../../records/domain/repositories/record_repository.dart';
 import '../../../categories/domain/repositories/category_repository.dart';
 import '../../domain/entities/dashboard_summary.dart';
 import '../../domain/entities/date_range.dart';
 
 class GetDashboardSummaryUseCase
     implements UseCase<DashboardSummary, DateRange> {
-  final ExpenseRepository expenseRepository;
+  final RecordRepository recordRepository;
   final CategoryRepository categoryRepository;
 
   GetDashboardSummaryUseCase({
-    required this.expenseRepository,
+    required this.recordRepository,
     required this.categoryRepository,
   });
 
   @override
   Future<Either<Failure, DashboardSummary>> call(DateRange dateRange) async {
     try {
-      // Get current period expenses
-      final currentResult = await expenseRepository.getExpenses(
+      // Get current period records
+      final currentResult = await recordRepository.getRecords(
         dateRange: DateTimeRange(
           start: dateRange.startDate,
           end: dateRange.endDate,
         ),
       );
 
-      final List<Expense> currentExpenses = currentResult.fold(
+      final List<Record> currentRecords = currentResult.fold(
         (failure) => [],
-        (expenses) => expenses,
+        (records) => records,
       );
 
-      // Get previous period expenses
+      // Get previous period records
       final previousDateRange = dateRange.previousPeriod;
-      final previousResult = await expenseRepository.getExpenses(
+      final previousResult = await recordRepository.getRecords(
         dateRange: DateTimeRange(
           start: previousDateRange.startDate,
           end: previousDateRange.endDate,
         ),
       );
 
-      final List<Expense> previousExpenses = previousResult.fold(
+      final List<Record> previousRecords = previousResult.fold(
         (failure) => [],
-        (expenses) => expenses,
+        (records) => records,
       );
 
-      // Calculate totals
-      final totalSpent = _calculateTotal(currentExpenses);
-      final previousPeriodTotal = _calculateTotal(previousExpenses);
+      // Calculate totals (treating absolute values as "spending" for now)
+      final totalSpent = _calculateTotal(currentRecords);
+      final previousPeriodTotal = _calculateTotal(previousRecords);
 
       // Calculate percent change
       double percentChange = 0;
@@ -60,13 +60,13 @@ class GetDashboardSummaryUseCase
 
       // Calculate category breakdown
       final categoryBreakdown = await _calculateCategoryBreakdown(
-        currentExpenses,
+        currentRecords,
       );
 
       // Get recent transactions (last 5)
-      final sortedExpenses = List<Expense>.from(currentExpenses)
+      final sortedRecords = List<Record>.from(currentRecords)
         ..sort((a, b) => b.date.compareTo(a.date));
-      final recentTransactions = sortedExpenses.take(5).toList();
+      final recentTransactions = sortedRecords.take(5).toList();
 
       return Right(
         DashboardSummary(
@@ -82,21 +82,21 @@ class GetDashboardSummaryUseCase
     }
   }
 
-  double _calculateTotal(List<Expense> expenses) {
-    return expenses.fold(0.0, (sum, expense) => sum + expense.amount.abs());
+  double _calculateTotal(List<Record> records) {
+    return records.fold(0.0, (sum, record) => sum + record.amount.abs());
   }
 
   Future<List<CategoryAmount>> _calculateCategoryBreakdown(
-    List<Expense> expenses,
+    List<Record> records,
   ) async {
-    final totalSpent = _calculateTotal(expenses);
+    final totalSpent = _calculateTotal(records);
     if (totalSpent == 0) return [];
 
     final categoryMap = <int, double>{};
-    for (final expense in expenses) {
-      if (expense.categoryId != null) {
-        categoryMap[expense.categoryId!] =
-            (categoryMap[expense.categoryId!] ?? 0) + expense.amount.abs();
+    for (final record in records) {
+      if (record.categoryId != null) {
+        categoryMap[record.categoryId!] =
+            (categoryMap[record.categoryId!] ?? 0) + record.amount.abs();
       }
     }
 

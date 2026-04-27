@@ -4,7 +4,7 @@ import '../entities/search_filters.dart';
 import '../entities/search_result.dart';
 
 abstract class SearchRepository {
-  Future<Either<Failure, List<SearchResult>>> searchExpenses(
+  Future<Either<Failure, List<SearchResult>>> searchRecords(
     SearchFilters filters,
   );
 }

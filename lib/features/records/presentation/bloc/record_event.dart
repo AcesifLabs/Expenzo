@@ -1,0 +1,48 @@
+import 'package:equatable/equatable.dart';
+import '../../domain/entities/record.dart';
+
+abstract class RecordEvent extends Equatable {
+  const RecordEvent();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class LoadRecords extends RecordEvent {
+  const LoadRecords();
+}
+
+class LoadMoreRecords extends RecordEvent {
+  const LoadMoreRecords();
+}
+
+class AddRecordEvent extends RecordEvent {
+  final Record record;
+
+  const AddRecordEvent(this.record);
+
+  @override
+  List<Object?> get props => [record];
+}
+
+class UpdateRecordEvent extends RecordEvent {
+  final Record record;
+
+  const UpdateRecordEvent(this.record);
+
+  @override
+  List<Object?> get props => [record];
+}
+
+class DeleteRecordEvent extends RecordEvent {
+  final int id;
+
+  const DeleteRecordEvent(this.id);
+
+  @override
+  List<Object?> get props => [id];
+}
+
+class RefreshRecords extends RecordEvent {
+  const RefreshRecords();
+}

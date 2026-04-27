@@ -5,7 +5,7 @@ import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 
-import 'tables/expenses_table.dart';
+import 'tables/records_table.dart';
 import 'tables/categories_table.dart';
 import 'tables/pending_recurring_table.dart';
 import 'tables/parsing_rules_table.dart';
@@ -15,7 +15,7 @@ import 'tables/budgets_table.dart';
 import 'tables/recurring_table.dart';
 import 'tables/expense_fts_table.dart';
 
-import 'daos/expense_dao.dart';
+import 'daos/record_dao.dart';
 import 'daos/category_dao.dart';
 import 'daos/recurring_dao.dart';
 import 'daos/budget_dao.dart';
@@ -27,7 +27,7 @@ part 'app_database.g.dart';
 
 @DriftDatabase(
   tables: [
-    Expenses,
+    Records,
     Categories,
     PendingRecurring,
     ParsingRules,
@@ -38,7 +38,7 @@ part 'app_database.g.dart';
     ExpenseFtsTable,
   ],
   daos: [
-    ExpenseDao,
+    RecordDao,
     CategoryDao,
     RecurringDao,
     BudgetDao,
@@ -51,7 +51,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration {
@@ -73,6 +73,21 @@ class AppDatabase extends _$AppDatabase {
           await _createFtsTable(customStatement);
           await _createFtsTriggers(customStatement);
         }
+        if (from < 6) {
+          // Rename expenses to records
+          await m.renameTable(records, 'expenses');
+          await m.addColumn(records, records.recordType);
+          await m.addColumn(categories, categories.categoryType);
+
+          await customStatement("UPDATE records SET record_type = 'OUT'");
+          await customStatement("UPDATE categories SET category_type = 'OUT'");
+
+          // Update FTS triggers
+          await customStatement("DROP TRIGGER IF EXISTS expenses_ai");
+          await customStatement("DROP TRIGGER IF EXISTS expenses_ad");
+          await customStatement("DROP TRIGGER IF EXISTS expenses_au");
+          await _createFtsTriggers(customStatement);
+        }
       },
     );
   }
@@ -91,7 +106,7 @@ class AppDatabase extends _$AppDatabase {
   ) async {
     // INSERT Trigger
     await executor('''
-      CREATE TRIGGER IF NOT EXISTS expenses_ai AFTER INSERT ON expenses BEGIN
+      CREATE TRIGGER IF NOT EXISTS records_ai AFTER INSERT ON records BEGIN
         INSERT INTO expense_fts(expense_id, description) 
         VALUES (new.id, new.description);
       END;
@@ -99,14 +114,14 @@ class AppDatabase extends _$AppDatabase {
 
     // DELETE Trigger
     await executor('''
-      CREATE TRIGGER IF NOT EXISTS expenses_ad AFTER DELETE ON expenses BEGIN
+      CREATE TRIGGER IF NOT EXISTS records_ad AFTER DELETE ON records BEGIN
         DELETE FROM expense_fts WHERE expense_id = old.id;
       END;
     ''');
 
     // UPDATE Trigger
     await executor('''
-      CREATE TRIGGER IF NOT EXISTS expenses_au AFTER UPDATE ON expenses BEGIN
+      CREATE TRIGGER IF NOT EXISTS records_au AFTER UPDATE ON records BEGIN
         UPDATE expense_fts SET description = new.description 
         WHERE expense_id = old.id;
       END;

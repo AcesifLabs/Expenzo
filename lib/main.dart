@@ -10,10 +10,10 @@ import 'features/auth/presentation/bloc/auth_event.dart';
 import 'features/categories/presentation/bloc/category_bloc.dart';
 import 'features/categories/presentation/bloc/category_event.dart';
 import 'features/categories/presentation/pages/category_list_page.dart';
-import 'features/expenses/presentation/bloc/expense_bloc.dart';
-import 'features/expenses/presentation/bloc/expense_event.dart';
-import 'features/expenses/presentation/pages/expense_list_page.dart';
-import 'features/expenses/presentation/pages/expense_form_page.dart';
+import 'features/records/presentation/bloc/record_bloc.dart';
+import 'features/records/presentation/bloc/record_event.dart';
+import 'features/records/presentation/pages/record_list_page.dart';
+import 'features/records/presentation/pages/record_form_page.dart';
 import 'features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
 import 'features/message_templates/presentation/pages/contact_selector_page.dart';
 import 'shared/presentation/widgets/app_shell.dart';
@@ -122,7 +122,7 @@ class _AppLoaderState extends State<AppLoader> {
       providers: [
         BlocProvider<AuthBloc>(create: (_) => di.getIt<AuthBloc>()),
         BlocProvider<CategoryBloc>(create: (_) => di.getIt<CategoryBloc>()),
-        BlocProvider<ExpenseBloc>(create: (_) => di.getIt<ExpenseBloc>()),
+        BlocProvider<RecordBloc>(create: (_) => di.getIt<RecordBloc>()),
         BlocProvider<SmsScannerBloc>(create: (_) => di.getIt<SmsScannerBloc>()),
       ],
       child: const _InitialDataLoader(),
@@ -211,7 +211,7 @@ class _InitialDataLoaderState extends State<_InitialDataLoader> {
       if (mounted) {
         context.read<AuthBloc>().add(const AuthCheckRequested());
         context.read<CategoryBloc>().add(const LoadCategories());
-        context.read<ExpenseBloc>().add(const LoadExpenses());
+        context.read<RecordBloc>().add(const LoadRecords());
       }
     });
   }

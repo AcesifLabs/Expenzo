@@ -21,8 +21,8 @@ import 'package:expense_tracker/features/message_templates/presentation/bloc/tem
 import 'package:expense_tracker/features/sms_parser/data/datasources/sms_local_datasource.dart';
 import 'package:expense_tracker/features/sms_parser/domain/usecases/scan_sms_usecase.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
-import 'package:expense_tracker/features/expenses/domain/repositories/expense_repository.dart';
-import 'package:expense_tracker/features/expenses/domain/usecases/create_expenses_from_parsed_list.dart';
+import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
+import 'package:expense_tracker/features/records/domain/usecases/create_records_from_parsed_list.dart';
 
 void initParsingModule(GetIt getIt) {
   // ── Parsing Rules ──
@@ -101,8 +101,8 @@ void initParsingModule(GetIt getIt) {
   getIt.registerFactory<SmsScannerBloc>(
     () => SmsScannerBloc(
       scanSmsUseCase: getIt<ScanSmsUseCase>(),
-      expenseRepository: getIt<ExpenseRepository>(),
-      createExpensesFromParsedList: getIt<CreateExpensesFromParsedList>(),
+      recordRepository: getIt<RecordRepository>(),
+      createRecordsFromParsedList: getIt<CreateRecordsFromParsedList>(),
     ),
   );
 }

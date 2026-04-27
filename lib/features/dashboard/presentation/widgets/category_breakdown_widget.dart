@@ -23,7 +23,7 @@ class CategoryBreakdownWidget extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.all(16),
           child: Text(
-            'No expenses in this period',
+            'No records in this period',
             style: TextStyle(color: Colors.grey),
           ),
         ),

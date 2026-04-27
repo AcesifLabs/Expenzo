@@ -9,7 +9,7 @@ import '../bloc/sms_scanner_state.dart';
 import '../widgets/parsed_transaction_card.dart';
 import '../../../parsing_rules/presentation/widgets/transaction_list_skeleton.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
-import '../../../expenses/domain/usecases/create_expenses_from_parsed_list.dart';
+import 'package:expense_tracker/features/records/domain/usecases/create_records_from_parsed_list.dart';
 
 class SmsScanPage extends StatelessWidget {
   const SmsScanPage({super.key});
@@ -116,7 +116,7 @@ class SmsScanPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '${state.results.length} new expenses found',
+              '${state.results.length} new records found',
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -225,7 +225,7 @@ class SmsScanPage extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             const Text(
-              'Tap the button below to scan your SMS messages\nand automatically create expenses.',
+              'Tap the button below to scan your SMS messages\nand automatically create records.',
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -336,7 +336,7 @@ class _SmsScanResultsPageState extends State<SmsScanResultsPage> {
                     ),
                     const SizedBox(height: 16),
                     const Text(
-                      'No new expenses found',
+                      'No new records found',
                       style: TextStyle(fontSize: 18),
                     ),
                     const SizedBox(height: 8),

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:expense_tracker/core/constants/record_type.dart';
 
 class Category extends Equatable {
   final int? id;
@@ -6,6 +7,7 @@ class Category extends Equatable {
   final String emoji;
   final String color;
   final bool isDefault;
+  final RecordType type;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -15,6 +17,7 @@ class Category extends Equatable {
     required this.emoji,
     required this.color,
     this.isDefault = false,
+    required this.type,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -25,6 +28,7 @@ class Category extends Equatable {
     String? emoji,
     String? color,
     bool? isDefault,
+    RecordType? type,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -34,6 +38,7 @@ class Category extends Equatable {
       emoji: emoji ?? this.emoji,
       color: color ?? this.color,
       isDefault: isDefault ?? this.isDefault,
+      type: type ?? this.type,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -46,6 +51,7 @@ class Category extends Equatable {
     emoji,
     color,
     isDefault,
+    type,
     createdAt,
     updatedAt,
   ];

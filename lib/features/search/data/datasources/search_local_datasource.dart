@@ -1,15 +1,17 @@
 import 'package:drift/drift.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
-import 'package:expense_tracker/core/database/app_database.dart' hide Category, Expense;
+import 'package:expense_tracker/core/database/app_database.dart'
+    hide Category, Record;
+import 'package:expense_tracker/core/constants/record_type.dart';
 import '../../domain/entities/search_filters.dart';
 import '../../domain/entities/search_result.dart';
-import '../../../expenses/domain/entities/expense.dart';
+import '../../../records/domain/entities/record.dart';
 import "package:expense_tracker/core/constants/source_types.dart";
 
 abstract class SearchLocalDatasource {
-  Future<List<SearchResult>> searchExpenses(SearchFilters filters);
-  Future<void> indexExpense(Expense expense);
-  Future<void> removeExpenseFromIndex(int expenseId);
+  Future<List<SearchResult>> searchRecords(SearchFilters filters);
+  Future<void> indexRecord(Record record);
+  Future<void> removeRecordFromIndex(int recordId);
   Future<void> rebuildIndex();
 }
 
@@ -19,16 +21,16 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
   SearchLocalDatasourceImpl({required this.db});
 
   @override
-  Future<List<SearchResult>> searchExpenses(SearchFilters filters) async {
+  Future<List<SearchResult>> searchRecords(SearchFilters filters) async {
     try {
       if (filters.isEmpty) {
         return [];
       }
 
       String query = '''
-        SELECT e.*, expense_fts.description as fts_description
-        FROM expenses e
-        INNER JOIN expense_fts ON expense_fts.expense_id = e.id
+        SELECT r.*, expense_fts.description as fts_description
+        FROM records r
+        INNER JOIN expense_fts ON expense_fts.expense_id = r.id
       ''';
 
       final conditions = <String>[];
@@ -41,23 +43,23 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
       }
 
       if (filters.categoryId != null) {
-        conditions.add('e.category_id = ?');
+        conditions.add('r.category_id = ?');
         args.add(filters.categoryId);
       }
 
       if (filters.dateRange != null) {
-        conditions.add('e.date >= ? AND e.date <= ?');
+        conditions.add('r.date >= ? AND r.date <= ?');
         args.add(filters.dateRange!.start.millisecondsSinceEpoch);
         args.add(filters.dateRange!.end.millisecondsSinceEpoch);
       }
 
       if (filters.minAmount != null) {
-        conditions.add('e.amount >= ?');
+        conditions.add('r.amount >= ?');
         args.add(filters.minAmount);
       }
 
       if (filters.maxAmount != null) {
-        conditions.add('e.amount <= ?');
+        conditions.add('r.amount <= ?');
         args.add(filters.maxAmount);
       }
 
@@ -65,7 +67,7 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
         query += ' WHERE ${conditions.join(' AND ')}';
       }
 
-      query += ' ORDER BY e.date DESC';
+      query += ' ORDER BY r.date DESC';
 
       final result = await db
           .customSelect(query, variables: args.map((a) => Variable(a)).toList())
@@ -73,7 +75,7 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
 
       return result.map((row) {
         return SearchResult(
-          expense: _mapToExpense(row),
+          record: _mapToRecord(row),
           relevanceScore: filters.query != null
               ? (row.data['fts_description'] as String?)
                         ?.split(' ')
@@ -90,11 +92,11 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
   }
 
   @override
-  Future<void> indexExpense(Expense expense) async {
+  Future<void> indexRecord(Record record) async {
     try {
       await db.customStatement(
         'INSERT INTO expense_fts (expense_id, description) VALUES (?, ?)',
-        [expense.id, expense.description],
+        [record.id, record.description],
       );
     } catch (e) {
       throw CacheException(message: e.toString());
@@ -102,10 +104,10 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
   }
 
   @override
-  Future<void> removeExpenseFromIndex(int expenseId) async {
+  Future<void> removeRecordFromIndex(int recordId) async {
     try {
       await db.customStatement('DELETE FROM expense_fts WHERE expense_id = ?', [
-        expenseId,
+        recordId,
       ]);
     } catch (e) {
       throw CacheException(message: e.toString());
@@ -120,16 +122,16 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
       // Single INSERT...SELECT — no per-row round-trips
       await db.customStatement('''
         INSERT INTO expense_fts (expense_id, description)
-        SELECT id, description FROM expenses
+        SELECT id, description FROM records
       ''');
     } catch (e) {
       throw CacheException(message: e.toString());
     }
   }
 
-  Expense _mapToExpense(QueryRow row) {
+  Record _mapToRecord(QueryRow row) {
     final data = row.data;
-    return Expense(
+    return Record(
       id: data['id'] as int?,
       amount: data['amount'] as double,
       description: data['description'] as String,
@@ -140,6 +142,7 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
         orElse: () => ExpenseSource.manual,
       ),
       sourceId: data['source_id'] as String?,
+      recordType: RecordType.fromDbValue(data['record_type'] as String),
       createdAt: data['created_at'] as DateTime,
       updatedAt: data['updated_at'] as DateTime,
     );

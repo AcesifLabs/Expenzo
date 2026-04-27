@@ -5,14 +5,14 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:expense_tracker/core/database/app_database.dart';
-import 'package:expense_tracker/core/database/daos/expense_dao.dart';
+import 'package:expense_tracker/core/database/daos/record_dao.dart';
 import 'package:expense_tracker/core/database/daos/category_dao.dart';
 import 'package:expense_tracker/core/database/daos/pending_recurring_dao.dart';
 import 'package:expense_tracker/core/database/daos/message_template_dao.dart';
 
 import 'auth_module.dart';
 import 'category_module.dart';
-import 'expense_module.dart';
+import 'record_module.dart';
 import 'parsing_module.dart';
 import 'report_module.dart';
 import 'budget_module.dart';
@@ -27,7 +27,7 @@ Future<void> get featureDependenciesReady =>
     _featureDependenciesCompleter?.future ?? Future.value();
 
 /// Registers ONLY the dependencies needed for the first visible screen
-/// (Auth + Database + Categories + Expenses). Returns immediately so
+/// (Auth + Database + Categories + Records). Returns immediately so
 /// the splash screen can render without waiting for the full DI graph.
 Future<void> initCriticalDependencies() async {
   // ── Infrastructure ──
@@ -45,7 +45,7 @@ Future<void> initCriticalDependencies() async {
   getIt.registerLazySingleton<AppDatabase>(() => AppDatabase());
 
   // DAOs
-  getIt.registerFactory<ExpenseDao>(() => ExpenseDao(getIt<AppDatabase>()));
+  getIt.registerFactory<RecordDao>(() => RecordDao(getIt<AppDatabase>()));
   getIt.registerFactory<CategoryDao>(() => CategoryDao(getIt<AppDatabase>()));
   getIt.registerFactory<PendingRecurringDao>(
     () => PendingRecurringDao(getIt<AppDatabase>()),
@@ -57,7 +57,7 @@ Future<void> initCriticalDependencies() async {
   // ── Feature Modules (Critical) ──
   initAuthModule(getIt);
   initCategoryModule(getIt);
-  initExpenseModule(getIt);
+  initRecordModule(getIt);
 }
 
 /// Registers feature-level dependencies (Scan, Email, Parsing, Reports,

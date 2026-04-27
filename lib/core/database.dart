@@ -1,5 +1,5 @@
 export 'database/app_database.dart';
-export 'database/tables/expenses_table.dart';
+export 'database/tables/records_table.dart';
 export 'database/tables/categories_table.dart';
 export 'database/tables/pending_recurring_table.dart';
 export 'database/tables/parsing_rules_table.dart';
@@ -8,7 +8,7 @@ export 'database/tables/expense_templates_table.dart';
 export 'database/tables/budgets_table.dart';
 export 'database/tables/recurring_table.dart';
 export 'database/tables/expense_fts_table.dart';
-export 'database/daos/expense_dao.dart';
+export 'database/daos/record_dao.dart';
 export 'database/daos/category_dao.dart';
 export 'database/daos/pending_recurring_dao.dart';
 export 'database/daos/parsing_rule_dao.dart';
