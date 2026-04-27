@@ -2,15 +2,16 @@ import 'package:drift/drift.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/database/app_database.dart' hide Category;
 import 'package:expense_tracker/core/database/daos/category_dao.dart';
+import 'package:expense_tracker/core/constants/record_type.dart';
 import '../../domain/entities/category.dart';
 
 abstract class CategoryLocalDatasource {
-  Future<List<Category>> getCategories();
+  Future<List<Category>> getCategories({RecordType? type});
   Future<Category?> getCategoryById(int id);
   Future<Category> createCategory(Category category);
   Future<Category> updateCategory(Category category);
   Future<void> deleteCategory(int id);
-  Stream<List<Category>> watchCategories();
+  Stream<List<Category>> watchCategories({RecordType? type});
 }
 
 class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
@@ -19,9 +20,11 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
   CategoryLocalDatasourceImpl({required this.categoryDao});
 
   @override
-  Future<List<Category>> getCategories() async {
+  Future<List<Category>> getCategories({RecordType? type}) async {
     try {
-      final categories = await categoryDao.getAllCategories();
+      final categories = await categoryDao.getAllCategories(
+        type: type?.dbValue,
+      );
       return categories.map(_mapToEntity).toList();
     } catch (e) {
       throw CacheException(message: e.toString());
@@ -47,6 +50,7 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
         emoji: Value(category.emoji),
         color: Value(category.color),
         isDefault: Value(category.isDefault),
+        categoryType: Value(category.type.dbValue),
         createdAt: Value(now),
         updatedAt: Value(now),
       );
@@ -67,6 +71,7 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
         emoji: Value(category.emoji),
         color: Value(category.color),
         isDefault: Value(category.isDefault),
+        categoryType: Value(category.type.dbValue),
         createdAt: Value(category.createdAt),
         updatedAt: Value(now),
       );
@@ -87,10 +92,10 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
   }
 
   @override
-  Stream<List<Category>> watchCategories() {
-    return categoryDao.watchCategories().map(
-      (categories) => categories.map(_mapToEntity).toList(),
-    );
+  Stream<List<Category>> watchCategories({RecordType? type}) {
+    return categoryDao
+        .watchCategories(type: type?.dbValue)
+        .map((categories) => categories.map(_mapToEntity).toList());
   }
 
   Category _mapToEntity(dynamic category) {
@@ -100,6 +105,7 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
       emoji: category.emoji,
       color: category.color,
       isDefault: category.isDefault,
+      type: RecordType.fromDbValue(category.categoryType),
       createdAt: category.createdAt,
       updatedAt: category.updatedAt,
     );

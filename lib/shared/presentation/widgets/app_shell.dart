@@ -3,11 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/core/utils/navigation_utils.dart';
+import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:expense_tracker/features/categories/presentation/pages/category_list_page.dart';
-import 'package:expense_tracker/features/expenses/presentation/bloc/expense_bloc.dart';
-import 'package:expense_tracker/features/expenses/presentation/pages/expense_list_page.dart';
-import 'package:expense_tracker/features/expenses/presentation/pages/expense_form_page.dart';
+import 'package:expense_tracker/features/categories/presentation/pages/category_form_page.dart';
+import 'package:expense_tracker/features/records/presentation/bloc/record_bloc.dart';
+import 'package:expense_tracker/features/records/presentation/pages/record_list_page.dart';
+import 'package:expense_tracker/features/records/presentation/pages/record_form_page.dart';
 import 'package:expense_tracker/features/message_templates/presentation/pages/contact_selector_page.dart';
 import 'package:expense_tracker/features/settings/presentation/bloc/settings_bloc.dart';
 import 'package:expense_tracker/features/settings/presentation/pages/settings_page.dart';
@@ -24,13 +26,15 @@ class AppShell extends StatefulWidget {
 class _AppShellState extends State<AppShell> {
   int _currentIndex = 0;
 
+  bool get _showFab => _currentIndex == 0 || _currentIndex == 1;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: LazyIndexedStack(
         index: _currentIndex,
         children: [
-          const ExpenseListPage(),
+          const RecordListPage(),
           const CategoryListPage(),
           const SmsPermissionGate(child: ContactSelectorPage()),
           BlocProvider(
@@ -39,11 +43,17 @@ class _AppShellState extends State<AppShell> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateToForm(context),
-        shape: const CircleBorder(),
-        child: Icon(PhosphorIcons.plus(PhosphorIconsStyle.regular)),
-      ),
+      floatingActionButton: _showFab
+          ? FloatingActionButton(
+              onPressed: () => _onFabPressed(context),
+              shape: const CircleBorder(),
+              child: Icon(
+                _currentIndex == 1
+                    ? PhosphorIcons.listPlus(PhosphorIconsStyle.regular)
+                    : PhosphorIcons.plus(PhosphorIconsStyle.regular),
+              ),
+            )
+          : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
@@ -55,7 +65,7 @@ class _AppShellState extends State<AppShell> {
               0,
               PhosphorIcons.invoice(PhosphorIconsStyle.regular),
               PhosphorIcons.invoice(PhosphorIconsStyle.fill),
-              'Expenses',
+              'Records',
             ),
             _buildNavItem(
               1,
@@ -63,7 +73,7 @@ class _AppShellState extends State<AppShell> {
               PhosphorIcons.tag(PhosphorIconsStyle.fill),
               'Categories',
             ),
-            const SizedBox(width: 40), // Space for FAB
+            if (_showFab) const SizedBox(width: 40), // Space for FAB
             _buildNavItem(
               2,
               PhosphorIcons.listMagnifyingGlass(PhosphorIconsStyle.regular),
@@ -107,16 +117,114 @@ class _AppShellState extends State<AppShell> {
     );
   }
 
-  void _navigateToForm(BuildContext context) {
+  void _onFabPressed(BuildContext context) {
+    if (_currentIndex == 0) {
+      _showRecordTypeSelection(context);
+    } else if (_currentIndex == 1) {
+      _showCategoryTypeSelection(context);
+    }
+  }
+
+  void _showRecordTypeSelection(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height * 0.25,
+            child: Column(
+              children: [
+                ListTile(
+                  leading: Icon(
+                    PhosphorIcons.trendUp(PhosphorIconsStyle.regular),
+                    color: Colors.green,
+                  ),
+                  title: const Text('Add Income'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _navigateToRecordForm(context, RecordType.income);
+                  },
+                ),
+                ListTile(
+                  leading: Icon(
+                    PhosphorIcons.trendDown(PhosphorIconsStyle.regular),
+                    color: Colors.red,
+                  ),
+                  title: const Text('Add Expense'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _navigateToRecordForm(context, RecordType.expense);
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showCategoryTypeSelection(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height * 0.25,
+            child: Column(
+              children: [
+                ListTile(
+                  leading: Icon(
+                    PhosphorIcons.tag(PhosphorIconsStyle.regular),
+                    color: Colors.green,
+                  ),
+                  title: const Text('Add Income Category'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _navigateToCategoryForm(context, RecordType.income);
+                  },
+                ),
+                ListTile(
+                  leading: Icon(
+                    PhosphorIcons.tag(PhosphorIconsStyle.regular),
+                    color: Colors.red,
+                  ),
+                  title: const Text('Add Expense Category'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _navigateToCategoryForm(context, RecordType.expense);
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _navigateToRecordForm(BuildContext context, RecordType type) {
     Navigator.push(
       context,
       SlidePageRoute(
         builder: (_) => MultiBlocProvider(
           providers: [
-            BlocProvider.value(value: di.getIt<ExpenseBloc>()),
+            BlocProvider.value(value: di.getIt<RecordBloc>()),
             BlocProvider.value(value: di.getIt<CategoryBloc>()),
           ],
-          child: const ExpenseFormPage(expense: null),
+          child: RecordFormPage(record: null, initialType: type),
+        ),
+      ),
+    );
+  }
+
+  void _navigateToCategoryForm(BuildContext context, RecordType type) {
+    Navigator.push(
+      context,
+      SlidePageRoute(
+        builder: (_) => BlocProvider.value(
+          value: di.getIt<CategoryBloc>(),
+          child: CategoryFormPage(category: null, initialType: type),
         ),
       ),
     );

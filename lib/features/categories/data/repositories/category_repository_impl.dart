@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/error/failures.dart';
+import 'package:expense_tracker/core/constants/record_type.dart';
 import '../../domain/entities/category.dart';
 import '../../domain/repositories/category_repository.dart';
 import '../datasources/category_local_datasource.dart';
@@ -11,9 +12,11 @@ class CategoryRepositoryImpl implements CategoryRepository {
   CategoryRepositoryImpl({required this.localDatasource});
 
   @override
-  Future<Either<CacheFailure, List<Category>>> getCategories() async {
+  Future<Either<CacheFailure, List<Category>>> getCategories({
+    RecordType? type,
+  }) async {
     try {
-      final categories = await localDatasource.getCategories();
+      final categories = await localDatasource.getCategories(type: type);
       return Right(categories);
     } on CacheException catch (e) {
       return Left(e.toFailure());
@@ -68,7 +71,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
   }
 
   @override
-  Stream<List<Category>> watchCategories() {
-    return localDatasource.watchCategories();
+  Stream<List<Category>> watchCategories({RecordType? type}) {
+    return localDatasource.watchCategories(type: type);
   }
 }

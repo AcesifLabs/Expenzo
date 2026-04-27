@@ -1,13 +1,13 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
-import 'package:expense_tracker/features/expenses/domain/repositories/expense_repository.dart';
+import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/entities/parsed_transaction.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/services/parsing_isolate_service.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/usecases/evaluate_rules.dart';
 import 'package:expense_tracker/features/sms_parser/data/datasources/sms_local_datasource.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
 import '../../domain/usecases/scan_sms_usecase.dart';
-import 'package:expense_tracker/features/expenses/domain/usecases/create_expenses_from_parsed_list.dart';
+import 'package:expense_tracker/features/records/domain/usecases/create_records_from_parsed_list.dart';
 import 'sms_scanner_event.dart';
 import 'sms_scanner_state.dart';
 
@@ -15,13 +15,13 @@ const _scanPageSize = 10;
 
 class SmsScannerBloc extends Bloc<SmsScannerEvent, SmsScannerState> {
   final ScanSmsUseCase scanSmsUseCase;
-  final ExpenseRepository expenseRepository;
-  final CreateExpensesFromParsedList createExpensesFromParsedList;
+  final RecordRepository recordRepository;
+  final CreateRecordsFromParsedList createRecordsFromParsedList;
 
   SmsScannerBloc({
     required this.scanSmsUseCase,
-    required this.expenseRepository,
-    required this.createExpensesFromParsedList,
+    required this.recordRepository,
+    required this.createRecordsFromParsedList,
   }) : super(SmsScannerInitial()) {
     on<StartScan>(_onStartScan);
     on<LoadMoreScanResults>(_onLoadMore);
@@ -36,7 +36,7 @@ class SmsScannerBloc extends Bloc<SmsScannerEvent, SmsScannerState> {
     CreateSelectedExpenses event,
     Emitter<SmsScannerState> emit,
   ) async {
-    final result = await createExpensesFromParsedList(event.transactions);
+    final result = await createRecordsFromParsedList(event.transactions);
 
     result.fold((failure) => emit(SmsScannerError(message: failure.message)), (
       creationResult,
@@ -194,7 +194,7 @@ class SmsScannerBloc extends Bloc<SmsScannerEvent, SmsScannerState> {
     if (!filterDuplicates || transactions.isEmpty) return transactions;
 
     final sourceIds = transactions.map((t) => t.sourceId).toList();
-    final existingIdsResult = await expenseRepository.getExistingSourceIds(
+    final existingIdsResult = await recordRepository.getExistingSourceIds(
       sourceIds,
     );
     final existingIds = existingIdsResult.getOrElse(() => <String>{});

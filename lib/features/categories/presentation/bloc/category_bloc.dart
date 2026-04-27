@@ -30,7 +30,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     Emitter<CategoryState> emit,
   ) async {
     emit(const CategoryLoading());
-    final result = await getCategories(NoParams());
+    final result = await getCategories(GetCategoriesParams(type: event.type));
     result.fold(
       (failure) => emit(CategoryError(failure.message)),
       (categories) => emit(CategoryLoaded(categories)),

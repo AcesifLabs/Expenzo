@@ -1,12 +1,12 @@
 import 'package:equatable/equatable.dart';
-import '../../../expenses/domain/entities/expense.dart';
+import '../../../records/domain/entities/record.dart';
 
 class DashboardSummary extends Equatable {
   final double totalSpent;
   final double previousPeriodTotal;
   final double percentChange;
   final List<CategoryAmount> categoryBreakdown;
-  final List<Expense> recentTransactions;
+  final List<Record> recentTransactions;
 
   const DashboardSummary({
     required this.totalSpent,

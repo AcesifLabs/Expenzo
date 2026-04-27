@@ -3,14 +3,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_icons.dart';
+import 'package:expense_tracker/core/constants/record_type.dart';
 import '../../domain/entities/category.dart';
 import '../bloc/category_bloc.dart';
 import '../bloc/category_event.dart';
 
 class CategoryFormPage extends StatefulWidget {
   final Category? category;
+  final RecordType? initialType;
 
-  const CategoryFormPage({super.key, this.category});
+  const CategoryFormPage({super.key, this.category, this.initialType});
 
   @override
   State<CategoryFormPage> createState() => _CategoryFormPageState();
@@ -21,6 +23,7 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
   late TextEditingController _nameController;
   String _selectedEmoji = 'package';
   String _selectedColor = '#2196F3';
+  late RecordType _type;
 
   static const List<String> _iconNames = [
     'package',
@@ -58,6 +61,7 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.category?.name ?? '');
+    _type = widget.category?.type ?? widget.initialType ?? RecordType.expense;
     if (_isEditing) {
       _selectedEmoji = widget.category!.emoji;
       _selectedColor = widget.category!.color;
@@ -74,7 +78,9 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditing ? 'Edit Category' : 'New Category'),
+        title: Text(
+          _isEditing ? 'Edit Category' : 'New ${_type.displayName} Category',
+        ),
       ),
       body: Form(
         key: _formKey,
@@ -175,6 +181,7 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
         name: _nameController.text,
         emoji: _selectedEmoji,
         color: _selectedColor,
+        type: _type,
         createdAt: widget.category?.createdAt ?? now,
         updatedAt: now,
       );

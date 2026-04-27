@@ -1,16 +1,16 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/search_filters.dart';
-import '../../domain/usecases/search_expenses.dart';
+import '../../domain/usecases/search_records.dart';
 import 'search_event.dart';
 import 'search_state.dart';
 
 class SearchBloc extends Bloc<SearchEvent, SearchState> {
-  final SearchExpenses searchExpenses;
+  final SearchRecords searchRecords;
   final SearchFilters _currentFilters = const SearchFilters();
   Timer? _debounceTimer;
 
-  SearchBloc({required this.searchExpenses}) : super(const SearchInitial()) {
+  SearchBloc({required this.searchRecords}) : super(const SearchInitial()) {
     on<SearchQueryChanged>(_onSearchQueryChanged);
     on<SearchFiltersChanged>(_onSearchFiltersChanged);
     on<ClearSearch>(_onClearSearch);
@@ -63,7 +63,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
 
     emit(const SearchLoading());
 
-    final result = await searchExpenses(filters);
+    final result = await searchRecords(filters);
 
     result.fold(
       (failure) => emit(SearchError(failure.message)),

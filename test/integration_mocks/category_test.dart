@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:dartz/dartz.dart';
-import 'package:expense_tracker/core/error/usecase.dart';
+import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/features/categories/domain/entities/category.dart';
 import 'package:expense_tracker/features/categories/domain/repositories/category_repository.dart';
 import 'package:expense_tracker/features/categories/domain/usecases/create_category.dart';
@@ -26,6 +26,7 @@ void main() {
       emoji: '🍔',
       color: '#FF5733',
       isDefault: false,
+      type: RecordType.expense,
       createdAt: now,
       updatedAt: now,
     );
@@ -38,6 +39,7 @@ void main() {
         emoji: '🚗',
         color: '#33FF57',
         isDefault: false,
+        type: RecordType.expense,
         createdAt: now,
         updatedAt: now,
       ),
@@ -58,10 +60,10 @@ void main() {
 
     test('getCategories returns list of categories', () async {
       when(
-        () => mockRepository.getCategories(),
+        () => mockRepository.getCategories(type: any(named: 'type')),
       ).thenAnswer((_) async => Right(testCategories));
 
-      final result = await getCategoriesUseCase(NoParams());
+      final result = await getCategoriesUseCase(const GetCategoriesParams());
 
       expect(result.isRight(), true);
       result.fold((failure) => fail('Should not return failure'), (categories) {
@@ -104,7 +106,7 @@ void main() {
 
     test('watchCategories returns stream of categories', () async {
       when(
-        () => mockRepository.watchCategories(),
+        () => mockRepository.watchCategories(type: any(named: 'type')),
       ).thenAnswer((_) => Stream.value(testCategories));
 
       await expectLater(
@@ -135,6 +137,7 @@ void main() {
         name: 'Food',
         emoji: '🍔',
         color: '#FF5733',
+        type: RecordType.expense,
         createdAt: now,
         updatedAt: now,
       );
@@ -144,6 +147,7 @@ void main() {
       expect(category.color, '#FF5733');
       expect(category.id, null);
       expect(category.isDefault, false);
+      expect(category.type, RecordType.expense);
     });
 
     test('should create category with all fields', () {
@@ -154,6 +158,7 @@ void main() {
         emoji: '🚗',
         color: '#33FF57',
         isDefault: true,
+        type: RecordType.expense,
         createdAt: now,
         updatedAt: now,
       );
@@ -172,6 +177,7 @@ void main() {
         name: 'Food',
         emoji: '🍔',
         color: '#FF5733',
+        type: RecordType.expense,
         createdAt: now,
         updatedAt: now,
       );
@@ -191,6 +197,7 @@ void main() {
         name: 'Food',
         emoji: '🍔',
         color: '#FF5733',
+        type: RecordType.expense,
         createdAt: now,
         updatedAt: now,
       );
@@ -199,6 +206,7 @@ void main() {
         name: 'Food',
         emoji: '🍔',
         color: '#FF5733',
+        type: RecordType.expense,
         createdAt: now,
         updatedAt: now,
       );

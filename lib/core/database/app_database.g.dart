@@ -3,11 +3,11 @@
 part of 'app_database.dart';
 
 // ignore_for_file: type=lint
-class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
+class $RecordsTable extends Records with TableInfo<$RecordsTable, Record> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $ExpensesTable(this.attachedDatabase, [this._alias]);
+  $RecordsTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
@@ -52,6 +52,12 @@ class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
   late final GeneratedColumn<String> sourceId = GeneratedColumn<String>(
       'source_id', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _recordTypeMeta =
+      const VerificationMeta('recordType');
+  @override
+  late final GeneratedColumn<String> recordType = GeneratedColumn<String>(
+      'record_type', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -77,6 +83,7 @@ class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
         categoryId,
         source,
         sourceId,
+        recordType,
         createdAt,
         updatedAt
       ];
@@ -84,9 +91,9 @@ class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'expenses';
+  static const String $name = 'records';
   @override
-  VerificationContext validateIntegrity(Insertable<Expense> instance,
+  VerificationContext validateIntegrity(Insertable<Record> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -127,6 +134,14 @@ class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
       context.handle(_sourceIdMeta,
           sourceId.isAcceptableOrUnknown(data['source_id']!, _sourceIdMeta));
     }
+    if (data.containsKey('record_type')) {
+      context.handle(
+          _recordTypeMeta,
+          recordType.isAcceptableOrUnknown(
+              data['record_type']!, _recordTypeMeta));
+    } else if (isInserting) {
+      context.missing(_recordTypeMeta);
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -141,9 +156,9 @@ class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Expense map(Map<String, dynamic> data, {String? tablePrefix}) {
+  Record map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Expense(
+    return Record(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
       amount: attachedDatabase.typeMapping
@@ -158,6 +173,8 @@ class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
           .read(DriftSqlType.string, data['${effectivePrefix}source'])!,
       sourceId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}source_id']),
+      recordType: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}record_type'])!,
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       updatedAt: attachedDatabase.typeMapping
@@ -166,12 +183,12 @@ class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
   }
 
   @override
-  $ExpensesTable createAlias(String alias) {
-    return $ExpensesTable(attachedDatabase, alias);
+  $RecordsTable createAlias(String alias) {
+    return $RecordsTable(attachedDatabase, alias);
   }
 }
 
-class Expense extends DataClass implements Insertable<Expense> {
+class Record extends DataClass implements Insertable<Record> {
   final int id;
   final double amount;
   final String description;
@@ -179,9 +196,10 @@ class Expense extends DataClass implements Insertable<Expense> {
   final int? categoryId;
   final String source;
   final String? sourceId;
+  final String recordType;
   final DateTime createdAt;
   final DateTime updatedAt;
-  const Expense(
+  const Record(
       {required this.id,
       required this.amount,
       required this.description,
@@ -189,6 +207,7 @@ class Expense extends DataClass implements Insertable<Expense> {
       this.categoryId,
       required this.source,
       this.sourceId,
+      required this.recordType,
       required this.createdAt,
       required this.updatedAt});
   @override
@@ -205,13 +224,14 @@ class Expense extends DataClass implements Insertable<Expense> {
     if (!nullToAbsent || sourceId != null) {
       map['source_id'] = Variable<String>(sourceId);
     }
+    map['record_type'] = Variable<String>(recordType);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
   }
 
-  ExpensesCompanion toCompanion(bool nullToAbsent) {
-    return ExpensesCompanion(
+  RecordsCompanion toCompanion(bool nullToAbsent) {
+    return RecordsCompanion(
       id: Value(id),
       amount: Value(amount),
       description: Value(description),
@@ -223,15 +243,16 @@ class Expense extends DataClass implements Insertable<Expense> {
       sourceId: sourceId == null && nullToAbsent
           ? const Value.absent()
           : Value(sourceId),
+      recordType: Value(recordType),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
   }
 
-  factory Expense.fromJson(Map<String, dynamic> json,
+  factory Record.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Expense(
+    return Record(
       id: serializer.fromJson<int>(json['id']),
       amount: serializer.fromJson<double>(json['amount']),
       description: serializer.fromJson<String>(json['description']),
@@ -239,6 +260,7 @@ class Expense extends DataClass implements Insertable<Expense> {
       categoryId: serializer.fromJson<int?>(json['categoryId']),
       source: serializer.fromJson<String>(json['source']),
       sourceId: serializer.fromJson<String?>(json['sourceId']),
+      recordType: serializer.fromJson<String>(json['recordType']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -254,12 +276,13 @@ class Expense extends DataClass implements Insertable<Expense> {
       'categoryId': serializer.toJson<int?>(categoryId),
       'source': serializer.toJson<String>(source),
       'sourceId': serializer.toJson<String?>(sourceId),
+      'recordType': serializer.toJson<String>(recordType),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
   }
 
-  Expense copyWith(
+  Record copyWith(
           {int? id,
           double? amount,
           String? description,
@@ -267,9 +290,10 @@ class Expense extends DataClass implements Insertable<Expense> {
           Value<int?> categoryId = const Value.absent(),
           String? source,
           Value<String?> sourceId = const Value.absent(),
+          String? recordType,
           DateTime? createdAt,
           DateTime? updatedAt}) =>
-      Expense(
+      Record(
         id: id ?? this.id,
         amount: amount ?? this.amount,
         description: description ?? this.description,
@@ -277,11 +301,12 @@ class Expense extends DataClass implements Insertable<Expense> {
         categoryId: categoryId.present ? categoryId.value : this.categoryId,
         source: source ?? this.source,
         sourceId: sourceId.present ? sourceId.value : this.sourceId,
+        recordType: recordType ?? this.recordType,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
       );
-  Expense copyWithCompanion(ExpensesCompanion data) {
-    return Expense(
+  Record copyWithCompanion(RecordsCompanion data) {
+    return Record(
       id: data.id.present ? data.id.value : this.id,
       amount: data.amount.present ? data.amount.value : this.amount,
       description:
@@ -291,6 +316,8 @@ class Expense extends DataClass implements Insertable<Expense> {
           data.categoryId.present ? data.categoryId.value : this.categoryId,
       source: data.source.present ? data.source.value : this.source,
       sourceId: data.sourceId.present ? data.sourceId.value : this.sourceId,
+      recordType:
+          data.recordType.present ? data.recordType.value : this.recordType,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -298,7 +325,7 @@ class Expense extends DataClass implements Insertable<Expense> {
 
   @override
   String toString() {
-    return (StringBuffer('Expense(')
+    return (StringBuffer('Record(')
           ..write('id: $id, ')
           ..write('amount: $amount, ')
           ..write('description: $description, ')
@@ -306,6 +333,7 @@ class Expense extends DataClass implements Insertable<Expense> {
           ..write('categoryId: $categoryId, ')
           ..write('source: $source, ')
           ..write('sourceId: $sourceId, ')
+          ..write('recordType: $recordType, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -314,11 +342,11 @@ class Expense extends DataClass implements Insertable<Expense> {
 
   @override
   int get hashCode => Object.hash(id, amount, description, date, categoryId,
-      source, sourceId, createdAt, updatedAt);
+      source, sourceId, recordType, createdAt, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Expense &&
+      (other is Record &&
           other.id == this.id &&
           other.amount == this.amount &&
           other.description == this.description &&
@@ -326,11 +354,12 @@ class Expense extends DataClass implements Insertable<Expense> {
           other.categoryId == this.categoryId &&
           other.source == this.source &&
           other.sourceId == this.sourceId &&
+          other.recordType == this.recordType &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
 
-class ExpensesCompanion extends UpdateCompanion<Expense> {
+class RecordsCompanion extends UpdateCompanion<Record> {
   final Value<int> id;
   final Value<double> amount;
   final Value<String> description;
@@ -338,9 +367,10 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
   final Value<int?> categoryId;
   final Value<String> source;
   final Value<String?> sourceId;
+  final Value<String> recordType;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
-  const ExpensesCompanion({
+  const RecordsCompanion({
     this.id = const Value.absent(),
     this.amount = const Value.absent(),
     this.description = const Value.absent(),
@@ -348,10 +378,11 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
     this.categoryId = const Value.absent(),
     this.source = const Value.absent(),
     this.sourceId = const Value.absent(),
+    this.recordType = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
-  ExpensesCompanion.insert({
+  RecordsCompanion.insert({
     this.id = const Value.absent(),
     required double amount,
     required String description,
@@ -359,12 +390,14 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
     this.categoryId = const Value.absent(),
     this.source = const Value.absent(),
     this.sourceId = const Value.absent(),
+    required String recordType,
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   })  : amount = Value(amount),
         description = Value(description),
-        date = Value(date);
-  static Insertable<Expense> custom({
+        date = Value(date),
+        recordType = Value(recordType);
+  static Insertable<Record> custom({
     Expression<int>? id,
     Expression<double>? amount,
     Expression<String>? description,
@@ -372,6 +405,7 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
     Expression<int>? categoryId,
     Expression<String>? source,
     Expression<String>? sourceId,
+    Expression<String>? recordType,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
   }) {
@@ -383,12 +417,13 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
       if (categoryId != null) 'category_id': categoryId,
       if (source != null) 'source': source,
       if (sourceId != null) 'source_id': sourceId,
+      if (recordType != null) 'record_type': recordType,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
     });
   }
 
-  ExpensesCompanion copyWith(
+  RecordsCompanion copyWith(
       {Value<int>? id,
       Value<double>? amount,
       Value<String>? description,
@@ -396,9 +431,10 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
       Value<int?>? categoryId,
       Value<String>? source,
       Value<String?>? sourceId,
+      Value<String>? recordType,
       Value<DateTime>? createdAt,
       Value<DateTime>? updatedAt}) {
-    return ExpensesCompanion(
+    return RecordsCompanion(
       id: id ?? this.id,
       amount: amount ?? this.amount,
       description: description ?? this.description,
@@ -406,6 +442,7 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
       categoryId: categoryId ?? this.categoryId,
       source: source ?? this.source,
       sourceId: sourceId ?? this.sourceId,
+      recordType: recordType ?? this.recordType,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -435,6 +472,9 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
     if (sourceId.present) {
       map['source_id'] = Variable<String>(sourceId.value);
     }
+    if (recordType.present) {
+      map['record_type'] = Variable<String>(recordType.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -446,7 +486,7 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
 
   @override
   String toString() {
-    return (StringBuffer('ExpensesCompanion(')
+    return (StringBuffer('RecordsCompanion(')
           ..write('id: $id, ')
           ..write('amount: $amount, ')
           ..write('description: $description, ')
@@ -454,6 +494,7 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
           ..write('categoryId: $categoryId, ')
           ..write('source: $source, ')
           ..write('sourceId: $sourceId, ')
+          ..write('recordType: $recordType, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -505,6 +546,14 @@ class $CategoriesTable extends Categories
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('CHECK ("is_default" IN (0, 1))'),
       defaultValue: const Constant(false));
+  static const VerificationMeta _categoryTypeMeta =
+      const VerificationMeta('categoryType');
+  @override
+  late final GeneratedColumn<String> categoryType = GeneratedColumn<String>(
+      'category_type', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('OUT'));
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -523,7 +572,7 @@ class $CategoriesTable extends Categories
       defaultValue: currentDateAndTime);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, name, emoji, color, isDefault, createdAt, updatedAt];
+      [id, name, emoji, color, isDefault, categoryType, createdAt, updatedAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -555,6 +604,12 @@ class $CategoriesTable extends Categories
       context.handle(_isDefaultMeta,
           isDefault.isAcceptableOrUnknown(data['is_default']!, _isDefaultMeta));
     }
+    if (data.containsKey('category_type')) {
+      context.handle(
+          _categoryTypeMeta,
+          categoryType.isAcceptableOrUnknown(
+              data['category_type']!, _categoryTypeMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -582,6 +637,8 @@ class $CategoriesTable extends Categories
           .read(DriftSqlType.string, data['${effectivePrefix}color'])!,
       isDefault: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}is_default'])!,
+      categoryType: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}category_type'])!,
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       updatedAt: attachedDatabase.typeMapping
@@ -601,6 +658,7 @@ class Category extends DataClass implements Insertable<Category> {
   final String emoji;
   final String color;
   final bool isDefault;
+  final String categoryType;
   final DateTime createdAt;
   final DateTime updatedAt;
   const Category(
@@ -609,6 +667,7 @@ class Category extends DataClass implements Insertable<Category> {
       required this.emoji,
       required this.color,
       required this.isDefault,
+      required this.categoryType,
       required this.createdAt,
       required this.updatedAt});
   @override
@@ -619,6 +678,7 @@ class Category extends DataClass implements Insertable<Category> {
     map['emoji'] = Variable<String>(emoji);
     map['color'] = Variable<String>(color);
     map['is_default'] = Variable<bool>(isDefault);
+    map['category_type'] = Variable<String>(categoryType);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -631,6 +691,7 @@ class Category extends DataClass implements Insertable<Category> {
       emoji: Value(emoji),
       color: Value(color),
       isDefault: Value(isDefault),
+      categoryType: Value(categoryType),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -645,6 +706,7 @@ class Category extends DataClass implements Insertable<Category> {
       emoji: serializer.fromJson<String>(json['emoji']),
       color: serializer.fromJson<String>(json['color']),
       isDefault: serializer.fromJson<bool>(json['isDefault']),
+      categoryType: serializer.fromJson<String>(json['categoryType']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -658,6 +720,7 @@ class Category extends DataClass implements Insertable<Category> {
       'emoji': serializer.toJson<String>(emoji),
       'color': serializer.toJson<String>(color),
       'isDefault': serializer.toJson<bool>(isDefault),
+      'categoryType': serializer.toJson<String>(categoryType),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -669,6 +732,7 @@ class Category extends DataClass implements Insertable<Category> {
           String? emoji,
           String? color,
           bool? isDefault,
+          String? categoryType,
           DateTime? createdAt,
           DateTime? updatedAt}) =>
       Category(
@@ -677,6 +741,7 @@ class Category extends DataClass implements Insertable<Category> {
         emoji: emoji ?? this.emoji,
         color: color ?? this.color,
         isDefault: isDefault ?? this.isDefault,
+        categoryType: categoryType ?? this.categoryType,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
       );
@@ -687,6 +752,9 @@ class Category extends DataClass implements Insertable<Category> {
       emoji: data.emoji.present ? data.emoji.value : this.emoji,
       color: data.color.present ? data.color.value : this.color,
       isDefault: data.isDefault.present ? data.isDefault.value : this.isDefault,
+      categoryType: data.categoryType.present
+          ? data.categoryType.value
+          : this.categoryType,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -700,6 +768,7 @@ class Category extends DataClass implements Insertable<Category> {
           ..write('emoji: $emoji, ')
           ..write('color: $color, ')
           ..write('isDefault: $isDefault, ')
+          ..write('categoryType: $categoryType, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -707,8 +776,8 @@ class Category extends DataClass implements Insertable<Category> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, name, emoji, color, isDefault, createdAt, updatedAt);
+  int get hashCode => Object.hash(
+      id, name, emoji, color, isDefault, categoryType, createdAt, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -718,6 +787,7 @@ class Category extends DataClass implements Insertable<Category> {
           other.emoji == this.emoji &&
           other.color == this.color &&
           other.isDefault == this.isDefault &&
+          other.categoryType == this.categoryType &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -728,6 +798,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
   final Value<String> emoji;
   final Value<String> color;
   final Value<bool> isDefault;
+  final Value<String> categoryType;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   const CategoriesCompanion({
@@ -736,6 +807,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     this.emoji = const Value.absent(),
     this.color = const Value.absent(),
     this.isDefault = const Value.absent(),
+    this.categoryType = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
@@ -745,6 +817,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     this.emoji = const Value.absent(),
     this.color = const Value.absent(),
     this.isDefault = const Value.absent(),
+    this.categoryType = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   }) : name = Value(name);
@@ -754,6 +827,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     Expression<String>? emoji,
     Expression<String>? color,
     Expression<bool>? isDefault,
+    Expression<String>? categoryType,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
   }) {
@@ -763,6 +837,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       if (emoji != null) 'emoji': emoji,
       if (color != null) 'color': color,
       if (isDefault != null) 'is_default': isDefault,
+      if (categoryType != null) 'category_type': categoryType,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
     });
@@ -774,6 +849,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       Value<String>? emoji,
       Value<String>? color,
       Value<bool>? isDefault,
+      Value<String>? categoryType,
       Value<DateTime>? createdAt,
       Value<DateTime>? updatedAt}) {
     return CategoriesCompanion(
@@ -782,6 +858,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       emoji: emoji ?? this.emoji,
       color: color ?? this.color,
       isDefault: isDefault ?? this.isDefault,
+      categoryType: categoryType ?? this.categoryType,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -805,6 +882,9 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     if (isDefault.present) {
       map['is_default'] = Variable<bool>(isDefault.value);
     }
+    if (categoryType.present) {
+      map['category_type'] = Variable<String>(categoryType.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -822,6 +902,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
           ..write('emoji: $emoji, ')
           ..write('color: $color, ')
           ..write('isDefault: $isDefault, ')
+          ..write('categoryType: $categoryType, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -4138,7 +4219,7 @@ class ExpenseFtsTableCompanion extends UpdateCompanion<ExpenseFts> {
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
-  late final $ExpensesTable expenses = $ExpensesTable(this);
+  late final $RecordsTable records = $RecordsTable(this);
   late final $CategoriesTable categories = $CategoriesTable(this);
   late final $PendingRecurringTable pendingRecurring =
       $PendingRecurringTable(this);
@@ -4151,22 +4232,12 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $RecurringTransactionsTable(this);
   late final $ExpenseFtsTableTable expenseFtsTable =
       $ExpenseFtsTableTable(this);
-  late final ExpenseDao expenseDao = ExpenseDao(this as AppDatabase);
-  late final CategoryDao categoryDao = CategoryDao(this as AppDatabase);
-  late final RecurringDao recurringDao = RecurringDao(this as AppDatabase);
-  late final BudgetDao budgetDao = BudgetDao(this as AppDatabase);
-  late final PendingRecurringDao pendingRecurringDao =
-      PendingRecurringDao(this as AppDatabase);
-  late final ParsingRuleDao parsingRuleDao =
-      ParsingRuleDao(this as AppDatabase);
-  late final MessageTemplateDao messageTemplateDao =
-      MessageTemplateDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
-        expenses,
+        records,
         categories,
         pendingRecurring,
         parsingRules,
@@ -4178,7 +4249,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       ];
 }
 
-typedef $$ExpensesTableCreateCompanionBuilder = ExpensesCompanion Function({
+typedef $$RecordsTableCreateCompanionBuilder = RecordsCompanion Function({
   Value<int> id,
   required double amount,
   required String description,
@@ -4186,10 +4257,11 @@ typedef $$ExpensesTableCreateCompanionBuilder = ExpensesCompanion Function({
   Value<int?> categoryId,
   Value<String> source,
   Value<String?> sourceId,
+  required String recordType,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
 });
-typedef $$ExpensesTableUpdateCompanionBuilder = ExpensesCompanion Function({
+typedef $$RecordsTableUpdateCompanionBuilder = RecordsCompanion Function({
   Value<int> id,
   Value<double> amount,
   Value<String> description,
@@ -4197,26 +4269,27 @@ typedef $$ExpensesTableUpdateCompanionBuilder = ExpensesCompanion Function({
   Value<int?> categoryId,
   Value<String> source,
   Value<String?> sourceId,
+  Value<String> recordType,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
 });
 
-class $$ExpensesTableTableManager extends RootTableManager<
+class $$RecordsTableTableManager extends RootTableManager<
     _$AppDatabase,
-    $ExpensesTable,
-    Expense,
-    $$ExpensesTableFilterComposer,
-    $$ExpensesTableOrderingComposer,
-    $$ExpensesTableCreateCompanionBuilder,
-    $$ExpensesTableUpdateCompanionBuilder> {
-  $$ExpensesTableTableManager(_$AppDatabase db, $ExpensesTable table)
+    $RecordsTable,
+    Record,
+    $$RecordsTableFilterComposer,
+    $$RecordsTableOrderingComposer,
+    $$RecordsTableCreateCompanionBuilder,
+    $$RecordsTableUpdateCompanionBuilder> {
+  $$RecordsTableTableManager(_$AppDatabase db, $RecordsTable table)
       : super(TableManagerState(
           db: db,
           table: table,
           filteringComposer:
-              $$ExpensesTableFilterComposer(ComposerState(db, table)),
+              $$RecordsTableFilterComposer(ComposerState(db, table)),
           orderingComposer:
-              $$ExpensesTableOrderingComposer(ComposerState(db, table)),
+              $$RecordsTableOrderingComposer(ComposerState(db, table)),
           updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<double> amount = const Value.absent(),
@@ -4225,10 +4298,11 @@ class $$ExpensesTableTableManager extends RootTableManager<
             Value<int?> categoryId = const Value.absent(),
             Value<String> source = const Value.absent(),
             Value<String?> sourceId = const Value.absent(),
+            Value<String> recordType = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
           }) =>
-              ExpensesCompanion(
+              RecordsCompanion(
             id: id,
             amount: amount,
             description: description,
@@ -4236,6 +4310,7 @@ class $$ExpensesTableTableManager extends RootTableManager<
             categoryId: categoryId,
             source: source,
             sourceId: sourceId,
+            recordType: recordType,
             createdAt: createdAt,
             updatedAt: updatedAt,
           ),
@@ -4247,10 +4322,11 @@ class $$ExpensesTableTableManager extends RootTableManager<
             Value<int?> categoryId = const Value.absent(),
             Value<String> source = const Value.absent(),
             Value<String?> sourceId = const Value.absent(),
+            required String recordType,
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
           }) =>
-              ExpensesCompanion.insert(
+              RecordsCompanion.insert(
             id: id,
             amount: amount,
             description: description,
@@ -4258,15 +4334,16 @@ class $$ExpensesTableTableManager extends RootTableManager<
             categoryId: categoryId,
             source: source,
             sourceId: sourceId,
+            recordType: recordType,
             createdAt: createdAt,
             updatedAt: updatedAt,
           ),
         ));
 }
 
-class $$ExpensesTableFilterComposer
-    extends FilterComposer<_$AppDatabase, $ExpensesTable> {
-  $$ExpensesTableFilterComposer(super.$state);
+class $$RecordsTableFilterComposer
+    extends FilterComposer<_$AppDatabase, $RecordsTable> {
+  $$RecordsTableFilterComposer(super.$state);
   ColumnFilters<int> get id => $state.composableBuilder(
       column: $state.table.id,
       builder: (column, joinBuilders) =>
@@ -4302,6 +4379,11 @@ class $$ExpensesTableFilterComposer
       builder: (column, joinBuilders) =>
           ColumnFilters(column, joinBuilders: joinBuilders));
 
+  ColumnFilters<String> get recordType => $state.composableBuilder(
+      column: $state.table.recordType,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
   ColumnFilters<DateTime> get createdAt => $state.composableBuilder(
       column: $state.table.createdAt,
       builder: (column, joinBuilders) =>
@@ -4313,9 +4395,9 @@ class $$ExpensesTableFilterComposer
           ColumnFilters(column, joinBuilders: joinBuilders));
 }
 
-class $$ExpensesTableOrderingComposer
-    extends OrderingComposer<_$AppDatabase, $ExpensesTable> {
-  $$ExpensesTableOrderingComposer(super.$state);
+class $$RecordsTableOrderingComposer
+    extends OrderingComposer<_$AppDatabase, $RecordsTable> {
+  $$RecordsTableOrderingComposer(super.$state);
   ColumnOrderings<int> get id => $state.composableBuilder(
       column: $state.table.id,
       builder: (column, joinBuilders) =>
@@ -4351,6 +4433,11 @@ class $$ExpensesTableOrderingComposer
       builder: (column, joinBuilders) =>
           ColumnOrderings(column, joinBuilders: joinBuilders));
 
+  ColumnOrderings<String> get recordType => $state.composableBuilder(
+      column: $state.table.recordType,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
   ColumnOrderings<DateTime> get createdAt => $state.composableBuilder(
       column: $state.table.createdAt,
       builder: (column, joinBuilders) =>
@@ -4368,6 +4455,7 @@ typedef $$CategoriesTableCreateCompanionBuilder = CategoriesCompanion Function({
   Value<String> emoji,
   Value<String> color,
   Value<bool> isDefault,
+  Value<String> categoryType,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
 });
@@ -4377,6 +4465,7 @@ typedef $$CategoriesTableUpdateCompanionBuilder = CategoriesCompanion Function({
   Value<String> emoji,
   Value<String> color,
   Value<bool> isDefault,
+  Value<String> categoryType,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
 });
@@ -4403,6 +4492,7 @@ class $$CategoriesTableTableManager extends RootTableManager<
             Value<String> emoji = const Value.absent(),
             Value<String> color = const Value.absent(),
             Value<bool> isDefault = const Value.absent(),
+            Value<String> categoryType = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
           }) =>
@@ -4412,6 +4502,7 @@ class $$CategoriesTableTableManager extends RootTableManager<
             emoji: emoji,
             color: color,
             isDefault: isDefault,
+            categoryType: categoryType,
             createdAt: createdAt,
             updatedAt: updatedAt,
           ),
@@ -4421,6 +4512,7 @@ class $$CategoriesTableTableManager extends RootTableManager<
             Value<String> emoji = const Value.absent(),
             Value<String> color = const Value.absent(),
             Value<bool> isDefault = const Value.absent(),
+            Value<String> categoryType = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
           }) =>
@@ -4430,6 +4522,7 @@ class $$CategoriesTableTableManager extends RootTableManager<
             emoji: emoji,
             color: color,
             isDefault: isDefault,
+            categoryType: categoryType,
             createdAt: createdAt,
             updatedAt: updatedAt,
           ),
@@ -4461,6 +4554,11 @@ class $$CategoriesTableFilterComposer
 
   ColumnFilters<bool> get isDefault => $state.composableBuilder(
       column: $state.table.isDefault,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get categoryType => $state.composableBuilder(
+      column: $state.table.categoryType,
       builder: (column, joinBuilders) =>
           ColumnFilters(column, joinBuilders: joinBuilders));
 
@@ -4500,6 +4598,11 @@ class $$CategoriesTableOrderingComposer
 
   ColumnOrderings<bool> get isDefault => $state.composableBuilder(
       column: $state.table.isDefault,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get categoryType => $state.composableBuilder(
+      column: $state.table.categoryType,
       builder: (column, joinBuilders) =>
           ColumnOrderings(column, joinBuilders: joinBuilders));
 
@@ -5855,8 +5958,8 @@ class $$ExpenseFtsTableTableOrderingComposer
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
-  $$ExpensesTableTableManager get expenses =>
-      $$ExpensesTableTableManager(_db, _db.expenses);
+  $$RecordsTableTableManager get records =>
+      $$RecordsTableTableManager(_db, _db.records);
   $$CategoriesTableTableManager get categories =>
       $$CategoriesTableTableManager(_db, _db.categories);
   $$PendingRecurringTableTableManager get pendingRecurring =>

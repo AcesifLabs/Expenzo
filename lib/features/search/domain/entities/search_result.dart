@@ -1,12 +1,12 @@
 import 'package:equatable/equatable.dart';
-import '../../../expenses/domain/entities/expense.dart';
+import '../../../records/domain/entities/record.dart';
 
 class SearchResult extends Equatable {
-  final Expense expense;
+  final Record record;
   final double? relevanceScore;
 
-  const SearchResult({required this.expense, this.relevanceScore});
+  const SearchResult({required this.record, this.relevanceScore});
 
   @override
-  List<Object?> get props => [expense, relevanceScore];
+  List<Object?> get props => [record, relevanceScore];
 }

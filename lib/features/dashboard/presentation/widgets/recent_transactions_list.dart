@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../../expenses/domain/entities/expense.dart';
+import '../../../records/domain/entities/record.dart';
 import "package:expense_tracker/core/constants/source_types.dart";
 
 class RecentTransactionsList extends StatelessWidget {
-  final List<Expense> transactions;
+  final List<Record> transactions;
   final String currencySymbol;
   final VoidCallback? onViewAll;
 
@@ -80,8 +80,6 @@ class RecentTransactionsList extends StatelessWidget {
               ],
             ),
           ),
-          // Use ListView.builder with shrinkWrap inside a Card context
-          // (acceptable here since transactions are limited to "recent" count)
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -89,7 +87,7 @@ class RecentTransactionsList extends StatelessWidget {
             separatorBuilder: (_, _) => const Divider(height: 1),
             itemBuilder: (context, index) {
               return _TransactionTile(
-                expense: transactions[index],
+                record: transactions[index],
                 currencyFormat: currencyFmt,
                 dateFormat: _dateFormat,
               );
@@ -101,15 +99,13 @@ class RecentTransactionsList extends StatelessWidget {
   }
 }
 
-/// Extracted private widget with pre-built formatters passed in,
-/// avoiding repeated allocation per tile.
 class _TransactionTile extends StatelessWidget {
-  final Expense expense;
+  final Record record;
   final NumberFormat currencyFormat;
   final DateFormat dateFormat;
 
   const _TransactionTile({
-    required this.expense,
+    required this.record,
     required this.currencyFormat,
     required this.dateFormat,
   });
@@ -118,9 +114,9 @@ class _TransactionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final sourceColor =
-        RecentTransactionsList._sourceColors[expense.source] ?? Colors.blue;
+        RecentTransactionsList._sourceColors[record.source] ?? Colors.blue;
     final sourceIcon =
-        RecentTransactionsList._sourceIcons[expense.source] ?? Icons.edit;
+        RecentTransactionsList._sourceIcons[record.source] ?? Icons.edit;
 
     return ListTile(
       leading: CircleAvatar(
@@ -128,19 +124,19 @@ class _TransactionTile extends StatelessWidget {
         child: Icon(sourceIcon, size: 20, color: sourceColor),
       ),
       title: Text(
-        expense.description,
+        record.description,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
       subtitle: Text(
-        dateFormat.format(expense.date),
+        dateFormat.format(record.date),
         style: theme.textTheme.bodySmall,
       ),
       trailing: Text(
-        currencyFormat.format(expense.amount.abs()),
+        currencyFormat.format(record.amount.abs()),
         style: theme.textTheme.bodyMedium?.copyWith(
           fontWeight: FontWeight.bold,
-          color: expense.amount < 0 ? Colors.red : null,
+          color: record.amount < 0 ? Colors.red : Colors.green,
         ),
       ),
     );

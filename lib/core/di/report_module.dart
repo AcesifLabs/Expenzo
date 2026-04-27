@@ -1,6 +1,5 @@
 import 'package:get_it/get_it.dart';
-import 'package:expense_tracker/core/database/app_database.dart';
-import 'package:expense_tracker/core/database/daos/expense_dao.dart';
+import 'package:expense_tracker/core/database/daos/record_dao.dart';
 import 'package:expense_tracker/core/database/daos/category_dao.dart';
 import 'package:expense_tracker/features/reports/data/repositories/reports_repository_impl.dart';
 import 'package:expense_tracker/features/reports/domain/repositories/reports_repository.dart';
@@ -12,7 +11,7 @@ import 'package:expense_tracker/features/reports/presentation/bloc/reports_bloc.
 void initReportModule(GetIt getIt) {
   getIt.registerLazySingleton<ReportsRepository>(
     () => ReportsRepositoryImpl(
-      expenseDao: getIt<ExpenseDao>(),
+      recordDao: getIt<RecordDao>(),
       categoryDao: getIt<CategoryDao>(),
     ),
   );

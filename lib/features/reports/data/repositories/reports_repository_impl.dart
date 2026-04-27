@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:drift/drift.dart';
 import 'package:expense_tracker/core/database/app_database.dart';
-import 'package:expense_tracker/core/database/daos/expense_dao.dart';
+import 'package:expense_tracker/core/database/daos/record_dao.dart';
 import 'package:expense_tracker/core/database/daos/category_dao.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import '../../domain/entities/date_amount.dart';
@@ -10,10 +10,10 @@ import '../../domain/entities/spending_insights.dart';
 import '../../domain/repositories/reports_repository.dart';
 
 class ReportsRepositoryImpl implements ReportsRepository {
-  final ExpenseDao expenseDao;
+  final RecordDao recordDao;
   final CategoryDao categoryDao;
 
-  ReportsRepositoryImpl({required this.expenseDao, required this.categoryDao});
+  ReportsRepositoryImpl({required this.recordDao, required this.categoryDao});
 
   @override
   Future<Either<Failure, List<DateAmount>>> getSpendingTrend({
@@ -22,12 +22,12 @@ class ReportsRepositoryImpl implements ReportsRepository {
     required Granularity granularity,
   }) async {
     try {
-      final results = await expenseDao.getSpendingTrend(startDate, endDate);
+      final results = await recordDao.getSpendingTrend(startDate, endDate);
 
       final Map<String, double> grouped = {};
       for (final row in results) {
-        final date = row.read(expenseDao.expenses.date)!;
-        final amount = row.read(expenseDao.expenses.amount.sum()) ?? 0.0;
+        final date = row.read(recordDao.records.date)!;
+        final amount = row.read(recordDao.records.amount.sum()) ?? 0.0;
 
         final key = _getDateKey(date, granularity);
         grouped[key] = (grouped[key] ?? 0.0) + amount.abs();
@@ -56,7 +56,7 @@ class ReportsRepositoryImpl implements ReportsRepository {
     required DateTime endDate,
   }) async {
     try {
-      final results = await expenseDao.getCategoryBreakdown(startDate, endDate);
+      final results = await recordDao.getCategoryBreakdown(startDate, endDate);
       final allCategories = await categoryDao.getAllCategories();
 
       final categoryMap = <String, Category>{};
@@ -67,9 +67,8 @@ class ReportsRepositoryImpl implements ReportsRepository {
       double totalAmount = 0;
       final List<MapEntry<String, double>> totals = [];
       for (final row in results) {
-        final catId =
-            row.read(expenseDao.expenses.categoryId)?.toString() ?? '';
-        final amount = row.read(expenseDao.expenses.amount.sum()) ?? 0.0;
+        final catId = row.read(recordDao.records.categoryId)?.toString() ?? '';
+        final amount = row.read(recordDao.records.amount.sum()) ?? 0.0;
         totalAmount += amount.abs();
         totals.add(MapEntry(catId, amount.abs()));
       }
@@ -104,15 +103,9 @@ class ReportsRepositoryImpl implements ReportsRepository {
     required DateTime endDate,
   }) async {
     try {
-      // For insights, we still need the full list to find highest day and average
-      // but we could also do this with more specific SQL queries.
-      // For now, let's keep it as is but using the DAO.
-      final expenses = await expenseDao.getExpensesByDateRange(
-        startDate,
-        endDate,
-      );
+      final records = await recordDao.getRecordsByDateRange(startDate, endDate);
 
-      if (expenses.isEmpty) {
+      if (records.isEmpty) {
         return const Right(
           SpendingInsights(
             highestDayAmount: 0,
@@ -125,12 +118,12 @@ class ReportsRepositoryImpl implements ReportsRepository {
 
       double totalSpent = 0;
       final Map<String, double> dailyTotals = {};
-      for (final expense in expenses) {
-        final amount = expense.amount.abs();
+      for (final record in records) {
+        final amount = record.amount.abs();
         totalSpent += amount;
 
         final key =
-            '${expense.date.year}-${expense.date.month}-${expense.date.day}';
+            '${record.date.year}-${record.date.month}-${record.date.day}';
         dailyTotals[key] = (dailyTotals[key] ?? 0.0) + amount;
       }
 
@@ -161,7 +154,7 @@ class ReportsRepositoryImpl implements ReportsRepository {
           highestDayDate: highestDayDate,
           highestDayAmount: highestAmount,
           avgDailySpending: avgDaily,
-          totalTransactionCount: expenses.length,
+          totalTransactionCount: records.length,
           totalSpent: totalSpent,
         ),
       );

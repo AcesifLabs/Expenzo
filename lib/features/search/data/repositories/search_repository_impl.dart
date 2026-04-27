@@ -12,11 +12,11 @@ class SearchRepositoryImpl implements SearchRepository {
   SearchRepositoryImpl({required this.localDatasource});
 
   @override
-  Future<Either<Failure, List<SearchResult>>> searchExpenses(
+  Future<Either<Failure, List<SearchResult>>> searchRecords(
     SearchFilters filters,
   ) async {
     try {
-      final results = await localDatasource.searchExpenses(filters);
+      final results = await localDatasource.searchRecords(filters);
       return Right(results);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
