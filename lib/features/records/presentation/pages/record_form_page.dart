@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_icons.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import '../../../../shared/presentation/widgets/shimmer_box.dart';

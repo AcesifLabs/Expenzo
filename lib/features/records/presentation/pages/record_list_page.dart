@@ -285,16 +285,23 @@ class _RecordListPageState extends State<RecordListPage> {
           ),
         )
         .then((_) {
+          // ignore: use_build_context_synchronously
           context.read<RecordBloc>().add(const RefreshRecords());
         });
   }
 
   void _navigateToForm(BuildContext context, Record? record) {
+    // Capture blocs before push to avoid context gaps during route animation
+    final recordBloc = context.read<RecordBloc>();
+    final categoryBloc = context.read<CategoryBloc>();
     Navigator.push(
       context,
       SlidePageRoute(
-        builder: (_) => BlocProvider.value(
-          value: context.read<RecordBloc>(),
+        builder: (_) => MultiBlocProvider(
+          providers: [
+            BlocProvider.value(value: recordBloc),
+            BlocProvider.value(value: categoryBloc),
+          ],
           child: RecordFormPage(record: record),
         ),
       ),

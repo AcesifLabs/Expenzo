@@ -28,7 +28,6 @@ class FirestoreSyncServiceImpl implements FirestoreSyncService {
   final SyncQueueService syncQueueService;
 
   final _syncStatusController = StreamController<SyncStatus>.broadcast();
-  SyncStatus _currentStatus = SyncStatus.idle;
 
   FirestoreSyncServiceImpl({
     required this.firestore,
@@ -49,7 +48,6 @@ class FirestoreSyncServiceImpl implements FirestoreSyncService {
   }
 
   void _setStatus(SyncStatus status) {
-    _currentStatus = status;
     _syncStatusController.add(status);
   }
 

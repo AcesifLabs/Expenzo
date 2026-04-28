@@ -1,6 +1,5 @@
 import 'package:intl/intl.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
-import 'package:expense_tracker/core/utils/regex_utils.dart';
 import '../entities/parsing_rule.dart';
 import '../entities/parsed_transaction.dart';
 import '../entities/parsing_types.dart';
@@ -50,10 +49,6 @@ class RuleEvaluator {
       }
       if (rule.sourceType == SourceType.email &&
           params.sourceType != AppSourceType.email) {
-        continue;
-      }
-      if (rule.sourceType == SourceType.email &&
-          params.sourceType != SourceType.email) {
         continue;
       }
 

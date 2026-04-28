@@ -4,18 +4,13 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'core/di/injection_container.dart' as di;
 import 'core/theme/app_theme.dart';
-import 'core/utils/navigation_utils.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
 import 'features/categories/presentation/bloc/category_bloc.dart';
 import 'features/categories/presentation/bloc/category_event.dart';
-import 'features/categories/presentation/pages/category_list_page.dart';
 import 'features/records/presentation/bloc/record_bloc.dart';
 import 'features/records/presentation/bloc/record_event.dart';
-import 'features/records/presentation/pages/record_list_page.dart';
-import 'features/records/presentation/pages/record_form_page.dart';
 import 'features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
-import 'features/message_templates/presentation/pages/contact_selector_page.dart';
 import 'shared/presentation/widgets/app_shell.dart';
 
 void main() {
@@ -177,11 +172,7 @@ class _SplashIconState extends State<_SplashIcon>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            PhosphorIcons.wallet(PhosphorIconsStyle.regular),
-            size: 64,
-            color: Theme.of(context).colorScheme.primary,
-          ),
+          Image.asset('assets/images/logo.png', width: 80, height: 80),
           const SizedBox(height: 16),
           Text(
             'Expenzo',

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:equatable/equatable.dart';
 import '../../domain/entities/parsing_rule.dart';
 import '../../domain/usecases/get_rules.dart';
 import '../../domain/usecases/update_rule.dart';

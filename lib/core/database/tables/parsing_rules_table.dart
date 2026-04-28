@@ -1,5 +1,4 @@
 import 'package:drift/drift.dart';
-import '../../constants/source_types.dart';
 
 class ParsingRules extends Table {
   TextColumn get id => text()();

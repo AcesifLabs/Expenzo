@@ -148,7 +148,12 @@ class _BudgetListPageContent extends StatelessWidget {
   void _navigateToCreate(BuildContext context) async {
     final result = await Navigator.push(
       context,
-      SlidePageRoute(builder: (_) => const BudgetFormPage()),
+      SlidePageRoute(
+        builder: (_) => BlocProvider.value(
+          value: context.read<BudgetBloc>(),
+          child: const BudgetFormPage(),
+        ),
+      ),
     );
     if (result == true && context.mounted) {
       context.read<BudgetBloc>().add(LoadBudgets());
@@ -158,7 +163,12 @@ class _BudgetListPageContent extends StatelessWidget {
   void _navigateToEdit(BuildContext context, Budget budget) async {
     final result = await Navigator.push(
       context,
-      SlidePageRoute(builder: (_) => BudgetFormPage(budget: budget)),
+      SlidePageRoute(
+        builder: (_) => BlocProvider.value(
+          value: context.read<BudgetBloc>(),
+          child: BudgetFormPage(budget: budget),
+        ),
+      ),
     );
     if (result == true && context.mounted) {
       context.read<BudgetBloc>().add(LoadBudgets());

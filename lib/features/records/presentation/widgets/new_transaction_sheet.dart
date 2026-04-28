@@ -145,7 +145,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet> {
               // Amount display
               ValueListenableBuilder<String>(
                 valueListenable: _amountText,
-                builder: (_, val, __) {
+                builder: (_, val, _) {
                   final displayVal = val.isEmpty ? '0' : val;
                   final sign = _type == RecordType.expense ? '-' : '+';
                   final signColor = _type == RecordType.expense
@@ -431,7 +431,7 @@ class _NumericKeypad extends StatelessWidget {
     final btnColor = color.onSurface.withAlpha(12);
     final txtColor = color.onSurface;
 
-    Widget _btn(String label, {VoidCallback? custom}) {
+    Widget btn(String label, {VoidCallback? custom}) {
       return Expanded(
         child: GestureDetector(
           onTap: custom ?? () => onDigit(label),
@@ -467,14 +467,14 @@ class _NumericKeypad extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         children: [
-          Row(children: [_btn('1'), _btn('2'), _btn('3')]),
-          Row(children: [_btn('4'), _btn('5'), _btn('6')]),
-          Row(children: [_btn('7'), _btn('8'), _btn('9')]),
+          Row(children: [btn('1'), btn('2'), btn('3')]),
+          Row(children: [btn('4'), btn('5'), btn('6')]),
+          Row(children: [btn('7'), btn('8'), btn('9')]),
           Row(
             children: [
-              _btn('.'),
-              _btn('0'),
-              _btn('back', custom: onBackspace),
+              btn('.'),
+              btn('0'),
+              btn('back', custom: onBackspace),
             ],
           ),
         ],
