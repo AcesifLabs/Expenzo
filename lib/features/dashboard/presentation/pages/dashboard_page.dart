@@ -228,10 +228,19 @@ class DashboardPage extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
     final currencyFmt = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
 
+    // Guard: GetBudgetsWithProgress is registered lazily (after 500ms delay).
+    // If the dashboard loads data before it's ready (common in release builds
+    // where SQLite is faster), `getIt` would throw and crash the entire page.
+    // Catching it gracefully keeps the rest of the dashboard visible.
+    final getBudgetsWithProgress = _tryGetBudgetsWithProgress();
+    if (getBudgetsWithProgress == null) {
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
+    }
+
     return FutureBuilder<List<BudgetProgress>>(
-      future: di.getIt<GetBudgetsWithProgress>()(limit: 5).then(
-        (result) => result.getOrElse(() => []),
-      ),
+      future: getBudgetsWithProgress(
+        limit: 5,
+      ).then((result) => result.getOrElse(() => [])),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return SliverToBoxAdapter(
@@ -436,6 +445,17 @@ class DashboardPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Tries to resolve [GetBudgetsWithProgress] from the DI container.
+  /// Returns `null` if the lazy-registered budget module hasn't been initialized yet.
+  /// This prevents a synchronous `getIt` throw from crashing the entire dashboard.
+  GetBudgetsWithProgress? _tryGetBudgetsWithProgress() {
+    try {
+      return di.getIt<GetBudgetsWithProgress>();
+    } catch (_) {
+      return null;
+    }
   }
 }
 
