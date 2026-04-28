@@ -1,5 +1,4 @@
 import 'package:drift/drift.dart';
-import '../../constants/source_types.dart';
 
 class Records extends Table {
   IntColumn get id => integer().autoIncrement()();
@@ -13,10 +12,9 @@ class Records extends Table {
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 
-  @override
-  List<TableIndex> get indexes => [
+  Set<TableIndex> get indexes => {
     const TableIndex(name: 'idx_records_date', columns: {#date}),
     const TableIndex(name: 'idx_records_category', columns: {#categoryId}),
     const TableIndex(name: 'idx_records_source_id', columns: {#sourceId}),
-  ];
+  };
 }

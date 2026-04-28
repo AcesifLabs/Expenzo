@@ -184,7 +184,7 @@ class _SettingsBody extends StatelessWidget {
           title: 'Notifications',
           trailing: Switch(
             value: settings.notificationsEnabled,
-            activeColor: const Color(0xFF34C759),
+            activeThumbColor: const Color(0xFF34C759),
             onChanged: (v) {
               context.read<SettingsBloc>().add(UpdateNotificationsEnabled(v));
             },
@@ -469,7 +469,7 @@ class _SettingTile extends StatelessWidget {
                 ],
               ),
             ),
-            if (trailing != null) trailing!,
+            ?trailing,
           ],
         ),
       ),

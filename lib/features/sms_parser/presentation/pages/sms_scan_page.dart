@@ -8,8 +8,6 @@ import '../bloc/sms_scanner_event.dart';
 import '../bloc/sms_scanner_state.dart';
 import '../widgets/parsed_transaction_card.dart';
 import '../../../parsing_rules/presentation/widgets/transaction_list_skeleton.dart';
-import 'package:expense_tracker/core/di/injection_container.dart' as di;
-import 'package:expense_tracker/features/records/domain/usecases/create_records_from_parsed_list.dart';
 
 class SmsScanPage extends StatelessWidget {
   const SmsScanPage({super.key});

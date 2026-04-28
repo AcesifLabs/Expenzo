@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/core/utils/regex_utils.dart';
-import 'confidence_badge.dart';
 
 class RegexTesterWidget extends StatefulWidget {
   final String pattern;
@@ -264,7 +263,7 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
                   const SizedBox(width: 16),
                   _buildFieldResult('Date', result.date?.toString()),
                   const Spacer(),
-                  ConfidenceBadge(confidenceScore: result.confidence),
+                  Text('${(result.confidence * 100).toInt()}% confidence'),
                 ],
               ),
             ],

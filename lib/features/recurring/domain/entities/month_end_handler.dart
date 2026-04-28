@@ -8,9 +8,8 @@ class MonthEndHandler {
   /// Handles the 31st edge case by moving to the last day of the month
   static DateTime getNextOccurrenceForMonthly({
     required DateTime current,
-    required int dayOfMonth,
+    int? dayOfMonth,
   }) {
-    // Get the next month
     int nextMonth = current.month + 1;
     int nextYear = current.year;
 
@@ -19,13 +18,11 @@ class MonthEndHandler {
       nextYear++;
     }
 
-    // Get the last day of the next month
     final lastDayOfNextMonth = getLastDayOfMonth(nextYear, nextMonth);
 
-    // If dayOfMonth exceeds the days in the next month, use the last day
-    final effectiveDay = dayOfMonth > lastDayOfNextMonth
-        ? lastDayOfNextMonth
-        : (dayOfMonth ?? current.day);
+    final effectiveDay = dayOfMonth != null
+        ? (dayOfMonth > lastDayOfNextMonth ? lastDayOfNextMonth : dayOfMonth)
+        : current.day;
 
     return DateTime(nextYear, nextMonth, effectiveDay);
   }
@@ -44,7 +41,7 @@ class MonthEndHandler {
       case RecurringFrequencyType.monthly:
         return getNextOccurrenceForMonthly(
           current: current,
-          dayOfMonth: dayOfMonth ?? current.day,
+          dayOfMonth: dayOfMonth,
         );
       case RecurringFrequencyType.yearly:
         return DateTime(current.year + 1, current.month, current.day);

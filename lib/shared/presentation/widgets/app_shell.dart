@@ -4,6 +4,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:expense_tracker/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:expense_tracker/features/records/presentation/bloc/record_bloc.dart';
 import 'package:expense_tracker/features/records/presentation/pages/record_list_page.dart';
 import 'package:expense_tracker/features/records/presentation/widgets/new_transaction_sheet.dart';
 import 'package:expense_tracker/features/budgets/presentation/pages/budget_list_page.dart';
@@ -164,8 +165,11 @@ class _AppShellState extends State<AppShell> {
         context: context,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
-        builder: (_) => BlocProvider.value(
-          value: context.read<CategoryBloc>(),
+        builder: (_) => MultiBlocProvider(
+          providers: [
+            BlocProvider.value(value: context.read<RecordBloc>()),
+            BlocProvider.value(value: context.read<CategoryBloc>()),
+          ],
           child: const NewTransactionSheet(),
         ),
       );
@@ -231,7 +235,10 @@ class _AppShellState extends State<AppShell> {
     Navigator.push(
       context,
       SlidePageRoute(
-        builder: (_) => CategoryFormPage(category: null, initialType: type),
+        builder: (_) => BlocProvider.value(
+          value: context.read<CategoryBloc>(),
+          child: CategoryFormPage(category: null, initialType: type),
+        ),
       ),
     );
   }

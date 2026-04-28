@@ -30,7 +30,6 @@ class RetroactiveScanDialog extends StatefulWidget {
 
 class _RetroactiveScanDialogState extends State<RetroactiveScanDialog> {
   bool _isScanning = true;
-  int _foundCount = 0;
 
   @override
   void initState() {
@@ -53,7 +52,6 @@ class _RetroactiveScanDialogState extends State<RetroactiveScanDialog> {
     if (mounted) {
       setState(() {
         _isScanning = false;
-        _foundCount = 0; // We tell them to go to the Scan tab to see results
       });
     }
   }

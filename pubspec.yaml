@@ -103,6 +103,10 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  # App assets
+  assets:
+    - assets/images/
+
   # Custom fonts
   fonts:
     - family: Browni
@@ -142,3 +146,12 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# ── App Icon Configuration ──
+# Run: dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/logo.png"
+  adaptive_icon_background: "#1C1C1E"
+  adaptive_icon_foreground: "assets/images/logo.png"

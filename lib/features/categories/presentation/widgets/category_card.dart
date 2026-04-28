@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:expense_tracker/core/theme/app_colors.dart';
+import 'package:expense_tracker/core/utils/color_utils.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_icons.dart';
 import '../../domain/entities/category.dart';
 
@@ -17,44 +18,33 @@ class CategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      color: _parseColor(category.color),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: onTap,
-        onLongPress: onLongPress,
-        borderRadius: BorderRadius.circular(12),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              AppIcons.getCategoryIcon(category.emoji),
-              size: 32,
+    final parsedColor = ColorUtils.fromHex(category.color);
+
+    return AppCard(
+      onTap: onTap,
+      onLongPress: onLongPress,
+      backgroundColor: parsedColor,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            AppIcons.getCategoryIcon(category.emoji),
+            size: 32,
+            color: Colors.white,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            category.name,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
               color: Colors.white,
             ),
-            const SizedBox(height: 8),
-            Text(
-              category.name,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Colors.white,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ),
     );
-  }
-
-  Color _parseColor(String colorString) {
-    try {
-      return Color(int.parse(colorString.replaceFirst('#', '0xFF')));
-    } catch (_) {
-      return AppColors.primary;
-    }
   }
 }
