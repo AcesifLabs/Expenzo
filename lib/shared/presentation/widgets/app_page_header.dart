@@ -17,7 +17,7 @@ class AppPageHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 4),
+      padding: const EdgeInsets.fromLTRB(20, 28, 20, 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
