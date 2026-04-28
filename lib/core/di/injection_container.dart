@@ -17,6 +17,7 @@ import 'parsing_module.dart';
 import 'report_module.dart';
 import 'budget_module.dart';
 import 'settings_module.dart';
+import 'dashboard_module.dart';
 
 final getIt = GetIt.instance;
 
@@ -58,6 +59,9 @@ Future<void> initCriticalDependencies() async {
   initAuthModule(getIt);
   initCategoryModule(getIt);
   initRecordModule(getIt);
+  initDashboardModule(getIt);
+  initParsingModule(getIt);
+  initReportModule(getIt);
 }
 
 /// Registers feature-level dependencies (Scan, Email, Parsing, Reports,
@@ -72,8 +76,6 @@ Future<void> initFeatureDependencies() async {
     final prefs = await SharedPreferences.getInstance();
     getIt.registerLazySingleton<SharedPreferences>(() => prefs);
 
-    initParsingModule(getIt);
-    initReportModule(getIt);
     initBudgetModule(getIt);
     initSettingsModule(getIt);
     _featureDependenciesCompleter!.complete();

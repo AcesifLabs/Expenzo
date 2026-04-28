@@ -5,14 +5,16 @@ import 'package:expense_tracker/core/constants/app_constants.dart';
 import 'package:expense_tracker/core/utils/navigation_utils.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_state.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_search_bar.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_empty_state.dart';
+import 'package:expense_tracker/shared/presentation/widgets/shimmer_box.dart';
 import '../../domain/entities/record.dart';
 import '../bloc/record_bloc.dart';
 import '../bloc/record_event.dart';
 import '../bloc/record_state.dart';
 import '../widgets/record_card.dart';
-import '../../../../shared/presentation/widgets/shimmer_box.dart';
 import 'record_form_page.dart';
-import '../../../categories/presentation/bloc/category_bloc.dart';
 import '../../../sms_parser/presentation/bloc/sms_scanner_bloc.dart';
 import '../../../sms_parser/presentation/bloc/sms_scanner_event.dart';
 import '../../../sms_parser/presentation/pages/sms_scan_page.dart';
@@ -27,6 +29,8 @@ class RecordListPage extends StatefulWidget {
 
 class _RecordListPageState extends State<RecordListPage> {
   final _scrollController = ScrollController();
+  final _searchCtrl = TextEditingController();
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -37,6 +41,7 @@ class _RecordListPageState extends State<RecordListPage> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchCtrl.dispose();
     super.dispose();
   }
 
@@ -51,6 +56,147 @@ class _RecordListPageState extends State<RecordListPage> {
     final maxScroll = _scrollController.position.maxScrollExtent;
     final currentScroll = _scrollController.offset;
     return currentScroll >= (maxScroll * 0.9);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AppScaffold(
+      title: 'Activity',
+      actions: [
+        IconButton(
+          icon: Icon(
+            PhosphorIcons.listMagnifyingGlass(PhosphorIconsStyle.light),
+          ),
+          color: Theme.of(context).colorScheme.onSurface.withAlpha(160),
+          onPressed: () => _showScanOptions(context),
+        ),
+        IconButton(
+          icon: Icon(PhosphorIcons.funnel(PhosphorIconsStyle.light)),
+          color: Theme.of(context).colorScheme.onSurface.withAlpha(160),
+          onPressed: () {},
+        ),
+      ],
+      child: Column(
+        children: [
+          AppSearchBar(
+            controller: _searchCtrl,
+            hintText: 'Search transactions...',
+            onChanged: (v) => setState(() => _searchQuery = v),
+          ),
+          Expanded(child: _buildRecordsList()),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRecordsList() {
+    return BlocBuilder<RecordBloc, RecordState>(
+      buildWhen: (previous, current) =>
+          current is RecordLoaded ||
+          current is RecordError ||
+          current is RecordLoading ||
+          current is RecordLoadingMore,
+      builder: (context, state) {
+        if (state is RecordLoading) {
+          return ShimmerList(
+            itemCount: 6,
+            itemBuilder: (context, index) => Card(
+              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+              child: ListTile(
+                leading: ShimmerBox.circle(size: 40),
+                title: ShimmerBox.textLine(width: 150),
+                subtitle: ShimmerBox.textLine(width: 100),
+              ),
+            ),
+          );
+        }
+        if (state is RecordError) {
+          return Center(child: Text(state.message));
+        }
+
+        List<Record> records = [];
+        bool hasMore = false;
+        bool isLoadingMore = false;
+
+        if (state is RecordLoaded) {
+          records = state.records;
+          hasMore = state.hasMore;
+        } else if (state is RecordLoadingMore) {
+          records = state.currentRecords;
+          hasMore = true;
+          isLoadingMore = true;
+        }
+
+        // Filter by search
+        if (_searchQuery.isNotEmpty) {
+          final q = _searchQuery.toLowerCase();
+          records = records
+              .where((r) => r.description.toLowerCase().contains(q))
+              .toList();
+        }
+
+        if (records.isEmpty) {
+          return const AppEmptyState(
+            icon: Icons.list,
+            message: 'No transactions found',
+          );
+        }
+
+        return RefreshIndicator(
+          onRefresh: () async {
+            context.read<RecordBloc>().add(const RefreshRecords());
+          },
+          child: ListView.builder(
+            controller: _scrollController,
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            itemCount: records.length + (hasMore ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index >= records.length) {
+                return _buildLoadMore(isLoadingMore);
+              }
+              final record = records[index];
+              final catState = context.read<CategoryBloc>().state;
+              String? catName;
+              String? catEmoji;
+              String? catColor;
+              if (catState is CategoryLoaded) {
+                final cat = catState.categories.where(
+                  (c) => c.id == record.categoryId,
+                );
+                if (cat.isNotEmpty) {
+                  catName = cat.first.name;
+                  catEmoji = cat.first.emoji;
+                  catColor = cat.first.color;
+                }
+              }
+              return RecordCard(
+                record: record,
+                categoryName: catName,
+                categoryEmoji: catEmoji,
+                categoryColor: catColor,
+                onTap: () => _navigateToForm(context, record),
+                onDelete: () => _handleDelete(context, record),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildLoadMore(bool isLoadingMore) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      alignment: Alignment.center,
+      child: isLoadingMore
+          ? const CircularProgressIndicator()
+          : Text(
+              'Scroll for more...',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface.withAlpha(100),
+              ),
+            ),
+    );
   }
 
   void _showScanOptions(BuildContext context) {
@@ -129,7 +275,6 @@ class _RecordListPageState extends State<RecordListPage> {
   void _startScan(BuildContext context, DateTime since) {
     final smsBloc = di.getIt<SmsScannerBloc>();
     smsBloc.add(StartScan(since: since, filterDuplicates: true));
-
     Navigator.of(context)
         .push(
           SlidePageRoute(
@@ -140,174 +285,16 @@ class _RecordListPageState extends State<RecordListPage> {
           ),
         )
         .then((_) {
-          // Refresh records list when returning
           context.read<RecordBloc>().add(const RefreshRecords());
         });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Records'),
-        actions: [
-          IconButton(
-            icon: Icon(PhosphorIcons.funnel(PhosphorIconsStyle.regular)),
-            onPressed: () {},
-          ),
-          PopupMenuButton<String>(
-            icon: Icon(PhosphorIcons.faders(PhosphorIconsStyle.regular)),
-            onSelected: (value) {
-              if (value == 'scan') {
-                _showScanOptions(context);
-              }
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'scan',
-                child: Row(
-                  children: [
-                    Icon(
-                      PhosphorIcons.listMagnifyingGlass(
-                        PhosphorIconsStyle.regular,
-                      ),
-                      size: 20,
-                    ),
-                    SizedBox(width: 8),
-                    Text('Scan previous records from SMS'),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-      body: BlocBuilder<RecordBloc, RecordState>(
-        buildWhen: (previous, current) =>
-            current is RecordLoaded ||
-            current is RecordError ||
-            current is RecordLoading ||
-            current is RecordLoadingMore,
-        builder: (context, state) {
-          if (state is RecordLoading) {
-            return ShimmerList(
-              itemCount: 6,
-              itemBuilder: (context, index) => Card(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: ListTile(
-                  leading: ShimmerBox.circle(size: 40),
-                  title: ShimmerBox.textLine(width: 150),
-                  subtitle: ShimmerBox.textLine(width: 100),
-                ),
-              ),
-            );
-          }
-          if (state is RecordError) {
-            return Center(child: Text(state.message));
-          }
-
-          List<Record> records = [];
-          bool hasMore = false;
-          bool isLoadingMore = false;
-
-          if (state is RecordLoaded) {
-            records = state.records;
-            hasMore = state.hasMore;
-          } else if (state is RecordLoadingMore) {
-            records = state.currentRecords;
-            hasMore = true;
-            isLoadingMore = true;
-          }
-
-          if (records.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    PhosphorIcons.invoice(PhosphorIconsStyle.regular),
-                    size: 64,
-                    color: Colors.grey[400],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No records yet',
-                    style: TextStyle(fontSize: 18, color: Colors.grey[600]),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Tap + to add your first record',
-                    style: TextStyle(color: Colors.grey[500]),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          return RepaintBoundary(
-            child: RefreshIndicator(
-              onRefresh: () async {
-                context.read<RecordBloc>().add(const RefreshRecords());
-              },
-              child: ListView.builder(
-                controller: _scrollController,
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                itemCount: records.length + (hasMore ? 1 : 0),
-                itemBuilder: (context, index) {
-                  if (index >= records.length) {
-                    return _buildLoadMoreIndicator(isLoadingMore);
-                  }
-                  final record = records[index];
-                  final catState = context.read<CategoryBloc>().state;
-                  String? catName;
-                  String? catEmoji;
-                  String? catColor;
-                  if (catState is CategoryLoaded) {
-                    final cat = catState.categories.where(
-                      (c) => c.id == record.categoryId,
-                    );
-                    if (cat.isNotEmpty) {
-                      catName = cat.first.name;
-                      catEmoji = cat.first.emoji;
-                      catColor = cat.first.color;
-                    }
-                  }
-                  return RecordCard(
-                    record: record,
-                    categoryName: catName,
-                    categoryEmoji: catEmoji,
-                    categoryColor: catColor,
-                    onTap: () => _navigateToForm(context, record),
-                    onDelete: () => _handleDelete(context, record),
-                  );
-                },
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildLoadMoreIndicator(bool isLoadingMore) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      alignment: Alignment.center,
-      child: isLoadingMore
-          ? const CircularProgressIndicator()
-          : const Text('Scroll for more...'),
-    );
   }
 
   void _navigateToForm(BuildContext context, Record? record) {
     Navigator.push(
       context,
       SlidePageRoute(
-        builder: (_) => MultiBlocProvider(
-          providers: [
-            BlocProvider.value(value: context.read<RecordBloc>()),
-            BlocProvider.value(value: context.read<CategoryBloc>()),
-          ],
+        builder: (_) => BlocProvider.value(
+          value: context.read<RecordBloc>(),
           child: RecordFormPage(record: record),
         ),
       ),

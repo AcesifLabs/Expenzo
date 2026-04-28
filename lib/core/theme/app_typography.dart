@@ -7,7 +7,6 @@ class AppTypography {
   // Lato for body text - Light 300 for normal, Regular 400 for emphasis
   // Using Google Fonts which automatically handles loading and caching
   static final _latoLight = GoogleFonts.lato(fontWeight: FontWeight.w300);
-  static final _latoRegular = GoogleFonts.lato(fontWeight: FontWeight.w400);
   static final _latoMedium = GoogleFonts.lato(fontWeight: FontWeight.w500);
   static final _latoBold = GoogleFonts.lato(fontWeight: FontWeight.w700);
 
