@@ -10,6 +10,7 @@ import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_summary_card.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_section_header.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_empty_state.dart';
+import 'package:expense_tracker/shared/presentation/widgets/shimmer_box.dart';
 import '../../domain/entities/date_range.dart';
 import '../../domain/entities/dashboard_summary.dart';
 import '../bloc/dashboard_bloc.dart';
@@ -31,17 +32,23 @@ class DashboardPage extends StatelessWidget {
             ? authState.user.photoUrl
             : null;
 
-        // Time-based greeting
-        final hour = DateTime.now().hour;
-        final greeting = hour < 12
-            ? 'Good morning'
-            : hour < 17
-            ? 'Good afternoon'
-            : 'Good evening';
+        // Formatted current date
+        final now = DateTime.now();
+        final day = now.day;
+        final suffix = day % 10 == 1 && day != 11
+            ? 'st'
+            : day % 10 == 2 && day != 12
+            ? 'nd'
+            : day % 10 == 3 && day != 13
+            ? 'rd'
+            : 'th';
+        final dateStr =
+            '$day$suffix ${DateFormat('MMMM').format(now)}, '
+            '${DateFormat('EEEE').format(now)}, ${now.year}';
 
         return AppScaffold.slivers(
           title: 'Welcome back, $name',
-          subtitle: greeting,
+          subtitle: dateStr,
           actions: [
             Padding(
               padding: const EdgeInsets.only(left: 8),
@@ -248,10 +255,33 @@ class DashboardPage extends StatelessWidget {
     return Container(
       height: 160,
       decoration: BoxDecoration(
-        color: const Color(0xFFE5E5EA),
+        color: Colors.transparent,
         borderRadius: BorderRadius.circular(20),
       ),
-      child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+      child: ShimmerBox(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Title
+              ShimmerBox.textLine(width: 100, height: 12),
+              const SizedBox(height: 8),
+              // Value
+              ShimmerBox.textLine(width: 160, height: 32),
+              const Spacer(),
+              // Income/Expense rows
+              Row(
+                children: [
+                  ShimmerBox.rectangle(width: 80, height: 36, borderRadius: 8),
+                  const SizedBox(width: 24),
+                  ShimmerBox.rectangle(width: 80, height: 36, borderRadius: 8),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

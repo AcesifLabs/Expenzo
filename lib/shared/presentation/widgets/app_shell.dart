@@ -101,6 +101,7 @@ class _AppShellState extends State<AppShell> {
     final rightCount = 3;
 
     return Container(
+      height: 80,
       padding: const EdgeInsets.only(top: 8, bottom: 20),
       decoration: BoxDecoration(
         color: colors.surface,
@@ -116,8 +117,12 @@ class _AppShellState extends State<AppShell> {
         children: [
           // Left side: Home, Activity, Budgets
           ...List.generate(leftCount, (i) => _navItem(i, colors)),
-          // FAB spacer — only when FAB visible
-          if (_showFab) const SizedBox(width: 56),
+          // FAB spacer — animated width for smooth transition
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            width: _showFab ? 56 : 0,
+          ),
           // Right side: Trends, Scan, Profile
           ...List.generate(rightCount, (i) => _navItem(leftCount + i, colors)),
         ],
@@ -136,19 +141,27 @@ class _AppShellState extends State<AppShell> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                _navIcon(i, fill: sel),
-                color: sel ? colors.primary : colors.onSurface.withAlpha(120),
-                size: 24,
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                transitionBuilder: (child, animation) {
+                  return ScaleTransition(scale: animation, child: child);
+                },
+                child: Icon(
+                  _navIcon(i, fill: sel),
+                  key: ValueKey('nav_icon_${i}_$sel'),
+                  color: sel ? colors.primary : colors.onSurface.withAlpha(120),
+                  size: 24,
+                ),
               ),
               const SizedBox(height: 2),
-              Text(
-                _labels[i],
+              AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 200),
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: sel ? FontWeight.w600 : FontWeight.w400,
                   color: sel ? colors.primary : colors.onSurface.withAlpha(120),
                 ),
+                child: Text(_labels[i]),
               ),
             ],
           ),
