@@ -48,8 +48,8 @@ class _RecordFormPageState extends State<RecordFormPage> {
     _recordType =
         widget.record?.recordType ?? widget.initialType ?? RecordType.expense;
 
-    // Load categories for the dropdown based on type
-    context.read<CategoryBloc>().add(LoadCategories(type: _recordType));
+    // Ensure categories are loaded — the global load might race with init
+    context.read<CategoryBloc>().add(const LoadCategories());
   }
 
   @override
@@ -127,6 +127,12 @@ class _RecordFormPageState extends State<RecordFormPage> {
                   return Text('Error: ${state.message}');
                 }
                 if (state is CategoryLoaded) {
+                  if (state.categories.isEmpty) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Text('No categories available. Create one first.'),
+                    );
+                  }
                   return DropdownButtonFormField<int>(
                     initialValue: _selectedCategoryId,
                     decoration: const InputDecoration(labelText: 'Category'),

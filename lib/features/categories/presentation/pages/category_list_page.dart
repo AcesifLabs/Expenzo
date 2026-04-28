@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:expense_tracker/core/utils/navigation_utils.dart';
 import '../../../../shared/presentation/widgets/shimmer_box.dart';
@@ -17,15 +16,7 @@ class CategoryListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Categories'),
-        actions: [
-          IconButton(
-            icon: Icon(PhosphorIcons.plus(PhosphorIconsStyle.regular)),
-            onPressed: () => _navigateToForm(context, null),
-          ),
-        ],
-      ),
+      appBar: AppBar(title: const Text('Categories')),
       body: BlocBuilder<CategoryBloc, CategoryState>(
         builder: (context, state) {
           if (state is CategoryLoading) {
