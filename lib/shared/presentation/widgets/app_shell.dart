@@ -2,19 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
+import 'package:expense_tracker/features/dashboard/presentation/bloc/dashboard_bloc.dart';
+import 'package:expense_tracker/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:expense_tracker/features/records/presentation/pages/record_list_page.dart';
+import 'package:expense_tracker/features/records/presentation/widgets/new_transaction_sheet.dart';
+import 'package:expense_tracker/features/budgets/presentation/pages/budget_list_page.dart';
+import 'package:expense_tracker/features/reports/presentation/pages/reports_page.dart';
+import 'package:expense_tracker/shared/presentation/widgets/sms_permission_gate.dart';
+import 'package:expense_tracker/features/message_templates/presentation/pages/contact_selector_page.dart';
 import 'package:expense_tracker/core/utils/navigation_utils.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:expense_tracker/features/categories/presentation/pages/category_list_page.dart';
 import 'package:expense_tracker/features/categories/presentation/pages/category_form_page.dart';
-import 'package:expense_tracker/features/records/presentation/bloc/record_bloc.dart';
-import 'package:expense_tracker/features/records/presentation/pages/record_list_page.dart';
-import 'package:expense_tracker/features/records/presentation/pages/record_form_page.dart';
-import 'package:expense_tracker/features/message_templates/presentation/pages/contact_selector_page.dart';
-import 'package:expense_tracker/features/settings/presentation/bloc/settings_bloc.dart';
-import 'package:expense_tracker/features/settings/presentation/pages/settings_page.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_action_card.dart';
 import 'lazy_indexed_stack.dart';
-import 'sms_permission_gate.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -26,21 +28,54 @@ class AppShell extends StatefulWidget {
 class _AppShellState extends State<AppShell> {
   int _currentIndex = 0;
 
-  bool get _showFab => _currentIndex == 0 || _currentIndex == 1;
+  static const _labels = [
+    'Home',
+    'Activity',
+    'Category',
+    'Trends',
+    'Scan',
+    'Budgets',
+  ];
+
+  bool get _showFab => _currentIndex <= 2; // Home, Activity, or Category
+
+  IconData _navIcon(int i, {bool fill = false}) {
+    final s = fill ? PhosphorIconsStyle.fill : PhosphorIconsStyle.light;
+    switch (i) {
+      case 0:
+        return PhosphorIcons.house(s);
+      case 1:
+        return PhosphorIcons.listDashes(s);
+      case 2:
+        return PhosphorIcons.tag(s);
+      case 3:
+        return PhosphorIcons.chartBar(s);
+      case 4:
+        return PhosphorIcons.listMagnifyingGlass(s);
+      case 5:
+        return PhosphorIcons.wallet(s);
+      default:
+        return PhosphorIcons.circle(s);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     return Scaffold(
       body: LazyIndexedStack(
         index: _currentIndex,
         children: [
+          BlocProvider(
+            create: (_) => di.getIt<DashboardBloc>(),
+            child: const DashboardPage(),
+          ),
           const RecordListPage(),
           const CategoryListPage(),
+          const ReportsPage(),
           const SmsPermissionGate(child: ContactSelectorPage()),
-          BlocProvider(
-            create: (_) => di.getIt<SettingsBloc>(),
-            child: const SettingsPage(),
-          ),
+          const BudgetListPage(),
         ],
       ),
       floatingActionButton: _showFab
@@ -48,173 +83,147 @@ class _AppShellState extends State<AppShell> {
               onPressed: () => _onFabPressed(context),
               shape: const CircleBorder(),
               child: Icon(
-                _currentIndex == 1
-                    ? PhosphorIcons.listPlus(PhosphorIconsStyle.regular)
-                    : PhosphorIcons.plus(PhosphorIconsStyle.regular),
+                _currentIndex == 2
+                    ? PhosphorIcons.listPlus(PhosphorIconsStyle.bold)
+                    : PhosphorIcons.plus(PhosphorIconsStyle.bold),
               ),
             )
           : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 8.0,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildNavItem(
-              0,
-              PhosphorIcons.invoice(PhosphorIconsStyle.regular),
-              PhosphorIcons.invoice(PhosphorIconsStyle.fill),
-              'Records',
-            ),
-            _buildNavItem(
-              1,
-              PhosphorIcons.tag(PhosphorIconsStyle.regular),
-              PhosphorIcons.tag(PhosphorIconsStyle.fill),
-              'Categories',
-            ),
-            if (_showFab) const SizedBox(width: 40), // Space for FAB
-            _buildNavItem(
-              2,
-              PhosphorIcons.listMagnifyingGlass(PhosphorIconsStyle.regular),
-              PhosphorIcons.listMagnifyingGlass(PhosphorIconsStyle.fill),
-              'Scan',
-            ),
-            _buildNavItem(
-              3,
-              PhosphorIcons.faders(PhosphorIconsStyle.regular),
-              PhosphorIcons.faders(PhosphorIconsStyle.fill),
-              'Settings',
-            ),
-          ],
-        ),
-      ),
+      bottomNavigationBar: _buildBottomNav(colors),
     );
   }
 
-  Widget _buildNavItem(
-    int index,
-    IconData icon,
-    IconData activeIcon,
-    String label,
-  ) {
-    final isSelected = _currentIndex == index;
-    final color = isSelected
-        ? Theme.of(context).colorScheme.primary
-        : Colors.grey;
+  Widget _buildBottomNav(ColorScheme colors) {
+    // Items after index 2 are rendered on the right of the FAB
+    final leftCount = 3;
+    final rightCount = 3;
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () => setState(() => _currentIndex = index),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+    return Container(
+      padding: const EdgeInsets.only(top: 8, bottom: 20),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(15),
+            blurRadius: 16,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: Row(
         children: [
-          Icon(isSelected ? activeIcon : icon, color: color),
-          const SizedBox(height: 4),
-          Text(label, style: TextStyle(color: color, fontSize: 12)),
+          // Left side: Home, Activity, Budgets
+          ...List.generate(leftCount, (i) => _navItem(i, colors)),
+          // FAB spacer — only when FAB visible
+          if (_showFab) const SizedBox(width: 56),
+          // Right side: Trends, Scan, Profile
+          ...List.generate(rightCount, (i) => _navItem(leftCount + i, colors)),
         ],
       ),
     );
   }
 
-  void _onFabPressed(BuildContext context) {
-    if (_currentIndex == 0) {
-      _showRecordTypeSelection(context);
-    } else if (_currentIndex == 1) {
-      _showCategoryTypeSelection(context);
-    }
+  Widget _navItem(int i, ColorScheme colors) {
+    final sel = _currentIndex == i;
+    return Expanded(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => setState(() => _currentIndex = i),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                _navIcon(i, fill: sel),
+                color: sel ? colors.primary : colors.onSurface.withAlpha(120),
+                size: 24,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                _labels[i],
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: sel ? FontWeight.w600 : FontWeight.w400,
+                  color: sel ? colors.primary : colors.onSurface.withAlpha(120),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
-  void _showRecordTypeSelection(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return SafeArea(
-          child: SizedBox(
-            height: MediaQuery.of(context).size.height * 0.25,
-            child: Column(
-              children: [
-                ListTile(
-                  leading: Icon(
-                    PhosphorIcons.trendUp(PhosphorIconsStyle.regular),
-                    color: Colors.green,
-                  ),
-                  title: const Text('Add Income'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _navigateToRecordForm(context, RecordType.income);
-                  },
-                ),
-                ListTile(
-                  leading: Icon(
-                    PhosphorIcons.trendDown(PhosphorIconsStyle.regular),
-                    color: Colors.red,
-                  ),
-                  title: const Text('Add Expense'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _navigateToRecordForm(context, RecordType.expense);
-                  },
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+  void _onFabPressed(BuildContext context) {
+    if (_currentIndex == 2) {
+      _showCategoryTypeSelection(context);
+    } else {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (_) => BlocProvider.value(
+          value: context.read<CategoryBloc>(),
+          child: const NewTransactionSheet(),
+        ),
+      );
+    }
   }
 
   void _showCategoryTypeSelection(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      builder: (context) {
+      builder: (ctx) {
+        final colors = Theme.of(context).colorScheme;
         return SafeArea(
-          child: SizedBox(
-            height: MediaQuery.of(context).size.height * 0.25,
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                ListTile(
-                  leading: Icon(
-                    PhosphorIcons.tag(PhosphorIconsStyle.regular),
-                    color: Colors.green,
+                Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: colors.onSurface.withAlpha(50),
+                    borderRadius: BorderRadius.circular(2),
                   ),
-                  title: const Text('Add Income Category'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _navigateToCategoryForm(context, RecordType.income);
-                  },
                 ),
-                ListTile(
-                  leading: Icon(
-                    PhosphorIcons.tag(PhosphorIconsStyle.regular),
-                    color: Colors.red,
-                  ),
-                  title: const Text('Add Expense Category'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _navigateToCategoryForm(context, RecordType.expense);
-                  },
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: AppActionCard(
+                        icon: PhosphorIcons.trendDown(PhosphorIconsStyle.fill),
+                        label: 'Expense Category',
+                        color: colors.error,
+                        onTap: () {
+                          Navigator.pop(ctx);
+                          _navigateToCategoryForm(context, RecordType.expense);
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: AppActionCard(
+                        icon: PhosphorIcons.trendUp(PhosphorIconsStyle.fill),
+                        label: 'Income Category',
+                        color: colors.primary,
+                        onTap: () {
+                          Navigator.pop(ctx);
+                          _navigateToCategoryForm(context, RecordType.income);
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
         );
       },
-    );
-  }
-
-  void _navigateToRecordForm(BuildContext context, RecordType type) {
-    Navigator.push(
-      context,
-      SlidePageRoute(
-        builder: (_) => MultiBlocProvider(
-          providers: [
-            BlocProvider.value(value: di.getIt<RecordBloc>()),
-            BlocProvider.value(value: di.getIt<CategoryBloc>()),
-          ],
-          child: RecordFormPage(record: null, initialType: type),
-        ),
-      ),
     );
   }
 
@@ -222,10 +231,7 @@ class _AppShellState extends State<AppShell> {
     Navigator.push(
       context,
       SlidePageRoute(
-        builder: (_) => BlocProvider.value(
-          value: di.getIt<CategoryBloc>(),
-          child: CategoryFormPage(category: null, initialType: type),
-        ),
+        builder: (_) => CategoryFormPage(category: null, initialType: type),
       ),
     );
   }

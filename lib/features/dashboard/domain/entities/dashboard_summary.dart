@@ -2,6 +2,8 @@ import 'package:equatable/equatable.dart';
 import '../../../records/domain/entities/record.dart';
 
 class DashboardSummary extends Equatable {
+  final double totalIncome;
+  final double totalExpense;
   final double totalSpent;
   final double previousPeriodTotal;
   final double percentChange;
@@ -9,6 +11,8 @@ class DashboardSummary extends Equatable {
   final List<Record> recentTransactions;
 
   const DashboardSummary({
+    required this.totalIncome,
+    required this.totalExpense,
     required this.totalSpent,
     required this.previousPeriodTotal,
     required this.percentChange,
@@ -16,12 +20,16 @@ class DashboardSummary extends Equatable {
     required this.recentTransactions,
   });
 
+  double get totalBalance => totalIncome - totalExpense;
+
   bool get isIncreased => percentChange > 0;
   bool get isDecreased => percentChange < 0;
   bool get hasNoChange => percentChange == 0;
 
   @override
   List<Object?> get props => [
+    totalIncome,
+    totalExpense,
     totalSpent,
     previousPeriodTotal,
     percentChange,
