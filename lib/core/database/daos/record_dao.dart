@@ -96,6 +96,66 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
         .toSet();
   }
 
+  Future<List<Record>> getRecordsByCategoryAndDateRange(
+    int categoryId,
+    DateTime start,
+    DateTime end,
+  ) {
+    return (select(records)
+          ..where(
+            (t) =>
+                t.categoryId.equals(categoryId) &
+                t.date.isBetweenValues(start, end),
+          )
+          ..orderBy([(t) => OrderingTerm.desc(t.date)]))
+        .get();
+  }
+
+  Future<double> getCategorySpending(
+    int categoryId,
+    DateTime start,
+    DateTime end,
+  ) async {
+    final items =
+        await (select(records)..where(
+              (t) =>
+                  t.categoryId.equals(categoryId) &
+                  t.date.isBetweenValues(start, end) &
+                  t.recordType.equals('OUT'),
+            ))
+            .get();
+    double total = 0;
+    for (final item in items) {
+      total += item.amount.abs();
+    }
+    return total;
+  }
+
+  Future<double> getTotalSpending(DateTime start, DateTime end) async {
+    final items =
+        await (select(records)..where(
+              (t) =>
+                  t.date.isBetweenValues(start, end) &
+                  t.recordType.equals('OUT'),
+            ))
+            .get();
+    double total = 0;
+    for (final item in items) {
+      total += item.amount.abs();
+    }
+    return total;
+  }
+
+  Future<List<Record>> getRecordsByDateRangeOnly(
+    DateTime start,
+    DateTime end,
+  ) async {
+    return (select(records)
+          ..where((t) => t.date.isBetweenValues(start, end))
+          ..orderBy([(t) => OrderingTerm.desc(t.date)]))
+        .get();
+  }
+
   Future<List<TypedResult>> getCategoryBreakdown(DateTime start, DateTime end) {
     final amountSum = records.amount.sum();
     final query = selectOnly(records)

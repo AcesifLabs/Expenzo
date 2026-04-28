@@ -1,47 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
-import '../../domain/entities/budget.dart';
+import 'package:expense_tracker/shared/presentation/widgets/budget_progress_indicator.dart';
+import 'package:expense_tracker/features/budgets/domain/usecases/get_budget_progress.dart';
 
 class BudgetProgressCard extends StatelessWidget {
-  final Budget budget;
+  final BudgetProgress progress;
+  final VoidCallback onTap;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
   const BudgetProgressCard({
     super.key,
-    required this.budget,
+    required this.progress,
+    required this.onTap,
     required this.onEdit,
     required this.onDelete,
   });
 
   @override
   Widget build(BuildContext context) {
-    final effectiveAmount =
-        budget.amount + (budget.rolloverEnabled ? budget.rolloverAmount : 0);
+    final fmt = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
 
     return AppCard(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
+      onTap: onTap,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                budget.categoryId ?? 'Overall Budget',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+              Expanded(
+                child: Text(
+                  progress.categoryId ?? 'Overall Budget',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               PopupMenuButton<String>(
                 onSelected: (value) {
-                  if (value == 'edit') {
-                    onEdit();
-                  } else if (value == 'delete') {
-                    onDelete();
-                  }
+                  if (value == 'edit') onEdit();
+                  if (value == 'delete') onDelete();
                 },
                 itemBuilder: (context) => [
                   const PopupMenuItem(value: 'edit', child: Text('Edit')),
@@ -52,26 +56,36 @@ class BudgetProgressCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            '\$${budget.amount.toStringAsFixed(2)} / ${budget.period.name}',
+            '${fmt.format(progress.spentAmount)} spent / ${fmt.format(progress.budgetAmount)} budget',
             style: TextStyle(fontSize: 14, color: Colors.grey[600]),
           ),
-          if (budget.rolloverEnabled && budget.rolloverAmount > 0) ...[
+          if (progress.rolloverAmount > 0) ...[
             const SizedBox(height: 4),
             Text(
-              'Includes \$${budget.rolloverAmount.toStringAsFixed(2)} rollover',
+              'Includes ${fmt.format(progress.rolloverAmount)} rollover',
               style: TextStyle(fontSize: 12, color: Colors.green[700]),
             ),
           ],
           const SizedBox(height: 12),
-          LinearProgressIndicator(
-            value: 0.5,
-            backgroundColor: Colors.grey[300],
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-          ),
+          BudgetProgressIndicator(percentage: progress.percentage),
           const SizedBox(height: 4),
-          Text(
-            'Effective budget: \$${effectiveAmount.toStringAsFixed(2)}',
-            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '${progress.percentage.toStringAsFixed(0)}% used',
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              ),
+              if (progress.isOverBudget)
+                Text(
+                  'OVER BUDGET',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFFFF3B30),
+                  ),
+                ),
+            ],
           ),
         ],
       ),

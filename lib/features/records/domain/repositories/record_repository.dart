@@ -26,4 +26,22 @@ abstract class RecordRepository {
     List<String> sourceIds,
   );
   Future<Either<CacheFailure, void>> addRecordsBatch(List<Record> records);
+  Future<Either<CacheFailure, List<Record>>> getRecordsByCategoryAndDateRange(
+    int categoryId,
+    DateTime start,
+    DateTime end,
+  );
+  Future<Either<CacheFailure, double>> getCategorySpending(
+    int categoryId,
+    DateTime start,
+    DateTime end,
+  );
+  Future<Either<CacheFailure, double>> getTotalSpending(
+    DateTime start,
+    DateTime end,
+  );
+  Future<Either<CacheFailure, List<Record>>> getRecordsByDateRangeOnly(
+    DateTime start,
+    DateTime end,
+  );
 }

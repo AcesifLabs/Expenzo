@@ -8,6 +8,10 @@ import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets.dar
 import 'package:expense_tracker/features/budgets/domain/usecases/create_budget.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/update_budget.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/delete_budget.dart';
+import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets_with_progress.dart';
+import 'package:expense_tracker/features/budgets/domain/usecases/get_budget_transactions.dart';
+import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
+import 'package:expense_tracker/features/categories/domain/repositories/category_repository.dart';
 import 'package:expense_tracker/features/budgets/presentation/bloc/budget_bloc.dart';
 
 void initBudgetModule(GetIt getIt) {
@@ -29,6 +33,19 @@ void initBudgetModule(GetIt getIt) {
   );
   getIt.registerLazySingleton(
     () => DeleteBudget(repository: getIt<BudgetRepository>()),
+  );
+  getIt.registerLazySingleton(
+    () => GetBudgetsWithProgress(
+      budgetRepository: getIt<BudgetRepository>(),
+      recordRepository: getIt<RecordRepository>(),
+      categoryRepository: getIt<CategoryRepository>(),
+    ),
+  );
+  getIt.registerLazySingleton(
+    () => GetBudgetTransactions(
+      budgetRepository: getIt<BudgetRepository>(),
+      recordRepository: getIt<RecordRepository>(),
+    ),
   );
   getIt.registerFactory<BudgetBloc>(
     () => BudgetBloc(

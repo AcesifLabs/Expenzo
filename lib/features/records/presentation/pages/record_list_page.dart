@@ -15,10 +15,6 @@ import '../bloc/record_event.dart';
 import '../bloc/record_state.dart';
 import '../widgets/record_card.dart';
 import 'record_form_page.dart';
-import '../../../sms_parser/presentation/bloc/sms_scanner_bloc.dart';
-import '../../../sms_parser/presentation/bloc/sms_scanner_event.dart';
-import '../../../sms_parser/presentation/pages/sms_scan_page.dart';
-import 'package:expense_tracker/core/di/injection_container.dart' as di;
 
 class RecordListPage extends StatefulWidget {
   const RecordListPage({super.key});
@@ -63,13 +59,6 @@ class _RecordListPageState extends State<RecordListPage> {
     return AppScaffold(
       title: 'Activity',
       actions: [
-        IconButton(
-          icon: Icon(
-            PhosphorIcons.listMagnifyingGlass(PhosphorIconsStyle.light),
-          ),
-          color: Theme.of(context).colorScheme.onSurface.withAlpha(160),
-          onPressed: () => _showScanOptions(context),
-        ),
         IconButton(
           icon: Icon(PhosphorIcons.funnel(PhosphorIconsStyle.light)),
           color: Theme.of(context).colorScheme.onSurface.withAlpha(160),
@@ -197,97 +186,6 @@ class _RecordListPageState extends State<RecordListPage> {
               ),
             ),
     );
-  }
-
-  void _showScanOptions(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (bottomSheetContext) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text(
-                  'Scan past SMS for records',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-              ListTile(
-                leading: Icon(
-                  PhosphorIcons.clockCounterClockwise(
-                    PhosphorIconsStyle.regular,
-                  ),
-                ),
-                title: const Text('Last 7 Days'),
-                onTap: () {
-                  Navigator.pop(bottomSheetContext);
-                  _startScan(
-                    context,
-                    DateTime.now().subtract(const Duration(days: 7)),
-                  );
-                },
-              ),
-              ListTile(
-                leading: Icon(
-                  PhosphorIcons.calendar(PhosphorIconsStyle.regular),
-                ),
-                title: const Text('Last 30 Days'),
-                onTap: () {
-                  Navigator.pop(bottomSheetContext);
-                  _startScan(
-                    context,
-                    DateTime.now().subtract(const Duration(days: 30)),
-                  );
-                },
-              ),
-              ListTile(
-                leading: Icon(
-                  PhosphorIcons.calendarDots(PhosphorIconsStyle.regular),
-                ),
-                title: const Text('Last 3 Months'),
-                onTap: () {
-                  Navigator.pop(bottomSheetContext);
-                  _startScan(
-                    context,
-                    DateTime.now().subtract(const Duration(days: 90)),
-                  );
-                },
-              ),
-              ListTile(
-                leading: Icon(
-                  PhosphorIcons.infinity(PhosphorIconsStyle.regular),
-                ),
-                title: const Text('All Time'),
-                onTap: () {
-                  Navigator.pop(bottomSheetContext);
-                  _startScan(context, DateTime(2000));
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  void _startScan(BuildContext context, DateTime since) {
-    final smsBloc = di.getIt<SmsScannerBloc>();
-    smsBloc.add(StartScan(since: since, filterDuplicates: true));
-    Navigator.of(context)
-        .push(
-          SlidePageRoute(
-            builder: (_) => BlocProvider.value(
-              value: smsBloc,
-              child: const SmsScanResultsPage(),
-            ),
-          ),
-        )
-        .then((_) {
-          // ignore: use_build_context_synchronously
-          context.read<RecordBloc>().add(const RefreshRecords());
-        });
   }
 
   void _navigateToForm(BuildContext context, Record? record) {
