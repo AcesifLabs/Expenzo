@@ -103,6 +103,71 @@ class RecordRepositoryImpl implements RecordRepository {
   }
 
   @override
+  Future<Either<CacheFailure, List<Record>>> getRecordsByCategoryAndDateRange(
+    int categoryId,
+    DateTime start,
+    DateTime end,
+  ) async {
+    try {
+      final records = await localDatasource.getRecordsByCategoryAndDateRange(
+        categoryId,
+        start,
+        end,
+      );
+      return Right(records);
+    } on CacheException catch (e) {
+      return Left(e.toFailure());
+    }
+  }
+
+  @override
+  Future<Either<CacheFailure, double>> getCategorySpending(
+    int categoryId,
+    DateTime start,
+    DateTime end,
+  ) async {
+    try {
+      final spending = await localDatasource.getCategorySpending(
+        categoryId,
+        start,
+        end,
+      );
+      return Right(spending);
+    } on CacheException catch (e) {
+      return Left(e.toFailure());
+    }
+  }
+
+  @override
+  Future<Either<CacheFailure, double>> getTotalSpending(
+    DateTime start,
+    DateTime end,
+  ) async {
+    try {
+      final spending = await localDatasource.getTotalSpending(start, end);
+      return Right(spending);
+    } on CacheException catch (e) {
+      return Left(e.toFailure());
+    }
+  }
+
+  @override
+  Future<Either<CacheFailure, List<Record>>> getRecordsByDateRangeOnly(
+    DateTime start,
+    DateTime end,
+  ) async {
+    try {
+      final records = await localDatasource.getRecordsByDateRangeOnly(
+        start,
+        end,
+      );
+      return Right(records);
+    } on CacheException catch (e) {
+      return Left(e.toFailure());
+    }
+  }
+
+  @override
   Future<Either<CacheFailure, void>> addRecordsBatch(
     List<Record> records,
   ) async {

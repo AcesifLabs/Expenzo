@@ -23,6 +23,18 @@ abstract class RecordLocalDatasource {
   Future<bool> recordExistsBySourceId(String sourceId);
   Future<Set<String>> getExistingSourceIds(List<String> sourceIds);
   Future<void> addRecordsBatch(List<Record> records);
+  Future<List<Record>> getRecordsByCategoryAndDateRange(
+    int categoryId,
+    DateTime start,
+    DateTime end,
+  );
+  Future<double> getCategorySpending(
+    int categoryId,
+    DateTime start,
+    DateTime end,
+  );
+  Future<double> getTotalSpending(DateTime start, DateTime end);
+  Future<List<Record>> getRecordsByDateRangeOnly(DateTime start, DateTime end);
 }
 
 class RecordLocalDatasourceImpl implements RecordLocalDatasource {
@@ -143,6 +155,59 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
   Future<Set<String>> getExistingSourceIds(List<String> sourceIds) async {
     try {
       return await recordDao.getExistingSourceIds(sourceIds);
+    } catch (e) {
+      throw CacheException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<List<Record>> getRecordsByCategoryAndDateRange(
+    int categoryId,
+    DateTime start,
+    DateTime end,
+  ) async {
+    try {
+      final records = await recordDao.getRecordsByCategoryAndDateRange(
+        categoryId,
+        start,
+        end,
+      );
+      return records.map(_mapToEntity).toList();
+    } catch (e) {
+      throw CacheException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<double> getCategorySpending(
+    int categoryId,
+    DateTime start,
+    DateTime end,
+  ) async {
+    try {
+      return await recordDao.getCategorySpending(categoryId, start, end);
+    } catch (e) {
+      throw CacheException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<double> getTotalSpending(DateTime start, DateTime end) async {
+    try {
+      return await recordDao.getTotalSpending(start, end);
+    } catch (e) {
+      throw CacheException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<List<Record>> getRecordsByDateRangeOnly(
+    DateTime start,
+    DateTime end,
+  ) async {
+    try {
+      final records = await recordDao.getRecordsByDateRangeOnly(start, end);
+      return records.map(_mapToEntity).toList();
     } catch (e) {
       throw CacheException(message: e.toString());
     }

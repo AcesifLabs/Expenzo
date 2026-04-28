@@ -3,16 +3,21 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
+import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_state.dart';
+import 'package:expense_tracker/features/budgets/domain/usecases/get_budget_progress.dart';
+import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets_with_progress.dart';
+import 'package:expense_tracker/features/budgets/domain/usecases/get_budget_transactions.dart';
 import 'package:expense_tracker/features/records/domain/entities/record.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_summary_card.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_section_header.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_empty_state.dart';
 import 'package:expense_tracker/shared/presentation/widgets/shimmer_box.dart';
+import 'package:expense_tracker/shared/presentation/widgets/budget_progress_indicator.dart';
+import 'package:expense_tracker/shared/presentation/widgets/budget_transaction_list.dart';
 import '../../domain/entities/date_range.dart';
-import '../../domain/entities/dashboard_summary.dart';
 import '../bloc/dashboard_bloc.dart';
 import '../bloc/dashboard_event.dart';
 import '../bloc/dashboard_state.dart';
@@ -155,42 +160,7 @@ class DashboardPage extends StatelessWidget {
         ),
         // Budgets section
         const SliverToBoxAdapter(child: AppSectionHeader(title: 'Budgets')),
-        if (s.categoryBreakdown.isEmpty)
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 24),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const AppEmptyState(
-                  icon: Icons.inbox,
-                  message: 'No spending this period',
-                ),
-              ),
-            ),
-          )
-        else
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: s.categoryBreakdown
-                      .take(5)
-                      .map((cat) => _CategoryBudgetRow(cat: cat))
-                      .toList(),
-                ),
-              ),
-            ),
-          ),
+        _buildBudgetCards(context),
         // Recent Activity
         const SliverToBoxAdapter(
           child: AppSectionHeader(title: 'Recent Activity'),
@@ -221,7 +191,10 @@ class DashboardPage extends StatelessWidget {
                   color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Column(
+                clipBehavior: Clip.antiAlias,
+                height: 270,
+                child: ListView(
+                  padding: EdgeInsets.zero,
                   children: s.recentTransactions
                       .map((r) => _RecentTile(record: r, fmt: currencyFmt))
                       .toList(),
@@ -249,6 +222,186 @@ class DashboardPage extends StatelessWidget {
         ),
       ),
     ];
+  }
+
+  Widget _buildBudgetCards(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final currencyFmt = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
+
+    return FutureBuilder<List<BudgetProgress>>(
+      future: di.getIt<GetBudgetsWithProgress>()(limit: 5).then(
+        (result) => result.getOrElse(() => []),
+      ),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: _buildBudgetSkeleton(context),
+            ),
+          );
+        }
+
+        final budgets = snapshot.data ?? [];
+        if (budgets.isEmpty) {
+          return SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                decoration: BoxDecoration(
+                  color: colors.surface,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const AppEmptyState(
+                  icon: Icons.inbox,
+                  message: 'No budgets set',
+                ),
+              ),
+            ),
+          );
+        }
+
+        return SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Container(
+              decoration: BoxDecoration(
+                color: colors.surface,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: budgets.map((bp) {
+                  return _BudgetProgressCard(
+                    progress: bp,
+                    currencyFmt: currencyFmt,
+                    onTap: () => _showBudgetTransactions(context, bp),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildBudgetSkeleton(BuildContext context) {
+    final surfaceColor = Theme.of(context).colorScheme.surface;
+    return Container(
+      height: 180,
+      decoration: BoxDecoration(
+        color: surfaceColor,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: ShimmerBox(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ShimmerBox.textLine(width: 120, height: 14),
+              const SizedBox(height: 12),
+              ShimmerBox.textLine(width: 80, height: 12),
+              const SizedBox(height: 8),
+              ShimmerBox.rectangle(width: double.infinity, height: 8),
+              const SizedBox(height: 12),
+              ShimmerBox.textLine(width: 100, height: 14),
+              const SizedBox(height: 12),
+              ShimmerBox.textLine(width: 60, height: 12),
+              const SizedBox(height: 8),
+              ShimmerBox.rectangle(width: double.infinity, height: 8),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showBudgetTransactions(BuildContext context, BudgetProgress bp) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: DraggableScrollableSheet(
+            initialChildSize: 0.6,
+            minChildSize: 0.3,
+            maxChildSize: 0.9,
+            expand: false,
+            builder: (context, scrollController) {
+              return Column(
+                children: [
+                  // Drag handle
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12, bottom: 8),
+                    child: Container(
+                      width: 36,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withAlpha(50),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  // Title
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
+                      children: [
+                        Text(
+                          'Budget Transactions',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          '\$${bp.budgetAmount.toStringAsFixed(0)}',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Divider(height: 24),
+                  // Transaction list
+                  Expanded(
+                    child: FutureBuilder<List<Record>>(
+                      future: di
+                          .getIt<GetBudgetTransactions>()(bp.budgetId)
+                          .then((r) => r.getOrElse(() => [])),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+                        return BudgetTransactionList(
+                          records: snapshot.data ?? [],
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildBalanceSkeleton() {
@@ -337,55 +490,75 @@ class _BalanceRow extends StatelessWidget {
 }
 
 // ──────────────────────────────────
-// Category Budget Row
+// Budget Progress Card (Home View)
 // ──────────────────────────────────
-class _CategoryBudgetRow extends StatelessWidget {
-  final CategoryAmount cat;
-  const _CategoryBudgetRow({required this.cat});
+class _BudgetProgressCard extends StatelessWidget {
+  final BudgetProgress progress;
+  final NumberFormat currencyFmt;
+  final VoidCallback onTap;
+
+  const _BudgetProgressCard({
+    required this.progress,
+    required this.currencyFmt,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final fmt = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
+    final spent = currencyFmt.format(progress.spentAmount);
+    final budget = currencyFmt.format(progress.budgetAmount);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        children: [
-          Row(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(cat.emoji, style: const TextStyle(fontSize: 16)),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  cat.categoryName,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: colors.onSurface,
+              // Header row
+              Row(
+                children: [
+                  // Budget name (from categoryId for now)
+                  Expanded(
+                    child: Text(
+                      progress.categoryId ?? 'Overall Budget',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: colors.onSurface,
+                      ),
+                    ),
                   ),
-                ),
+                  // Spent vs Budget
+                  Text(
+                    '$spent / $budget',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: colors.onSurface.withAlpha(180),
+                    ),
+                  ),
+                ],
               ),
+              const SizedBox(height: 8),
+              // Progress bar
+              BudgetProgressIndicator(percentage: progress.percentage),
+              const SizedBox(height: 4),
+              // Percentage text
               Text(
-                fmt.format(cat.amount),
+                '${progress.percentage.toStringAsFixed(0)}% used',
                 style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: colors.onSurface,
+                  fontSize: 11,
+                  color: colors.onSurface.withAlpha(120),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 6),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: LinearProgressIndicator(
-              value: cat.percentage / 100,
-              backgroundColor: colors.primary.withAlpha(20),
-              color: colors.primary,
-              minHeight: 8,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

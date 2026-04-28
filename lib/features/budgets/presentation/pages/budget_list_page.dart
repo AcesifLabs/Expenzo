@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'package:expense_tracker/core/di/injection_container.dart';
+import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/core/utils/navigation_utils.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_summary_card.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_empty_state.dart';
+import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets_with_progress.dart';
+import 'package:expense_tracker/features/budgets/domain/usecases/get_budget_progress.dart';
 import '../../domain/entities/budget.dart';
 import '../bloc/budget_bloc.dart';
 import '../bloc/budget_event.dart';
@@ -14,6 +16,7 @@ import '../bloc/budget_state.dart';
 import '../widgets/budget_progress_card.dart';
 import '../widgets/skeletons/budget_list_skeleton.dart';
 import 'budget_form_page.dart';
+import 'budget_details_page.dart';
 
 class BudgetListPage extends StatelessWidget {
   const BudgetListPage({super.key});
@@ -21,18 +24,47 @@ class BudgetListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => getIt<BudgetBloc>()..add(LoadBudgets()),
+      create: (context) => di.getIt<BudgetBloc>()..add(LoadBudgets()),
       child: const _BudgetListPageContent(),
     );
   }
 }
 
-class _BudgetListPageContent extends StatelessWidget {
+class _BudgetListPageContent extends StatefulWidget {
   const _BudgetListPageContent();
 
   @override
+  State<_BudgetListPageContent> createState() => _BudgetListPageContentState();
+}
+
+class _BudgetListPageContentState extends State<_BudgetListPageContent> {
+  Map<String, BudgetProgress> _progressMap = {};
+  bool _loadingProgress = false;
+
+  void _loadProgress(List<Budget> budgets) {
+    if (budgets.isEmpty || _loadingProgress) return;
+    _loadingProgress = true;
+    di.getIt<GetBudgetsWithProgress>()(limit: budgets.length).then((result) {
+      if (!mounted) return;
+      final progressList = result.getOrElse(() => <BudgetProgress>[]);
+      setState(() {
+        _progressMap = {for (final p in progressList) p.budgetId: p};
+        _loadingProgress = false;
+      });
+    });
+  }
+
+  BudgetProgress? _findProgress(Budget budget) {
+    if (budget.id != null && _progressMap.containsKey(budget.id)) {
+      return _progressMap[budget.id];
+    }
+    // Fallback: compute from progress list matching by category
+    return null;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final fmt = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+    final fmt = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
 
     return BlocConsumer<BudgetBloc, BudgetState>(
       listener: (context, state) {
@@ -44,6 +76,9 @@ class _BudgetListPageContent extends StatelessWidget {
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(SnackBar(content: Text(state.message)));
+        }
+        if (state is BudgetLoaded && _progressMap.isEmpty) {
+          _loadProgress(state.budgets);
         }
       },
       builder: (context, state) {
@@ -85,8 +120,34 @@ class _BudgetListPageContent extends StatelessWidget {
                   sliver: SliverList(
                     delegate: SliverChildBuilderDelegate((context, index) {
                       final budget = state.budgets[index];
+                      final progress = _findProgress(budget);
+                      // Fallback: create a basic progress if not loaded yet
+                      final displayProgress =
+                          progress ??
+                          BudgetProgress(
+                            budgetId: budget.id ?? '',
+                            budgetAmount: budget.amount,
+                            effectiveAmount:
+                                budget.amount +
+                                (budget.rolloverEnabled
+                                    ? budget.rolloverAmount
+                                    : 0),
+                            spentAmount: 0,
+                            rolloverAmount: budget.rolloverAmount,
+                            percentage: 0,
+                            isOverBudget: false,
+                            categoryId: budget.categoryId,
+                            periodRange: DateTimeRange(
+                              start: budget.startDate,
+                              end: budget.startDate,
+                            ),
+                            period: budget.period,
+                          );
+
                       return BudgetProgressCard(
-                        budget: budget,
+                        progress: displayProgress,
+                        onTap: () =>
+                            _navigateToDetails(context, displayProgress),
                         onEdit: () => _navigateToEdit(context, budget),
                         onDelete: () => _confirmDelete(context, budget),
                       );
@@ -111,6 +172,13 @@ class _BudgetListPageContent extends StatelessWidget {
       0,
       (sum, b) => sum + b.amount,
     );
+    final totalSpent = _progressMap.values.fold<double>(
+      0,
+      (sum, p) => sum + p.spentAmount,
+    );
+    final overallPercentage = totalBudget > 0
+        ? (totalSpent / totalBudget) * 100
+        : 0.0;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
@@ -124,9 +192,13 @@ class _BudgetListPageContent extends StatelessWidget {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(6),
                     child: LinearProgressIndicator(
-                      value: 0.35,
+                      value: (overallPercentage / 100).clamp(0.0, 1.0),
                       backgroundColor: Colors.white.withAlpha(25),
-                      color: const Color(0xFF34C759),
+                      color: overallPercentage > 100
+                          ? const Color(0xFFFF3B30)
+                          : overallPercentage >= 80
+                          ? const Color(0xFFFF9F0A)
+                          : const Color(0xFF34C759),
                       minHeight: 8,
                     ),
                   ),
@@ -142,6 +214,13 @@ class _BudgetListPageContent extends StatelessWidget {
               )
             : null,
       ),
+    );
+  }
+
+  void _navigateToDetails(BuildContext context, BudgetProgress progress) {
+    Navigator.push(
+      context,
+      SlidePageRoute(builder: (_) => BudgetDetailsPage(progress: progress)),
     );
   }
 
