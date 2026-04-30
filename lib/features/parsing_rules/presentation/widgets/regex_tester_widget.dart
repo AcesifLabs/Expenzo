@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:expense_tracker/core/utils/regex_utils.dart';
 
 class RegexTesterWidget extends StatefulWidget {
@@ -179,7 +180,7 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              const Icon(Icons.warning, color: Colors.orange),
+              Icon(PhosphorIcons.warning(PhosphorIconsStyle.regular), color: Colors.orange),
               const SizedBox(width: 8),
               const Expanded(
                 child: Text(
@@ -201,9 +202,9 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Row(
+              Row(
                 children: [
-                  Icon(Icons.error, color: Colors.red),
+                  Icon(PhosphorIcons.warningCircle(PhosphorIconsStyle.regular), color: Colors.red),
                   SizedBox(width: 8),
                   Text(
                     'Error',
@@ -231,7 +232,7 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
             Row(
               children: [
                 Icon(
-                  result.matchFound ? Icons.check_circle : Icons.cancel,
+                  result.matchFound ? PhosphorIcons.checkCircle(PhosphorIconsStyle.fill) : PhosphorIcons.xCircle(PhosphorIconsStyle.fill),
                   color: result.matchFound ? Colors.green : Colors.grey,
                 ),
                 const SizedBox(width: 8),

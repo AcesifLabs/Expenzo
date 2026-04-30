@@ -1,3 +1,4 @@
+import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_icons.dart';
@@ -54,34 +55,40 @@ class _CategoryPieChartState extends State<CategoryPieChart> {
   }
 
   List<PieChartSectionData> _buildSections() {
-    final colors = _getColors();
+    final colors = AppColors.categoryColors;
 
     return widget.data.asMap().entries.map((entry) {
       final index = entry.key;
       final item = entry.value;
       final isTouched = index == touchedIndex;
-      final radius = isTouched ? 60.0 : 50.0;
+      final radius = isTouched ? 70.0 : 60.0;
 
       return PieChartSectionData(
         color: colors[index % colors.length],
         value: item.amount,
-        title: '${item.percentage.toStringAsFixed(1)}%',
+        title: isTouched ? '${item.percentage.toStringAsFixed(1)}%' : '',
         radius: radius,
-        titleStyle: TextStyle(
-          fontSize: isTouched ? 14 : 12,
+        titleStyle: const TextStyle(
+          fontSize: 14,
           fontWeight: FontWeight.bold,
-          color: Colors.white,
+          color: AppColors.backgroundDark,
         ),
+        badgeWidget: !isTouched ? _Badge(
+          AppIcons.getCategoryIcon(item.emoji),
+          size: 32,
+          borderColor: colors[index % colors.length],
+        ) : null,
+        badgePositionPercentageOffset: 0.98,
       );
     }).toList();
   }
 
   Widget _buildLegend() {
-    final colors = _getColors();
+    final colors = AppColors.categoryColors;
 
     return Wrap(
       spacing: 16,
-      runSpacing: 8,
+      runSpacing: 12,
       alignment: WrapAlignment.center,
       children: widget.data.asMap().entries.map((entry) {
         final index = entry.key;
@@ -91,35 +98,58 @@ class _CategoryPieChartState extends State<CategoryPieChart> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 12,
-              height: 12,
+              width: 10,
+              height: 10,
               decoration: BoxDecoration(
                 color: colors[index % colors.length],
-                shape: BoxShape.circle,
+                borderRadius: BorderRadius.circular(3),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              item.categoryName,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: Theme.of(context).colorScheme.onSurface.withAlpha(200),
               ),
             ),
             const SizedBox(width: 4),
-            Icon(AppIcons.getCategoryIcon(item.emoji), size: 12),
-            const SizedBox(width: 4),
-            Text(item.categoryName, style: const TextStyle(fontSize: 12)),
+            Text(
+              '(${item.percentage.toStringAsFixed(0)}%)',
+              style: TextStyle(
+                fontSize: 10,
+                color: Theme.of(context).colorScheme.onSurface.withAlpha(120),
+              ),
+            ),
           ],
         );
       }).toList(),
     );
   }
+}
 
-  List<Color> _getColors() {
-    return const [
-      Color(0xFF2196F3), // Blue
-      Color(0xFFFF5722), // Deep Orange
-      Color(0xFF4CAF50), // Green
-      Color(0xFFFF9800), // Orange
-      Color(0xFF9C27B0), // Purple
-      Color(0xFF00BCD4), // Cyan
-      Color(0xFFE91E63), // Pink
-      Color(0xFF795548), // Brown
-      Color(0xFF607D8B), // Blue Grey
-      Color(0xFF009688), // Teal
-    ];
+class _Badge extends StatelessWidget {
+  final IconData icon;
+  final double size;
+  final Color borderColor;
+
+  const _Badge(this.icon, {required this.size, required this.borderColor});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: AppColors.surfaceDark,
+        shape: BoxShape.circle,
+        border: Border.all(color: borderColor, width: 2),
+      ),
+      child: Center(
+        child: Icon(icon, size: size * 0.5, color: borderColor),
+      ),
+    );
   }
 }

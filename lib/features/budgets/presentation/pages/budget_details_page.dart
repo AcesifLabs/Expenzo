@@ -1,3 +1,5 @@
+import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -19,68 +21,64 @@ class BudgetDetailsPage extends StatelessWidget {
     final fmt = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
     final colors = Theme.of(context).colorScheme;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(progress.categoryId ?? 'Budget Details'),
-        leading: IconButton(
-          icon: Icon(PhosphorIcons.arrowLeft(PhosphorIconsStyle.light)),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: Column(
+    return AppScaffold(
+      title: progress.categoryId ?? 'Budget Details',
+      child: Column(
         children: [
           // Budget summary header
-          Container(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              children: [
-                Text(
-                  '${fmt.format(progress.spentAmount)} / ${fmt.format(progress.budgetAmount)}',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
-                    color: colors.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${progress.period.name} budget',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: colors.onSurface.withAlpha(140),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                BudgetProgressIndicator(percentage: progress.percentage),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '${progress.percentage.toStringAsFixed(0)}% used',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: colors.onSurface.withAlpha(120),
-                      ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            child: AppCard(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                children: [
+                  Text(
+                    '${fmt.format(progress.spentAmount)} / ${fmt.format(progress.budgetAmount)}',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w700,
+                      color: colors.onSurface,
                     ),
-                    if (progress.isOverBudget)
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '${progress.period.name} budget',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: colors.onSurface.withAlpha(140),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  BudgetProgressIndicator(percentage: progress.percentage),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
                       Text(
-                        'OVER BUDGET',
+                        '${progress.percentage.toStringAsFixed(0)}% used',
                         style: TextStyle(
                           fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFFFF3B30),
+                          color: colors.onSurface.withAlpha(120),
                         ),
                       ),
-                  ],
-                ),
-              ],
+                      if (progress.isOverBudget)
+                        Text(
+                          'OVER BUDGET',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: colors.error,
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
-          const Divider(height: 1),
           // Section label
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
             child: Row(
               children: [
                 Icon(

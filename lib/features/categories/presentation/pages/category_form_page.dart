@@ -85,7 +85,7 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(24),
           children: [
             TextFormField(
               controller: _nameController,
@@ -115,10 +115,10 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
                     height: 48,
                     decoration: BoxDecoration(
                       border: Border.all(
-                        color: isSelected ? AppColors.primary : Colors.grey,
+                        color: isSelected ? AppColors.primary : Theme.of(context).colorScheme.outline.withAlpha(40),
                         width: isSelected ? 2 : 1,
                       ),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: Center(
                       child: Icon(
@@ -150,7 +150,7 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
                         color: isSelected ? Colors.black : Colors.transparent,
                         width: isSelected ? 3 : 0,
                       ),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: isSelected
                         ? Icon(

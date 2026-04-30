@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_bloc.dart';
@@ -10,6 +9,8 @@ import 'package:expense_tracker/features/budgets/domain/usecases/get_budget_prog
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets_with_progress.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budget_transactions.dart';
 import 'package:expense_tracker/features/records/domain/entities/record.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_summary_card.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_section_header.dart';
@@ -37,7 +38,6 @@ class DashboardPage extends StatelessWidget {
             ? authState.user.photoUrl
             : null;
 
-        // Formatted current date
         final now = DateTime.now();
         final day = now.day;
         final suffix = day % 10 == 1 && day != 11
@@ -89,6 +89,7 @@ class DashboardPage extends StatelessWidget {
 
   List<Widget> _buildContent(BuildContext context, DashboardState state) {
     final currencyFmt = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+    final colors = Theme.of(context).colorScheme;
 
     if (state is DashboardLoading) {
       return [
@@ -142,7 +143,7 @@ class DashboardPage extends StatelessWidget {
                     icon: PhosphorIcons.trendUp(PhosphorIconsStyle.fill),
                     label: 'Income',
                     amount: s.totalIncome,
-                    color: const Color(0xFF34C759),
+                    color: colors.secondary,
                     currencyFmt: currencyFmt,
                   ),
                   const SizedBox(width: 24),
@@ -150,7 +151,7 @@ class DashboardPage extends StatelessWidget {
                     icon: PhosphorIcons.trendDown(PhosphorIconsStyle.fill),
                     label: 'Expense',
                     amount: s.totalExpense,
-                    color: const Color(0xFFFF3B30),
+                    color: colors.error,
                     currencyFmt: currencyFmt,
                   ),
                 ],
@@ -159,24 +160,22 @@ class DashboardPage extends StatelessWidget {
           ),
         ),
         // Budgets section
+        const SliverToBoxAdapter(child: SizedBox(height: 16)),
         const SliverToBoxAdapter(child: AppSectionHeader(title: 'Budgets')),
         _buildBudgetCards(context),
         // Recent Activity
+        const SliverToBoxAdapter(child: SizedBox(height: 16)),
         const SliverToBoxAdapter(
           child: AppSectionHeader(title: 'Recent Activity'),
         ),
         if (s.recentTransactions.isEmpty)
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 24),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const AppEmptyState(
-                  icon: Icons.inbox,
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: AppCard(
+                padding: const EdgeInsets.symmetric(vertical: 32),
+                child: AppEmptyState(
+                  icon: PhosphorIcons.tray(PhosphorIconsStyle.regular),
                   message: 'No transactions yet',
                 ),
               ),
@@ -185,19 +184,17 @@ class DashboardPage extends StatelessWidget {
         else
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
-                  borderRadius: BorderRadius.circular(16),
-                ),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: AppCard(
                 clipBehavior: Clip.antiAlias,
-                height: 270,
-                child: ListView(
-                  padding: EdgeInsets.zero,
-                  children: s.recentTransactions
-                      .map((r) => _RecentTile(record: r, fmt: currencyFmt))
-                      .toList(),
+                child: SizedBox(
+                  height: 190,
+                  child: ListView(
+                    padding: EdgeInsets.zero,
+                    children: s.recentTransactions
+                        .map((r) => _RecentTile(record: r, fmt: currencyFmt))
+                        .toList(),
+                  ),
                 ),
               ),
             ),
@@ -225,7 +222,6 @@ class DashboardPage extends StatelessWidget {
   }
 
   Widget _buildBudgetCards(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
     final currencyFmt = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
 
     // Guard: GetBudgetsWithProgress is registered lazily (after 500ms delay).
@@ -255,15 +251,11 @@ class DashboardPage extends StatelessWidget {
         if (budgets.isEmpty) {
           return SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: AppCard(
                 padding: const EdgeInsets.symmetric(vertical: 24),
-                decoration: BoxDecoration(
-                  color: colors.surface,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const AppEmptyState(
-                  icon: Icons.inbox,
+                child: AppEmptyState(
+                  icon: PhosphorIcons.tray(PhosphorIconsStyle.regular),
                   message: 'No budgets set',
                 ),
               ),
@@ -273,13 +265,9 @@ class DashboardPage extends StatelessWidget {
 
         return SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Container(
-              decoration: BoxDecoration(
-                color: colors.surface,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: AppCard(
+              padding: const EdgeInsets.all(24),
               child: Column(
                 children: budgets.map((bp) {
                   return _BudgetProgressCard(
@@ -597,8 +585,8 @@ class _RecentTile extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
     final isExpense = record.recordType == RecordType.expense;
     final amtColor = isExpense
-        ? const Color(0xFFFF3B30)
-        : const Color(0xFF34C759);
+        ? colors.error
+        : colors.secondary;
     final dateStr = DateFormat('MMM dd').format(record.date);
 
     return Padding(

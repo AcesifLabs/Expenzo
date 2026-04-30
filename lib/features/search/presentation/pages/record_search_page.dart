@@ -1,3 +1,5 @@
+import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -23,16 +25,12 @@ class _RecordSearchPageState extends State<RecordSearchPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Search Records'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-      ),
-      body: Column(
+    return AppScaffold(
+      title: 'Search Records',
+      child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(24),
             child: SearchBarWidget(
               controller: _searchController,
               onChanged: (query) {
@@ -116,25 +114,25 @@ class _RecordSearchPageState extends State<RecordSearchPage> {
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.only(bottom: 16),
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
       itemCount: state.results.length,
+      separatorBuilder: (context, index) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final result = state.results[index];
         final record = result.record;
         final dateFormat = DateFormat('MMM dd, yyyy');
         final isNegative = record.amount < 0;
 
-        return Card(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        return AppCard(
           child: ListTile(
             contentPadding: const EdgeInsets.all(12),
             leading: Container(
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
+                color: AppColors.primary.withAlpha(25),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: const Center(
                 child: Text('📦', style: TextStyle(fontSize: 24)),
@@ -144,17 +142,18 @@ class _RecordSearchPageState extends State<RecordSearchPage> {
               record.description,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontWeight: FontWeight.w600),
             ),
             subtitle: Text(
               dateFormat.format(record.date),
-              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurface.withAlpha(140)),
             ),
             trailing: Text(
               '${isNegative ? '-' : ''}৳${record.amount.abs().toStringAsFixed(2)}',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: isNegative ? AppColors.error : AppColors.success,
+                color: isNegative ? AppColors.errorDark : AppColors.successDark,
               ),
             ),
           ),

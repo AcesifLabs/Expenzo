@@ -106,10 +106,10 @@ class _BudgetListPageContentState extends State<_BudgetListPageContent> {
               // Budget list
               if (state.budgets.isEmpty)
                 SliverToBoxAdapter(
-                  child: const Padding(
-                    padding: EdgeInsets.all(40),
+                  child: Padding(
+                    padding: const EdgeInsets.all(40),
                     child: AppEmptyState(
-                      icon: Icons.inbox,
+                      icon: PhosphorIcons.tray(PhosphorIconsStyle.regular),
                       message: 'No budgets yet. Tap + to create one.',
                     ),
                   ),

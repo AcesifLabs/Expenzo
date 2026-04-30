@@ -68,6 +68,7 @@ class _AppShellState extends State<AppShell> {
     final colors = Theme.of(context).colorScheme;
 
     return Scaffold(
+      extendBody: true,
       body: LazyIndexedStack(
         index: _currentIndex,
         children: [
@@ -103,32 +104,44 @@ class _AppShellState extends State<AppShell> {
     final leftCount = 3;
     final rightCount = 3;
 
-    return Container(
-      height: 80,
-      padding: const EdgeInsets.only(top: 8, bottom: 20),
-      decoration: BoxDecoration(
-        color: colors.surface,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(15),
-            blurRadius: 16,
-            offset: const Offset(0, -4),
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        child: Container(
+          height: 72,
+          decoration: BoxDecoration(
+            color: colors.surface.withAlpha(240),
+            borderRadius: BorderRadius.circular(32),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(20),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
+            border: Border.all(
+              color: colors.onSurface.withAlpha(10),
+              width: 1,
+            ),
           ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Left side: Home, Activity, Budgets
-          ...List.generate(leftCount, (i) => _navItem(i, colors)),
-          // FAB spacer — animated width for smooth transition
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-            width: _showFab ? 56 : 0,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              children: [
+                // Left side: Home, Activity, Budgets
+                ...List.generate(leftCount, (i) => _navItem(i, colors)),
+                // FAB spacer — animated width for smooth transition
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  width: _showFab ? 48 : 0,
+                ),
+                // Right side: Trends, Scan, Profile
+                ...List.generate(rightCount, (i) => _navItem(leftCount + i, colors)),
+              ],
+            ),
           ),
-          // Right side: Trends, Scan, Profile
-          ...List.generate(rightCount, (i) => _navItem(leftCount + i, colors)),
-        ],
+        ),
       ),
     );
   }
@@ -268,9 +281,12 @@ class _ScanPageWithFab extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: const SmsPermissionGate(child: ContactSelectorPage()),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showScanOptions(context),
-        child: Icon(PhosphorIcons.fileMagnifyingGlass(PhosphorIconsStyle.bold)),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 80),
+        child: FloatingActionButton(
+          onPressed: () => _showScanOptions(context),
+          child: Icon(PhosphorIcons.fileMagnifyingGlass(PhosphorIconsStyle.bold)),
+        ),
       ),
     );
   }

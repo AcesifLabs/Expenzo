@@ -18,10 +18,12 @@ class AppCard extends StatelessWidget {
   final VoidCallback? onLongPress;
   final Key? dismissibleKey;
   final VoidCallback? onDismissed;
-  final Color? backgroundColor;
+   final Color? backgroundColor;
+  final Color? borderColor;
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? margin;
-  final double borderRadius;
+  final double? borderRadius;
+  final Clip clipBehavior;
 
   const AppCard({
     super.key,
@@ -31,20 +33,27 @@ class AppCard extends StatelessWidget {
     this.dismissibleKey,
     this.onDismissed,
     this.backgroundColor,
+    this.borderColor,
     this.padding,
     this.margin,
-    this.borderRadius = 12,
+    this.borderRadius,
+    this.clipBehavior = Clip.none,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final radius = borderRadius ?? (theme.cardTheme.shape as RoundedRectangleBorder?)?.borderRadius.resolve(Directionality.of(context)).topLeft.x ?? 10.0;
+    
     Widget inner = Container(
       decoration: BoxDecoration(
-        color: backgroundColor ?? Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(borderRadius),
+        color: backgroundColor ?? theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(radius),
+        border: borderColor != null ? Border.all(color: borderColor!, width: 1.5) : null,
       ),
+      clipBehavior: clipBehavior,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(borderRadius),
+        borderRadius: BorderRadius.circular(radius),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
@@ -67,12 +76,12 @@ class AppCard extends StatelessWidget {
           alignment: Alignment.centerRight,
           padding: const EdgeInsets.only(right: 20),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.error,
-            borderRadius: BorderRadius.circular(borderRadius),
+            color: theme.colorScheme.error,
+            borderRadius: BorderRadius.circular(radius),
           ),
           child: Icon(
             PhosphorIcons.trash(PhosphorIconsStyle.regular),
-            color: Colors.white,
+            color: theme.colorScheme.onSecondary,
           ),
         ),
         child: inner,

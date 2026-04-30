@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -12,9 +13,30 @@ import 'features/records/presentation/bloc/record_bloc.dart';
 import 'features/records/presentation/bloc/record_event.dart';
 import 'features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
 import 'shared/presentation/widgets/app_shell.dart';
+import 'shared/presentation/widgets/app_error_view.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Framework error UI swap
+  ErrorWidget.builder = (details) => AppErrorView(details: details);
+
+  // Global error logging
+  FlutterError.onError = (details) {
+    FlutterError.presentError(details);
+    if (kReleaseMode) {
+      // Log to service
+    }
+  };
+
+  // Async error catch
+  PlatformDispatcher.instance.onError = (error, stack) {
+    if (kDebugMode) {
+      print('Async Error: $error');
+    }
+    return true;
+  };
+
   runApp(const ExpenzoApp());
 }
 

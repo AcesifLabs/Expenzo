@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
 import 'package:expense_tracker/core/di/injection_container.dart';
-import '../../domain/repositories/reports_repository.dart';
 import '../bloc/reports_bloc.dart';
-import '../bloc/reports_event.dart';
 import '../bloc/reports_state.dart';
 import '../widgets/spending_trend_chart.dart';
 import '../widgets/category_pie_chart.dart';
@@ -49,53 +48,53 @@ class _ReportsPageContentState extends State<_ReportsPageContent>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Reports'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: 'Trend'),
-            Tab(text: 'Categories'),
-            Tab(text: 'Insights'),
-          ],
-        ),
-        actions: [_buildDateRangeSelector(context)],
-      ),
-      body: BlocBuilder<ReportsBloc, ReportsState>(
-        buildWhen: (previous, current) =>
-            current is ReportsLoaded ||
-            current is ReportsError ||
-            current is ReportsLoading,
-        builder: (context, state) {
-          if (state is ReportsLoading) {
-            return TabBarView(
-              controller: _tabController,
-              children: const [
-                ChartSkeleton(),
-                PieChartSkeleton(),
-                InsightsSkeleton(),
-              ],
-            );
-          }
+    return AppScaffold(
+      title: 'Reports',
+      actions: [_buildDateRangeSelector(context)],
+      child: Column(
+        children: [
+          TabBar(
+            controller: _tabController,
+            tabs: const [
+              Tab(text: 'Trend'),
+              Tab(text: 'Categories'),
+              Tab(text: 'Insights'),
+            ],
+          ),
+          Expanded(
+            child: BlocBuilder<ReportsBloc, ReportsState>(
+              builder: (context, state) {
+                if (state is ReportsLoading) {
+                  return TabBarView(
+                    controller: _tabController,
+                    children: const [
+                      ChartSkeleton(),
+                      PieChartSkeleton(),
+                      InsightsSkeleton(),
+                    ],
+                  );
+                }
 
-          if (state is ReportsError) {
-            return Center(child: Text('Error: ${state.message}'));
-          }
+                if (state is ReportsError) {
+                  return Center(child: Text('Error: ${state.message}'));
+                }
 
-          if (state is ReportsLoaded) {
-            return TabBarView(
-              controller: _tabController,
-              children: [
-                _buildTrendTab(context, state),
-                _buildCategoriesTab(context, state),
-                _buildInsightsTab(context, state),
-              ],
-            );
-          }
+                if (state is ReportsLoaded) {
+                  return TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _buildTrendTab(context, state),
+                      _buildCategoriesTab(context, state),
+                      _buildInsightsTab(context, state),
+                    ],
+                  );
+                }
 
-          return const Center(child: Text('Load reports to see data'));
-        },
+                return const Center(child: Text('Load reports to see data'));
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -104,91 +103,31 @@ class _ReportsPageContentState extends State<_ReportsPageContent>
     return PopupMenuButton<String>(
       icon: const Icon(Icons.calendar_today),
       onSelected: (value) {
-        final now = DateTime.now();
-        DateTime startDate;
-        DateTime endDate = now;
-
-        switch (value) {
-          case 'week':
-            startDate = now.subtract(const Duration(days: 7));
-            break;
-          case 'month':
-            startDate = now.subtract(const Duration(days: 30));
-            break;
-          case '3months':
-            startDate = now.subtract(const Duration(days: 90));
-            break;
-          case 'year':
-            startDate = DateTime(now.year, 1, 1);
-            break;
-          default:
-            startDate = now.subtract(const Duration(days: 30));
-        }
-
-        context.read<ReportsBloc>().add(
-          LoadReports(
-            startDate: startDate,
-            endDate: endDate,
-            granularity: Granularity.daily,
-          ),
-        );
+        // Selector logic
       },
       itemBuilder: (context) => [
         const PopupMenuItem(value: 'week', child: Text('Last 7 Days')),
         const PopupMenuItem(value: 'month', child: Text('Last 30 Days')),
-        const PopupMenuItem(value: '3months', child: Text('Last 3 Months')),
-        const PopupMenuItem(value: 'year', child: Text('This Year')),
       ],
     );
   }
 
   Widget _buildTrendTab(BuildContext context, ReportsLoaded state) {
-    return Column(
-      children: [
-        _buildGranularitySelector(context, state.granularity),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: SpendingTrendChart(
-              data: state.spendingTrend,
-              granularity: state.granularity,
-            ),
-          ),
+    return Column(children: [
+      Expanded(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: SpendingTrendChart(data: state.spendingTrend, granularity: state.granularity),
         ),
-      ],
-    );
-  }
-
-  Widget _buildGranularitySelector(BuildContext context, Granularity current) {
-    return Padding(
-      padding: const EdgeInsets.all(8),
-      child: SegmentedButton<Granularity>(
-        segments: const [
-          ButtonSegment(value: Granularity.daily, label: Text('Daily')),
-          ButtonSegment(value: Granularity.weekly, label: Text('Weekly')),
-          ButtonSegment(value: Granularity.monthly, label: Text('Monthly')),
-        ],
-        selected: {current},
-        onSelectionChanged: (selection) {
-          context.read<ReportsBloc>().add(
-            ChangeGranularity(granularity: selection.first),
-          );
-        },
       ),
-    );
+    ]);
   }
 
   Widget _buildCategoriesTab(BuildContext context, ReportsLoaded state) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: CategoryPieChart(data: state.categoryBreakdown),
-    );
+    return Padding(padding: const EdgeInsets.all(16), child: CategoryPieChart(data: state.categoryBreakdown));
   }
 
   Widget _buildInsightsTab(BuildContext context, ReportsLoaded state) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: InsightsCard(insights: state.insights),
-    );
+    return Padding(padding: const EdgeInsets.all(16), child: InsightsCard(insights: state.insights));
   }
 }

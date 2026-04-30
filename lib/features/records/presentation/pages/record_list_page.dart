@@ -1,3 +1,4 @@
+import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -89,8 +90,8 @@ class _RecordListPageState extends State<RecordListPage> {
         if (state is RecordLoading) {
           return ShimmerList(
             itemCount: 6,
-            itemBuilder: (context, index) => Card(
-              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+            itemBuilder: (context, index) => AppCard(
+              margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
               child: ListTile(
                 leading: ShimmerBox.circle(size: 40),
                 title: ShimmerBox.textLine(width: 150),
@@ -125,8 +126,8 @@ class _RecordListPageState extends State<RecordListPage> {
         }
 
         if (records.isEmpty) {
-          return const AppEmptyState(
-            icon: Icons.list,
+          return AppEmptyState(
+            icon: PhosphorIcons.list(PhosphorIconsStyle.regular),
             message: 'No transactions found',
           );
         }

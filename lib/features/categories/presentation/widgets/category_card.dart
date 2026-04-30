@@ -23,22 +23,23 @@ class CategoryCard extends StatelessWidget {
     return AppCard(
       onTap: onTap,
       onLongPress: onLongPress,
-      backgroundColor: parsedColor,
+      backgroundColor: Colors.transparent,
+      borderColor: parsedColor,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             AppIcons.getCategoryIcon(category.emoji),
             size: 32,
-            color: Colors.white,
+            color: parsedColor,
           ),
           const SizedBox(height: 8),
           Text(
             category.name,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: Colors.white,
+              fontWeight: FontWeight.w600,
+              color: parsedColor,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
