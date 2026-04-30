@@ -14,6 +14,8 @@ import 'features/records/presentation/bloc/record_event.dart';
 import 'features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
 import 'shared/presentation/widgets/app_shell.dart';
 import 'shared/presentation/widgets/app_error_view.dart';
+import 'core/database/database_seeder.dart';
+import 'core/database/app_database.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -78,6 +80,10 @@ class _AppLoaderState extends State<AppLoader> {
     try {
       await Firebase.initializeApp();
       await di.initCriticalDependencies();
+      
+      // Seed initial data
+      final db = di.getIt<AppDatabase>();
+      await DatabaseSeeder.seedInitialCategories(db);
 
       if (mounted) {
         setState(() => _initialized = true);
