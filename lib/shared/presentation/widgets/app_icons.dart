@@ -365,7 +365,7 @@ class AppIcons {
       case 'printer':
         return printer;
       default:
-        return Icons.help_outline;
+        return PhosphorIcons.question(PhosphorIconsStyle.regular);
     }
   }
 }

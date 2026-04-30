@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../domain/entities/expense_template.dart';
 import '../../domain/entities/message_source.dart';
 
@@ -69,10 +70,10 @@ class _RetroactiveScanDialogState extends State<RetroactiveScanDialog> {
                 Text('Looking for past expenses matching your new template...'),
               ],
             )
-          : const Column(
+          : Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.check_circle, color: Colors.green, size: 48),
+                Icon(PhosphorIcons.checkCircle(PhosphorIconsStyle.fill), color: Colors.green, size: 48),
                 SizedBox(height: 16),
                 Text(
                   'Template active! Future messages will be parsed automatically.',

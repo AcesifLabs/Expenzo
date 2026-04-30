@@ -26,15 +26,18 @@ class SpendingTrendChart extends StatelessWidget {
 
     final maxY = data.map((e) => e.amount).reduce((a, b) => a > b ? a : b);
 
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return LineChart(
       LineChartData(
         gridData: FlGridData(
           show: true,
           drawVerticalLine: false,
-          horizontalInterval: maxY / 4,
+          horizontalInterval: maxY > 0 ? maxY / 4 : 1,
           getDrawingHorizontalLine: (value) {
             return FlLine(
-              color: Colors.grey.withValues(alpha: 0.2),
+              color: colors.onSurface.withAlpha(20),
               strokeWidth: 1,
             );
           },
@@ -43,16 +46,16 @@ class SpendingTrendChart extends StatelessWidget {
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              reservedSize: 30,
+              reservedSize: 32,
               interval: _getInterval(),
               getTitlesWidget: (value, meta) {
                 final index = value.toInt();
                 if (index >= 0 && index < data.length) {
                   return Padding(
-                    padding: const EdgeInsets.only(top: 8),
+                    padding: const EdgeInsets.only(top: 12),
                     child: Text(
                       _formatDate(data[index].date),
-                      style: const TextStyle(fontSize: 10),
+                      style: TextStyle(fontSize: 10, color: colors.onSurface.withAlpha(140)),
                     ),
                   );
                 }
@@ -63,11 +66,11 @@ class SpendingTrendChart extends StatelessWidget {
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              reservedSize: 50,
+              reservedSize: 48,
               getTitlesWidget: (value, meta) {
                 return Text(
                   _formatAmount(value),
-                  style: const TextStyle(fontSize: 10),
+                  style: TextStyle(fontSize: 10, color: colors.onSurface.withAlpha(140)),
                 );
               },
             ),
@@ -84,24 +87,47 @@ class SpendingTrendChart extends StatelessWidget {
           LineChartBarData(
             spots: spots,
             isCurved: true,
-            color: Theme.of(context).primaryColor,
-            barWidth: 3,
-            dotData: const FlDotData(show: true),
+            color: colors.primary,
+            barWidth: 4,
+            isStrokeCapRound: true,
+            dotData: FlDotData(
+              show: true,
+              getDotPainter: (spot, percent, barData, index) => FlDotCirclePainter(
+                radius: 4,
+                color: colors.primary,
+                strokeWidth: 2,
+                strokeColor: colors.surface,
+              ),
+            ),
             belowBarData: BarAreaData(
               show: true,
-              color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  colors.primary.withAlpha(50),
+                  colors.primary.withAlpha(0),
+                ],
+              ),
             ),
           ),
         ],
         lineTouchData: LineTouchData(
           touchTooltipData: LineTouchTooltipData(
+            getTooltipColor: (spot) => colors.surface,
             getTooltipItems: (touchedSpots) {
               return touchedSpots.map((spot) {
                 final index = spot.x.toInt();
                 if (index >= 0 && index < data.length) {
                   return LineTooltipItem(
-                    '${_formatDate(data[index].date)}\n৳${data[index].amount.toStringAsFixed(2)}',
-                    const TextStyle(color: Colors.white),
+                    '৳${data[index].amount.toStringAsFixed(0)}',
+                    TextStyle(color: colors.onSurface, fontWeight: FontWeight.bold),
+                    children: [
+                      TextSpan(
+                        text: '\n${_formatDate(data[index].date)}',
+                        style: TextStyle(color: colors.onSurface.withAlpha(140), fontSize: 10, fontWeight: FontWeight.normal),
+                      ),
+                    ],
                   );
                 }
                 return null;

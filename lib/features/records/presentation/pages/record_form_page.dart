@@ -72,7 +72,7 @@ class _RecordFormPageState extends State<RecordFormPage> {
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(24),
           children: [
             TextFormField(
               controller: _amountController,

@@ -5,12 +5,12 @@ import 'app_typography.dart';
 class AppTheme {
   AppTheme._();
 
-  // Shared shape values — more rounded for modern look
-  static const _cardBorderRadius = BorderRadius.all(Radius.circular(16));
-  static const _buttonBorderRadius = BorderRadius.all(Radius.circular(14));
-  static const _dialogBorderRadius = BorderRadius.all(Radius.circular(20));
-  static const _chipBorderRadius = BorderRadius.all(Radius.circular(10));
-  static const _snackBorderRadius = BorderRadius.all(Radius.circular(12));
+  // Shared shape values — subtle rounding
+  static const _cardBorderRadius = BorderRadius.all(Radius.circular(10));
+  static const _buttonBorderRadius = BorderRadius.all(Radius.circular(8));
+  static const _dialogBorderRadius = BorderRadius.all(Radius.circular(10));
+  static const _chipBorderRadius = BorderRadius.all(Radius.circular(6));
+  static const _snackBorderRadius = BorderRadius.all(Radius.circular(8));
   static const _buttonPadding = EdgeInsets.symmetric(
     horizontal: 24,
     vertical: 14,
@@ -222,19 +222,19 @@ class AppTheme {
       secondary: AppColors.primary,
       error: AppColors.errorDark,
       surface: AppColors.surfaceDark,
-      onPrimary: Color(0xFF1C1C1E),
-      onSecondary: Colors.white,
+      onPrimary: AppColors.backgroundDark,
+      onSecondary: AppColors.backgroundDark,
     ),
     scaffoldBg: AppColors.backgroundDark,
     appBarBg: AppColors.surfaceDark,
     appBarFg: AppColors.textPrimaryDark,
     cardColor: AppColors.surfaceDark,
     cardShadow: Colors.black45,
-    inputFill: Color(0xFF3A3A3C),
-    inputBorder: AppColors.textSecondaryDark.withAlpha(60),
+    inputFill: Color(0xFF2C2C2E),
+    inputBorder: AppColors.textSecondaryDark.withAlpha(40),
     inputFocused: AppColors.secondary,
     buttonBg: AppColors.secondary,
-    buttonFg: Colors.white,
+    buttonFg: AppColors.backgroundDark,
     outlineFg: AppColors.secondary,
     outlineBorder: AppColors.secondary.withAlpha(80),
     textFg: AppColors.secondary,

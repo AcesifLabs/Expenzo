@@ -4,18 +4,18 @@ class AppColors {
   AppColors._();
 
   // ── Primary Palette ──
-  // Neon Mint - Primary accent color
-  static const Color primary = Color(0xFF02FF94);
-  // Deep Mint - Secondary
-  static const Color secondary = Color(0xFF00D97E);
-  // Cool off-white bg - modern & clean
+  // Lavender - Primary accent color
+  static const Color primary = Color(0xFFD1C4E9);
+  // Mint - Secondary
+  static const Color secondary = Color(0xFFA2D3A4);
+  // Deep charcoal bg - modern & clean
   static const Color backgroundLight = Color(0xFFF5F7FA);
-  // Near-black bg for dark theme
-  static const Color backgroundDark = Color(0xFF1C1C1E);
+  // True charcoal bg for dark theme
+  static const Color backgroundDark = Color(0xFF141315);
 
   // ── Surface Colors ──
   static const Color surfaceLight = Color(0xFFFFFFFF);
-  static const Color surfaceDark = Color(0xFF2C2C2E);
+  static const Color surfaceDark = Color(0xFF1C1B1D);
 
   // ── Text Colors ──
   static const Color textPrimaryLight = Color(0xFF1C1C1E);
@@ -25,17 +25,17 @@ class AppColors {
 
   // ── Semantic Colors ──
   static const Color error = Color(0xFFFF3B30);
-  static const Color errorDark = Color(0xFFFF453A);
+  static const Color errorDark = Color(0xFFF48FB1); // Rose
   static const Color success = Color(0xFF34C759);
-  static const Color successDark = Color(0xFF30D158);
+  static const Color successDark = Color(0xFFA2D3A4); // Mint
   static const Color warning = Color(0xFFFF9F0A);
   static const Color warningDark = Color(0xFFFFD60A);
 
   // ── Financial Colors ──
   static const Color income = Color(0xFF34C759);
-  static const Color incomeDark = Color(0xFF30D158);
+  static const Color incomeDark = Color(0xFFA2D3A4);
   static const Color expense = Color(0xFFFF3B30);
-  static const Color expenseDark = Color(0xFFFF453A);
+  static const Color expenseDark = Color(0xFFF48FB1);
 
   // ── Category Colors (Modern Vibrancy) ──
   static const List<Color> categoryColors = [

@@ -1,9 +1,11 @@
+import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:expense_tracker/features/categories/domain/entities/category.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:expense_tracker/core/utils/navigation_utils.dart';
-import '../../../../shared/presentation/widgets/shimmer_box.dart';
-import '../../domain/entities/category.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_empty_state.dart';
 import '../bloc/category_bloc.dart';
 import '../bloc/category_event.dart';
 import '../bloc/category_state.dart';
@@ -15,54 +17,43 @@ class CategoryListPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Categories')),
-      body: BlocBuilder<CategoryBloc, CategoryState>(
+    return AppScaffold(
+      title: 'Categories',
+      onRefresh: () async {
+        context.read<CategoryBloc>().add(const LoadCategories());
+      },
+      child: BlocBuilder<CategoryBloc, CategoryState>(
         builder: (context, state) {
           if (state is CategoryLoading) {
-            return ShimmerList(
-              itemCount: 6,
-              itemBuilder: (context, index) => Card(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: ListTile(
-                  leading: ShimmerBox.circle(size: 40),
-                  title: ShimmerBox.textLine(width: 150),
-                ),
-              ),
-            );
+            return const Center(child: CircularProgressIndicator());
           }
-
           if (state is CategoryError) {
             return Center(child: Text(state.message));
           }
           if (state is CategoryLoaded) {
             if (state.categories.isEmpty) {
-              return const Center(
-                child: Text('No categories yet. Tap + to add one.'),
+              return AppEmptyState(
+                icon: PhosphorIcons.tag(PhosphorIconsStyle.regular),
+                message: 'No categories created',
               );
             }
-            return RefreshIndicator(
-              onRefresh: () async {
-                context.read<CategoryBloc>().add(const LoadCategories());
-              },
-              child: GridView.builder(
-                padding: const EdgeInsets.all(16),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 1,
-                ),
-                itemCount: state.categories.length,
-                itemBuilder: (context, index) {
-                  final category = state.categories[index];
-                  return CategoryCard(
-                    category: category,
-                    onTap: () => _navigateToForm(context, category),
-                    onLongPress: () => _showDeleteDialog(context, category),
-                  );
-                },
+            return GridView.builder(
+              padding: const EdgeInsets.all(24),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                childAspectRatio: 1.1,
               ),
+              itemCount: state.categories.length,
+              itemBuilder: (context, index) {
+                final category = state.categories[index];
+                return CategoryCard(
+                  category: category,
+                  onTap: () => _navigateToForm(context, category),
+                  onLongPress: () => _showDeleteDialog(context, category),
+                );
+              },
             );
           }
           return const SizedBox.shrink();
@@ -98,8 +89,8 @@ class CategoryListPage extends StatelessWidget {
             onPressed: () {
               Navigator.pop(dialogContext);
               context.read<CategoryBloc>().add(
-                DeleteCategoryEvent(category.id!),
-              );
+                    DeleteCategoryEvent(category.id!),
+                  );
             },
             style: TextButton.styleFrom(foregroundColor: AppColors.error),
             child: const Text('Delete'),
