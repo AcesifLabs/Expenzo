@@ -11,7 +11,7 @@ class RecentTransactionsList extends StatelessWidget {
 
   static final Map<ExpenseSource, IconData> _sourceIcons = {
     ExpenseSource.manual: PhosphorIcons.pencilSimple(PhosphorIconsStyle.regular),
-    ExpenseSource.sms: PhosphorIcons.chat(PhosphorIconsStyle.regular),
+    ExpenseSource.sms: PhosphorIcons.chatDots(PhosphorIconsStyle.regular),
     ExpenseSource.email: PhosphorIcons.envelope(PhosphorIconsStyle.regular),
     ExpenseSource.recurring: PhosphorIcons.arrowsClockwise(PhosphorIconsStyle.regular),
   };

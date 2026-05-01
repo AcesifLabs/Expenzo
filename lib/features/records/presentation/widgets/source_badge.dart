@@ -46,7 +46,11 @@ class SourceBadge extends StatelessWidget {
             size: 12,
             color: Colors.white,
           )
-        : Text(source.icon, style: TextStyle(fontSize: 10, color: baseColor));
+        : Icon(
+            AppIcons.getSourceIcon(source),
+            size: 12,
+            color: Colors.white,
+          );
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),

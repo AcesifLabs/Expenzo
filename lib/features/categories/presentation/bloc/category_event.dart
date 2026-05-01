@@ -11,10 +11,11 @@ abstract class CategoryEvent extends Equatable {
 
 class LoadCategories extends CategoryEvent {
   final RecordType? type;
-  const LoadCategories({this.type});
+  final bool sortByUsage;
+  const LoadCategories({this.type, this.sortByUsage = false});
 
   @override
-  List<Object?> get props => [type];
+  List<Object?> get props => [type, sortByUsage];
 }
 
 class CreateCategoryEvent extends CategoryEvent {

@@ -1,3 +1,5 @@
+import 'package:expense_tracker/shared/presentation/widgets/app_icons.dart';
+import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -40,11 +42,23 @@ class _NewTransactionSheetState extends State<NewTransactionSheet> {
   }
 
   void _loadCategories() {
-    context.read<CategoryBloc>().add(LoadCategories(type: _type));
-    final state = context.read<CategoryBloc>().state;
-    if (state is CategoryLoaded) {
-      _categories = state.categories;
-    }
+    context.read<CategoryBloc>().add(LoadCategories(type: _type, sortByUsage: true));
+  }
+
+  void _showAllCategories(BuildContext context, List<Category> allCategories) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => _AllCategoriesPicker(
+        categories: allCategories,
+        selectedId: _selectedCategoryId,
+        onSelect: (id) {
+          setState(() => _selectedCategoryId = id);
+          Navigator.pop(ctx);
+        },
+      ),
+    );
   }
 
   void _switchType(RecordType t) {
@@ -226,8 +240,8 @@ class _NewTransactionSheetState extends State<NewTransactionSheet> {
                   child: FilledButton(
                     onPressed: _submit,
                     style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xFF1C1C1E),
-                      foregroundColor: Colors.white,
+                      backgroundColor: _type == RecordType.expense ? colors.error : colors.primary,
+                      foregroundColor: colors.onPrimary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),
@@ -236,7 +250,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet> {
                       'Add ${_type.displayName}',
                       style: const TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
@@ -250,14 +264,13 @@ class _NewTransactionSheetState extends State<NewTransactionSheet> {
   }
 
   Widget _buildCategoryChips(ColorScheme colors) {
-    // Listen to category bloc for updates
     return BlocBuilder<CategoryBloc, CategoryState>(
       builder: (ctx, state) {
         if (state is CategoryLoaded) {
           _categories = state.categories;
         }
-        final cats = _categories;
-        if (cats.isEmpty) {
+        final allCats = _categories;
+        if (allCats.isEmpty) {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Text(
@@ -266,48 +279,223 @@ class _NewTransactionSheetState extends State<NewTransactionSheet> {
             ),
           );
         }
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: cats.map((cat) {
-              final sel = _selectedCategoryId == cat.id;
-              return GestureDetector(
-                onTap: () => setState(() {
-                  _selectedCategoryId = sel ? null : cat.id;
-                }),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: sel
-                        ? const Color(0xFF1C1C1E)
-                        : colors.onSurface.withAlpha(12),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: sel
-                          ? const Color(0xFF1C1C1E)
-                          : colors.onSurface.withAlpha(20),
-                      width: 1,
-                    ),
-                  ),
-                  child: Text(
-                    cat.name,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: sel ? FontWeight.w600 : FontWeight.w400,
-                      color: sel ? Colors.white : colors.onSurface,
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
+
+        // Show top 5 or selected one
+        final displayCats = allCats.take(5).toList();
+        if (_selectedCategoryId != null &&
+            !displayCats.any((c) => c.id == _selectedCategoryId)) {
+          final selected = allCats.firstWhere((c) => c.id == _selectedCategoryId);
+          displayCats.removeLast();
+          displayCats.insert(0, selected);
+        }
+
+        return Container(
+          height: 50,
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            children: [
+              ...displayCats.map((cat) {
+                final sel = _selectedCategoryId == cat.id;
+                return _CategoryPickerItem(
+                  category: cat,
+                  isSelected: sel,
+                  onTap: () => setState(() {
+                    _selectedCategoryId = sel ? null : cat.id;
+                  }),
+                );
+              }),
+              // More button - hide if something selected
+              if (_selectedCategoryId == null)
+                _MoreButton(onTap: () => _showAllCategories(context, allCats)),
+            ],
           ),
         );
       },
+    );
+  }
+}
+
+class _CategoryPickerItem extends StatelessWidget {
+  final Category category;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _CategoryPickerItem({
+    required this.category,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final iconColor = isSelected ? colors.primary : colors.onSurface.withAlpha(150);
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOutCubic,
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: isSelected ? colors.primary.withAlpha(25) : colors.onSurface.withAlpha(10),
+          borderRadius: BorderRadius.circular(25),
+          border: Border.all(
+            color: isSelected ? colors.primary.withAlpha(50) : Colors.transparent,
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              AppIcons.getCategoryIcon(category.emoji),
+              size: 20,
+              color: iconColor,
+            ),
+            ClipRect(
+              child: AnimatedSize(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOutCubic,
+                child: isSelected
+                    ? Padding(
+                        padding: const EdgeInsets.only(left: 8),
+                        child: Text(
+                          category.name,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: iconColor,
+                          ),
+                          maxLines: 1,
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MoreButton extends StatelessWidget {
+  final VoidCallback onTap;
+  const _MoreButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 50,
+        margin: const EdgeInsets.only(left: 4),
+        decoration: BoxDecoration(
+          color: colors.onSurface.withAlpha(10),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          PhosphorIcons.dotsThree(PhosphorIconsStyle.bold),
+          size: 20,
+          color: colors.onSurface.withAlpha(150),
+        ),
+      ),
+    );
+  }
+}
+
+class _AllCategoriesPicker extends StatelessWidget {
+  final List<Category> categories;
+  final int? selectedId;
+  final ValueChanged<int> onSelect;
+
+  const _AllCategoriesPicker({
+    required this.categories,
+    required this.selectedId,
+    required this.onSelect,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 36,
+            height: 4,
+            margin: const EdgeInsets.only(bottom: 24),
+            decoration: BoxDecoration(
+              color: colors.onSurface.withAlpha(50),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const Text(
+            'Select Category',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 24),
+          Flexible(
+            child: GridView.builder(
+              shrinkWrap: true,
+              itemCount: categories.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 4,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                childAspectRatio: 0.8,
+              ),
+              itemBuilder: (context, index) {
+                final cat = categories[index];
+                final isSel = cat.id == selectedId;
+                return GestureDetector(
+                  onTap: () => onSelect(cat.id!),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 56,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          color: isSel ? colors.primary.withAlpha(40) : colors.onSurface.withAlpha(10),
+                          shape: BoxShape.circle,
+                          border: isSel ? Border.all(color: colors.primary, width: 2) : null,
+                        ),
+                        child: Icon(
+                          AppIcons.getCategoryIcon(cat.emoji),
+                          color: isSel ? colors.primary : colors.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        cat.name,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 24),
+        ],
+      ),
     );
   }
 }

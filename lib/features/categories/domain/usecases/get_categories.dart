@@ -12,14 +12,18 @@ class GetCategories extends UseCase<List<Category>, GetCategoriesParams> {
 
   @override
   Future<Either<Failure, List<Category>>> call(GetCategoriesParams params) {
-    return repository.getCategories(type: params.type);
+    return repository.getCategories(
+      type: params.type,
+      sortByUsage: params.sortByUsage,
+    );
   }
 }
 
 class GetCategoriesParams extends Params {
   final RecordType? type;
-  const GetCategoriesParams({this.type});
+  final bool sortByUsage;
+  const GetCategoriesParams({this.type, this.sortByUsage = false});
 
   @override
-  List<Object?> get props => [type];
+  List<Object?> get props => [type, sortByUsage];
 }

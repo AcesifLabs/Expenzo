@@ -9,20 +9,41 @@ class CategoryDao extends DatabaseAccessor<AppDatabase>
     with _$CategoryDaoMixin {
   CategoryDao(super.db);
 
-  Stream<List<Category>> watchCategories({String? type}) {
-    var query = select(categories)..orderBy([(t) => OrderingTerm.asc(t.name)]);
+  Stream<List<Category>> watchCategories({String? type, bool sortByUsage = false}) {
+    var query = select(categories);
+    
+    if (sortByUsage) {
+      query.orderBy([(t) => OrderingTerm.desc(t.usageCount), (t) => OrderingTerm.asc(t.name)]);
+    } else {
+      query.orderBy([(t) => OrderingTerm.asc(t.name)]);
+    }
+
     if (type != null) {
       query.where((t) => t.categoryType.equals(type));
     }
     return query.watch();
   }
 
-  Future<List<Category>> getAllCategories({String? type}) {
-    var query = select(categories)..orderBy([(t) => OrderingTerm.asc(t.name)]);
+  Future<List<Category>> getAllCategories({String? type, bool sortByUsage = false}) {
+    var query = select(categories);
+
+    if (sortByUsage) {
+      query.orderBy([(t) => OrderingTerm.desc(t.usageCount), (t) => OrderingTerm.asc(t.name)]);
+    } else {
+      query.orderBy([(t) => OrderingTerm.asc(t.name)]);
+    }
+
     if (type != null) {
       query.where((t) => t.categoryType.equals(type));
     }
     return query.get();
+  }
+
+  Future<void> incrementUsageCount(int id) async {
+    await customStatement(
+      'UPDATE categories SET usage_count = usage_count + 1 WHERE id = ?',
+      [id],
+    );
   }
 
   Future<Category?> getCategoryById(int id) {

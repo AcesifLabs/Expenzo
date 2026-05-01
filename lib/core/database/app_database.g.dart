@@ -554,6 +554,14 @@ class $CategoriesTable extends Categories
       type: DriftSqlType.string,
       requiredDuringInsert: false,
       defaultValue: const Constant('OUT'));
+  static const VerificationMeta _usageCountMeta =
+      const VerificationMeta('usageCount');
+  @override
+  late final GeneratedColumn<int> usageCount = GeneratedColumn<int>(
+      'usage_count', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -571,8 +579,17 @@ class $CategoriesTable extends Categories
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, name, emoji, color, isDefault, categoryType, createdAt, updatedAt];
+  List<GeneratedColumn> get $columns => [
+        id,
+        name,
+        emoji,
+        color,
+        isDefault,
+        categoryType,
+        usageCount,
+        createdAt,
+        updatedAt
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -610,6 +627,12 @@ class $CategoriesTable extends Categories
           categoryType.isAcceptableOrUnknown(
               data['category_type']!, _categoryTypeMeta));
     }
+    if (data.containsKey('usage_count')) {
+      context.handle(
+          _usageCountMeta,
+          usageCount.isAcceptableOrUnknown(
+              data['usage_count']!, _usageCountMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -639,6 +662,8 @@ class $CategoriesTable extends Categories
           .read(DriftSqlType.bool, data['${effectivePrefix}is_default'])!,
       categoryType: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}category_type'])!,
+      usageCount: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}usage_count'])!,
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       updatedAt: attachedDatabase.typeMapping
@@ -659,6 +684,7 @@ class Category extends DataClass implements Insertable<Category> {
   final String color;
   final bool isDefault;
   final String categoryType;
+  final int usageCount;
   final DateTime createdAt;
   final DateTime updatedAt;
   const Category(
@@ -668,6 +694,7 @@ class Category extends DataClass implements Insertable<Category> {
       required this.color,
       required this.isDefault,
       required this.categoryType,
+      required this.usageCount,
       required this.createdAt,
       required this.updatedAt});
   @override
@@ -679,6 +706,7 @@ class Category extends DataClass implements Insertable<Category> {
     map['color'] = Variable<String>(color);
     map['is_default'] = Variable<bool>(isDefault);
     map['category_type'] = Variable<String>(categoryType);
+    map['usage_count'] = Variable<int>(usageCount);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -692,6 +720,7 @@ class Category extends DataClass implements Insertable<Category> {
       color: Value(color),
       isDefault: Value(isDefault),
       categoryType: Value(categoryType),
+      usageCount: Value(usageCount),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -707,6 +736,7 @@ class Category extends DataClass implements Insertable<Category> {
       color: serializer.fromJson<String>(json['color']),
       isDefault: serializer.fromJson<bool>(json['isDefault']),
       categoryType: serializer.fromJson<String>(json['categoryType']),
+      usageCount: serializer.fromJson<int>(json['usageCount']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -721,6 +751,7 @@ class Category extends DataClass implements Insertable<Category> {
       'color': serializer.toJson<String>(color),
       'isDefault': serializer.toJson<bool>(isDefault),
       'categoryType': serializer.toJson<String>(categoryType),
+      'usageCount': serializer.toJson<int>(usageCount),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -733,6 +764,7 @@ class Category extends DataClass implements Insertable<Category> {
           String? color,
           bool? isDefault,
           String? categoryType,
+          int? usageCount,
           DateTime? createdAt,
           DateTime? updatedAt}) =>
       Category(
@@ -742,6 +774,7 @@ class Category extends DataClass implements Insertable<Category> {
         color: color ?? this.color,
         isDefault: isDefault ?? this.isDefault,
         categoryType: categoryType ?? this.categoryType,
+        usageCount: usageCount ?? this.usageCount,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
       );
@@ -755,6 +788,8 @@ class Category extends DataClass implements Insertable<Category> {
       categoryType: data.categoryType.present
           ? data.categoryType.value
           : this.categoryType,
+      usageCount:
+          data.usageCount.present ? data.usageCount.value : this.usageCount,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -769,6 +804,7 @@ class Category extends DataClass implements Insertable<Category> {
           ..write('color: $color, ')
           ..write('isDefault: $isDefault, ')
           ..write('categoryType: $categoryType, ')
+          ..write('usageCount: $usageCount, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -776,8 +812,8 @@ class Category extends DataClass implements Insertable<Category> {
   }
 
   @override
-  int get hashCode => Object.hash(
-      id, name, emoji, color, isDefault, categoryType, createdAt, updatedAt);
+  int get hashCode => Object.hash(id, name, emoji, color, isDefault,
+      categoryType, usageCount, createdAt, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -788,6 +824,7 @@ class Category extends DataClass implements Insertable<Category> {
           other.color == this.color &&
           other.isDefault == this.isDefault &&
           other.categoryType == this.categoryType &&
+          other.usageCount == this.usageCount &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -799,6 +836,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
   final Value<String> color;
   final Value<bool> isDefault;
   final Value<String> categoryType;
+  final Value<int> usageCount;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   const CategoriesCompanion({
@@ -808,6 +846,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     this.color = const Value.absent(),
     this.isDefault = const Value.absent(),
     this.categoryType = const Value.absent(),
+    this.usageCount = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
@@ -818,6 +857,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     this.color = const Value.absent(),
     this.isDefault = const Value.absent(),
     this.categoryType = const Value.absent(),
+    this.usageCount = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   }) : name = Value(name);
@@ -828,6 +868,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     Expression<String>? color,
     Expression<bool>? isDefault,
     Expression<String>? categoryType,
+    Expression<int>? usageCount,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
   }) {
@@ -838,6 +879,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       if (color != null) 'color': color,
       if (isDefault != null) 'is_default': isDefault,
       if (categoryType != null) 'category_type': categoryType,
+      if (usageCount != null) 'usage_count': usageCount,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
     });
@@ -850,6 +892,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       Value<String>? color,
       Value<bool>? isDefault,
       Value<String>? categoryType,
+      Value<int>? usageCount,
       Value<DateTime>? createdAt,
       Value<DateTime>? updatedAt}) {
     return CategoriesCompanion(
@@ -859,6 +902,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       color: color ?? this.color,
       isDefault: isDefault ?? this.isDefault,
       categoryType: categoryType ?? this.categoryType,
+      usageCount: usageCount ?? this.usageCount,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -885,6 +929,9 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     if (categoryType.present) {
       map['category_type'] = Variable<String>(categoryType.value);
     }
+    if (usageCount.present) {
+      map['usage_count'] = Variable<int>(usageCount.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -903,6 +950,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
           ..write('color: $color, ')
           ..write('isDefault: $isDefault, ')
           ..write('categoryType: $categoryType, ')
+          ..write('usageCount: $usageCount, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -4232,6 +4280,16 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $RecurringTransactionsTable(this);
   late final $ExpenseFtsTableTable expenseFtsTable =
       $ExpenseFtsTableTable(this);
+  late final RecordDao recordDao = RecordDao(this as AppDatabase);
+  late final CategoryDao categoryDao = CategoryDao(this as AppDatabase);
+  late final RecurringDao recurringDao = RecurringDao(this as AppDatabase);
+  late final BudgetDao budgetDao = BudgetDao(this as AppDatabase);
+  late final PendingRecurringDao pendingRecurringDao =
+      PendingRecurringDao(this as AppDatabase);
+  late final ParsingRuleDao parsingRuleDao =
+      ParsingRuleDao(this as AppDatabase);
+  late final MessageTemplateDao messageTemplateDao =
+      MessageTemplateDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4456,6 +4514,7 @@ typedef $$CategoriesTableCreateCompanionBuilder = CategoriesCompanion Function({
   Value<String> color,
   Value<bool> isDefault,
   Value<String> categoryType,
+  Value<int> usageCount,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
 });
@@ -4466,6 +4525,7 @@ typedef $$CategoriesTableUpdateCompanionBuilder = CategoriesCompanion Function({
   Value<String> color,
   Value<bool> isDefault,
   Value<String> categoryType,
+  Value<int> usageCount,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
 });
@@ -4493,6 +4553,7 @@ class $$CategoriesTableTableManager extends RootTableManager<
             Value<String> color = const Value.absent(),
             Value<bool> isDefault = const Value.absent(),
             Value<String> categoryType = const Value.absent(),
+            Value<int> usageCount = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
           }) =>
@@ -4503,6 +4564,7 @@ class $$CategoriesTableTableManager extends RootTableManager<
             color: color,
             isDefault: isDefault,
             categoryType: categoryType,
+            usageCount: usageCount,
             createdAt: createdAt,
             updatedAt: updatedAt,
           ),
@@ -4513,6 +4575,7 @@ class $$CategoriesTableTableManager extends RootTableManager<
             Value<String> color = const Value.absent(),
             Value<bool> isDefault = const Value.absent(),
             Value<String> categoryType = const Value.absent(),
+            Value<int> usageCount = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
           }) =>
@@ -4523,6 +4586,7 @@ class $$CategoriesTableTableManager extends RootTableManager<
             color: color,
             isDefault: isDefault,
             categoryType: categoryType,
+            usageCount: usageCount,
             createdAt: createdAt,
             updatedAt: updatedAt,
           ),
@@ -4559,6 +4623,11 @@ class $$CategoriesTableFilterComposer
 
   ColumnFilters<String> get categoryType => $state.composableBuilder(
       column: $state.table.categoryType,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get usageCount => $state.composableBuilder(
+      column: $state.table.usageCount,
       builder: (column, joinBuilders) =>
           ColumnFilters(column, joinBuilders: joinBuilders));
 
@@ -4603,6 +4672,11 @@ class $$CategoriesTableOrderingComposer
 
   ColumnOrderings<String> get categoryType => $state.composableBuilder(
       column: $state.table.categoryType,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get usageCount => $state.composableBuilder(
+      column: $state.table.usageCount,
       builder: (column, joinBuilders) =>
           ColumnOrderings(column, joinBuilders: joinBuilders));
 

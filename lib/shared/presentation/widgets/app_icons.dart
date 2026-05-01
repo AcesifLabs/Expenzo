@@ -122,7 +122,7 @@ class AppIcons {
       PhosphorIcons.graduationCap(PhosphorIconsStyle.regular);
 
   // ============ SOURCE ICONS ============
-  static IconData get sms => PhosphorIcons.chat(PhosphorIconsStyle.regular);
+  static IconData get sms => PhosphorIcons.chatDots(PhosphorIconsStyle.regular);
   static IconData get email =>
       PhosphorIcons.envelope(PhosphorIconsStyle.regular);
   static IconData get manual =>
@@ -286,9 +286,9 @@ class AppIcons {
         return category;
       // Source
       case 'sms':
-        return sms;
+        return PhosphorIcons.chatDots(PhosphorIconsStyle.regular);
       case 'message':
-        return sms;
+        return PhosphorIcons.chatDots(PhosphorIconsStyle.regular);
       case 'email':
       case 'mail':
         return email;

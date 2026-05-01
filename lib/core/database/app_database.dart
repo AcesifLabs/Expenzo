@@ -51,7 +51,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration {
@@ -87,6 +87,9 @@ class AppDatabase extends _$AppDatabase {
           await customStatement("DROP TRIGGER IF EXISTS expenses_ad");
           await customStatement("DROP TRIGGER IF EXISTS expenses_au");
           await _createFtsTriggers(customStatement);
+        }
+        if (from < 7) {
+          await m.addColumn(categories, categories.usageCount);
         }
       },
     );

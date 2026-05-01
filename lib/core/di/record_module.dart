@@ -1,3 +1,4 @@
+import 'package:expense_tracker/features/categories/domain/repositories/category_repository.dart';
 import 'package:get_it/get_it.dart';
 import 'package:expense_tracker/core/database/daos/record_dao.dart';
 import 'package:expense_tracker/features/records/data/datasources/record_local_datasource.dart';
@@ -19,7 +20,7 @@ void initRecordModule(GetIt getIt) {
     () => RecordRepositoryImpl(localDatasource: getIt<RecordLocalDatasource>()),
   );
   getIt.registerLazySingleton(() => GetRecords(getIt<RecordRepository>()));
-  getIt.registerLazySingleton(() => AddRecord(getIt<RecordRepository>()));
+  getIt.registerLazySingleton(() => AddRecord(getIt<RecordRepository>(), getIt<CategoryRepository>()));
   getIt.registerLazySingleton(() => UpdateRecord(getIt<RecordRepository>()));
   getIt.registerLazySingleton(() => DeleteRecord(getIt<RecordRepository>()));
   getIt.registerLazySingleton(
