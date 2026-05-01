@@ -6,12 +6,13 @@ import 'package:expense_tracker/core/constants/record_type.dart';
 import '../../domain/entities/category.dart';
 
 abstract class CategoryLocalDatasource {
-  Future<List<Category>> getCategories({RecordType? type});
+  Future<List<Category>> getCategories({RecordType? type, bool sortByUsage = false});
   Future<Category?> getCategoryById(int id);
   Future<Category> createCategory(Category category);
   Future<Category> updateCategory(Category category);
   Future<void> deleteCategory(int id);
-  Stream<List<Category>> watchCategories({RecordType? type});
+  Stream<List<Category>> watchCategories({RecordType? type, bool sortByUsage = false});
+  Future<void> incrementUsageCount(int id);
 }
 
 class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
@@ -20,10 +21,11 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
   CategoryLocalDatasourceImpl({required this.categoryDao});
 
   @override
-  Future<List<Category>> getCategories({RecordType? type}) async {
+  Future<List<Category>> getCategories({RecordType? type, bool sortByUsage = false}) async {
     try {
       final categories = await categoryDao.getAllCategories(
         type: type?.dbValue,
+        sortByUsage: sortByUsage,
       );
       return categories.map(_mapToEntity).toList();
     } catch (e) {
@@ -51,6 +53,7 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
         color: Value(category.color),
         isDefault: Value(category.isDefault),
         categoryType: Value(category.type.dbValue),
+        usageCount: const Value(0),
         createdAt: Value(now),
         updatedAt: Value(now),
       );
@@ -92,10 +95,19 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
   }
 
   @override
-  Stream<List<Category>> watchCategories({RecordType? type}) {
+  Stream<List<Category>> watchCategories({RecordType? type, bool sortByUsage = false}) {
     return categoryDao
-        .watchCategories(type: type?.dbValue)
+        .watchCategories(type: type?.dbValue, sortByUsage: sortByUsage)
         .map((categories) => categories.map(_mapToEntity).toList());
+  }
+
+  @override
+  Future<void> incrementUsageCount(int id) async {
+    try {
+      await categoryDao.incrementUsageCount(id);
+    } catch (e) {
+      throw CacheException(message: e.toString());
+    }
   }
 
   Category _mapToEntity(dynamic category) {

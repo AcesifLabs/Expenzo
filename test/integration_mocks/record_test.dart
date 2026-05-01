@@ -5,16 +5,19 @@ import 'package:expense_tracker/features/records/domain/entities/record.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
+import 'package:expense_tracker/features/categories/domain/repositories/category_repository.dart';
 import 'package:expense_tracker/features/records/domain/usecases/add_record.dart';
 import 'package:expense_tracker/features/records/domain/usecases/update_record.dart';
 import 'package:expense_tracker/features/records/domain/usecases/delete_record.dart';
 import 'package:expense_tracker/features/records/domain/usecases/get_records.dart';
 
 class MockRecordRepository extends Mock implements RecordRepository {}
+class MockCategoryRepository extends Mock implements CategoryRepository {}
 
 void main() {
   group('Record Use Case Tests', () {
     late MockRecordRepository mockRepository;
+    late MockCategoryRepository mockCategoryRepository;
     late GetRecords getRecordsUseCase;
     late AddRecord addRecordUseCase;
     late UpdateRecord updateRecordUseCase;
@@ -57,8 +60,9 @@ void main() {
 
     setUp(() {
       mockRepository = MockRecordRepository();
+      mockCategoryRepository = MockCategoryRepository();
       getRecordsUseCase = GetRecords(mockRepository);
-      addRecordUseCase = AddRecord(mockRepository);
+      addRecordUseCase = AddRecord(mockRepository, mockCategoryRepository);
       updateRecordUseCase = UpdateRecord(mockRepository);
       deleteRecordUseCase = DeleteRecord(mockRepository);
     });
@@ -82,15 +86,19 @@ void main() {
       });
     });
 
-    test('addRecord adds and returns record', () async {
+    test('addRecord adds and returns record and increments usage', () async {
       when(
         () => mockRepository.addRecord(any()),
       ).thenAnswer((_) async => Right(testRecord));
+      when(
+        () => mockCategoryRepository.incrementUsageCount(any()),
+      ).thenAnswer((_) async => const Right(null));
 
       final result = await addRecordUseCase(testRecord);
 
       expect(result.isRight(), true);
       verify(() => mockRepository.addRecord(testRecord)).called(1);
+      verify(() => mockCategoryRepository.incrementUsageCount(testRecord.categoryId!)).called(1);
     });
 
     test('updateRecord updates and returns record', () async {

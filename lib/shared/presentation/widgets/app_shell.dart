@@ -85,6 +85,7 @@ class _AppShellState extends State<AppShell> {
       ),
       floatingActionButton: _showFab
           ? FloatingActionButton(
+              heroTag: 'shell_fab',
               onPressed: () => _onFabPressed(context),
               shape: const CircleBorder(),
               child: Icon(
@@ -284,6 +285,7 @@ class _ScanPageWithFab extends StatelessWidget {
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 80),
         child: FloatingActionButton(
+          heroTag: 'scan_fab',
           onPressed: () => _showScanOptions(context),
           child: Icon(PhosphorIcons.fileMagnifyingGlass(PhosphorIconsStyle.bold)),
         ),

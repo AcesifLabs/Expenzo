@@ -14,9 +14,13 @@ class CategoryRepositoryImpl implements CategoryRepository {
   @override
   Future<Either<CacheFailure, List<Category>>> getCategories({
     RecordType? type,
+    bool sortByUsage = false,
   }) async {
     try {
-      final categories = await localDatasource.getCategories(type: type);
+      final categories = await localDatasource.getCategories(
+        type: type,
+        sortByUsage: sortByUsage,
+      );
       return Right(categories);
     } on CacheException catch (e) {
       return Left(e.toFailure());
@@ -71,7 +75,20 @@ class CategoryRepositoryImpl implements CategoryRepository {
   }
 
   @override
-  Stream<List<Category>> watchCategories({RecordType? type}) {
-    return localDatasource.watchCategories(type: type);
+  Stream<List<Category>> watchCategories({
+    RecordType? type,
+    bool sortByUsage = false,
+  }) {
+    return localDatasource.watchCategories(type: type, sortByUsage: sortByUsage);
+  }
+
+  @override
+  Future<Either<CacheFailure, void>> incrementUsageCount(int id) async {
+    try {
+      await localDatasource.incrementUsageCount(id);
+      return const Right(null);
+    } on CacheException catch (e) {
+      return Left(e.toFailure());
+    }
   }
 }

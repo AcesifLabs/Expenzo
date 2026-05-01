@@ -160,11 +160,11 @@ class DashboardPage extends StatelessWidget {
           ),
         ),
         // Budgets section
-        const SliverToBoxAdapter(child: SizedBox(height: 16)),
+        const SliverToBoxAdapter(child: SizedBox(height: 2)),
         const SliverToBoxAdapter(child: AppSectionHeader(title: 'Budgets')),
         _buildBudgetCards(context),
         // Recent Activity
-        const SliverToBoxAdapter(child: SizedBox(height: 16)),
+        const SliverToBoxAdapter(child: SizedBox(height: 5)),
         const SliverToBoxAdapter(
           child: AppSectionHeader(title: 'Recent Activity'),
         ),
@@ -188,7 +188,7 @@ class DashboardPage extends StatelessWidget {
               child: AppCard(
                 clipBehavior: Clip.antiAlias,
                 child: SizedBox(
-                  height: 190,
+                  height: 140,
                   child: ListView(
                     padding: EdgeInsets.zero,
                     children: s.recentTransactions
@@ -224,61 +224,66 @@ class DashboardPage extends StatelessWidget {
   Widget _buildBudgetCards(BuildContext context) {
     final currencyFmt = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
 
-    // Guard: GetBudgetsWithProgress is registered lazily (after 500ms delay).
-    // If the dashboard loads data before it's ready (common in release builds
-    // where SQLite is faster), `getIt` would throw and crash the entire page.
-    // Catching it gracefully keeps the rest of the dashboard visible.
-    final getBudgetsWithProgress = _tryGetBudgetsWithProgress();
-    if (getBudgetsWithProgress == null) {
-      return const SliverToBoxAdapter(child: SizedBox.shrink());
-    }
-
-    return FutureBuilder<List<BudgetProgress>>(
-      future: getBudgetsWithProgress(
-        limit: 5,
-      ).then((result) => result.getOrElse(() => [])),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: _buildBudgetSkeleton(context),
-            ),
-          );
+    return FutureBuilder(
+      future: di.featureDependenciesReady,
+      builder: (context, ready) {
+        if (ready.connectionState != ConnectionState.done) {
+          return const SliverToBoxAdapter(child: SizedBox.shrink());
         }
 
-        final budgets = snapshot.data ?? [];
-        if (budgets.isEmpty) {
-          return SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: AppCard(
-                padding: const EdgeInsets.symmetric(vertical: 24),
-                child: AppEmptyState(
-                  icon: PhosphorIcons.tray(PhosphorIconsStyle.regular),
-                  message: 'No budgets set',
+        final getBudgetsWithProgress = _tryGetBudgetsWithProgress();
+        if (getBudgetsWithProgress == null) {
+          return const SliverToBoxAdapter(child: SizedBox.shrink());
+        }
+
+        return FutureBuilder<List<BudgetProgress>>(
+          future: getBudgetsWithProgress(
+            limit: 5,
+          ).then((result) => result.getOrElse(() => [])),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: _buildBudgetSkeleton(context),
+                ),
+              );
+            }
+
+            final budgets = snapshot.data ?? [];
+            if (budgets.isEmpty) {
+              return SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: AppCard(
+                    padding: const EdgeInsets.symmetric(vertical: 24),
+                    child: AppEmptyState(
+                      icon: PhosphorIcons.tray(PhosphorIconsStyle.regular),
+                      message: 'No budgets set',
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            return SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: AppCard(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    children: budgets.map((bp) {
+                      return _BudgetProgressCard(
+                        progress: bp,
+                        currencyFmt: currencyFmt,
+                        onTap: () => _showBudgetTransactions(context, bp),
+                      );
+                    }).toList(),
+                  ),
                 ),
               ),
-            ),
-          );
-        }
-
-        return SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: AppCard(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                children: budgets.map((bp) {
-                  return _BudgetProgressCard(
-                    progress: bp,
-                    currencyFmt: currencyFmt,
-                    onTap: () => _showBudgetTransactions(context, bp),
-                  );
-                }).toList(),
-              ),
-            ),
-          ),
+            );
+          },
         );
       },
     );
