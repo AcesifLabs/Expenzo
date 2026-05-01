@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
+import 'package:expense_tracker/core/utils/navigation_utils.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:expense_tracker/features/auth/presentation/bloc/auth_event.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_state.dart';
+import 'package:expense_tracker/features/auth/presentation/pages/login_page.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budget_progress.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets_with_progress.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budget_transactions.dart';
 import 'package:expense_tracker/features/records/domain/entities/record.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:expense_tracker/features/settings/presentation/bloc/settings_bloc.dart';
+import 'package:expense_tracker/features/settings/presentation/bloc/settings_event.dart';
+import 'package:expense_tracker/features/settings/presentation/pages/settings_page.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_summary_card.dart';
@@ -57,24 +63,34 @@ class DashboardPage extends StatelessWidget {
           actions: [
             Padding(
               padding: const EdgeInsets.only(left: 8),
-              child: CircleAvatar(
-                radius: 22,
-                backgroundColor: Theme.of(
-                  context,
-                ).colorScheme.primary.withAlpha(30),
-                backgroundImage: photoUrl != null
-                    ? NetworkImage(photoUrl)
-                    : null,
-                child: photoUrl == null
-                    ? Text(
-                        name.isNotEmpty ? name[0].toUpperCase() : '?',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      )
-                    : null,
+              child: PopupMenuButton<String>(
+                offset: const Offset(0, 48),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                onSelected: (value) => _handleMenuAction(context, value),
+                itemBuilder: (context) => _buildMenuItems(context),
+                child: CircleAvatar(
+                  radius: 22,
+                  backgroundColor: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withAlpha(30),
+                  backgroundImage: photoUrl != null
+                      ? NetworkImage(photoUrl)
+                      : null,
+                  child: photoUrl == null
+                      ? Text(
+                          name.isNotEmpty ? name[0].toUpperCase() : '?',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color:
+                                Theme.of(context).colorScheme.primary,
+                          ),
+                        )
+                      : null,
+                ),
               ),
             ),
           ],
@@ -459,6 +475,151 @@ class DashboardPage extends StatelessWidget {
       return null;
     }
   }
+
+  List<PopupMenuEntry<String>> _buildMenuItems(BuildContext context) {
+    final authState = context.read<AuthBloc>().state;
+    final isAuth = authState is Authenticated;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return [
+      PopupMenuItem(
+        value: 'account',
+        child: _MenuRow(
+          icon: isAuth
+              ? PhosphorIcons.user(PhosphorIconsStyle.light)
+              : PhosphorIcons.userPlus(PhosphorIconsStyle.light),
+          text: isAuth ? 'Profile' : 'Sign Up',
+        ),
+      ),
+      const PopupMenuDivider(),
+      PopupMenuItem(
+        value: 'settings',
+        child: _MenuRow(
+          icon: PhosphorIcons.gear(PhosphorIconsStyle.light),
+          text: 'Settings',
+        ),
+      ),
+      PopupMenuItem(
+        value: 'theme',
+        child: _MenuRow(
+          icon: isDark
+              ? PhosphorIcons.moon(PhosphorIconsStyle.fill)
+              : PhosphorIcons.sun(PhosphorIconsStyle.fill),
+          text: isDark ? 'Dark Mode' : 'Light Mode',
+          trailing: isDark ? PhosphorIcons.check(PhosphorIconsStyle.bold) : null,
+        ),
+      ),
+      PopupMenuItem(
+        value: 'language',
+        child: _MenuRow(
+          icon: PhosphorIcons.translate(PhosphorIconsStyle.light),
+          text: 'Language',
+        ),
+      ),
+      const PopupMenuDivider(),
+      PopupMenuItem(
+        value: 'feedback',
+        child: _MenuRow(
+          icon: PhosphorIcons.chatTeardrop(PhosphorIconsStyle.light),
+          text: 'Feedback',
+        ),
+      ),
+      if (isAuth) ...[
+        const PopupMenuDivider(),
+        PopupMenuItem(
+          value: 'sign_out',
+          child: _MenuRow(
+            icon: PhosphorIcons.signOut(PhosphorIconsStyle.light),
+            text: 'Sign Out',
+          ),
+        ),
+      ],
+    ];
+  }
+
+  void _handleMenuAction(BuildContext context, String value) {
+    switch (value) {
+      case 'account':
+        final authState = context.read<AuthBloc>().state;
+        if (authState is Authenticated) {
+          Navigator.push(
+            context,
+            SlidePageRoute(builder: (_) => const SettingsPage()),
+          );
+        } else {
+          Navigator.push(
+            context,
+            SlidePageRoute(builder: (_) => const LoginPage()),
+          );
+        }
+      case 'settings':
+        Navigator.push(
+          context,
+          SlidePageRoute(builder: (_) => const SettingsPage()),
+        );
+      case 'theme':
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        di.getIt<SettingsBloc>().add(UpdateTheme(isDark ? 'light' : 'dark'));
+      case 'language':
+        Navigator.push(
+          context,
+          SlidePageRoute(builder: (_) => const SettingsPage()),
+        );
+      case 'feedback':
+        Navigator.push(
+          context,
+          SlidePageRoute(builder: (_) => const FeedbackPage()),
+        );
+      case 'sign_out':
+        context.read<AuthBloc>().add(const SignOutRequested());
+    }
+  }
+}
+
+// ──────────────────────────────────
+// Menu Row
+// ──────────────────────────────────
+class _MenuRow extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  final IconData? trailing;
+
+  const _MenuRow({
+    required this.icon,
+    required this.text,
+    this.trailing,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 20),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(text, style: const TextStyle(fontSize: 14)),
+        ),
+        if (trailing != null) Icon(trailing, size: 18),
+      ],
+    );
+  }
+}
+
+// ──────────────────────────────────
+// Feedback Stub Page
+// ──────────────────────────────────
+class FeedbackPage extends StatelessWidget {
+  const FeedbackPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AppScaffold(
+      title: 'Feedback',
+      child: const Center(
+        child: Text('Coming soon'),
+      ),
+    );
+  }
 }
 
 // ──────────────────────────────────
@@ -481,6 +642,7 @@ class _BalanceRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final onSurface = Theme.of(context).colorScheme.onSurface;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -493,15 +655,15 @@ class _BalanceRow extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.white.withAlpha(140),
+                color: onSurface.withAlpha(140),
               ),
             ),
             Text(
               currencyFmt.format(amount),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Colors.white,
+                color: onSurface,
               ),
             ),
           ],

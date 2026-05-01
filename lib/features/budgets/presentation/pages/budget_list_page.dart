@@ -193,7 +193,10 @@ class _BudgetListPageContentState extends State<_BudgetListPageContent> {
                     borderRadius: BorderRadius.circular(6),
                     child: LinearProgressIndicator(
                       value: (overallPercentage / 100).clamp(0.0, 1.0),
-                      backgroundColor: Colors.white.withAlpha(25),
+                      backgroundColor: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withAlpha(25),
                       color: overallPercentage > 100
                           ? const Color(0xFFFF3B30)
                           : overallPercentage >= 80
@@ -207,7 +210,10 @@ class _BudgetListPageContentState extends State<_BudgetListPageContent> {
                     '${state.budgets.length} budgets active',
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.white.withAlpha(140),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withAlpha(140),
                     ),
                   ),
                 ],

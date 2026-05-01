@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/core/utils/navigation_utils.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
@@ -244,7 +245,7 @@ class _AppShellState extends State<AppShell> {
                       child: AppActionCard(
                         icon: PhosphorIcons.trendUp(PhosphorIconsStyle.fill),
                         label: 'Income Category',
-                        color: colors.primary,
+                        color: AppColors.income,
                         onTap: () {
                           Navigator.pop(ctx);
                           _navigateToCategoryForm(context, RecordType.income);

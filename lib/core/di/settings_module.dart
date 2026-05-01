@@ -25,7 +25,7 @@ void initSettingsModule(GetIt getIt) {
     () => UpdateSettings(getIt<SettingsRepository>()),
   );
 
-  getIt.registerFactory<SettingsBloc>(
+  getIt.registerLazySingleton<SettingsBloc>(
     () => SettingsBloc(
       getSettings: getIt<GetSettings>(),
       updateSettings: getIt<UpdateSettings>(),

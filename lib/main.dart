@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,6 +12,9 @@ import 'features/categories/presentation/bloc/category_bloc.dart';
 import 'features/categories/presentation/bloc/category_event.dart';
 import 'features/records/presentation/bloc/record_bloc.dart';
 import 'features/records/presentation/bloc/record_event.dart';
+import 'features/settings/presentation/bloc/settings_bloc.dart';
+import 'features/settings/presentation/bloc/settings_state.dart';
+import 'features/settings/presentation/bloc/settings_event.dart';
 import 'features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
 import 'shared/presentation/widgets/app_shell.dart';
 import 'shared/presentation/widgets/app_error_view.dart';
@@ -42,20 +46,72 @@ void main() {
   runApp(const ExpenzoApp());
 }
 
-class ExpenzoApp extends StatelessWidget {
+class ExpenzoApp extends StatefulWidget {
   const ExpenzoApp({super.key});
 
   @override
+  State<ExpenzoApp> createState() => _ExpenzoAppState();
+}
+
+class _ExpenzoAppState extends State<ExpenzoApp> {
+  final _themeModeNotifier = ValueNotifier<ThemeMode>(ThemeMode.system);
+  StreamSubscription? _settingsSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _tryInitSettings();
+  }
+
+  void _tryInitSettings() {
+    try {
+      final bloc = di.getIt<SettingsBloc>()..add(const LoadSettings());
+      _settingsSubscription = bloc.stream.listen((state) {
+        if (state is SettingsLoaded) {
+          _themeModeNotifier.value =
+              _themeModeFromString(state.settings.theme);
+        } else if (state is SettingsUpdateSuccess) {
+          _themeModeNotifier.value =
+              _themeModeFromString(state.settings.theme);
+        }
+      });
+    } catch (_) {
+      // Not registered yet (init still running) — retry after frame
+      WidgetsBinding.instance.addPostFrameCallback((_) => _tryInitSettings());
+    }
+  }
+
+  @override
+  void dispose() {
+    _settingsSubscription?.cancel();
+    _themeModeNotifier.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Expenzo',
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
-      debugShowCheckedModeBanner: false,
-      home: const AppLoader(),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: _themeModeNotifier,
+      builder: (context, themeMode, _) {
+        return MaterialApp(
+          title: 'Expenzo',
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeMode,
+          debugShowCheckedModeBanner: false,
+          home: const AppLoader(),
+        );
+      },
     );
   }
+}
+
+ThemeMode _themeModeFromString(String theme) {
+  return switch (theme) {
+    'light' => ThemeMode.light,
+    'dark' => ThemeMode.dark,
+    _ => ThemeMode.system,
+  };
 }
 
 class AppLoader extends StatefulWidget {
