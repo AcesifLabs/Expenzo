@@ -138,7 +138,7 @@ class _RecordListPageState extends State<RecordListPage> {
           },
           child: ListView.builder(
             controller: _scrollController,
-            padding: const EdgeInsets.symmetric(vertical: 4),
+            padding: const EdgeInsets.fromLTRB(0, 4, 0, 100),
             itemCount: records.length + (hasMore ? 1 : 0),
             itemBuilder: (context, index) {
               if (index >= records.length) {

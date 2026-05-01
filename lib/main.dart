@@ -225,8 +225,7 @@ class _InitialDataLoaderState extends State<_InitialDataLoader> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await di.featureDependenciesReady;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         context.read<AuthBloc>().add(const AuthCheckRequested());
         context.read<CategoryBloc>().add(const LoadCategories());

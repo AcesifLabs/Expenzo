@@ -228,7 +228,12 @@ class DashboardPage extends StatelessWidget {
       future: di.featureDependenciesReady,
       builder: (context, ready) {
         if (ready.connectionState != ConnectionState.done) {
-          return const SliverToBoxAdapter(child: SizedBox.shrink());
+          return SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: _buildBudgetSkeleton(context),
+            ),
+          );
         }
 
         final getBudgetsWithProgress = _tryGetBudgetsWithProgress();
