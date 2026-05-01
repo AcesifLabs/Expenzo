@@ -22,10 +22,9 @@ import 'dashboard_module.dart';
 final getIt = GetIt.instance;
 
 bool _featureDependenciesRegistered = false;
-Completer<void>? _featureDependenciesCompleter;
+final _featureDependenciesCompleter = Completer<void>();
 
-Future<void> get featureDependenciesReady =>
-    _featureDependenciesCompleter?.future ?? Future.value();
+Future<void> get featureDependenciesReady => _featureDependenciesCompleter.future;
 
 /// Registers ONLY the dependencies needed for the first visible screen
 /// (Auth + Database + Categories + Records). Returns immediately so
@@ -70,7 +69,6 @@ Future<void> initCriticalDependencies() async {
 Future<void> initFeatureDependencies() async {
   if (_featureDependenciesRegistered) return;
   _featureDependenciesRegistered = true;
-  _featureDependenciesCompleter = Completer<void>();
 
   try {
     final prefs = await SharedPreferences.getInstance();
@@ -78,9 +76,9 @@ Future<void> initFeatureDependencies() async {
 
     initBudgetModule(getIt);
     initSettingsModule(getIt);
-    _featureDependenciesCompleter!.complete();
+    _featureDependenciesCompleter.complete();
   } catch (e, s) {
-    _featureDependenciesCompleter!.completeError(e, s);
+    _featureDependenciesCompleter.completeError(e, s);
     rethrow;
   }
 }
