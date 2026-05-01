@@ -27,7 +27,7 @@ final _featureDependenciesCompleter = Completer<void>();
 Future<void> get featureDependenciesReady => _featureDependenciesCompleter.future;
 
 /// Registers ONLY the dependencies needed for the first visible screen
-/// (Auth + Database + Categories + Records). Returns immediately so
+/// (Auth + Database + Categories + Records + Settings). Returns immediately so
 /// the splash screen can render without waiting for the full DI graph.
 Future<void> initCriticalDependencies() async {
   // ── Infrastructure ──
@@ -54,6 +54,11 @@ Future<void> initCriticalDependencies() async {
     () => MessageTemplateDao(getIt<AppDatabase>()),
   );
 
+  // ── Settings (needed immediately for theme) ──
+  final prefs = await SharedPreferences.getInstance();
+  getIt.registerLazySingleton<SharedPreferences>(() => prefs);
+  initSettingsModule(getIt);
+
   // ── Feature Modules (Critical) ──
   initAuthModule(getIt);
   initCategoryModule(getIt);
@@ -63,19 +68,15 @@ Future<void> initCriticalDependencies() async {
   initReportModule(getIt);
 }
 
-/// Registers feature-level dependencies (Scan, Email, Parsing, Reports,
-/// Budgets, Templates). Called in the background after the first frame
-/// renders. Safe to call multiple times — will only register once.
+/// Registers feature-level dependencies (Budgets).
+/// Called in the background after the first frame renders.
+/// Safe to call multiple times — will only register once.
 Future<void> initFeatureDependencies() async {
   if (_featureDependenciesRegistered) return;
   _featureDependenciesRegistered = true;
 
   try {
-    final prefs = await SharedPreferences.getInstance();
-    getIt.registerLazySingleton<SharedPreferences>(() => prefs);
-
     initBudgetModule(getIt);
-    initSettingsModule(getIt);
     _featureDependenciesCompleter.complete();
   } catch (e, s) {
     _featureDependenciesCompleter.completeError(e, s);

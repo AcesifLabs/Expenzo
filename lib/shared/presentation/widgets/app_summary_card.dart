@@ -24,10 +24,11 @@ class AppSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C1C1E),
+        color: colors.surface,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
@@ -35,15 +36,18 @@ class AppSummaryCard extends StatelessWidget {
         children: [
           Text(
             title,
-            style: TextStyle(fontSize: 14, color: Colors.white.withAlpha(160)),
+            style: TextStyle(
+              fontSize: 14,
+              color: colors.onSurface.withAlpha(160),
+            ),
           ),
           const SizedBox(height: 6),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 32,
               fontWeight: FontWeight.w700,
-              color: Colors.white,
+              color: colors.onSurface,
             ),
           ),
           if (bottomChild != null) ...[

@@ -39,7 +39,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     final result = await updateSettings(event.settings);
     result.fold(
       (failure) => emit(SettingsError(failure.message)),
-      (settings) => emit(SettingsUpdateSuccess(settings)),
+      (settings) => emit(SettingsLoaded(settings)),
     );
   }
 
