@@ -46,3 +46,11 @@ class DeleteRecordEvent extends RecordEvent {
 class RefreshRecords extends RecordEvent {
   const RefreshRecords();
 }
+
+class SearchRecords extends RecordEvent {
+  final String query;
+  const SearchRecords(this.query);
+
+  @override
+  List<Object?> get props => [query];
+}
