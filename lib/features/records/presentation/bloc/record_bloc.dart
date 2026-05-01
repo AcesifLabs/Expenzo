@@ -33,6 +33,7 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     on<UpdateRecordEvent>(_onUpdateRecord);
     on<DeleteRecordEvent>(_onDeleteRecord);
     on<RefreshRecords>(_onRefreshRecords);
+    on<SearchRecords>(_onSearchRecords);
     on<_RecordsUpdated>(_onRecordsUpdated);
   }
 
@@ -73,12 +74,16 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     Emitter<RecordState> emit,
   ) async {
     final records = event.records;
+    final currentQuery = state is RecordLoaded
+        ? (state as RecordLoaded).searchQuery
+        : '';
 
     emit(
       RecordLoaded(
         records: records,
         total: records.length,
         hasMore: records.length >= _pageSize,
+        searchQuery: currentQuery,
       ),
     );
   }
@@ -110,6 +115,7 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
           records: allRecords,
           total: allRecords.length,
           hasMore: newRecords.length >= _pageSize,
+          searchQuery: currentState.searchQuery,
         ),
       );
     });
@@ -157,6 +163,15 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
   ) async {
     // Re-trigger initial load (which also re-subscribes to the stream)
     add(const LoadRecords());
+  }
+
+  void _onSearchRecords(
+    SearchRecords event,
+    Emitter<RecordState> emit,
+  ) {
+    if (state is RecordLoaded) {
+      emit((state as RecordLoaded).copyWith(searchQuery: event.query));
+    }
   }
 
   @override

@@ -27,7 +27,6 @@ class RecordListPage extends StatefulWidget {
 class _RecordListPageState extends State<RecordListPage> {
   final _scrollController = ScrollController();
   final _searchCtrl = TextEditingController();
-  String _searchQuery = '';
 
   @override
   void initState() {
@@ -71,7 +70,7 @@ class _RecordListPageState extends State<RecordListPage> {
           AppSearchBar(
             controller: _searchCtrl,
             hintText: 'Search transactions...',
-            onChanged: (v) => setState(() => _searchQuery = v),
+            onChanged: (v) => context.read<RecordBloc>().add(SearchRecords(v)),
           ),
           Expanded(child: _buildRecordsList()),
         ],
@@ -109,20 +108,12 @@ class _RecordListPageState extends State<RecordListPage> {
         bool isLoadingMore = false;
 
         if (state is RecordLoaded) {
-          records = state.records;
+          records = state.filteredRecords;
           hasMore = state.hasMore;
         } else if (state is RecordLoadingMore) {
           records = state.currentRecords;
           hasMore = true;
           isLoadingMore = true;
-        }
-
-        // Filter by search
-        if (_searchQuery.isNotEmpty) {
-          final q = _searchQuery.toLowerCase();
-          records = records
-              .where((r) => r.description.toLowerCase().contains(q))
-              .toList();
         }
 
         if (records.isEmpty) {

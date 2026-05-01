@@ -30,23 +30,37 @@ class RecordLoaded extends RecordState {
   final List<Record> records;
   final int total;
   final bool hasMore;
+  final String searchQuery;
 
   const RecordLoaded({
     required this.records,
     this.total = 0,
     this.hasMore = false,
+    this.searchQuery = '',
   });
 
-  RecordLoaded copyWith({List<Record>? records, int? total, bool? hasMore}) {
+  List<Record> get filteredRecords {
+    if (searchQuery.isEmpty) return records;
+    final q = searchQuery.toLowerCase();
+    return records.where((r) => r.description.toLowerCase().contains(q)).toList();
+  }
+
+  RecordLoaded copyWith({
+    List<Record>? records,
+    int? total,
+    bool? hasMore,
+    String? searchQuery,
+  }) {
     return RecordLoaded(
       records: records ?? this.records,
       total: total ?? this.total,
       hasMore: hasMore ?? this.hasMore,
+      searchQuery: searchQuery ?? this.searchQuery,
     );
   }
 
   @override
-  List<Object?> get props => [records, total, hasMore];
+  List<Object?> get props => [records, total, hasMore, searchQuery];
 }
 
 class RecordError extends RecordState {

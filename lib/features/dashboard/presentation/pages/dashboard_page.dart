@@ -202,13 +202,17 @@ class DashboardPage extends StatelessWidget {
       ];
     }
 
-    // DashboardInitial — trigger load
+    // DashboardInitial — trigger load after initial queries settle
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<DashboardBloc>().add(
-        const LoadDashboard(
-          dateRange: DateRange(preset: DateRangePreset.thisMonth),
-        ),
-      );
+      Future.delayed(const Duration(milliseconds: 450), () {
+        if (context.mounted) {
+          context.read<DashboardBloc>().add(
+            const LoadDashboard(
+              dateRange: DateRange(preset: DateRangePreset.thisMonth),
+            ),
+          );
+        }
+      });
     });
 
     return [

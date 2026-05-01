@@ -52,17 +52,14 @@ class AppCard extends StatelessWidget {
         border: borderColor != null ? Border.all(color: borderColor!, width: 1.5) : null,
       ),
       clipBehavior: clipBehavior,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(radius),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onTap,
-            onLongPress: onLongPress,
-            child: padding != null
-                ? Padding(padding: padding!, child: child)
-                : child,
-          ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          onLongPress: onLongPress,
+          child: padding != null
+              ? Padding(padding: padding!, child: child)
+              : child,
         ),
       ),
     );

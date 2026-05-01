@@ -25,14 +25,11 @@ class BudgetProgressIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(100),
-      child: LinearProgressIndicator(
-        value: (percentage / 100).clamp(0.0, 1.0),
-        backgroundColor: Theme.of(context).colorScheme.onSurface.withAlpha(20),
-        color: _color(context),
-        minHeight: height,
-      ),
+    return LinearProgressIndicator(
+      value: (percentage / 100).clamp(0.0, 1.0),
+      backgroundColor: Theme.of(context).colorScheme.onSurface.withAlpha(20),
+      color: _color(context),
+      minHeight: height,
     );
   }
 }

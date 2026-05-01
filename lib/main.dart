@@ -226,11 +226,19 @@ class _InitialDataLoaderState extends State<_InitialDataLoader> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        context.read<AuthBloc>().add(const AuthCheckRequested());
-        context.read<CategoryBloc>().add(const LoadCategories());
-        context.read<RecordBloc>().add(const LoadRecords());
-      }
+      if (!mounted) return;
+      // Stagger to avoid GC spike from concurrent DB queries
+      context.read<AuthBloc>().add(const AuthCheckRequested());
+      Future.delayed(const Duration(milliseconds: 150), () {
+        if (mounted) {
+          context.read<CategoryBloc>().add(const LoadCategories());
+        }
+      });
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (mounted) {
+          context.read<RecordBloc>().add(const LoadRecords());
+        }
+      });
     });
   }
 
