@@ -1,6 +1,9 @@
+import 'package:drift/drift.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import '../../../../core/database/app_database.dart' show UsersCompanion;
+import '../../../../core/database/daos/user_dao.dart';
 import '../../domain/entities/user.dart';
 
 abstract class AuthRemoteDatasource {
@@ -15,10 +18,12 @@ abstract class AuthRemoteDatasource {
 class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
   final GoogleSignIn googleSignIn;
   final fb.FirebaseAuth firebaseAuth;
+  final UserDao userDao;
 
   AuthRemoteDatasourceImpl({
     required this.googleSignIn,
     required this.firebaseAuth,
+    required this.userDao,
   });
 
   @override
@@ -56,12 +61,15 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
       throw Exception('Firebase sign in failed');
     }
 
-    return _mapFirebaseUserToEntity(firebaseUser);
+    final user = _mapFirebaseUserToEntity(firebaseUser);
+    await _syncUserToLocalDb(firebaseUser);
+    return user;
   }
 
   @override
   Future<void> signOut() async {
     debugPrint('AuthRemoteDatasource: signOut called');
+    await userDao.clearUser();
     await googleSignIn.signOut();
     await firebaseAuth.signOut();
   }
@@ -72,6 +80,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
     final firebaseUser = firebaseAuth.currentUser;
     debugPrint('AuthRemoteDatasource: currentUser: $firebaseUser');
     if (firebaseUser == null) return null;
+    await _syncUserToLocalDb(firebaseUser);
     return _mapFirebaseUserToEntity(firebaseUser);
   }
 
@@ -86,6 +95,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
     final user = firebaseAuth.currentUser;
     if (user != null) {
       await user.delete();
+      await userDao.clearUser();
     }
   }
 
@@ -107,5 +117,17 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
       displayName: user.displayName,
       photoUrl: user.photoURL,
     );
+  }
+
+  Future<void> _syncUserToLocalDb(fb.User firebaseUser) async {
+    final now = DateTime.now().toUtc();
+    await userDao.upsertUser(UsersCompanion.insert(
+      uid: firebaseUser.uid,
+      email: firebaseUser.email ?? '',
+      displayName: Value(firebaseUser.displayName),
+      photoUrl: Value(firebaseUser.photoURL),
+      createdAt: now,
+      lastLoginAt: now,
+    ));
   }
 }

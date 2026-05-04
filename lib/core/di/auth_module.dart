@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:get_it/get_it.dart';
+import 'package:expense_tracker/core/database/daos/user_dao.dart';
 import 'package:expense_tracker/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:expense_tracker/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:expense_tracker/features/auth/domain/repositories/auth_repository.dart';
@@ -15,6 +16,7 @@ void initAuthModule(GetIt getIt) {
     () => AuthRemoteDatasourceImpl(
       googleSignIn: getIt<GoogleSignIn>(),
       firebaseAuth: getIt<FirebaseAuth>(),
+      userDao: getIt<UserDao>(),
     ),
   );
   getIt.registerLazySingleton<AuthRepository>(

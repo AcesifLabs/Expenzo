@@ -221,6 +221,13 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
                                     child: TextButton.icon(
                                       icon: const Icon(Icons.auto_fix_high),
                                       label: const Text('Use as Template'),
+                                      style: TextButton.styleFrom(
+                                        foregroundColor:
+                                            Theme.of(context).brightness ==
+                                                    Brightness.light
+                                                ? Colors.black
+                                                : null,
+                                      ),
                                       onPressed: () {
                                         Navigator.of(context).push(
                                           SlidePageRoute(

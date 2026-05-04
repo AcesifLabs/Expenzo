@@ -9,6 +9,7 @@ class Records extends Table {
   TextColumn get source => text().withDefault(const Constant('manual'))();
   TextColumn get sourceId => text().nullable()();
   TextColumn get recordType => text()(); // IN or OUT
+  IntColumn get userId => integer().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 

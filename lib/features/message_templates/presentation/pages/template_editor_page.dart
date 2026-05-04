@@ -120,13 +120,17 @@ class _InteractiveTemplateBuilderState
           spacing: 8,
           runSpacing: 8,
           children: _words.map((word) {
-            // Clean punctuation for trigger selection
             final cleanWord = word.replaceAll(RegExp(r'[^\w]'), '');
             if (cleanWord.isEmpty) return const SizedBox.shrink();
 
             final isSelected = _selectedTrigger == cleanWord;
+            final isLight = Theme.of(context).brightness == Brightness.light;
+
             return ChoiceChip(
-              label: Text(cleanWord),
+              label: Text(
+                cleanWord,
+                style: TextStyle(color: isLight ? Colors.black : null),
+              ),
               selected: isSelected,
               onSelected: (selected) {
                 setState(() {
@@ -178,10 +182,15 @@ class _InteractiveTemplateBuilderState
             children: _numbers.map((number) {
               final isSelected = _selectedAmount == number;
               final displayAmount = _stripCurrencyPrefix(number);
+              final isLight = Theme.of(context).brightness == Brightness.light;
+
               return ChoiceChip(
                 label: Text(
                   displayAmount,
-                  style: const TextStyle(fontSize: 18),
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: isLight ? Colors.black : null,
+                  ),
                 ),
                 selected: isSelected,
                 selectedColor: Colors.green.shade100,

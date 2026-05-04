@@ -9,6 +9,7 @@ import 'package:expense_tracker/core/database/daos/record_dao.dart';
 import 'package:expense_tracker/core/database/daos/category_dao.dart';
 import 'package:expense_tracker/core/database/daos/pending_recurring_dao.dart';
 import 'package:expense_tracker/core/database/daos/message_template_dao.dart';
+import 'package:expense_tracker/core/database/daos/user_dao.dart';
 
 import 'auth_module.dart';
 import 'category_module.dart';
@@ -52,6 +53,9 @@ Future<void> initCriticalDependencies() async {
   );
   getIt.registerFactory<MessageTemplateDao>(
     () => MessageTemplateDao(getIt<AppDatabase>()),
+  );
+  getIt.registerFactory<UserDao>(
+    () => UserDao(getIt<AppDatabase>()),
   );
 
   // ── Settings (needed immediately for theme) ──

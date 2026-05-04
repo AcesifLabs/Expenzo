@@ -10,6 +10,7 @@ class Budgets extends Table {
       boolean().withDefault(const Constant(false))();
   RealColumn get rolloverAmount => real().withDefault(const Constant(0.0))();
   BoolColumn get isEnabled => boolean().withDefault(const Constant(true))();
+  IntColumn get userId => integer().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 

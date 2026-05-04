@@ -26,6 +26,9 @@ class SourceBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final contentColor = isLight ? Colors.black : Colors.white;
+
     final isManualOverride =
         source == ExpenseSource.manual && categoryName != null;
 
@@ -44,12 +47,12 @@ class SourceBadge extends StatelessWidget {
         ? Icon(
             AppIcons.getCategoryIcon(categoryIconName ?? 'package'),
             size: 12,
-            color: Colors.white,
+            color: contentColor,
           )
         : Icon(
             AppIcons.getSourceIcon(source),
             size: 12,
-            color: Colors.white,
+            color: contentColor,
           );
 
     return Container(
@@ -68,7 +71,7 @@ class SourceBadge extends StatelessWidget {
             label,
             style: TextStyle(
               fontSize: 12,
-              color: Colors.white,
+              color: contentColor,
               fontWeight: FontWeight.w600,
             ),
           ),

@@ -14,6 +14,7 @@ import 'tables/expense_templates_table.dart';
 import 'tables/budgets_table.dart';
 import 'tables/recurring_table.dart';
 import 'tables/expense_fts_table.dart';
+import 'tables/users_table.dart';
 
 import 'daos/record_dao.dart';
 import 'daos/category_dao.dart';
@@ -22,6 +23,7 @@ import 'daos/budget_dao.dart';
 import 'daos/pending_recurring_dao.dart';
 import 'daos/parsing_rule_dao.dart';
 import 'daos/message_template_dao.dart';
+import 'daos/user_dao.dart';
 
 part 'app_database.g.dart';
 
@@ -36,6 +38,7 @@ part 'app_database.g.dart';
     Budgets,
     RecurringTransactions,
     ExpenseFtsTable,
+    Users,
   ],
   daos: [
     RecordDao,
@@ -45,13 +48,14 @@ part 'app_database.g.dart';
     PendingRecurringDao,
     ParsingRuleDao,
     MessageTemplateDao,
+    UserDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration {
@@ -90,6 +94,14 @@ class AppDatabase extends _$AppDatabase {
         }
         if (from < 7) {
           await m.addColumn(categories, categories.usageCount);
+        }
+        if (from < 8) {
+          await m.createTable(users);
+        }
+        if (from < 9) {
+          await m.addColumn(records, records.userId);
+          await m.addColumn(categories, categories.userId);
+          await m.addColumn(budgets, budgets.userId);
         }
       },
     );
