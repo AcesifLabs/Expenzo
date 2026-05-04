@@ -8,6 +8,7 @@ class Categories extends Table {
   BoolColumn get isDefault => boolean().withDefault(const Constant(false))();
   TextColumn get categoryType => text().withDefault(const Constant('OUT'))();
   IntColumn get usageCount => integer().withDefault(const Constant(0))();
+  IntColumn get userId => integer().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }

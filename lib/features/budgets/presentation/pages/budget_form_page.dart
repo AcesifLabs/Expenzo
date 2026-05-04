@@ -152,7 +152,7 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
         categoryId: _selectedCategoryId,
         amount: double.parse(_amountController.text),
         period: _selectedPeriod,
-        startDate: DateTime.now(),
+        startDate: DateTime(DateTime.now().year, DateTime.now().month, 1),
         rolloverEnabled: _rolloverEnabled,
         rolloverAmount: widget.budget?.rolloverAmount ?? 0,
         isEnabled: true,

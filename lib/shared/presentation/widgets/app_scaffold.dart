@@ -79,7 +79,7 @@ class AppScaffold extends StatelessWidget {
       content = RefreshIndicator(onRefresh: onRefresh!, child: content);
     }
 
-    return content;
+    return Material(type: MaterialType.transparency, child: content);
   }
 }
 

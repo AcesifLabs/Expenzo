@@ -5,7 +5,6 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:expense_tracker/core/constants/app_constants.dart';
 import 'package:expense_tracker/core/utils/navigation_utils.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
-import 'package:expense_tracker/features/categories/presentation/bloc/category_state.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_search_bar.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_empty_state.dart';
@@ -136,25 +135,8 @@ class _RecordListPageState extends State<RecordListPage> {
                 return _buildLoadMore(isLoadingMore);
               }
               final record = records[index];
-              final catState = context.read<CategoryBloc>().state;
-              String? catName;
-              String? catEmoji;
-              String? catColor;
-              if (catState is CategoryLoaded) {
-                final cat = catState.categories.where(
-                  (c) => c.id == record.categoryId,
-                );
-                if (cat.isNotEmpty) {
-                  catName = cat.first.name;
-                  catEmoji = cat.first.emoji;
-                  catColor = cat.first.color;
-                }
-              }
               return RecordCard(
                 record: record,
-                categoryName: catName,
-                categoryEmoji: catEmoji,
-                categoryColor: catColor,
                 onTap: () => _navigateToForm(context, record),
                 onDelete: () => _handleDelete(context, record),
               );
@@ -181,7 +163,6 @@ class _RecordListPageState extends State<RecordListPage> {
   }
 
   void _navigateToForm(BuildContext context, Record? record) {
-    // Capture blocs before push to avoid context gaps during route animation
     final recordBloc = context.read<RecordBloc>();
     final categoryBloc = context.read<CategoryBloc>();
     Navigator.push(

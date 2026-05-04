@@ -6,6 +6,8 @@ import 'package:expense_tracker/features/parsing_rules/domain/services/parsing_i
 import 'package:expense_tracker/features/parsing_rules/domain/usecases/evaluate_rules.dart';
 import 'package:expense_tracker/features/sms_parser/data/datasources/sms_local_datasource.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
+import 'package:expense_tracker/features/budgets/presentation/bloc/budget_bloc.dart';
+import 'package:expense_tracker/features/budgets/presentation/bloc/budget_event.dart';
 import '../../domain/usecases/scan_sms_usecase.dart';
 import 'package:expense_tracker/features/records/domain/usecases/create_records_from_parsed_list.dart';
 import 'sms_scanner_event.dart';
@@ -41,6 +43,10 @@ class SmsScannerBloc extends Bloc<SmsScannerEvent, SmsScannerState> {
     result.fold((failure) => emit(SmsScannerError(message: failure.message)), (
       creationResult,
     ) {
+      // Notify budget to reload — scan may have added expenses
+      try {
+        di.getIt<BudgetBloc>().add(LoadBudgets());
+      } catch (_) {}
       add(ClearResults());
     });
   }

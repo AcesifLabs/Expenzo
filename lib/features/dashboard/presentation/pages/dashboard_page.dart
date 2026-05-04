@@ -8,7 +8,6 @@ import 'package:expense_tracker/core/utils/navigation_utils.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_event.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_state.dart';
-import 'package:expense_tracker/features/auth/presentation/pages/login_page.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budget_progress.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets_with_progress.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budget_transactions.dart';
@@ -482,15 +481,22 @@ class DashboardPage extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return [
-      PopupMenuItem(
-        value: 'account',
-        child: _MenuRow(
-          icon: isAuth
-              ? PhosphorIcons.user(PhosphorIconsStyle.light)
-              : PhosphorIcons.userPlus(PhosphorIconsStyle.light),
-          text: isAuth ? 'Profile' : 'Sign Up',
+      if (isAuth)
+        PopupMenuItem(
+          value: 'account',
+          child: _MenuRow(
+            icon: PhosphorIcons.user(PhosphorIconsStyle.light),
+            text: 'Profile',
+          ),
+        )
+      else
+        PopupMenuItem(
+          value: 'sign_in',
+          child: _MenuRow(
+            icon: PhosphorIcons.signIn(PhosphorIconsStyle.light),
+            text: 'Sign In',
+          ),
         ),
-      ),
       const PopupMenuDivider(),
       PopupMenuItem(
         value: 'settings',
@@ -540,18 +546,12 @@ class DashboardPage extends StatelessWidget {
   void _handleMenuAction(BuildContext context, String value) {
     switch (value) {
       case 'account':
-        final authState = context.read<AuthBloc>().state;
-        if (authState is Authenticated) {
-          Navigator.push(
-            context,
-            SlidePageRoute(builder: (_) => const SettingsPage()),
-          );
-        } else {
-          Navigator.push(
-            context,
-            SlidePageRoute(builder: (_) => const LoginPage()),
-          );
-        }
+        Navigator.push(
+          context,
+          SlidePageRoute(builder: (_) => const SettingsPage()),
+        );
+      case 'sign_in':
+        context.read<AuthBloc>().add(const SignInWithGoogleRequested());
       case 'settings':
         Navigator.push(
           context,

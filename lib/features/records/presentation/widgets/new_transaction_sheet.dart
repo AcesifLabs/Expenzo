@@ -1,5 +1,4 @@
 import 'package:expense_tracker/shared/presentation/widgets/app_icons.dart';
-import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -42,7 +41,9 @@ class _NewTransactionSheetState extends State<NewTransactionSheet> {
   }
 
   void _loadCategories() {
-    context.read<CategoryBloc>().add(LoadCategories(type: _type, sortByUsage: true));
+    context.read<CategoryBloc>().add(
+      LoadCategories(type: _type, sortByUsage: true),
+    );
   }
 
   void _showAllCategories(BuildContext context, List<Category> allCategories) {
@@ -231,7 +232,6 @@ class _NewTransactionSheetState extends State<NewTransactionSheet> {
                   style: TextStyle(fontSize: 15, color: colors.onSurface),
                 ),
               ),
-              // Submit button
               Padding(
                 padding: const EdgeInsets.fromLTRB(24, 4, 24, 24),
                 child: SizedBox(
@@ -240,7 +240,9 @@ class _NewTransactionSheetState extends State<NewTransactionSheet> {
                   child: FilledButton(
                     onPressed: _submit,
                     style: FilledButton.styleFrom(
-                      backgroundColor: _type == RecordType.expense ? colors.error : colors.primary,
+                      backgroundColor: _type == RecordType.expense
+                          ? colors.error
+                          : colors.primary,
                       foregroundColor: colors.onPrimary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
@@ -280,11 +282,12 @@ class _NewTransactionSheetState extends State<NewTransactionSheet> {
           );
         }
 
-        // Show top 5 or selected one
         final displayCats = allCats.take(5).toList();
         if (_selectedCategoryId != null &&
             !displayCats.any((c) => c.id == _selectedCategoryId)) {
-          final selected = allCats.firstWhere((c) => c.id == _selectedCategoryId);
+          final selected = allCats.firstWhere(
+            (c) => c.id == _selectedCategoryId,
+          );
           displayCats.removeLast();
           displayCats.insert(0, selected);
         }
@@ -331,7 +334,13 @@ class _CategoryPickerItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final iconColor = isSelected ? colors.primary : colors.onSurface.withAlpha(150);
+    final isLight = Theme.of(context).brightness == Brightness.light;
+
+    final iconColor = isSelected
+        ? colors.primary
+        : colors.onSurface.withAlpha(150);
+
+    final textColor = (isSelected && isLight) ? Colors.black : iconColor;
 
     return GestureDetector(
       onTap: onTap,
@@ -341,10 +350,14 @@ class _CategoryPickerItem extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 4),
         padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
-          color: isSelected ? colors.primary.withAlpha(25) : colors.onSurface.withAlpha(10),
+          color: isSelected
+              ? colors.primary.withAlpha(25)
+              : colors.onSurface.withAlpha(10),
           borderRadius: BorderRadius.circular(25),
           border: Border.all(
-            color: isSelected ? colors.primary.withAlpha(50) : Colors.transparent,
+            color: isSelected
+                ? colors.primary.withAlpha(50)
+                : Colors.transparent,
             width: 1,
           ),
         ),
@@ -368,7 +381,7 @@ class _CategoryPickerItem extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.bold,
-                            color: iconColor,
+                            color: textColor,
                           ),
                           maxLines: 1,
                         ),
@@ -467,9 +480,13 @@ class _AllCategoriesPicker extends StatelessWidget {
                         width: 56,
                         height: 56,
                         decoration: BoxDecoration(
-                          color: isSel ? colors.primary.withAlpha(40) : colors.onSurface.withAlpha(10),
+                          color: isSel
+                              ? colors.primary.withAlpha(40)
+                              : colors.onSurface.withAlpha(10),
                           shape: BoxShape.circle,
-                          border: isSel ? Border.all(color: colors.primary, width: 2) : null,
+                          border: isSel
+                              ? Border.all(color: colors.primary, width: 2)
+                              : null,
                         ),
                         child: Icon(
                           AppIcons.getCategoryIcon(cat.emoji),
@@ -481,7 +498,9 @@ class _AllCategoriesPicker extends StatelessWidget {
                         cat.name,
                         style: TextStyle(
                           fontSize: 11,
-                          fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
+                          fontWeight: isSel
+                              ? FontWeight.bold
+                              : FontWeight.normal,
                         ),
                         textAlign: TextAlign.center,
                         maxLines: 1,

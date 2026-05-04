@@ -7,8 +7,8 @@ import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 
-class LoginPage extends StatelessWidget {
-  const LoginPage({super.key});
+class SignUpPage extends StatelessWidget {
+  const SignUpPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +16,6 @@ class LoginPage extends StatelessWidget {
       backgroundColor: AppColors.backgroundLight,
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
-          debugPrint('LoginPage: BlocConsumer state: $state');
           if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -27,12 +26,10 @@ class LoginPage extends StatelessWidget {
             );
           }
           if (state is Authenticated) {
-            debugPrint('LoginPage: Authenticated, user: ${state.user}');
             Navigator.of(context).popUntil((route) => route.isFirst);
           }
         },
         builder: (context, state) {
-          debugPrint('LoginPage: builder state: $state');
           return SafeArea(
             child: Center(
               child: Padding(
@@ -42,20 +39,20 @@ class LoginPage extends StatelessWidget {
                   children: [
                     const Spacer(),
                     Icon(
-                      PhosphorIcons.wallet(PhosphorIconsStyle.regular),
+                      PhosphorIcons.userPlus(PhosphorIconsStyle.regular),
                       size: 80,
                       color: AppColors.primary,
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      'Expenzo',
+                      'Create Account',
                       style: AppTypography.headlineLarge.copyWith(
                         color: AppColors.primary,
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Track your expenses effortlessly',
+                      'Start tracking your expenses today',
                       style: AppTypography.bodyLarge.copyWith(
                         color: AppColors.textSecondaryLight,
                       ),
@@ -66,11 +63,11 @@ class LoginPage extends StatelessWidget {
                         children: [
                           CircularProgressIndicator(),
                           SizedBox(height: 16),
-                          Text('Signing in...'),
+                          Text('Creating account...'),
                         ],
                       )
                     else
-                      _buildSignInButton(context),
+                      _buildSignUpButton(context),
                     const SizedBox(height: 48),
                   ],
                 ),
@@ -82,14 +79,13 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSignInButton(BuildContext context) {
+  Widget _buildSignUpButton(BuildContext context) {
     return ElevatedButton(
       onPressed: () {
-        debugPrint('LoginPage: Sign in button pressed');
         context.read<AuthBloc>().add(const SignInWithGoogleRequested());
       },
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFFDB4437),
+        backgroundColor: const Color(0xFF4285F4),
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -100,7 +96,7 @@ class LoginPage extends StatelessWidget {
           const Icon(Icons.g_mobiledata, size: 24),
           const SizedBox(width: 12),
           Text(
-            'Sign in with Google',
+            'Sign up with Google',
             style: AppTypography.labelLarge.copyWith(
               fontWeight: FontWeight.bold,
               color: Colors.white,

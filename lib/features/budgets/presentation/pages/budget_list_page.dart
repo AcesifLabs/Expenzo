@@ -77,7 +77,9 @@ class _BudgetListPageContentState extends State<_BudgetListPageContent> {
             context,
           ).showSnackBar(SnackBar(content: Text(state.message)));
         }
-        if (state is BudgetLoaded && _progressMap.isEmpty) {
+        if (state is BudgetLoaded) {
+          // Always recalculate — scan or manual entries may have added records
+          _progressMap = {};
           _loadProgress(state.budgets);
         }
       },
