@@ -1,47 +1,41 @@
-# Miscellaneous
+# NestJS / Node
+packages/backend/dist/
+packages/backend/node_modules/
+packages/backend/.env
+packages/backend/.env.local
+
+# Flutter/Dart/Pub related (now in packages/mobile)
+packages/mobile/**/doc/api/
+packages/mobile/.dart_tool/
+packages/mobile/.flutter-plugins-dependencies
+packages/mobile/.pub-cache/
+packages/mobile/.pub/
+packages/mobile/build/
+packages/mobile/**/build/
+
+# Android keys (not committed)
+packages/mobile/android/app/google-services.json
+packages/mobile/android/app/debug
+packages/mobile/android/app/profile
+packages/mobile/android/app/release
+
+# Misc
 *.class
 *.log
 *.pyc
 *.swp
 .DS_Store
 .atom/
-.build/
-.buildlog/
 .history
 .svn/
 .swiftpm/
-migrate_working_dir/
-
-# IntelliJ related
 *.iml
 *.ipr
 *.iws
 .idea/
-
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
-.dart_tool/
-.flutter-plugins-dependencies
-.pub-cache/
-.pub/
-/build/
-/coverage/
-
-# Symbolication related
 app.*.symbols
-
-# Obfuscation related
 app.*.map.json
-
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
-/android/app/google-services.json
-**/build/88
+/coverage/
+**/.env**
+**/build/**
+**/task**
