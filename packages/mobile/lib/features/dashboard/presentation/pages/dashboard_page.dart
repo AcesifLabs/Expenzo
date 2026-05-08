@@ -61,7 +61,7 @@ class DashboardPage extends StatelessWidget {
           subtitle: dateStr,
           actions: [
             Padding(
-              padding: const EdgeInsets.only(left: 8),
+              padding: const EdgeInsets.only(left: 8, right: 8),
               child: PopupMenuButton<String>(
                 offset: const Offset(0, 48),
                 shape: RoundedRectangleBorder(
@@ -69,25 +69,45 @@ class DashboardPage extends StatelessWidget {
                 ),
                 onSelected: (value) => _handleMenuAction(context, value),
                 itemBuilder: (context) => _buildMenuItems(context),
-                child: CircleAvatar(
-                  radius: 22,
-                  backgroundColor: Theme.of(context).colorScheme.primary.withAlpha(30),
-                  backgroundImage: photoUrl != null ? NetworkImage(photoUrl) : null,
-                  child: photoUrl == null
-                      ? (authState is Authenticated
-                          ? Text(
-                              name.isNotEmpty ? name[0].toUpperCase() : '?',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                            )
-                          : Icon(
-                              PhosphorIcons.user(PhosphorIconsStyle.regular),
-                              color: Theme.of(context).colorScheme.primary,
-                            ))
-                      : null,
+                padding: EdgeInsets.zero,
+                icon: SizedBox(
+                  width: 44,
+                  height: 44,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      CircleAvatar(
+                        radius: 20,
+                        backgroundColor: Theme.of(context).colorScheme.primary.withAlpha(30),
+                        backgroundImage: photoUrl != null ? NetworkImage(photoUrl) : null,
+                        child: photoUrl == null
+                            ? (authState is Authenticated
+                                ? Text(
+                                    name.isNotEmpty ? name[0].toUpperCase() : '?',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: Theme.of(context).colorScheme.primary,
+                                    ),
+                                  )
+                                : Icon(
+                                    PhosphorIcons.user(PhosphorIconsStyle.regular),
+                                    color: Theme.of(context).colorScheme.primary,
+                                    size: 20,
+                                  ))
+                            : null,
+                      ),
+                      if (authState is AuthLoading)
+                        SizedBox(
+                          width: 44,
+                          height: 44,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),
