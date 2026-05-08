@@ -44,9 +44,7 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => getIt<BudgetBloc>(),
-      child: Scaffold(
+    return Scaffold(
         appBar: AppBar(
           title: Text(isEditing ? 'Edit Budget' : 'Create Budget'),
         ),
@@ -141,10 +139,8 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
             );
           },
         ),
-      ),
     );
   }
-
   void _submit() {
     if (_formKey.currentState!.validate()) {
       final budget = Budget(
