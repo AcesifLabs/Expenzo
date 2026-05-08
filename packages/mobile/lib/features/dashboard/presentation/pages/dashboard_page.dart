@@ -57,7 +57,7 @@ class DashboardPage extends StatelessWidget {
             '${DateFormat('EEEE').format(now)}, ${now.year}';
 
         return AppScaffold.slivers(
-          title: 'Welcome back, $name',
+          title: null,
           subtitle: dateStr,
           actions: [
             Padding(
@@ -71,23 +71,22 @@ class DashboardPage extends StatelessWidget {
                 itemBuilder: (context) => _buildMenuItems(context),
                 child: CircleAvatar(
                   radius: 22,
-                  backgroundColor: Theme.of(context)
-                      .colorScheme
-                      .primary
-                      .withAlpha(30),
-                  backgroundImage: photoUrl != null
-                      ? NetworkImage(photoUrl)
-                      : null,
+                  backgroundColor: Theme.of(context).colorScheme.primary.withAlpha(30),
+                  backgroundImage: photoUrl != null ? NetworkImage(photoUrl) : null,
                   child: photoUrl == null
-                      ? Text(
-                          name.isNotEmpty ? name[0].toUpperCase() : '?',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color:
-                                Theme.of(context).colorScheme.primary,
-                          ),
-                        )
+                      ? (authState is Authenticated
+                          ? Text(
+                              name.isNotEmpty ? name[0].toUpperCase() : '?',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            )
+                          : Icon(
+                              PhosphorIcons.user(PhosphorIconsStyle.regular),
+                              color: Theme.of(context).colorScheme.primary,
+                            ))
                       : null,
                 ),
               ),

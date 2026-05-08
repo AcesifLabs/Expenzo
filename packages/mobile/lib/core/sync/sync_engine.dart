@@ -11,6 +11,9 @@ import '../database/daos/budget_dao.dart';
 import 'connectivity_service.dart';
 import 'sync_event.dart';
 
+enum SyncConflictType { none, localOnly, cloudOnly, conflict }
+enum SyncMode { localWins, cloudWins, merge }
+
 class SyncEngine {
   final ApiClient _apiClient = ApiClient();
   final ConnectivityService _connectivity = ConnectivityService();
@@ -22,6 +25,10 @@ class SyncEngine {
   StreamSubscription? _syncEventSub;
   bool _isSyncing = false;
   bool _initialized = false;
+  void Function(double)? _onProgress;
+
+  void Function(double)? get onProgress => _onProgress;
+  set onProgress(void Function(double)? cb) => _onProgress = cb;
 
   SyncEngine({
     required SyncQueueDao syncQueueDao,
@@ -47,23 +54,43 @@ class SyncEngine {
 
   Future<void> stop() async { _connectivitySub?.cancel(); _syncEventSub?.cancel(); _initialized = false; }
 
+  static const int chunkSize = 500;
+
   Future<void> _safePushChanges() async {
-    if (_isSyncing) return; _isSyncing = true;
+    if (_isSyncing) return;
+    _isSyncing = true;
     try {
       if (!await _connectivity.checkNow()) { _isSyncing = false; return; }
       final queue = await _syncQueueDao.getUnsynced();
       if (queue.isEmpty) { _isSyncing = false; return; }
-      debugPrint('SyncEngine: Pushing ${queue.length} changes');
-      final changes = queue.map((item) => {'table': item.entityTable, 'action': item.action, 'id': item.recordId, 'data': item.payload.isNotEmpty ? jsonDecode(item.payload) : null, 'updatedAt': item.createdAt.toUtc().toIso8601String()}).toList();
-      final response = await _apiClient.dio.post(ApiConstants.syncPush, data: {'changes': changes});
-      final results = response.data['results'] as List;
-      final syncedIds = <int>[];
-      for (int i = 0; i < results.length; i++) {
-        if (results[i]['status'] == 'success' || results[i]['status'] == 'conflict') syncedIds.add(queue[i].id);
+
+      int processed = 0;
+      final total = queue.length;
+      
+      while (processed < total) {
+        final end = processed + chunkSize > total ? total : processed + chunkSize;
+        final batch = queue.sublist(processed, end);
+        debugPrint('SyncEngine: Pushing chunk ${processed ~/ chunkSize + 1} (${batch.length} items)');
+        
+        final changes = batch.map((item) => {
+          'table': item.entityTable, 'action': item.action, 'id': item.recordId,
+          'data': item.payload.isNotEmpty ? jsonDecode(item.payload) : null,
+          'updatedAt': item.createdAt.toUtc().toIso8601String()
+        }).toList();
+        
+        final response = await _apiClient.dio.post(ApiConstants.syncPush, data: {'changes': changes});
+        final results = response.data['results'] as List;
+        final syncedIds = <int>[];
+        for (int i = 0; i < results.length; i++) {
+          if (results[i]['status'] == 'success' || results[i]['status'] == 'conflict') {
+            syncedIds.add(batch[i].id);
+          }
+        }
+        if (syncedIds.isNotEmpty) await _syncQueueDao.markSynced(syncedIds);
+        
+        processed = end;
+        _onProgress?.call(processed / total);
       }
-      if (syncedIds.isNotEmpty) await _syncQueueDao.markSynced(syncedIds);
-      final remaining = await _syncQueueDao.getUnsynced();
-      if (remaining.isNotEmpty) { _isSyncing = false; await _safePushChanges(); return; }
     } catch (e) { debugPrint('SyncEngine push failed: $e'); }
     finally { _isSyncing = false; }
   }
@@ -108,5 +135,41 @@ class SyncEngine {
       debugPrint('SyncEngine: Migration complete');
       await TokenStorage.markFirstSyncDone();
     } catch (e) { debugPrint('SyncEngine: Migration failed: $e'); }
+  }
+
+  Future<SyncConflictType> checkConflict() async {
+    int localCount = 0;
+    if (_recordDao != null) localCount += await _recordDao!.getAllRecords().then((r) => r.length);
+    if (_categoryDao != null) localCount += await _categoryDao!.getAllCategories().then((r) => r.length);
+    if (_budgetDao != null) localCount += await _budgetDao!.getAllBudgets().then((r) => r.length);
+    
+    int cloudCount = 0;
+    try {
+      final response = await _apiClient.dio.get('/sync/summary');
+      cloudCount = response.data['totalCount'] ?? 0;
+    } catch (_) { cloudCount = 0; }
+
+    if (localCount > 0 && cloudCount > 0) return SyncConflictType.conflict;
+    if (localCount > 0) return SyncConflictType.localOnly;
+    if (cloudCount > 0) return SyncConflictType.cloudOnly;
+    return SyncConflictType.none;
+  }
+
+  Future<void> executeDecision(SyncMode mode) async {
+    switch (mode) {
+      case SyncMode.localWins:
+        await _apiClient.dio.delete('/sync/clear');
+        await _safePushChanges();
+        break;
+      case SyncMode.cloudWins:
+        // Database reset handled externally by caller
+        await _safePullChanges();
+        break;
+      case SyncMode.merge:
+        await _safePushChanges();
+        await _safePullChanges();
+        break;
+    }
+    await TokenStorage.markFirstSyncDone();
   }
 }

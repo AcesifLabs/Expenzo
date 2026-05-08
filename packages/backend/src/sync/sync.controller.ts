@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Query, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Get, Delete, Body, Query, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { SyncService } from './sync.service';
 import { PushSyncDto } from './dto/push-sync.dto';
 import { PullSyncQueryDto } from './dto/pull-sync-query.dto';
@@ -19,5 +19,17 @@ export class SyncController {
   @Get('pull')
   pull(@CurrentUser('sub') userId: string, @Query() query: PullSyncQueryDto) {
     return this.syncService.pullChanges(userId, query.since);
+  }
+
+  @Get('summary')
+  async summary(@CurrentUser('sub') userId: string) {
+    return this.syncService.getSummary(userId);
+  }
+
+  @Delete('clear')
+  @HttpCode(HttpStatus.OK)
+  async clear(@CurrentUser('sub') userId: string) {
+    await this.syncService.clearUserData(userId);
+    return { status: 'cleared' };
   }
 }

@@ -86,4 +86,21 @@ export class SyncService {
     }
     return { changes, serverTime: new Date().toISOString() };
   }
+
+  async getSummary(userId: string) {
+    let totalCount = 0;
+    const tables: { [key: string]: number } = {};
+    for (const [table, repo] of this.repoMap) {
+      const count = await repo.count({ where: { userId } });
+      tables[table] = count;
+      totalCount += count;
+    }
+    return { totalCount, tables };
+  }
+
+  async clearUserData(userId: string) {
+    for (const [table, repo] of this.repoMap) {
+      await repo.delete({ userId });
+    }
+  }
 }
