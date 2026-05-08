@@ -79,10 +79,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         final engine = di.getIt<SyncEngine>();
         final conflict = await engine.checkConflict();
         if (conflict == SyncConflictType.conflict) {
-          emit(AuthSyncConflictPending());
+          emit(AuthSyncConflictPending(user));
           return;
         }
-      } catch (_) {}
+      } catch (e) {
+        debugPrint('AuthBloc: Conflict check failed, proceeding with auth: $e');
+      }
     }
     emit(Authenticated(user));
     _tryStartSyncEngine();

@@ -32,7 +32,8 @@ class DatabaseSeeder {
             name: cat.$1,
             emoji: Value(cat.$2),
             color: Value(cat.$3),
-            categoryType: const Value('OUT'), isDefault: const Value(true), // Default to expense
+            categoryType: const Value('OUT'),
+            isDefault: const Value(true), // Default to expense
             createdAt: Value(now),
             updatedAt: Value(now),
           ),

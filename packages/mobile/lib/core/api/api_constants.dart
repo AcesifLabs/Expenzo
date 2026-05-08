@@ -16,4 +16,6 @@ class ApiConstants {
   static const String pendingRecurrings = '/pending-recurrings';
   static const String syncPush = '/sync/push';
   static const String syncPull = '/sync/pull';
+  static const String syncSummary = '/sync/summary';
+  static const String syncClear = '/sync/clear';
 }

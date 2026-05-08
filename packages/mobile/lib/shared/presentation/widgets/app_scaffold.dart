@@ -51,7 +51,7 @@ class AppScaffold extends StatelessWidget {
     required List<Widget> slivers,
     this.onRefresh,
   }) : _body = _SliverBody(
-         title: title ?? '',
+         title: title,
          subtitle: subtitle,
          actions: actions,
          slivers: slivers,
@@ -84,7 +84,7 @@ class AppScaffold extends StatelessWidget {
 }
 
 class _SliverBody extends StatelessWidget {
-  final String title;
+  final String? title;
   final String? subtitle;
   final List<Widget>? actions;
   final List<Widget> slivers;
@@ -103,7 +103,7 @@ class _SliverBody extends StatelessWidget {
       slivers: [
         SliverToBoxAdapter(
           child: AppPageHeader(
-            title: title,
+            title: title ?? '',
             subtitle: subtitle,
             actions: actions,
           ),
