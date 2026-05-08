@@ -16,6 +16,7 @@ import 'tables/recurring_table.dart';
 import 'tables/expense_fts_table.dart';
 import 'tables/users_table.dart';
 import 'tables/sync_queue_table.dart';
+import 'tables/app_settings_table.dart';
 
 import 'daos/record_dao.dart';
 import 'daos/category_dao.dart';
@@ -42,6 +43,7 @@ part 'app_database.g.dart';
     ExpenseFtsTable,
     Users,
     SyncQueue,
+    AppSettings,
   ],
   daos: [
     RecordDao,
@@ -59,7 +61,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration {
@@ -109,6 +111,9 @@ class AppDatabase extends _$AppDatabase {
         }
         if (from < 10) {
           await m.createTable(syncQueue);
+        }
+        if (from < 11) {
+          await m.createTable(appSettings);
         }
       },
     );

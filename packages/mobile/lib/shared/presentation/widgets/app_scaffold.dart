@@ -24,7 +24,7 @@ import 'app_page_header.dart';
 /// )
 /// ```
 class AppScaffold extends StatelessWidget {
-  final String title;
+  final String? title;
   final String? subtitle;
   final List<Widget>? actions;
   final Widget? _body;
@@ -51,7 +51,7 @@ class AppScaffold extends StatelessWidget {
     required List<Widget> slivers,
     this.onRefresh,
   }) : _body = _SliverBody(
-         title: title,
+         title: title ?? '',
          subtitle: subtitle,
          actions: actions,
          slivers: slivers,
@@ -69,7 +69,7 @@ class AppScaffold extends StatelessWidget {
       content = Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppPageHeader(title: title, subtitle: subtitle, actions: actions),
+          AppPageHeader(title: title ?? '', subtitle: subtitle, actions: actions),
           Expanded(child: _body ?? const SizedBox.shrink()),
         ],
       );

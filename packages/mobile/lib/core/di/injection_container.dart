@@ -5,6 +5,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:expense_tracker/core/database/app_database.dart';
+import 'package:expense_tracker/core/database/database_reset.dart';
 import 'package:expense_tracker/core/database/daos/record_dao.dart';
 import 'package:expense_tracker/core/database/daos/category_dao.dart';
 import 'package:expense_tracker/core/database/daos/pending_recurring_dao.dart';
@@ -89,6 +90,33 @@ Future<void> initCriticalDependencies() async {
   initDashboardModule(getIt);
   initParsingModule(getIt);
   initReportModule(getIt);
+}
+
+Future<void> resetDatabaseInstance() async {
+  // Unregister existing
+  if (getIt.isRegistered<AppDatabase>()) {
+    getIt.unregister<AppDatabase>();
+  }
+  if (getIt.isRegistered<RecordDao>()) getIt.unregister<RecordDao>();
+  if (getIt.isRegistered<CategoryDao>()) getIt.unregister<CategoryDao>();
+  if (getIt.isRegistered<BudgetDao>()) getIt.unregister<BudgetDao>();
+  if (getIt.isRegistered<SyncQueueDao>()) getIt.unregister<SyncQueueDao>();
+  if (getIt.isRegistered<UserDao>()) getIt.unregister<UserDao>();
+  if (getIt.isRegistered<MessageTemplateDao>()) getIt.unregister<MessageTemplateDao>();
+  if (getIt.isRegistered<PendingRecurringDao>()) getIt.unregister<PendingRecurringDao>();
+
+  // Delete file
+  await DatabaseReset.deleteDatabaseFile();
+
+  // Re-register
+  getIt.registerLazySingleton<AppDatabase>(() => AppDatabase());
+  getIt.registerFactory<RecordDao>(() => RecordDao(getIt<AppDatabase>()));
+  getIt.registerFactory<CategoryDao>(() => CategoryDao(getIt<AppDatabase>()));
+  getIt.registerFactory<PendingRecurringDao>(() => PendingRecurringDao(getIt<AppDatabase>()));
+  getIt.registerFactory<MessageTemplateDao>(() => MessageTemplateDao(getIt<AppDatabase>()));
+  getIt.registerFactory<UserDao>(() => UserDao(getIt<AppDatabase>()));
+  getIt.registerFactory<SyncQueueDao>(() => SyncQueueDao(getIt<AppDatabase>()));
+  getIt.registerFactory<BudgetDao>(() => BudgetDao(getIt<AppDatabase>()));
 }
 
 /// Registers feature-level dependencies (Budgets).
