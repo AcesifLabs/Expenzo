@@ -13,10 +13,11 @@ import 'package:expense_tracker/core/database/daos/message_template_dao.dart';
 import 'package:expense_tracker/core/database/daos/user_dao.dart';
 import 'package:expense_tracker/core/database/daos/budget_dao.dart';
 import 'package:expense_tracker/core/database/daos/sync_queue_dao.dart';
-import 'package:expense_tracker/core/database/daos/budget_dao.dart';
 import 'package:expense_tracker/core/api/api_client.dart';
 import 'package:expense_tracker/core/sync/connectivity_service.dart';
 import 'package:expense_tracker/core/sync/sync_engine.dart';
+import 'package:expense_tracker/core/sync/sync_table_registry.dart';
+import 'package:expense_tracker/core/sync/default_sync_registry.dart';
 
 import 'auth_module.dart';
 import 'category_module.dart';
@@ -33,6 +34,26 @@ bool _featureDependenciesRegistered = false;
 final _featureDependenciesCompleter = Completer<void>();
 
 Future<void> get featureDependenciesReady => _featureDependenciesCompleter.future;
+
+void _registerDaoFactories() {
+  getIt.registerFactory<RecordDao>(() => RecordDao(getIt<AppDatabase>()));
+  getIt.registerFactory<CategoryDao>(() => CategoryDao(getIt<AppDatabase>()));
+  getIt.registerFactory<PendingRecurringDao>(() => PendingRecurringDao(getIt<AppDatabase>()));
+  getIt.registerFactory<MessageTemplateDao>(() => MessageTemplateDao(getIt<AppDatabase>()));
+  getIt.registerFactory<UserDao>(() => UserDao(getIt<AppDatabase>()));
+  getIt.registerFactory<BudgetDao>(() => BudgetDao(getIt<AppDatabase>()));
+  getIt.registerFactory<SyncQueueDao>(() => SyncQueueDao(getIt<AppDatabase>()));
+}
+
+void _unregisterDaoFactories() {
+  if (getIt.isRegistered<RecordDao>()) getIt.unregister<RecordDao>();
+  if (getIt.isRegistered<CategoryDao>()) getIt.unregister<CategoryDao>();
+  if (getIt.isRegistered<BudgetDao>()) getIt.unregister<BudgetDao>();
+  if (getIt.isRegistered<SyncQueueDao>()) getIt.unregister<SyncQueueDao>();
+  if (getIt.isRegistered<UserDao>()) getIt.unregister<UserDao>();
+  if (getIt.isRegistered<MessageTemplateDao>()) getIt.unregister<MessageTemplateDao>();
+  if (getIt.isRegistered<PendingRecurringDao>()) getIt.unregister<PendingRecurringDao>();
+}
 
 /// Registers ONLY the dependencies needed for the first visible screen
 /// (Auth + Database + Categories + Records + Settings). Returns immediately so
@@ -53,29 +74,19 @@ Future<void> initCriticalDependencies() async {
   getIt.registerLazySingleton<AppDatabase>(() => AppDatabase());
 
   // DAOs
-  getIt.registerFactory<RecordDao>(() => RecordDao(getIt<AppDatabase>()));
-  getIt.registerFactory<CategoryDao>(() => CategoryDao(getIt<AppDatabase>()));
-  getIt.registerFactory<PendingRecurringDao>(
-    () => PendingRecurringDao(getIt<AppDatabase>()),
-  );
-  getIt.registerFactory<MessageTemplateDao>(
-    () => MessageTemplateDao(getIt<AppDatabase>()),
-  );
-  getIt.registerFactory<UserDao>(
-    () => UserDao(getIt<AppDatabase>()),
-  );
-  getIt.registerFactory<BudgetDao>(
-    () => BudgetDao(getIt<AppDatabase>()),
-  );
-  getIt.registerFactory<SyncQueueDao>(
-    () => SyncQueueDao(getIt<AppDatabase>()),
-  );
+  _registerDaoFactories();
 
   // API & Sync
   getIt.registerLazySingleton<ApiClient>(() => ApiClient());
   getIt.registerLazySingleton<ConnectivityService>(() => ConnectivityService());
+  getIt.registerLazySingleton<SyncTableRegistry>(() => createDefaultSyncRegistry());
   getIt.registerLazySingleton<SyncEngine>(
-    () => SyncEngine(syncQueueDao: getIt<SyncQueueDao>(), recordDao: getIt<RecordDao>(), categoryDao: getIt<CategoryDao>(), budgetDao: getIt<BudgetDao>()),
+    () => SyncEngine(
+      syncQueueDao: getIt<SyncQueueDao>(),
+      apiClient: getIt<ApiClient>(),
+      connectivity: getIt<ConnectivityService>(),
+      registry: getIt<SyncTableRegistry>(),
+    ),
   );
 
   // ── Settings (needed immediately for theme) ──
@@ -92,31 +103,21 @@ Future<void> initCriticalDependencies() async {
   initReportModule(getIt);
 }
 
-Future<void> resetDatabaseInstance() async {
+  Future<void> resetDatabaseInstance() async {
   // Unregister existing
   if (getIt.isRegistered<AppDatabase>()) {
+    final db = getIt<AppDatabase>();
+    await db.close();
     getIt.unregister<AppDatabase>();
   }
-  if (getIt.isRegistered<RecordDao>()) getIt.unregister<RecordDao>();
-  if (getIt.isRegistered<CategoryDao>()) getIt.unregister<CategoryDao>();
-  if (getIt.isRegistered<BudgetDao>()) getIt.unregister<BudgetDao>();
-  if (getIt.isRegistered<SyncQueueDao>()) getIt.unregister<SyncQueueDao>();
-  if (getIt.isRegistered<UserDao>()) getIt.unregister<UserDao>();
-  if (getIt.isRegistered<MessageTemplateDao>()) getIt.unregister<MessageTemplateDao>();
-  if (getIt.isRegistered<PendingRecurringDao>()) getIt.unregister<PendingRecurringDao>();
+  _unregisterDaoFactories();
 
   // Delete file
   await DatabaseReset.deleteDatabaseFile();
 
   // Re-register
   getIt.registerLazySingleton<AppDatabase>(() => AppDatabase());
-  getIt.registerFactory<RecordDao>(() => RecordDao(getIt<AppDatabase>()));
-  getIt.registerFactory<CategoryDao>(() => CategoryDao(getIt<AppDatabase>()));
-  getIt.registerFactory<PendingRecurringDao>(() => PendingRecurringDao(getIt<AppDatabase>()));
-  getIt.registerFactory<MessageTemplateDao>(() => MessageTemplateDao(getIt<AppDatabase>()));
-  getIt.registerFactory<UserDao>(() => UserDao(getIt<AppDatabase>()));
-  getIt.registerFactory<SyncQueueDao>(() => SyncQueueDao(getIt<AppDatabase>()));
-  getIt.registerFactory<BudgetDao>(() => BudgetDao(getIt<AppDatabase>()));
+  _registerDaoFactories();
 }
 
 /// Registers feature-level dependencies (Budgets).

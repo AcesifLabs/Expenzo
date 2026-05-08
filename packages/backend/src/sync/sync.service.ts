@@ -99,8 +99,21 @@ export class SyncService {
   }
 
   async clearUserData(userId: string) {
-    for (const [table, repo] of this.repoMap) {
-      await repo.delete({ userId });
+    const deletionOrder: SyncTable[] = [
+      SyncTable.PENDING_RECURRING,
+      SyncTable.RECURRING_TRANSACTIONS,
+      SyncTable.EXPENSE_TEMPLATES,
+      SyncTable.PARSING_RULES,
+      SyncTable.MESSAGE_SOURCES,
+      SyncTable.BUDGETS,
+      SyncTable.RECORDS,
+      SyncTable.CATEGORIES,
+    ];
+    for (const table of deletionOrder) {
+      const repo = this.repoMap.get(table);
+      if (repo) {
+        await repo.delete({ userId });
+      }
     }
   }
 }

@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,6 +20,14 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
   bool _syncing = false;
   double _progress = 0;
   String _status = '';
+
+  @override
+  void dispose() {
+    try {
+      di.getIt<SyncEngine>().onProgress = null;
+    } catch (_) {}
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

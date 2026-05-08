@@ -39,5 +39,9 @@ class AuthError extends AuthState {
 }
 
 class AuthSyncConflictPending extends AuthState {
-  const AuthSyncConflictPending();
+  final User user;
+  const AuthSyncConflictPending(this.user);
+
+  @override
+  List<Object?> get props => [user];
 }
