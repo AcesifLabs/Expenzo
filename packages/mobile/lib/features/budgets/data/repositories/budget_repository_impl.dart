@@ -50,7 +50,7 @@ class BudgetRepositoryImpl implements BudgetRepository {
   Future<Either<Failure, Budget>> createBudget(Budget budget) async {
     try {
       await localDatasource.createBudget(budget);
-      _enqueueSync('insert', budget.id!, {'categoryId': budget.categoryId, 'amount': budget.amount, 'period': budget.period, 'startDate': budget.startDate.toUtc().toIso8601String(), 'rolloverEnabled': budget.rolloverEnabled, 'rolloverAmount': budget.rolloverAmount, 'isEnabled': budget.isEnabled});
+      _enqueueSync('insert', budget.id ?? DateTime.now().millisecondsSinceEpoch.toString(), {'categoryId': budget.categoryId, 'amount': budget.amount, 'period': budget.period.name, 'startDate': budget.startDate.toUtc().toIso8601String(), 'rolloverEnabled': budget.rolloverEnabled, 'rolloverAmount': budget.rolloverAmount, 'isEnabled': budget.isEnabled});
       return Right(budget);
     } on CacheException catch (e) {
       return Left(e.toFailure());
@@ -61,7 +61,7 @@ class BudgetRepositoryImpl implements BudgetRepository {
   Future<Either<Failure, Budget>> updateBudget(Budget budget) async {
     try {
       await localDatasource.updateBudget(budget);
-      _enqueueSync('update', budget.id!, {'categoryId': budget.categoryId, 'amount': budget.amount, 'period': budget.period, 'startDate': budget.startDate.toUtc().toIso8601String(), 'rolloverEnabled': budget.rolloverEnabled, 'rolloverAmount': budget.rolloverAmount, 'isEnabled': budget.isEnabled});
+      _enqueueSync('update', budget.id ?? DateTime.now().millisecondsSinceEpoch.toString(), {'categoryId': budget.categoryId, 'amount': budget.amount, 'period': budget.period.name, 'startDate': budget.startDate.toUtc().toIso8601String(), 'rolloverEnabled': budget.rolloverEnabled, 'rolloverAmount': budget.rolloverAmount, 'isEnabled': budget.isEnabled});
       return Right(budget);
     } on CacheException catch (e) {
       return Left(e.toFailure());
