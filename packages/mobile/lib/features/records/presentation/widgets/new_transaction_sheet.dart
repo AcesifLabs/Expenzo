@@ -159,10 +159,13 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     if (_hasManuallyDeselected) return;
     if (categories.isEmpty) return;
 
-    final generalCat = categories.cast<Category?>().firstWhere(
-      (c) => c!.name == 'General' && c.isDefault,
-      orElse: () => null,
-    );
+    Category? generalCat;
+    for (final c in categories) {
+      if (c.name == 'General' && c.isDefault) {
+        generalCat = c;
+        break;
+      }
+    }
 
     final targetId = generalCat?.id ?? categories.first.id;
     if (targetId != null) {
@@ -382,7 +385,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     final colors = Theme.of(context).colorScheme;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
-    // Wrap with swipe gesture detector (right=income, left=expense)
+    // Swipe gesture: left→right = expense, right→left = income
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       onHorizontalDragEnd: _onHorizontalSwipe,
@@ -576,10 +579,13 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
         final displayCats = allCats.take(5).toList();
         if (_selectedCategoryId != null &&
             !displayCats.any((c) => c.id == _selectedCategoryId)) {
-          final selected = allCats.cast<Category?>().firstWhere(
-            (c) => c!.id == _selectedCategoryId,
-            orElse: () => null,
-          );
+          Category? selected;
+          for (final c in allCats) {
+            if (c.id == _selectedCategoryId) {
+              selected = c;
+              break;
+            }
+          }
           if (selected != null) {
             displayCats.removeLast();
             displayCats.insert(0, selected);
@@ -1021,30 +1027,30 @@ class _NumericKeypadState extends State<_NumericKeypad> {
       child: Column(
         children: [
           Row(children: [
-            _KeypadButton(color: btnColor, txtColor: txtColor, onTap: () => widget.onDigit('1'), child: Text('1', style: _keypadTextStyle(txtColor))),
-            _KeypadButton(color: btnColor, txtColor: txtColor, onTap: () => widget.onDigit('2'), child: Text('2', style: _keypadTextStyle(txtColor))),
-            _KeypadButton(color: btnColor, txtColor: txtColor, onTap: () => widget.onDigit('3'), child: Text('3', style: _keypadTextStyle(txtColor))),
+            _KeypadButton(color: btnColor, onTap: () => widget.onDigit('1'), child: Text('1', style: _keypadTextStyle(txtColor))),
+            _KeypadButton(color: btnColor, onTap: () => widget.onDigit('2'), child: Text('2', style: _keypadTextStyle(txtColor))),
+            _KeypadButton(color: btnColor, onTap: () => widget.onDigit('3'), child: Text('3', style: _keypadTextStyle(txtColor))),
           ]),
           Row(children: [
-            _KeypadButton(color: btnColor, txtColor: txtColor, onTap: () => widget.onDigit('4'), child: Text('4', style: _keypadTextStyle(txtColor))),
-            _KeypadButton(color: btnColor, txtColor: txtColor, onTap: () => widget.onDigit('5'), child: Text('5', style: _keypadTextStyle(txtColor))),
-            _KeypadButton(color: btnColor, txtColor: txtColor, onTap: () => widget.onDigit('6'), child: Text('6', style: _keypadTextStyle(txtColor))),
+            _KeypadButton(color: btnColor, onTap: () => widget.onDigit('4'), child: Text('4', style: _keypadTextStyle(txtColor))),
+            _KeypadButton(color: btnColor, onTap: () => widget.onDigit('5'), child: Text('5', style: _keypadTextStyle(txtColor))),
+            _KeypadButton(color: btnColor, onTap: () => widget.onDigit('6'), child: Text('6', style: _keypadTextStyle(txtColor))),
           ]),
           Row(children: [
-            _KeypadButton(color: btnColor, txtColor: txtColor, onTap: () => widget.onDigit('7'), child: Text('7', style: _keypadTextStyle(txtColor))),
-            _KeypadButton(color: btnColor, txtColor: txtColor, onTap: () => widget.onDigit('8'), child: Text('8', style: _keypadTextStyle(txtColor))),
-            _KeypadButton(color: btnColor, txtColor: txtColor, onTap: () => widget.onDigit('9'), child: Text('9', style: _keypadTextStyle(txtColor))),
+            _KeypadButton(color: btnColor, onTap: () => widget.onDigit('7'), child: Text('7', style: _keypadTextStyle(txtColor))),
+            _KeypadButton(color: btnColor, onTap: () => widget.onDigit('8'), child: Text('8', style: _keypadTextStyle(txtColor))),
+            _KeypadButton(color: btnColor, onTap: () => widget.onDigit('9'), child: Text('9', style: _keypadTextStyle(txtColor))),
           ]),
           Row(
             children: [
-              _KeypadButton(color: btnColor, txtColor: txtColor, onTap: () => widget.onDigit('.'), child: Text('.', style: _keypadTextStyle(txtColor))),
-              _KeypadButton(color: btnColor, txtColor: txtColor, onTap: () => widget.onDigit('0'), child: Text('0', style: _keypadTextStyle(txtColor))),
+              _KeypadButton(color: btnColor, onTap: () => widget.onDigit('.'), child: Text('.', style: _keypadTextStyle(txtColor))),
+              _KeypadButton(color: btnColor, onTap: () => widget.onDigit('0'), child: Text('0', style: _keypadTextStyle(txtColor))),
               _KeypadButton(
                 color: btnColor,
-                txtColor: txtColor,
                 onTap: widget.onBackspace,
                 onLongPressStart: _onBackspaceLongPressStart,
                 onLongPressEnd: _onBackspaceLongPressEnd,
+                onLongPressCancel: _cancelBackspaceTimers,
                 child: Icon(PhosphorIcons.backspace(PhosphorIconsStyle.light), color: txtColor, size: 22),
               ),
             ],
@@ -1063,19 +1069,19 @@ class _NumericKeypadState extends State<_NumericKeypad> {
 
 class _KeypadButton extends StatelessWidget {
   final Color color;
-  final Color txtColor;
   final Widget child;
   final VoidCallback onTap;
   final void Function(LongPressStartDetails)? onLongPressStart;
   final void Function(LongPressEndDetails)? onLongPressEnd;
+  final VoidCallback? onLongPressCancel;
 
   const _KeypadButton({
     required this.color,
-    required this.txtColor,
     required this.child,
     required this.onTap,
     this.onLongPressStart,
     this.onLongPressEnd,
+    this.onLongPressCancel,
   });
 
   @override
@@ -1085,6 +1091,7 @@ class _KeypadButton extends StatelessWidget {
         onTap: onTap,
         onLongPressStart: onLongPressStart,
         onLongPressEnd: onLongPressEnd,
+        onLongPressCancel: onLongPressCancel,
         child: Container(
           height: 52,
           margin: const EdgeInsets.all(4),

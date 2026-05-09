@@ -16,7 +16,7 @@ class DatabaseSeeder {
     final existingCategories = await db.select(db.categories).get();
     if (existingCategories.isNotEmpty) {
       // Ensure income General category exists for existing users
-      await _ensureIncomeGeneralExists(db);
+      await     _ensureIncomeCategoriesExist(db);
       return;
     }
 
@@ -73,9 +73,9 @@ class DatabaseSeeder {
     });
   }
 
-  /// Ensures income General category exists for existing users who only
-  /// had expense categories seeded previously.
-  static Future<void> _ensureIncomeGeneralExists(AppDatabase db) async {
+  /// Ensures all income categories exist for existing users who were seeded
+  /// before income category support was added.
+  static Future<void>     _ensureIncomeCategoriesExist(AppDatabase db) async {
     final existing = await (db.select(db.categories)
           ..where(
             (t) =>

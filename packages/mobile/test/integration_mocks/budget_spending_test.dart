@@ -38,6 +38,9 @@ void main() {
     registerFallbackValue(DateTime.now());
   });
 
+  // These tests verify the use-case layer contract with stubbed repositories.
+  // For DAO-level income/expense filtering verification, see integration tests
+  // that use an in-memory Drift database with real record insertion.
   group('Budget spending excludes income records', () {
     test(
       'getTotalSpending returns only expense totals, not income',
@@ -56,15 +59,12 @@ void main() {
           periodEnd,
         );
 
-        // Assert: Should be 150.0 (expenses only), NOT 225.0 (if income added)
-        // and NOT 75.0 (if income subtracted)
+        // Assert: Stub returns exact value — no income leakage
         expect(result.isRight(), true);
         result.fold(
           (failure) => fail('Should not return failure'),
           (spending) {
             expect(spending, 150.0);
-            expect(spending, isNot(225.0)); // Would be wrong if income included
-            expect(spending, isNot(75.0)); // Would be wrong if income subtracted
           },
         );
 
@@ -79,8 +79,7 @@ void main() {
       () async {
         const categoryId = 1;
 
-        // Arrange: Category 1 has $100 expense and $75 income
-        // getCategorySpending should return only the $100 expense
+        // Arrange: Stub returns $100 (expense-only spending from repository)
         when(
           () => mockRecordRepository.getCategorySpending(
             categoryId,
@@ -96,14 +95,12 @@ void main() {
           periodEnd,
         );
 
-        // Assert: Only expense amount, income excluded
+        // Assert: Stub returns exact value — only expense spending
         expect(result.isRight(), true);
         result.fold(
           (failure) => fail('Should not return failure'),
           (spending) {
             expect(spending, 100.0);
-            expect(spending, isNot(175.0)); // Would be wrong if income added
-            expect(spending, isNot(25.0)); // Would be wrong if income subtracted
           },
         );
       },
