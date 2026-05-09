@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
+import { FirebaseTokenPayload } from './dto/firebasetokenpayload.dto';
 import { firebaseAuth } from '../config/firebase.config';
 
 @Injectable()
@@ -14,7 +15,7 @@ export class AuthService {
   ) {}
 
   async loginWithFirebaseToken(firebaseToken: string) {
-    let decodedToken: any;
+    let decodedToken: FirebaseTokenPayload;
 
     // Dev mode: if Firebase not configured, accept dev tokens prefixed with "dev-"
     const isDevToken = firebaseToken.startsWith('dev-');
@@ -27,7 +28,7 @@ export class AuthService {
       }
     } else {
       try {
-        decodedToken = await firebaseAuth().verifyIdToken(firebaseToken);
+        decodedToken = await firebaseAuth().verifyIdToken(firebaseToken) as unknown as FirebaseTokenPayload;
       } catch (error: any) {
         throw new UnauthorizedException('Invalid Firebase token: ' + error.message);
       }

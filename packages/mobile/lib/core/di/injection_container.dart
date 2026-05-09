@@ -5,7 +5,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:expense_tracker/core/database/app_database.dart';
-import 'package:expense_tracker/core/database/database_reset.dart';
+import 'package:expense_tracker/core/database/database_seeder.dart';
 import 'package:expense_tracker/core/database/daos/record_dao.dart';
 import 'package:expense_tracker/core/database/daos/category_dao.dart';
 import 'package:expense_tracker/core/database/daos/pending_recurring_dao.dart';
@@ -43,16 +43,6 @@ void _registerDaoFactories() {
   getIt.registerFactory<UserDao>(() => UserDao(getIt<AppDatabase>()));
   getIt.registerFactory<BudgetDao>(() => BudgetDao(getIt<AppDatabase>()));
   getIt.registerFactory<SyncQueueDao>(() => SyncQueueDao(getIt<AppDatabase>()));
-}
-
-void _unregisterDaoFactories() {
-  if (getIt.isRegistered<RecordDao>()) getIt.unregister<RecordDao>();
-  if (getIt.isRegistered<CategoryDao>()) getIt.unregister<CategoryDao>();
-  if (getIt.isRegistered<BudgetDao>()) getIt.unregister<BudgetDao>();
-  if (getIt.isRegistered<SyncQueueDao>()) getIt.unregister<SyncQueueDao>();
-  if (getIt.isRegistered<UserDao>()) getIt.unregister<UserDao>();
-  if (getIt.isRegistered<MessageTemplateDao>()) getIt.unregister<MessageTemplateDao>();
-  if (getIt.isRegistered<PendingRecurringDao>()) getIt.unregister<PendingRecurringDao>();
 }
 
 /// Registers ONLY the dependencies needed for the first visible screen
@@ -104,20 +94,11 @@ Future<void> initCriticalDependencies() async {
 }
 
   Future<void> resetDatabaseInstance() async {
-  // Unregister existing
   if (getIt.isRegistered<AppDatabase>()) {
     final db = getIt<AppDatabase>();
-    await db.close();
-    getIt.unregister<AppDatabase>();
+    await db.clearAllTables();
+    await DatabaseSeeder.seedInitialCategories(db);
   }
-  _unregisterDaoFactories();
-
-  // Delete file
-  await DatabaseReset.deleteDatabaseFile();
-
-  // Re-register
-  getIt.registerLazySingleton<AppDatabase>(() => AppDatabase());
-  _registerDaoFactories();
 }
 
 /// Registers feature-level dependencies (Budgets).

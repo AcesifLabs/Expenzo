@@ -9,6 +9,8 @@ import 'core/di/injection_container.dart' as di;
 import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
+import 'features/auth/presentation/bloc/auth_state.dart';
+import 'features/auth/presentation/pages/sync_conflict_page.dart';
 import 'features/categories/presentation/bloc/category_bloc.dart';
 import 'features/categories/presentation/bloc/category_event.dart';
 import 'features/records/presentation/bloc/record_bloc.dart';
@@ -308,5 +310,37 @@ class _InitialDataLoaderState extends State<_InitialDataLoader> {
   }
 
   @override
-  Widget build(BuildContext context) => const AppShell();
+  Widget build(BuildContext context) {
+    return BlocConsumer<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is Authenticated) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Signed in as ${state.user.email ?? state.user.displayName ?? 'User'}'),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        } else if (state is AuthError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Sign-in failed: ${state.message}'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 5),
+            ),
+          );
+        } else if (state is AuthLoading) {
+          // Optionally show a loading indicator — currently AppShell renders normally
+        }
+      },
+      builder: (context, state) {
+        if (state is AuthSyncConflictPending) {
+          return const SyncConflictPage();
+        }
+        // Unauthenticated, AuthInitial, Authenticated, AuthLoading,
+        // AuthError — all render AppShell (app accessible without sign-in)
+        return const AppShell();
+      },
+    );
+  }
 }

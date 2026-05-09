@@ -154,6 +154,19 @@ class AppDatabase extends _$AppDatabase {
       END;
     ''');
   }
+
+  Future<void> clearAllTables() async {
+    await customStatement('PRAGMA foreign_keys = OFF');
+    try {
+      await transaction(() async {
+        for (final table in allTables) {
+          await delete(table).go();
+        }
+      });
+    } finally {
+      await customStatement('PRAGMA foreign_keys = ON');
+    }
+  }
 }
 
 LazyDatabase _openConnection() {

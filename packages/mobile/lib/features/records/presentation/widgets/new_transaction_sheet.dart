@@ -195,6 +195,9 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   }
 
   // ── Swipe gesture handler (left→right = expense, right→left = income) ──
+  // Safe with category-chip ListView: the chip scrollbar's
+  // HorizontalDragGestureRecognizer wins the gesture arena within its
+  // bounds; this handler only fires on unclaimed horizontal drags.
   void _onHorizontalSwipe(DragEndDetails details) {
     final velocity = details.primaryVelocity;
     if (velocity == null) return;

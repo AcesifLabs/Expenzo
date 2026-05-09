@@ -13,6 +13,7 @@ import { ExpenseTemplatesModule } from './expense-templates/expense-templates.mo
 import { ParsingRulesModule } from './parsing-rules/parsing-rules.module';
 import { RecurringTransactionsModule } from './recurring-transactions/recurring-transactions.module';
 import { SyncModule } from './sync/sync.module';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { SyncModule } from './sync/sync.module';
     RecurringTransactionsModule,
     SyncModule,
   ],
+  controllers: [AppController],
   providers: [
     {
       provide: APP_GUARD,

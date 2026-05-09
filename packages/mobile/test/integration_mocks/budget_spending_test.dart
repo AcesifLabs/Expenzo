@@ -45,62 +45,80 @@ void main() {
     test(
       'getTotalSpending returns only expense totals, not income',
       () async {
-        // Arrange: Mock returns 150.0 (sum of expenses only, excluding income)
+        // Arrange: Overall budget, stub returns expense-only spending
+        final testBudget = Budget(
+          id: 'budget-overall',
+          categoryId: null,
+          amount: 300.0,
+          period: BudgetPeriod.monthly,
+          startDate: periodStart,
+          isEnabled: true,
+        );
+
         when(
-          () => mockRecordRepository.getTotalSpending(
-            any(),
-            any(),
-          ),
+          () => mockBudgetRepository.getBudgets(),
+        ).thenAnswer((_) async => Right([testBudget]));
+
+        when(
+          () => mockRecordRepository.getTotalSpending(any(), any()),
         ).thenAnswer((_) async => const Right(150.0));
 
         // Act
-        final result = await mockRecordRepository.getTotalSpending(
-          periodStart,
-          periodEnd,
-        );
+        final result = await getBudgetsWithProgress();
 
-        // Assert: Stub returns exact value — no income leakage
+        // Assert: Spending visible in budget progress
         expect(result.isRight(), true);
         result.fold(
           (failure) => fail('Should not return failure'),
-          (spending) {
-            expect(spending, 150.0);
+          (progressList) {
+            expect(progressList.length, 1);
+            final progress = progressList.first;
+            expect(progress.spentAmount, 150.0);
+            expect(progress.percentage, 50.0); // 150/300 * 100
           },
         );
-
-        verify(
-          () => mockRecordRepository.getTotalSpending(periodStart, periodEnd),
-        ).called(1);
       },
     );
 
     test(
       'getCategorySpending excludes income records in same category',
       () async {
-        const categoryId = 1;
+        const categoryId = '1';
 
-        // Arrange: Stub returns $100 (expense-only spending from repository)
+        // Arrange: Category budget, stub returns expense-only spending
+        final testBudget = Budget(
+          id: 'budget-cat',
+          categoryId: categoryId,
+          amount: 200.0,
+          period: BudgetPeriod.monthly,
+          startDate: periodStart,
+          isEnabled: true,
+        );
+
+        when(
+          () => mockBudgetRepository.getBudgets(),
+        ).thenAnswer((_) async => Right([testBudget]));
+
         when(
           () => mockRecordRepository.getCategorySpending(
-            categoryId,
+            int.parse(categoryId),
             any(),
             any(),
           ),
         ).thenAnswer((_) async => const Right(100.0));
 
         // Act
-        final result = await mockRecordRepository.getCategorySpending(
-          categoryId,
-          periodStart,
-          periodEnd,
-        );
+        final result = await getBudgetsWithProgress();
 
-        // Assert: Stub returns exact value — only expense spending
+        // Assert: Only expense spending counted in budget progress
         expect(result.isRight(), true);
         result.fold(
           (failure) => fail('Should not return failure'),
-          (spending) {
-            expect(spending, 100.0);
+          (progressList) {
+            expect(progressList.length, 1);
+            final progress = progressList.first;
+            expect(progress.spentAmount, 100.0);
+            expect(progress.percentage, 50.0); // 100/200 * 100
           },
         );
       },

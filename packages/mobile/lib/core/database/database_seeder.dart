@@ -15,8 +15,8 @@ class DatabaseSeeder {
     // Check if any categories exist
     final existingCategories = await db.select(db.categories).get();
     if (existingCategories.isNotEmpty) {
-      // Ensure income General category exists for existing users
-      await     _ensureIncomeCategoriesExist(db);
+      // Ensure all income categories exist for existing users
+      await _ensureIncomeCategoriesExist(db);
       return;
     }
 
@@ -75,23 +75,23 @@ class DatabaseSeeder {
 
   /// Ensures all income categories exist for existing users who were seeded
   /// before income category support was added.
-  static Future<void>     _ensureIncomeCategoriesExist(AppDatabase db) async {
-    final existing = await (db.select(db.categories)
-          ..where(
-            (t) =>
-                t.name.equals('General') & t.categoryType.equals('IN'),
-          ))
-        .getSingleOrNull();
+  static Future<void> _ensureIncomeCategoriesExist(AppDatabase db) async {
+    // Query all existing IN-category names to avoid inserting duplicates
+    final existingIn = await (db.select(db.categories)
+          ..where((t) => t.categoryType.equals('IN')))
+        .get();
+    final existingNames = existingIn.map((c) => c.name).toSet();
 
-    if (existing != null) return;
+    final missing = _incomeCategories
+        .where((cat) => !existingNames.contains(cat.$1))
+        .toList();
+
+    if (missing.isEmpty) return;
 
     final now = DateTime.now();
 
-    // Seed all income categories for existing users
-    final incomeCategories = _incomeCategories;
-
     await db.batch((batch) {
-      for (final cat in incomeCategories) {
+      for (final cat in missing) {
         batch.insert(
           db.categories,
           CategoriesCompanion.insert(

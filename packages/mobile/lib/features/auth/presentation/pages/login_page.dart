@@ -26,10 +26,6 @@ class LoginPage extends StatelessWidget {
               ),
             );
           }
-          if (state is Authenticated) {
-            debugPrint('LoginPage: Authenticated, user: ${state.user}');
-            Navigator.of(context).popUntil((route) => route.isFirst);
-          }
         },
         builder: (context, state) {
           debugPrint('LoginPage: builder state: $state');
