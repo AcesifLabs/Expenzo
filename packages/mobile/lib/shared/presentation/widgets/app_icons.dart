@@ -80,6 +80,11 @@ class AppIcons {
     'graduationCap': PhosphorIcons.graduationCap,
     'currencyDollar': PhosphorIcons.currencyDollar,
     'gift': PhosphorIcons.gift,
+    // Income category icons
+    'briefcase': PhosphorIcons.briefcase,
+    'laptop': PhosphorIcons.laptop,
+    'chartLineUp': PhosphorIcons.chartLineUp,
+    'arrowULeftDown': PhosphorIcons.arrowULeftDown,
   };
 
   /// Resolves an icon identifier (stored in Category.emoji) to Phosphor IconData.

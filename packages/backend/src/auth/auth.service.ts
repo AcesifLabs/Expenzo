@@ -5,13 +5,6 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { firebaseAuth } from '../config/firebase.config';
 
-interface FirebaseTokenPayload {
-  uid: string;
-  email: string;
-  name?: string;
-  picture?: string;
-}
-
 @Injectable()
 export class AuthService {
   constructor(
