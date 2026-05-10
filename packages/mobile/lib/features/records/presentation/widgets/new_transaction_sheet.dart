@@ -3,14 +3,20 @@ import 'dart:async';
 import 'package:expense_tracker/shared/presentation/widgets/app_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
+import 'package:expense_tracker/core/di/injection_container.dart' as di;
+import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:expense_tracker/features/categories/domain/entities/category.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_state.dart';
 import '../../../categories/presentation/bloc/category_event.dart';
 import '../../domain/entities/record.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
+import 'package:expense_tracker/features/recurring/domain/entities/recurring_transaction.dart';
+import 'package:expense_tracker/features/recurring/presentation/bloc/recurring_bloc.dart';
+import 'package:expense_tracker/features/recurring/presentation/bloc/recurring_event.dart';
 import '../bloc/record_bloc.dart';
 import '../bloc/record_event.dart';
 
@@ -33,6 +39,10 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   // ── Validation error flags ──
   bool _labelError = false;
   bool _categoryError = false;
+
+  // ── Date picker + recurring ──
+  DateTime _selectedDate = DateTime.now();
+  bool _isRecurring = false;
 
   // ── Validation glow animation ──
   late final AnimationController _glowController;
@@ -293,7 +303,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     final record = Record(
       amount: finalAmount,
       description: _noteCtrl.text.trim(),
-      date: DateTime.now(),
+      date: _selectedDate,
       categoryId: _selectedCategoryId,
       source: ExpenseSource.manual,
       recordType: _type,
@@ -302,6 +312,23 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     );
 
     context.read<RecordBloc>().add(AddRecordEvent(record));
+
+    if (_isRecurring) {
+      final recurring = RecurringTransaction(
+        description: _noteCtrl.text.trim(),
+        amount: finalAmount,
+        categoryId: _selectedCategoryId,
+        frequency: RecurringFrequency.monthly,
+        startDate: _selectedDate,
+        endDate: null,
+        nextOccurrence: _selectedDate,
+        isActive: true,
+        autoCreateExpense: true,
+        dayOfMonth: _selectedDate.day,
+      );
+      di.getIt<RecurringBloc>().add(CreateRecurring(recurring));
+    }
+
     Navigator.pop(context);
   }
 
@@ -471,6 +498,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                   ),
                 ),
                 _buildCategoryChips(colors),
+                _buildDateAndRecurringRow(colors),
                 // Note field (required, animated error border, typewriter hint)
                 _buildNoteField(colors),
                 Padding(
@@ -558,6 +586,134 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
           ),
         );
       },
+    );
+  }
+
+  // ── Date picker + recurring checkbox row ──
+  Widget _buildDateAndRecurringRow(ColorScheme colors) {
+    final dateFmt = DateFormat('MMM dd, yyyy');
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 12, 24, 4),
+      child: Row(
+        children: [
+          // Date button
+          Expanded(
+            child: InkWell(
+              onTap: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: _selectedDate,
+                  firstDate: DateTime(2000),
+                  lastDate: DateTime(2100),
+                  builder: (ctx, child) => Theme(
+                    data: Theme.of(ctx).copyWith(
+                      colorScheme: isDark
+                          ? ColorScheme.dark(
+                              primary: AppColors.secondary,
+                              onPrimary: Colors.black,
+                              surface: AppColors.surfaceDark,
+                              onSurface: Colors.white,
+                              onSurfaceVariant: Colors.white70,
+                            )
+                          : null,
+                    ),
+                    child: child!,
+                  ),
+                );
+                if (picked != null) {
+                  setState(() => _selectedDate = picked);
+                }
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: colors.onSurface.withAlpha(30),
+                  ),
+                  color: colors.onSurface.withAlpha(6),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      PhosphorIcons.calendar(PhosphorIconsStyle.light),
+                      size: 20,
+                      color: colors.onSurface.withAlpha(180),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      dateFmt.format(_selectedDate),
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: colors.onSurface,
+                      ),
+                    ),
+                    const Spacer(),
+                    Icon(
+                      PhosphorIcons.caretDown(PhosphorIconsStyle.light),
+                      size: 14,
+                      color: colors.onSurface.withAlpha(100),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          // Recurring checkbox + info icon
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 24,
+                height: 24,
+                child: Checkbox(
+                  value: _isRecurring,
+                  onChanged: (v) => setState(
+                    () => _isRecurring = v ?? false,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  activeColor: colors.primary,
+                  side: BorderSide(
+                    color: colors.onSurface.withAlpha(120),
+                    width: 1.5,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                'Recurring?',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: colors.onSurface.withAlpha(200),
+                ),
+              ),
+              const SizedBox(width: 4),
+              Tooltip(
+                message:
+                    'Check this if your expense or income repeats every month',
+                preferBelow: false,
+                triggerMode: TooltipTriggerMode.tap,
+                child: Icon(
+                  PhosphorIcons.info(PhosphorIconsStyle.light),
+                  size: 14,
+                  color: colors.onSurface.withAlpha(120),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 

@@ -25,6 +25,7 @@ import 'record_module.dart';
 import 'parsing_module.dart';
 import 'report_module.dart';
 import 'budget_module.dart';
+import 'recurring_module.dart';
 import 'settings_module.dart';
 import 'dashboard_module.dart';
 
@@ -110,6 +111,7 @@ Future<void> initFeatureDependencies() async {
 
   try {
     initBudgetModule(getIt);
+    initRecurringModule(getIt);
     _featureDependenciesCompleter.complete();
   } catch (e, s) {
     _featureDependenciesCompleter.completeError(e, s);

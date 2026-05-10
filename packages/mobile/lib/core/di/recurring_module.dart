@@ -1,0 +1,48 @@
+import 'package:get_it/get_it.dart';
+import 'package:expense_tracker/core/database/app_database.dart';
+import 'package:expense_tracker/features/recurring/data/datasources/recurring_local_datasource.dart';
+import 'package:expense_tracker/features/recurring/data/repositories/recurring_repository_impl.dart';
+import 'package:expense_tracker/features/recurring/domain/repositories/recurring_repository.dart';
+import 'package:expense_tracker/features/recurring/domain/usecases/get_recurring_list.dart';
+import 'package:expense_tracker/features/recurring/domain/usecases/create_recurring.dart' as usecase;
+import 'package:expense_tracker/features/recurring/domain/usecases/update_recurring.dart' as usecase;
+import 'package:expense_tracker/features/recurring/domain/usecases/delete_recurring.dart' as usecase;
+import 'package:expense_tracker/features/recurring/domain/usecases/process_recurring.dart' as usecase;
+import 'package:expense_tracker/features/recurring/presentation/bloc/recurring_bloc.dart';
+
+void initRecurringModule(GetIt getIt) {
+  getIt.registerLazySingleton<RecurringLocalDatasource>(
+    () => RecurringLocalDatasourceImpl(
+      recurringDao: getIt<AppDatabase>().recurringDao,
+    ),
+  );
+  getIt.registerLazySingleton<RecurringRepository>(
+    () => RecurringRepositoryImpl(
+      localDatasource: getIt<RecurringLocalDatasource>(),
+    ),
+  );
+  getIt.registerLazySingleton(
+    () => GetRecurringList(getIt<RecurringRepository>()),
+  );
+  getIt.registerLazySingleton(
+    () => usecase.CreateRecurring(getIt<RecurringRepository>()),
+  );
+  getIt.registerLazySingleton(
+    () => usecase.UpdateRecurring(getIt<RecurringRepository>()),
+  );
+  getIt.registerLazySingleton(
+    () => usecase.DeleteRecurring(getIt<RecurringRepository>()),
+  );
+  getIt.registerLazySingleton(
+    () => usecase.ProcessRecurring(getIt<RecurringRepository>()),
+  );
+  getIt.registerFactory<RecurringBloc>(
+    () => RecurringBloc(
+      getRecurringList: getIt<GetRecurringList>(),
+      createRecurring: getIt<usecase.CreateRecurring>(),
+      updateRecurring: getIt<usecase.UpdateRecurring>(),
+      deleteRecurring: getIt<usecase.DeleteRecurring>(),
+      processRecurring: getIt<usecase.ProcessRecurring>(),
+    ),
+  );
+}
