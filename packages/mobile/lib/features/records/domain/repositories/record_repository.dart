@@ -12,14 +12,14 @@ class DateTimeRange {
 abstract class RecordRepository {
   Future<Either<CacheFailure, List<Record>>> getRecords({
     DateTimeRange? dateRange,
-    int? categoryId,
+    String? categoryId,
     int? limit,
     int? offset,
   });
-  Future<Either<CacheFailure, Record>> getRecordById(int id);
+  Future<Either<CacheFailure, Record>> getRecordById(String id);
   Future<Either<CacheFailure, Record>> addRecord(Record record);
   Future<Either<CacheFailure, Record>> updateRecord(Record record);
-  Future<Either<CacheFailure, Unit>> deleteRecord(int id);
+  Future<Either<CacheFailure, Unit>> deleteRecord(String id);
   Stream<List<Record>> watchRecords({int? limit, int? offset});
   Future<Either<CacheFailure, bool>> recordExistsBySourceId(String sourceId);
   Future<Either<CacheFailure, Set<String>>> getExistingSourceIds(
@@ -27,12 +27,12 @@ abstract class RecordRepository {
   );
   Future<Either<CacheFailure, void>> addRecordsBatch(List<Record> records);
   Future<Either<CacheFailure, List<Record>>> getRecordsByCategoryAndDateRange(
-    int categoryId,
+    String categoryId,
     DateTime start,
     DateTime end,
   );
   Future<Either<CacheFailure, double>> getCategorySpending(
-    int categoryId,
+    String categoryId,
     DateTime start,
     DateTime end,
   );

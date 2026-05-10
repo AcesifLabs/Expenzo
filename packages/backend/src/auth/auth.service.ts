@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { FirebaseTokenPayload } from './dto/firebasetokenpayload.dto';
 import { firebaseAuth } from '../config/firebase.config';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class AuthService {
@@ -40,6 +41,7 @@ export class AuthService {
 
     if (!user) {
       user = this.userRepository.create({
+        id: uuidv4(),
         firebaseUid: uid,
         email: email || '',
         displayName: name,

@@ -5,7 +5,7 @@ class ExpenseFtsTable extends Table {
   @override
   String get tableName => 'expense_fts';
 
-  IntColumn get expenseId => integer()();
+  TextColumn get expenseId => text()();
   TextColumn get description => text()();
 
   @override

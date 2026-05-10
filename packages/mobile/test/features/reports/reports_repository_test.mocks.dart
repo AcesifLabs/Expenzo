@@ -312,7 +312,7 @@ class MockRecordDao extends _i1.Mock implements _i6.RecordDao {
       ) as _i5.Future<List<_i2.Record>>);
 
   @override
-  _i5.Future<_i2.Record?> getRecordById(int? id) => (super.noSuchMethod(
+  _i5.Future<_i2.Record?> getRecordById(String? id) => (super.noSuchMethod(
         Invocation.method(
           #getRecordById,
           [id],
@@ -337,7 +337,7 @@ class MockRecordDao extends _i1.Mock implements _i6.RecordDao {
       ) as _i5.Future<List<_i2.Record>>);
 
   @override
-  _i5.Future<List<_i2.Record>> getRecordsByCategory(int? categoryId) =>
+  _i5.Future<List<_i2.Record>> getRecordsByCategory(String? categoryId) =>
       (super.noSuchMethod(
         Invocation.method(
           #getRecordsByCategory,
@@ -378,7 +378,7 @@ class MockRecordDao extends _i1.Mock implements _i6.RecordDao {
       ) as _i5.Future<bool>);
 
   @override
-  _i5.Future<int> deleteRecord(int? id) => (super.noSuchMethod(
+  _i5.Future<int> deleteRecord(String? id) => (super.noSuchMethod(
         Invocation.method(
           #deleteRecord,
           [id],
@@ -387,7 +387,7 @@ class MockRecordDao extends _i1.Mock implements _i6.RecordDao {
       ) as _i5.Future<int>);
 
   @override
-  _i5.Future<int> getRecordCountByCategory(int? categoryId) =>
+  _i5.Future<int> getRecordCountByCategory(String? categoryId) =>
       (super.noSuchMethod(
         Invocation.method(
           #getRecordCountByCategory,
@@ -417,7 +417,7 @@ class MockRecordDao extends _i1.Mock implements _i6.RecordDao {
 
   @override
   _i5.Future<List<_i2.Record>> getRecordsByCategoryAndDateRange(
-    int? categoryId,
+    String? categoryId,
     DateTime? start,
     DateTime? end,
   ) =>
@@ -435,7 +435,7 @@ class MockRecordDao extends _i1.Mock implements _i6.RecordDao {
 
   @override
   _i5.Future<double> getCategorySpending(
-    int? categoryId,
+    String? categoryId,
     DateTime? start,
     DateTime? end,
   ) =>
@@ -1127,7 +1127,7 @@ class MockCategoryDao extends _i1.Mock implements _i8.CategoryDao {
       ) as _i5.Future<List<_i2.Category>>);
 
   @override
-  _i5.Future<void> incrementUsageCount(int? id) => (super.noSuchMethod(
+  _i5.Future<void> incrementUsageCount(String? id) => (super.noSuchMethod(
         Invocation.method(
           #incrementUsageCount,
           [id],
@@ -1137,7 +1137,7 @@ class MockCategoryDao extends _i1.Mock implements _i8.CategoryDao {
       ) as _i5.Future<void>);
 
   @override
-  _i5.Future<_i2.Category?> getCategoryById(int? id) => (super.noSuchMethod(
+  _i5.Future<_i2.Category?> getCategoryById(String? id) => (super.noSuchMethod(
         Invocation.method(
           #getCategoryById,
           [id],
@@ -1166,7 +1166,7 @@ class MockCategoryDao extends _i1.Mock implements _i8.CategoryDao {
       ) as _i5.Future<bool>);
 
   @override
-  _i5.Future<int> deleteCategory(int? id) => (super.noSuchMethod(
+  _i5.Future<int> deleteCategory(String? id) => (super.noSuchMethod(
         Invocation.method(
           #deleteCategory,
           [id],

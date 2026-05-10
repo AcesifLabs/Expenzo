@@ -21,7 +21,7 @@ void main() {
 
     final now = DateTime.now();
     final testCategory = Category(
-      id: 1,
+      id: '1',
       name: 'Food',
       emoji: '🍔',
       color: '#FF5733',
@@ -34,7 +34,7 @@ void main() {
     final testCategories = [
       testCategory,
       Category(
-        id: 2,
+        id: '2',
         name: 'Transport',
         emoji: '🚗',
         color: '#33FF57',
@@ -99,9 +99,9 @@ void main() {
         () => mockRepository.deleteCategory(any()),
       ).thenAnswer((_) async => const Right(unit));
 
-      await deleteCategoryUseCase(1);
+      await deleteCategoryUseCase('1');
 
-      verify(() => mockRepository.deleteCategory(1)).called(1);
+      verify(() => mockRepository.deleteCategory('1')).called(1);
     });
 
     test('watchCategories returns stream of categories', () async {
@@ -120,12 +120,12 @@ void main() {
         () => mockRepository.getCategoryById(any()),
       ).thenAnswer((_) async => Right(testCategory));
 
-      final result = await mockRepository.getCategoryById(1);
+      final result = await mockRepository.getCategoryById('1');
 
       expect(result.isRight(), true);
       result.fold((failure) => fail('Should not return failure'), (category) {
         expect(category, testCategory);
-        expect(category.id, 1);
+        expect(category.id, '1');
       });
     });
   });
@@ -153,7 +153,7 @@ void main() {
     test('should create category with all fields', () {
       final now = DateTime.now();
       final category = Category(
-        id: 1,
+        id: '1',
         name: 'Transport',
         emoji: '🚗',
         color: '#33FF57',
@@ -163,7 +163,7 @@ void main() {
         updatedAt: now,
       );
 
-      expect(category.id, 1);
+      expect(category.id, '1');
       expect(category.name, 'Transport');
       expect(category.emoji, '🚗');
       expect(category.color, '#33FF57');
@@ -173,7 +173,7 @@ void main() {
     test('should copy category with updated fields', () {
       final now = DateTime.now();
       final original = Category(
-        id: 1,
+        id: '1',
         name: 'Food',
         emoji: '🍔',
         color: '#FF5733',
@@ -184,7 +184,7 @@ void main() {
 
       final updated = original.copyWith(name: 'Groceries', emoji: '🛒');
 
-      expect(updated.id, 1);
+      expect(updated.id, '1');
       expect(updated.name, 'Groceries');
       expect(updated.emoji, '🛒');
       expect(updated.color, '#FF5733');
@@ -193,7 +193,7 @@ void main() {
     test('should support equatable equality', () {
       final now = DateTime.now();
       final category1 = Category(
-        id: 1,
+        id: '1',
         name: 'Food',
         emoji: '🍔',
         color: '#FF5733',
@@ -202,7 +202,7 @@ void main() {
         updatedAt: now,
       );
       final category2 = Category(
-        id: 1,
+        id: '1',
         name: 'Food',
         emoji: '🍔',
         color: '#FF5733',

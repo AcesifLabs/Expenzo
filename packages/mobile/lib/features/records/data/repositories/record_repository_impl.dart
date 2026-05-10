@@ -31,7 +31,7 @@ class RecordRepositoryImpl implements RecordRepository {
   @override
   Future<Either<CacheFailure, List<Record>>> getRecords({
     DateTimeRange? dateRange,
-    int? categoryId,
+    String? categoryId,
     int? limit,
     int? offset,
   }) async {
@@ -49,7 +49,7 @@ class RecordRepositoryImpl implements RecordRepository {
   }
 
   @override
-  Future<Either<CacheFailure, Record>> getRecordById(int id) async {
+  Future<Either<CacheFailure, Record>> getRecordById(String id) async {
     try {
       final record = await localDatasource.getRecordById(id);
       if (record == null) {
@@ -65,7 +65,7 @@ class RecordRepositoryImpl implements RecordRepository {
   Future<Either<CacheFailure, Record>> addRecord(Record record) async {
     try {
       final added = await localDatasource.addRecord(record);
-      _enqueueSync('insert', added.id!.toString(), {
+      _enqueueSync('insert', added.id!, {
         'amount': added.amount, 'description': added.description,
         'date': added.date.toUtc().toIso8601String(),
         'categoryId': added.categoryId,
@@ -81,7 +81,7 @@ class RecordRepositoryImpl implements RecordRepository {
   Future<Either<CacheFailure, Record>> updateRecord(Record record) async {
     try {
       final updated = await localDatasource.updateRecord(record);
-      _enqueueSync('update', updated.id!.toString(), {
+      _enqueueSync('update', updated.id!, {
         'amount': updated.amount, 'description': updated.description,
         'date': updated.date.toUtc().toIso8601String(),
         'categoryId': updated.categoryId,
@@ -94,10 +94,10 @@ class RecordRepositoryImpl implements RecordRepository {
   }
 
   @override
-  Future<Either<CacheFailure, Unit>> deleteRecord(int id) async {
+  Future<Either<CacheFailure, Unit>> deleteRecord(String id) async {
     try {
       await localDatasource.deleteRecord(id);
-      _enqueueSync('delete', id.toString());
+      _enqueueSync('delete', id);
       return const Right(unit);
     } on CacheException catch (e) {
       return Left(e.toFailure());
@@ -135,7 +135,7 @@ class RecordRepositoryImpl implements RecordRepository {
 
   @override
   Future<Either<CacheFailure, List<Record>>> getRecordsByCategoryAndDateRange(
-    int categoryId,
+    String categoryId,
     DateTime start,
     DateTime end,
   ) async {
@@ -153,7 +153,7 @@ class RecordRepositoryImpl implements RecordRepository {
 
   @override
   Future<Either<CacheFailure, double>> getCategorySpending(
-    int categoryId,
+    String categoryId,
     DateTime start,
     DateTime end,
   ) async {
@@ -204,7 +204,7 @@ class RecordRepositoryImpl implements RecordRepository {
       await localDatasource.addRecordsBatch(records);
       for (final r in records) {
         if (r.id != null) {
-          _enqueueSync('insert', r.id!.toString(), {
+          _enqueueSync('insert', r.id!, {
             'amount': r.amount, 'description': r.description,
             'date': r.date.toUtc().toIso8601String(),
             'categoryId': r.categoryId,

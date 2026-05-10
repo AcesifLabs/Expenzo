@@ -4,13 +4,13 @@ import 'package:expense_tracker/core/error/usecase.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
 import '../repositories/category_repository.dart';
 
-class DeleteCategory extends UseCase<Unit, int> {
+class DeleteCategory extends UseCase<Unit, String> {
   final CategoryRepository repository;
 
   DeleteCategory(this.repository);
 
   @override
-  Future<Either<Failure, Unit>> call(int id) async {
+  Future<Either<Failure, Unit>> call(String id) async {
     try {
       return await repository.deleteCategory(id);
     } on CacheException catch (e) {

@@ -26,7 +26,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   late RecordType _type;
   final _amountText = ValueNotifier<String>('');
   final _noteCtrl = TextEditingController();
-  int? _selectedCategoryId;
+  String? _selectedCategoryId;
   List<Category> _categories = [];
   bool _hasManuallyDeselected = false;
 
@@ -184,6 +184,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     setState(() {
       _type = t;
       _selectedCategoryId = null;
+      _categories = [];
       _hasManuallyDeselected = false;
       _labelError = false;
       _categoryError = false;
@@ -569,6 +570,22 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
           _selectDefaultCategory(state.categories);
         }
         final allCats = _categories;
+        if (state is CategoryLoading) {
+          return Container(
+            height: 50,
+            margin: const EdgeInsets.symmetric(vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            alignment: Alignment.center,
+            child: SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: colors.onSurface.withAlpha(80),
+              ),
+            ),
+          );
+        }
         if (allCats.isEmpty) {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -748,8 +765,8 @@ class _MoreButton extends StatelessWidget {
 
 class _AllCategoriesPicker extends StatelessWidget {
   final List<Category> categories;
-  final int? selectedId;
-  final ValueChanged<int> onSelect;
+  final String? selectedId;
+  final ValueChanged<String> onSelect;
 
   const _AllCategoriesPicker({
     required this.categories,
@@ -1007,6 +1024,7 @@ class _NumericKeypadState extends State<_NumericKeypad> {
   }
 
   void _onBackspaceLongPressStart(LongPressStartDetails _) {
+    _cancelBackspaceTimers();
     widget.onBackspace();
     _initialDelayTimer = Timer(const Duration(milliseconds: 300), () {
       _backspaceTimer = Timer.periodic(

@@ -25,7 +25,7 @@ class PendingRecurringDao extends DatabaseAccessor<AppDatabase>
     return into(pendingRecurring).insert(pending);
   }
 
-  Future<int> removePending(int id) {
+  Future<int> removePending(String id) {
     return (delete(pendingRecurring)..where((t) => t.id.equals(id))).go();
   }
 }

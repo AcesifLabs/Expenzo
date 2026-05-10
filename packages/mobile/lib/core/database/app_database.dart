@@ -61,7 +61,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration {
@@ -114,6 +114,109 @@ class AppDatabase extends _$AppDatabase {
         }
         if (from < 11) {
           await m.createTable(appSettings);
+        }
+        if (from < 12) {
+          // ── Categories: int id → text id ──
+          await customStatement('DROP TRIGGER IF EXISTS records_ai');
+          await customStatement('DROP TRIGGER IF EXISTS records_ad');
+          await customStatement('DROP TRIGGER IF EXISTS records_au');
+
+          await customStatement('''
+            CREATE TABLE categories_new (
+              id TEXT NOT NULL PRIMARY KEY,
+              name TEXT NOT NULL,
+              emoji TEXT NOT NULL DEFAULT 'package',
+              color TEXT NOT NULL DEFAULT '#2196F3',
+              is_default INTEGER NOT NULL DEFAULT 0,
+              category_type TEXT NOT NULL DEFAULT 'OUT',
+              usage_count INTEGER NOT NULL DEFAULT 0,
+              user_id INTEGER,
+              created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
+              updated_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
+            )
+          ''');
+          await customStatement('''
+            INSERT INTO categories_new
+            SELECT CAST(id AS TEXT), name, emoji, color, is_default,
+                   category_type, usage_count, user_id, created_at, updated_at
+            FROM categories
+          ''');
+          await customStatement('DROP TABLE categories');
+          await customStatement(
+            'ALTER TABLE categories_new RENAME TO categories',
+          );
+
+          // ── Records: int id → text, int categoryId → text ──
+          await customStatement('''
+            CREATE TABLE records_new (
+              id TEXT NOT NULL PRIMARY KEY,
+              amount REAL NOT NULL,
+              description TEXT NOT NULL,
+              date INTEGER NOT NULL,
+              category_id TEXT,
+              source TEXT NOT NULL DEFAULT 'manual',
+              source_id TEXT,
+              record_type TEXT NOT NULL,
+              user_id INTEGER,
+              created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
+              updated_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
+            )
+          ''');
+          await customStatement('''
+            INSERT INTO records_new
+            SELECT CAST(id AS TEXT), amount, description, date,
+                   CAST(category_id AS TEXT), source, source_id,
+                   record_type, user_id, created_at, updated_at
+            FROM records
+          ''');
+          await customStatement('DROP TABLE records');
+          await customStatement(
+            'ALTER TABLE records_new RENAME TO records',
+          );
+
+          // Recreate indexes
+          await customStatement(
+            'CREATE INDEX idx_records_date ON records (date)',
+          );
+          await customStatement(
+            'CREATE INDEX idx_records_category ON records (category_id)',
+          );
+          await customStatement(
+            'CREATE INDEX idx_records_source_id ON records (source_id)',
+          );
+
+          // ── PendingRecurring: int id → text ──
+          await customStatement('''
+            CREATE TABLE pending_recurring_new (
+              id TEXT NOT NULL PRIMARY KEY,
+              recurring_id TEXT NOT NULL,
+              due_date INTEGER NOT NULL,
+              amount REAL NOT NULL,
+              description TEXT NOT NULL,
+              category_id TEXT,
+              created_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
+            )
+          ''');
+          await customStatement('''
+            INSERT INTO pending_recurring_new
+            SELECT CAST(id AS TEXT), recurring_id, due_date, amount,
+                   description, category_id, created_at
+            FROM pending_recurring
+          ''');
+          await customStatement('DROP TABLE pending_recurring');
+          await customStatement(
+            'ALTER TABLE pending_recurring_new RENAME TO pending_recurring',
+          );
+
+          // ── FTS: rebuild with text IDs ──
+          await customStatement('DELETE FROM expense_fts');
+          await customStatement('''
+            INSERT INTO expense_fts (expense_id, description)
+            SELECT id, description FROM records
+          ''');
+
+          // Recreate FTS triggers
+          await _createFtsTriggers(customStatement);
         }
       },
     );

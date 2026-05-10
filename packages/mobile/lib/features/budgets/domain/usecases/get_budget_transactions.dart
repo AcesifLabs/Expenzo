@@ -24,11 +24,11 @@ class GetBudgetTransactions {
         budget.period,
       );
 
-      final intCategoryId = int.tryParse(budget.categoryId ?? '');
+      final catId = budget.categoryId;
 
-      if (intCategoryId != null) {
+      if (catId != null) {
         final result = await recordRepository.getRecordsByCategoryAndDateRange(
-          intCategoryId,
+          catId,
           periodRange.start,
           periodRange.end,
         );

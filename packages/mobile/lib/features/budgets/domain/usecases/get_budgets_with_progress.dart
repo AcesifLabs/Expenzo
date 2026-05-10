@@ -35,13 +35,12 @@ class GetBudgetsWithProgress {
         budget.period,
       );
 
-      // Convert budget's string categoryId to int for record lookup
-      final intCategoryId = int.tryParse(budget.categoryId ?? '');
+      final catId = budget.categoryId;
       double spentAmount = 0;
 
-      if (intCategoryId != null) {
+      if (catId != null) {
         final spendingResult = await recordRepository.getCategorySpending(
-          intCategoryId,
+          catId,
           periodRange.start,
           periodRange.end,
         );

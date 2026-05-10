@@ -19,9 +19,7 @@ void main() {
   late MockBudgetRepository mockBudgetRepository;
   late GetBudgetsWithProgress getBudgetsWithProgress;
 
-  final now = DateTime.now();
-  final periodStart = DateTime(now.year, now.month, 1);
-  final periodEnd = DateTime(now.year, now.month + 1, 1);
+  final periodStart = DateTime(DateTime.now().year, DateTime.now().month, 1);
 
   setUp(() {
     mockRecordRepository = MockRecordRepository();
@@ -101,7 +99,7 @@ void main() {
 
         when(
           () => mockRecordRepository.getCategorySpending(
-            int.parse(categoryId),
+            categoryId,
             any(),
             any(),
           ),
@@ -212,7 +210,7 @@ void main() {
       () async {
         // Arrange: Category budget of $300, expenses in category = $250,
         // income in category = $100 (should be ignored)
-        const categoryId = 5;
+        const categoryId = '5';
         final testBudget = Budget(
           id: 'budget-3',
           categoryId: categoryId.toString(),

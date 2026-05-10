@@ -132,11 +132,11 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
   Record _mapToRecord(QueryRow row) {
     final data = row.data;
     return Record(
-      id: data['id'] as int?,
+      id: data['id'] as String?,
       amount: data['amount'] as double,
       description: data['description'] as String,
       date: data['date'] as DateTime,
-      categoryId: data['category_id'] as int?,
+      categoryId: data['category_id'] as String?,
       source: ExpenseSource.values.firstWhere(
         (s) => s.name == data['source'],
         orElse: () => ExpenseSource.manual,

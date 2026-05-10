@@ -93,7 +93,7 @@ Future<void> initCriticalDependencies() async {
   initReportModule(getIt);
 }
 
-  Future<void> resetDatabaseInstance() async {
+Future<void> resetDatabaseInstance() async {
   if (getIt.isRegistered<AppDatabase>()) {
     final db = getIt<AppDatabase>();
     await db.clearAllTables();

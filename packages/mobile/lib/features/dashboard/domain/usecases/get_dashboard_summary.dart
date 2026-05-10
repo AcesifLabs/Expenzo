@@ -103,7 +103,7 @@ class GetDashboardSummaryUseCase
     final totalSpent = _calculateTotal(records);
     if (totalSpent == 0) return [];
 
-    final categoryMap = <int, double>{};
+    final categoryMap = <String, double>{};
     for (final record in records) {
       if (record.categoryId != null) {
         categoryMap[record.categoryId!] =
@@ -123,7 +123,7 @@ class GetDashboardSummaryUseCase
         final amount = entry.value;
         breakdown.add(
           CategoryAmount(
-            categoryId: category.id.toString(),
+            categoryId: category.id!,
             emoji: category.emoji,
             categoryName: category.name,
             amount: amount,

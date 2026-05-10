@@ -3,12 +3,12 @@ import 'app_database.dart';
 
 class DatabaseSeeder {
   static const _incomeCategories = [
-    ('Salary', 'briefcase', '#43A047'),
-    ('Freelance', 'laptop', '#00ACC1'),
-    ('Investment', 'chartLineUp', '#7CB342'),
-    ('Refund', 'arrowULeftDown', '#FF9800'),
-    ('Gift', 'gift', '#FFB300'),
-    ('General', 'package', '#1E88E5'),
+    ('default_in_salary', 'Salary', 'briefcase', '#43A047'),
+    ('default_in_freelance', 'Freelance', 'laptop', '#00ACC1'),
+    ('default_in_investment', 'Investment', 'chartLineUp', '#7CB342'),
+    ('default_in_refund', 'Refund', 'arrowULeftDown', '#FF9800'),
+    ('default_in_gift', 'Gift', 'gift', '#FFB300'),
+    ('default_in_general', 'General', 'package', '#1E88E5'),
   ];
 
   static Future<void> seedInitialCategories(AppDatabase db) async {
@@ -22,20 +22,20 @@ class DatabaseSeeder {
 
     final now = DateTime.now();
 
-    // Expense categories
+    // Expense categories (id, name, emoji, color)
     final expenseCategories = [
-      ('Food', 'forkKnife', '#FF9800'),
-      ('Shopping', 'shoppingCart', '#D81B60'),
-      ('Transport', 'car', '#00ACC1'),
-      ('Home', 'house', '#5E35B1'),
-      ('Health', 'heartbeat', '#E53935'),
-      ('Entertainment', 'gameController', '#43A047'),
-      ('Bills', 'deviceMobile', '#FDD835'),
-      ('Travel', 'airplane', '#3949AB'),
-      ('Education', 'graduationCap', '#00897B'),
-      ('Investment', 'currencyDollar', '#7CB342'),
-      ('Gifts', 'gift', '#FFB300'),
-      ('General', 'package', '#1E88E5'),
+      ('default_out_food', 'Food', 'forkKnife', '#FF9800'),
+      ('default_out_shopping', 'Shopping', 'shoppingCart', '#D81B60'),
+      ('default_out_transport', 'Transport', 'car', '#00ACC1'),
+      ('default_out_home', 'Home', 'house', '#5E35B1'),
+      ('default_out_health', 'Health', 'heartbeat', '#E53935'),
+      ('default_out_entertainment', 'Entertainment', 'gameController', '#43A047'),
+      ('default_out_bills', 'Bills', 'deviceMobile', '#FDD835'),
+      ('default_out_travel', 'Travel', 'airplane', '#3949AB'),
+      ('default_out_education', 'Education', 'graduationCap', '#00897B'),
+      ('default_out_investment', 'Investment', 'currencyDollar', '#7CB342'),
+      ('default_out_gifts', 'Gifts', 'gift', '#FFB300'),
+      ('default_out_general', 'General', 'package', '#1E88E5'),
     ];
 
     // Income categories
@@ -46,9 +46,10 @@ class DatabaseSeeder {
         batch.insert(
           db.categories,
           CategoriesCompanion.insert(
-            name: cat.$1,
-            emoji: Value(cat.$2),
-            color: Value(cat.$3),
+            id: cat.$1,
+            name: cat.$2,
+            emoji: Value(cat.$3),
+            color: Value(cat.$4),
             categoryType: const Value('OUT'),
             isDefault: const Value(true),
             createdAt: Value(now),
@@ -60,9 +61,10 @@ class DatabaseSeeder {
         batch.insert(
           db.categories,
           CategoriesCompanion.insert(
-            name: cat.$1,
-            emoji: Value(cat.$2),
-            color: Value(cat.$3),
+            id: cat.$1,
+            name: cat.$2,
+            emoji: Value(cat.$3),
+            color: Value(cat.$4),
             categoryType: const Value('IN'),
             isDefault: const Value(true),
             createdAt: Value(now),
@@ -83,7 +85,7 @@ class DatabaseSeeder {
     final existingNames = existingIn.map((c) => c.name).toSet();
 
     final missing = _incomeCategories
-        .where((cat) => !existingNames.contains(cat.$1))
+        .where((cat) => !existingNames.contains(cat.$2))
         .toList();
 
     if (missing.isEmpty) return;
@@ -95,9 +97,10 @@ class DatabaseSeeder {
         batch.insert(
           db.categories,
           CategoriesCompanion.insert(
-            name: cat.$1,
-            emoji: Value(cat.$2),
-            color: Value(cat.$3),
+            id: cat.$1,
+            name: cat.$2,
+            emoji: Value(cat.$3),
+            color: Value(cat.$4),
             categoryType: const Value('IN'),
             isDefault: const Value(true),
             createdAt: Value(now),
