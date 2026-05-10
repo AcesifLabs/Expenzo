@@ -1,8 +1,11 @@
 import 'package:expense_tracker/features/categories/domain/repositories/category_repository.dart';
 import 'package:get_it/get_it.dart';
+import 'package:expense_tracker/core/api/api_client.dart';
 import 'package:expense_tracker/core/database/daos/record_dao.dart';
 import 'package:expense_tracker/core/database/daos/sync_queue_dao.dart';
+import 'package:expense_tracker/core/sync/connectivity_service.dart';
 import 'package:expense_tracker/features/records/data/datasources/record_local_datasource.dart';
+import 'package:expense_tracker/features/records/data/datasources/record_remote_datasource.dart';
 import 'package:expense_tracker/features/records/data/repositories/record_repository_impl.dart';
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
 import 'package:expense_tracker/features/records/domain/usecases/add_record.dart';
@@ -17,9 +20,14 @@ void initRecordModule(GetIt getIt) {
   getIt.registerLazySingleton<RecordLocalDatasource>(
     () => RecordLocalDatasourceImpl(recordDao: getIt<RecordDao>()),
   );
+  getIt.registerLazySingleton<RecordRemoteDatasource>(
+    () => RecordRemoteDatasourceImpl(apiClient: getIt<ApiClient>()),
+  );
   getIt.registerLazySingleton<RecordRepository>(
     () => RecordRepositoryImpl(
       localDatasource: getIt<RecordLocalDatasource>(),
+      remoteDatasource: getIt<RecordRemoteDatasource>(),
+      connectivity: getIt<ConnectivityService>(),
       syncQueueDao: getIt<SyncQueueDao>(),
     ),
   );

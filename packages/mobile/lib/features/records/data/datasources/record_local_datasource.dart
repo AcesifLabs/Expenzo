@@ -36,6 +36,14 @@ abstract class RecordLocalDatasource {
   );
   Future<double> getTotalSpending(DateTime start, DateTime end);
   Future<List<Record>> getRecordsByDateRangeOnly(DateTime start, DateTime end);
+  Future<List<Record>> getFilteredRecords({
+    DateTime? startDate,
+    DateTime? endDate,
+    List<String>? categoryIds,
+    String? recordType,
+    int? limit,
+    int? offset,
+  });
 }
 
 class RecordLocalDatasourceImpl implements RecordLocalDatasource {
@@ -236,6 +244,31 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
         );
       }).toList();
       await recordDao.insertRecordsBatch(companions);
+    } catch (e) {
+      throw CacheException(message: e.toString());
+    }
+  }
+
+  /// Combined filter query for offline filtering.
+  @override
+  Future<List<Record>> getFilteredRecords({
+    DateTime? startDate,
+    DateTime? endDate,
+    List<String>? categoryIds,
+    String? recordType,
+    int? limit,
+    int? offset,
+  }) async {
+    try {
+      final records = await recordDao.getFilteredRecords(
+        startDate: startDate,
+        endDate: endDate,
+        categoryIds: categoryIds,
+        recordType: recordType,
+        limit: limit,
+        offset: offset,
+      );
+      return records.map(_mapToEntity).toList();
     } catch (e) {
       throw CacheException(message: e.toString());
     }

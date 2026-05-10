@@ -42,8 +42,6 @@ class _AppShellState extends State<AppShell> {
     'Budgets',
   ];
 
-  bool get _showFab => _currentIndex <= 2; // Home, Activity, or Category
-
   IconData _navIcon(int i, {bool fill = false}) {
     final s = fill ? PhosphorIconsStyle.fill : PhosphorIconsStyle.light;
     switch (i) {
@@ -67,6 +65,8 @@ class _AppShellState extends State<AppShell> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final keyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
+    final showFab = _currentIndex <= 2 && !keyboardOpen;
 
     return Scaffold(
       extendBody: true,
@@ -84,7 +84,7 @@ class _AppShellState extends State<AppShell> {
           const BudgetListPage(),
         ],
       ),
-      floatingActionButton: _showFab
+      floatingActionButton: showFab
           ? FloatingActionButton(
               heroTag: 'shell_fab',
               onPressed: () => _onFabPressed(context),
@@ -97,11 +97,11 @@ class _AppShellState extends State<AppShell> {
             )
           : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: _buildBottomNav(colors),
+      bottomNavigationBar: _buildBottomNav(colors, showFab),
     );
   }
 
-  Widget _buildBottomNav(ColorScheme colors) {
+  Widget _buildBottomNav(ColorScheme colors, bool showFab) {
     // Items after index 2 are rendered on the right of the FAB
     final leftCount = 3;
     final rightCount = 3;
@@ -136,7 +136,7 @@ class _AppShellState extends State<AppShell> {
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.easeInOut,
-                  width: _showFab ? 48 : 0,
+                  width: showFab ? 48 : 0,
                 ),
                 // Right side: Trends, Scan, Profile
                 ...List.generate(rightCount, (i) => _navItem(leftCount + i, colors)),

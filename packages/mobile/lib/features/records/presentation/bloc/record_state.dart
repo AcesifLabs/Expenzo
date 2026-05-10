@@ -31,12 +31,20 @@ class RecordLoaded extends RecordState {
   final int total;
   final bool hasMore;
   final String searchQuery;
+  final DateTime? filterStartDate;
+  final DateTime? filterEndDate;
+  final List<String>? filterCategoryIds;
+  final String? filterRecordType;
 
   const RecordLoaded({
     required this.records,
     this.total = 0,
     this.hasMore = false,
     this.searchQuery = '',
+    this.filterStartDate,
+    this.filterEndDate,
+    this.filterCategoryIds,
+    this.filterRecordType,
   });
 
   List<Record> get filteredRecords {
@@ -50,17 +58,35 @@ class RecordLoaded extends RecordState {
     int? total,
     bool? hasMore,
     String? searchQuery,
+    DateTime? filterStartDate,
+    DateTime? filterEndDate,
+    List<String>? filterCategoryIds,
+    String? filterRecordType,
+    bool clearFilters = false,
   }) {
     return RecordLoaded(
       records: records ?? this.records,
       total: total ?? this.total,
       hasMore: hasMore ?? this.hasMore,
       searchQuery: searchQuery ?? this.searchQuery,
+      filterStartDate: clearFilters ? null : (filterStartDate ?? this.filterStartDate),
+      filterEndDate: clearFilters ? null : (filterEndDate ?? this.filterEndDate),
+      filterCategoryIds: clearFilters ? null : (filterCategoryIds ?? this.filterCategoryIds),
+      filterRecordType: clearFilters ? null : (filterRecordType ?? this.filterRecordType),
     );
   }
 
   @override
-  List<Object?> get props => [records, total, hasMore, searchQuery];
+  List<Object?> get props => [
+    records,
+    total,
+    hasMore,
+    searchQuery,
+    filterStartDate,
+    filterEndDate,
+    filterCategoryIds,
+    filterRecordType,
+  ];
 }
 
 class RecordError extends RecordState {

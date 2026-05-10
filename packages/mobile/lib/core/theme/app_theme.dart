@@ -149,6 +149,14 @@ class AppTheme {
         shape: const RoundedRectangleBorder(borderRadius: _chipBorderRadius),
         side: BorderSide.none,
       ),
+      datePickerTheme: DatePickerThemeData(
+        rangeSelectionBackgroundColor: buttonBg.withAlpha(20),
+        todayBorder: BorderSide(color: outlineBorder),
+        todayForegroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return buttonFg;
+          return null;
+        }),
+      ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: navBg,
         selectedItemColor: navSelected,

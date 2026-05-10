@@ -14,6 +14,7 @@ import '../bloc/record_bloc.dart';
 import '../bloc/record_event.dart';
 import '../bloc/record_state.dart';
 import '../widgets/record_card.dart';
+import '../widgets/record_filter_modal.dart';
 import 'record_form_page.dart';
 
 class RecordListPage extends StatefulWidget {
@@ -61,7 +62,7 @@ class _RecordListPageState extends State<RecordListPage> {
         IconButton(
           icon: Icon(PhosphorIcons.funnel(PhosphorIconsStyle.light)),
           color: Theme.of(context).colorScheme.onSurface.withAlpha(160),
-          onPressed: () {},
+          onPressed: () => _showFilterModal(context),
         ),
       ],
       child: Column(
@@ -72,9 +73,13 @@ class _RecordListPageState extends State<RecordListPage> {
             onChanged: (v) => context.read<RecordBloc>().add(SearchRecords(v)),
           ),
           Expanded(
-            child: Scrollbar(
-              controller: _scrollController,
-              child: _buildRecordsList(),
+            child: GestureDetector(
+              onTap: () => FocusScope.of(context).unfocus(),
+              behavior: HitTestBehavior.translucent,
+              child: Scrollbar(
+                controller: _scrollController,
+                child: _buildRecordsList(),
+              ),
             ),
           ),
         ],
@@ -198,6 +203,44 @@ class _RecordListPageState extends State<RecordListPage> {
           },
         ),
       ),
+    );
+  }
+
+  void _showFilterModal(BuildContext context) {
+    final recordBloc = context.read<RecordBloc>();
+    final categoryBloc = context.read<CategoryBloc>();
+    final state = recordBloc.state;
+    DateTime? startDate;
+    DateTime? endDate;
+    List<String>? categoryIds;
+    String? recordType;
+
+    if (state is RecordLoaded) {
+      startDate = state.filterStartDate;
+      endDate = state.filterEndDate;
+      categoryIds = state.filterCategoryIds;
+      recordType = state.filterRecordType;
+    }
+
+    showRecordFilterModal(
+      context,
+      recordBloc: recordBloc,
+      categoryBloc: categoryBloc,
+      startDate: startDate,
+      endDate: endDate,
+      categoryIds: categoryIds,
+      recordType: recordType,
+      onApply: ({startDate, endDate, categoryIds, recordType}) {
+        recordBloc.add(ApplyFilters(
+          startDate: startDate,
+          endDate: endDate,
+          categoryIds: categoryIds,
+          recordType: recordType,
+        ));
+      },
+      onClear: () {
+        recordBloc.add(const ClearFilters());
+      },
     );
   }
 }

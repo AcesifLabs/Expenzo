@@ -1,0 +1,111 @@
+import 'package:drift/native.dart';
+import 'package:expense_tracker/core/database/app_database.dart';
+import 'package:expense_tracker/core/database/daos/record_dao.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:drift/drift.dart';
+
+void main() {
+  late AppDatabase db;
+  late RecordDao dao;
+
+  setUp(() {
+    db = AppDatabase.forTesting(NativeDatabase.memory());
+    dao = RecordDao(db);
+  });
+
+  tearDown(() async {
+    await db.close();
+  });
+
+  group('RecordDao.getFilteredRecords', () {
+    final now = DateTime.now();
+    final cat1 = 'cat-1';
+    final cat2 = 'cat-2';
+
+    Future<void> _insertRecord({
+      required String id,
+      required double amount,
+      required DateTime date,
+      String? categoryId,
+      required String type,
+    }) async {
+      await db.into(db.records).insert(
+            RecordsCompanion.insert(
+              id: id,
+              amount: amount,
+              description: 'Test $id',
+              date: date,
+              categoryId: Value(categoryId),
+              recordType: type,
+            ),
+          );
+    }
+
+    test('should filter by date range', () async {
+      await _insertRecord(id: '1', amount: 10, date: now.subtract(const Duration(days: 5)), type: 'OUT');
+      await _insertRecord(id: '2', amount: 20, date: now, type: 'OUT');
+      await _insertRecord(id: '3', amount: 30, date: now.add(const Duration(days: 5)), type: 'OUT');
+
+      final results = await dao.getFilteredRecords(
+        startDate: now.subtract(const Duration(days: 1)),
+        endDate: now.add(const Duration(days: 1)),
+      );
+
+      expect(results.length, 1);
+      expect(results.first.id, '2');
+    });
+
+    test('should filter by multiple categories', () async {
+      await _insertRecord(id: '1', amount: 10, date: now, categoryId: cat1, type: 'OUT');
+      await _insertRecord(id: '2', amount: 20, date: now, categoryId: cat2, type: 'OUT');
+      await _insertRecord(id: '3', amount: 30, date: now, categoryId: 'other', type: 'OUT');
+
+      final results = await dao.getFilteredRecords(
+        categoryIds: [cat1, cat2],
+      );
+
+      expect(results.length, 2);
+      final ids = results.map((e) => e.id).toSet();
+      expect(ids.contains('1'), true);
+      expect(ids.contains('2'), true);
+    });
+
+    test('should filter by record type', () async {
+      await _insertRecord(id: '1', amount: 10, date: now, type: 'IN');
+      await _insertRecord(id: '2', amount: 20, date: now, type: 'OUT');
+
+      final results = await dao.getFilteredRecords(
+        recordType: 'IN',
+      );
+
+      expect(results.length, 1);
+      expect(results.first.id, '1');
+    });
+
+    test('should combine all filters', () async {
+      await _insertRecord(id: '1', amount: 10, date: now, categoryId: cat1, type: 'IN'); // Match
+      await _insertRecord(id: '2', amount: 20, date: now, categoryId: cat1, type: 'OUT'); // Wrong type
+      await _insertRecord(id: '3', amount: 30, date: now, categoryId: 'other', type: 'IN'); // Wrong category
+      await _insertRecord(id: '4', amount: 40, date: now.subtract(const Duration(days: 10)), categoryId: cat1, type: 'IN'); // Wrong date
+
+      final results = await dao.getFilteredRecords(
+        startDate: now.subtract(const Duration(days: 1)),
+        endDate: now.add(const Duration(days: 1)),
+        categoryIds: [cat1],
+        recordType: 'IN',
+      );
+
+      expect(results.length, 1);
+      expect(results.first.id, '1');
+    });
+
+    test('should return all records when no filters provided', () async {
+      await _insertRecord(id: '1', amount: 10, date: now, type: 'IN');
+      await _insertRecord(id: '2', amount: 20, date: now, type: 'OUT');
+
+      final results = await dao.getFilteredRecords();
+
+      expect(results.length, 2);
+    });
+  });
+}
