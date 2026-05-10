@@ -325,6 +325,11 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       await di.featureDependenciesReady;
       if (!di.getIt.isRegistered<RecurringRepository>()) return;
       final repo = di.getIt<RecurringRepository>();
+
+      // First occurrence was just saved manually; advance to next period
+      // so the recurring processor doesn't immediately duplicate it.
+      final nextOccurrence = _nextOccurrenceAfter(_selectedDate);
+
       await repo.createRecurring(
         RecurringTransaction(
           description: _noteCtrl.text.trim(),
@@ -333,15 +338,13 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
           frequency: RecurringFrequency.monthly,
           startDate: _selectedDate,
           endDate: null,
-          nextOccurrence: _selectedDate,
+          nextOccurrence: nextOccurrence,
           isActive: true,
           autoCreateExpense: true,
           dayOfMonth: _selectedDate.day,
         ),
       );
     } catch (_) {
-      // Recurring setup is non-critical — the record itself is already saved.
-      // Show a subtle snackbar so the user knows recurring wasn't set up.
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -352,6 +355,13 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
         );
       }
     }
+  }
+
+  /// Returns the next scheduled occurrence after [date] based on frequency.
+  /// Currently only monthly frequency is exposed in the sheet UI.
+  DateTime _nextOccurrenceAfter(DateTime date) {
+    // monthly: advance by one month, preserving the day-of-month
+    return DateTime(date.year, date.month + 1, date.day);
   }
 
   // ── Typewriter engine (type → pause → erase → next) ──
