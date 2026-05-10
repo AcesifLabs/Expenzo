@@ -15,8 +15,7 @@ import '../../../categories/presentation/bloc/category_event.dart';
 import '../../domain/entities/record.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
 import 'package:expense_tracker/features/recurring/domain/entities/recurring_transaction.dart';
-import 'package:expense_tracker/features/recurring/presentation/bloc/recurring_bloc.dart';
-import 'package:expense_tracker/features/recurring/presentation/bloc/recurring_event.dart';
+import 'package:expense_tracker/features/recurring/domain/repositories/recurring_repository.dart';
 import '../bloc/record_bloc.dart';
 import '../bloc/record_event.dart';
 
@@ -314,19 +313,25 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     context.read<RecordBloc>().add(AddRecordEvent(record));
 
     if (_isRecurring) {
-      final recurring = RecurringTransaction(
-        description: _noteCtrl.text.trim(),
-        amount: finalAmount,
-        categoryId: _selectedCategoryId,
-        frequency: RecurringFrequency.monthly,
-        startDate: _selectedDate,
-        endDate: null,
-        nextOccurrence: _selectedDate,
-        isActive: true,
-        autoCreateExpense: true,
-        dayOfMonth: _selectedDate.day,
-      );
-      di.getIt<RecurringBloc>().add(CreateRecurring(recurring));
+      // Wait for feature DI to finish (RecurringModule registered async)
+      di.featureDependenciesReady.then((_) {
+        if (!di.getIt.isRegistered<RecurringRepository>()) return;
+        final repo = di.getIt<RecurringRepository>();
+        repo.createRecurring(
+          RecurringTransaction(
+            description: _noteCtrl.text.trim(),
+            amount: finalAmount,
+            categoryId: _selectedCategoryId,
+            frequency: RecurringFrequency.monthly,
+            startDate: _selectedDate,
+            endDate: null,
+            nextOccurrence: _selectedDate,
+            isActive: true,
+            autoCreateExpense: true,
+            dayOfMonth: _selectedDate.day,
+          ),
+        );
+      });
     }
 
     Navigator.pop(context);

@@ -11,7 +11,7 @@ import "package:expense_tracker/core/constants/source_types.dart";
 abstract class SearchLocalDatasource {
   Future<List<SearchResult>> searchRecords(SearchFilters filters);
   Future<void> indexRecord(Record record);
-  Future<void> removeRecordFromIndex(int recordId);
+  Future<void> removeRecordFromIndex(String recordId);
   Future<void> rebuildIndex();
 }
 
@@ -104,7 +104,7 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
   }
 
   @override
-  Future<void> removeRecordFromIndex(int recordId) async {
+  Future<void> removeRecordFromIndex(String recordId) async {
     try {
       await db.customStatement('DELETE FROM expense_fts WHERE expense_id = ?', [
         recordId,

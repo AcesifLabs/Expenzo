@@ -14,6 +14,7 @@ import 'package:expense_tracker/core/database/daos/user_dao.dart';
 import 'package:expense_tracker/core/database/daos/budget_dao.dart';
 import 'package:expense_tracker/core/database/daos/sync_queue_dao.dart';
 import 'package:expense_tracker/core/api/api_client.dart';
+import 'package:expense_tracker/core/api/token_storage.dart';
 import 'package:expense_tracker/core/sync/connectivity_service.dart';
 import 'package:expense_tracker/core/sync/sync_engine.dart';
 import 'package:expense_tracker/core/sync/sync_table_registry.dart';
@@ -100,6 +101,8 @@ Future<void> resetDatabaseInstance() async {
     await db.clearAllTables();
     await DatabaseSeeder.seedInitialCategories(db);
   }
+  // Reset sync cursor so next pull uses epoch (full re-sync)
+  await TokenStorage.clearSyncState();
 }
 
 /// Registers feature-level dependencies (Budgets).
