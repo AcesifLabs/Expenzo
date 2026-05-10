@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:expense_tracker/core/constants/record_type.dart';
 import '../../domain/entities/category.dart';
 
 abstract class CategoryState extends Equatable {
@@ -18,11 +19,12 @@ class CategoryLoading extends CategoryState {
 
 class CategoryLoaded extends CategoryState {
   final List<Category> categories;
+  final RecordType? type;
 
-  const CategoryLoaded(this.categories);
+  const CategoryLoaded(this.categories, {this.type});
 
   @override
-  List<Object?> get props => [categories];
+  List<Object?> get props => [categories, type];
 }
 
 class CategoryError extends CategoryState {

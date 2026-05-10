@@ -34,7 +34,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     );
     result.fold(
       (failure) => emit(CategoryError(failure.message)),
-      (categories) => emit(CategoryLoaded(categories)),
+      (categories) => emit(CategoryLoaded(categories, type: event.type)),
     );
   }
 

@@ -1,17 +1,20 @@
 import 'package:drift/drift.dart';
 
 class Records extends Table {
-  IntColumn get id => integer().autoIncrement()();
+  TextColumn get id => text()();
   RealColumn get amount => real()();
   TextColumn get description => text()();
   DateTimeColumn get date => dateTime()();
-  IntColumn get categoryId => integer().nullable()();
+  TextColumn get categoryId => text().nullable()();
   TextColumn get source => text().withDefault(const Constant('manual'))();
   TextColumn get sourceId => text().nullable()();
   TextColumn get recordType => text()(); // IN or OUT
   IntColumn get userId => integer().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column> get primaryKey => {id};
 
   Set<TableIndex> get indexes => {
     const TableIndex(name: 'idx_records_date', columns: {#date}),

@@ -147,14 +147,19 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
   }
 
   Future<void> _syncUserToLocalDb(fb.User firebaseUser) async {
-    final now = DateTime.now().toUtc();
-    await userDao.upsertUser(UsersCompanion.insert(
-      uid: firebaseUser.uid,
-      email: firebaseUser.email ?? '',
-      displayName: Value(firebaseUser.displayName),
-      photoUrl: Value(firebaseUser.photoURL),
-      createdAt: now,
-      lastLoginAt: now,
-    ));
+    try {
+      final now = DateTime.now().toUtc();
+      await userDao.upsertUser(UsersCompanion.insert(
+        uid: firebaseUser.uid,
+        email: firebaseUser.email ?? '',
+        displayName: Value(firebaseUser.displayName),
+        photoUrl: Value(firebaseUser.photoURL),
+        createdAt: now,
+        lastLoginAt: now,
+      ));
+    } catch (e) {
+      debugPrint('AuthRemoteDatasource: Failed to sync user to local DB: $e');
+      // Non-fatal: user is already authenticated at Firebase level
+    }
   }
 }

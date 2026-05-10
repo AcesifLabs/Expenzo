@@ -5,13 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
-
-interface JwtPayload {
-  sub: string;
-  firebaseUid: string;
-  iat: number;
-  exp: number;
-}
+import { JwtPayload } from '../dto/jwtpayload.dto';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {

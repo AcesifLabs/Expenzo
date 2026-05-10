@@ -37,7 +37,7 @@ class UpdateCategoryEvent extends CategoryEvent {
 }
 
 class DeleteCategoryEvent extends CategoryEvent {
-  final int id;
+  final String id;
 
   const DeleteCategoryEvent(this.id);
 

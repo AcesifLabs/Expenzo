@@ -29,7 +29,7 @@ class _RecordFormPageState extends State<RecordFormPage> {
   late TextEditingController _amountController;
   late TextEditingController _descriptionController;
   late DateTime _selectedDate;
-  int? _selectedCategoryId;
+  String? _selectedCategoryId;
   late RecordType _recordType;
 
   bool get _isEditing => widget.record != null;
@@ -49,7 +49,7 @@ class _RecordFormPageState extends State<RecordFormPage> {
         widget.record?.recordType ?? widget.initialType ?? RecordType.expense;
 
     // Ensure categories are loaded — the global load might race with init
-    context.read<CategoryBloc>().add(const LoadCategories());
+    context.read<CategoryBloc>().add(LoadCategories(type: _recordType));
   }
 
   @override
@@ -133,16 +133,16 @@ class _RecordFormPageState extends State<RecordFormPage> {
                       child: Text('No categories available. Create one first.'),
                     );
                   }
-                  return DropdownButtonFormField<int>(
+                  return DropdownButtonFormField<String>(
                     initialValue: _selectedCategoryId,
                     decoration: const InputDecoration(labelText: 'Category'),
                     items: [
-                      const DropdownMenuItem<int>(
+                      const DropdownMenuItem<String>(
                         value: null,
                         child: Text('No Category'),
                       ),
                       ...state.categories.map((cat) {
-                        return DropdownMenuItem<int>(
+                        return DropdownMenuItem<String>(
                           value: cat.id,
                           child: Row(
                             children: [

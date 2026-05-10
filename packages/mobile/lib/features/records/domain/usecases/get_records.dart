@@ -22,7 +22,7 @@ class GetRecords extends UseCase<List<Record>, GetRecordsParams> {
 
 class GetRecordsParams extends Params {
   final DateTimeRange? dateRange;
-  final int? categoryId;
+  final String? categoryId;
   final int? limit;
   final int? offset;
 
