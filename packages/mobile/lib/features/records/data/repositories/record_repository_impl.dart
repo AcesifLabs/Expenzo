@@ -3,17 +3,23 @@ import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/sync/sync_event.dart';
+import 'package:expense_tracker/core/sync/connectivity_service.dart';
 import 'package:expense_tracker/core/database/daos/sync_queue_dao.dart';
 import '../../domain/entities/record.dart';
 import '../../domain/repositories/record_repository.dart';
 import '../datasources/record_local_datasource.dart';
+import '../datasources/record_remote_datasource.dart';
 
 class RecordRepositoryImpl implements RecordRepository {
   final RecordLocalDatasource localDatasource;
+  final RecordRemoteDatasource remoteDatasource;
+  final ConnectivityService connectivity;
   final SyncQueueDao? _syncQueueDao;
 
   RecordRepositoryImpl({
     required this.localDatasource,
+    required this.remoteDatasource,
+    required this.connectivity,
     SyncQueueDao? syncQueueDao,
   }) : _syncQueueDao = syncQueueDao;
 
@@ -44,6 +50,44 @@ class RecordRepositoryImpl implements RecordRepository {
       );
       return Right(records);
     } on CacheException catch (e) {
+      return Left(e.toFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Record>>> getFilteredRecords({
+    DateTime? startDate,
+    DateTime? endDate,
+    List<String>? categoryIds,
+    String? recordType,
+    int? limit,
+    int? offset,
+  }) async {
+    try {
+      final online = await connectivity.checkNow();
+      if (online) {
+        final resp = await remoteDatasource.getRecords(
+          limit: limit,
+          startDate: startDate?.toUtc().toIso8601String(),
+          endDate: endDate?.toUtc().toIso8601String(),
+          categoryIds: categoryIds,
+          recordType: recordType,
+        );
+        return Right(resp.data);
+      }
+      // Offline: query local DB
+      final records = await localDatasource.getFilteredRecords(
+        startDate: startDate,
+        endDate: endDate,
+        categoryIds: categoryIds,
+        recordType: recordType,
+        limit: limit,
+        offset: offset,
+      );
+      return Right(records);
+    } on CacheException catch (e) {
+      return Left(e.toFailure());
+    } on ServerException catch (e) {
       return Left(e.toFailure());
     }
   }
