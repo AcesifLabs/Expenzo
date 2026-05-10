@@ -130,11 +130,21 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
     }
   }
 
+  /// SQLite may return whole-number floats as int; coerce safely.
+  double _toDouble(dynamic value) {
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    throw CacheException(
+      message: 'Unexpected amount type: ${value.runtimeType}',
+    );
+  }
+
   Record _mapToRecord(QueryRow row) {
     final data = row.data;
     return Record(
       id: data['id'] as String?,
-      amount: data['amount'] as double,
+      amount: _toDouble(data['amount']),
       description: data['description'] as String,
       date: _intToDateTime(data['date']),
       categoryId: data['category_id'] as String?,

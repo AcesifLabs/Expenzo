@@ -78,14 +78,14 @@ class DatabaseSeeder {
   /// Ensures all income categories exist for existing users who were seeded
   /// before income category support was added.
   static Future<void> _ensureIncomeCategoriesExist(AppDatabase db) async {
-    // Query all existing IN-category names to avoid inserting duplicates
+    // Query existing seeded income categories by their stable IDs
     final existingIn = await (db.select(db.categories)
           ..where((t) => t.categoryType.equals('IN')))
         .get();
-    final existingNames = existingIn.map((c) => c.name).toSet();
+    final existingIds = existingIn.map((c) => c.id).toSet();
 
     final missing = _incomeCategories
-        .where((cat) => !existingNames.contains(cat.$2))
+        .where((cat) => !existingIds.contains(cat.$1))
         .toList();
 
     if (missing.isEmpty) return;

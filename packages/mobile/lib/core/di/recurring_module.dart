@@ -4,10 +4,10 @@ import 'package:expense_tracker/features/recurring/data/datasources/recurring_lo
 import 'package:expense_tracker/features/recurring/data/repositories/recurring_repository_impl.dart';
 import 'package:expense_tracker/features/recurring/domain/repositories/recurring_repository.dart';
 import 'package:expense_tracker/features/recurring/domain/usecases/get_recurring_list.dart';
-import 'package:expense_tracker/features/recurring/domain/usecases/create_recurring.dart' as usecase;
-import 'package:expense_tracker/features/recurring/domain/usecases/update_recurring.dart' as usecase;
-import 'package:expense_tracker/features/recurring/domain/usecases/delete_recurring.dart' as usecase;
-import 'package:expense_tracker/features/recurring/domain/usecases/process_recurring.dart' as usecase;
+import 'package:expense_tracker/features/recurring/domain/usecases/create_recurring.dart' as create_uc;
+import 'package:expense_tracker/features/recurring/domain/usecases/update_recurring.dart' as update_uc;
+import 'package:expense_tracker/features/recurring/domain/usecases/delete_recurring.dart' as delete_uc;
+import 'package:expense_tracker/features/recurring/domain/usecases/process_recurring.dart' as process_uc;
 import 'package:expense_tracker/features/recurring/presentation/bloc/recurring_bloc.dart';
 
 void initRecurringModule(GetIt getIt) {
@@ -25,24 +25,24 @@ void initRecurringModule(GetIt getIt) {
     () => GetRecurringList(getIt<RecurringRepository>()),
   );
   getIt.registerLazySingleton(
-    () => usecase.CreateRecurring(getIt<RecurringRepository>()),
+    () => create_uc.CreateRecurring(getIt<RecurringRepository>()),
   );
   getIt.registerLazySingleton(
-    () => usecase.UpdateRecurring(getIt<RecurringRepository>()),
+    () => update_uc.UpdateRecurring(getIt<RecurringRepository>()),
   );
   getIt.registerLazySingleton(
-    () => usecase.DeleteRecurring(getIt<RecurringRepository>()),
+    () => delete_uc.DeleteRecurring(getIt<RecurringRepository>()),
   );
   getIt.registerLazySingleton(
-    () => usecase.ProcessRecurring(getIt<RecurringRepository>()),
+    () => process_uc.ProcessRecurring(getIt<RecurringRepository>()),
   );
   getIt.registerFactory<RecurringBloc>(
     () => RecurringBloc(
       getRecurringList: getIt<GetRecurringList>(),
-      createRecurring: getIt<usecase.CreateRecurring>(),
-      updateRecurring: getIt<usecase.UpdateRecurring>(),
-      deleteRecurring: getIt<usecase.DeleteRecurring>(),
-      processRecurring: getIt<usecase.ProcessRecurring>(),
+      createRecurring: getIt<create_uc.CreateRecurring>(),
+      updateRecurring: getIt<update_uc.UpdateRecurring>(),
+      deleteRecurring: getIt<delete_uc.DeleteRecurring>(),
+      processRecurring: getIt<process_uc.ProcessRecurring>(),
     ),
   );
 }
