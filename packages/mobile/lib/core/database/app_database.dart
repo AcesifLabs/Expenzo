@@ -13,7 +13,6 @@ import 'tables/message_sources_table.dart';
 import 'tables/expense_templates_table.dart';
 import 'tables/budgets_table.dart';
 import 'tables/recurring_table.dart';
-import 'tables/expense_fts_table.dart';
 import 'tables/users_table.dart';
 import 'tables/sync_queue_table.dart';
 import 'tables/app_settings_table.dart';
@@ -40,7 +39,6 @@ part 'app_database.g.dart';
     ExpenseTemplates,
     Budgets,
     RecurringTransactions,
-    ExpenseFtsTable,
     Users,
     SyncQueue,
     AppSettings,
@@ -61,7 +59,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 13;
 
   @override
   MigrationStrategy get migration {
@@ -218,6 +216,18 @@ class AppDatabase extends _$AppDatabase {
           // Recreate FTS triggers
           await _createFtsTriggers(customStatement);
         }
+        if (from < 13) {
+          // ── FTS: Drift managed ExpenseFtsTable as regular table ──
+          // Drop the regular table (created by m.createAll() pre-v13).
+          // Recreate as proper virtual FTS5 table.
+          await customStatement('DROP TABLE IF EXISTS expense_fts');
+          await _createFtsTable(customStatement);
+          await customStatement('''
+            INSERT INTO expense_fts (expense_id, description)
+            SELECT id, description FROM records
+          ''');
+          await _createFtsTriggers(customStatement);
+        }
       },
     );
   }
@@ -265,6 +275,8 @@ class AppDatabase extends _$AppDatabase {
         for (final table in allTables) {
           await delete(table).go();
         }
+        // Virtual FTS5 table (not managed by Drift, deleted separately)
+        await customStatement('DELETE FROM expense_fts');
       });
     } finally {
       await customStatement('PRAGMA foreign_keys = ON');

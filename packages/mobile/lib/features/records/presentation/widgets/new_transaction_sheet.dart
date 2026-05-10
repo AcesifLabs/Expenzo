@@ -34,6 +34,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   String? _selectedCategoryId;
   List<Category> _categories = [];
   bool _hasManuallyDeselected = false;
+  RecordType? _lastRequestedType; // Guards against stale CategoryLoaded states
 
   // ── Validation error flags ──
   bool _labelError = false;
@@ -138,6 +139,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   }
 
   void _loadCategories() {
+    _lastRequestedType = _type;
     context.read<CategoryBloc>().add(
       LoadCategories(type: _type, sortByUsage: true),
     );
@@ -313,28 +315,45 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     context.read<RecordBloc>().add(AddRecordEvent(record));
 
     if (_isRecurring) {
-      // Wait for feature DI to finish (RecurringModule registered async)
-      di.featureDependenciesReady.then((_) {
-        if (!di.getIt.isRegistered<RecurringRepository>()) return;
-        final repo = di.getIt<RecurringRepository>();
-        repo.createRecurring(
-          RecurringTransaction(
-            description: _noteCtrl.text.trim(),
-            amount: finalAmount,
-            categoryId: _selectedCategoryId,
-            frequency: RecurringFrequency.monthly,
-            startDate: _selectedDate,
-            endDate: null,
-            nextOccurrence: _selectedDate,
-            isActive: true,
-            autoCreateExpense: true,
-            dayOfMonth: _selectedDate.day,
-          ),
-        );
-      });
+      unawaited(_createRecurringTransaction(finalAmount));
     }
 
     Navigator.pop(context);
+  }
+
+  // ── Fire-and-forget recurring creation (primary record already saved) ──
+  Future<void> _createRecurringTransaction(double finalAmount) async {
+    try {
+      await di.featureDependenciesReady;
+      if (!di.getIt.isRegistered<RecurringRepository>()) return;
+      final repo = di.getIt<RecurringRepository>();
+      await repo.createRecurring(
+        RecurringTransaction(
+          description: _noteCtrl.text.trim(),
+          amount: finalAmount,
+          categoryId: _selectedCategoryId,
+          frequency: RecurringFrequency.monthly,
+          startDate: _selectedDate,
+          endDate: null,
+          nextOccurrence: _selectedDate,
+          isActive: true,
+          autoCreateExpense: true,
+          dayOfMonth: _selectedDate.day,
+        ),
+      );
+    } catch (_) {
+      // Recurring setup is non-critical — the record itself is already saved.
+      // Show a subtle snackbar so the user knows recurring wasn't set up.
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Recurring transaction could not be saved. '
+                'You can set it up later from the Recurring tab.'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    }
   }
 
   // ── Typewriter engine (type → pause → erase → next) ──
@@ -421,10 +440,8 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     final colors = Theme.of(context).colorScheme;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
-    // Swipe gesture: left→right = expense, right→left = income
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
-      onHorizontalDragEnd: _onHorizontalSwipe,
       behavior: HitTestBehavior.translucent,
       child: Padding(
         padding: EdgeInsets.only(bottom: bottomInset),
@@ -450,36 +467,51 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                     ),
                   ),
                 ),
-                // Toggle
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                  child: _TypeToggle(type: _type, onSwitch: _switchType),
-                ),
-                // Amount display
-                ValueListenableBuilder<String>(
-                  valueListenable: _amountText,
-                  builder: (_, val, child) {
-                    final displayVal = val.isEmpty ? '0' : val;
-                    final sign = _type == RecordType.expense ? '-' : '+';
-                    final signColor = _type == RecordType.expense
-                        ? const Color(0xFFFF3B30)
-                        : const Color(0xFF34C759);
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Text(
-                        '$sign$displayVal',
-                        style: TextStyle(
-                          fontSize: 48,
-                          fontWeight: FontWeight.w700,
-                          color: signColor,
-                          letterSpacing: -1,
+                // ── Swipe zone: toggle + amount (scoped to avoid conflict
+                //     with horizontal category-chip ListView below) ──
+                GestureDetector(
+                  onHorizontalDragEnd: _onHorizontalSwipe,
+                  behavior: HitTestBehavior.translucent,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Toggle
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
                         ),
+                        child: _TypeToggle(
+                            type: _type, onSwitch: _switchType),
                       ),
-                    );
-                  },
+                      // Amount display
+                      ValueListenableBuilder<String>(
+                        valueListenable: _amountText,
+                        builder: (_, val, child) {
+                          final displayVal = val.isEmpty ? '0' : val;
+                          final sign = _type == RecordType.expense
+                              ? '-'
+                              : '+';
+                          final signColor = _type == RecordType.expense
+                              ? const Color(0xFFFF3B30)
+                              : const Color(0xFF34C759);
+                          return Padding(
+                            padding:
+                                const EdgeInsets.symmetric(vertical: 8),
+                            child: Text(
+                              '$sign$displayVal',
+                              style: TextStyle(
+                                fontSize: 48,
+                                fontWeight: FontWeight.w700,
+                                color: signColor,
+                                letterSpacing: -1,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
                 ),
                 // Numeric keypad with hold-to-delete
                 _NumericKeypad(
@@ -727,25 +759,16 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     return BlocBuilder<CategoryBloc, CategoryState>(
       builder: (ctx, state) {
         if (state is CategoryLoaded) {
+          // Ignore if loaded for a different record type (race with _switchType)
+          if (_lastRequestedType != null && _lastRequestedType != _type) {
+            return _buildCategoryLoadingSpinner(colors);
+          }
           _categories = state.categories;
           _selectDefaultCategory(state.categories);
         }
         final allCats = _categories;
         if (state is CategoryLoading) {
-          return Container(
-            height: 50,
-            margin: const EdgeInsets.symmetric(vertical: 8),
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            alignment: Alignment.center,
-            child: SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: colors.onSurface.withAlpha(80),
-              ),
-            ),
-          );
+          return _buildCategoryLoadingSpinner(colors);
         }
         if (allCats.isEmpty) {
           return Padding(
@@ -814,6 +837,23 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
           },
         );
       },
+    );
+  }
+
+  Widget _buildCategoryLoadingSpinner(ColorScheme colors) {
+    return Container(
+      height: 50,
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      alignment: Alignment.center,
+      child: SizedBox(
+        width: 20,
+        height: 20,
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          color: colors.onSurface.withAlpha(80),
+        ),
+      ),
     );
   }
 }

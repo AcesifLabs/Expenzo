@@ -7,7 +7,6 @@ export 'database/tables/message_sources_table.dart';
 export 'database/tables/expense_templates_table.dart';
 export 'database/tables/budgets_table.dart';
 export 'database/tables/recurring_table.dart';
-export 'database/tables/expense_fts_table.dart';
 export 'database/daos/record_dao.dart';
 export 'database/daos/category_dao.dart';
 export 'database/daos/pending_recurring_dao.dart';

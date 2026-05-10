@@ -49,7 +49,7 @@ class _RecordFormPageState extends State<RecordFormPage> {
         widget.record?.recordType ?? widget.initialType ?? RecordType.expense;
 
     // Ensure categories are loaded — the global load might race with init
-    context.read<CategoryBloc>().add(const LoadCategories());
+    context.read<CategoryBloc>().add(LoadCategories(type: _recordType));
   }
 
   @override

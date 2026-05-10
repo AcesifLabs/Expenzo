@@ -19,7 +19,8 @@ void main() {
   late MockBudgetRepository mockBudgetRepository;
   late GetBudgetsWithProgress getBudgetsWithProgress;
 
-  final periodStart = DateTime(DateTime.now().year, DateTime.now().month, 1);
+  final now = DateTime.now();
+  final periodStart = DateTime(now.year, now.month, 1);
 
   setUp(() {
     mockRecordRepository = MockRecordRepository();

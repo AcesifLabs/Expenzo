@@ -135,7 +135,7 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
       id: data['id'] as String?,
       amount: data['amount'] as double,
       description: data['description'] as String,
-      date: data['date'] as DateTime,
+      date: _intToDateTime(data['date']),
       categoryId: data['category_id'] as String?,
       source: ExpenseSource.values.firstWhere(
         (s) => s.name == data['source'],
@@ -143,8 +143,18 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
       ),
       sourceId: data['source_id'] as String?,
       recordType: RecordType.fromDbValue(data['record_type'] as String),
-      createdAt: data['created_at'] as DateTime,
-      updatedAt: data['updated_at'] as DateTime,
+      createdAt: _intToDateTime(data['created_at']),
+      updatedAt: _intToDateTime(data['updated_at']),
+    );
+  }
+
+  /// Convert raw SQLite integer (millis since epoch) to DateTime.
+  /// Drift's customSelect() returns timestamp columns as int, not DateTime.
+  DateTime _intToDateTime(dynamic value) {
+    if (value is int) return DateTime.fromMillisecondsSinceEpoch(value);
+    if (value is DateTime) return value;
+    throw CacheException(
+      message: 'Unexpected date type: ${value.runtimeType}',
     );
   }
 }

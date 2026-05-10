@@ -4210,203 +4210,6 @@ class RecurringTransactionsCompanion
   }
 }
 
-class $ExpenseFtsTableTable extends ExpenseFtsTable
-    with TableInfo<$ExpenseFtsTableTable, ExpenseFts> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $ExpenseFtsTableTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _expenseIdMeta =
-      const VerificationMeta('expenseId');
-  @override
-  late final GeneratedColumn<String> expenseId = GeneratedColumn<String>(
-      'expense_id', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _descriptionMeta =
-      const VerificationMeta('description');
-  @override
-  late final GeneratedColumn<String> description = GeneratedColumn<String>(
-      'description', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  @override
-  List<GeneratedColumn> get $columns => [expenseId, description];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'expense_fts';
-  @override
-  VerificationContext validateIntegrity(Insertable<ExpenseFts> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('expense_id')) {
-      context.handle(_expenseIdMeta,
-          expenseId.isAcceptableOrUnknown(data['expense_id']!, _expenseIdMeta));
-    } else if (isInserting) {
-      context.missing(_expenseIdMeta);
-    }
-    if (data.containsKey('description')) {
-      context.handle(
-          _descriptionMeta,
-          description.isAcceptableOrUnknown(
-              data['description']!, _descriptionMeta));
-    } else if (isInserting) {
-      context.missing(_descriptionMeta);
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => const {};
-  @override
-  ExpenseFts map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return ExpenseFts(
-      expenseId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}expense_id'])!,
-      description: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
-    );
-  }
-
-  @override
-  $ExpenseFtsTableTable createAlias(String alias) {
-    return $ExpenseFtsTableTable(attachedDatabase, alias);
-  }
-}
-
-class ExpenseFts extends DataClass implements Insertable<ExpenseFts> {
-  final String expenseId;
-  final String description;
-  const ExpenseFts({required this.expenseId, required this.description});
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['expense_id'] = Variable<String>(expenseId);
-    map['description'] = Variable<String>(description);
-    return map;
-  }
-
-  ExpenseFtsTableCompanion toCompanion(bool nullToAbsent) {
-    return ExpenseFtsTableCompanion(
-      expenseId: Value(expenseId),
-      description: Value(description),
-    );
-  }
-
-  factory ExpenseFts.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return ExpenseFts(
-      expenseId: serializer.fromJson<String>(json['expenseId']),
-      description: serializer.fromJson<String>(json['description']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'expenseId': serializer.toJson<String>(expenseId),
-      'description': serializer.toJson<String>(description),
-    };
-  }
-
-  ExpenseFts copyWith({String? expenseId, String? description}) => ExpenseFts(
-        expenseId: expenseId ?? this.expenseId,
-        description: description ?? this.description,
-      );
-  ExpenseFts copyWithCompanion(ExpenseFtsTableCompanion data) {
-    return ExpenseFts(
-      expenseId: data.expenseId.present ? data.expenseId.value : this.expenseId,
-      description:
-          data.description.present ? data.description.value : this.description,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('ExpenseFts(')
-          ..write('expenseId: $expenseId, ')
-          ..write('description: $description')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(expenseId, description);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is ExpenseFts &&
-          other.expenseId == this.expenseId &&
-          other.description == this.description);
-}
-
-class ExpenseFtsTableCompanion extends UpdateCompanion<ExpenseFts> {
-  final Value<String> expenseId;
-  final Value<String> description;
-  final Value<int> rowid;
-  const ExpenseFtsTableCompanion({
-    this.expenseId = const Value.absent(),
-    this.description = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  ExpenseFtsTableCompanion.insert({
-    required String expenseId,
-    required String description,
-    this.rowid = const Value.absent(),
-  })  : expenseId = Value(expenseId),
-        description = Value(description);
-  static Insertable<ExpenseFts> custom({
-    Expression<String>? expenseId,
-    Expression<String>? description,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (expenseId != null) 'expense_id': expenseId,
-      if (description != null) 'description': description,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  ExpenseFtsTableCompanion copyWith(
-      {Value<String>? expenseId,
-      Value<String>? description,
-      Value<int>? rowid}) {
-    return ExpenseFtsTableCompanion(
-      expenseId: expenseId ?? this.expenseId,
-      description: description ?? this.description,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (expenseId.present) {
-      map['expense_id'] = Variable<String>(expenseId.value);
-    }
-    if (description.present) {
-      map['description'] = Variable<String>(description.value);
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('ExpenseFtsTableCompanion(')
-          ..write('expenseId: $expenseId, ')
-          ..write('description: $description, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
 class $UsersTable extends Users with TableInfo<$UsersTable, User> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -5405,8 +5208,6 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $BudgetsTable budgets = $BudgetsTable(this);
   late final $RecurringTransactionsTable recurringTransactions =
       $RecurringTransactionsTable(this);
-  late final $ExpenseFtsTableTable expenseFtsTable =
-      $ExpenseFtsTableTable(this);
   late final $UsersTable users = $UsersTable(this);
   late final $SyncQueueTable syncQueue = $SyncQueueTable(this);
   late final $AppSettingsTable appSettings = $AppSettingsTable(this);
@@ -5435,7 +5236,6 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         expenseTemplates,
         budgets,
         recurringTransactions,
-        expenseFtsTable,
         users,
         syncQueue,
         appSettings
@@ -7149,87 +6949,6 @@ class $$RecurringTransactionsTableOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $$ExpenseFtsTableTableCreateCompanionBuilder = ExpenseFtsTableCompanion
-    Function({
-  required String expenseId,
-  required String description,
-  Value<int> rowid,
-});
-typedef $$ExpenseFtsTableTableUpdateCompanionBuilder = ExpenseFtsTableCompanion
-    Function({
-  Value<String> expenseId,
-  Value<String> description,
-  Value<int> rowid,
-});
-
-class $$ExpenseFtsTableTableTableManager extends RootTableManager<
-    _$AppDatabase,
-    $ExpenseFtsTableTable,
-    ExpenseFts,
-    $$ExpenseFtsTableTableFilterComposer,
-    $$ExpenseFtsTableTableOrderingComposer,
-    $$ExpenseFtsTableTableCreateCompanionBuilder,
-    $$ExpenseFtsTableTableUpdateCompanionBuilder> {
-  $$ExpenseFtsTableTableTableManager(
-      _$AppDatabase db, $ExpenseFtsTableTable table)
-      : super(TableManagerState(
-          db: db,
-          table: table,
-          filteringComposer:
-              $$ExpenseFtsTableTableFilterComposer(ComposerState(db, table)),
-          orderingComposer:
-              $$ExpenseFtsTableTableOrderingComposer(ComposerState(db, table)),
-          updateCompanionCallback: ({
-            Value<String> expenseId = const Value.absent(),
-            Value<String> description = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              ExpenseFtsTableCompanion(
-            expenseId: expenseId,
-            description: description,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required String expenseId,
-            required String description,
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              ExpenseFtsTableCompanion.insert(
-            expenseId: expenseId,
-            description: description,
-            rowid: rowid,
-          ),
-        ));
-}
-
-class $$ExpenseFtsTableTableFilterComposer
-    extends FilterComposer<_$AppDatabase, $ExpenseFtsTableTable> {
-  $$ExpenseFtsTableTableFilterComposer(super.$state);
-  ColumnFilters<String> get expenseId => $state.composableBuilder(
-      column: $state.table.expenseId,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<String> get description => $state.composableBuilder(
-      column: $state.table.description,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-}
-
-class $$ExpenseFtsTableTableOrderingComposer
-    extends OrderingComposer<_$AppDatabase, $ExpenseFtsTableTable> {
-  $$ExpenseFtsTableTableOrderingComposer(super.$state);
-  ColumnOrderings<String> get expenseId => $state.composableBuilder(
-      column: $state.table.expenseId,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<String> get description => $state.composableBuilder(
-      column: $state.table.description,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-}
-
 typedef $$UsersTableCreateCompanionBuilder = UsersCompanion Function({
   Value<int> id,
   required String uid,
@@ -7649,8 +7368,6 @@ class $AppDatabaseManager {
       $$BudgetsTableTableManager(_db, _db.budgets);
   $$RecurringTransactionsTableTableManager get recurringTransactions =>
       $$RecurringTransactionsTableTableManager(_db, _db.recurringTransactions);
-  $$ExpenseFtsTableTableTableManager get expenseFtsTable =>
-      $$ExpenseFtsTableTableTableManager(_db, _db.expenseFtsTable);
   $$UsersTableTableManager get users =>
       $$UsersTableTableManager(_db, _db.users);
   $$SyncQueueTableTableManager get syncQueue =>
