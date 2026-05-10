@@ -48,9 +48,10 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
       }
 
       if (filters.dateRange != null) {
+        // Drift stores dateTime() as unix seconds; convert from milliseconds.
         conditions.add('r.date >= ? AND r.date <= ?');
-        args.add(filters.dateRange!.start.millisecondsSinceEpoch);
-        args.add(filters.dateRange!.end.millisecondsSinceEpoch);
+        args.add(filters.dateRange!.start.millisecondsSinceEpoch ~/ 1000);
+        args.add(filters.dateRange!.end.millisecondsSinceEpoch ~/ 1000);
       }
 
       if (filters.minAmount != null) {
@@ -148,10 +149,9 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
     );
   }
 
-  /// Convert raw SQLite integer (millis since epoch) to DateTime.
-  /// Drift's customSelect() returns timestamp columns as int, not DateTime.
+  /// Convert raw SQLite integer (Drift stores dateTime() as unix seconds).
   DateTime _intToDateTime(dynamic value) {
-    if (value is int) return DateTime.fromMillisecondsSinceEpoch(value);
+    if (value is int) return DateTime.fromMillisecondsSinceEpoch(value * 1000);
     if (value is DateTime) return value;
     throw CacheException(
       message: 'Unexpected date type: ${value.runtimeType}',

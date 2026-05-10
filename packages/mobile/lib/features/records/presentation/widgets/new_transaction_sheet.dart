@@ -34,7 +34,6 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   String? _selectedCategoryId;
   List<Category> _categories = [];
   bool _hasManuallyDeselected = false;
-  RecordType? _lastRequestedType; // Guards against stale CategoryLoaded states
 
   // ── Validation error flags ──
   bool _labelError = false;
@@ -139,7 +138,6 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   }
 
   void _loadCategories() {
-    _lastRequestedType = _type;
     context.read<CategoryBloc>().add(
       LoadCategories(type: _type, sortByUsage: true),
     );
@@ -760,7 +758,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       builder: (ctx, state) {
         if (state is CategoryLoaded) {
           // Ignore if loaded for a different record type (race with _switchType)
-          if (_lastRequestedType != null && _lastRequestedType != _type) {
+          if (state.type != null && state.type != _type) {
             return _buildCategoryLoadingSpinner(colors);
           }
           _categories = state.categories;
