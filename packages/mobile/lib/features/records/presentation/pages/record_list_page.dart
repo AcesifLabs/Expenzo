@@ -71,7 +71,12 @@ class _RecordListPageState extends State<RecordListPage> {
             hintText: 'Search transactions...',
             onChanged: (v) => context.read<RecordBloc>().add(SearchRecords(v)),
           ),
-          Expanded(child: _buildRecordsList()),
+          Expanded(
+            child: Scrollbar(
+              controller: _scrollController,
+              child: _buildRecordsList(),
+            ),
+          ),
         ],
       ),
     );
