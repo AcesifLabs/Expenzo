@@ -450,6 +450,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
+      onHorizontalDragEnd: _onHorizontalSwipe,
       behavior: HitTestBehavior.translucent,
       child: Padding(
         padding: EdgeInsets.only(bottom: bottomInset),
@@ -475,51 +476,40 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                     ),
                   ),
                 ),
-                // ── Swipe zone: toggle + amount (scoped to avoid conflict
-                //     with horizontal category-chip ListView below) ──
-                GestureDetector(
-                  onHorizontalDragEnd: _onHorizontalSwipe,
-                  behavior: HitTestBehavior.translucent,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Toggle
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
-                        ),
-                        child: _TypeToggle(
-                            type: _type, onSwitch: _switchType),
-                      ),
-                      // Amount display
-                      ValueListenableBuilder<String>(
-                        valueListenable: _amountText,
-                        builder: (_, val, child) {
-                          final displayVal = val.isEmpty ? '0' : val;
-                          final sign = _type == RecordType.expense
-                              ? '-'
-                              : '+';
-                          final signColor = _type == RecordType.expense
-                              ? const Color(0xFFFF3B30)
-                              : const Color(0xFF34C759);
-                          return Padding(
-                            padding:
-                                const EdgeInsets.symmetric(vertical: 8),
-                            child: Text(
-                              '$sign$displayVal',
-                              style: TextStyle(
-                                fontSize: 48,
-                                fontWeight: FontWeight.w700,
-                                color: signColor,
-                                letterSpacing: -1,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
+                // Toggle
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
                   ),
+                  child: _TypeToggle(
+                      type: _type, onSwitch: _switchType),
+                ),
+                // Amount display
+                ValueListenableBuilder<String>(
+                  valueListenable: _amountText,
+                  builder: (_, val, child) {
+                    final displayVal = val.isEmpty ? '0' : val;
+                    final sign = _type == RecordType.expense
+                        ? '-'
+                        : '+';
+                    final signColor = _type == RecordType.expense
+                        ? const Color(0xFFFF3B30)
+                        : const Color(0xFF34C759);
+                    return Padding(
+                      padding:
+                          const EdgeInsets.symmetric(vertical: 8),
+                      child: Text(
+                        '$sign$displayVal',
+                        style: TextStyle(
+                          fontSize: 48,
+                          fontWeight: FontWeight.w700,
+                          color: signColor,
+                          letterSpacing: -1,
+                        ),
+                      ),
+                    );
+                  },
                 ),
                 // Numeric keypad with hold-to-delete
                 _NumericKeypad(
