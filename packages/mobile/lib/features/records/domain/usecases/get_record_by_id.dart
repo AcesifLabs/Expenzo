@@ -4,13 +4,13 @@ import 'package:expense_tracker/core/error/usecase.dart';
 import '../entities/record.dart';
 import '../repositories/record_repository.dart';
 
-class GetRecordById extends UseCase<Record, int> {
+class GetRecordById extends UseCase<Record, String> {
   final RecordRepository repository;
 
   GetRecordById(this.repository);
 
   @override
-  Future<Either<Failure, Record>> call(int id) {
+  Future<Either<Failure, Record>> call(String id) {
     return repository.getRecordById(id);
   }
 }

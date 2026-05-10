@@ -33,11 +33,9 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
   Future<void> _loadCategoryName() async {
     final catId = widget.progress.categoryId;
     if (catId == null) return;
-    final intId = int.tryParse(catId);
-    if (intId == null) return;
     try {
       final result =
-          await di.getIt<CategoryRepository>().getCategoryById(intId);
+          await di.getIt<CategoryRepository>().getCategoryById(catId);
       if (mounted) {
         final name = result.fold((_) => '', (cat) => cat.name);
         setState(() => _categoryName = name);

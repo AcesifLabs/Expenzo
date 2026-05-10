@@ -20,7 +20,7 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
     return query.get();
   }
 
-  Future<Record?> getRecordById(int id) {
+  Future<Record?> getRecordById(String id) {
     return (select(records)..where((t) => t.id.equals(id))).getSingleOrNull();
   }
 
@@ -31,7 +31,7 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
         .get();
   }
 
-  Future<List<Record>> getRecordsByCategory(int categoryId) {
+  Future<List<Record>> getRecordsByCategory(String categoryId) {
     return (select(records)
           ..where((t) => t.categoryId.equals(categoryId))
           ..orderBy([(t) => OrderingTerm.desc(t.date)]))
@@ -57,11 +57,11 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
     ).replace(record.copyWith(updatedAt: Value(DateTime.now().toUtc())));
   }
 
-  Future<int> deleteRecord(int id) {
+  Future<int> deleteRecord(String id) {
     return (delete(records)..where((t) => t.id.equals(id))).go();
   }
 
-  Future<int> getRecordCountByCategory(int categoryId) async {
+  Future<int> getRecordCountByCategory(String categoryId) async {
     final count = countAll();
     final query = selectOnly(records)
       ..addColumns([count])
@@ -97,7 +97,7 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
   }
 
   Future<List<Record>> getRecordsByCategoryAndDateRange(
-    int categoryId,
+    String categoryId,
     DateTime start,
     DateTime end,
   ) {
@@ -112,7 +112,7 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
   }
 
   Future<double> getCategorySpending(
-    int categoryId,
+    String categoryId,
     DateTime start,
     DateTime end,
   ) async {

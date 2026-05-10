@@ -60,7 +60,7 @@ class _AuthInterceptor extends Interceptor {
           await TokenStorage.saveToken(newJwt);
           final opts = err.requestOptions;
           opts.headers['Authorization'] = 'Bearer $newJwt';
-          final retryResponse = await Dio().request(opts.path, options: Options(method: opts.method, headers: opts.headers), data: opts.data, queryParameters: opts.queryParameters);
+          final retryResponse = await Dio().fetch(opts);
           handler.resolve(retryResponse);
           return;
         }

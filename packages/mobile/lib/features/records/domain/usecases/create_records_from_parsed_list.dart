@@ -56,9 +56,7 @@ class CreateRecordsFromParsedList
               amount: -(parsed.amount?.abs() ?? 0),
               description: parsed.description ?? parsed.rawMessage,
               date: parsed.date ?? now,
-              categoryId: parsed.categoryId != null
-                  ? int.tryParse(parsed.categoryId!)
-                  : null,
+              categoryId: parsed.categoryId,
               source: parsed.sourceType == AppSourceType.sms
                   ? ExpenseSource.sms
                   : ExpenseSource.email,

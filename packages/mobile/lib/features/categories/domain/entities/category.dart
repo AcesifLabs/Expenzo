@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 
 class Category extends Equatable {
-  final int? id;
+  final String? id;
   final String name;
   final String emoji;
   final String color;
@@ -23,7 +23,7 @@ class Category extends Equatable {
   });
 
   Category copyWith({
-    int? id,
+    String? id,
     String? name,
     String? emoji,
     String? color,

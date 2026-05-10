@@ -40,6 +40,11 @@ class TokenStorage {
     await _storage.write(key: _isFirstSyncKey, value: 'false');
   }
 
+  static Future<void> clearSyncState() async {
+    await _storage.delete(key: _lastSyncKey);
+    await _storage.delete(key: _isFirstSyncKey);
+  }
+
   static Future<void> clearAll() async {
     await _storage.deleteAll();
   }

@@ -25,11 +25,11 @@ void main() {
 
     final now = DateTime.now();
     final testRecord = Record(
-      id: 1,
+      id: '1',
       amount: 100.50,
       description: 'Lunch at restaurant',
       date: now,
-      categoryId: 1,
+      categoryId: '1',
       source: ExpenseSource.manual,
       sourceId: null,
       recordType: RecordType.expense,
@@ -40,11 +40,11 @@ void main() {
     final testRecords = [
       testRecord,
       Record(
-        id: 2,
+        id: '2',
         amount: 50.00,
         description: 'Bus fare',
         date: now,
-        categoryId: 2,
+        categoryId: '2',
         source: ExpenseSource.manual,
         sourceId: null,
         recordType: RecordType.expense,
@@ -117,9 +117,9 @@ void main() {
         () => mockRepository.deleteRecord(any()),
       ).thenAnswer((_) async => const Right(unit));
 
-      await deleteRecordUseCase(1);
+      await deleteRecordUseCase('1');
 
-      verify(() => mockRepository.deleteRecord(1)).called(1);
+      verify(() => mockRepository.deleteRecord('1')).called(1);
     });
 
     test('getRecordById returns record', () async {
@@ -127,12 +127,12 @@ void main() {
         () => mockRepository.getRecordById(any()),
       ).thenAnswer((_) async => Right(testRecord));
 
-      final result = await mockRepository.getRecordById(1);
+      final result = await mockRepository.getRecordById('1');
 
       expect(result.isRight(), true);
       result.fold((failure) => fail('Should not return failure'), (record) {
         expect(record, testRecord);
-        expect(record.id, 1);
+        expect(record.id, '1');
       });
     });
 
@@ -173,11 +173,11 @@ void main() {
     test('should create record with all fields', () {
       final now = DateTime.now();
       final record = Record(
-        id: 1,
+        id: '1',
         amount: 50.00,
         description: 'Bus fare',
         date: now,
-        categoryId: 2,
+        categoryId: '2',
         source: ExpenseSource.sms,
         sourceId: 'sms_123',
         recordType: RecordType.expense,
@@ -185,10 +185,10 @@ void main() {
         updatedAt: now,
       );
 
-      expect(record.id, 1);
+      expect(record.id, '1');
       expect(record.amount, 50.00);
       expect(record.description, 'Bus fare');
-      expect(record.categoryId, 2);
+      expect(record.categoryId, '2');
       expect(record.source, ExpenseSource.sms);
       expect(record.sourceId, 'sms_123');
     });
@@ -268,7 +268,7 @@ void main() {
     test('should copy record with updated fields', () {
       final now = DateTime.now();
       final original = Record(
-        id: 1,
+        id: '1',
         amount: 100,
         description: 'Original',
         date: now,
@@ -280,7 +280,7 @@ void main() {
 
       final updated = original.copyWith(amount: 200, description: 'Updated');
 
-      expect(updated.id, 1);
+      expect(updated.id, '1');
       expect(updated.amount, 200);
       expect(updated.description, 'Updated');
     });

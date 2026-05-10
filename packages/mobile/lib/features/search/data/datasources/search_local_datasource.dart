@@ -11,7 +11,7 @@ import "package:expense_tracker/core/constants/source_types.dart";
 abstract class SearchLocalDatasource {
   Future<List<SearchResult>> searchRecords(SearchFilters filters);
   Future<void> indexRecord(Record record);
-  Future<void> removeRecordFromIndex(int recordId);
+  Future<void> removeRecordFromIndex(String recordId);
   Future<void> rebuildIndex();
 }
 
@@ -48,9 +48,10 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
       }
 
       if (filters.dateRange != null) {
+        // Drift stores dateTime() as unix seconds; convert from milliseconds.
         conditions.add('r.date >= ? AND r.date <= ?');
-        args.add(filters.dateRange!.start.millisecondsSinceEpoch);
-        args.add(filters.dateRange!.end.millisecondsSinceEpoch);
+        args.add(filters.dateRange!.start.millisecondsSinceEpoch ~/ 1000);
+        args.add(filters.dateRange!.end.millisecondsSinceEpoch ~/ 1000);
       }
 
       if (filters.minAmount != null) {
@@ -104,7 +105,7 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
   }
 
   @override
-  Future<void> removeRecordFromIndex(int recordId) async {
+  Future<void> removeRecordFromIndex(String recordId) async {
     try {
       await db.customStatement('DELETE FROM expense_fts WHERE expense_id = ?', [
         recordId,
@@ -129,22 +130,41 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
     }
   }
 
+  /// SQLite may return whole-number floats as int; coerce safely.
+  double _toDouble(dynamic value) {
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    throw CacheException(
+      message: 'Unexpected amount type: ${value.runtimeType}',
+    );
+  }
+
   Record _mapToRecord(QueryRow row) {
     final data = row.data;
     return Record(
-      id: data['id'] as int?,
-      amount: data['amount'] as double,
+      id: data['id'] as String?,
+      amount: _toDouble(data['amount']),
       description: data['description'] as String,
-      date: data['date'] as DateTime,
-      categoryId: data['category_id'] as int?,
+      date: _intToDateTime(data['date']),
+      categoryId: data['category_id'] as String?,
       source: ExpenseSource.values.firstWhere(
         (s) => s.name == data['source'],
         orElse: () => ExpenseSource.manual,
       ),
       sourceId: data['source_id'] as String?,
       recordType: RecordType.fromDbValue(data['record_type'] as String),
-      createdAt: data['created_at'] as DateTime,
-      updatedAt: data['updated_at'] as DateTime,
+      createdAt: _intToDateTime(data['created_at']),
+      updatedAt: _intToDateTime(data['updated_at']),
+    );
+  }
+
+  /// Convert raw SQLite integer (Drift stores dateTime() as unix seconds).
+  DateTime _intToDateTime(dynamic value) {
+    if (value is int) return DateTime.fromMillisecondsSinceEpoch(value * 1000);
+    if (value is DateTime) return value;
+    throw CacheException(
+      message: 'Unexpected date type: ${value.runtimeType}',
     );
   }
 }

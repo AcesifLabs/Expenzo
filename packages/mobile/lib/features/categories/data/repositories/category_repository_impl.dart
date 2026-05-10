@@ -41,7 +41,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
   }
 
   @override
-  Future<Either<CacheFailure, Category>> getCategoryById(int id) async {
+  Future<Either<CacheFailure, Category>> getCategoryById(String id) async {
     try {
       final category = await localDatasource.getCategoryById(id);
       if (category == null) {
@@ -57,7 +57,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
   Future<Either<CacheFailure, Category>> createCategory(Category category) async {
     try {
       final created = await localDatasource.createCategory(category);
-      _enqueueSync('insert', created.id!.toString(), {'name': created.name, 'emoji': created.emoji, 'color': created.color, 'type': created.type.dbValue, 'isDefault': created.isDefault});
+      _enqueueSync('insert', created.id!, {'name': created.name, 'emoji': created.emoji, 'color': created.color, 'type': created.type.dbValue, 'isDefault': created.isDefault});
       return Right(created);
     } on CacheException catch (e) {
       return Left(e.toFailure());
@@ -68,7 +68,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
   Future<Either<CacheFailure, Category>> updateCategory(Category category) async {
     try {
       final updated = await localDatasource.updateCategory(category);
-      _enqueueSync('update', updated.id!.toString(), {'name': updated.name, 'emoji': updated.emoji, 'color': updated.color, 'type': updated.type.dbValue, 'isDefault': updated.isDefault});
+      _enqueueSync('update', updated.id!, {'name': updated.name, 'emoji': updated.emoji, 'color': updated.color, 'type': updated.type.dbValue, 'isDefault': updated.isDefault});
       return Right(updated);
     } on CacheException catch (e) {
       return Left(e.toFailure());
@@ -76,10 +76,10 @@ class CategoryRepositoryImpl implements CategoryRepository {
   }
 
   @override
-  Future<Either<CacheFailure, Unit>> deleteCategory(int id) async {
+  Future<Either<CacheFailure, Unit>> deleteCategory(String id) async {
     try {
       await localDatasource.deleteCategory(id);
-      _enqueueSync('delete', id.toString());
+      _enqueueSync('delete', id);
       return const Right(unit);
     } on CacheException catch (e) {
       return Left(e.toFailure());
@@ -95,7 +95,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
   }
 
   @override
-  Future<Either<CacheFailure, void>> incrementUsageCount(int id) async {
+  Future<Either<CacheFailure, void>> incrementUsageCount(String id) async {
     try {
       await localDatasource.incrementUsageCount(id);
       return const Right(null);

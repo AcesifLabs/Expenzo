@@ -39,14 +39,14 @@ class CategoryDao extends DatabaseAccessor<AppDatabase>
     return query.get();
   }
 
-  Future<void> incrementUsageCount(int id) async {
+  Future<void> incrementUsageCount(String id) async {
     await customStatement(
       'UPDATE categories SET usage_count = usage_count + 1 WHERE id = ?',
       [id],
     );
   }
 
-  Future<Category?> getCategoryById(int id) {
+  Future<Category?> getCategoryById(String id) {
     return (select(
       categories,
     )..where((t) => t.id.equals(id))).getSingleOrNull();
@@ -62,7 +62,7 @@ class CategoryDao extends DatabaseAccessor<AppDatabase>
     ).replace(category.copyWith(updatedAt: Value(DateTime.now().toUtc())));
   }
 
-  Future<int> deleteCategory(int id) {
+  Future<int> deleteCategory(String id) {
     return (delete(categories)..where((t) => t.id.equals(id))).go();
   }
 }

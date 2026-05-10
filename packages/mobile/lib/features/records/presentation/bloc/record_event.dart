@@ -35,7 +35,7 @@ class UpdateRecordEvent extends RecordEvent {
 }
 
 class DeleteRecordEvent extends RecordEvent {
-  final int id;
+  final String id;
 
   const DeleteRecordEvent(this.id);
 

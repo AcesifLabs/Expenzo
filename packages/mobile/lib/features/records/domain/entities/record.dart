@@ -3,11 +3,11 @@ import "package:expense_tracker/core/constants/source_types.dart";
 import "package:expense_tracker/core/constants/record_type.dart";
 
 class Record extends Equatable {
-  final int? id;
+  final String? id;
   final double amount;
   final String description;
   final DateTime date;
-  final int? categoryId;
+  final String? categoryId;
   final ExpenseSource source;
   final String? sourceId;
   final RecordType recordType;
@@ -30,11 +30,11 @@ class Record extends Equatable {
   bool get isFromScan => source != ExpenseSource.manual;
 
   Record copyWith({
-    int? id,
+    String? id,
     double? amount,
     String? description,
     DateTime? date,
-    int? categoryId,
+    String? categoryId,
     ExpenseSource? source,
     String? sourceId,
     RecordType? recordType,
