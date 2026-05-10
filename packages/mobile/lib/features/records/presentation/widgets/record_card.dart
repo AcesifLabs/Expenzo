@@ -32,13 +32,13 @@ class RecordCard extends StatelessWidget {
         String? categoryColor;
 
         if (state is CategoryLoaded) {
-          final categories = state.categories.where(
+          final matchedCategories = state.categories.where(
             (c) => c.id == record.categoryId,
           );
-          if (categories.isNotEmpty) {
-            categoryName = categories.first.name;
-            categoryEmoji = categories.first.emoji;
-            categoryColor = categories.first.color;
+          if (matchedCategories.isNotEmpty) {
+            categoryName = matchedCategories.first.name;
+            categoryEmoji = matchedCategories.first.emoji;
+            categoryColor = matchedCategories.first.color;
           }
         }
 

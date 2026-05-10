@@ -160,6 +160,7 @@ class _RecordFormPageState extends State<RecordFormPage> {
                     onChanged: (value) {
                       setState(() => _selectedCategoryId = value);
                     },
+                    key: ValueKey('category_dropdown_$_recordType'),
                   );
                 }
                 return const SizedBox.shrink();

@@ -1,3 +1,4 @@
+import 'package:expense_tracker/core/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/core/theme/app_colors.dart';
 import "package:expense_tracker/core/constants/source_types.dart";
@@ -32,16 +33,6 @@ class SourceBadge extends StatelessWidget {
     final isManualOverride =
         source == ExpenseSource.manual && categoryName != null;
 
-    final Color baseColor;
-    if (isManualOverride && categoryColor != null) {
-      baseColor = Color(int.parse(categoryColor!.replaceFirst('#', '0xFF')));
-    } else {
-      baseColor = _colorMap[source] ?? AppColors.textSecondaryLight;
-    }
-
-    final Color bgTint = baseColor.withAlpha(40);
-    final Color borderTint = baseColor.withAlpha(80);
-
     final label = isManualOverride ? categoryName! : source.displayName;
     final iconWidget = isManualOverride
         ? Icon(
@@ -54,6 +45,16 @@ class SourceBadge extends StatelessWidget {
             size: 12,
             color: contentColor,
           );
+
+    final Color baseColor;
+    if (isManualOverride && categoryColor != null) {
+      baseColor = ColorUtils.fromHex(categoryColor!);
+    } else {
+      baseColor = _colorMap[source] ?? AppColors.textSecondaryLight;
+    }
+
+    final Color bgTint = baseColor.withAlpha(40);
+    final Color borderTint = baseColor.withAlpha(80);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
