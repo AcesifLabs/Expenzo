@@ -20,6 +20,13 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
 
   StreamSubscription<List<Record>>? _recordsSubscription;
 
+  bool _hasActiveFilters(RecordLoaded state) {
+    return state.filterStartDate != null ||
+        state.filterEndDate != null ||
+        (state.filterCategoryIds != null && state.filterCategoryIds!.isNotEmpty) ||
+        state.filterRecordType != null;
+  }
+
   RecordBloc({
     required this.getRecords,
     required this.addRecord,
@@ -34,6 +41,8 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     on<DeleteRecordEvent>(_onDeleteRecord);
     on<RefreshRecords>(_onRefreshRecords);
     on<SearchRecords>(_onSearchRecords);
+    on<ApplyFilters>(_onApplyFilters);
+    on<ClearFilters>(_onClearFilters);
     on<_RecordsUpdated>(_onRecordsUpdated);
   }
 
@@ -104,21 +113,46 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
       ),
     );
 
-    final result = await getRecords(
-      GetRecordsParams(limit: _pageSize, offset: currentState.records.length),
-    );
-
-    result.fold((failure) => emit(RecordError(failure.message)), (newRecords) {
-      final allRecords = [...currentState.records, ...newRecords];
-      emit(
-        RecordLoaded(
-          records: allRecords,
-          total: allRecords.length,
-          hasMore: newRecords.length >= _pageSize,
-          searchQuery: currentState.searchQuery,
-        ),
+    if (_hasActiveFilters(currentState)) {
+      // Filtered pagination: use getFilteredRecords with offset
+      final result = await recordRepository.getFilteredRecords(
+        startDate: currentState.filterStartDate,
+        endDate: currentState.filterEndDate,
+        categoryIds: currentState.filterCategoryIds,
+        recordType: currentState.filterRecordType,
+        limit: _pageSize,
+        offset: currentState.records.length,
       );
-    });
+
+      result.fold(
+        (failure) => emit(RecordError(failure.message)),
+        (newRecords) {
+          final allRecords = [...currentState.records, ...newRecords];
+          emit(currentState.copyWith(
+            records: allRecords,
+            total: allRecords.length,
+            hasMore: newRecords.length >= _pageSize,
+          ));
+        },
+      );
+    } else {
+      // Normal pagination: use getRecords
+      final result = await getRecords(
+        GetRecordsParams(limit: _pageSize, offset: currentState.records.length),
+      );
+
+      result.fold((failure) => emit(RecordError(failure.message)), (newRecords) {
+        final allRecords = [...currentState.records, ...newRecords];
+        emit(
+          RecordLoaded(
+            records: allRecords,
+            total: allRecords.length,
+            hasMore: newRecords.length >= _pageSize,
+            searchQuery: currentState.searchQuery,
+          ),
+        );
+      });
+    }
   }
 
   Future<void> _onAddRecord(
@@ -172,6 +206,53 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     if (state is RecordLoaded) {
       emit((state as RecordLoaded).copyWith(searchQuery: event.query));
     }
+  }
+
+  Future<void> _onApplyFilters(
+    ApplyFilters event,
+    Emitter<RecordState> emit,
+  ) async {
+    final currentQuery = state is RecordLoaded
+        ? (state as RecordLoaded).searchQuery
+        : '';
+
+    emit(const RecordLoading());
+
+    // Cancel stream subscription — switch to manual filtered fetch
+    await _recordsSubscription?.cancel();
+    _recordsSubscription = null;
+
+    final result = await recordRepository.getFilteredRecords(
+      startDate: event.startDate,
+      endDate: event.endDate,
+      categoryIds: event.categoryIds,
+      recordType: event.recordType,
+      limit: _pageSize,
+    );
+
+    result.fold(
+      (failure) => emit(RecordError(failure.message)),
+      (records) => emit(
+        RecordLoaded(
+          records: records,
+          total: records.length,
+          hasMore: records.length >= _pageSize,
+          searchQuery: currentQuery,
+          filterStartDate: event.startDate,
+          filterEndDate: event.endDate,
+          filterCategoryIds: event.categoryIds,
+          filterRecordType: event.recordType,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onClearFilters(
+    ClearFilters event,
+    Emitter<RecordState> emit,
+  ) async {
+    // Reset to unfiltered: restart the reactive stream
+    add(const LoadRecords());
   }
 
   @override

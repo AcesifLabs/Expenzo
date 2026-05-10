@@ -11,14 +11,16 @@ export class RecordsService {
   constructor(@InjectRepository(Record) private readonly recordRepository: Repository<Record>) {}
 
   async findAll(userId: string, query: QueryRecordsDto) {
-    const { cursor, limit = 50, startDate, endDate, categoryId, recordType } = query;
+    const { cursor, limit = 50, startDate, endDate, categoryIds, recordType } = query;
     const qb = this.recordRepository.createQueryBuilder('record')
       .where('record.userId = :userId', { userId })
       .orderBy('record.id', 'ASC').take(limit);
     if (cursor) qb.andWhere('record.id > :cursor', { cursor });
     if (startDate) qb.andWhere('record.date >= :startDate', { startDate: new Date(startDate) });
     if (endDate) qb.andWhere('record.date <= :endDate', { endDate: new Date(endDate) });
-    if (categoryId) qb.andWhere('record.categoryId = :categoryId', { categoryId });
+    if (categoryIds && categoryIds.length > 0) {
+      qb.andWhere('record.categoryId IN (:...categoryIds)', { categoryIds });
+    }
     if (recordType) qb.andWhere('record.recordType = :recordType', { recordType });
     const [data, total] = await qb.getManyAndCount();
     const nextCursor = data.length === limit ? data[data.length - 1]?.id : null;

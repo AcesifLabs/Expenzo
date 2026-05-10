@@ -54,3 +54,27 @@ class SearchRecords extends RecordEvent {
   @override
   List<Object?> get props => [query];
 }
+
+class ApplyFilters extends RecordEvent {
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final List<String>? categoryIds;
+  final String? recordType;
+
+  const ApplyFilters({
+    this.startDate,
+    this.endDate,
+    this.categoryIds,
+    this.recordType,
+  });
+
+  @override
+  List<Object?> get props => [startDate, endDate, categoryIds, recordType];
+}
+
+class ClearFilters extends RecordEvent {
+  const ClearFilters();
+
+  @override
+  List<Object?> get props => [];
+}

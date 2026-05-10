@@ -156,6 +156,52 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
         .get();
   }
 
+  /// Combined filter query: date range + multiple categories + record type.
+  /// All filters optional. Use NULL / empty to skip a filter.
+  Future<List<Record>> getFilteredRecords({
+    DateTime? startDate,
+    DateTime? endDate,
+    List<String>? categoryIds,
+    String? recordType,
+    int? limit,
+    int? offset,
+  }) {
+    final q = select(records);
+
+    // Build a single where clause with all conditions chained via &
+    q.where(
+      (t) {
+        Expression<bool>? where;
+        void and(Expression<bool> e) {
+          where = where == null ? e : where! & e;
+        }
+
+        if (startDate != null && endDate != null) {
+          and(t.date.isBetweenValues(startDate, endDate));
+        } else if (startDate != null) {
+          and(t.date.isBiggerOrEqualValue(startDate));
+        } else if (endDate != null) {
+          and(t.date.isSmallerOrEqualValue(endDate));
+        }
+
+        if (categoryIds != null && categoryIds.isNotEmpty) {
+          and(t.categoryId.isIn(categoryIds));
+        }
+
+        if (recordType != null && recordType.isNotEmpty) {
+          and(t.recordType.equals(recordType));
+        }
+
+        return where ?? const Constant(true);
+      },
+    );
+
+    q.orderBy([(t) => OrderingTerm.desc(t.date)]);
+    if (limit != null) q.limit(limit, offset: offset);
+
+    return q.get();
+  }
+
   Future<List<TypedResult>> getCategoryBreakdown(DateTime start, DateTime end) {
     final amountSum = records.amount.sum();
     final query = selectOnly(records)
