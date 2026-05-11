@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:dartz/dartz.dart';
+import 'package:flutter/foundation.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/sync/sync_event.dart';
@@ -64,7 +65,15 @@ class RecordRepositoryImpl implements RecordRepository {
     int? offset,
   }) async {
     try {
-      final online = await connectivity.checkNow();
+      bool online = false;
+      try {
+        online = await connectivity.checkNow().timeout(
+          const Duration(seconds: 3),
+          onTimeout: () => false,
+        );
+      } catch (e) {
+        debugPrint('Connectivity check failed, assuming offline: $e');
+      }
       if (online) {
         final resp = await remoteDatasource.getRecords(
           limit: limit,

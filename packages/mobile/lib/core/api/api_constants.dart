@@ -1,7 +1,13 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiConstants {
-  static String get baseUrl => dotenv.env['BACKEND_URL'] ?? 'http://localhost:3000/api';
+  static String get baseUrl {
+    final value = dotenv.env['BACKEND_URL'];
+    if (value == null || value.isEmpty || value == 'TBD') {
+      return 'http://localhost:3000/api';
+    }
+    return value;
+  }
   static const String login = '/auth/login';
   static const String records = '/records';
   static const String recordsBulk = '/records/bulk';

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
@@ -49,12 +51,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final result = await signInWithGoogle(NoParams());
       final user = result.fold((f) => null, (u) => u);
       if (user == null) {
-        emit(AuthError(result.fold((f) => f.message, (_) => 'Unknown error')));
+        emit(
+          AuthError(
+            result.fold((f) => f.message, (_) => 'Unknown error'),
+            isUserInitiated: true,
+          ),
+        );
         return;
       }
       await _onAuthSuccess(user, emit);
     } catch (e) {
-      emit(AuthError(e.toString()));
+      emit(AuthError(e.toString(), isUserInitiated: true));
     }
   }
 
@@ -87,12 +94,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
     }
     emit(Authenticated(user));
-    _tryStartSyncEngine();
+    unawaited(_tryStartSyncEngine());
   }
 
-  void _tryStartSyncEngine() {
+  Future<void> _tryStartSyncEngine() async {
     try {
-      di.getIt<SyncEngine>().start();
+      await di.getIt<SyncEngine>().start();
     } catch (e) {
       debugPrint('AuthBloc: SyncEngine start failed: $e');
     }

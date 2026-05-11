@@ -7,7 +7,6 @@ import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/core/sync/sync_engine.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_event.dart';
-import 'package:expense_tracker/features/auth/presentation/bloc/auth_state.dart';
 
 class SyncConflictPage extends StatefulWidget {
   const SyncConflictPage({super.key});

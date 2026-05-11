@@ -144,13 +144,29 @@ class _AppLoaderState extends State<AppLoader> {
   }
 
   Future<void> _startInitialization() async {
+    // Firebase init — non-fatal. App works offline without Firebase.
     try {
-      await Firebase.initializeApp();
+      await Firebase.initializeApp().timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          debugPrint('Firebase init timed out — proceeding offline');
+          throw TimeoutException('Firebase init timed out');
+        },
+      );
+    } catch (e) {
+      debugPrint('Firebase init failed (non-fatal): $e');
+    }
+
+    // DI + DB — fatal. App cannot function without local database.
+    try {
       await di.initCriticalDependencies();
-      
-      // Seed initial data
+
       final db = di.getIt<AppDatabase>();
-      await DatabaseSeeder.seedInitialCategories(db);
+      try {
+        await DatabaseSeeder.seedInitialCategories(db);
+      } catch (e) {
+        debugPrint('DatabaseSeeder failed (non-fatal): $e');
+      }
 
       if (mounted) {
         setState(() => _initialized = true);
@@ -322,13 +338,16 @@ class _InitialDataLoaderState extends State<_InitialDataLoader> {
             ),
           );
         } else if (state is AuthError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Sign-in failed: ${state.message}'),
-              backgroundColor: Colors.red,
-              duration: const Duration(seconds: 5),
-            ),
-          );
+          // Only show error snackbar if user explicitly tried to sign in
+          if (state.isUserInitiated) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Sign-in failed: ${state.message}'),
+                backgroundColor: Colors.red,
+                duration: const Duration(seconds: 5),
+              ),
+            );
+          }
         } else if (state is AuthLoading) {
           // Optionally show a loading indicator — currently AppShell renders normally
         }

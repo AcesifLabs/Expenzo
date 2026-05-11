@@ -32,6 +32,7 @@ class AppShell extends StatefulWidget {
 
 class _AppShellState extends State<AppShell> {
   int _currentIndex = 0;
+  DateTime? _lastFabPress;
 
   static const _labels = [
     'Home',
@@ -189,6 +190,10 @@ class _AppShellState extends State<AppShell> {
   }
 
   void _onFabPressed(BuildContext context) {
+    final now = DateTime.now();
+    if (_lastFabPress != null &&
+        now.difference(_lastFabPress!) < const Duration(seconds: 1)) return;
+    _lastFabPress = now;
     if (_currentIndex == 2) {
       _showCategoryTypeSelection(context);
     } else {
