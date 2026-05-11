@@ -6,8 +6,8 @@ import 'package:expense_tracker/main.dart' as app;
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  group('Offline scenarios', () {
-    testWidgets('App starts and shows dashboard without network', (
+  group('Startup resilience scenarios', () {
+    testWidgets('App starts and shows dashboard without initialization errors', (
       tester,
     ) async {
       app.main();
@@ -20,7 +20,9 @@ void main() {
       expect(find.byType(MaterialApp), findsOneWidget);
     });
 
-    testWidgets('Dashboard renders with seeded categories', (tester) async {
+    testWidgets('Dashboard renders with seeded categories after startup', (
+      tester,
+    ) async {
       app.main();
       await tester.pumpAndSettle(const Duration(seconds: 20));
 

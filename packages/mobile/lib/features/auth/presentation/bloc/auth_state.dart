@@ -31,11 +31,12 @@ class Unauthenticated extends AuthState {
 
 class AuthError extends AuthState {
   final String message;
+  final bool isUserInitiated;
 
-  const AuthError(this.message);
+  const AuthError(this.message, {this.isUserInitiated = false});
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [message, isUserInitiated];
 }
 
 class AuthSyncConflictPending extends AuthState {

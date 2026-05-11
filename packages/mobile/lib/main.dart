@@ -305,8 +305,6 @@ class _InitialDataLoader extends StatefulWidget {
 }
 
 class _InitialDataLoaderState extends State<_InitialDataLoader> {
-  bool _userInitiatedAuth = false;
-
   @override
   void initState() {
     super.initState();
@@ -341,7 +339,7 @@ class _InitialDataLoaderState extends State<_InitialDataLoader> {
           );
         } else if (state is AuthError) {
           // Only show error snackbar if user explicitly tried to sign in
-          if (_userInitiatedAuth) {
+          if (state.isUserInitiated) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('Sign-in failed: ${state.message}'),
