@@ -87,12 +87,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
     }
     emit(Authenticated(user));
-    _tryStartSyncEngine();
+    await _tryStartSyncEngine();
   }
 
-  void _tryStartSyncEngine() {
+  Future<void> _tryStartSyncEngine() async {
     try {
-      di.getIt<SyncEngine>().start();
+      await di.getIt<SyncEngine>().start();
     } catch (e) {
       debugPrint('AuthBloc: SyncEngine start failed: $e');
     }

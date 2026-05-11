@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import '../api/api_client.dart';
-import 'package:drift/drift.dart';
 import '../database/app_database.dart';
 import '../api/api_constants.dart';
 import '../api/token_storage.dart';
@@ -26,7 +25,17 @@ class SyncEngine {
   StreamSubscription? _syncEventSub;
   bool _isSyncing = false;
   bool _initialized = false;
+  int _retryCount = 0;
+  Timer? _retryTimer;
   void Function(double)? _onProgress;
+
+  static const List<Duration> _backoffDelays = [
+    Duration(seconds: 5),
+    Duration(seconds: 15),
+    Duration(seconds: 45),
+    Duration(minutes: 2),
+    Duration(minutes: 5),
+  ];
 
   void Function(double)? get onProgress => _onProgress;
   set onProgress(void Function(double)? cb) => _onProgress = cb;
@@ -43,27 +52,56 @@ class SyncEngine {
 
   Future<void> start() async {
     if (_initialized) return;
-    _initialized = true;
     await _connectivitySub?.cancel();
     await _syncEventSub?.cancel();
     debugPrint('SyncEngine: Starting');
-    final hasToken = await TokenStorage.hasToken();
-    if (!hasToken) {
-      debugPrint('SyncEngine: No JWT');
-      return;
+    try {
+      final hasToken = await TokenStorage.hasToken();
+      if (!hasToken) {
+        debugPrint('SyncEngine: No JWT');
+        return;
+      }
+      await _safePullChanges();
+      await _safePushChanges();
+      if (await TokenStorage.isFirstSync()) {
+        await _migrateExistingData();
+      }
+      _connectivitySub = _connectivity.onlineStream.listen(
+        (online) async {
+          if (online) {
+            await _safePullChanges();
+            await _safePushChanges();
+          }
+        },
+        onError: (e) {
+          debugPrint('Connectivity stream error: $e');
+          _isSyncing = false;
+        },
+      );
+      _syncEventSub = SyncEventBus().events.listen(
+        (_) async {
+          final online = await _connectivity.checkNow();
+          if (online) {
+            await _safePullChanges();
+            await _safePushChanges();
+          }
+        },
+        onError: (e) {
+          debugPrint('SyncEventBus listener error: $e');
+          _isSyncing = false;
+        },
+      );
+      _initialized = true;
+    } catch (e) {
+      debugPrint('SyncEngine start failed: $e');
+      _initialized = false;
     }
-    await _safePullChanges();
-    await _safePushChanges();
-    if (await TokenStorage.isFirstSync()) {
-      await _migrateExistingData();
-    }
-    _connectivitySub = _connectivity.onlineStream.listen((online) {
-      if (online) _safePushChanges();
-    });
-    _syncEventSub = SyncEventBus().events.listen((_) => _safePushChanges());
   }
 
   Future<void> stop() async {
+    _retryTimer?.cancel();
+    _retryTimer = null;
+    _retryCount = 0;
     await _connectivitySub?.cancel();
     _connectivitySub = null;
     await _syncEventSub?.cancel();
@@ -130,8 +168,10 @@ class SyncEngine {
         processed = end;
         _onProgress?.call(processed / total);
       }
+      _retryCount = 0; // reset backoff on success
     } catch (e) {
       debugPrint('SyncEngine push failed: $e');
+      _scheduleRetry();
     } finally {
       _isSyncing = false;
     }
@@ -233,6 +273,21 @@ class SyncEngine {
     } catch (e) {
       debugPrint('Error applying remote change to $tableName: $e');
     }
+  }
+
+  void _scheduleRetry() {
+    if (_retryCount >= _backoffDelays.length) {
+      _retryCount = 0;
+      return;
+    }
+    final delay = _backoffDelays[_retryCount];
+    debugPrint('SyncEngine: Retrying in ${delay.inSeconds}s (attempt ${_retryCount + 1})');
+    _retryTimer?.cancel();
+    _retryTimer = Timer(delay, () async {
+      _retryCount++;
+      await _safePullChanges();
+      await _safePushChanges();
+    });
   }
 
   Future<SyncConflictType> checkConflict() async {

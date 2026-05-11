@@ -517,27 +517,12 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                   onBackspace: _backspace,
                   color: colors,
                 ),
-                // Categories
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Category',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: colors.onSurface,
-                      ),
-                    ),
-                  ),
-                ),
-                _buildCategoryChips(colors),
-                _buildDateAndRecurringRow(colors),
                 // Note field (required, animated error border, typewriter hint)
                 _buildNoteField(colors),
+                _buildCategoryChips(colors),
+                _buildDateAndRecurringRow(colors),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 4, 24, 24),
+                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
                   child: SizedBox(
                     width: double.infinity,
                     height: 52,

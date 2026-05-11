@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'api_constants.dart';
 import 'token_storage.dart';
+import '../sync/connectivity_service.dart';
+import '../di/injection_container.dart' as di;
 
 class ApiClient {
   static final ApiClient _instance = ApiClient._internal();
@@ -51,6 +53,13 @@ class _AuthInterceptor extends Interceptor {
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     if (err.response?.statusCode == 401) {
       try {
+        // Skip token refresh if offline
+        final connectivity = di.getIt<ConnectivityService>();
+        if (!await connectivity.checkNow()) {
+          debugPrint('AuthInterceptor: Offline, skipping token refresh');
+          handler.next(err);
+          return;
+        }
         final firebaseUser = FirebaseAuth.instance.currentUser;
         if (firebaseUser != null) {
           final firebaseToken = await firebaseUser.getIdToken(true);
