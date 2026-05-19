@@ -1,4 +1,4 @@
-package com.expenzo.expense_tracker
+package com.acesiflabs.expenzo
 
 import io.flutter.embedding.android.FlutterActivity
 
