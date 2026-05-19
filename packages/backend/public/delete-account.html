@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account Deletion — Expenzo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #333; line-height: 1.6; background: #f5f5f5; }
+    .container { max-width: 640px; margin: 0 auto; padding: 32px 20px; }
+    h1 { font-size: 1.75rem; margin-bottom: 8px; color: #1a1a1a; }
+    .subtitle { color: #666; margin-bottom: 32px; font-size: 0.95rem; }
+    h2 { font-size: 1.15rem; margin: 24px 0 12px; color: #1a1a1a; }
+    ol, ul { padding-left: 24px; margin-bottom: 12px; }
+    li { margin-bottom: 8px; }
+    .card { background: #fff; border-radius: 8px; padding: 24px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .deleted li { color: #c62828; }
+    .retained li { color: #1565c0; }
+    .warning { background: #fff3e0; border-left: 4px solid #ef6c00; padding: 12px 16px; border-radius: 4px; margin-top: 24px; font-size: 0.9rem; }
+    a { color: #1565c0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Account Deletion Request</h1>
+    <p class="subtitle">Expenzo by Acesif Labs</p>
+
+    <div class="card">
+      <h2>How to delete your account</h2>
+      <p>You can request account deletion in two ways:</p>
+      <h2>Via the app</h2>
+      <ol>
+        <li>Open the <strong>Expenzo</strong> app</li>
+        <li>Go to <strong>Settings</strong></li>
+        <li>Tap <strong>Delete Account</strong></li>
+        <li>Confirm the deletion</li>
+      </ol>
+      <h2>Via email</h2>
+      <p>Send an email to <a href="mailto:support@acesiflabs.com">support@acesiflabs.com</a> with the subject line <strong>"Delete My Expenzo Account"</strong> from the email address associated with your account. We will process your request within 7 business days.</p>
+    </div>
+
+    <div class="card deleted">
+      <h2>Data that will be deleted</h2>
+      <ul>
+        <li>Profile information (name, email, profile photo)</li>
+        <li>All expense and income records</li>
+        <li>Categories and budgets</li>
+        <li>Message sources and SMS parsing rules</li>
+        <li>Expense templates</li>
+        <li>Recurring transactions and pending recurring items</li>
+      </ul>
+    </div>
+
+    <div class="card retained">
+      <h2>Data that may be retained</h2>
+      <ul>
+        <li>Anonymous, aggregated analytics data not linked to your identity</li>
+        <li>Firebase authentication logs — managed by Google per their <a href="https://firebase.google.com/support/privacy" target="_blank">privacy policy</a></li>
+      </ul>
+    </div>
+
+    <div class="warning">
+      <strong>Important:</strong> Account deletion is <strong>irreversible</strong>. Once your account is deleted, all associated data is permanently erased and cannot be recovered.
+    </div>
+  </div>
+</body>
+</html>
