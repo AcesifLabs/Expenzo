@@ -1,0 +1,51 @@
+name: Deploy Android
+
+on:
+  push:
+    branches: [mobile-staging]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Build & Deploy to Play Store
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: packages/mobile
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.7'
+          channel: 'stable'
+          cache: true
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+          bundler-cache: true
+          working-directory: packages/mobile/android
+
+      - name: Install Flutter dependencies
+        run: flutter pub get
+
+      - name: Decode .env.prod
+        run: echo "${{ secrets.ENV_PROD }}" | base64 --decode > .env.prod
+
+      - name: Decode keystore
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.jks
+
+      - name: Run Fastlane beta lane
+        working-directory: packages/mobile/android
+        run: bundle exec fastlane beta
+        env:
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
+          PLAY_STORE_JSON_KEY: ${{ secrets.PLAY_STORE_JSON_KEY }}

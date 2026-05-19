@@ -20,4 +20,9 @@ export class AuthController {
   async getProfile(@CurrentUser() user: { sub: string }) {
     return this.authService.getProfile(user.sub);
   }
+
+  @Get('delete-account')
+  async deleteAccount(@CurrentUser() user: { sub: string }) {
+    return this.authService.deleteAccount(user.sub);
+  }
 }

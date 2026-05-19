@@ -75,6 +75,13 @@ export class AuthService {
     };
   }
 
+  async deleteAccount(userId: string) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) throw new UnauthorizedException('User not found');
+    await this.userRepository.remove(user);
+    return { deleted: true, userId };
+  }
+
   async getProfile(userId: string) {
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) throw new UnauthorizedException('User not found');

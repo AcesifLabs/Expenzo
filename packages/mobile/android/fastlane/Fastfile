@@ -1,0 +1,41 @@
+default_platform(:android)
+
+platform :android do
+
+  desc "Run tests"
+  lane :test do
+    sh "cd .. && flutter test"
+  end
+
+  desc "Build and upload to Play Store internal track"
+  lane :beta do
+    # Clean previous builds
+    sh "cd .. && flutter clean"
+
+    # Build the AAB
+    sh "cd .. && flutter build appbundle --release"
+
+    # Upload to Play Store internal track
+    upload_to_play_store(
+      track: "internal",
+      aab: "../build/app/outputs/bundle/release/app-release.aab",
+      release_status: "completed",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+    )
+  end
+
+  desc "Promote internal build to production"
+  lane :production do
+    upload_to_play_store(
+      track: "internal",
+      track_promote_to: "production",
+      skip_upload_changelogs: true,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+    )
+  end
+
+end
