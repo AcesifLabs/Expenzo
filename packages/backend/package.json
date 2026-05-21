@@ -17,6 +17,7 @@
     "typeorm": "NODE_OPTIONS='--no-deprecation' typeorm-ts-node-commonjs -d src/data-source.ts",
     "migration:generate": "NODE_OPTIONS='--no-deprecation' typeorm-ts-node-commonjs -d src/data-source.ts migration:generate",
     "migration:run": "NODE_OPTIONS='--no-deprecation' typeorm-ts-node-commonjs -d src/data-source.ts migration:run",
+    "migration:run:prod": "NODE_OPTIONS='--no-deprecation' typeorm -d dist/data-source.js migration:run",
     "migration:revert": "NODE_OPTIONS='--no-deprecation' typeorm-ts-node-commonjs -d src/data-source.ts migration:revert",
     "migration:create": "NODE_OPTIONS='--no-deprecation' typeorm-ts-node-commonjs -d src/data-source.ts migration:create",
     "db:drop": "npm run typeorm -- schema:drop && npm run typeorm -- query 'DROP TABLE IF EXISTS migrations CASCADE'",

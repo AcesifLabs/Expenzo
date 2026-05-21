@@ -3,6 +3,9 @@ name: Deploy Android
 on:
   push:
     branches: [mobile-staging]
+    paths:
+      - 'packages/mobile/**'
+      - '.github/workflows/deploy-android.yml'
   workflow_dispatch:
 
 jobs:
