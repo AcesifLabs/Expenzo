@@ -40,8 +40,8 @@ jobs:
             docker compose up -d --force-recreate
 
             echo "=== Waiting for health check ==="
-            for i in $(seq 1 30); do
-              if wget --spider -q http://localhost:3000/api 2>/dev/null; then
+            for i in $(seq 1 60); do
+              if wget --spider -q http://localhost:3000/api/health 2>/dev/null; then
                 echo "Health check passed after ${i}s"
                 docker compose logs --tail=20
                 exit 0
@@ -49,6 +49,6 @@ jobs:
               sleep 1
             done
 
-            echo "ERROR: Health check failed after 30s"
+            echo "ERROR: Health check failed after 60s"
             docker compose logs --tail=50
             exit 1
