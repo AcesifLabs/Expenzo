@@ -29,7 +29,7 @@ jobs:
             git pull origin main
 
             echo "=== Writing .env file ==="
-            echo "${{ secrets.BACKEND_ENV }}" > packages/backend/.env
+            echo "${{ secrets.BACKEND_ENV_BASE64 }}" | base64 --decode > packages/backend/.env
 
             echo "=== Running migrations ==="
             cd packages/backend
