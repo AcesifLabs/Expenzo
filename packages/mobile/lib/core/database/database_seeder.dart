@@ -29,7 +29,12 @@ class DatabaseSeeder {
       ('default_out_transport', 'Transport', 'car', '#00ACC1'),
       ('default_out_home', 'Home', 'house', '#5E35B1'),
       ('default_out_health', 'Health', 'heartbeat', '#E53935'),
-      ('default_out_entertainment', 'Entertainment', 'gameController', '#43A047'),
+      (
+        'default_out_entertainment',
+        'Entertainment',
+        'gameController',
+        '#43A047',
+      ),
       ('default_out_bills', 'Bills', 'deviceMobile', '#FDD835'),
       ('default_out_travel', 'Travel', 'airplane', '#3949AB'),
       ('default_out_education', 'Education', 'graduationCap', '#00897B'),
@@ -79,9 +84,9 @@ class DatabaseSeeder {
   /// before income category support was added.
   static Future<void> _ensureIncomeCategoriesExist(AppDatabase db) async {
     // Query existing seeded income categories by their stable IDs
-    final existingIn = await (db.select(db.categories)
-          ..where((t) => t.categoryType.equals('IN')))
-        .get();
+    final existingIn = await (db.select(
+      db.categories,
+    )..where((t) => t.categoryType.equals('IN'))).get();
     final existingIds = existingIn.map((c) => c.id).toSet();
 
     final missing = _incomeCategories

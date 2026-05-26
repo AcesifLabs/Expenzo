@@ -9,11 +9,17 @@ class CategoryDao extends DatabaseAccessor<AppDatabase>
     with _$CategoryDaoMixin {
   CategoryDao(super.db);
 
-  Stream<List<Category>> watchCategories({String? type, bool sortByUsage = false}) {
+  Stream<List<Category>> watchCategories({
+    String? type,
+    bool sortByUsage = false,
+  }) {
     var query = select(categories);
-    
+
     if (sortByUsage) {
-      query.orderBy([(t) => OrderingTerm.desc(t.usageCount), (t) => OrderingTerm.asc(t.name)]);
+      query.orderBy([
+        (t) => OrderingTerm.desc(t.usageCount),
+        (t) => OrderingTerm.asc(t.name),
+      ]);
     } else {
       query.orderBy([(t) => OrderingTerm.asc(t.name)]);
     }
@@ -24,11 +30,17 @@ class CategoryDao extends DatabaseAccessor<AppDatabase>
     return query.watch();
   }
 
-  Future<List<Category>> getAllCategories({String? type, bool sortByUsage = false}) {
+  Future<List<Category>> getAllCategories({
+    String? type,
+    bool sortByUsage = false,
+  }) {
     var query = select(categories);
 
     if (sortByUsage) {
-      query.orderBy([(t) => OrderingTerm.desc(t.usageCount), (t) => OrderingTerm.asc(t.name)]);
+      query.orderBy([
+        (t) => OrderingTerm.desc(t.usageCount),
+        (t) => OrderingTerm.asc(t.name),
+      ]);
     } else {
       query.orderBy([(t) => OrderingTerm.asc(t.name)]);
     }

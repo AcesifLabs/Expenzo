@@ -14,6 +14,7 @@ import { ParsingRulesModule } from './parsing-rules/parsing-rules.module';
 import { RecurringTransactionsModule } from './recurring-transactions/recurring-transactions.module';
 import { SyncModule } from './sync/sync.module';
 import { AppController } from './app.controller';
+import { getDatabaseSslConfig } from './config/database-ssl';
 
 @Module({
   imports: [
@@ -24,18 +25,22 @@ import { AppController } from './app.controller';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        type: 'postgres',
-        url: config.get<string>('DATABASE_URL'),
-        ssl: { rejectUnauthorized: false },
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: false, // use migrations
-        logging: config.get('NODE_ENV') !== 'production',
-        autoLoadEntities: true,
-        extra: {
-          connectionTimeoutMillis: 15000,
-        },
-      }),
+      useFactory: (config: ConfigService) => {
+        const databaseUrl = config.get<string>('DATABASE_URL');
+
+        return {
+          type: 'postgres',
+          url: databaseUrl,
+          ssl: getDatabaseSslConfig(databaseUrl, config.get<string>('DATABASE_SSL')),
+          entities: [__dirname + '/**/*.entity{.ts,.js}'],
+          synchronize: false, // use migrations
+          logging: config.get('NODE_ENV') !== 'production',
+          autoLoadEntities: true,
+          extra: {
+            connectionTimeoutMillis: 15000,
+          },
+        };
+      },
     }),
     CommonModule,
     AuthModule,

@@ -55,7 +55,10 @@ class SpendingTrendChart extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 12),
                     child: Text(
                       _formatDate(data[index].date),
-                      style: TextStyle(fontSize: 10, color: colors.onSurface.withAlpha(140)),
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: colors.onSurface.withAlpha(140),
+                      ),
                     ),
                   );
                 }
@@ -70,7 +73,10 @@ class SpendingTrendChart extends StatelessWidget {
               getTitlesWidget: (value, meta) {
                 return Text(
                   _formatAmount(value),
-                  style: TextStyle(fontSize: 10, color: colors.onSurface.withAlpha(140)),
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: colors.onSurface.withAlpha(140),
+                  ),
                 );
               },
             ),
@@ -92,12 +98,13 @@ class SpendingTrendChart extends StatelessWidget {
             isStrokeCapRound: true,
             dotData: FlDotData(
               show: true,
-              getDotPainter: (spot, percent, barData, index) => FlDotCirclePainter(
-                radius: 4,
-                color: colors.primary,
-                strokeWidth: 2,
-                strokeColor: colors.surface,
-              ),
+              getDotPainter: (spot, percent, barData, index) =>
+                  FlDotCirclePainter(
+                    radius: 4,
+                    color: colors.primary,
+                    strokeWidth: 2,
+                    strokeColor: colors.surface,
+                  ),
             ),
             belowBarData: BarAreaData(
               show: true,
@@ -121,11 +128,18 @@ class SpendingTrendChart extends StatelessWidget {
                 if (index >= 0 && index < data.length) {
                   return LineTooltipItem(
                     '৳${data[index].amount.toStringAsFixed(0)}',
-                    TextStyle(color: colors.onSurface, fontWeight: FontWeight.bold),
+                    TextStyle(
+                      color: colors.onSurface,
+                      fontWeight: FontWeight.bold,
+                    ),
                     children: [
                       TextSpan(
                         text: '\n${_formatDate(data[index].date)}',
-                        style: TextStyle(color: colors.onSurface.withAlpha(140), fontSize: 10, fontWeight: FontWeight.normal),
+                        style: TextStyle(
+                          color: colors.onSurface.withAlpha(140),
+                          fontSize: 10,
+                          fontWeight: FontWeight.normal,
+                        ),
                       ),
                     ],
                   );

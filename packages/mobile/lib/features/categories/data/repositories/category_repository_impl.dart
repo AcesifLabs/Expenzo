@@ -18,9 +18,19 @@ class CategoryRepositoryImpl implements CategoryRepository {
     SyncQueueDao? syncQueueDao,
   }) : _syncQueueDao = syncQueueDao;
 
-  void _enqueueSync(String action, String recordId, [Map<String, dynamic>? data]) {
-    if (_syncQueueDao == null) return;
-    _syncQueueDao!.enqueue(tableName: 'categories', recordId: recordId, action: action, payload: data != null ? jsonEncode(data) : '');
+  void _enqueueSync(
+    String action,
+    String recordId, [
+    Map<String, dynamic>? data,
+  ]) {
+    final syncQueueDao = _syncQueueDao;
+    if (syncQueueDao == null) return;
+    syncQueueDao.enqueue(
+      tableName: 'categories',
+      recordId: recordId,
+      action: action,
+      payload: data != null ? jsonEncode(data) : '',
+    );
     SyncEventBus().trigger();
   }
 
@@ -54,10 +64,18 @@ class CategoryRepositoryImpl implements CategoryRepository {
   }
 
   @override
-  Future<Either<CacheFailure, Category>> createCategory(Category category) async {
+  Future<Either<CacheFailure, Category>> createCategory(
+    Category category,
+  ) async {
     try {
       final created = await localDatasource.createCategory(category);
-      _enqueueSync('insert', created.id!, {'name': created.name, 'emoji': created.emoji, 'color': created.color, 'type': created.type.dbValue, 'isDefault': created.isDefault});
+      _enqueueSync('insert', created.id!, {
+        'name': created.name,
+        'emoji': created.emoji,
+        'color': created.color,
+        'type': created.type.dbValue,
+        'isDefault': created.isDefault,
+      });
       return Right(created);
     } on CacheException catch (e) {
       return Left(e.toFailure());
@@ -65,10 +83,18 @@ class CategoryRepositoryImpl implements CategoryRepository {
   }
 
   @override
-  Future<Either<CacheFailure, Category>> updateCategory(Category category) async {
+  Future<Either<CacheFailure, Category>> updateCategory(
+    Category category,
+  ) async {
     try {
       final updated = await localDatasource.updateCategory(category);
-      _enqueueSync('update', updated.id!, {'name': updated.name, 'emoji': updated.emoji, 'color': updated.color, 'type': updated.type.dbValue, 'isDefault': updated.isDefault});
+      _enqueueSync('update', updated.id!, {
+        'name': updated.name,
+        'emoji': updated.emoji,
+        'color': updated.color,
+        'type': updated.type.dbValue,
+        'isDefault': updated.isDefault,
+      });
       return Right(updated);
     } on CacheException catch (e) {
       return Left(e.toFailure());
@@ -91,7 +117,10 @@ class CategoryRepositoryImpl implements CategoryRepository {
     RecordType? type,
     bool sortByUsage = false,
   }) {
-    return localDatasource.watchCategories(type: type, sortByUsage: sortByUsage);
+    return localDatasource.watchCategories(
+      type: type,
+      sortByUsage: sortByUsage,
+    );
   }
 
   @override

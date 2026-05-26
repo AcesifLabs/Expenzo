@@ -44,102 +44,101 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(isEditing ? 'Edit Budget' : 'Create Budget'),
-        ),
-        body: BlocConsumer<BudgetBloc, BudgetState>(
-          listener: (context, state) {
-            if (state is BudgetOperationSuccess) {
-              Navigator.pop(context, true);
-            } else if (state is BudgetError) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(state.message)));
-            }
-          },
-          builder: (context, state) {
-            return Form(
-              key: _formKey,
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  // Amount
-                  TextFormField(
-                    controller: _amountController,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    decoration: const InputDecoration(
-                      labelText: 'Budget Amount',
-                      prefixText: '৳',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter an amount';
-                      }
-                      if (double.tryParse(value) == null) {
-                        return 'Please enter a valid number';
-                      }
-                      return null;
-                    },
+      appBar: AppBar(title: Text(isEditing ? 'Edit Budget' : 'Create Budget')),
+      body: BlocConsumer<BudgetBloc, BudgetState>(
+        listener: (context, state) {
+          if (state is BudgetOperationSuccess) {
+            Navigator.pop(context, true);
+          } else if (state is BudgetError) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.message)));
+          }
+        },
+        builder: (context, state) {
+          return Form(
+            key: _formKey,
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                // Amount
+                TextFormField(
+                  controller: _amountController,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
                   ),
-                  const SizedBox(height: 16),
+                  decoration: const InputDecoration(
+                    labelText: 'Budget Amount',
+                    prefixText: '৳',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter an amount';
+                    }
+                    if (double.tryParse(value) == null) {
+                      return 'Please enter a valid number';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
 
-                  // Period
-                  DropdownButtonFormField<BudgetPeriod>(
-                    initialValue: _selectedPeriod,
-                    decoration: const InputDecoration(
-                      labelText: 'Period',
-                      border: OutlineInputBorder(),
+                // Period
+                DropdownButtonFormField<BudgetPeriod>(
+                  initialValue: _selectedPeriod,
+                  decoration: const InputDecoration(
+                    labelText: 'Period',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: BudgetPeriod.weekly,
+                      child: Text('Weekly'),
                     ),
-                    items: const [
-                      DropdownMenuItem(
-                        value: BudgetPeriod.weekly,
-                        child: Text('Weekly'),
-                      ),
-                      DropdownMenuItem(
-                        value: BudgetPeriod.monthly,
-                        child: Text('Monthly'),
-                      ),
-                      DropdownMenuItem(
-                        value: BudgetPeriod.yearly,
-                        child: Text('Yearly'),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() => _selectedPeriod = value);
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Rollover toggle
-                  SwitchListTile(
-                    title: const Text('Enable Rollover'),
-                    subtitle: const Text(
-                      'Carry forward unspent amount to next period',
+                    DropdownMenuItem(
+                      value: BudgetPeriod.monthly,
+                      child: Text('Monthly'),
                     ),
-                    value: _rolloverEnabled,
-                    onChanged: (value) {
-                      setState(() => _rolloverEnabled = value);
-                    },
-                  ),
-                  const SizedBox(height: 24),
+                    DropdownMenuItem(
+                      value: BudgetPeriod.yearly,
+                      child: Text('Yearly'),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() => _selectedPeriod = value);
+                    }
+                  },
+                ),
+                const SizedBox(height: 16),
 
-                  // Submit button
-                  ElevatedButton(
-                    onPressed: state is BudgetLoading ? null : _submit,
-                    child: Text(isEditing ? 'Update Budget' : 'Create Budget'),
+                // Rollover toggle
+                SwitchListTile(
+                  title: const Text('Enable Rollover'),
+                  subtitle: const Text(
+                    'Carry forward unspent amount to next period',
                   ),
-                ],
-              ),
-            );
-          },
-        ),
+                  value: _rolloverEnabled,
+                  onChanged: (value) {
+                    setState(() => _rolloverEnabled = value);
+                  },
+                ),
+                const SizedBox(height: 24),
+
+                // Submit button
+                ElevatedButton(
+                  onPressed: state is BudgetLoading ? null : _submit,
+                  child: Text(isEditing ? 'Update Budget' : 'Create Budget'),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
+
   void _submit() {
     if (_formKey.currentState!.validate()) {
       final budget = Budget(

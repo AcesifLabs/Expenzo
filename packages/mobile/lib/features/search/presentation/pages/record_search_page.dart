@@ -146,7 +146,10 @@ class _RecordSearchPageState extends State<RecordSearchPage> {
             ),
             subtitle: Text(
               dateFormat.format(record.date),
-              style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurface.withAlpha(140)),
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurface.withAlpha(140),
+              ),
             ),
             trailing: Text(
               '${isNegative ? '-' : ''}৳${record.amount.abs().toStringAsFixed(2)}',

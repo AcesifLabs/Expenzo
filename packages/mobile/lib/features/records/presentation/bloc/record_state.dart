@@ -50,7 +50,9 @@ class RecordLoaded extends RecordState {
   List<Record> get filteredRecords {
     if (searchQuery.isEmpty) return records;
     final q = searchQuery.toLowerCase();
-    return records.where((r) => r.description.toLowerCase().contains(q)).toList();
+    return records
+        .where((r) => r.description.toLowerCase().contains(q))
+        .toList();
   }
 
   RecordLoaded copyWith({
@@ -69,10 +71,18 @@ class RecordLoaded extends RecordState {
       total: total ?? this.total,
       hasMore: hasMore ?? this.hasMore,
       searchQuery: searchQuery ?? this.searchQuery,
-      filterStartDate: clearFilters ? null : (filterStartDate ?? this.filterStartDate),
-      filterEndDate: clearFilters ? null : (filterEndDate ?? this.filterEndDate),
-      filterCategoryIds: clearFilters ? null : (filterCategoryIds ?? this.filterCategoryIds),
-      filterRecordType: clearFilters ? null : (filterRecordType ?? this.filterRecordType),
+      filterStartDate: clearFilters
+          ? null
+          : (filterStartDate ?? this.filterStartDate),
+      filterEndDate: clearFilters
+          ? null
+          : (filterEndDate ?? this.filterEndDate),
+      filterCategoryIds: clearFilters
+          ? null
+          : (filterCategoryIds ?? this.filterCategoryIds),
+      filterRecordType: clearFilters
+          ? null
+          : (filterRecordType ?? this.filterRecordType),
     );
   }
 

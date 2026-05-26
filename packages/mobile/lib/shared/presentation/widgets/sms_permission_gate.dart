@@ -1,11 +1,20 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:expense_tracker/core/di/injection_container.dart' as di;
+import 'package:expense_tracker/features/sms_parser/application/realtime_sms_processor.dart';
 
 class SmsPermissionGate extends StatefulWidget {
   final Widget child;
+  final ValueChanged<bool>? onPermissionChanged;
 
-  const SmsPermissionGate({super.key, required this.child});
+  const SmsPermissionGate({
+    super.key,
+    required this.child,
+    this.onPermissionChanged,
+  });
 
   @override
   State<SmsPermissionGate> createState() => _SmsPermissionGateState();
@@ -23,47 +32,68 @@ class _SmsPermissionGateState extends State<SmsPermissionGate> {
 
   Future<void> _checkPermission() async {
     final status = await Permission.sms.status;
+    final hasPermission = status.isGranted;
+    widget.onPermissionChanged?.call(hasPermission);
     if (mounted) {
       setState(() {
-        _hasPermission = status.isGranted;
+        _hasPermission = hasPermission;
         _isLoading = false;
       });
+    }
+
+    if (status.isGranted) {
+      unawaited(_startRealtimeProcessor());
     }
   }
 
   Future<void> _requestPermission() async {
     setState(() => _isLoading = true);
     final status = await Permission.sms.request();
+    final hasPermission = status.isGranted;
+    widget.onPermissionChanged?.call(hasPermission);
     if (mounted) {
       setState(() {
-        _hasPermission = status.isGranted;
+        _hasPermission = hasPermission;
         _isLoading = false;
       });
-      if (!status.isGranted && status.isPermanentlyDenied) {
-        // Show dialog asking to open settings
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Permission Required'),
-            content: const Text(
-              'SMS permission is permanently denied. Please enable it in app settings to use the smart scanner.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  openAppSettings();
-                },
-                child: const Text('Open Settings'),
-              ),
-            ],
+    }
+
+    if (status.isGranted) {
+      unawaited(_startRealtimeProcessor());
+    }
+
+    if (!status.isGranted && status.isPermanentlyDenied && mounted) {
+      // Show dialog asking to open settings
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Permission Required'),
+          content: const Text(
+            'SMS permission is permanently denied. Please enable it in app settings to use the smart scanner.',
           ),
-        );
-      }
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                openAppSettings();
+              },
+              child: const Text('Open Settings'),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  Future<void> _startRealtimeProcessor() async {
+    try {
+      await di.getIt<RealtimeSmsProcessor>().start();
+    } catch (e) {
+      debugPrint('SmsPermissionGate start skipped: $e');
     }
   }
 
@@ -83,7 +113,11 @@ class _SmsPermissionGateState extends State<SmsPermissionGate> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(PhosphorIcons.warningCircle(PhosphorIconsStyle.regular), size: 80, color: Colors.grey),
+            Icon(
+              PhosphorIcons.warningCircle(PhosphorIconsStyle.regular),
+              size: 80,
+              color: Colors.grey,
+            ),
             const SizedBox(height: 24),
             const Text(
               'SMS Access Required',

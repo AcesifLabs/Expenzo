@@ -24,9 +24,14 @@ class RecordRepositoryImpl implements RecordRepository {
     SyncQueueDao? syncQueueDao,
   }) : _syncQueueDao = syncQueueDao;
 
-  void _enqueueSync(String action, String recordId, [Map<String, dynamic>? data]) {
-    if (_syncQueueDao == null) return;
-    _syncQueueDao!.enqueue(
+  void _enqueueSync(
+    String action,
+    String recordId, [
+    Map<String, dynamic>? data,
+  ]) {
+    final syncQueueDao = _syncQueueDao;
+    if (syncQueueDao == null) return;
+    syncQueueDao.enqueue(
       tableName: 'records',
       recordId: recordId,
       action: action,
@@ -119,10 +124,12 @@ class RecordRepositoryImpl implements RecordRepository {
     try {
       final added = await localDatasource.addRecord(record);
       _enqueueSync('insert', added.id!, {
-        'amount': added.amount, 'description': added.description,
+        'amount': added.amount,
+        'description': added.description,
         'date': added.date.toUtc().toIso8601String(),
         'categoryId': added.categoryId,
-        'source': added.source.name, 'recordType': added.recordType.dbValue,
+        'source': added.source.name,
+        'recordType': added.recordType.dbValue,
       });
       return Right(added);
     } on CacheException catch (e) {
@@ -135,10 +142,12 @@ class RecordRepositoryImpl implements RecordRepository {
     try {
       final updated = await localDatasource.updateRecord(record);
       _enqueueSync('update', updated.id!, {
-        'amount': updated.amount, 'description': updated.description,
+        'amount': updated.amount,
+        'description': updated.description,
         'date': updated.date.toUtc().toIso8601String(),
         'categoryId': updated.categoryId,
-        'source': updated.source.name, 'recordType': updated.recordType.dbValue,
+        'source': updated.source.name,
+        'recordType': updated.recordType.dbValue,
       });
       return Right(updated);
     } on CacheException catch (e) {
@@ -252,16 +261,20 @@ class RecordRepositoryImpl implements RecordRepository {
   }
 
   @override
-  Future<Either<CacheFailure, void>> addRecordsBatch(List<Record> records) async {
+  Future<Either<CacheFailure, void>> addRecordsBatch(
+    List<Record> records,
+  ) async {
     try {
       await localDatasource.addRecordsBatch(records);
       for (final r in records) {
         if (r.id != null) {
           _enqueueSync('insert', r.id!, {
-            'amount': r.amount, 'description': r.description,
+            'amount': r.amount,
+            'description': r.description,
             'date': r.date.toUtc().toIso8601String(),
             'categoryId': r.categoryId,
-            'source': r.source.name, 'recordType': r.recordType.dbValue,
+            'source': r.source.name,
+            'recordType': r.recordType.dbValue,
           });
         }
       }

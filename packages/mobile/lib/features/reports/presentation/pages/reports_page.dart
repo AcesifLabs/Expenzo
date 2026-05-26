@@ -113,21 +113,32 @@ class _ReportsPageContentState extends State<_ReportsPageContent>
   }
 
   Widget _buildTrendTab(BuildContext context, ReportsLoaded state) {
-    return Column(children: [
-      Expanded(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: SpendingTrendChart(data: state.spendingTrend, granularity: state.granularity),
+    return Column(
+      children: [
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: SpendingTrendChart(
+              data: state.spendingTrend,
+              granularity: state.granularity,
+            ),
+          ),
         ),
-      ),
-    ]);
+      ],
+    );
   }
 
   Widget _buildCategoriesTab(BuildContext context, ReportsLoaded state) {
-    return Padding(padding: const EdgeInsets.all(16), child: CategoryPieChart(data: state.categoryBreakdown));
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: CategoryPieChart(data: state.categoryBreakdown),
+    );
   }
 
   Widget _buildInsightsTab(BuildContext context, ReportsLoaded state) {
-    return Padding(padding: const EdgeInsets.all(16), child: InsightsCard(insights: state.insights));
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: InsightsCard(insights: state.insights),
+    );
   }
 }

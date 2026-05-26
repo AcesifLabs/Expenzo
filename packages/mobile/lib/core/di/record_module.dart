@@ -32,7 +32,9 @@ void initRecordModule(GetIt getIt) {
     ),
   );
   getIt.registerLazySingleton(() => GetRecords(getIt<RecordRepository>()));
-  getIt.registerLazySingleton(() => AddRecord(getIt<RecordRepository>(), getIt<CategoryRepository>()));
+  getIt.registerLazySingleton(
+    () => AddRecord(getIt<RecordRepository>(), getIt<CategoryRepository>()),
+  );
   getIt.registerLazySingleton(() => UpdateRecord(getIt<RecordRepository>()));
   getIt.registerLazySingleton(() => DeleteRecord(getIt<RecordRepository>()));
   getIt.registerLazySingleton(

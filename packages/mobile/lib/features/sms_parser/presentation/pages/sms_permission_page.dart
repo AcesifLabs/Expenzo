@@ -67,7 +67,9 @@ class SmsPermissionPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   _buildInfoCard(
-                    icon: PhosphorIcons.slidersHorizontal(PhosphorIconsStyle.regular),
+                    icon: PhosphorIcons.slidersHorizontal(
+                      PhosphorIconsStyle.regular,
+                    ),
                     title: 'You\'re in Control',
                     description:
                         'Choose which SMS to convert to expenses. You can always edit or delete them.',
@@ -143,7 +145,12 @@ class SmsPermissionPage extends StatelessWidget {
                       ),
                       child: Column(
                         children: [
-                          Icon(PhosphorIcons.warningCircle(PhosphorIconsStyle.regular), color: AppColors.error),
+                          Icon(
+                            PhosphorIcons.warningCircle(
+                              PhosphorIconsStyle.regular,
+                            ),
+                            color: AppColors.error,
+                          ),
                           const SizedBox(height: 8),
                           const Text(
                             'Permission request timed out. Please try again.',

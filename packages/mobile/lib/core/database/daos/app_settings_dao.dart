@@ -5,16 +5,25 @@ import '../tables/app_settings_table.dart';
 part 'app_settings_dao.g.dart';
 
 @DriftAccessor(tables: [AppSettings])
-class AppSettingsDao extends DatabaseAccessor<AppDatabase> with _$AppSettingsDaoMixin {
+class AppSettingsDao extends DatabaseAccessor<AppDatabase>
+    with _$AppSettingsDaoMixin {
   AppSettingsDao(super.db);
 
   Future<String?> getValue(String key) async {
-    final row = await (select(appSettings)..where((t) => t.key.equals(key))).getSingleOrNull();
+    final row = await (select(
+      appSettings,
+    )..where((t) => t.key.equals(key))).getSingleOrNull();
     return row?.value;
   }
 
   Future<void> setValue(String key, String value) async {
-    await into(appSettings).insertOnConflictUpdate(AppSettingsCompanion.insert(key: key, value: value, updatedAt: Value(DateTime.now().toUtc())));
+    await into(appSettings).insertOnConflictUpdate(
+      AppSettingsCompanion.insert(
+        key: key,
+        value: value,
+        updatedAt: Value(DateTime.now().toUtc()),
+      ),
+    );
   }
 
   Future<Map<String, String>> getAll() async {

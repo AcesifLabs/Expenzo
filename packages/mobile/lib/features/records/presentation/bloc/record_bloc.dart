@@ -23,7 +23,8 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
   bool _hasActiveFilters(RecordLoaded state) {
     return state.filterStartDate != null ||
         state.filterEndDate != null ||
-        (state.filterCategoryIds != null && state.filterCategoryIds!.isNotEmpty) ||
+        (state.filterCategoryIds != null &&
+            state.filterCategoryIds!.isNotEmpty) ||
         state.filterRecordType != null;
   }
 
@@ -124,24 +125,27 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
         offset: currentState.records.length,
       );
 
-      result.fold(
-        (failure) => emit(RecordError(failure.message)),
-        (newRecords) {
-          final allRecords = [...currentState.records, ...newRecords];
-          emit(currentState.copyWith(
+      result.fold((failure) => emit(RecordError(failure.message)), (
+        newRecords,
+      ) {
+        final allRecords = [...currentState.records, ...newRecords];
+        emit(
+          currentState.copyWith(
             records: allRecords,
             total: allRecords.length,
             hasMore: newRecords.length >= _pageSize,
-          ));
-        },
-      );
+          ),
+        );
+      });
     } else {
       // Normal pagination: use getRecords
       final result = await getRecords(
         GetRecordsParams(limit: _pageSize, offset: currentState.records.length),
       );
 
-      result.fold((failure) => emit(RecordError(failure.message)), (newRecords) {
+      result.fold((failure) => emit(RecordError(failure.message)), (
+        newRecords,
+      ) {
         final allRecords = [...currentState.records, ...newRecords];
         emit(
           RecordLoaded(
@@ -199,10 +203,7 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     add(const LoadRecords());
   }
 
-  void _onSearchRecords(
-    SearchRecords event,
-    Emitter<RecordState> emit,
-  ) {
+  void _onSearchRecords(SearchRecords event, Emitter<RecordState> emit) {
     if (state is RecordLoaded) {
       emit((state as RecordLoaded).copyWith(searchQuery: event.query));
     }

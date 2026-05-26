@@ -8,11 +8,13 @@ class ApiConstants {
     }
     return value;
   }
+
   static const String login = '/auth/login';
   static const String records = '/records';
   static const String recordsBulk = '/records/bulk';
   static const String categories = '/categories';
-  static String categoryIncrementUsage(String id) => '/categories/$id/increment-usage';
+  static String categoryIncrementUsage(String id) =>
+      '/categories/$id/increment-usage';
   static const String budgets = '/budgets';
   static String budgetProgress(String id) => '/budgets/$id/progress';
   static const String messageSources = '/message-sources';

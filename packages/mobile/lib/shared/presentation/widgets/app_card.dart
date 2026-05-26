@@ -18,7 +18,7 @@ class AppCard extends StatelessWidget {
   final VoidCallback? onLongPress;
   final Key? dismissibleKey;
   final VoidCallback? onDismissed;
-   final Color? backgroundColor;
+  final Color? backgroundColor;
   final Color? borderColor;
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? margin;
@@ -43,13 +43,21 @@ class AppCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final radius = borderRadius ?? (theme.cardTheme.shape as RoundedRectangleBorder?)?.borderRadius.resolve(Directionality.of(context)).topLeft.x ?? 10.0;
-    
+    final radius =
+        borderRadius ??
+        (theme.cardTheme.shape as RoundedRectangleBorder?)?.borderRadius
+            .resolve(Directionality.of(context))
+            .topLeft
+            .x ??
+        10.0;
+
     Widget inner = Container(
       decoration: BoxDecoration(
         color: backgroundColor ?? theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(radius),
-        border: borderColor != null ? Border.all(color: borderColor!, width: 1.5) : null,
+        border: borderColor != null
+            ? Border.all(color: borderColor!, width: 1.5)
+            : null,
       ),
       clipBehavior: clipBehavior,
       child: Material(

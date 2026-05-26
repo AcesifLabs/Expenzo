@@ -4,10 +4,14 @@ import 'package:expense_tracker/features/recurring/data/datasources/recurring_lo
 import 'package:expense_tracker/features/recurring/data/repositories/recurring_repository_impl.dart';
 import 'package:expense_tracker/features/recurring/domain/repositories/recurring_repository.dart';
 import 'package:expense_tracker/features/recurring/domain/usecases/get_recurring_list.dart';
-import 'package:expense_tracker/features/recurring/domain/usecases/create_recurring.dart' as create_uc;
-import 'package:expense_tracker/features/recurring/domain/usecases/update_recurring.dart' as update_uc;
-import 'package:expense_tracker/features/recurring/domain/usecases/delete_recurring.dart' as delete_uc;
-import 'package:expense_tracker/features/recurring/domain/usecases/process_recurring.dart' as process_uc;
+import 'package:expense_tracker/features/recurring/domain/usecases/create_recurring.dart'
+    as create_uc;
+import 'package:expense_tracker/features/recurring/domain/usecases/update_recurring.dart'
+    as update_uc;
+import 'package:expense_tracker/features/recurring/domain/usecases/delete_recurring.dart'
+    as delete_uc;
+import 'package:expense_tracker/features/recurring/domain/usecases/process_recurring.dart'
+    as process_uc;
 import 'package:expense_tracker/features/recurring/presentation/bloc/recurring_bloc.dart';
 
 void initRecurringModule(GetIt getIt) {

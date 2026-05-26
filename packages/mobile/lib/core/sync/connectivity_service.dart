@@ -9,14 +9,25 @@ class ConnectivityService {
   bool _isOnline = false;
   bool get isOnline => _isOnline;
 
-  Stream<bool> get onlineStream => _connectivity.onConnectivityChanged.asyncMap((results) => _checkConnectivity(results));
+  Stream<bool> get onlineStream => _connectivity.onConnectivityChanged.asyncMap(
+    (results) => _checkConnectivity(results),
+  );
 
   Future<bool> _checkConnectivity(List<ConnectivityResult> results) async {
-    if (results.isEmpty || results.contains(ConnectivityResult.none)) { _isOnline = false; return false; }
+    if (results.isEmpty || results.contains(ConnectivityResult.none)) {
+      _isOnline = false;
+      return false;
+    }
     try {
-      await _apiClient.dio.get('/health', options: Options(validateStatus: (_) => true)).timeout(const Duration(seconds: 5));
-      _isOnline = true; return true;
-    } catch (_) { _isOnline = false; return false; }
+      await _apiClient.dio
+          .get('/health', options: Options(validateStatus: (_) => true))
+          .timeout(const Duration(seconds: 5));
+      _isOnline = true;
+      return true;
+    } catch (_) {
+      _isOnline = false;
+      return false;
+    }
   }
 
   Future<bool> checkNow() async {

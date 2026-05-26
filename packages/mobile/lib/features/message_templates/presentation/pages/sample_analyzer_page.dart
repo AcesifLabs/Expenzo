@@ -224,9 +224,9 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
                                       style: TextButton.styleFrom(
                                         foregroundColor:
                                             Theme.of(context).brightness ==
-                                                    Brightness.light
-                                                ? Colors.black
-                                                : null,
+                                                Brightness.light
+                                            ? Colors.black
+                                            : null,
                                       ),
                                       onPressed: () {
                                         Navigator.of(context).push(

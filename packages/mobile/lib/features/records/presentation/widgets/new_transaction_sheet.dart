@@ -213,9 +213,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     if (velocity == null) return;
     if (velocity.abs() < 100) return;
 
-    final targetType = velocity > 0
-        ? RecordType.expense
-        : RecordType.income;
+    final targetType = velocity > 0 ? RecordType.expense : RecordType.income;
 
     if (targetType != _type) {
       _switchType(targetType);
@@ -248,8 +246,11 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   double get _parsedAmount => double.tryParse(_amountText.value) ?? 0;
 
   // Resolve animated glow border color for validation error fields
-  Color _resolveGlowBorderColor(bool hasError, ColorScheme colors,
-      {Color? fallback}) {
+  Color _resolveGlowBorderColor(
+    bool hasError,
+    ColorScheme colors, {
+    Color? fallback,
+  }) {
     if (!hasError) return fallback ?? Colors.transparent;
     if (_glowController.isAnimating) {
       return Color.lerp(
@@ -348,8 +349,10 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Recurring transaction could not be saved. '
-                'You can set it up later from the Recurring tab.'),
+            content: Text(
+              'Recurring transaction could not be saved. '
+              'You can set it up later from the Recurring tab.',
+            ),
             duration: Duration(seconds: 3),
           ),
         );
@@ -457,8 +460,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
         child: Container(
           decoration: BoxDecoration(
             color: colors.surface,
-            borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(24)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: SingleChildScrollView(
             child: Column(
@@ -482,23 +484,19 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                     horizontal: 24,
                     vertical: 12,
                   ),
-                  child: _TypeToggle(
-                      type: _type, onSwitch: _switchType),
+                  child: _TypeToggle(type: _type, onSwitch: _switchType),
                 ),
                 // Amount display
                 ValueListenableBuilder<String>(
                   valueListenable: _amountText,
                   builder: (_, val, child) {
                     final displayVal = val.isEmpty ? '0' : val;
-                    final sign = _type == RecordType.expense
-                        ? '-'
-                        : '+';
+                    final sign = _type == RecordType.expense ? '-' : '+';
                     final signColor = _type == RecordType.expense
                         ? const Color(0xFFFF3B30)
                         : const Color(0xFF34C759);
                     return Padding(
-                      padding:
-                          const EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.symmetric(vertical: 8),
                       child: Text(
                         '$sign$displayVal',
                         style: TextStyle(
@@ -576,17 +574,11 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
               hintStyle: TextStyle(color: colors.onSurface.withAlpha(80)),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: borderColor,
-                  width: borderWidth,
-                ),
+                borderSide: BorderSide(color: borderColor, width: borderWidth),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: borderColor,
-                  width: borderWidth,
-                ),
+                borderSide: BorderSide(color: borderColor, width: borderWidth),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -654,9 +646,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                 ),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: colors.onSurface.withAlpha(30),
-                  ),
+                  border: Border.all(color: colors.onSurface.withAlpha(30)),
                   color: colors.onSurface.withAlpha(6),
                 ),
                 child: Row(
@@ -696,9 +686,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                 height: 24,
                 child: Checkbox(
                   value: _isRecurring,
-                  onChanged: (v) => setState(
-                    () => _isRecurring = v ?? false,
-                  ),
+                  onChanged: (v) => setState(() => _isRecurring = v ?? false),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(4),
                   ),
@@ -813,7 +801,8 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                   }),
                   if (_selectedCategoryId == null)
                     _MoreButton(
-                        onTap: () => _showAllCategories(context, allCats)),
+                      onTap: () => _showAllCategories(context, allCats),
+                    ),
                 ],
               ),
             );
@@ -881,8 +870,8 @@ class _CategoryPickerItem extends StatelessWidget {
             color: isSelected
                 ? colors.primary.withAlpha(50)
                 : errorBorderColor != Colors.transparent
-                    ? errorBorderColor
-                    : colors.onSurface.withAlpha(40),
+                ? errorBorderColor
+                : colors.onSurface.withAlpha(40),
             width: 1,
           ),
         ),
@@ -1088,8 +1077,9 @@ class _TypeToggle extends StatelessWidget {
                     curve: Curves.easeInOut,
                     width: pillWidth,
                     decoration: BoxDecoration(
-                      color: (isExpense ? expenseColor : incomeColor)
-                          .withAlpha(25),
+                      color: (isExpense ? expenseColor : incomeColor).withAlpha(
+                        25,
+                      ),
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
@@ -1231,32 +1221,86 @@ class _NumericKeypadState extends State<_NumericKeypad> {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         children: [
-          Row(children: [
-            _KeypadButton(color: btnColor, onTap: () => widget.onDigit('1'), child: Text('1', style: _keypadTextStyle(txtColor))),
-            _KeypadButton(color: btnColor, onTap: () => widget.onDigit('2'), child: Text('2', style: _keypadTextStyle(txtColor))),
-            _KeypadButton(color: btnColor, onTap: () => widget.onDigit('3'), child: Text('3', style: _keypadTextStyle(txtColor))),
-          ]),
-          Row(children: [
-            _KeypadButton(color: btnColor, onTap: () => widget.onDigit('4'), child: Text('4', style: _keypadTextStyle(txtColor))),
-            _KeypadButton(color: btnColor, onTap: () => widget.onDigit('5'), child: Text('5', style: _keypadTextStyle(txtColor))),
-            _KeypadButton(color: btnColor, onTap: () => widget.onDigit('6'), child: Text('6', style: _keypadTextStyle(txtColor))),
-          ]),
-          Row(children: [
-            _KeypadButton(color: btnColor, onTap: () => widget.onDigit('7'), child: Text('7', style: _keypadTextStyle(txtColor))),
-            _KeypadButton(color: btnColor, onTap: () => widget.onDigit('8'), child: Text('8', style: _keypadTextStyle(txtColor))),
-            _KeypadButton(color: btnColor, onTap: () => widget.onDigit('9'), child: Text('9', style: _keypadTextStyle(txtColor))),
-          ]),
           Row(
             children: [
-              _KeypadButton(color: btnColor, onTap: () => widget.onDigit('.'), child: Text('.', style: _keypadTextStyle(txtColor))),
-              _KeypadButton(color: btnColor, onTap: () => widget.onDigit('0'), child: Text('0', style: _keypadTextStyle(txtColor))),
+              _KeypadButton(
+                color: btnColor,
+                onTap: () => widget.onDigit('1'),
+                child: Text('1', style: _keypadTextStyle(txtColor)),
+              ),
+              _KeypadButton(
+                color: btnColor,
+                onTap: () => widget.onDigit('2'),
+                child: Text('2', style: _keypadTextStyle(txtColor)),
+              ),
+              _KeypadButton(
+                color: btnColor,
+                onTap: () => widget.onDigit('3'),
+                child: Text('3', style: _keypadTextStyle(txtColor)),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              _KeypadButton(
+                color: btnColor,
+                onTap: () => widget.onDigit('4'),
+                child: Text('4', style: _keypadTextStyle(txtColor)),
+              ),
+              _KeypadButton(
+                color: btnColor,
+                onTap: () => widget.onDigit('5'),
+                child: Text('5', style: _keypadTextStyle(txtColor)),
+              ),
+              _KeypadButton(
+                color: btnColor,
+                onTap: () => widget.onDigit('6'),
+                child: Text('6', style: _keypadTextStyle(txtColor)),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              _KeypadButton(
+                color: btnColor,
+                onTap: () => widget.onDigit('7'),
+                child: Text('7', style: _keypadTextStyle(txtColor)),
+              ),
+              _KeypadButton(
+                color: btnColor,
+                onTap: () => widget.onDigit('8'),
+                child: Text('8', style: _keypadTextStyle(txtColor)),
+              ),
+              _KeypadButton(
+                color: btnColor,
+                onTap: () => widget.onDigit('9'),
+                child: Text('9', style: _keypadTextStyle(txtColor)),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              _KeypadButton(
+                color: btnColor,
+                onTap: () => widget.onDigit('.'),
+                child: Text('.', style: _keypadTextStyle(txtColor)),
+              ),
+              _KeypadButton(
+                color: btnColor,
+                onTap: () => widget.onDigit('0'),
+                child: Text('0', style: _keypadTextStyle(txtColor)),
+              ),
               _KeypadButton(
                 color: btnColor,
                 onTap: widget.onBackspace,
                 onLongPressStart: _onBackspaceLongPressStart,
                 onLongPressEnd: _onBackspaceLongPressEnd,
                 onLongPressCancel: _cancelBackspaceTimers,
-                child: Icon(PhosphorIcons.backspace(PhosphorIconsStyle.light), color: txtColor, size: 22),
+                child: Icon(
+                  PhosphorIcons.backspace(PhosphorIconsStyle.light),
+                  color: txtColor,
+                  size: 22,
+                ),
               ),
             ],
           ),
@@ -1265,11 +1309,8 @@ class _NumericKeypadState extends State<_NumericKeypad> {
     );
   }
 
-  static TextStyle _keypadTextStyle(Color color) => TextStyle(
-    fontSize: 22,
-    fontWeight: FontWeight.w500,
-    color: color,
-  );
+  static TextStyle _keypadTextStyle(Color color) =>
+      TextStyle(fontSize: 22, fontWeight: FontWeight.w500, color: color);
 }
 
 class _KeypadButton extends StatelessWidget {

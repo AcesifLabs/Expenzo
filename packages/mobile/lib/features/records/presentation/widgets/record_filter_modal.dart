@@ -23,7 +23,8 @@ class RecordFilterModal extends StatefulWidget {
     DateTime? endDate,
     List<String>? categoryIds,
     String? recordType,
-  }) onApply;
+  })
+  onApply;
 
   final VoidCallback onClear;
 
@@ -56,7 +57,9 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
       _selectedCategoryIds.addAll(widget.categoryIds!);
     }
     if (widget.recordType != null) {
-      _recordType = widget.recordType == 'IN' ? RecordType.income : RecordType.expense;
+      _recordType = widget.recordType == 'IN'
+          ? RecordType.income
+          : RecordType.expense;
     }
     // Ensure categories are loaded
     context.read<CategoryBloc>().add(const LoadCategories());
@@ -83,7 +86,9 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
     widget.onApply(
       startDate: _startDate,
       endDate: _endDate,
-      categoryIds: _selectedCategoryIds.isEmpty ? null : _selectedCategoryIds.toList(),
+      categoryIds: _selectedCategoryIds.isEmpty
+          ? null
+          : _selectedCategoryIds.toList(),
       recordType: _recordType?.dbValue,
     );
     Navigator.of(context).pop();
@@ -129,115 +134,127 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                  // Header
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text('Filter Records', style: theme.textTheme.titleLarge),
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          PhosphorIcons.x(PhosphorIconsStyle.regular),
-                          color: theme.colorScheme.onSurface.withAlpha(120),
-                        ),
-                        onPressed: () => Navigator.of(context).pop(),
-                        visualDensity: VisualDensity.compact,
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(
-                          minWidth: 36,
-                          minHeight: 36,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-
-                  // ── Date Range ──
-                  Text('Date Range', style: theme.textTheme.titleSmall),
-                  const SizedBox(height: 8),
-                  InkWell(
-                    onTap: _pickDateRange,
-                    borderRadius: BorderRadius.circular(12),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surface,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: theme.colorScheme.outline.withAlpha(60),
-                        ),
-                      ),
-                      child: Row(
+                      // Header
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Icon(
-                            PhosphorIcons.calendar(PhosphorIconsStyle.regular),
-                            size: 20,
-                            color: theme.colorScheme.onSurface.withAlpha(160),
+                          Expanded(
+                            child: Text(
+                              'Filter Records',
+                              style: theme.textTheme.titleLarge,
+                            ),
                           ),
-                          const SizedBox(width: 12),
-                          Text(
-                            _startDate != null && _endDate != null
-                                ? '${_formatDate(_startDate!)} - ${_formatDate(_endDate!)}'
-                                : 'Select date range',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: _startDate != null
-                                  ? theme.colorScheme.onSurface
-                                  : theme.colorScheme.onSurface.withAlpha(120),
+                          IconButton(
+                            icon: Icon(
+                              PhosphorIcons.x(PhosphorIconsStyle.regular),
+                              color: theme.colorScheme.onSurface.withAlpha(120),
+                            ),
+                            onPressed: () => Navigator.of(context).pop(),
+                            visualDensity: VisualDensity.compact,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(
+                              minWidth: 36,
+                              minHeight: 36,
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
+                      const SizedBox(height: 24),
 
-                  // ── Record Type ──
-                  Text('Record Type', style: theme.textTheme.titleSmall),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      _buildTypeChip('All', null, theme),
-                      _buildTypeChip('Income', RecordType.income, theme),
-                      _buildTypeChip('Expense', RecordType.expense, theme),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-
-                  // ── Categories ──
-                  Text('Categories', style: theme.textTheme.titleSmall),
-                  const SizedBox(height: 8),
-                  _buildCategoryDropdown(theme),
-                  const SizedBox(height: 24),
-
-                  // ── Buttons ──
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: _handleClear,
-                          child: const Text('Clear Filter'),
+                      // ── Date Range ──
+                      Text('Date Range', style: theme.textTheme.titleSmall),
+                      const SizedBox(height: 8),
+                      InkWell(
+                        onTap: _pickDateRange,
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.surface,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: theme.colorScheme.outline.withAlpha(60),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                PhosphorIcons.calendar(
+                                  PhosphorIconsStyle.regular,
+                                ),
+                                size: 20,
+                                color: theme.colorScheme.onSurface.withAlpha(
+                                  160,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                _startDate != null && _endDate != null
+                                    ? '${_formatDate(_startDate!)} - ${_formatDate(_endDate!)}'
+                                    : 'Select date range',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: _startDate != null
+                                      ? theme.colorScheme.onSurface
+                                      : theme.colorScheme.onSurface.withAlpha(
+                                          120,
+                                        ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: _handleApply,
-                          child: const Text('Apply Filter'),
-                        ),
+                      const SizedBox(height: 24),
+
+                      // ── Record Type ──
+                      Text('Record Type', style: theme.textTheme.titleSmall),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          _buildTypeChip('All', null, theme),
+                          _buildTypeChip('Income', RecordType.income, theme),
+                          _buildTypeChip('Expense', RecordType.expense, theme),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+
+                      // ── Categories ──
+                      Text('Categories', style: theme.textTheme.titleSmall),
+                      const SizedBox(height: 8),
+                      _buildCategoryDropdown(theme),
+                      const SizedBox(height: 24),
+
+                      // ── Buttons ──
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: _handleClear,
+                              child: const Text('Clear Filter'),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: _handleApply,
+                              child: const Text('Apply Filter'),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
         ),
-      ),
-    ),
       ],
     );
   }
@@ -253,7 +270,9 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
       selectedColor: theme.colorScheme.primary,
       labelStyle: TextStyle(
         color: selected
-            ? (theme.brightness == Brightness.dark ? Colors.black : AppColors.onPrimary)
+            ? (theme.brightness == Brightness.dark
+                  ? Colors.black
+                  : AppColors.onPrimary)
             : theme.colorScheme.onSurface,
         fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
       ),
@@ -284,8 +303,8 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
         final label = selectedCount == 0
             ? 'All categories'
             : selectedCount == categories.length
-                ? 'All ($selectedCount)'
-                : '$selectedCount selected';
+            ? 'All ($selectedCount)'
+            : '$selectedCount selected';
 
         return InkWell(
           onTap: () => _showCategoryDialog(context, categories, theme),
@@ -412,7 +431,8 @@ Future<void> showRecordFilterModal(
     DateTime? endDate,
     List<String>? categoryIds,
     String? recordType,
-  }) onApply,
+  })
+  onApply,
   required VoidCallback onClear,
 }) {
   return Navigator.of(context).push(

@@ -27,7 +27,7 @@ class SyncEngine {
   bool _initialized = false;
   int _retryCount = 0;
   Timer? _retryTimer;
-  void Function(double)? _onProgress;
+  void Function(double)? onProgress;
 
   static const List<Duration> _backoffDelays = [
     Duration(seconds: 5),
@@ -36,9 +36,6 @@ class SyncEngine {
     Duration(minutes: 2),
     Duration(minutes: 5),
   ];
-
-  void Function(double)? get onProgress => _onProgress;
-  set onProgress(void Function(double)? cb) => _onProgress = cb;
 
   SyncEngine({
     required SyncQueueDao syncQueueDao,
@@ -166,7 +163,7 @@ class SyncEngine {
         if (syncedIds.isNotEmpty) await _syncQueueDao.markSynced(syncedIds);
 
         processed = end;
-        _onProgress?.call(processed / total);
+        onProgress?.call(processed / total);
       }
       _retryCount = 0; // reset backoff on success
     } catch (e) {
@@ -237,7 +234,7 @@ class SyncEngine {
           ApiConstants.syncPush,
           data: {'changes': batch},
         );
-        _onProgress?.call(end / changes.length);
+        onProgress?.call(end / changes.length);
       }
 
       debugPrint('SyncEngine: Migration complete');
@@ -281,7 +278,9 @@ class SyncEngine {
       return;
     }
     final delay = _backoffDelays[_retryCount];
-    debugPrint('SyncEngine: Retrying in ${delay.inSeconds}s (attempt ${_retryCount + 1})');
+    debugPrint(
+      'SyncEngine: Retrying in ${delay.inSeconds}s (attempt ${_retryCount + 1})',
+    );
     _retryTimer?.cancel();
     _retryTimer = Timer(delay, () async {
       _retryCount++;

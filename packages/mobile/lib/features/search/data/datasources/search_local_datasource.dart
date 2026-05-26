@@ -163,8 +163,6 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
   DateTime _intToDateTime(dynamic value) {
     if (value is int) return DateTime.fromMillisecondsSinceEpoch(value * 1000);
     if (value is DateTime) return value;
-    throw CacheException(
-      message: 'Unexpected date type: ${value.runtimeType}',
-    );
+    throw CacheException(message: 'Unexpected date type: ${value.runtimeType}');
   }
 }

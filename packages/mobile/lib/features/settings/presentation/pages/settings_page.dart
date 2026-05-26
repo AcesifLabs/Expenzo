@@ -65,10 +65,17 @@ class _SettingTile extends StatelessWidget {
       leading: Icon(icon, color: titleColor ?? colors.onSurface),
       title: Text(
         title,
-        style: TextStyle(color: titleColor ?? colors.onSurface, fontWeight: FontWeight.w600),
+        style: TextStyle(
+          color: titleColor ?? colors.onSurface,
+          fontWeight: FontWeight.w600,
+        ),
       ),
       subtitle: subtitle != null ? Text(subtitle!) : null,
-      trailing: Icon(PhosphorIcons.caretRight(PhosphorIconsStyle.regular), size: 16, color: colors.onSurface.withAlpha(100)),
+      trailing: Icon(
+        PhosphorIcons.caretRight(PhosphorIconsStyle.regular),
+        size: 16,
+        color: colors.onSurface.withAlpha(100),
+      ),
     );
   }
 }

@@ -19,7 +19,9 @@ class BudgetProgressIndicator extends StatelessWidget {
   Color _color(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     if (percentage > 100) return colors.error; // rose
-    if (percentage >= 80) return const Color(0xFFFF9F0A); // keep orange for warning
+    if (percentage >= 80) {
+      return const Color(0xFFFF9F0A); // keep orange for warning
+    }
     return colors.secondary; // mint
   }
 

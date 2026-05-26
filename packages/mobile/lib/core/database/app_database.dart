@@ -57,7 +57,7 @@ part 'app_database.g.dart';
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
-  AppDatabase.forTesting(QueryExecutor e) : super(e);
+  AppDatabase.forTesting(super.e);
 
   @override
   int get schemaVersion => 13;
@@ -169,9 +169,7 @@ class AppDatabase extends _$AppDatabase {
             FROM records
           ''');
           await customStatement('DROP TABLE records');
-          await customStatement(
-            'ALTER TABLE records_new RENAME TO records',
-          );
+          await customStatement('ALTER TABLE records_new RENAME TO records');
 
           // Recreate indexes
           await customStatement(

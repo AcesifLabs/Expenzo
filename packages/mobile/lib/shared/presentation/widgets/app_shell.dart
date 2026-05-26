@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -15,6 +17,7 @@ import 'package:expense_tracker/features/reports/presentation/pages/reports_page
 import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanner_event.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/pages/sms_scan_page.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:expense_tracker/features/categories/presentation/pages/category_list_page.dart';
 import 'package:expense_tracker/features/categories/presentation/pages/category_form_page.dart';
@@ -122,10 +125,7 @@ class _AppShellState extends State<AppShell> {
                 offset: const Offset(0, 8),
               ),
             ],
-            border: Border.all(
-              color: colors.onSurface.withAlpha(10),
-              width: 1,
-            ),
+            border: Border.all(color: colors.onSurface.withAlpha(10), width: 1),
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -140,7 +140,10 @@ class _AppShellState extends State<AppShell> {
                   width: showFab ? 48 : 0,
                 ),
                 // Right side: Trends, Scan, Profile
-                ...List.generate(rightCount, (i) => _navItem(leftCount + i, colors)),
+                ...List.generate(
+                  rightCount,
+                  (i) => _navItem(leftCount + i, colors),
+                ),
               ],
             ),
           ),
@@ -192,7 +195,9 @@ class _AppShellState extends State<AppShell> {
   void _onFabPressed(BuildContext context) {
     final now = DateTime.now();
     if (_lastFabPress != null &&
-        now.difference(_lastFabPress!) < const Duration(seconds: 1)) return;
+        now.difference(_lastFabPress!) < const Duration(seconds: 1)) {
+      return;
+    }
     _lastFabPress = now;
     if (_currentIndex == 2) {
       _showCategoryTypeSelection(context);
@@ -283,19 +288,56 @@ class _AppShellState extends State<AppShell> {
 // ──────────────────────────────────
 // Scan Page with FAB
 // ──────────────────────────────────
-class _ScanPageWithFab extends StatelessWidget {
+class _ScanPageWithFab extends StatefulWidget {
+  @override
+  State<_ScanPageWithFab> createState() => _ScanPageWithFabState();
+}
+
+class _ScanPageWithFabState extends State<_ScanPageWithFab> {
+  bool _hasSmsPermission = false;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_loadInitialPermission());
+  }
+
+  Future<void> _loadInitialPermission() async {
+    final status = await Permission.sms.status;
+    if (!mounted) return;
+    setState(() {
+      _hasSmsPermission = status.isGranted;
+    });
+  }
+
+  void _onPermissionChanged(bool granted) {
+    if (!mounted || _hasSmsPermission == granted) {
+      return;
+    }
+    setState(() {
+      _hasSmsPermission = granted;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: const SmsPermissionGate(child: ContactSelectorPage()),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 80),
-        child: FloatingActionButton(
-          heroTag: 'scan_fab',
-          onPressed: () => _showScanOptions(context),
-          child: Icon(PhosphorIcons.fileMagnifyingGlass(PhosphorIconsStyle.bold)),
-        ),
+      body: SmsPermissionGate(
+        onPermissionChanged: _onPermissionChanged,
+        child: const ContactSelectorPage(),
       ),
+      floatingActionButton: _hasSmsPermission
+          ? Padding(
+              padding: const EdgeInsets.only(bottom: 80),
+              child: FloatingActionButton(
+                heroTag: 'scan_fab',
+                onPressed: () => _showScanOptions(context),
+                child: Icon(
+                  PhosphorIcons.fileMagnifyingGlass(PhosphorIconsStyle.bold),
+                ),
+              ),
+            )
+          : const SizedBox.shrink(),
     );
   }
 

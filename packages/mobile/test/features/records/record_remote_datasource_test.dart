@@ -8,6 +8,7 @@ import 'package:expense_tracker/core/constants/source_types.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 
 class MockApiClient extends Mock implements ApiClient {}
+
 class MockDio extends Mock implements Dio {}
 
 void main() {
@@ -54,10 +55,10 @@ void main() {
         statusCode: 200,
       );
 
-      when(() => mockDio.get(
-            any(),
-            queryParameters: any(named: 'queryParameters'),
-          )).thenAnswer((_) async => mockResponse);
+      when(
+        () =>
+            mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
+      ).thenAnswer((_) async => mockResponse);
 
       final result = await datasource.getRecords();
       expect(result.data.length, 1);
@@ -85,10 +86,10 @@ void main() {
         statusCode: 200,
       );
 
-      when(() => mockDio.get(
-            any(),
-            queryParameters: any(named: 'queryParameters'),
-          )).thenAnswer((_) async => mockResponse);
+      when(
+        () =>
+            mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
+      ).thenAnswer((_) async => mockResponse);
 
       final result = await datasource.getRecords();
       expect(result.data.first.amount, 100.0);
@@ -115,10 +116,10 @@ void main() {
         statusCode: 200,
       );
 
-      when(() => mockDio.get(
-            any(),
-            queryParameters: any(named: 'queryParameters'),
-          )).thenAnswer((_) async => mockResponse);
+      when(
+        () =>
+            mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
+      ).thenAnswer((_) async => mockResponse);
 
       final result = await datasource.getRecords();
       expect(result.data.first.amount, 0.0);
@@ -145,10 +146,10 @@ void main() {
         statusCode: 200,
       );
 
-      when(() => mockDio.get(
-            any(),
-            queryParameters: any(named: 'queryParameters'),
-          )).thenAnswer((_) async => mockResponse);
+      when(
+        () =>
+            mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
+      ).thenAnswer((_) async => mockResponse);
 
       final result = await datasource.getRecords();
       expect(result.data.first.createdAt, DateTime.utc(2024, 1, 15, 9, 0, 0));
@@ -177,10 +178,10 @@ void main() {
         statusCode: 200,
       );
 
-      when(() => mockDio.get(
-            any(),
-            queryParameters: any(named: 'queryParameters'),
-          )).thenAnswer((_) async => mockResponse);
+      when(
+        () =>
+            mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
+      ).thenAnswer((_) async => mockResponse);
 
       final result = await datasource.getRecords();
       expect(result.data.first.source, ExpenseSource.sms);
@@ -208,10 +209,10 @@ void main() {
         statusCode: 200,
       );
 
-      when(() => mockDio.get(
-            any(),
-            queryParameters: any(named: 'queryParameters'),
-          )).thenAnswer((_) async => mockResponse);
+      when(
+        () =>
+            mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
+      ).thenAnswer((_) async => mockResponse);
 
       final result = await datasource.getRecords();
       expect(result.data.first.source, ExpenseSource.manual);
@@ -238,10 +239,10 @@ void main() {
         statusCode: 200,
       );
 
-      when(() => mockDio.get(
-            any(),
-            queryParameters: any(named: 'queryParameters'),
-          )).thenAnswer((_) async => mockResponse);
+      when(
+        () =>
+            mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
+      ).thenAnswer((_) async => mockResponse);
 
       final result = await datasource.getRecords();
       expect(result.data.first.recordType, RecordType.income);
@@ -268,30 +269,27 @@ void main() {
         statusCode: 200,
       );
 
-      when(() => mockDio.get(
-            any(),
-            queryParameters: any(named: 'queryParameters'),
-          )).thenAnswer((_) async => mockResponse);
+      when(
+        () =>
+            mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
+      ).thenAnswer((_) async => mockResponse);
 
       final result = await datasource.getRecords();
       expect(result.data.first.recordType, RecordType.expense);
     });
 
     test('throws ServerException on DioException', () async {
-      when(() => mockDio.get(
-            any(),
-            queryParameters: any(named: 'queryParameters'),
-          )).thenThrow(
+      when(
+        () =>
+            mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
+      ).thenThrow(
         DioException(
           requestOptions: RequestOptions(path: '/records'),
           message: 'Network error',
         ),
       );
 
-      expect(
-        () => datasource.getRecords(),
-        throwsA(isA<ServerException>()),
-      );
+      expect(() => datasource.getRecords(), throwsA(isA<ServerException>()));
     });
 
     test('returns correct nextCursor and total from response', () async {
@@ -315,10 +313,10 @@ void main() {
         statusCode: 200,
       );
 
-      when(() => mockDio.get(
-            any(),
-            queryParameters: any(named: 'queryParameters'),
-          )).thenAnswer((_) async => mockResponse);
+      when(
+        () =>
+            mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
+      ).thenAnswer((_) async => mockResponse);
 
       final result = await datasource.getRecords();
       expect(result.nextCursor, 'cursor-123');

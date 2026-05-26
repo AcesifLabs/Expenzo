@@ -73,16 +73,29 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
     try {
       final firebaseToken = await firebaseUser.getIdToken(true);
       final apiClient = di.getIt<ApiClient>();
-      final response = await apiClient.dio.post(ApiConstants.login, data: {'firebaseToken': firebaseToken});
+      final response = await apiClient.dio.post(
+        ApiConstants.login,
+        data: {'firebaseToken': firebaseToken},
+      );
       await TokenStorage.saveToken(response.data['accessToken']);
       debugPrint('AuthRemoteDatasource: Backend JWT obtained');
     } catch (e) {
       // Firebase Admin not configured? Try dev token fallback
-      debugPrint('AuthRemoteDatasource: Backend JWT with Firebase failed, trying dev token: $e');
+      debugPrint(
+        'AuthRemoteDatasource: Backend JWT with Firebase failed, trying dev token: $e',
+      );
       try {
-        final payload = {'uid': firebaseUser.uid, 'email': firebaseUser.email, 'name': firebaseUser.displayName};
-        final devToken = 'dev-' + base64Encode(const Utf8Encoder().convert(jsonEncode(payload)));
-        final response = await di.getIt<ApiClient>().dio.post(ApiConstants.login, data: {'firebaseToken': devToken});
+        final payload = {
+          'uid': firebaseUser.uid,
+          'email': firebaseUser.email,
+          'name': firebaseUser.displayName,
+        };
+        final devToken =
+            'dev-${base64Encode(const Utf8Encoder().convert(jsonEncode(payload)))}';
+        final response = await di.getIt<ApiClient>().dio.post(
+          ApiConstants.login,
+          data: {'firebaseToken': devToken},
+        );
         await TokenStorage.saveToken(response.data['accessToken']);
         debugPrint('AuthRemoteDatasource: Dev JWT obtained');
       } catch (e2) {
@@ -149,14 +162,16 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
   Future<void> _syncUserToLocalDb(fb.User firebaseUser) async {
     try {
       final now = DateTime.now().toUtc();
-      await userDao.upsertUser(UsersCompanion.insert(
-        uid: firebaseUser.uid,
-        email: firebaseUser.email ?? '',
-        displayName: Value(firebaseUser.displayName),
-        photoUrl: Value(firebaseUser.photoURL),
-        createdAt: now,
-        lastLoginAt: now,
-      ));
+      await userDao.upsertUser(
+        UsersCompanion.insert(
+          uid: firebaseUser.uid,
+          email: firebaseUser.email ?? '',
+          displayName: Value(firebaseUser.displayName),
+          photoUrl: Value(firebaseUser.photoURL),
+          createdAt: now,
+          lastLoginAt: now,
+        ),
+      );
     } catch (e) {
       debugPrint('AuthRemoteDatasource: Failed to sync user to local DB: $e');
       // Non-fatal: user is already authenticated at Firebase level

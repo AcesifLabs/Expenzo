@@ -89,8 +89,8 @@ class CategoryListPage extends StatelessWidget {
             onPressed: () {
               Navigator.pop(dialogContext);
               context.read<CategoryBloc>().add(
-                    DeleteCategoryEvent(category.id!),
-                  );
+                DeleteCategoryEvent(category.id!),
+              );
             },
             style: TextButton.styleFrom(foregroundColor: AppColors.error),
             child: const Text('Delete'),

@@ -37,5 +37,7 @@ app.*.symbols
 app.*.map.json
 /coverage/
 **/.env**
+!packages/mobile/.env.dev
+!packages/mobile/.env.prod
 **/build/**
 **/task**

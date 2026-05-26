@@ -1,6 +1,7 @@
 import 'dart:async';
 
 class SyncTriggered {}
+
 class SyncEventBus {
   static final SyncEventBus _instance = SyncEventBus._internal();
   factory SyncEventBus() => _instance;
