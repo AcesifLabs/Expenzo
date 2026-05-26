@@ -85,43 +85,8 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
                   );
                 },
               ),
-              ListTile(
-                leading: const Icon(Icons.delete),
-                title: const Text('Delete'),
-                onTap: () {
-                  Navigator.pop(bottomSheetContext);
-                  _confirmDelete(context, msg);
-                },
-              ),
             ],
           ),
-        );
-      },
-    );
-  }
-
-  void _confirmDelete(BuildContext context, dynamic msg) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text('Delete Message'),
-          content: const Text(
-            'Are you sure you want to delete this message from the template?',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(dialogContext);
-                // TODO: Implement delete logic
-              },
-              child: const Text('Delete'),
-            ),
-          ],
         );
       },
     );
