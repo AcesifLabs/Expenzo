@@ -2,16 +2,15 @@ name: Deploy Android
 
 on:
   push:
-    branches: [mobile-staging]
-    paths:
-      - 'packages/mobile/**'
-      - '.github/workflows/deploy-android.yml'
+    tags:
+      - 'mobile-v*'
   workflow_dispatch:
 
 jobs:
   deploy:
     name: Build & Deploy to Play Store
     runs-on: ubuntu-latest
+    environment: mobile-internal
 
     defaults:
       run:
@@ -20,6 +19,33 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Parse release tag
+        id: version
+        run: |
+          set -euo pipefail
+
+          TAG="${GITHUB_REF_NAME}"
+          if [[ ! "$TAG" =~ ^mobile-v([0-9]+\.[0-9]+\.[0-9]+)\+([0-9]+)$ ]]; then
+            echo "Invalid tag: $TAG"
+            echo "Expected format: mobile-v1.2.3+45"
+            exit 1
+          fi
+
+          echo "build_name=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+          echo "build_number=${BASH_REMATCH[2]}" >> "$GITHUB_OUTPUT"
+
+      - name: Verify tag commit is on main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          TAG_COMMIT="$(git rev-parse "${GITHUB_REF}^{commit}")"
+          if ! git merge-base --is-ancestor "$TAG_COMMIT" origin/main; then
+            echo "Tag commit $TAG_COMMIT is not reachable from origin/main"
+            exit 1
+          fi
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -38,6 +64,15 @@ jobs:
       - name: Install Flutter dependencies
         run: flutter pub get
 
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Analyze code
+        run: flutter analyze --no-fatal-infos
+
+      - name: Run tests
+        run: flutter test
+
       - name: Decode .env.prod
         run: echo "${{ secrets.ENV_PROD }}" | base64 --decode > .env.prod
 
@@ -48,7 +83,16 @@ jobs:
         working-directory: packages/mobile/android
         run: bundle exec fastlane beta
         env:
+          BUILD_NAME: ${{ steps.version.outputs.build_name }}
+          BUILD_NUMBER: ${{ steps.version.outputs.build_number }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
           PLAY_STORE_JSON_KEY: ${{ secrets.PLAY_STORE_JSON_KEY }}
+
+      - name: Upload release AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: expenzo-android-${{ github.ref_name }}
+          path: packages/mobile/build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
