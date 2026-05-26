@@ -63,12 +63,7 @@ class _IsolatePayload {
 
 /// Helper (top-level, accessible from isolate)
 void _isolateLog(String message) {
-  try {
-    log(message, name: 'ParsingIsolate');
-  } catch (_) {
-    // ignore: avoid_print
-    print(message);
-  }
+  log(message, name: 'ParsingIsolate');
 }
 
 /// Top-level function executed in the background isolate.

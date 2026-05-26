@@ -51,7 +51,7 @@ void main() async {
   // Async error catch
   PlatformDispatcher.instance.onError = (error, stack) {
     if (kDebugMode) {
-      print('Async Error: $error');
+      debugPrint('Async Error: $error');
     }
     return true;
   };

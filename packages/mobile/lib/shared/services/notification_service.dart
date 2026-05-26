@@ -61,7 +61,7 @@ class NotificationService {
 
     _isInitialized = true;
     if (kDebugMode) {
-      print('NotificationService initialized');
+      debugPrint('NotificationService initialized');
     }
   }
 
@@ -73,13 +73,15 @@ class NotificationService {
         final deepLink = data['deepLink'] as String?;
         if (deepLink != null) {
           if (kDebugMode) {
-            print('Notification tapped with deep link: $deepLink');
+            debugPrint('Notification tapped with deep link: $deepLink');
+            debugPrint(
+              'Notification deep link received but navigation is not wired here: $deepLink',
+            );
           }
-          // TODO: Navigate to deep link
         }
       } catch (e) {
         if (kDebugMode) {
-          print('Failed to parse notification payload: $e');
+          debugPrint('Failed to parse notification payload: $e');
         }
       }
     }
