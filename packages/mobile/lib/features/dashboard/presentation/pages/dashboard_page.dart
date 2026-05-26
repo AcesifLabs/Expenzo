@@ -78,23 +78,35 @@ class DashboardPage extends StatelessWidget {
                     children: [
                       CircleAvatar(
                         radius: 20,
-                        backgroundColor: Theme.of(context).colorScheme.primary.withAlpha(30),
-                        backgroundImage: photoUrl != null ? NetworkImage(photoUrl) : null,
+                        backgroundColor: Theme.of(
+                          context,
+                        ).colorScheme.primary.withAlpha(30),
+                        backgroundImage: photoUrl != null
+                            ? NetworkImage(photoUrl)
+                            : null,
                         child: photoUrl == null
                             ? (authState is Authenticated
-                                ? Text(
-                                    name.isNotEmpty ? name[0].toUpperCase() : '?',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: Theme.of(context).colorScheme.primary,
-                                    ),
-                                  )
-                                : Icon(
-                                    PhosphorIcons.user(PhosphorIconsStyle.regular),
-                                    color: Theme.of(context).colorScheme.primary,
-                                    size: 20,
-                                  ))
+                                  ? Text(
+                                      name.isNotEmpty
+                                          ? name[0].toUpperCase()
+                                          : '?',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.primary,
+                                      ),
+                                    )
+                                  : Icon(
+                                      PhosphorIcons.user(
+                                        PhosphorIconsStyle.regular,
+                                      ),
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
+                                      size: 20,
+                                    ))
                             : null,
                       ),
                       if (authState is AuthLoading)
@@ -531,7 +543,9 @@ class DashboardPage extends StatelessWidget {
               ? PhosphorIcons.moon(PhosphorIconsStyle.fill)
               : PhosphorIcons.sun(PhosphorIconsStyle.fill),
           text: isDark ? 'Dark Mode' : 'Light Mode',
-          trailing: isDark ? PhosphorIcons.check(PhosphorIconsStyle.bold) : null,
+          trailing: isDark
+              ? PhosphorIcons.check(PhosphorIconsStyle.bold)
+              : null,
         ),
       ),
       PopupMenuItem(
@@ -603,11 +617,7 @@ class _MenuRow extends StatelessWidget {
   final String text;
   final IconData? trailing;
 
-  const _MenuRow({
-    required this.icon,
-    required this.text,
-    this.trailing,
-  });
+  const _MenuRow({required this.icon, required this.text, this.trailing});
 
   @override
   Widget build(BuildContext context) {
@@ -615,9 +625,7 @@ class _MenuRow extends StatelessWidget {
       children: [
         Icon(icon, size: 20),
         const SizedBox(width: 12),
-        Expanded(
-          child: Text(text, style: const TextStyle(fontSize: 14)),
-        ),
+        Expanded(child: Text(text, style: const TextStyle(fontSize: 14))),
         if (trailing != null) Icon(trailing, size: 18),
       ],
     );
@@ -634,9 +642,7 @@ class FeedbackPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppScaffold(
       title: 'Feedback',
-      child: const Center(
-        child: Text('Coming soon'),
-      ),
+      child: const Center(child: Text('Coming soon')),
     );
   }
 }
@@ -672,10 +678,7 @@ class _BalanceRow extends StatelessWidget {
           children: [
             Text(
               label,
-              style: TextStyle(
-                fontSize: 12,
-                color: onSurface.withAlpha(140),
-              ),
+              style: TextStyle(fontSize: 12, color: onSurface.withAlpha(140)),
             ),
             Text(
               currencyFmt.format(amount),
@@ -779,9 +782,7 @@ class _RecentTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final isExpense = record.recordType == RecordType.expense;
-    final amtColor = isExpense
-        ? colors.error
-        : colors.secondary;
+    final amtColor = isExpense ? colors.error : colors.secondary;
     final dateStr = DateFormat('MMM dd').format(record.date);
 
     return Padding(

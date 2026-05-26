@@ -9,10 +9,7 @@ void main() {
 
   const channel = MethodChannel('flutter.baseflow.com/permissions/methods');
 
-  void mockPermissionChannel({
-    int checkStatus = 0,
-    int requestStatus = 1,
-  }) {
+  void mockPermissionChannel({int checkStatus = 0, int requestStatus = 1}) {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async {
           if (call.method == 'checkPermissionStatus') {
@@ -44,10 +41,7 @@ void main() {
     final bloc = SmsPermissionBloc();
     final expectation = expectLater(
       bloc.stream,
-      emitsInOrder([
-        const SmsPermissionLoading(),
-        const SmsPermissionDenied(),
-      ]),
+      emitsInOrder([const SmsPermissionLoading(), const SmsPermissionDenied()]),
     );
 
     bloc.add(const CheckSmsPermission());
@@ -59,10 +53,7 @@ void main() {
     final bloc = SmsPermissionBloc();
     final expectation = expectLater(
       bloc.stream,
-      emitsInOrder([
-        const SmsPermissionLoading(),
-        const SmsPermissionDenied(),
-      ]),
+      emitsInOrder([const SmsPermissionLoading(), const SmsPermissionDenied()]),
     );
 
     bloc.add(const RequestSmsPermission());
@@ -70,31 +61,31 @@ void main() {
     await bloc.close();
   });
 
-  test('check permission emits permanently denied when blocked forever', () async {
-    mockPermissionChannel(checkStatus: 4);
-    final bloc = SmsPermissionBloc();
-    final expectation = expectLater(
-      bloc.stream,
-      emitsInOrder([
-        const SmsPermissionLoading(),
-        const SmsPermissionPermanentlyDenied(),
-      ]),
-    );
+  test(
+    'check permission emits permanently denied when blocked forever',
+    () async {
+      mockPermissionChannel(checkStatus: 4);
+      final bloc = SmsPermissionBloc();
+      final expectation = expectLater(
+        bloc.stream,
+        emitsInOrder([
+          const SmsPermissionLoading(),
+          const SmsPermissionPermanentlyDenied(),
+        ]),
+      );
 
-    bloc.add(const CheckSmsPermission());
-    await expectation;
-    await bloc.close();
-  });
+      bloc.add(const CheckSmsPermission());
+      await expectation;
+      await bloc.close();
+    },
+  );
 
   test('request permission emits denied when request is rejected', () async {
     mockPermissionChannel(requestStatus: 0);
     final bloc = SmsPermissionBloc();
     final expectation = expectLater(
       bloc.stream,
-      emitsInOrder([
-        const SmsPermissionLoading(),
-        const SmsPermissionDenied(),
-      ]),
+      emitsInOrder([const SmsPermissionLoading(), const SmsPermissionDenied()]),
     );
 
     bloc.add(const RequestSmsPermission());

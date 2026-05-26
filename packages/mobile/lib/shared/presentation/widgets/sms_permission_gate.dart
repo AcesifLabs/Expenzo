@@ -113,7 +113,11 @@ class _SmsPermissionGateState extends State<SmsPermissionGate> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(PhosphorIcons.warningCircle(PhosphorIconsStyle.regular), size: 80, color: Colors.grey),
+            Icon(
+              PhosphorIcons.warningCircle(PhosphorIconsStyle.regular),
+              size: 80,
+              color: Colors.grey,
+            ),
             const SizedBox(height: 24),
             const Text(
               'SMS Access Required',

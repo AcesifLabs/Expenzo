@@ -40,10 +40,7 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                if (_syncing)
-                  _buildProgressView()
-                else
-                  _buildDecisionView(),
+                if (_syncing) _buildProgressView() else _buildDecisionView(),
               ],
             ),
           ),
@@ -59,22 +56,49 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
         const SizedBox(height: 32),
         const Icon(Icons.sync, size: 64, color: AppColors.primary),
         const SizedBox(height: 16),
-        Text('Sync Conflict', style: AppTypography.headlineLarge.copyWith(color: AppColors.primary)),
+        Text(
+          'Sync Conflict',
+          style: AppTypography.headlineLarge.copyWith(color: AppColors.primary),
+        ),
         const SizedBox(height: 8),
-        Text('You have data on this device and in the cloud.\nHow would you like to proceed?',
+        Text(
+          'You have data on this device and in the cloud.\nHow would you like to proceed?',
           textAlign: TextAlign.center,
-          style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondaryLight)),
+          style: AppTypography.bodyLarge.copyWith(
+            color: AppColors.textSecondaryLight,
+          ),
+        ),
         const SizedBox(height: 32),
-        _decisionButton('Merge My Data', 'Keep all data from both sources', AppColors.primary, () => _executeDecision(SyncMode.merge)),
+        _decisionButton(
+          'Merge My Data',
+          'Keep all data from both sources',
+          AppColors.primary,
+          () => _executeDecision(SyncMode.merge),
+        ),
         const SizedBox(height: 12),
-        _decisionButton('Replace with Cloud Data', 'Delete local data, use cloud version', colors.error, () => _showReplaceConfirm()),
+        _decisionButton(
+          'Replace with Cloud Data',
+          'Delete local data, use cloud version',
+          colors.error,
+          () => _showReplaceConfirm(),
+        ),
         const SizedBox(height: 12),
-        _decisionButton('Overwrite Cloud with Local', 'Replace cloud data with this device', Colors.orange, () => _executeDecision(SyncMode.localWins)),
+        _decisionButton(
+          'Overwrite Cloud with Local',
+          'Replace cloud data with this device',
+          Colors.orange,
+          () => _executeDecision(SyncMode.localWins),
+        ),
       ],
     );
   }
 
-  Widget _decisionButton(String title, String subtitle, Color color, VoidCallback onTap) {
+  Widget _decisionButton(
+    String title,
+    String subtitle,
+    Color color,
+    VoidCallback onTap,
+  ) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
@@ -83,15 +107,24 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
           backgroundColor: color.withAlpha(25),
           foregroundColor: color,
           padding: const EdgeInsets.all(16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: color.withAlpha(50))),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: color.withAlpha(50)),
+          ),
           elevation: 0,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
             const SizedBox(height: 4),
-            Text(subtitle, style: TextStyle(fontSize: 13, color: color.withAlpha(180))),
+            Text(
+              subtitle,
+              style: TextStyle(fontSize: 13, color: color.withAlpha(180)),
+            ),
           ],
         ),
       ),
@@ -114,10 +147,13 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
               child: Center(
                 child: Text(
                   '${(_progress * 100).toInt()}%',
-                  style: (theme.textTheme.headlineMedium ?? AppTypography.headlineLarge).copyWith(
-                    color: colors.primary,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style:
+                      (theme.textTheme.headlineMedium ??
+                              AppTypography.headlineLarge)
+                          .copyWith(
+                            color: colors.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
                 ),
               ),
             ),
@@ -126,7 +162,8 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
           Text(
             _status,
             textAlign: TextAlign.center,
-            style: (theme.textTheme.bodyLarge ?? AppTypography.bodyLarge).copyWith(color: colors.onSurfaceVariant),
+            style: (theme.textTheme.bodyLarge ?? AppTypography.bodyLarge)
+                .copyWith(color: colors.onSurfaceVariant),
           ),
         ],
       ),
@@ -139,22 +176,42 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
         title: const Text('Replace Local Data?'),
-        content: const Text('This will permanently delete all data on this device and replace it with your cloud data.'),
+        content: const Text(
+          'This will permanently delete all data on this device and replace it with your cloud data.',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          TextButton(onPressed: () { Navigator.pop(ctx); _executeDecision(SyncMode.cloudWins); }, child: const Text('Replace', style: TextStyle(color: Colors.red))),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _executeDecision(SyncMode.cloudWins);
+            },
+            child: const Text('Replace', style: TextStyle(color: Colors.red)),
+          ),
         ],
       ),
     );
   }
 
   Future<void> _executeDecision(SyncMode mode) async {
-    setState(() { _syncing = true; _progress = 0; _status = 'Preparing...'; });
+    setState(() {
+      _syncing = true;
+      _progress = 0;
+      _status = 'Preparing...';
+    });
 
     try {
       final engine = di.getIt<SyncEngine>();
       engine.onProgress = (p) {
-        if (mounted) setState(() { _progress = p; _status = 'Syncing...'; });
+        if (mounted) {
+          setState(() {
+            _progress = p;
+            _status = 'Syncing...';
+          });
+        }
       };
 
       if (mode == SyncMode.cloudWins) {
@@ -165,7 +222,10 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
       await engine.executeDecision(mode);
 
       if (mounted) {
-        setState(() { _progress = 1.0; _status = 'Complete!'; });
+        setState(() {
+          _progress = 1.0;
+          _status = 'Complete!';
+        });
         await Future.delayed(const Duration(seconds: 1));
         if (mounted) {
           context.read<AuthBloc>().add(const AuthCheckRequested());
@@ -173,7 +233,11 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() { _syncing = false; _status = 'Error: ${e.toString().substring(0, min(50, e.toString().length))}'; });
+        setState(() {
+          _syncing = false;
+          _status =
+              'Error: ${e.toString().substring(0, min(50, e.toString().length))}';
+        });
       }
     }
   }
@@ -189,11 +253,24 @@ class _PieChartPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 2 - 8;
 
-    final bgPaint = Paint()..color = primaryColor.withAlpha(30)..style = PaintingStyle.stroke..strokeWidth = 12;
+    final bgPaint = Paint()
+      ..color = primaryColor.withAlpha(30)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 12;
     canvas.drawCircle(center, radius, bgPaint);
 
-    final fgPaint = Paint()..color = primaryColor..style = PaintingStyle.stroke..strokeWidth = 12..strokeCap = StrokeCap.round;
-    canvas.drawArc(Rect.fromCircle(center: center, radius: radius), -pi / 2, 2 * pi * progress, false, fgPaint);
+    final fgPaint = Paint()
+      ..color = primaryColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 12
+      ..strokeCap = StrokeCap.round;
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      -pi / 2,
+      2 * pi * progress,
+      false,
+      fgPaint,
+    );
   }
 
   @override

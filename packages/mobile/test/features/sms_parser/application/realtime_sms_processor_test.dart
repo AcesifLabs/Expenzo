@@ -79,9 +79,7 @@ void main() {
 
   test('non-monitored sender ignored', () async {
     final contextLoaded = Completer<void>();
-    when(
-      () => evaluateRules.loadContext(),
-    ).thenAnswer((_) async {
+    when(() => evaluateRules.loadContext()).thenAnswer((_) async {
       if (!contextLoaded.isCompleted) {
         contextLoaded.complete();
       }
@@ -130,11 +128,8 @@ void main() {
     );
 
     when(() => evaluateRules.loadContext()).thenAnswer(
-      (_) async => ParsingContext(
-        rules: [],
-        templates: [],
-        sources: [monitoredSource],
-      ),
+      (_) async =>
+          ParsingContext(rules: [], templates: [], sources: [monitoredSource]),
     );
     when(
       () => parsingIsolateService.parseMessages(
@@ -146,11 +141,15 @@ void main() {
     when(
       () => recordRepository.getExistingSourceIds(any()),
     ).thenAnswer((_) async => const Right(<String>{}));
-    when(
-      () => createRecordsFromParsedList(any()),
-    ).thenAnswer((_) async => const Right(CreateRecordsResult(createdCount: 1, skippedDuplicates: 0, errors: [])));
+    when(() => createRecordsFromParsedList(any())).thenAnswer(
+      (_) async => const Right(
+        CreateRecordsResult(createdCount: 1, skippedDuplicates: 0, errors: []),
+      ),
+    );
 
-    when(() => listener.drainPendingMessages()).thenAnswer((_) async => [event]);
+    when(
+      () => listener.drainPendingMessages(),
+    ).thenAnswer((_) async => [event]);
 
     await processor.start();
 
@@ -161,7 +160,9 @@ void main() {
         sourceType: 'sms',
       ),
     ).called(1);
-    verify(() => createRecordsFromParsedList(any(that: hasLength(1)))).called(1);
+    verify(
+      () => createRecordsFromParsedList(any(that: hasLength(1))),
+    ).called(1);
   });
 
   test('duplicate sourceId ignored', () async {
@@ -184,11 +185,8 @@ void main() {
     );
 
     when(() => evaluateRules.loadContext()).thenAnswer(
-      (_) async => ParsingContext(
-        rules: [],
-        templates: [],
-        sources: [monitoredSource],
-      ),
+      (_) async =>
+          ParsingContext(rules: [], templates: [], sources: [monitoredSource]),
     );
     when(
       () => parsingIsolateService.parseMessages(
@@ -201,7 +199,9 @@ void main() {
       () => recordRepository.getExistingSourceIds(any()),
     ).thenAnswer((_) async => Right(<String>{event.sourceId}));
 
-    when(() => listener.drainPendingMessages()).thenAnswer((_) async => [event]);
+    when(
+      () => listener.drainPendingMessages(),
+    ).thenAnswer((_) async => [event]);
 
     await processor.start();
 
@@ -221,11 +221,8 @@ void main() {
     );
 
     when(() => evaluateRules.loadContext()).thenAnswer(
-      (_) async => ParsingContext(
-        rules: [],
-        templates: [],
-        sources: [monitoredSource],
-      ),
+      (_) async =>
+          ParsingContext(rules: [], templates: [], sources: [monitoredSource]),
     );
     ParseMessageInput? capturedInput;
     when(
@@ -235,7 +232,8 @@ void main() {
         sourceType: any(named: 'sourceType'),
       ),
     ).thenAnswer((invocation) async {
-      final messages = invocation.namedArguments[#messages] as List<ParseMessageInput>;
+      final messages =
+          invocation.namedArguments[#messages] as List<ParseMessageInput>;
       capturedInput = messages.first;
       return [];
     });
@@ -288,11 +286,8 @@ void main() {
     );
 
     when(() => evaluateRules.loadContext()).thenAnswer(
-      (_) async => ParsingContext(
-        rules: [],
-        templates: [],
-        sources: [monitoredSource],
-      ),
+      (_) async =>
+          ParsingContext(rules: [], templates: [], sources: [monitoredSource]),
     );
     when(
       () => parsingIsolateService.parseMessages(
@@ -304,10 +299,14 @@ void main() {
     when(
       () => recordRepository.getExistingSourceIds(any()),
     ).thenAnswer((_) async => Right(<String>{duplicate.sourceId}));
+    when(() => createRecordsFromParsedList(any())).thenAnswer(
+      (_) async => const Right(
+        CreateRecordsResult(createdCount: 1, skippedDuplicates: 1, errors: []),
+      ),
+    );
     when(
-      () => createRecordsFromParsedList(any()),
-    ).thenAnswer((_) async => const Right(CreateRecordsResult(createdCount: 1, skippedDuplicates: 1, errors: [])));
-    when(() => listener.drainPendingMessages()).thenAnswer((_) async => [event]);
+      () => listener.drainPendingMessages(),
+    ).thenAnswer((_) async => [event]);
 
     await processor.start();
 
@@ -348,11 +347,8 @@ void main() {
     );
 
     when(() => evaluateRules.loadContext()).thenAnswer(
-      (_) async => ParsingContext(
-        rules: [],
-        templates: [],
-        sources: [monitoredSource],
-      ),
+      (_) async =>
+          ParsingContext(rules: [], templates: [], sources: [monitoredSource]),
     );
 
     var callCount = 0;
@@ -373,18 +369,18 @@ void main() {
     when(
       () => recordRepository.getExistingSourceIds(any()),
     ).thenAnswer((_) async => const Right(<String>{}));
-    when(
-      () => createRecordsFromParsedList(any()),
-    ).thenAnswer((_) async => const Right(CreateRecordsResult(createdCount: 1, skippedDuplicates: 0, errors: [])));
+    when(() => createRecordsFromParsedList(any())).thenAnswer(
+      (_) async => const Right(
+        CreateRecordsResult(createdCount: 1, skippedDuplicates: 0, errors: []),
+      ),
+    );
 
     when(
       () => listener.drainPendingMessages(),
     ).thenAnswer((_) async => [monitoredEvent]);
 
     final createCalled = Completer<void>();
-    when(
-      () => createRecordsFromParsedList(any()),
-    ).thenAnswer((_) async {
+    when(() => createRecordsFromParsedList(any())).thenAnswer((_) async {
       if (!createCalled.isCompleted) {
         createCalled.complete();
       }
@@ -399,7 +395,9 @@ void main() {
     await createCalled.future;
 
     expect(callCount, 2);
-    verify(() => createRecordsFromParsedList(any(that: hasLength(1)))).called(1);
+    verify(
+      () => createRecordsFromParsedList(any(that: hasLength(1))),
+    ).called(1);
   });
 
   test('start twice does not double-subscribe or drain', () async {
@@ -423,11 +421,8 @@ void main() {
     final createCalled = Completer<void>();
 
     when(() => evaluateRules.loadContext()).thenAnswer(
-      (_) async => ParsingContext(
-        rules: [],
-        templates: [],
-        sources: [monitoredSource],
-      ),
+      (_) async =>
+          ParsingContext(rules: [], templates: [], sources: [monitoredSource]),
     );
     when(
       () => parsingIsolateService.parseMessages(
@@ -439,9 +434,7 @@ void main() {
     when(
       () => recordRepository.getExistingSourceIds(any()),
     ).thenAnswer((_) async => const Right(<String>{}));
-    when(
-      () => createRecordsFromParsedList(any()),
-    ).thenAnswer((_) async {
+    when(() => createRecordsFromParsedList(any())).thenAnswer((_) async {
       if (!createCalled.isCompleted) {
         createCalled.complete();
       }
@@ -458,7 +451,9 @@ void main() {
 
     verify(() => listener.start()).called(1);
     verify(() => listener.drainPendingMessages()).called(1);
-    verify(() => createRecordsFromParsedList(any(that: hasLength(1)))).called(1);
+    verify(
+      () => createRecordsFromParsedList(any(that: hasLength(1))),
+    ).called(1);
   });
 
   test('stop stops further processing', () async {
@@ -469,11 +464,8 @@ void main() {
     );
 
     when(() => evaluateRules.loadContext()).thenAnswer(
-      (_) async => ParsingContext(
-        rules: [],
-        templates: [],
-        sources: [monitoredSource],
-      ),
+      (_) async =>
+          ParsingContext(rules: [], templates: [], sources: [monitoredSource]),
     );
     when(
       () => parsingIsolateService.parseMessages(
@@ -517,11 +509,8 @@ void main() {
     );
 
     when(() => evaluateRules.loadContext()).thenAnswer(
-      (_) async => ParsingContext(
-        rules: [],
-        templates: [],
-        sources: [monitoredSource],
-      ),
+      (_) async =>
+          ParsingContext(rules: [], templates: [], sources: [monitoredSource]),
     );
     when(
       () => parsingIsolateService.parseMessages(
@@ -533,37 +522,45 @@ void main() {
     when(
       () => recordRepository.getExistingSourceIds(any()),
     ).thenAnswer((_) async => const Left(CacheFailure(message: 'db failed')));
-    when(() => listener.drainPendingMessages()).thenAnswer((_) async => [event]);
+    when(
+      () => listener.drainPendingMessages(),
+    ).thenAnswer((_) async => [event]);
 
     await processor.start();
 
     verifyNever(() => createRecordsFromParsedList(any()));
   });
 
-  test('start failure in listener.start resets state and allows retry', () async {
-    when(() => listener.start()).thenThrow(Exception('listener failed'));
+  test(
+    'start failure in listener.start resets state and allows retry',
+    () async {
+      when(() => listener.start()).thenThrow(Exception('listener failed'));
 
-    await expectLater(processor.start(), throwsException);
+      await expectLater(processor.start(), throwsException);
 
-    when(() => listener.start()).thenAnswer((_) async {});
-    await processor.start();
+      when(() => listener.start()).thenAnswer((_) async {});
+      await processor.start();
 
-    verify(() => listener.start()).called(2);
-  });
+      verify(() => listener.start()).called(2);
+    },
+  );
 
-  test('start failure in drainPendingMessages resets state and allows retry', () async {
-    when(() => listener.start()).thenAnswer((_) async {});
-    when(() => listener.stop()).thenAnswer((_) async {});
-    when(
-      () => listener.drainPendingMessages(),
-    ).thenThrow(Exception('drain failed'));
+  test(
+    'start failure in drainPendingMessages resets state and allows retry',
+    () async {
+      when(() => listener.start()).thenAnswer((_) async {});
+      when(() => listener.stop()).thenAnswer((_) async {});
+      when(
+        () => listener.drainPendingMessages(),
+      ).thenThrow(Exception('drain failed'));
 
-    await expectLater(processor.start(), throwsException);
-    verify(() => listener.stop()).called(1);
+      await expectLater(processor.start(), throwsException);
+      verify(() => listener.stop()).called(1);
 
-    when(() => listener.drainPendingMessages()).thenAnswer((_) async => []);
-    await processor.start();
+      when(() => listener.drainPendingMessages()).thenAnswer((_) async => []);
+      await processor.start();
 
-    verify(() => listener.start()).called(2);
-  });
+      verify(() => listener.start()).called(2);
+    },
+  );
 }

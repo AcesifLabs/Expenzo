@@ -73,11 +73,13 @@ class _CategoryPieChartState extends State<CategoryPieChart> {
           fontWeight: FontWeight.bold,
           color: AppColors.backgroundDark,
         ),
-        badgeWidget: !isTouched ? _Badge(
-          AppIcons.getCategoryIcon(item.emoji),
-          size: 32,
-          borderColor: colors[index % colors.length],
-        ) : null,
+        badgeWidget: !isTouched
+            ? _Badge(
+                AppIcons.getCategoryIcon(item.emoji),
+                size: 32,
+                borderColor: colors[index % colors.length],
+              )
+            : null,
         badgePositionPercentageOffset: 0.98,
       );
     }).toList();

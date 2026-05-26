@@ -35,13 +35,18 @@ final getIt = GetIt.instance;
 bool _featureDependenciesRegistered = false;
 final _featureDependenciesCompleter = Completer<void>();
 
-Future<void> get featureDependenciesReady => _featureDependenciesCompleter.future;
+Future<void> get featureDependenciesReady =>
+    _featureDependenciesCompleter.future;
 
 void _registerDaoFactories() {
   getIt.registerFactory<RecordDao>(() => RecordDao(getIt<AppDatabase>()));
   getIt.registerFactory<CategoryDao>(() => CategoryDao(getIt<AppDatabase>()));
-  getIt.registerFactory<PendingRecurringDao>(() => PendingRecurringDao(getIt<AppDatabase>()));
-  getIt.registerFactory<MessageTemplateDao>(() => MessageTemplateDao(getIt<AppDatabase>()));
+  getIt.registerFactory<PendingRecurringDao>(
+    () => PendingRecurringDao(getIt<AppDatabase>()),
+  );
+  getIt.registerFactory<MessageTemplateDao>(
+    () => MessageTemplateDao(getIt<AppDatabase>()),
+  );
   getIt.registerFactory<UserDao>(() => UserDao(getIt<AppDatabase>()));
   getIt.registerFactory<BudgetDao>(() => BudgetDao(getIt<AppDatabase>()));
   getIt.registerFactory<SyncQueueDao>(() => SyncQueueDao(getIt<AppDatabase>()));
@@ -71,7 +76,9 @@ Future<void> initCriticalDependencies() async {
   // API & Sync
   getIt.registerLazySingleton<ApiClient>(() => ApiClient());
   getIt.registerLazySingleton<ConnectivityService>(() => ConnectivityService());
-  getIt.registerLazySingleton<SyncTableRegistry>(() => createDefaultSyncRegistry());
+  getIt.registerLazySingleton<SyncTableRegistry>(
+    () => createDefaultSyncRegistry(),
+  );
   getIt.registerLazySingleton<SyncEngine>(
     () => SyncEngine(
       syncQueueDao: getIt<SyncQueueDao>(),

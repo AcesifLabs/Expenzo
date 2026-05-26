@@ -38,9 +38,7 @@ void main() {
         });
 
     await tester.pumpWidget(
-      const MaterialApp(
-        home: SmsPermissionGate(child: Text('SMS-CHILD')),
-      ),
+      const MaterialApp(home: SmsPermissionGate(child: Text('SMS-CHILD'))),
     );
     await tester.pumpAndSettle();
 
@@ -60,9 +58,7 @@ void main() {
         });
 
     await tester.pumpWidget(
-      const MaterialApp(
-        home: SmsPermissionGate(child: Text('SMS-CHILD')),
-      ),
+      const MaterialApp(home: SmsPermissionGate(child: Text('SMS-CHILD'))),
     );
     await tester.pumpAndSettle();
 

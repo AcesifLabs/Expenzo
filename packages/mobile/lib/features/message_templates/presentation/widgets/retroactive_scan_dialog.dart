@@ -73,7 +73,11 @@ class _RetroactiveScanDialogState extends State<RetroactiveScanDialog> {
           : Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(PhosphorIcons.checkCircle(PhosphorIconsStyle.fill), color: Colors.green, size: 48),
+                Icon(
+                  PhosphorIcons.checkCircle(PhosphorIconsStyle.fill),
+                  color: Colors.green,
+                  size: 48,
+                ),
                 SizedBox(height: 16),
                 Text(
                   'Template active! Future messages will be parsed automatically.',

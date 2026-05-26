@@ -12,6 +12,7 @@ import 'package:expense_tracker/features/records/domain/usecases/delete_record.d
 import 'package:expense_tracker/features/records/domain/usecases/get_records.dart';
 
 class MockRecordRepository extends Mock implements RecordRepository {}
+
 class MockCategoryRepository extends Mock implements CategoryRepository {}
 
 void main() {
@@ -98,7 +99,10 @@ void main() {
 
       expect(result.isRight(), true);
       verify(() => mockRepository.addRecord(testRecord)).called(1);
-      verify(() => mockCategoryRepository.incrementUsageCount(testRecord.categoryId!)).called(1);
+      verify(
+        () =>
+            mockCategoryRepository.incrementUsageCount(testRecord.categoryId!),
+      ).called(1);
     });
 
     test('updateRecord updates and returns record', () async {

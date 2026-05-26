@@ -13,7 +13,10 @@ abstract class SyncTableHandler<TTable extends Table, TRow extends DataClass> {
 
 class SyncTableRegistry {
   final Map<String, SyncTableHandler> _handlers = {};
-  void register(SyncTableHandler handler) { _handlers[handler.tableName] = handler; }
+  void register(SyncTableHandler handler) {
+    _handlers[handler.tableName] = handler;
+  }
+
   SyncTableHandler? operator [](String tableName) => _handlers[tableName];
   Iterable<SyncTableHandler> get all => _handlers.values;
   Iterable<String> get tableNames => _handlers.keys;

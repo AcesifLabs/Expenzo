@@ -10,7 +10,9 @@ import 'package:mocktail/mocktail.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MockRecordBloc extends Mock implements RecordBloc {}
+
 class MockCategoryBloc extends Mock implements CategoryBloc {}
+
 class FakeCategoryEvent extends Fake implements CategoryEvent {}
 
 void main() {
@@ -25,13 +27,15 @@ void main() {
     mockRecordBloc = MockRecordBloc();
     mockCategoryBloc = MockCategoryBloc();
 
-    when(() => mockCategoryBloc.state).thenReturn(const CategoryLoaded([], type: null));
+    when(
+      () => mockCategoryBloc.state,
+    ).thenReturn(const CategoryLoaded([], type: null));
     when(() => mockRecordBloc.state).thenReturn(const RecordInitial());
     when(() => mockCategoryBloc.add(any())).thenReturn(null);
     when(() => mockCategoryBloc.stream).thenAnswer((_) => const Stream.empty());
     when(() => mockRecordBloc.stream).thenAnswer((_) => const Stream.empty());
-    when(() => mockCategoryBloc.close()).thenAnswer((_) async => null);
-    when(() => mockRecordBloc.close()).thenAnswer((_) async => null);
+    when(() => mockCategoryBloc.close()).thenAnswer((_) async {});
+    when(() => mockRecordBloc.close()).thenAnswer((_) async {});
   });
 
   Widget createWidgetUnderTest() {
@@ -63,7 +67,9 @@ void main() {
     expect(find.text('Clear Filter'), findsOneWidget);
   });
 
-  testWidgets('should show date range picker when date section tapped', (tester) async {
+  testWidgets('should show date range picker when date section tapped', (
+    tester,
+  ) async {
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pump();
 

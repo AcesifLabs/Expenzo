@@ -4,10 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('SmsSenderNormalizer', () {
     test('normalize trims, collapses whitespace, and lowercases', () {
-      expect(
-        SmsSenderNormalizer.normalize('  VK   BANK  '),
-        equals('vk bank'),
-      );
+      expect(SmsSenderNormalizer.normalize('  VK   BANK  '), equals('vk bank'));
     });
 
     test('matches ignores whitespace and case', () {

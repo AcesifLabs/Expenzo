@@ -7,18 +7,19 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('Startup resilience scenarios', () {
-    testWidgets('App starts and shows dashboard without initialization errors', (
-      tester,
-    ) async {
-      app.main();
-      await tester.pumpAndSettle(const Duration(seconds: 20));
+    testWidgets(
+      'App starts and shows dashboard without initialization errors',
+      (tester) async {
+        app.main();
+        await tester.pumpAndSettle(const Duration(seconds: 20));
 
-      // Should NOT show "Initialization Failed"
-      expect(find.text('Initialization Failed'), findsNothing);
+        // Should NOT show "Initialization Failed"
+        expect(find.text('Initialization Failed'), findsNothing);
 
-      // Should show AppShell content (bottom nav exists)
-      expect(find.byType(MaterialApp), findsOneWidget);
-    });
+        // Should show AppShell content (bottom nav exists)
+        expect(find.byType(MaterialApp), findsOneWidget);
+      },
+    );
 
     testWidgets('Dashboard renders with seeded categories after startup', (
       tester,

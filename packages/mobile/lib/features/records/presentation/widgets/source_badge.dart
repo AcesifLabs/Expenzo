@@ -40,11 +40,7 @@ class SourceBadge extends StatelessWidget {
             size: 12,
             color: contentColor,
           )
-        : Icon(
-            AppIcons.getSourceIcon(source),
-            size: 12,
-            color: contentColor,
-          );
+        : Icon(AppIcons.getSourceIcon(source), size: 12, color: contentColor);
 
     final Color baseColor;
     if (isManualOverride && categoryColor != null) {

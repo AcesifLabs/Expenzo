@@ -34,8 +34,9 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
     final catId = widget.progress.categoryId;
     if (catId == null) return;
     try {
-      final result =
-          await di.getIt<CategoryRepository>().getCategoryById(catId);
+      final result = await di.getIt<CategoryRepository>().getCategoryById(
+        catId,
+      );
       if (mounted) {
         final name = result.fold((_) => '', (cat) => cat.name);
         setState(() => _categoryName = name);
@@ -79,7 +80,9 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  BudgetProgressIndicator(percentage: widget.progress.percentage),
+                  BudgetProgressIndicator(
+                    percentage: widget.progress.percentage,
+                  ),
                   const SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -131,15 +134,14 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
           // Transaction list
           Expanded(
             child: FutureBuilder<List<Record>>(
-              future: di.getIt<GetBudgetTransactions>()(widget.progress.budgetId)
+              future: di
+                  .getIt<GetBudgetTransactions>()(widget.progress.budgetId)
                   .then((r) => r.getOrElse(() => [])),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                return BudgetTransactionList(
-                  records: snapshot.data ?? [],
-                );
+                return BudgetTransactionList(records: snapshot.data ?? []);
               },
             ),
           ),

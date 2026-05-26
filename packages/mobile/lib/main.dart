@@ -81,11 +81,9 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
       final bloc = di.getIt<SettingsBloc>()..add(const LoadSettings());
       _settingsSubscription = bloc.stream.listen((state) {
         if (state is SettingsLoaded) {
-          _themeModeNotifier.value =
-              _themeModeFromString(state.settings.theme);
+          _themeModeNotifier.value = _themeModeFromString(state.settings.theme);
         } else if (state is SettingsUpdateSuccess) {
-          _themeModeNotifier.value =
-              _themeModeFromString(state.settings.theme);
+          _themeModeNotifier.value = _themeModeFromString(state.settings.theme);
         }
       });
     } catch (_) {
@@ -370,7 +368,9 @@ class _InitialDataLoaderState extends State<_InitialDataLoader> {
         if (state is Authenticated) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Signed in as ${state.user.email ?? state.user.displayName ?? 'User'}'),
+              content: Text(
+                'Signed in as ${state.user.email ?? state.user.displayName ?? 'User'}',
+              ),
               backgroundColor: Colors.green,
               duration: const Duration(seconds: 3),
             ),

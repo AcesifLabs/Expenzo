@@ -17,9 +17,19 @@ class BudgetRepositoryImpl implements BudgetRepository {
     SyncQueueDao? syncQueueDao,
   }) : _syncQueueDao = syncQueueDao;
 
-  void _enqueueSync(String action, String recordId, [Map<String, dynamic>? data]) {
-    if (_syncQueueDao == null) return;
-    _syncQueueDao!.enqueue(tableName: 'budgets', recordId: recordId, action: action, payload: data != null ? jsonEncode(data) : '');
+  void _enqueueSync(
+    String action,
+    String recordId, [
+    Map<String, dynamic>? data,
+  ]) {
+    final syncQueueDao = _syncQueueDao;
+    if (syncQueueDao == null) return;
+    syncQueueDao.enqueue(
+      tableName: 'budgets',
+      recordId: recordId,
+      action: action,
+      payload: data != null ? jsonEncode(data) : '',
+    );
     SyncEventBus().trigger();
   }
 
@@ -50,7 +60,19 @@ class BudgetRepositoryImpl implements BudgetRepository {
   Future<Either<Failure, Budget>> createBudget(Budget budget) async {
     try {
       await localDatasource.createBudget(budget);
-      _enqueueSync('insert', budget.id ?? DateTime.now().millisecondsSinceEpoch.toString(), {'categoryId': budget.categoryId, 'amount': budget.amount, 'period': budget.period.name, 'startDate': budget.startDate.toUtc().toIso8601String(), 'rolloverEnabled': budget.rolloverEnabled, 'rolloverAmount': budget.rolloverAmount, 'isEnabled': budget.isEnabled});
+      _enqueueSync(
+        'insert',
+        budget.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        {
+          'categoryId': budget.categoryId,
+          'amount': budget.amount,
+          'period': budget.period.name,
+          'startDate': budget.startDate.toUtc().toIso8601String(),
+          'rolloverEnabled': budget.rolloverEnabled,
+          'rolloverAmount': budget.rolloverAmount,
+          'isEnabled': budget.isEnabled,
+        },
+      );
       return Right(budget);
     } on CacheException catch (e) {
       return Left(e.toFailure());
@@ -61,7 +83,19 @@ class BudgetRepositoryImpl implements BudgetRepository {
   Future<Either<Failure, Budget>> updateBudget(Budget budget) async {
     try {
       await localDatasource.updateBudget(budget);
-      _enqueueSync('update', budget.id ?? DateTime.now().millisecondsSinceEpoch.toString(), {'categoryId': budget.categoryId, 'amount': budget.amount, 'period': budget.period.name, 'startDate': budget.startDate.toUtc().toIso8601String(), 'rolloverEnabled': budget.rolloverEnabled, 'rolloverAmount': budget.rolloverAmount, 'isEnabled': budget.isEnabled});
+      _enqueueSync(
+        'update',
+        budget.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        {
+          'categoryId': budget.categoryId,
+          'amount': budget.amount,
+          'period': budget.period.name,
+          'startDate': budget.startDate.toUtc().toIso8601String(),
+          'rolloverEnabled': budget.rolloverEnabled,
+          'rolloverAmount': budget.rolloverAmount,
+          'isEnabled': budget.isEnabled,
+        },
+      );
       return Right(budget);
     } on CacheException catch (e) {
       return Left(e.toFailure());

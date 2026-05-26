@@ -125,10 +125,7 @@ class _AppShellState extends State<AppShell> {
                 offset: const Offset(0, 8),
               ),
             ],
-            border: Border.all(
-              color: colors.onSurface.withAlpha(10),
-              width: 1,
-            ),
+            border: Border.all(color: colors.onSurface.withAlpha(10), width: 1),
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -143,7 +140,10 @@ class _AppShellState extends State<AppShell> {
                   width: showFab ? 48 : 0,
                 ),
                 // Right side: Trends, Scan, Profile
-                ...List.generate(rightCount, (i) => _navItem(leftCount + i, colors)),
+                ...List.generate(
+                  rightCount,
+                  (i) => _navItem(leftCount + i, colors),
+                ),
               ],
             ),
           ),
@@ -195,7 +195,9 @@ class _AppShellState extends State<AppShell> {
   void _onFabPressed(BuildContext context) {
     final now = DateTime.now();
     if (_lastFabPress != null &&
-        now.difference(_lastFabPress!) < const Duration(seconds: 1)) return;
+        now.difference(_lastFabPress!) < const Duration(seconds: 1)) {
+      return;
+    }
     _lastFabPress = now;
     if (_currentIndex == 2) {
       _showCategoryTypeSelection(context);

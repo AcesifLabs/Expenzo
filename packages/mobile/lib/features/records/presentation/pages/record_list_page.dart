@@ -231,12 +231,14 @@ class _RecordListPageState extends State<RecordListPage> {
       categoryIds: categoryIds,
       recordType: recordType,
       onApply: ({startDate, endDate, categoryIds, recordType}) {
-        recordBloc.add(ApplyFilters(
-          startDate: startDate,
-          endDate: endDate,
-          categoryIds: categoryIds,
-          recordType: recordType,
-        ));
+        recordBloc.add(
+          ApplyFilters(
+            startDate: startDate,
+            endDate: endDate,
+            categoryIds: categoryIds,
+            recordType: recordType,
+          ),
+        );
       },
       onClear: () {
         recordBloc.add(const ClearFilters());

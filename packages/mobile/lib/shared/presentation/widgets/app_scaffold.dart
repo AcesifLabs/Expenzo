@@ -69,7 +69,11 @@ class AppScaffold extends StatelessWidget {
       content = Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppPageHeader(title: title ?? '', subtitle: subtitle, actions: actions),
+          AppPageHeader(
+            title: title ?? '',
+            subtitle: subtitle,
+            actions: actions,
+          ),
           Expanded(child: _body ?? const SizedBox.shrink()),
         ],
       );

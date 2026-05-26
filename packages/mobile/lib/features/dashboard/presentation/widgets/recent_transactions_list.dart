@@ -10,16 +10,23 @@ class RecentTransactionsList extends StatelessWidget {
   const RecentTransactionsList({super.key, required this.transactions});
 
   static final Map<ExpenseSource, IconData> _sourceIcons = {
-    ExpenseSource.manual: PhosphorIcons.pencilSimple(PhosphorIconsStyle.regular),
+    ExpenseSource.manual: PhosphorIcons.pencilSimple(
+      PhosphorIconsStyle.regular,
+    ),
     ExpenseSource.sms: PhosphorIcons.chatDots(PhosphorIconsStyle.regular),
     ExpenseSource.email: PhosphorIcons.envelope(PhosphorIconsStyle.regular),
-    ExpenseSource.recurring: PhosphorIcons.arrowsClockwise(PhosphorIconsStyle.regular),
+    ExpenseSource.recurring: PhosphorIcons.arrowsClockwise(
+      PhosphorIconsStyle.regular,
+    ),
   };
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+    final currencyFormat = NumberFormat.currency(
+      symbol: '\$',
+      decimalDigits: 2,
+    );
     final dateFormat = DateFormat('MMM dd, yyyy');
 
     if (transactions.isEmpty) {
@@ -32,8 +39,12 @@ class RecentTransactionsList extends StatelessWidget {
       itemCount: transactions.length,
       itemBuilder: (context, index) {
         final record = transactions[index];
-        final sourceIcon = _sourceIcons[record.source] ?? PhosphorIcons.pencilSimple(PhosphorIconsStyle.regular);
-        final sourceColor = record.recordType == RecordType.expense ? colors.error : colors.secondary;
+        final sourceIcon =
+            _sourceIcons[record.source] ??
+            PhosphorIcons.pencilSimple(PhosphorIconsStyle.regular);
+        final sourceColor = record.recordType == RecordType.expense
+            ? colors.error
+            : colors.secondary;
 
         return ListTile(
           leading: CircleAvatar(
@@ -44,10 +55,7 @@ class RecentTransactionsList extends StatelessWidget {
           subtitle: Text(dateFormat.format(record.date)),
           trailing: Text(
             currencyFormat.format(record.amount),
-            style: TextStyle(
-              color: sourceColor,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(color: sourceColor, fontWeight: FontWeight.bold),
           ),
         );
       },

@@ -115,7 +115,11 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
                     height: 48,
                     decoration: BoxDecoration(
                       border: Border.all(
-                        color: isSelected ? AppColors.primary : Theme.of(context).colorScheme.outline.withAlpha(40),
+                        color: isSelected
+                            ? AppColors.primary
+                            : Theme.of(
+                                context,
+                              ).colorScheme.outline.withAlpha(40),
                         width: isSelected ? 2 : 1,
                       ),
                       borderRadius: BorderRadius.circular(12),

@@ -80,7 +80,9 @@ class _ContactSelectorViewState extends State<ContactSelectorView> {
             child: TextField(
               decoration: InputDecoration(
                 hintText: 'Search contacts...',
-                prefixIcon: Icon(PhosphorIcons.magnifyingGlass(PhosphorIconsStyle.regular)),
+                prefixIcon: Icon(
+                  PhosphorIcons.magnifyingGlass(PhosphorIconsStyle.regular),
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -150,8 +152,12 @@ class _ContactSelectorViewState extends State<ContactSelectorView> {
                             leading: CircleAvatar(
                               child: Icon(
                                 contact.sourceType == 'sms'
-                                    ? PhosphorIcons.chat(PhosphorIconsStyle.regular)
-                                    : PhosphorIcons.envelope(PhosphorIconsStyle.regular),
+                                    ? PhosphorIcons.chat(
+                                        PhosphorIconsStyle.regular,
+                                      )
+                                    : PhosphorIcons.envelope(
+                                        PhosphorIconsStyle.regular,
+                                      ),
                               ),
                             ),
                             title: Row(
@@ -197,7 +203,11 @@ class _ContactSelectorViewState extends State<ContactSelectorView> {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            trailing: Icon(PhosphorIcons.caretRight(PhosphorIconsStyle.regular)),
+                            trailing: Icon(
+                              PhosphorIcons.caretRight(
+                                PhosphorIconsStyle.regular,
+                              ),
+                            ),
                             onTap: () {
                               final source =
                                   existingSource ??
@@ -216,7 +226,6 @@ class _ContactSelectorViewState extends State<ContactSelectorView> {
                                           SampleAnalyzerPage(source: source),
                                     ),
                                   )
-
                                   .then((_) {
                                     if (context.mounted) {
                                       context.read<MessageSourcesBloc>().add(

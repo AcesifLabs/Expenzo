@@ -9,20 +9,21 @@ class SlidePageRoute<T> extends PageRouteBuilder<T> {
   ).chain(CurveTween(curve: Curves.easeOutQuart));
 
   SlidePageRoute({required this.builder})
-      : super(
-          pageBuilder: (context, animation, secondaryAnimation) => builder(context),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return SlideTransition(
-              position: animation.drive(_slideTween),
-              child: FadeTransition(
-                opacity: animation,
-                child: RepaintBoundary(child: child),
-              ),
-            );
-          },
-          transitionDuration: const Duration(milliseconds: 300),
-          reverseTransitionDuration: const Duration(milliseconds: 250),
-          maintainState: true,
-          opaque: true,
-        );
+    : super(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            builder(context),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return SlideTransition(
+            position: animation.drive(_slideTween),
+            child: FadeTransition(
+              opacity: animation,
+              child: RepaintBoundary(child: child),
+            ),
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 300),
+        reverseTransitionDuration: const Duration(milliseconds: 250),
+        maintainState: true,
+        opaque: true,
+      );
 }
