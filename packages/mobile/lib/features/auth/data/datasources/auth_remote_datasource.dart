@@ -31,6 +31,11 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
     required this.userDao,
   });
 
+  @visibleForTesting
+  static bool isDevTokenFallbackAllowed({required bool isDebugMode}) {
+    return isDebugMode;
+  }
+
   @override
   Future<User> signInWithGoogle() async {
     debugPrint('AuthRemoteDatasource: signInWithGoogle started');
@@ -80,10 +85,12 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
       await TokenStorage.saveToken(response.data['accessToken']);
       debugPrint('AuthRemoteDatasource: Backend JWT obtained');
     } catch (e) {
-      // Firebase Admin not configured? Try dev token fallback
-      debugPrint(
-        'AuthRemoteDatasource: Backend JWT with Firebase failed, trying dev token: $e',
-      );
+      debugPrint('AuthRemoteDatasource: Backend JWT with Firebase failed: $e');
+
+      if (!isDevTokenFallbackAllowed(isDebugMode: kDebugMode)) {
+        rethrow;
+      }
+
       try {
         final payload = {
           'uid': firebaseUser.uid,
@@ -100,6 +107,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
         debugPrint('AuthRemoteDatasource: Dev JWT obtained');
       } catch (e2) {
         debugPrint('AuthRemoteDatasource: Dev JWT also failed: $e2');
+        rethrow;
       }
     }
 

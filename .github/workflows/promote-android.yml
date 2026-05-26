@@ -1,0 +1,46 @@
+name: Promote Android
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Mobile release tag to promote, for audit only. Example: mobile-v1.2.3+45'
+        required: true
+        type: string
+
+jobs:
+  promote:
+    name: Promote internal build to production
+    runs-on: ubuntu-latest
+    environment: mobile-production
+
+    defaults:
+      run:
+        working-directory: packages/mobile
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate release tag input
+        run: |
+          set -euo pipefail
+          TAG="${{ inputs.release_tag }}"
+          if [[ ! "$TAG" =~ ^mobile-v([0-9]+\.[0-9]+\.[0-9]+)\+([0-9]+)$ ]]; then
+            echo "Invalid release_tag: $TAG"
+            echo "Expected format: mobile-v1.2.3+45"
+            exit 1
+          fi
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+          bundler-cache: true
+          working-directory: packages/mobile/android
+
+      - name: Promote internal build to production
+        working-directory: packages/mobile/android
+        run: bundle exec fastlane production
+        env:
+          PLAY_STORE_JSON_KEY: ${{ secrets.PLAY_STORE_JSON_KEY }}

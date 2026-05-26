@@ -16,7 +16,6 @@ class LoginPage extends StatelessWidget {
       backgroundColor: AppColors.backgroundLight,
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
-          debugPrint('LoginPage: BlocConsumer state: $state');
           if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -28,7 +27,6 @@ class LoginPage extends StatelessWidget {
           }
         },
         builder: (context, state) {
-          debugPrint('LoginPage: builder state: $state');
           return SafeArea(
             child: Center(
               child: Padding(
@@ -81,7 +79,6 @@ class LoginPage extends StatelessWidget {
   Widget _buildSignInButton(BuildContext context) {
     return ElevatedButton(
       onPressed: () {
-        debugPrint('LoginPage: Sign in button pressed');
         context.read<AuthBloc>().add(const SignInWithGoogleRequested());
       },
       style: ElevatedButton.styleFrom(
