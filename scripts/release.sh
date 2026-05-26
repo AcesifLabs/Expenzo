@@ -4,13 +4,18 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: ./scripts/release.sh vX.Y.Z+N
+Usage:
+  ./scripts/release.sh prepare vX.Y.Z+N
+  ./scripts/release.sh publish vX.Y.Z+N
 
 Example:
-  ./scripts/release.sh v1.0.0+2
+  ./scripts/release.sh prepare v1.0.0+2
+  ./scripts/release.sh publish v1.0.0+2
 
-Creates and pushes:
+prepare creates and pushes:
   Branch: release/mobile-vX.Y.Z+N
+
+publish creates and pushes:
   Tag:    mobile-vX.Y.Z+N
 EOF
 }
@@ -20,13 +25,20 @@ if [[ ${1:-} == "-h" || ${1:-} == "--help" ]]; then
   exit 0
 fi
 
-if [[ $# -ne 1 ]]; then
-  echo "Error: expected exactly 1 argument." >&2
+if [[ $# -ne 2 ]]; then
+  echo "Error: expected exactly 2 arguments: <prepare|publish> <version>." >&2
   usage
   exit 1
 fi
 
-VERSION="$1"
+MODE="$1"
+VERSION="$2"
+
+if [[ "$MODE" != "prepare" && "$MODE" != "publish" ]]; then
+  echo "Error: invalid mode '$MODE'. Use 'prepare' or 'publish'." >&2
+  usage
+  exit 1
+fi
 
 if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+\+[0-9]+$ ]]; then
   echo "Error: invalid version '$VERSION'. Expected format: vX.Y.Z+N" >&2
@@ -51,21 +63,6 @@ if git show-ref --verify --quiet "refs/heads/${RELEASE_BRANCH}"; then
   exit 1
 fi
 
-if git show-ref --verify --quiet "refs/tags/${RELEASE_TAG}"; then
-  echo "Error: local tag already exists: ${RELEASE_TAG}" >&2
-  exit 1
-fi
-
-if git ls-remote --exit-code --heads origin "${RELEASE_BRANCH}" >/dev/null 2>&1; then
-  echo "Error: remote branch already exists: origin/${RELEASE_BRANCH}" >&2
-  exit 1
-fi
-
-if git ls-remote --exit-code --tags origin "refs/tags/${RELEASE_TAG}" >/dev/null 2>&1; then
-  echo "Error: remote tag already exists: ${RELEASE_TAG}" >&2
-  exit 1
-fi
-
 echo "Fetching origin..."
 git fetch origin
 
@@ -75,24 +72,53 @@ git checkout main
 echo "Updating local main..."
 git pull --ff-only origin main
 
-echo "Creating release branch: ${RELEASE_BRANCH}"
-git checkout -b "${RELEASE_BRANCH}"
+if [[ "$MODE" == "prepare" ]]; then
+  if git show-ref --verify --quiet "refs/heads/${RELEASE_BRANCH}"; then
+    echo "Error: local branch already exists: ${RELEASE_BRANCH}" >&2
+    exit 1
+  fi
+
+  if git ls-remote --exit-code --heads origin "${RELEASE_BRANCH}" >/dev/null 2>&1; then
+    echo "Error: remote branch already exists: origin/${RELEASE_BRANCH}" >&2
+    exit 1
+  fi
+
+  echo "Creating release branch: ${RELEASE_BRANCH}"
+  git checkout -b "${RELEASE_BRANCH}"
+
+  echo "Pushing release branch..."
+  git push -u origin "${RELEASE_BRANCH}"
+
+  echo
+  echo "Done. Created and pushed:"
+  echo "  Branch: ${RELEASE_BRANCH}"
+  echo
+  echo "Next steps:"
+  echo "  1) Open PR from ${RELEASE_BRANCH} -> main"
+  echo "  2) Merge PR"
+  echo "  3) After merge, run: ./scripts/release.sh publish ${VERSION}"
+  exit 0
+fi
+
+if git show-ref --verify --quiet "refs/tags/${RELEASE_TAG}"; then
+  echo "Error: local tag already exists: ${RELEASE_TAG}" >&2
+  exit 1
+fi
+
+if git ls-remote --exit-code --tags origin "refs/tags/${RELEASE_TAG}" >/dev/null 2>&1; then
+  echo "Error: remote tag already exists: ${RELEASE_TAG}" >&2
+  exit 1
+fi
 
 echo "Creating annotated tag: ${RELEASE_TAG}"
 git tag -a "${RELEASE_TAG}" -m "Release ${RELEASE_TAG}"
-
-echo "Pushing release branch..."
-git push -u origin "${RELEASE_BRANCH}"
 
 echo "Pushing release tag..."
 git push origin "${RELEASE_TAG}"
 
 echo
 echo "Done. Created and pushed:"
-echo "  Branch: ${RELEASE_BRANCH}"
-echo "  Tag:    ${RELEASE_TAG}"
+echo "  Tag: ${RELEASE_TAG}"
 echo
 echo "Next steps:"
-echo "  1) Open PR from ${RELEASE_BRANCH} -> main"
-echo "  2) Merge PR"
-echo "  3) Tag-triggered Android release workflow will run"
+echo "  Tag-triggered Android release workflow will run"

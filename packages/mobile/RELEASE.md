@@ -42,20 +42,41 @@ Mapping:
 
 `versionCode` must always increase for Play Console uploads.
 
-## 3) Create and Push a Release Tag
+## 3) Prepare a Release Branch
 
-Create release tags from `main`:
+Create a release PR branch (no tag yet):
+
+```bash
+./scripts/release.sh prepare v1.2.3+45
+```
+
+This creates and pushes:
+
+`release/mobile-v1.2.3+45`
+
+Then open a PR from `release/mobile-v1.2.3+45` to `main` and merge it.
+
+## 4) Publish the Release Tag (After Merge)
+
+After the release PR is merged to `main`, publish the release tag:
 
 ```bash
 git checkout main
 git pull origin main
-git tag mobile-v1.2.3+45
-git push origin mobile-v1.2.3+45
+./scripts/release.sh publish v1.2.3+45
 ```
 
-This triggers `.github/workflows/deploy-android.yml`.
+This creates and pushes:
 
-## 4) What the Internal Release Workflow Does
+`mobile-v1.2.3+45`
+
+The tag push triggers `.github/workflows/deploy-android.yml`.
+
+### Why tagging happens after merge
+
+The deploy workflow validates that the tag commit is reachable from `origin/main`. If you tag before merge, the workflow can fail this guard.
+
+## 5) What the Internal Release Workflow Does
 
 On tag push (`mobile-v*`), the workflow:
 
@@ -69,7 +90,7 @@ On tag push (`mobile-v*`), the workflow:
 5. Runs `fastlane beta` to build and upload a signed AAB to Play internal track
 6. Uploads the generated AAB as a GitHub Actions artifact
 
-## 5) Promote to Production
+## 6) Promote to Production
 
 Use manual workflow `.github/workflows/promote-android.yml`:
 
@@ -80,7 +101,7 @@ Use manual workflow `.github/workflows/promote-android.yml`:
 
 This promotion workflow only runs `fastlane production` and does not rebuild a new binary.
 
-## 6) Local Fastlane Sanity Checks
+## 7) Local Fastlane Sanity Checks
 
 ```bash
 cd packages/mobile/android
