@@ -10,6 +10,7 @@ import org.json.JSONObject
 object SmsEventStore {
     private const val PREFS_NAME = "sms_event_store"
     private const val KEY_PENDING_EVENTS = "pending_events"
+    private const val MAX_PENDING_EVENTS = 100
 
     @Volatile
     private var eventSink: EventChannel.EventSink? = null
@@ -31,6 +32,11 @@ object SmsEventStore {
                 JSONArray()
             }
             array.put(payloadJson)
+
+            while (array.length() > MAX_PENDING_EVENTS) {
+                array.remove(0)
+            }
+
             val editor = sharedPreferences.edit().putString(KEY_PENDING_EVENTS, array.toString())
             if (fromReceiver) {
                 editor.commit()

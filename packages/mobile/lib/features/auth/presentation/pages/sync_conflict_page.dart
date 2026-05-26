@@ -197,5 +197,6 @@ class _PieChartPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _PieChartPainter old) => old.progress != progress;
+  bool shouldRepaint(covariant _PieChartPainter old) =>
+      old.progress != progress || old.primaryColor != primaryColor;
 }

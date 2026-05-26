@@ -539,4 +539,31 @@ void main() {
 
     verifyNever(() => createRecordsFromParsedList(any()));
   });
+
+  test('start failure in listener.start resets state and allows retry', () async {
+    when(() => listener.start()).thenThrow(Exception('listener failed'));
+
+    await expectLater(processor.start(), throwsException);
+
+    when(() => listener.start()).thenAnswer((_) async {});
+    await processor.start();
+
+    verify(() => listener.start()).called(2);
+  });
+
+  test('start failure in drainPendingMessages resets state and allows retry', () async {
+    when(() => listener.start()).thenAnswer((_) async {});
+    when(() => listener.stop()).thenAnswer((_) async {});
+    when(
+      () => listener.drainPendingMessages(),
+    ).thenThrow(Exception('drain failed'));
+
+    await expectLater(processor.start(), throwsException);
+    verify(() => listener.stop()).called(1);
+
+    when(() => listener.drainPendingMessages()).thenAnswer((_) async => []);
+    await processor.start();
+
+    verify(() => listener.start()).called(2);
+  });
 }

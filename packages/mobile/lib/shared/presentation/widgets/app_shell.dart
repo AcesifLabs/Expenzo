@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -284,30 +286,56 @@ class _AppShellState extends State<AppShell> {
 // ──────────────────────────────────
 // Scan Page with FAB
 // ──────────────────────────────────
-class _ScanPageWithFab extends StatelessWidget {
+class _ScanPageWithFab extends StatefulWidget {
+  @override
+  State<_ScanPageWithFab> createState() => _ScanPageWithFabState();
+}
+
+class _ScanPageWithFabState extends State<_ScanPageWithFab> {
+  bool _hasSmsPermission = false;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_loadInitialPermission());
+  }
+
+  Future<void> _loadInitialPermission() async {
+    final status = await Permission.sms.status;
+    if (!mounted) return;
+    setState(() {
+      _hasSmsPermission = status.isGranted;
+    });
+  }
+
+  void _onPermissionChanged(bool granted) {
+    if (!mounted || _hasSmsPermission == granted) {
+      return;
+    }
+    setState(() {
+      _hasSmsPermission = granted;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: const SmsPermissionGate(child: ContactSelectorPage()),
-      floatingActionButton: FutureBuilder<PermissionStatus>(
-        future: Permission.sms.status,
-        builder: (context, snapshot) {
-          if (snapshot.data?.isGranted != true) {
-            return const SizedBox.shrink();
-          }
-
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 80),
-            child: FloatingActionButton(
-              heroTag: 'scan_fab',
-              onPressed: () => _showScanOptions(context),
-              child: Icon(
-                PhosphorIcons.fileMagnifyingGlass(PhosphorIconsStyle.bold),
-              ),
-            ),
-          );
-        },
+      body: SmsPermissionGate(
+        onPermissionChanged: _onPermissionChanged,
+        child: const ContactSelectorPage(),
       ),
+      floatingActionButton: _hasSmsPermission
+          ? Padding(
+              padding: const EdgeInsets.only(bottom: 80),
+              child: FloatingActionButton(
+                heroTag: 'scan_fab',
+                onPressed: () => _showScanOptions(context),
+                child: Icon(
+                  PhosphorIcons.fileMagnifyingGlass(PhosphorIconsStyle.bold),
+                ),
+              ),
+            )
+          : const SizedBox.shrink(),
     );
   }
 

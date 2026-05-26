@@ -40,18 +40,30 @@ class RealtimeSmsProcessor {
     }
     _isStarted = true;
 
-    await _listener.start();
+    var listenerStarted = false;
+    try {
+      await _listener.start();
+      listenerStarted = true;
 
-    await drainPendingMessages();
+      await drainPendingMessages();
 
-    _subscription = _listener.messages.listen(
-      (event) {
-        unawaited(_enqueueProcessing(event));
-      },
-      onError: (Object error, StackTrace stackTrace) {
-        _logError('stream error', error, stackTrace);
-      },
-    );
+      _subscription = _listener.messages.listen(
+        (event) {
+          unawaited(_enqueueProcessing(event));
+        },
+        onError: (Object error, StackTrace stackTrace) {
+          _logError('stream error', error, stackTrace);
+        },
+      );
+    } catch (_) {
+      _isStarted = false;
+      await _subscription?.cancel();
+      _subscription = null;
+      if (listenerStarted) {
+        await _listener.stop();
+      }
+      rethrow;
+    }
   }
 
   Future<void> drainPendingMessages() async {
