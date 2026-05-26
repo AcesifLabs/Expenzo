@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:expense_tracker/core/di/injection_container.dart' as di;
+import 'package:expense_tracker/features/sms_parser/application/realtime_sms_processor.dart';
 
 class SmsPermissionGate extends StatefulWidget {
   final Widget child;
@@ -23,6 +25,13 @@ class _SmsPermissionGateState extends State<SmsPermissionGate> {
 
   Future<void> _checkPermission() async {
     final status = await Permission.sms.status;
+    if (status.isGranted) {
+      try {
+        await di.getIt<RealtimeSmsProcessor>().start();
+      } catch (e) {
+        debugPrint('SmsPermissionGate start skipped: $e');
+      }
+    }
     if (mounted) {
       setState(() {
         _hasPermission = status.isGranted;
@@ -34,6 +43,13 @@ class _SmsPermissionGateState extends State<SmsPermissionGate> {
   Future<void> _requestPermission() async {
     setState(() => _isLoading = true);
     final status = await Permission.sms.request();
+    if (status.isGranted) {
+      try {
+        await di.getIt<RealtimeSmsProcessor>().start();
+      } catch (e) {
+        debugPrint('SmsPermissionGate start skipped: $e');
+      }
+    }
     if (mounted) {
       setState(() {
         _hasPermission = status.isGranted;

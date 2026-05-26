@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -19,6 +20,7 @@ import 'features/settings/presentation/bloc/settings_bloc.dart';
 import 'features/settings/presentation/bloc/settings_state.dart';
 import 'features/settings/presentation/bloc/settings_event.dart';
 import 'features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
+import 'features/sms_parser/application/realtime_sms_processor.dart';
 import 'shared/presentation/widgets/app_shell.dart';
 import 'shared/presentation/widgets/app_error_view.dart';
 import 'core/database/database_seeder.dart';
@@ -132,7 +134,7 @@ class AppLoader extends StatefulWidget {
   State<AppLoader> createState() => _AppLoaderState();
 }
 
-class _AppLoaderState extends State<AppLoader> {
+class _AppLoaderState extends State<AppLoader> with WidgetsBindingObserver {
   bool _initialized = false;
   bool _error = false;
   String _errorMessage = '';
@@ -140,7 +142,21 @@ class _AppLoaderState extends State<AppLoader> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _startInitialization();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      unawaited(_tryDrainRealtimeSms());
+    }
   }
 
   Future<void> _startInitialization() async {
@@ -172,6 +188,8 @@ class _AppLoaderState extends State<AppLoader> {
         setState(() => _initialized = true);
       }
 
+      unawaited(_tryStartRealtimeSmsProcessing());
+
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         await Future.delayed(const Duration(milliseconds: 500));
         di.initFeatureDependencies();
@@ -183,6 +201,26 @@ class _AppLoaderState extends State<AppLoader> {
           _errorMessage = e.toString();
         });
       }
+    }
+  }
+
+  Future<void> _tryStartRealtimeSmsProcessing() async {
+    try {
+      final status = await Permission.sms.status;
+      if (!status.isGranted) return;
+      await di.getIt<RealtimeSmsProcessor>().start();
+    } catch (e) {
+      debugPrint('Realtime SMS start skipped: $e');
+    }
+  }
+
+  Future<void> _tryDrainRealtimeSms() async {
+    try {
+      final status = await Permission.sms.status;
+      if (!status.isGranted) return;
+      await di.getIt<RealtimeSmsProcessor>().drainPendingMessages();
+    } catch (e) {
+      debugPrint('Realtime SMS drain skipped: $e');
     }
   }
 

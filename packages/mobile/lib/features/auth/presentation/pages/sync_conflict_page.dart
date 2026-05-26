@@ -33,7 +33,7 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
     return PopScope(
       canPop: false,
       child: Scaffold(
-        backgroundColor: AppColors.backgroundLight,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -99,22 +99,37 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
   }
 
   Widget _buildProgressView() {
-    return Column(
-      children: [
-        const SizedBox(height: 32),
-        SizedBox(
-          width: 160,
-          height: 160,
-          child: CustomPaint(
-            painter: _PieChartPainter(_progress),
-            child: Center(
-              child: Text('${(_progress * 100).toInt()}%', style: AppTypography.headlineLarge.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold)),
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: 160,
+            height: 160,
+            child: CustomPaint(
+              painter: _PieChartPainter(_progress, colors.primary),
+              child: Center(
+                child: Text(
+                  '${(_progress * 100).toInt()}%',
+                  style: (theme.textTheme.headlineMedium ?? AppTypography.headlineLarge).copyWith(
+                    color: colors.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 24),
-        Text(_status, style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondaryLight)),
-      ],
+          const SizedBox(height: 24),
+          Text(
+            _status,
+            textAlign: TextAlign.center,
+            style: (theme.textTheme.bodyLarge ?? AppTypography.bodyLarge).copyWith(color: colors.onSurfaceVariant),
+          ),
+        ],
+      ),
     );
   }
 
@@ -166,17 +181,18 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
 
 class _PieChartPainter extends CustomPainter {
   final double progress;
-  _PieChartPainter(this.progress);
+  final Color primaryColor;
+  _PieChartPainter(this.progress, this.primaryColor);
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 2 - 8;
 
-    final bgPaint = Paint()..color = AppColors.primary.withAlpha(30)..style = PaintingStyle.stroke..strokeWidth = 12;
+    final bgPaint = Paint()..color = primaryColor.withAlpha(30)..style = PaintingStyle.stroke..strokeWidth = 12;
     canvas.drawCircle(center, radius, bgPaint);
 
-    final fgPaint = Paint()..color = AppColors.primary..style = PaintingStyle.stroke..strokeWidth = 12..strokeCap = StrokeCap.round;
+    final fgPaint = Paint()..color = primaryColor..style = PaintingStyle.stroke..strokeWidth = 12..strokeCap = StrokeCap.round;
     canvas.drawArc(Rect.fromCircle(center: center, radius: radius), -pi / 2, 2 * pi * progress, false, fgPaint);
   }
 

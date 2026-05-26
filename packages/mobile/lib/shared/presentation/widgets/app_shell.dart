@@ -15,6 +15,7 @@ import 'package:expense_tracker/features/reports/presentation/pages/reports_page
 import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanner_event.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/pages/sms_scan_page.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:expense_tracker/features/categories/presentation/pages/category_list_page.dart';
 import 'package:expense_tracker/features/categories/presentation/pages/category_form_page.dart';
@@ -288,13 +289,24 @@ class _ScanPageWithFab extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: const SmsPermissionGate(child: ContactSelectorPage()),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 80),
-        child: FloatingActionButton(
-          heroTag: 'scan_fab',
-          onPressed: () => _showScanOptions(context),
-          child: Icon(PhosphorIcons.fileMagnifyingGlass(PhosphorIconsStyle.bold)),
-        ),
+      floatingActionButton: FutureBuilder<PermissionStatus>(
+        future: Permission.sms.status,
+        builder: (context, snapshot) {
+          if (snapshot.data?.isGranted != true) {
+            return const SizedBox.shrink();
+          }
+
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 80),
+            child: FloatingActionButton(
+              heroTag: 'scan_fab',
+              onPressed: () => _showScanOptions(context),
+              child: Icon(
+                PhosphorIcons.fileMagnifyingGlass(PhosphorIconsStyle.bold),
+              ),
+            ),
+          );
+        },
       ),
     );
   }

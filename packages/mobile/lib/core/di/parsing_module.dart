@@ -19,7 +19,10 @@ import 'package:expense_tracker/features/message_templates/presentation/bloc/con
 import 'package:expense_tracker/features/message_templates/presentation/bloc/sample_analyzer_bloc.dart';
 import 'package:expense_tracker/features/message_templates/presentation/bloc/template_editor_bloc.dart';
 import 'package:expense_tracker/features/sms_parser/data/datasources/sms_local_datasource.dart';
+import 'package:expense_tracker/features/sms_parser/data/services/method_channel_realtime_sms_listener.dart';
+import 'package:expense_tracker/features/sms_parser/domain/services/realtime_sms_listener.dart';
 import 'package:expense_tracker/features/sms_parser/domain/usecases/scan_sms_usecase.dart';
+import 'package:expense_tracker/features/sms_parser/application/realtime_sms_processor.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
 import 'package:expense_tracker/features/records/domain/usecases/create_records_from_parsed_list.dart';
@@ -101,6 +104,20 @@ void initParsingModule(GetIt getIt) {
   getIt.registerFactory<SmsScannerBloc>(
     () => SmsScannerBloc(
       scanSmsUseCase: getIt<ScanSmsUseCase>(),
+      recordRepository: getIt<RecordRepository>(),
+      createRecordsFromParsedList: getIt<CreateRecordsFromParsedList>(),
+    ),
+  );
+
+  // ── Realtime SMS Processing ──
+  getIt.registerLazySingleton<RealtimeSmsListener>(
+    () => MethodChannelRealtimeSmsListener(),
+  );
+  getIt.registerLazySingleton(
+    () => RealtimeSmsProcessor(
+      listener: getIt<RealtimeSmsListener>(),
+      evaluateRules: getIt<EvaluateRulesUseCase>(),
+      parsingIsolateService: getIt<ParsingIsolateService>(),
       recordRepository: getIt<RecordRepository>(),
       createRecordsFromParsedList: getIt<CreateRecordsFromParsedList>(),
     ),
