@@ -9,11 +9,17 @@ platform :android do
 
   desc "Build and upload to Play Store internal track"
   lane :beta do
+    build_name = ENV["BUILD_NAME"]
+    build_number = ENV["BUILD_NUMBER"]
+
+    UI.user_error!("BUILD_NAME is required") if build_name.to_s.empty?
+    UI.user_error!("BUILD_NUMBER is required") if build_number.to_s.empty?
+
     # Clean previous builds
     sh "cd .. && flutter clean"
 
     # Build the AAB
-    sh "cd .. && flutter build appbundle --release"
+    sh "cd .. && flutter build appbundle --release --build-name #{build_name} --build-number #{build_number}"
 
     # Upload to Play Store internal track
     upload_to_play_store(
