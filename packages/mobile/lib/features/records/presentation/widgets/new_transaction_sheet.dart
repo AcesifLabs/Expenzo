@@ -38,6 +38,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   // ── Validation error flags ──
   bool _labelError = false;
   bool _categoryError = false;
+  bool _isSubmitting = false;
 
   // ── Date picker + recurring ──
   DateTime _selectedDate = DateTime.now();
@@ -268,7 +269,8 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   }
 
   // ── Submit with validation (amount + label + category) ──
-  void _submit() {
+  Future<void> _submit() async {
+    if (_isSubmitting) return;
     final amount = _parsedAmount;
     bool hasError = false;
 
@@ -297,6 +299,8 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       return;
     }
 
+    setState(() => _isSubmitting = true);
+
     final now = DateTime.now().toUtc();
     final finalAmount = _type == RecordType.expense ? -amount : amount;
 
@@ -314,17 +318,34 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     context.read<RecordBloc>().add(AddRecordEvent(record));
 
     if (_isRecurring) {
-      unawaited(_createRecurringTransaction(finalAmount));
+      final created = await _createRecurringTransaction(finalAmount);
+      if (!created) {
+        if (mounted) {
+          setState(() => _isSubmitting = false);
+        }
+        return;
+      }
     }
 
-    Navigator.pop(context);
+    if (mounted) {
+      Navigator.pop(context);
+    }
   }
 
   // ── Fire-and-forget recurring creation (primary record already saved) ──
-  Future<void> _createRecurringTransaction(double finalAmount) async {
+  Future<bool> _createRecurringTransaction(double finalAmount) async {
     try {
       await di.featureDependenciesReady;
-      if (!di.getIt.isRegistered<RecurringRepository>()) return;
+      if (!di.getIt.isRegistered<RecurringRepository>()) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Recurring transactions are not ready yet.'),
+            ),
+          );
+        }
+        return false;
+      }
       final repo = di.getIt<RecurringRepository>();
 
       // First occurrence was just saved manually; advance to next period
@@ -345,6 +366,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
           dayOfMonth: _selectedDate.day,
         ),
       );
+      return true;
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -357,6 +379,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
           ),
         );
       }
+      return false;
     }
   }
 
@@ -525,7 +548,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                     width: double.infinity,
                     height: 52,
                     child: FilledButton(
-                      onPressed: _submit,
+                      onPressed: _isSubmitting ? null : () => unawaited(_submit()),
                       style: FilledButton.styleFrom(
                         backgroundColor: _type == RecordType.expense
                             ? colors.error
