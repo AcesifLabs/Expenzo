@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/core/utils/navigation_utils.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_bloc.dart';
@@ -23,6 +22,7 @@ import 'package:expense_tracker/shared/presentation/widgets/app_empty_state.dart
 import 'package:expense_tracker/shared/presentation/widgets/shimmer_box.dart';
 import 'package:expense_tracker/shared/presentation/widgets/budget_progress_indicator.dart';
 import 'package:expense_tracker/shared/presentation/widgets/budget_transaction_list.dart';
+import 'package:expense_tracker/shared/presentation/widgets/read_only_record_tile.dart';
 import '../../domain/entities/date_range.dart';
 import '../bloc/dashboard_bloc.dart';
 import '../bloc/dashboard_event.dart';
@@ -780,64 +780,12 @@ class _RecentTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    final isExpense = record.recordType == RecordType.expense;
-    final amtColor = isExpense ? colors.error : colors.secondary;
-    final dateStr = DateFormat('MMM dd').format(record.date);
-
-    return Padding(
+    return ReadOnlyRecordTile(
+      record: record,
+      amountFormat: fmt,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 20,
-            backgroundColor: amtColor.withAlpha(25),
-            child: Icon(
-              isExpense
-                  ? PhosphorIcons.trendDown(PhosphorIconsStyle.fill)
-                  : PhosphorIcons.trendUp(PhosphorIconsStyle.fill),
-              color: amtColor,
-              size: 18,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  record.description.isNotEmpty
-                      ? record.description
-                      : (isExpense ? 'Expense' : 'Income'),
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: colors.onSurface,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  dateStr,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: colors.onSurface.withAlpha(120),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Text(
-            fmt.format(record.amount),
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              color: amtColor,
-            ),
-          ),
-        ],
-      ),
+      avatarRadius: 20,
+      iconSize: 18,
     );
   }
 }
