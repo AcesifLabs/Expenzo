@@ -172,6 +172,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     );
 
     if (picked != null) {
+      if (!mounted) return;
       setState(() {
         if (isStart) {
           _startDate = picked;

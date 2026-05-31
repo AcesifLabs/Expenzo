@@ -224,6 +224,7 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
+    if (!mounted) return;
     if (picked != null && picked != _startDate) {
       setState(() => _startDate = picked);
     }
@@ -236,6 +237,7 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
+    if (!mounted) return;
     if (picked != null) {
       setState(() => _endDate = picked);
     }
