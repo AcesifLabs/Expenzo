@@ -7,7 +7,6 @@ import 'package:expense_tracker/core/utils/navigation_utils.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_summary_card.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_empty_state.dart';
-import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets_with_progress.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budget_progress.dart';
 import '../../domain/entities/budget.dart';
 import '../bloc/budget_bloc.dart';
@@ -38,28 +37,10 @@ class _BudgetListPageContent extends StatefulWidget {
 }
 
 class _BudgetListPageContentState extends State<_BudgetListPageContent> {
-  Map<String, BudgetProgress> _progressMap = {};
-  bool _loadingProgress = false;
-
-  void _loadProgress(List<Budget> budgets) {
-    if (budgets.isEmpty || _loadingProgress) return;
-    _loadingProgress = true;
-    di.getIt<GetBudgetsWithProgress>()(limit: budgets.length).then((result) {
-      if (!mounted) return;
-      final progressList = result.getOrElse(() => <BudgetProgress>[]);
-      setState(() {
-        _progressMap = {for (final p in progressList) p.budgetId: p};
-        _loadingProgress = false;
-      });
-    });
-  }
-
-  BudgetProgress? _findProgress(Budget budget) {
-    if (budget.id != null && _progressMap.containsKey(budget.id)) {
-      return _progressMap[budget.id];
-    }
-    // Fallback: compute from progress list matching by category
-    return null;
+  BudgetProgress? _findProgress(BudgetLoaded state, Budget budget) {
+    final id = budget.id;
+    if (id == null) return null;
+    return state.progressByBudgetId[id];
   }
 
   @override
@@ -76,11 +57,6 @@ class _BudgetListPageContentState extends State<_BudgetListPageContent> {
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(SnackBar(content: Text(state.message)));
-        }
-        if (state is BudgetLoaded) {
-          // Always recalculate — scan or manual entries may have added records
-          _progressMap = {};
-          _loadProgress(state.budgets);
         }
       },
       builder: (context, state) {
@@ -122,7 +98,7 @@ class _BudgetListPageContentState extends State<_BudgetListPageContent> {
                   sliver: SliverList(
                     delegate: SliverChildBuilderDelegate((context, index) {
                       final budget = state.budgets[index];
-                      final progress = _findProgress(budget);
+                      final progress = _findProgress(state, budget);
                       // Fallback: create a basic progress if not loaded yet
                       final displayProgress =
                           progress ??
@@ -174,7 +150,7 @@ class _BudgetListPageContentState extends State<_BudgetListPageContent> {
       0,
       (sum, b) => sum + b.amount,
     );
-    final totalSpent = _progressMap.values.fold<double>(
+    final totalSpent = state.progressByBudgetId.values.fold<double>(
       0,
       (sum, p) => sum + p.spentAmount,
     );
@@ -224,9 +200,15 @@ class _BudgetListPageContentState extends State<_BudgetListPageContent> {
   }
 
   void _navigateToDetails(BuildContext context, BudgetProgress progress) {
+    final bloc = context.read<BudgetBloc>();
     Navigator.push(
       context,
-      SlidePageRoute(builder: (_) => BudgetDetailsPage(progress: progress)),
+      SlidePageRoute(
+        builder: (_) => BlocProvider.value(
+          value: bloc,
+          child: BudgetDetailsPage(progress: progress),
+        ),
+      ),
     );
   }
 
