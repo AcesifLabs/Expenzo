@@ -9,11 +9,15 @@ import 'package:expense_tracker/features/budgets/domain/usecases/update_budget.d
 import 'package:expense_tracker/features/budgets/domain/usecases/delete_budget.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budget_progress.dart';
+import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets_with_progress.dart';
+import 'package:expense_tracker/features/budgets/domain/usecases/get_budget_transactions.dart';
 import 'package:expense_tracker/features/budgets/presentation/bloc/budget_bloc.dart';
 import 'package:expense_tracker/features/budgets/presentation/bloc/budget_event.dart';
 import 'package:expense_tracker/features/budgets/presentation/bloc/budget_state.dart';
 
 class MockBudgetRepository extends Mock implements BudgetRepository {}
+class MockGetBudgetsWithProgress extends Mock implements GetBudgetsWithProgress {}
+class MockGetBudgetTransactions extends Mock implements GetBudgetTransactions {}
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -25,6 +29,8 @@ void main() {
     late UpdateBudget updateBudgetUseCase;
     late DeleteBudget deleteBudgetUseCase;
     late GetBudgetProgress getBudgetProgressUseCase;
+    late MockGetBudgetsWithProgress mockGetBudgetsWithProgress;
+    late MockGetBudgetTransactions mockGetBudgetTransactions;
     late BudgetBloc budgetBloc;
 
     final testBudget = Budget(
@@ -40,6 +46,8 @@ void main() {
 
     setUp(() {
       mockRepository = MockBudgetRepository();
+      mockGetBudgetsWithProgress = MockGetBudgetsWithProgress();
+      mockGetBudgetTransactions = MockGetBudgetTransactions();
       getBudgetsUseCase = GetBudgets(repository: mockRepository);
       createBudgetUseCase = CreateBudget(repository: mockRepository);
       updateBudgetUseCase = UpdateBudget(repository: mockRepository);
@@ -50,6 +58,8 @@ void main() {
         createBudget: createBudgetUseCase,
         updateBudget: updateBudgetUseCase,
         deleteBudget: deleteBudgetUseCase,
+        getBudgetsWithProgress: mockGetBudgetsWithProgress,
+        getBudgetTransactions: mockGetBudgetTransactions,
       );
     });
 
@@ -61,6 +71,9 @@ void main() {
       when(
         () => mockRepository.getBudgets(),
       ).thenAnswer((_) async => Right([testBudget]));
+      when(
+        () => mockGetBudgetsWithProgress(limit: any(named: 'limit')),
+      ).thenAnswer((_) async => const Right([]));
 
       budgetBloc.add(LoadBudgets());
 
