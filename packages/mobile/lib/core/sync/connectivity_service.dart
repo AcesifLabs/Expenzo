@@ -1,17 +1,28 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import '../api/api_client.dart';
 
 class ConnectivityService {
-  final Connectivity _connectivity = Connectivity();
-  final ApiClient _apiClient = ApiClient();
+  final Connectivity _connectivity;
+  final ApiClient _apiClient;
+
+  ConnectivityService({Connectivity? connectivity, ApiClient? apiClient})
+      : _connectivity = connectivity ?? Connectivity(),
+        _apiClient = apiClient ?? ApiClient();
   bool _isOnline = false;
   bool get isOnline => _isOnline;
 
-  Stream<bool> get onlineStream => _connectivity.onConnectivityChanged.asyncMap(
-    (results) => _checkConnectivity(results),
-  );
+  /// Stream of connectivity state that gracefully handles platform errors
+  /// (e.g. SecurityException from registerDefaultNetworkCallback on Android 14+).
+  /// On error, the last known state is preserved and the error is logged.
+  Stream<bool> get onlineStream => _connectivity.onConnectivityChanged
+      .handleError((Object error, StackTrace stack) {
+        debugPrint('[ConnectivityService] stream error: $error');
+        _isOnline = false;
+      })
+      .asyncMap((results) => _checkConnectivity(results));
 
   Future<bool> _checkConnectivity(List<ConnectivityResult> results) async {
     if (results.isEmpty || results.contains(ConnectivityResult.none)) {
@@ -31,7 +42,12 @@ class ConnectivityService {
   }
 
   Future<bool> checkNow() async {
-    final results = await _connectivity.checkConnectivity();
-    return _checkConnectivity(results);
+    try {
+      final results = await _connectivity.checkConnectivity();
+      return _checkConnectivity(results);
+    } catch (e) {
+      debugPrint('[ConnectivityService] checkNow error: $e');
+      return _isOnline;
+    }
   }
 }
