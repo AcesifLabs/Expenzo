@@ -16,6 +16,8 @@ import 'package:expense_tracker/features/budgets/presentation/bloc/budget_event.
 import 'package:expense_tracker/features/budgets/presentation/bloc/budget_state.dart';
 
 class MockBudgetRepository extends Mock implements BudgetRepository {}
+class MockGetBudgetsWithProgress extends Mock implements GetBudgetsWithProgress {}
+class MockGetBudgetTransactions extends Mock implements GetBudgetTransactions {}
 
 class MockGetBudgetsWithProgress extends Mock
     implements GetBudgetsWithProgress {}
