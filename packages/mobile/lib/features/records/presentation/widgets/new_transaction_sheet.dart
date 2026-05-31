@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:expense_tracker/shared/presentation/widgets/app_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -18,6 +17,10 @@ import 'package:expense_tracker/features/recurring/domain/entities/recurring_tra
 import 'package:expense_tracker/features/recurring/domain/repositories/recurring_repository.dart';
 import '../bloc/record_bloc.dart';
 import '../bloc/record_event.dart';
+import 'new_transaction/all_categories_picker.dart';
+import 'new_transaction/category_picker_item.dart';
+import 'new_transaction/numeric_keypad.dart';
+import 'new_transaction/type_toggle.dart';
 
 class NewTransactionSheet extends StatefulWidget {
   const NewTransactionSheet({super.key});
@@ -149,7 +152,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => _AllCategoriesPicker(
+      builder: (ctx) => AllCategoriesPicker(
         categories: allCategories,
         selectedId: _selectedCategoryId,
         onSelect: (id) {
@@ -507,7 +510,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                     horizontal: 24,
                     vertical: 12,
                   ),
-                  child: _TypeToggle(type: _type, onSwitch: _switchType),
+                  child: TypeToggle(type: _type, onSwitch: _switchType),
                 ),
                 // Amount display
                 ValueListenableBuilder<String>(
@@ -533,7 +536,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                   },
                 ),
                 // Numeric keypad with hold-to-delete
-                _NumericKeypad(
+                NumericKeypad(
                   onDigit: _appendDigit,
                   onBackspace: _backspace,
                   color: colors,
@@ -794,11 +797,6 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
         return AnimatedBuilder(
           animation: _glowCurve,
           builder: (context, _) {
-            final errorBorderColor = _resolveGlowBorderColor(
-              _categoryError,
-              colors,
-            );
-
             return Container(
               height: 50,
               margin: const EdgeInsets.symmetric(vertical: 8),
@@ -807,24 +805,38 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 children: [
                   ...displayCats.map((cat) {
-                    final sel = _selectedCategoryId == cat.id;
-                    return _CategoryPickerItem(
+                    return CategoryPickerItem(
                       category: cat,
-                      isSelected: sel,
-                      errorBorderColor: errorBorderColor,
-                      onTap: () => setState(() {
-                        _selectedCategoryId = sel ? null : cat.id;
-                        if (sel) _hasManuallyDeselected = true;
-                        if (!sel) {
+                      isSelected: cat.id == _selectedCategoryId,
+                      errorBorderColor: _resolveGlowBorderColor(
+                        _categoryError,
+                        colors,
+                        fallback: Colors.transparent,
+                      ),
+                      onTap: () {
+                        setState(() {
+                          _selectedCategoryId = cat.id;
                           _categoryError = false;
-                          _hasManuallyDeselected = false;
-                        }
-                      }),
+                        });
+                      },
                     );
                   }),
                   if (_selectedCategoryId == null)
-                    _MoreButton(
+                    GestureDetector(
                       onTap: () => _showAllCategories(context, allCats),
+                      child: Container(
+                        width: 50,
+                        margin: const EdgeInsets.only(left: 4),
+                        decoration: BoxDecoration(
+                          color: colors.onSurface.withAlpha(10),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          PhosphorIcons.dotsThree(PhosphorIconsStyle.bold),
+                          size: 20,
+                          color: colors.onSurface.withAlpha(150),
+                        ),
+                      ),
                     ),
                 ],
               ),
@@ -847,528 +859,6 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
         child: CircularProgressIndicator(
           strokeWidth: 2,
           color: colors.onSurface.withAlpha(80),
-        ),
-      ),
-    );
-  }
-}
-
-class _CategoryPickerItem extends StatelessWidget {
-  final Category category;
-  final bool isSelected;
-  final Color errorBorderColor;
-  final VoidCallback onTap;
-
-  const _CategoryPickerItem({
-    required this.category,
-    required this.isSelected,
-    required this.errorBorderColor,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    final isLight = Theme.of(context).brightness == Brightness.light;
-
-    final iconColor = isSelected
-        ? colors.primary
-        : colors.onSurface.withAlpha(150);
-
-    final textColor = (isSelected && isLight) ? Colors.black : iconColor;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOutCubic,
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? colors.primary.withAlpha(25)
-              : colors.onSurface.withAlpha(10),
-          borderRadius: BorderRadius.circular(25),
-          border: Border.all(
-            color: isSelected
-                ? colors.primary.withAlpha(50)
-                : errorBorderColor != Colors.transparent
-                ? errorBorderColor
-                : colors.onSurface.withAlpha(40),
-            width: 1,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              AppIcons.getCategoryIcon(category.emoji),
-              size: 20,
-              color: iconColor,
-            ),
-            ClipRect(
-              child: AnimatedSize(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOutCubic,
-                child: isSelected
-                    ? Padding(
-                        padding: const EdgeInsets.only(left: 8),
-                        child: Text(
-                          category.name,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            color: textColor,
-                          ),
-                          maxLines: 1,
-                        ),
-                      )
-                    : const SizedBox.shrink(),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _MoreButton extends StatelessWidget {
-  final VoidCallback onTap;
-  const _MoreButton({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 50,
-        margin: const EdgeInsets.only(left: 4),
-        decoration: BoxDecoration(
-          color: colors.onSurface.withAlpha(10),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(
-          PhosphorIcons.dotsThree(PhosphorIconsStyle.bold),
-          size: 20,
-          color: colors.onSurface.withAlpha(150),
-        ),
-      ),
-    );
-  }
-}
-
-class _AllCategoriesPicker extends StatelessWidget {
-  final List<Category> categories;
-  final String? selectedId;
-  final ValueChanged<String> onSelect;
-
-  const _AllCategoriesPicker({
-    required this.categories,
-    required this.selectedId,
-    required this.onSelect,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    return Container(
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 36,
-            height: 4,
-            margin: const EdgeInsets.only(bottom: 24),
-            decoration: BoxDecoration(
-              color: colors.onSurface.withAlpha(50),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const Text(
-            'Select Category',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 24),
-          Flexible(
-            child: GridView.builder(
-              shrinkWrap: true,
-              itemCount: categories.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                childAspectRatio: 0.8,
-              ),
-              itemBuilder: (context, index) {
-                final cat = categories[index];
-                final isSel = cat.id == selectedId;
-                return GestureDetector(
-                  onTap: () => onSelect(cat.id!),
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 56,
-                        height: 56,
-                        decoration: BoxDecoration(
-                          color: isSel
-                              ? colors.primary.withAlpha(40)
-                              : colors.onSurface.withAlpha(10),
-                          shape: BoxShape.circle,
-                          border: isSel
-                              ? Border.all(color: colors.primary, width: 2)
-                              : null,
-                        ),
-                        child: Icon(
-                          AppIcons.getCategoryIcon(cat.emoji),
-                          color: isSel ? colors.primary : colors.onSurface,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        cat.name,
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: isSel
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                        ),
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 24),
-        ],
-      ),
-    );
-  }
-}
-
-// ──────────────────────────────────
-// Type Toggle with sliding pill animation (500ms)
-// ──────────────────────────────────
-class _TypeToggle extends StatelessWidget {
-  final RecordType type;
-  final ValueChanged<RecordType> onSwitch;
-
-  const _TypeToggle({required this.type, required this.onSwitch});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    final isExpense = type == RecordType.expense;
-    const expenseColor = Color(0xFFFF3B30);
-    const incomeColor = Color(0xFF34C759);
-    const animDuration = Duration(milliseconds: 500);
-
-    return Container(
-      decoration: BoxDecoration(
-        color: colors.onSurface.withAlpha(12),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      padding: const EdgeInsets.all(4),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final pillWidth = constraints.maxWidth / 2 - 8;
-          final pillLeft = isExpense ? 4.0 : constraints.maxWidth / 2;
-
-          return SizedBox(
-            height: 44,
-            child: Stack(
-              children: [
-                // Animated sliding pill highlight
-                AnimatedPositioned(
-                  duration: animDuration,
-                  curve: Curves.easeInOut,
-                  left: pillLeft,
-                  top: 4,
-                  bottom: 4,
-                  child: AnimatedContainer(
-                    duration: animDuration,
-                    curve: Curves.easeInOut,
-                    width: pillWidth,
-                    decoration: BoxDecoration(
-                      color: (isExpense ? expenseColor : incomeColor).withAlpha(
-                        25,
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                // Tab buttons (on top of pill)
-                Row(
-                  children: [
-                    Expanded(
-                      child: _ToggleTab(
-                        icon: PhosphorIcons.trendDown(PhosphorIconsStyle.fill),
-                        label: 'Expense',
-                        isActive: isExpense,
-                        activeColor: expenseColor,
-                        colors: colors,
-                        onTap: () => onSwitch(RecordType.expense),
-                      ),
-                    ),
-                    Expanded(
-                      child: _ToggleTab(
-                        icon: PhosphorIcons.trendUp(PhosphorIconsStyle.fill),
-                        label: 'Income',
-                        isActive: !isExpense,
-                        activeColor: incomeColor,
-                        colors: colors,
-                        onTap: () => onSwitch(RecordType.income),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _ToggleTab extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool isActive;
-  final Color activeColor;
-  final ColorScheme colors;
-  final VoidCallback onTap;
-
-  const _ToggleTab({
-    required this.icon,
-    required this.label,
-    required this.isActive,
-    required this.activeColor,
-    required this.colors,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final fgColor = isActive ? activeColor : colors.onSurface.withAlpha(100);
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 18, color: fgColor),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: fgColor,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ──────────────────────────────────
-// Numeric Keypad with hold-to-delete
-// ──────────────────────────────────
-class _NumericKeypad extends StatefulWidget {
-  final void Function(String) onDigit;
-  final VoidCallback onBackspace;
-  final ColorScheme color;
-
-  const _NumericKeypad({
-    required this.onDigit,
-    required this.onBackspace,
-    required this.color,
-  });
-
-  @override
-  State<_NumericKeypad> createState() => _NumericKeypadState();
-}
-
-class _NumericKeypadState extends State<_NumericKeypad> {
-  Timer? _backspaceTimer;
-  Timer? _initialDelayTimer;
-
-  @override
-  void dispose() {
-    _cancelBackspaceTimers();
-    super.dispose();
-  }
-
-  void _cancelBackspaceTimers() {
-    _initialDelayTimer?.cancel();
-    _initialDelayTimer = null;
-    _backspaceTimer?.cancel();
-    _backspaceTimer = null;
-  }
-
-  void _onBackspaceLongPressStart(LongPressStartDetails _) {
-    _cancelBackspaceTimers();
-    widget.onBackspace();
-    _initialDelayTimer = Timer(const Duration(milliseconds: 300), () {
-      _backspaceTimer = Timer.periodic(
-        const Duration(milliseconds: 100),
-        (_) => widget.onBackspace(),
-      );
-    });
-  }
-
-  void _onBackspaceLongPressEnd(LongPressEndDetails _) {
-    _cancelBackspaceTimers();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final btnColor = widget.color.onSurface.withAlpha(12);
-    final txtColor = widget.color.onSurface;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              _KeypadButton(
-                color: btnColor,
-                onTap: () => widget.onDigit('1'),
-                child: Text('1', style: _keypadTextStyle(txtColor)),
-              ),
-              _KeypadButton(
-                color: btnColor,
-                onTap: () => widget.onDigit('2'),
-                child: Text('2', style: _keypadTextStyle(txtColor)),
-              ),
-              _KeypadButton(
-                color: btnColor,
-                onTap: () => widget.onDigit('3'),
-                child: Text('3', style: _keypadTextStyle(txtColor)),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              _KeypadButton(
-                color: btnColor,
-                onTap: () => widget.onDigit('4'),
-                child: Text('4', style: _keypadTextStyle(txtColor)),
-              ),
-              _KeypadButton(
-                color: btnColor,
-                onTap: () => widget.onDigit('5'),
-                child: Text('5', style: _keypadTextStyle(txtColor)),
-              ),
-              _KeypadButton(
-                color: btnColor,
-                onTap: () => widget.onDigit('6'),
-                child: Text('6', style: _keypadTextStyle(txtColor)),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              _KeypadButton(
-                color: btnColor,
-                onTap: () => widget.onDigit('7'),
-                child: Text('7', style: _keypadTextStyle(txtColor)),
-              ),
-              _KeypadButton(
-                color: btnColor,
-                onTap: () => widget.onDigit('8'),
-                child: Text('8', style: _keypadTextStyle(txtColor)),
-              ),
-              _KeypadButton(
-                color: btnColor,
-                onTap: () => widget.onDigit('9'),
-                child: Text('9', style: _keypadTextStyle(txtColor)),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              _KeypadButton(
-                color: btnColor,
-                onTap: () => widget.onDigit('.'),
-                child: Text('.', style: _keypadTextStyle(txtColor)),
-              ),
-              _KeypadButton(
-                color: btnColor,
-                onTap: () => widget.onDigit('0'),
-                child: Text('0', style: _keypadTextStyle(txtColor)),
-              ),
-              _KeypadButton(
-                color: btnColor,
-                onTap: widget.onBackspace,
-                onLongPressStart: _onBackspaceLongPressStart,
-                onLongPressEnd: _onBackspaceLongPressEnd,
-                onLongPressCancel: _cancelBackspaceTimers,
-                child: Icon(
-                  PhosphorIcons.backspace(PhosphorIconsStyle.light),
-                  color: txtColor,
-                  size: 22,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  static TextStyle _keypadTextStyle(Color color) =>
-      TextStyle(fontSize: 22, fontWeight: FontWeight.w500, color: color);
-}
-
-class _KeypadButton extends StatelessWidget {
-  final Color color;
-  final Widget child;
-  final VoidCallback onTap;
-  final void Function(LongPressStartDetails)? onLongPressStart;
-  final void Function(LongPressEndDetails)? onLongPressEnd;
-  final VoidCallback? onLongPressCancel;
-
-  const _KeypadButton({
-    required this.color,
-    required this.child,
-    required this.onTap,
-    this.onLongPressStart,
-    this.onLongPressEnd,
-    this.onLongPressCancel,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        onLongPressStart: onLongPressStart,
-        onLongPressEnd: onLongPressEnd,
-        onLongPressCancel: onLongPressCancel,
-        child: Container(
-          height: 52,
-          margin: const EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Center(child: child),
         ),
       ),
     );
