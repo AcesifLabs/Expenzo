@@ -20,9 +20,12 @@ import 'package:expense_tracker/shared/presentation/widgets/app_summary_card.dar
 import 'package:expense_tracker/shared/presentation/widgets/app_section_header.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_empty_state.dart';
 import 'package:expense_tracker/shared/presentation/widgets/shimmer_box.dart';
-import 'package:expense_tracker/shared/presentation/widgets/budget_progress_indicator.dart';
 import 'package:expense_tracker/shared/presentation/widgets/budget_transaction_list.dart';
 import 'package:expense_tracker/shared/presentation/widgets/read_only_record_tile.dart';
+import 'package:expense_tracker/features/dashboard/presentation/widgets/menu_row.dart';
+import 'package:expense_tracker/features/dashboard/presentation/widgets/balance_row.dart';
+import 'package:expense_tracker/features/dashboard/presentation/widgets/budget_progress_summary_card.dart';
+import 'package:expense_tracker/features/dashboard/presentation/widgets/feedback_page.dart';
 import '../../domain/entities/date_range.dart';
 import '../bloc/dashboard_bloc.dart';
 import '../bloc/dashboard_event.dart';
@@ -185,7 +188,7 @@ class DashboardPage extends StatelessWidget {
               value: currencyFmt.format(s.totalBalance),
               bottomChild: Row(
                 children: [
-                  _BalanceRow(
+                  BalanceRow(
                     icon: PhosphorIcons.trendUp(PhosphorIconsStyle.fill),
                     label: 'Income',
                     amount: s.totalIncome,
@@ -193,7 +196,7 @@ class DashboardPage extends StatelessWidget {
                     currencyFmt: currencyFmt,
                   ),
                   const SizedBox(width: 24),
-                  _BalanceRow(
+                  BalanceRow(
                     icon: PhosphorIcons.trendDown(PhosphorIconsStyle.fill),
                     label: 'Expense',
                     amount: s.totalExpense,
@@ -328,7 +331,7 @@ class DashboardPage extends StatelessWidget {
                   padding: const EdgeInsets.all(24),
                   child: Column(
                     children: budgets.map((bp) {
-                      return _BudgetProgressCard(
+                      return BudgetProgressSummaryCard(
                         progress: bp,
                         currencyFmt: currencyFmt,
                         onTap: () => _showBudgetTransactions(context, bp),
@@ -515,7 +518,7 @@ class DashboardPage extends StatelessWidget {
       if (isAuth)
         PopupMenuItem(
           value: 'account',
-          child: _MenuRow(
+          child: MenuRow(
             icon: PhosphorIcons.user(PhosphorIconsStyle.light),
             text: 'Profile',
           ),
@@ -523,7 +526,7 @@ class DashboardPage extends StatelessWidget {
       else
         PopupMenuItem(
           value: 'sign_in',
-          child: _MenuRow(
+          child: MenuRow(
             icon: PhosphorIcons.signIn(PhosphorIconsStyle.light),
             text: 'Sign In',
           ),
@@ -531,14 +534,14 @@ class DashboardPage extends StatelessWidget {
       const PopupMenuDivider(),
       PopupMenuItem(
         value: 'settings',
-        child: _MenuRow(
+        child: MenuRow(
           icon: PhosphorIcons.gear(PhosphorIconsStyle.light),
           text: 'Settings',
         ),
       ),
       PopupMenuItem(
         value: 'theme',
-        child: _MenuRow(
+        child: MenuRow(
           icon: isDark
               ? PhosphorIcons.moon(PhosphorIconsStyle.fill)
               : PhosphorIcons.sun(PhosphorIconsStyle.fill),
@@ -550,7 +553,7 @@ class DashboardPage extends StatelessWidget {
       ),
       PopupMenuItem(
         value: 'language',
-        child: _MenuRow(
+        child: MenuRow(
           icon: PhosphorIcons.translate(PhosphorIconsStyle.light),
           text: 'Language',
         ),
@@ -558,7 +561,7 @@ class DashboardPage extends StatelessWidget {
       const PopupMenuDivider(),
       PopupMenuItem(
         value: 'feedback',
-        child: _MenuRow(
+        child: MenuRow(
           icon: PhosphorIcons.chatTeardrop(PhosphorIconsStyle.light),
           text: 'Feedback',
         ),
@@ -567,7 +570,7 @@ class DashboardPage extends StatelessWidget {
         const PopupMenuDivider(),
         PopupMenuItem(
           value: 'sign_out',
-          child: _MenuRow(
+          child: MenuRow(
             icon: PhosphorIcons.signOut(PhosphorIconsStyle.light),
             text: 'Sign Out',
           ),
@@ -606,167 +609,6 @@ class DashboardPage extends StatelessWidget {
       case 'sign_out':
         context.read<AuthBloc>().add(const SignOutRequested());
     }
-  }
-}
-
-// ──────────────────────────────────
-// Menu Row
-// ──────────────────────────────────
-class _MenuRow extends StatelessWidget {
-  final IconData icon;
-  final String text;
-  final IconData? trailing;
-
-  const _MenuRow({required this.icon, required this.text, this.trailing});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 20),
-        const SizedBox(width: 12),
-        Expanded(child: Text(text, style: const TextStyle(fontSize: 14))),
-        if (trailing != null) Icon(trailing, size: 18),
-      ],
-    );
-  }
-}
-
-// ──────────────────────────────────
-// Feedback Stub Page
-// ──────────────────────────────────
-class FeedbackPage extends StatelessWidget {
-  const FeedbackPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return AppScaffold(
-      title: 'Feedback',
-      child: const Center(child: Text('Coming soon')),
-    );
-  }
-}
-
-// ──────────────────────────────────
-// Balance Row (income / expense)
-// ──────────────────────────────────
-class _BalanceRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final double amount;
-  final Color color;
-  final NumberFormat currencyFmt;
-
-  const _BalanceRow({
-    required this.icon,
-    required this.label,
-    required this.amount,
-    required this.color,
-    required this.currencyFmt,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final onSurface = Theme.of(context).colorScheme.onSurface;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, color: color, size: 18),
-        const SizedBox(width: 6),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: TextStyle(fontSize: 12, color: onSurface.withAlpha(140)),
-            ),
-            Text(
-              currencyFmt.format(amount),
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: onSurface,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-// ──────────────────────────────────
-// Budget Progress Card (Home View)
-// ──────────────────────────────────
-class _BudgetProgressCard extends StatelessWidget {
-  final BudgetProgress progress;
-  final NumberFormat currencyFmt;
-  final VoidCallback onTap;
-
-  const _BudgetProgressCard({
-    required this.progress,
-    required this.currencyFmt,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    final spent = currencyFmt.format(progress.spentAmount);
-    final budget = currencyFmt.format(progress.budgetAmount);
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header row
-              Row(
-                children: [
-                  // Budget name (from categoryId for now)
-                  Expanded(
-                    child: Text(
-                      progress.categoryId ?? 'Overall Budget',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: colors.onSurface,
-                      ),
-                    ),
-                  ),
-                  // Spent vs Budget
-                  Text(
-                    '$spent / $budget',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: colors.onSurface.withAlpha(180),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              // Progress bar
-              BudgetProgressIndicator(percentage: progress.percentage),
-              const SizedBox(height: 4),
-              // Percentage text
-              Text(
-                '${progress.percentage.toStringAsFixed(0)}% used',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: colors.onSurface.withAlpha(120),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }
 
