@@ -76,6 +76,9 @@ jobs:
       - name: Decode .env.prod
         run: echo "${{ secrets.ENV_PROD }}" | base64 --decode > .env.prod
 
+      - name: Decode google-services.json
+        run: echo "${{ secrets.GOOGLE_SERVICES_JSON_B64 }}" | base64 --decode > android/app/google-services.json
+
       - name: Decode keystore
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.jks
 
