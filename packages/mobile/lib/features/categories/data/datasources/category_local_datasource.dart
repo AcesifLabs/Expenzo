@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
-import 'package:expense_tracker/core/database/app_database.dart' hide Category;
+import 'package:expense_tracker/core/database/app_database.dart' as db;
 import 'package:expense_tracker/core/database/daos/category_dao.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import '../../domain/entities/category.dart';
@@ -58,7 +58,7 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
     try {
       final now = DateTime.now().toUtc();
       final id = category.id ?? const Uuid().v4();
-      final companion = CategoriesCompanion(
+      final companion = db.CategoriesCompanion(
         id: Value(id),
         name: Value(category.name),
         emoji: Value(category.emoji),
@@ -80,7 +80,7 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
   Future<Category> updateCategory(Category category) async {
     try {
       final now = DateTime.now().toUtc();
-      final companion = CategoriesCompanion(
+      final companion = db.CategoriesCompanion(
         id: Value(category.id!),
         name: Value(category.name),
         emoji: Value(category.emoji),
@@ -125,7 +125,7 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
     }
   }
 
-  Category _mapToEntity(dynamic category) {
+  Category _mapToEntity(db.Category category) {
     return Category(
       id: category.id,
       name: category.name,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_badge.dart';
 import '../../../parsing_rules/domain/entities/parsed_transaction.dart';
@@ -20,7 +21,7 @@ class ParsedTransactionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final currencyFormat = NumberFormat.currency(symbol: '\$');
+    final currencyFormat = CurrencyFormatter.getFormatter();
 
     return AppCard(
       onTap: () => onSelectionChanged(!isSelected),

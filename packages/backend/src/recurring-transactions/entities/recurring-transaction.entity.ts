@@ -1,7 +1,9 @@
-import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
 import { User } from '../../auth/entities/user.entity';
+import { TransactionFrequency } from '../../common/enums/transaction-frequency.enum';
 
 @Entity('recurring_transactions')
+@Index(['userId', 'updatedAt'])
 export class RecurringTransaction {
   @PrimaryColumn('text')
   id: string;
@@ -22,8 +24,8 @@ export class RecurringTransaction {
   @Column('text', { nullable: true })
   categoryId: string;
 
-  @Column()
-  frequency: string;
+  @Column({ type: 'varchar', default: TransactionFrequency.MONTHLY })
+  frequency: TransactionFrequency;
 
   @Column('timestamptz')
   startDate: Date;

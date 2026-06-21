@@ -131,7 +131,9 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
           final day = int.parse(match.group(2)!);
           final year = int.parse(match.group(3)!);
           return DateTime(year, month, day);
-        } catch (_) {}
+        } catch (e) {
+          debugPrint('RegexTesterWidget: Failed to parse date components: $e');
+        }
       }
     }
     return null;

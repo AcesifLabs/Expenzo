@@ -13,7 +13,7 @@ export class SyncChangeItem {
   @IsEnum(SyncTable) table: SyncTable;
   @IsEnum(SyncAction) action: SyncAction;
   @IsString() id: string;
-  @IsObject() @IsOptional() data?: Record<string, any>;
+  @IsObject() @IsOptional() data?: Record<string, unknown>;
   @IsDateString() @IsOptional() updatedAt?: string;
 }
 

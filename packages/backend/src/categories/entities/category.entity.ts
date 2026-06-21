@@ -1,8 +1,10 @@
 import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
 import { User } from '../../auth/entities/user.entity';
+import { CategoryType } from '../../common/enums/category-type.enum';
 
 @Entity('categories')
 @Index(['userId'])
+@Index(['userId', 'updatedAt'])
 export class Category {
   @PrimaryColumn('text')
   id: string;
@@ -26,8 +28,8 @@ export class Category {
   @Column({ default: false })
   isDefault: boolean;
 
-  @Column({ default: 'OUT' })
-  categoryType: string;
+  @Column({ type: 'varchar', default: CategoryType.EXPENSE })
+  categoryType: CategoryType;
 
   @Column({ default: 0 })
   usageCount: number;

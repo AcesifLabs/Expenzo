@@ -1,8 +1,10 @@
 import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
 import { User } from '../../auth/entities/user.entity';
+import { BudgetPeriod } from '../../common/enums/budget-period.enum';
 
 @Entity('budgets')
 @Index(['userId', 'startDate'])
+@Index(['userId', 'updatedAt'])
 export class Budget {
   @PrimaryColumn('text')
   id: string;
@@ -20,8 +22,8 @@ export class Budget {
   @Column('decimal', { precision: 12, scale: 2 })
   amount: number;
 
-  @Column()
-  period: string;
+  @Column({ type: 'varchar' })
+  period: BudgetPeriod;
 
   @Column('timestamptz')
   startDate: Date;

@@ -7,9 +7,11 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/core/theme/app_colors.dart';
+import 'package:expense_tracker/core/utils/navigation_utils.dart';
 import 'package:expense_tracker/features/categories/domain/entities/category.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_state.dart';
+import 'package:expense_tracker/features/categories/presentation/pages/category_form_page.dart';
 import '../../../categories/presentation/bloc/category_event.dart';
 import '../../domain/entities/record.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
@@ -21,6 +23,7 @@ import 'new_transaction/all_categories_picker.dart';
 import 'new_transaction/category_picker_item.dart';
 import 'new_transaction/numeric_keypad.dart';
 import 'new_transaction/type_toggle.dart';
+import 'new_transaction/typewriter_animation_mixin.dart';
 
 class NewTransactionSheet extends StatefulWidget {
   const NewTransactionSheet({super.key});
@@ -30,7 +33,7 @@ class NewTransactionSheet extends StatefulWidget {
 }
 
 class _NewTransactionSheetState extends State<NewTransactionSheet>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, TypewriterAnimationMixin {
   late RecordType _type;
   final _amountText = ValueNotifier<String>('');
   final _noteCtrl = TextEditingController();
@@ -70,18 +73,14 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     'Investment dividend',
   ];
 
-  Timer? _typewriterTimer;
-  int _twPhraseIndex = 0;
-  int _twCharIndex = 0;
-  String _twDisplayText = '';
-  bool _twIsErasing = false;
-  bool _twIsPaused = false;
-
   @override
   void initState() {
     super.initState();
     _type = RecordType.expense;
     _loadCategories();
+
+    // Initialize typewriter with expense placeholders
+    initTypewriter(_expensePlaceholders);
 
     // Unified note controller listener (label validation + typewriter)
     _noteCtrl.addListener(_onNoteChanged);
@@ -109,13 +108,12 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
 
     // Start typewriter after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _startTypewriter();
+      if (mounted) startTypewriter();
     });
   }
 
   @override
   void dispose() {
-    _stopTypewriter();
     _noteCtrl.removeListener(_onNoteChanged);
     _glowController.dispose();
     _amountText.dispose();
@@ -125,19 +123,16 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
 
   // ── Note change handler (clear label error + pause/resume typewriter) ──
   void _onNoteChanged() {
-    // Task 3: Clear label error when user types
+    // Clear label error when user types
     if (_labelError && _noteCtrl.text.trim().isNotEmpty) {
       setState(() => _labelError = false);
     }
 
-    // Task 7: Typewriter pause/resume
-    if (_noteCtrl.text.isNotEmpty && !_twIsPaused) {
-      _twIsPaused = true;
-      _stopTypewriter();
-      setState(() => _twDisplayText = '');
-    } else if (_noteCtrl.text.isEmpty && _twIsPaused) {
-      _twIsPaused = false;
-      _startTypewriter();
+    // Typewriter pause/resume
+    if (_noteCtrl.text.isNotEmpty && !isTypewriterPaused) {
+      pauseTypewriter();
+    } else if (_noteCtrl.text.isEmpty && isTypewriterPaused) {
+      resumeTypewriter();
     }
   }
 
@@ -147,7 +142,15 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     );
   }
 
-  void _showAllCategories(BuildContext context, List<Category> allCategories) {
+  void _showAllCategories(
+    BuildContext context,
+    List<Category> allCategories,
+    RecordType type,
+  ) {
+    final colors = Theme.of(context).colorScheme;
+    final accentColor = type == RecordType.expense
+        ? colors.error
+        : colors.primary;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -155,6 +158,14 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       builder: (ctx) => AllCategoriesPicker(
         categories: allCategories,
         selectedId: _selectedCategoryId,
+        type: type,
+        accentColor: accentColor,
+        onAddNew: () {
+          // Capture bloc from outer context BEFORE popping
+          final categoryBloc = context.read<CategoryBloc>();
+          Navigator.pop(ctx); // Close the picker
+          _addNewCategory(context, type, categoryBloc); // Use outer context
+        },
         onSelect: (id) {
           setState(() {
             _selectedCategoryId = id;
@@ -164,6 +175,30 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
         },
       ),
     );
+  }
+
+  Future<void> _addNewCategory(
+    BuildContext context,
+    RecordType type,
+    CategoryBloc categoryBloc,
+  ) async {
+    final Category? created = await Navigator.push<Category>(
+      context,
+      SlidePageRoute(
+        builder: (_) => BlocProvider.value(
+          value: categoryBloc,
+          child: CategoryFormPage(initialType: type),
+        ),
+      ),
+    );
+    if (created != null && context.mounted) {
+      setState(() {
+        _selectedCategoryId = created.id;
+        // Prepend to _categories so the chip bar shows the new category
+        // immediately, even before the BlocBuilder reloads from the DB.
+        _categories = [created, ..._categories];
+      });
+    }
   }
 
   // ── Pre-select default "General" category ──
@@ -193,7 +228,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
 
   void _switchType(RecordType t) {
     _glowController.reset();
-    _stopTypewriter();
+    stopTypewriter();
     setState(() {
       _type = t;
       _selectedCategoryId = null;
@@ -203,15 +238,16 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       _categoryError = false;
     });
     _loadCategories();
-    if (!_twIsPaused) {
-      _startTypewriter();
+    // Update typewriter phrases for new type
+    initTypewriter(
+      t == RecordType.expense ? _expensePlaceholders : _incomePlaceholders,
+    );
+    if (!isTypewriterPaused) {
+      startTypewriter();
     }
   }
 
   // ── Swipe gesture handler (left→right = expense, right→left = income) ──
-  // Safe with category-chip ListView: the chip scrollbar's
-  // HorizontalDragGestureRecognizer wins the gesture arena within its
-  // bounds; this handler only fires on unclaimed horizontal drags.
   void _onHorizontalSwipe(DragEndDetails details) {
     final velocity = details.primaryVelocity;
     if (velocity == null) return;
@@ -370,7 +406,10 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
         ),
       );
       return true;
-    } catch (_) {
+    } catch (e) {
+      debugPrint(
+        'NewTransactionSheet: Failed to create recurring transaction: $e',
+      );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -387,87 +426,15 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   }
 
   /// Returns the next scheduled occurrence after [date] based on frequency.
-  /// Currently only monthly frequency is exposed in the sheet UI.
   DateTime _nextOccurrenceAfter(DateTime date) {
     // monthly: advance by one month, preserving the day-of-month
     return DateTime(date.year, date.month + 1, date.day);
   }
 
-  // ── Typewriter engine (type → pause → erase → next) ──
-  List<String> get _twPhrases =>
-      _type == RecordType.expense ? _expensePlaceholders : _incomePlaceholders;
-
-  void _startTypewriter() {
-    _stopTypewriter();
-    _twPhraseIndex = 0;
-    _twCharIndex = 0;
-    _twDisplayText = '';
-    _twIsErasing = false;
-    _tickTypewriter();
-  }
-
-  void _stopTypewriter() {
-    _typewriterTimer?.cancel();
-    _typewriterTimer = null;
-  }
-
-  void _tickTypewriter() {
-    if (_twIsPaused || !mounted) return;
-
-    final phrases = _twPhrases;
-    if (phrases.isEmpty) return;
-
-    final currentPhrase = phrases[_twPhraseIndex % phrases.length];
-
-    if (!_twIsErasing) {
-      // Typing phase
-      if (_twCharIndex < currentPhrase.length) {
-        _twCharIndex++;
-        _twDisplayText = currentPhrase.substring(0, _twCharIndex);
-        setState(() {});
-        _typewriterTimer = Timer(
-          const Duration(milliseconds: 80),
-          _tickTypewriter,
-        );
-      } else {
-        // Phrase complete — pause 2 seconds, then erase
-        _typewriterTimer = Timer(const Duration(seconds: 2), () {
-          if (!_twIsPaused && mounted) {
-            _twIsErasing = true;
-            _tickTypewriter();
-          }
-        });
-      }
-    } else {
-      // Erasing phase
-      if (_twCharIndex > 0) {
-        _twCharIndex--;
-        _twDisplayText = currentPhrase.substring(0, _twCharIndex);
-        setState(() {});
-        _typewriterTimer = Timer(
-          const Duration(milliseconds: 40),
-          _tickTypewriter,
-        );
-      } else {
-        // Fully erased — next phrase after brief gap
-        _twIsErasing = false;
-        _twPhraseIndex = (_twPhraseIndex + 1) % phrases.length;
-        _twCharIndex = 0;
-        _twDisplayText = '';
-        setState(() {});
-        _typewriterTimer = Timer(const Duration(milliseconds: 300), () {
-          if (!_twIsPaused && mounted) {
-            _tickTypewriter();
-          }
-        });
-      }
-    }
-  }
-
   // ── Dynamic hint text (typewriter or static fallback) ──
   String _getHintText() {
-    if (!_twIsPaused && _twDisplayText.isNotEmpty) {
-      return _twDisplayText;
+    if (!isTypewriterPaused && typewriterDisplayText.isNotEmpty) {
+      return typewriterDisplayText;
     }
     return _type == RecordType.expense ? 'Name of expense' : 'Name of income';
   }
@@ -551,7 +518,9 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                     width: double.infinity,
                     height: 52,
                     child: FilledButton(
-                      onPressed: _isSubmitting ? null : () => unawaited(_submit()),
+                      onPressed: _isSubmitting
+                          ? null
+                          : () => unawaited(_submit()),
                       style: FilledButton.styleFrom(
                         backgroundColor: _type == RecordType.expense
                             ? colors.error
@@ -609,7 +578,11 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(
-                  color: _labelError ? borderColor : colors.primary,
+                  color: _labelError
+                      ? borderColor
+                      : _type == RecordType.expense
+                      ? colors.error
+                      : colors.primary,
                   width: 2.0,
                 ),
               ),
@@ -649,7 +622,9 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                     data: Theme.of(ctx).copyWith(
                       colorScheme: isDark
                           ? ColorScheme.dark(
-                              primary: AppColors.secondary,
+                              primary: _type == RecordType.expense
+                                  ? AppColors.expense
+                                  : AppColors.secondary,
                               onPrimary: Colors.black,
                               surface: AppColors.surfaceDark,
                               onSurface: Colors.white,
@@ -716,7 +691,9 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  activeColor: colors.primary,
+                  activeColor: _type == RecordType.expense
+                      ? colors.error
+                      : colors.primary,
                   side: BorderSide(
                     color: colors.onSurface.withAlpha(120),
                     width: 1.5,
@@ -777,7 +754,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
           );
         }
 
-        final displayCats = allCats.take(5).toList();
+        final displayCats = allCats.take(4).toList();
         if (_selectedCategoryId != null &&
             !displayCats.any((c) => c.id == _selectedCategoryId)) {
           Category? selected;
@@ -793,7 +770,6 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
           }
         }
 
-        // Task 4: Wrap with AnimatedBuilder for per-chip glow
         return AnimatedBuilder(
           animation: _glowCurve,
           builder: (context, _) {
@@ -813,6 +789,9 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                         colors,
                         fallback: Colors.transparent,
                       ),
+                      selectedColor: _type == RecordType.expense
+                          ? colors.error
+                          : colors.primary,
                       onTap: () {
                         setState(() {
                           _selectedCategoryId = cat.id;
@@ -821,23 +800,22 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                       },
                     );
                   }),
-                  if (_selectedCategoryId == null)
-                    GestureDetector(
-                      onTap: () => _showAllCategories(context, allCats),
-                      child: Container(
-                        width: 50,
-                        margin: const EdgeInsets.only(left: 4),
-                        decoration: BoxDecoration(
-                          color: colors.onSurface.withAlpha(10),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          PhosphorIcons.dotsThree(PhosphorIconsStyle.bold),
-                          size: 20,
-                          color: colors.onSurface.withAlpha(150),
-                        ),
+                  GestureDetector(
+                    onTap: () => _showAllCategories(context, allCats, _type),
+                    child: Container(
+                      width: 50,
+                      margin: const EdgeInsets.only(left: 4),
+                      decoration: BoxDecoration(
+                        color: colors.onSurface.withAlpha(10),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        PhosphorIcons.gridFour(PhosphorIconsStyle.bold),
+                        size: 20,
+                        color: colors.onSurface.withAlpha(150),
                       ),
                     ),
+                  ),
                 ],
               ),
             );

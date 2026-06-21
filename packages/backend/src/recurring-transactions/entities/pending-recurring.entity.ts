@@ -1,8 +1,9 @@
-import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
 import { User } from '../../auth/entities/user.entity';
 import { RecurringTransaction } from './recurring-transaction.entity';
 
 @Entity('pending_recurring')
+@Index(['userId', 'updatedAt'])
 export class PendingRecurring {
   @PrimaryColumn('text')
   id: string;

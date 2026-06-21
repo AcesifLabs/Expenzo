@@ -6,6 +6,7 @@ import '../bloc/sample_analyzer_bloc.dart';
 import '../../domain/entities/message_source.dart';
 import 'template_editor_page.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
+import 'package:expense_tracker/features/sms_parser/domain/entities/sms_message.dart';
 
 class SampleAnalyzerPage extends StatelessWidget {
   final MessageSource source;
@@ -62,7 +63,7 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
     return currentScroll >= (maxScroll * 0.9);
   }
 
-  void _showMessageOptions(BuildContext context, dynamic msg) {
+  void _showMessageOptions(BuildContext context, SmsMessage msg) {
     showModalBottomSheet(
       context: context,
       builder: (bottomSheetContext) {

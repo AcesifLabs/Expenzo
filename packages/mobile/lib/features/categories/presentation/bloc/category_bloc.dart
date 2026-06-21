@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:expense_tracker/core/constants/record_type.dart';
 import '../../domain/usecases/create_category.dart';
 import '../../domain/usecases/delete_category.dart';
 import '../../domain/usecases/get_categories.dart';
@@ -11,6 +12,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   final CreateCategory createCategory;
   final UpdateCategory updateCategory;
   final DeleteCategory deleteCategory;
+  RecordType? _lastRequestedType;
 
   CategoryBloc({
     required this.getCategories,
@@ -28,6 +30,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     LoadCategories event,
     Emitter<CategoryState> emit,
   ) async {
+    _lastRequestedType = event.type;
     emit(const CategoryLoading());
     final result = await getCategories(
       GetCategoriesParams(type: event.type, sortByUsage: event.sortByUsage),
@@ -46,7 +49,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     final result = await createCategory(event.category);
     result.fold(
       (failure) => emit(CategoryError(failure.message)),
-      (_) => add(const LoadCategories()),
+      (_) => add(LoadCategories(type: _lastRequestedType, sortByUsage: true)),
     );
   }
 
@@ -58,7 +61,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     final result = await updateCategory(event.category);
     result.fold(
       (failure) => emit(CategoryError(failure.message)),
-      (_) => add(const LoadCategories()),
+      (_) => add(LoadCategories(type: _lastRequestedType, sortByUsage: true)),
     );
   }
 
@@ -70,7 +73,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     final result = await deleteCategory(event.id);
     result.fold(
       (failure) => emit(CategoryError(failure.message)),
-      (_) => add(const LoadCategories()),
+      (_) => add(LoadCategories(type: _lastRequestedType, sortByUsage: true)),
     );
   }
 }

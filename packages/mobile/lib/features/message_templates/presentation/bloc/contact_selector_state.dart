@@ -1,11 +1,12 @@
 import 'package:equatable/equatable.dart';
+import 'package:expense_tracker/core/constants/source_types.dart';
 
 class DeviceContact extends Equatable {
   final String address;
   final String displayName;
   final String lastMessage;
   final DateTime lastMessageDate;
-  final String sourceType; // 'sms' or 'email'
+  final ExpenseSource sourceType;
 
   const DeviceContact({
     required this.address,
