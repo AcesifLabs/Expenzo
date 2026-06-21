@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import '../../constants/source_types.dart';
 import '../../database/app_database.dart';
 import '../sync_table_registry.dart';
 
@@ -38,7 +39,7 @@ class ParsingRulesSyncHandler
     categoryId: data['categoryId'] != null
         ? Value(data['categoryId'])
         : const Value.absent(),
-    sourceType: data['sourceType'] ?? 'sms',
+    sourceType: data['sourceType'] ?? ExpenseSource.sms.name,
     isEnabled: data['isEnabled'] != null
         ? Value(data['isEnabled'])
         : const Value.absent(),

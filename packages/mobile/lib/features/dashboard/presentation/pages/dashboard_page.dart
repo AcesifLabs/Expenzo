@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
+import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/core/utils/navigation_utils.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_event.dart';
@@ -21,21 +21,70 @@ import 'package:expense_tracker/shared/presentation/widgets/app_summary_card.dar
 import 'package:expense_tracker/shared/presentation/widgets/app_section_header.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_empty_state.dart';
 import 'package:expense_tracker/shared/presentation/widgets/shimmer_box.dart';
-import 'package:expense_tracker/shared/presentation/widgets/budget_progress_indicator.dart';
 import 'package:expense_tracker/shared/presentation/widgets/budget_transaction_list.dart';
+import 'package:expense_tracker/shared/presentation/widgets/read_only_record_tile.dart';
+import 'package:expense_tracker/features/dashboard/presentation/widgets/menu_row.dart';
+import 'package:expense_tracker/features/dashboard/presentation/widgets/balance_row.dart';
+import 'package:expense_tracker/features/dashboard/presentation/widgets/budget_progress_summary_card.dart';
+import 'package:expense_tracker/shared/presentation/pages/feedback_page.dart';
 import '../../domain/entities/date_range.dart';
 import '../bloc/dashboard_bloc.dart';
 import '../bloc/dashboard_event.dart';
 import '../bloc/dashboard_state.dart';
 
-class DashboardPage extends StatelessWidget {
+class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
 
   @override
+  State<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends State<DashboardPage> {
+  bool _initialLoadScheduled = false;
+  Future<List<BudgetProgress>>? _budgetsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _initialLoadScheduled) return;
+      _initialLoadScheduled = true;
+      context.read<DashboardBloc>().add(
+        const LoadDashboard(
+          dateRange: DateRange(preset: DateRangePreset.thisMonth),
+        ),
+      );
+    });
+  }
+
+  Future<List<BudgetProgress>> _loadBudgets() async {
+    await di.featureDependenciesReady;
+    final getBudgetsWithProgress = _tryGetBudgetsWithProgress();
+    if (getBudgetsWithProgress == null) return [];
+    final result = await getBudgetsWithProgress(limit: 5);
+    return result.fold(
+      (failure) {
+        debugPrint('DashboardPage: Failed to load budgets: ${failure.message}');
+        return <BudgetProgress>[];
+      },
+      (budgets) => budgets,
+    );
+  }
+
+  void _ensureBudgetsFuture() {
+    _budgetsFuture ??= _loadBudgets();
+  }
+
+  /// Reset the cached budgets future so the next [FutureBuilder] rebuild
+  /// fetches fresh data. Called on pull-to-refresh and after budget edits.
+  void _invalidateBudgetsFuture() {
+    _budgetsFuture = null;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocBuilder<DashboardBloc, DashboardState>(
-      builder: (context, state) {
-        final authState = context.watch<AuthBloc>().state;
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, authState) {
         final name = authState is Authenticated
             ? (authState.user.displayName ?? 'User')
             : 'User';
@@ -56,77 +105,82 @@ class DashboardPage extends StatelessWidget {
             '$day$suffix ${DateFormat('MMMM').format(now)}, '
             '${DateFormat('EEEE').format(now)}, ${now.year}';
 
-        return AppScaffold.slivers(
-          title: null,
-          subtitle: dateStr,
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(left: 8, right: 8),
-              child: PopupMenuButton<String>(
-                offset: const Offset(0, 48),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                onSelected: (value) => _handleMenuAction(context, value),
-                itemBuilder: (context) => _buildMenuItems(context),
-                padding: EdgeInsets.zero,
-                icon: SizedBox(
-                  width: 44,
-                  height: 44,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      CircleAvatar(
-                        radius: 20,
-                        backgroundColor: Theme.of(
-                          context,
-                        ).colorScheme.primary.withAlpha(30),
-                        backgroundImage: photoUrl != null
-                            ? NetworkImage(photoUrl)
-                            : null,
-                        child: photoUrl == null
-                            ? (authState is Authenticated
-                                  ? Text(
-                                      name.isNotEmpty
-                                          ? name[0].toUpperCase()
-                                          : '?',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.primary,
-                                      ),
-                                    )
-                                  : Icon(
-                                      PhosphorIcons.user(
-                                        PhosphorIconsStyle.regular,
-                                      ),
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.primary,
-                                      size: 20,
-                                    ))
-                            : null,
-                      ),
-                      if (authState is AuthLoading)
-                        SizedBox(
-                          width: 44,
-                          height: 44,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Theme.of(context).colorScheme.primary,
+        return BlocBuilder<DashboardBloc, DashboardState>(
+          builder: (context, state) {
+            return AppScaffold.slivers(
+              title: null,
+              subtitle: dateStr,
+              actions: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 8, right: 8),
+                  child: PopupMenuButton<String>(
+                    offset: const Offset(0, 48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    onSelected: (value) => _handleMenuAction(context, value),
+                    itemBuilder: (context) => _buildMenuItems(context),
+                    padding: EdgeInsets.zero,
+                    icon: SizedBox(
+                      width: 44,
+                      height: 44,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          CircleAvatar(
+                            radius: 20,
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primary.withAlpha(30),
+                            backgroundImage: photoUrl != null
+                                ? NetworkImage(photoUrl)
+                                : null,
+                            child: photoUrl == null
+                                ? (authState is Authenticated
+                                      ? Text(
+                                          name.isNotEmpty
+                                              ? name[0].toUpperCase()
+                                              : '?',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.primary,
+                                          ),
+                                        )
+                                      : Icon(
+                                          PhosphorIcons.user(
+                                            PhosphorIconsStyle.regular,
+                                          ),
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.primary,
+                                          size: 20,
+                                        ))
+                                : null,
                           ),
-                        ),
-                    ],
+                          if (authState is AuthLoading)
+                            SizedBox(
+                              width: 44,
+                              height: 44,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-          ],
-          slivers: _buildContent(context, state),
-          onRefresh: () async {
-            context.read<DashboardBloc>().add(RefreshDashboard());
+              ],
+              slivers: _buildContent(context, state),
+              onRefresh: () async {
+                _invalidateBudgetsFuture();
+                context.read<DashboardBloc>().add(RefreshDashboard());
+              },
+            );
           },
         );
       },
@@ -134,15 +188,36 @@ class DashboardPage extends StatelessWidget {
   }
 
   List<Widget> _buildContent(BuildContext context, DashboardState state) {
-    final currencyFmt = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+    final currencyFmt = CurrencyFormatter.getFormatter(decimalDigits: 2);
     final colors = Theme.of(context).colorScheme;
 
     if (state is DashboardLoading) {
       return [
+        // Balance skeleton
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: _buildBalanceSkeleton(),
+          ),
+        ),
+        // Budgets section skeleton
+        const SliverToBoxAdapter(child: SizedBox(height: 2)),
+        const SliverToBoxAdapter(child: AppSectionHeader(title: 'Budgets')),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: _buildBudgetSkeleton(context),
+          ),
+        ),
+        // Recent Activity skeleton
+        const SliverToBoxAdapter(child: SizedBox(height: 5)),
+        const SliverToBoxAdapter(
+          child: AppSectionHeader(title: 'Recent Activity'),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: _buildRecentActivitySkeleton(),
           ),
         ),
       ];
@@ -185,7 +260,7 @@ class DashboardPage extends StatelessWidget {
               value: currencyFmt.format(s.totalBalance),
               bottomChild: Row(
                 children: [
-                  _BalanceRow(
+                  BalanceRow(
                     icon: PhosphorIcons.trendUp(PhosphorIconsStyle.fill),
                     label: 'Income',
                     amount: s.totalIncome,
@@ -193,7 +268,7 @@ class DashboardPage extends StatelessWidget {
                     currencyFmt: currencyFmt,
                   ),
                   const SizedBox(width: 24),
-                  _BalanceRow(
+                  BalanceRow(
                     icon: PhosphorIcons.trendDown(PhosphorIconsStyle.fill),
                     label: 'Expense',
                     amount: s.totalExpense,
@@ -248,36 +323,46 @@ class DashboardPage extends StatelessWidget {
       ];
     }
 
-    // DashboardInitial — trigger load after initial queries settle
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(const Duration(milliseconds: 450), () {
-        if (context.mounted) {
-          context.read<DashboardBloc>().add(
-            const LoadDashboard(
-              dateRange: DateRange(preset: DateRangePreset.thisMonth),
-            ),
-          );
-        }
-      });
-    });
-
+    // DashboardInitial — pure skeleton, no side effects
     return [
+      // Balance skeleton
       SliverToBoxAdapter(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: _buildBalanceSkeleton(),
         ),
       ),
+      // Budgets section skeleton
+      const SliverToBoxAdapter(child: SizedBox(height: 2)),
+      const SliverToBoxAdapter(child: AppSectionHeader(title: 'Budgets')),
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: _buildBudgetSkeleton(context),
+        ),
+      ),
+      // Recent Activity skeleton
+      const SliverToBoxAdapter(child: SizedBox(height: 5)),
+      const SliverToBoxAdapter(
+        child: AppSectionHeader(title: 'Recent Activity'),
+      ),
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: _buildRecentActivitySkeleton(),
+        ),
+      ),
     ];
   }
 
   Widget _buildBudgetCards(BuildContext context) {
-    final currencyFmt = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
+    final currencyFmt = CurrencyFormatter.getFormatter(decimalDigits: 0);
+    _ensureBudgetsFuture();
 
-    return FutureBuilder(
-      future: di.featureDependenciesReady,
-      builder: (context, ready) {
-        if (ready.connectionState != ConnectionState.done) {
+    return FutureBuilder<List<BudgetProgress>>(
+      future: _budgetsFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
           return SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -286,59 +371,38 @@ class DashboardPage extends StatelessWidget {
           );
         }
 
-        final getBudgetsWithProgress = _tryGetBudgetsWithProgress();
-        if (getBudgetsWithProgress == null) {
-          return const SliverToBoxAdapter(child: SizedBox.shrink());
-        }
-
-        return FutureBuilder<List<BudgetProgress>>(
-          future: getBudgetsWithProgress(
-            limit: 5,
-          ).then((result) => result.getOrElse(() => [])),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: _buildBudgetSkeleton(context),
-                ),
-              );
-            }
-
-            final budgets = snapshot.data ?? [];
-            if (budgets.isEmpty) {
-              return SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: AppCard(
-                    padding: const EdgeInsets.symmetric(vertical: 24),
-                    child: AppEmptyState(
-                      icon: PhosphorIcons.tray(PhosphorIconsStyle.regular),
-                      message: 'No budgets set',
-                    ),
-                  ),
-                ),
-              );
-            }
-
-            return SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: AppCard(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    children: budgets.map((bp) {
-                      return _BudgetProgressCard(
-                        progress: bp,
-                        currencyFmt: currencyFmt,
-                        onTap: () => _showBudgetTransactions(context, bp),
-                      );
-                    }).toList(),
-                  ),
+        final budgets = snapshot.data ?? [];
+        if (budgets.isEmpty) {
+          return SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: AppCard(
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                child: AppEmptyState(
+                  icon: PhosphorIcons.tray(PhosphorIconsStyle.regular),
+                  message: 'No budgets set',
                 ),
               ),
-            );
-          },
+            ),
+          );
+        }
+
+        return SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: AppCard(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                children: budgets.map((bp) {
+                  return BudgetProgressSummaryCard(
+                    progress: bp,
+                    currencyFmt: currencyFmt,
+                    onTap: () => _showBudgetTransactions(context, bp),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
         );
       },
     );
@@ -495,6 +559,25 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
+  Widget _buildRecentActivitySkeleton() {
+    return SizedBox(
+      height: 140,
+      child: ShimmerBox(
+        child: AppCard(
+          clipBehavior: Clip.antiAlias,
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: const [
+              _RecentActivityTileSkeleton(),
+              _RecentActivityTileSkeleton(),
+              _RecentActivityTileSkeleton(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   /// Tries to resolve [GetBudgetsWithProgress] from the DI container.
   /// Returns `null` if the lazy-registered budget module hasn't been initialized yet.
   /// This prevents a synchronous `getIt` throw from crashing the entire dashboard.
@@ -515,7 +598,7 @@ class DashboardPage extends StatelessWidget {
       if (isAuth)
         PopupMenuItem(
           value: 'account',
-          child: _MenuRow(
+          child: MenuRow(
             icon: PhosphorIcons.user(PhosphorIconsStyle.light),
             text: 'Profile',
           ),
@@ -523,7 +606,7 @@ class DashboardPage extends StatelessWidget {
       else
         PopupMenuItem(
           value: 'sign_in',
-          child: _MenuRow(
+          child: MenuRow(
             icon: PhosphorIcons.signIn(PhosphorIconsStyle.light),
             text: 'Sign In',
           ),
@@ -531,14 +614,14 @@ class DashboardPage extends StatelessWidget {
       const PopupMenuDivider(),
       PopupMenuItem(
         value: 'settings',
-        child: _MenuRow(
+        child: MenuRow(
           icon: PhosphorIcons.gear(PhosphorIconsStyle.light),
           text: 'Settings',
         ),
       ),
       PopupMenuItem(
         value: 'theme',
-        child: _MenuRow(
+        child: MenuRow(
           icon: isDark
               ? PhosphorIcons.moon(PhosphorIconsStyle.fill)
               : PhosphorIcons.sun(PhosphorIconsStyle.fill),
@@ -550,7 +633,7 @@ class DashboardPage extends StatelessWidget {
       ),
       PopupMenuItem(
         value: 'language',
-        child: _MenuRow(
+        child: MenuRow(
           icon: PhosphorIcons.translate(PhosphorIconsStyle.light),
           text: 'Language',
         ),
@@ -558,7 +641,7 @@ class DashboardPage extends StatelessWidget {
       const PopupMenuDivider(),
       PopupMenuItem(
         value: 'feedback',
-        child: _MenuRow(
+        child: MenuRow(
           icon: PhosphorIcons.chatTeardrop(PhosphorIconsStyle.light),
           text: 'Feedback',
         ),
@@ -567,7 +650,7 @@ class DashboardPage extends StatelessWidget {
         const PopupMenuDivider(),
         PopupMenuItem(
           value: 'sign_out',
-          child: _MenuRow(
+          child: MenuRow(
             icon: PhosphorIcons.signOut(PhosphorIconsStyle.light),
             text: 'Sign Out',
           ),
@@ -610,167 +693,6 @@ class DashboardPage extends StatelessWidget {
 }
 
 // ──────────────────────────────────
-// Menu Row
-// ──────────────────────────────────
-class _MenuRow extends StatelessWidget {
-  final IconData icon;
-  final String text;
-  final IconData? trailing;
-
-  const _MenuRow({required this.icon, required this.text, this.trailing});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 20),
-        const SizedBox(width: 12),
-        Expanded(child: Text(text, style: const TextStyle(fontSize: 14))),
-        if (trailing != null) Icon(trailing, size: 18),
-      ],
-    );
-  }
-}
-
-// ──────────────────────────────────
-// Feedback Stub Page
-// ──────────────────────────────────
-class FeedbackPage extends StatelessWidget {
-  const FeedbackPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return AppScaffold(
-      title: 'Feedback',
-      child: const Center(child: Text('Coming soon')),
-    );
-  }
-}
-
-// ──────────────────────────────────
-// Balance Row (income / expense)
-// ──────────────────────────────────
-class _BalanceRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final double amount;
-  final Color color;
-  final NumberFormat currencyFmt;
-
-  const _BalanceRow({
-    required this.icon,
-    required this.label,
-    required this.amount,
-    required this.color,
-    required this.currencyFmt,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final onSurface = Theme.of(context).colorScheme.onSurface;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, color: color, size: 18),
-        const SizedBox(width: 6),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: TextStyle(fontSize: 12, color: onSurface.withAlpha(140)),
-            ),
-            Text(
-              currencyFmt.format(amount),
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: onSurface,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-// ──────────────────────────────────
-// Budget Progress Card (Home View)
-// ──────────────────────────────────
-class _BudgetProgressCard extends StatelessWidget {
-  final BudgetProgress progress;
-  final NumberFormat currencyFmt;
-  final VoidCallback onTap;
-
-  const _BudgetProgressCard({
-    required this.progress,
-    required this.currencyFmt,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    final spent = currencyFmt.format(progress.spentAmount);
-    final budget = currencyFmt.format(progress.budgetAmount);
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header row
-              Row(
-                children: [
-                  // Budget name (from categoryId for now)
-                  Expanded(
-                    child: Text(
-                      progress.categoryId ?? 'Overall Budget',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: colors.onSurface,
-                      ),
-                    ),
-                  ),
-                  // Spent vs Budget
-                  Text(
-                    '$spent / $budget',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: colors.onSurface.withAlpha(180),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              // Progress bar
-              BudgetProgressIndicator(percentage: progress.percentage),
-              const SizedBox(height: 4),
-              // Percentage text
-              Text(
-                '${progress.percentage.toStringAsFixed(0)}% used',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: colors.onSurface.withAlpha(120),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ──────────────────────────────────
 // Recent Transaction Tile
 // ──────────────────────────────────
 class _RecentTile extends StatelessWidget {
@@ -780,64 +702,35 @@ class _RecentTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    final isExpense = record.recordType == RecordType.expense;
-    final amtColor = isExpense ? colors.error : colors.secondary;
-    final dateStr = DateFormat('MMM dd').format(record.date);
-
-    return Padding(
+    return ReadOnlyRecordTile(
+      record: record,
+      amountFormat: fmt,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
+      avatarRadius: 20,
+      iconSize: 18,
+    );
+  }
+}
+
+// ──────────────────────────────────
+// Recent Activity Tile Skeleton
+// ──────────────────────────────────
+class _RecentActivityTileSkeleton extends StatelessWidget {
+  const _RecentActivityTileSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: ShimmerBox.circle(size: 40),
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            radius: 20,
-            backgroundColor: amtColor.withAlpha(25),
-            child: Icon(
-              isExpense
-                  ? PhosphorIcons.trendDown(PhosphorIconsStyle.fill)
-                  : PhosphorIcons.trendUp(PhosphorIconsStyle.fill),
-              color: amtColor,
-              size: 18,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  record.description.isNotEmpty
-                      ? record.description
-                      : (isExpense ? 'Expense' : 'Income'),
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: colors.onSurface,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  dateStr,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: colors.onSurface.withAlpha(120),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Text(
-            fmt.format(record.amount),
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              color: amtColor,
-            ),
-          ),
+          ShimmerBox.textLine(height: 14),
+          const SizedBox(height: 4),
+          ShimmerBox.textLine(width: 80, height: 12),
         ],
       ),
+      trailing: ShimmerBox.textLine(width: 60, height: 16),
     );
   }
 }

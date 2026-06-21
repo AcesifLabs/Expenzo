@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/budget.dart';
+import '../../domain/usecases/get_budget_progress.dart';
+import '../../../records/domain/entities/record.dart';
 
 abstract class BudgetState extends Equatable {
   const BudgetState();
@@ -14,11 +16,44 @@ class BudgetLoading extends BudgetState {}
 
 class BudgetLoaded extends BudgetState {
   final List<Budget> budgets;
+  final Map<String, BudgetProgress> progressByBudgetId;
+  final String? selectedBudgetId;
+  final List<Record> selectedBudgetTransactions;
+  final bool isLoadingTransactions;
 
-  const BudgetLoaded(this.budgets);
+  const BudgetLoaded(
+    this.budgets, {
+    this.progressByBudgetId = const {},
+    this.selectedBudgetId,
+    this.selectedBudgetTransactions = const [],
+    this.isLoadingTransactions = false,
+  });
+
+  BudgetLoaded copyWith({
+    List<Budget>? budgets,
+    Map<String, BudgetProgress>? progressByBudgetId,
+    String? selectedBudgetId,
+    List<Record>? selectedBudgetTransactions,
+    bool? isLoadingTransactions,
+  }) {
+    return BudgetLoaded(
+      budgets ?? this.budgets,
+      progressByBudgetId: progressByBudgetId ?? this.progressByBudgetId,
+      selectedBudgetId: selectedBudgetId ?? this.selectedBudgetId,
+      selectedBudgetTransactions:
+          selectedBudgetTransactions ?? this.selectedBudgetTransactions,
+      isLoadingTransactions: isLoadingTransactions ?? this.isLoadingTransactions,
+    );
+  }
 
   @override
-  List<Object?> get props => [budgets];
+  List<Object?> get props => [
+        budgets,
+        progressByBudgetId,
+        selectedBudgetId,
+        selectedBudgetTransactions,
+        isLoadingTransactions,
+      ];
 }
 
 class BudgetError extends BudgetState {

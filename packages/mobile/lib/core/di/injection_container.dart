@@ -32,11 +32,15 @@ import 'dashboard_module.dart';
 
 final getIt = GetIt.instance;
 
-bool _featureDependenciesRegistered = false;
-final _featureDependenciesCompleter = Completer<void>();
+/// Future that completes when [initCriticalDependencies] finishes.
+/// Fetched from get_it so that [GetIt.I.reset] (during hardReset) naturally
+/// wipes it, forcing consumers to wait for re-initialization.
+Future<void> get criticalDependenciesReady =>
+    getIt.get<Future<void>>(instanceName: 'criticalReady');
 
+/// Future that completes when [initFeatureDependencies] finishes.
 Future<void> get featureDependenciesReady =>
-    _featureDependenciesCompleter.future;
+    getIt.get<Future<void>>(instanceName: 'featureReady');
 
 void _registerDaoFactories() {
   getIt.registerFactory<RecordDao>(() => RecordDao(getIt<AppDatabase>()));
@@ -56,6 +60,11 @@ void _registerDaoFactories() {
 /// (Auth + Database + Categories + Records + Settings). Returns immediately so
 /// the splash screen can render without waiting for the full DI graph.
 Future<void> initCriticalDependencies() async {
+  if (getIt.isRegistered<Future<void>>(instanceName: 'criticalReady')) return;
+
+  final completer = Completer<void>();
+  getIt.registerSingleton<Future<void>>(completer.future, instanceName: 'criticalReady');
+
   // ── Infrastructure ──
   getIt.registerLazySingleton<GoogleSignIn>(
     () => GoogleSignIn(
@@ -100,6 +109,8 @@ Future<void> initCriticalDependencies() async {
   initDashboardModule(getIt);
   initParsingModule(getIt);
   initReportModule(getIt);
+
+  completer.complete();
 }
 
 Future<void> resetDatabaseInstance() async {
@@ -114,17 +125,19 @@ Future<void> resetDatabaseInstance() async {
 
 /// Registers feature-level dependencies (Budgets).
 /// Called in the background after the first frame renders.
-/// Safe to call multiple times — will only register once.
+/// Idempotent — safe to call multiple times.
 Future<void> initFeatureDependencies() async {
-  if (_featureDependenciesRegistered) return;
-  _featureDependenciesRegistered = true;
+  if (getIt.isRegistered<Future<void>>(instanceName: 'featureReady')) return;
+
+  final completer = Completer<void>();
+  getIt.registerSingleton<Future<void>>(completer.future, instanceName: 'featureReady');
 
   try {
     initBudgetModule(getIt);
     initRecurringModule(getIt);
-    _featureDependenciesCompleter.complete();
+    completer.complete();
   } catch (e, s) {
-    _featureDependenciesCompleter.completeError(e, s);
+    completer.completeError(e, s);
     rethrow;
   }
 }

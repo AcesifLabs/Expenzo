@@ -1,8 +1,9 @@
-import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
 import { User } from '../../auth/entities/user.entity';
 import { MessageSource } from '../../message-sources/entities/message-source.entity';
 
 @Entity('expense_templates')
+@Index(['userId', 'updatedAt'])
 export class ExpenseTemplate {
   @PrimaryColumn('text')
   id: string;

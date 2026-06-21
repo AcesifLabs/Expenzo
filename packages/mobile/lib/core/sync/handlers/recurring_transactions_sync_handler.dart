@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import '../../constants/transaction_frequency.dart';
 import '../../database/app_database.dart';
 import '../sync_table_registry.dart';
 
@@ -38,7 +39,7 @@ class RecurringTransactionsSyncHandler
     categoryId: data['categoryId'] != null
         ? Value(data['categoryId'])
         : const Value.absent(),
-    frequency: data['frequency'] ?? 'monthly',
+    frequency: data['frequency'] ?? TransactionFrequency.monthly.name,
     startDate: DateTime.parse(data['startDate']).toLocal(),
     endDate: data['endDate'] != null
         ? Value(DateTime.parse(data['endDate']).toLocal())

@@ -5,12 +5,13 @@ import { Record } from './entities/record.entity';
 import { CreateRecordDto } from './dto/create-record.dto';
 import { UpdateRecordDto } from './dto/update-record.dto';
 import { QueryRecordsDto } from './dto/query-records.dto';
+import { PaginatedResult } from './records.types';
 
 @Injectable()
 export class RecordsService {
   constructor(@InjectRepository(Record) private readonly recordRepository: Repository<Record>) {}
 
-  async findAll(userId: string, query: QueryRecordsDto) {
+  async findAll(userId: string, query: QueryRecordsDto): Promise<PaginatedResult<Record>> {
     const { cursor, limit = 50, startDate, endDate, categoryIds, recordType } = query;
     const qb = this.recordRepository.createQueryBuilder('record')
       .where('record.userId = :userId', { userId })
@@ -27,30 +28,33 @@ export class RecordsService {
     return { data, nextCursor, total };
   }
 
-  async findById(userId: string, id: string) {
+  async findById(userId: string, id: string): Promise<Record> {
     const record = await this.recordRepository.findOne({ where: { id, userId } });
     if (!record) throw new NotFoundException(`Record ${id} not found`);
     return record;
   }
 
-  async create(userId: string, dto: CreateRecordDto) {
+  async create(userId: string, dto: CreateRecordDto): Promise<Record> {
     const record = this.recordRepository.create({ ...dto, userId, date: new Date(dto.date) });
     return this.recordRepository.save(record);
   }
 
-  async createBulk(userId: string, dtos: CreateRecordDto[]) {
+  async createBulk(userId: string, dtos: CreateRecordDto[]): Promise<Record[]> {
     const records = dtos.map(dto => this.recordRepository.create({ ...dto, userId, date: new Date(dto.date) }));
     return this.recordRepository.save(records);
   }
 
-  async update(userId: string, id: string, dto: UpdateRecordDto) {
+  async update(userId: string, id: string, dto: UpdateRecordDto): Promise<Record> {
     const record = await this.findById(userId, id);
-    Object.assign(record, dto);
-    if (dto.date) record.date = new Date(dto.date);
+    if (dto.amount !== undefined) record.amount = dto.amount;
+    if (dto.description !== undefined) record.description = dto.description;
+    if (dto.date !== undefined) record.date = new Date(dto.date);
+    if (dto.categoryId !== undefined) record.categoryId = dto.categoryId;
+    if (dto.recordType !== undefined) record.recordType = dto.recordType;
     return this.recordRepository.save(record);
   }
 
-  async remove(userId: string, id: string) {
+  async remove(userId: string, id: string): Promise<void> {
     const result = await this.recordRepository.delete({ id, userId });
     if (result.affected === 0) throw new NotFoundException(`Record ${id} not found`);
   }

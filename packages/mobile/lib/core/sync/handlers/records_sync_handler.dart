@@ -1,4 +1,6 @@
 import 'package:drift/drift.dart';
+import '../../constants/record_type.dart';
+import '../../constants/source_types.dart';
 import '../../database/app_database.dart';
 import '../sync_table_registry.dart';
 
@@ -29,11 +31,11 @@ class RecordsSyncHandler extends SyncTableHandler<$RecordsTable, Record> {
         categoryId: data['categoryId'] != null
             ? Value(data['categoryId'])
             : const Value.absent(),
-        source: Value(data['source'] ?? 'manual'),
+        source: Value(data['source'] ?? ExpenseSource.manual.name),
         sourceId: data['sourceId'] != null
             ? Value(data['sourceId'])
             : const Value.absent(),
-        recordType: data['recordType'] ?? 'OUT',
+        recordType: data['recordType'] ?? RecordType.expense.dbValue,
         createdAt: data['createdAt'] != null
             ? Value(DateTime.parse(data['createdAt']).toLocal())
             : const Value.absent(),

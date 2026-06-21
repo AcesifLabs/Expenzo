@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import '../constants/record_type.dart';
 import 'app_database.dart';
 
 class DatabaseSeeder {
@@ -55,7 +56,7 @@ class DatabaseSeeder {
             name: cat.$2,
             emoji: Value(cat.$3),
             color: Value(cat.$4),
-            categoryType: const Value('OUT'),
+            categoryType: Value(RecordType.expense.dbValue),
             isDefault: const Value(true),
             createdAt: Value(now),
             updatedAt: Value(now),
@@ -70,7 +71,7 @@ class DatabaseSeeder {
             name: cat.$2,
             emoji: Value(cat.$3),
             color: Value(cat.$4),
-            categoryType: const Value('IN'),
+            categoryType: Value(RecordType.income.dbValue),
             isDefault: const Value(true),
             createdAt: Value(now),
             updatedAt: Value(now),
@@ -106,7 +107,7 @@ class DatabaseSeeder {
             name: cat.$2,
             emoji: Value(cat.$3),
             color: Value(cat.$4),
-            categoryType: const Value('IN'),
+            categoryType: Value(RecordType.income.dbValue),
             isDefault: const Value(true),
             createdAt: Value(now),
             updatedAt: Value(now),

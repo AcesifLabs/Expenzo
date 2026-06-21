@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:expense_tracker/core/constants/source_types.dart';
 import '../../../sms_parser/data/datasources/sms_local_datasource.dart';
 import 'contact_selector_event.dart';
 import 'contact_selector_state.dart';
@@ -98,7 +99,7 @@ class ContactSelectorBloc
           displayName: msg.address,
           lastMessage: msg.body,
           lastMessageDate: msg.date,
-          sourceType: 'sms',
+          sourceType: ExpenseSource.sms,
         );
       } else {
         final existing = _contactsMap[msg.address]!;
@@ -108,7 +109,7 @@ class ContactSelectorBloc
             displayName: msg.address,
             lastMessage: msg.body,
             lastMessageDate: msg.date,
-            sourceType: 'sms',
+            sourceType: ExpenseSource.sms,
           );
         }
       }

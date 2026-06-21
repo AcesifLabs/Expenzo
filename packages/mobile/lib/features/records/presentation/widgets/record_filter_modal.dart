@@ -57,7 +57,7 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
       _selectedCategoryIds.addAll(widget.categoryIds!);
     }
     if (widget.recordType != null) {
-      _recordType = widget.recordType == 'IN'
+      _recordType = widget.recordType == RecordType.income.dbValue
           ? RecordType.income
           : RecordType.expense;
     }

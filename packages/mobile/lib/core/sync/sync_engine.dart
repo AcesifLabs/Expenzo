@@ -9,6 +9,7 @@ import '../database/daos/sync_queue_dao.dart';
 import '../di/injection_container.dart' as di;
 import 'connectivity_service.dart';
 import 'sync_event.dart';
+import 'sync_status.dart';
 import 'sync_table_registry.dart';
 
 enum SyncConflictType { none, localOnly, cloudOnly, conflict }
@@ -155,8 +156,8 @@ class SyncEngine {
         final results = response.data['results'] as List;
         final syncedIds = <int>[];
         for (int i = 0; i < results.length; i++) {
-          if (results[i]['status'] == 'success' ||
-              results[i]['status'] == 'conflict') {
+          final status = SyncStatus.fromString(results[i]['status'] as String);
+          if (status == SyncStatus.success || status == SyncStatus.conflict) {
             syncedIds.add(batch[i].id);
           }
         }

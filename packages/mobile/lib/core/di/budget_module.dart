@@ -56,6 +56,8 @@ void initBudgetModule(GetIt getIt) {
       createBudget: getIt<CreateBudget>(),
       updateBudget: getIt<UpdateBudget>(),
       deleteBudget: getIt<DeleteBudget>(),
+      getBudgetsWithProgress: getIt<GetBudgetsWithProgress>(),
+      getBudgetTransactions: getIt<GetBudgetTransactions>(),
     ),
   );
 }

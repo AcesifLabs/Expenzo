@@ -1,15 +1,16 @@
-import 'package:expense_tracker/core/di/injection_container.dart' as di;
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budget_progress.dart';
-import 'package:expense_tracker/features/budgets/domain/usecases/get_budget_transactions.dart';
-import 'package:expense_tracker/features/categories/domain/repositories/category_repository.dart';
-import 'package:expense_tracker/features/records/domain/entities/record.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
 import 'package:expense_tracker/shared/presentation/widgets/budget_progress_indicator.dart';
 import 'package:expense_tracker/shared/presentation/widgets/budget_transaction_list.dart';
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import '../bloc/budget_bloc.dart';
+import '../bloc/budget_event.dart';
+import '../bloc/budget_state.dart';
 
 /// Full-screen detail view for a single budget, showing its transactions.
 class BudgetDetailsPage extends StatefulWidget {
@@ -22,35 +23,22 @@ class BudgetDetailsPage extends StatefulWidget {
 }
 
 class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
-  String _categoryName = '';
-
   @override
   void initState() {
     super.initState();
-    _loadCategoryName();
-  }
-
-  Future<void> _loadCategoryName() async {
-    final catId = widget.progress.categoryId;
-    if (catId == null) return;
-    try {
-      final result = await di.getIt<CategoryRepository>().getCategoryById(
-        catId,
-      );
-      if (mounted) {
-        final name = result.fold((_) => '', (cat) => cat.name);
-        setState(() => _categoryName = name);
-      }
-    } catch (_) {}
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context
+          .read<BudgetBloc>()
+          .add(LoadBudgetTransactions(widget.progress.budgetId));
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final fmt = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
+    final fmt = CurrencyFormatter.getFormatter(decimalDigits: 0);
     final colors = Theme.of(context).colorScheme;
-    final title = _categoryName.isNotEmpty
-        ? _categoryName
-        : (widget.progress.categoryId ?? 'Budget Details');
+    final title = widget.progress.categoryId ?? 'Budget Details';
 
     return AppScaffold(
       title: title,
@@ -131,17 +119,20 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
               ],
             ),
           ),
-          // Transaction list
+          // Transaction list from Bloc state
           Expanded(
-            child: FutureBuilder<List<Record>>(
-              future: di
-                  .getIt<GetBudgetTransactions>()(widget.progress.budgetId)
-                  .then((r) => r.getOrElse(() => [])),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+            child: BlocBuilder<BudgetBloc, BudgetState>(
+              builder: (context, state) {
+                if (state is BudgetLoaded &&
+                    state.selectedBudgetId == widget.progress.budgetId) {
+                  if (state.isLoadingTransactions) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  return BudgetTransactionList(
+                    records: state.selectedBudgetTransactions,
+                  );
                 }
-                return BudgetTransactionList(records: snapshot.data ?? []);
+                return const Center(child: CircularProgressIndicator());
               },
             ),
           ),

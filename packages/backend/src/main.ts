@@ -1,12 +1,13 @@
 import './config/force-ipv4'; // MUST be first import
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { AppModule } from './app.module';
 import { initializeFirebase } from './config/firebase.config';
 
 async function bootstrap() {
+  const logger = new Logger('Bootstrap');
   initializeFirebase();
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -35,7 +36,8 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(process.env.PORT || 3000);
-  console.log(`Expenzo backend running on port ${process.env.PORT || 3000}`);
+  const port = process.env.PORT || 3000;
+  await app.listen(port);
+  logger.log(`Expenzo backend running on port ${port}`);
 }
 bootstrap();

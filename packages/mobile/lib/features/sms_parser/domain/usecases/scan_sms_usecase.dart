@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
+import 'package:expense_tracker/core/constants/source_types.dart';
 import '../../../parsing_rules/domain/entities/parsed_transaction.dart';
 import '../../../parsing_rules/domain/services/parsing_isolate_service.dart';
 import '../../../parsing_rules/domain/usecases/evaluate_rules.dart' as eval;
@@ -58,7 +59,7 @@ class ScanSmsUseCase
       final results = await _isolateService.parseMessages(
         messages: parseInputs,
         context: context,
-        sourceType: 'sms',
+        sourceType: ExpenseSource.sms.name,
       );
 
       return Right(results);

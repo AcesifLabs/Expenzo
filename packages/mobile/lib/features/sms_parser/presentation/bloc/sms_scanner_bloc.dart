@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
@@ -46,7 +47,9 @@ class SmsScannerBloc extends Bloc<SmsScannerEvent, SmsScannerState> {
       // Notify budget to reload — scan may have added expenses
       try {
         di.getIt<BudgetBloc>().add(LoadBudgets());
-      } catch (_) {}
+      } catch (e) {
+        debugPrint('SmsScannerBloc: Failed to reload budgets: $e');
+      }
       add(ClearResults());
     });
   }

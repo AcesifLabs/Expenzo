@@ -72,7 +72,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(const AuthLoading());
     try {
       await di.getIt<SyncEngine>().stop();
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('AuthBloc: Failed to stop sync engine during sign out: $e');
+    }
     final result = await signOut(NoParams());
     result.fold(
       (failure) => emit(AuthError(failure.message)),

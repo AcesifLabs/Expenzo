@@ -195,6 +195,7 @@ class _RecordFormPageState extends State<RecordFormPage> {
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
+    if (!mounted) return;
     if (picked != null && picked != _selectedDate) {
       setState(() => _selectedDate = picked);
     }

@@ -131,7 +131,7 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
   }
 
   /// SQLite may return whole-number floats as int; coerce safely.
-  double _toDouble(dynamic value) {
+  double _toDouble(Object value) {
     if (value is double) return value;
     if (value is int) return value.toDouble();
     if (value is String) return double.tryParse(value) ?? 0.0;
@@ -160,7 +160,7 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
   }
 
   /// Convert raw SQLite integer (Drift stores dateTime() as unix seconds).
-  DateTime _intToDateTime(dynamic value) {
+  DateTime _intToDateTime(Object value) {
     if (value is int) return DateTime.fromMillisecondsSinceEpoch(value * 1000);
     if (value is DateTime) return value;
     throw CacheException(message: 'Unexpected date type: ${value.runtimeType}');

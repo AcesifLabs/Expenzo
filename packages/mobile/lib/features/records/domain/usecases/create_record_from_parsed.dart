@@ -31,7 +31,7 @@ class CreateRecordFromParsed extends UseCase<Record?, ParsedTransaction> {
         description: parsed.description ?? parsed.rawMessage,
         date: parsed.date ?? DateTime.now(),
         categoryId: parsed.categoryId,
-        source: parsed.sourceType == 'sms'
+        source: parsed.sourceType == ExpenseSource.sms.name
             ? ExpenseSource.sms
             : ExpenseSource.email,
         sourceId: parsed.sourceId,

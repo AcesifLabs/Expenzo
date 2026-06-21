@@ -3,25 +3,19 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/core/utils/navigation_utils.dart';
-import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:expense_tracker/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:expense_tracker/features/records/presentation/bloc/record_bloc.dart';
 import 'package:expense_tracker/features/records/presentation/pages/record_list_page.dart';
 import 'package:expense_tracker/features/records/presentation/widgets/new_transaction_sheet.dart';
 import 'package:expense_tracker/features/budgets/presentation/pages/budget_list_page.dart';
-import 'package:expense_tracker/features/reports/presentation/pages/reports_page.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanner_event.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/pages/sms_scan_page.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
-import 'package:expense_tracker/features/categories/presentation/pages/category_list_page.dart';
-import 'package:expense_tracker/features/categories/presentation/pages/category_form_page.dart';
-import 'package:expense_tracker/shared/presentation/widgets/app_action_card.dart';
 import 'package:expense_tracker/shared/presentation/widgets/sms_permission_gate.dart';
 import 'package:expense_tracker/features/message_templates/presentation/pages/contact_selector_page.dart';
 import 'lazy_indexed_stack.dart';
@@ -40,8 +34,6 @@ class _AppShellState extends State<AppShell> {
   static const _labels = [
     'Home',
     'Activity',
-    'Category',
-    'Trends',
     'Scan',
     'Budgets',
   ];
@@ -54,12 +46,8 @@ class _AppShellState extends State<AppShell> {
       case 1:
         return PhosphorIcons.listDashes(s);
       case 2:
-        return PhosphorIcons.tag(s);
-      case 3:
-        return PhosphorIcons.chartBar(s);
-      case 4:
         return PhosphorIcons.listMagnifyingGlass(s);
-      case 5:
+      case 3:
         return PhosphorIcons.wallet(s);
       default:
         return PhosphorIcons.circle(s);
@@ -70,7 +58,7 @@ class _AppShellState extends State<AppShell> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final keyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
-    final showFab = _currentIndex <= 2 && !keyboardOpen;
+    final showFab = _currentIndex <= 1 && !keyboardOpen;
 
     return Scaffold(
       extendBody: true,
@@ -82,8 +70,6 @@ class _AppShellState extends State<AppShell> {
             child: const DashboardPage(),
           ),
           const RecordListPage(),
-          const CategoryListPage(),
-          const ReportsPage(),
           _ScanPageWithFab(),
           const BudgetListPage(),
         ],
@@ -93,11 +79,7 @@ class _AppShellState extends State<AppShell> {
               heroTag: 'shell_fab',
               onPressed: () => _onFabPressed(context),
               shape: const CircleBorder(),
-              child: Icon(
-                _currentIndex == 2
-                    ? PhosphorIcons.listPlus(PhosphorIconsStyle.bold)
-                    : PhosphorIcons.plus(PhosphorIconsStyle.bold),
-              ),
+              child: Icon(PhosphorIcons.plus(PhosphorIconsStyle.bold)),
             )
           : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -106,9 +88,9 @@ class _AppShellState extends State<AppShell> {
   }
 
   Widget _buildBottomNav(ColorScheme colors, bool showFab) {
-    // Items after index 2 are rendered on the right of the FAB
-    final leftCount = 3;
-    final rightCount = 3;
+    // Items after index 1 are rendered on the right of the FAB
+    final leftCount = 2;
+    final rightCount = 2;
 
     return SafeArea(
       child: Padding(
@@ -199,90 +181,20 @@ class _AppShellState extends State<AppShell> {
       return;
     }
     _lastFabPress = now;
-    if (_currentIndex == 2) {
-      _showCategoryTypeSelection(context);
-    } else {
-      showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (_) => MultiBlocProvider(
-          providers: [
-            BlocProvider.value(value: context.read<RecordBloc>()),
-            BlocProvider.value(value: context.read<CategoryBloc>()),
-          ],
-          child: const NewTransactionSheet(),
-        ),
-      );
-    }
-  }
-
-  void _showCategoryTypeSelection(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      builder: (ctx) {
-        final colors = Theme.of(context).colorScheme;
-        return SafeArea(
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: colors.onSurface.withAlpha(50),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(
-                      child: AppActionCard(
-                        icon: PhosphorIcons.trendDown(PhosphorIconsStyle.fill),
-                        label: 'Expense Category',
-                        color: colors.error,
-                        onTap: () {
-                          Navigator.pop(ctx);
-                          _navigateToCategoryForm(context, RecordType.expense);
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: AppActionCard(
-                        icon: PhosphorIcons.trendUp(PhosphorIconsStyle.fill),
-                        label: 'Income Category',
-                        color: AppColors.income,
-                        onTap: () {
-                          Navigator.pop(ctx);
-                          _navigateToCategoryForm(context, RecordType.income);
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  void _navigateToCategoryForm(BuildContext context, RecordType type) {
-    Navigator.push(
-      context,
-      SlidePageRoute(
-        builder: (_) => BlocProvider.value(
-          value: context.read<CategoryBloc>(),
-          child: CategoryFormPage(category: null, initialType: type),
-        ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => MultiBlocProvider(
+        providers: [
+          BlocProvider.value(value: context.read<RecordBloc>()),
+          BlocProvider.value(value: context.read<CategoryBloc>()),
+        ],
+        child: const NewTransactionSheet(),
       ),
     );
   }
+
 }
 
 // ──────────────────────────────────

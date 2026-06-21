@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:expense_tracker/core/constants/source_types.dart';
 import 'package:expense_tracker/core/utils/navigation_utils.dart';
 import '../bloc/contact_selector_bloc.dart';
 import '../bloc/contact_selector_event.dart';
@@ -151,7 +152,7 @@ class _ContactSelectorViewState extends State<ContactSelectorView> {
                           return ListTile(
                             leading: CircleAvatar(
                               child: Icon(
-                                contact.sourceType == 'sms'
+                                contact.sourceType == ExpenseSource.sms
                                     ? PhosphorIcons.chat(
                                         PhosphorIconsStyle.regular,
                                       )

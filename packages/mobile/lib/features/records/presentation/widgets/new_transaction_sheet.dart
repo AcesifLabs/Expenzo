@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:expense_tracker/shared/presentation/widgets/app_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -8,9 +7,11 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/core/theme/app_colors.dart';
+import 'package:expense_tracker/core/utils/navigation_utils.dart';
 import 'package:expense_tracker/features/categories/domain/entities/category.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_state.dart';
+import 'package:expense_tracker/features/categories/presentation/pages/category_form_page.dart';
 import '../../../categories/presentation/bloc/category_event.dart';
 import '../../domain/entities/record.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
@@ -18,6 +19,11 @@ import 'package:expense_tracker/features/recurring/domain/entities/recurring_tra
 import 'package:expense_tracker/features/recurring/domain/repositories/recurring_repository.dart';
 import '../bloc/record_bloc.dart';
 import '../bloc/record_event.dart';
+import 'new_transaction/all_categories_picker.dart';
+import 'new_transaction/category_picker_item.dart';
+import 'new_transaction/numeric_keypad.dart';
+import 'new_transaction/type_toggle.dart';
+import 'new_transaction/typewriter_animation_mixin.dart';
 
 class NewTransactionSheet extends StatefulWidget {
   const NewTransactionSheet({super.key});
@@ -27,7 +33,7 @@ class NewTransactionSheet extends StatefulWidget {
 }
 
 class _NewTransactionSheetState extends State<NewTransactionSheet>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, TypewriterAnimationMixin {
   late RecordType _type;
   final _amountText = ValueNotifier<String>('');
   final _noteCtrl = TextEditingController();
@@ -38,6 +44,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   // ── Validation error flags ──
   bool _labelError = false;
   bool _categoryError = false;
+  bool _isSubmitting = false;
 
   // ── Date picker + recurring ──
   DateTime _selectedDate = DateTime.now();
@@ -66,18 +73,14 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     'Investment dividend',
   ];
 
-  Timer? _typewriterTimer;
-  int _twPhraseIndex = 0;
-  int _twCharIndex = 0;
-  String _twDisplayText = '';
-  bool _twIsErasing = false;
-  bool _twIsPaused = false;
-
   @override
   void initState() {
     super.initState();
     _type = RecordType.expense;
     _loadCategories();
+
+    // Initialize typewriter with expense placeholders
+    initTypewriter(_expensePlaceholders);
 
     // Unified note controller listener (label validation + typewriter)
     _noteCtrl.addListener(_onNoteChanged);
@@ -105,13 +108,12 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
 
     // Start typewriter after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _startTypewriter();
+      if (mounted) startTypewriter();
     });
   }
 
   @override
   void dispose() {
-    _stopTypewriter();
     _noteCtrl.removeListener(_onNoteChanged);
     _glowController.dispose();
     _amountText.dispose();
@@ -121,19 +123,16 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
 
   // ── Note change handler (clear label error + pause/resume typewriter) ──
   void _onNoteChanged() {
-    // Task 3: Clear label error when user types
+    // Clear label error when user types
     if (_labelError && _noteCtrl.text.trim().isNotEmpty) {
       setState(() => _labelError = false);
     }
 
-    // Task 7: Typewriter pause/resume
-    if (_noteCtrl.text.isNotEmpty && !_twIsPaused) {
-      _twIsPaused = true;
-      _stopTypewriter();
-      setState(() => _twDisplayText = '');
-    } else if (_noteCtrl.text.isEmpty && _twIsPaused) {
-      _twIsPaused = false;
-      _startTypewriter();
+    // Typewriter pause/resume
+    if (_noteCtrl.text.isNotEmpty && !isTypewriterPaused) {
+      pauseTypewriter();
+    } else if (_noteCtrl.text.isEmpty && isTypewriterPaused) {
+      resumeTypewriter();
     }
   }
 
@@ -143,14 +142,30 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     );
   }
 
-  void _showAllCategories(BuildContext context, List<Category> allCategories) {
+  void _showAllCategories(
+    BuildContext context,
+    List<Category> allCategories,
+    RecordType type,
+  ) {
+    final colors = Theme.of(context).colorScheme;
+    final accentColor = type == RecordType.expense
+        ? colors.error
+        : colors.primary;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => _AllCategoriesPicker(
+      builder: (ctx) => AllCategoriesPicker(
         categories: allCategories,
         selectedId: _selectedCategoryId,
+        type: type,
+        accentColor: accentColor,
+        onAddNew: () {
+          // Capture bloc from outer context BEFORE popping
+          final categoryBloc = context.read<CategoryBloc>();
+          Navigator.pop(ctx); // Close the picker
+          _addNewCategory(context, type, categoryBloc); // Use outer context
+        },
         onSelect: (id) {
           setState(() {
             _selectedCategoryId = id;
@@ -160,6 +175,30 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
         },
       ),
     );
+  }
+
+  Future<void> _addNewCategory(
+    BuildContext context,
+    RecordType type,
+    CategoryBloc categoryBloc,
+  ) async {
+    final Category? created = await Navigator.push<Category>(
+      context,
+      SlidePageRoute(
+        builder: (_) => BlocProvider.value(
+          value: categoryBloc,
+          child: CategoryFormPage(initialType: type),
+        ),
+      ),
+    );
+    if (created != null && context.mounted) {
+      setState(() {
+        _selectedCategoryId = created.id;
+        // Prepend to _categories so the chip bar shows the new category
+        // immediately, even before the BlocBuilder reloads from the DB.
+        _categories = [created, ..._categories];
+      });
+    }
   }
 
   // ── Pre-select default "General" category ──
@@ -189,7 +228,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
 
   void _switchType(RecordType t) {
     _glowController.reset();
-    _stopTypewriter();
+    stopTypewriter();
     setState(() {
       _type = t;
       _selectedCategoryId = null;
@@ -199,15 +238,16 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       _categoryError = false;
     });
     _loadCategories();
-    if (!_twIsPaused) {
-      _startTypewriter();
+    // Update typewriter phrases for new type
+    initTypewriter(
+      t == RecordType.expense ? _expensePlaceholders : _incomePlaceholders,
+    );
+    if (!isTypewriterPaused) {
+      startTypewriter();
     }
   }
 
   // ── Swipe gesture handler (left→right = expense, right→left = income) ──
-  // Safe with category-chip ListView: the chip scrollbar's
-  // HorizontalDragGestureRecognizer wins the gesture arena within its
-  // bounds; this handler only fires on unclaimed horizontal drags.
   void _onHorizontalSwipe(DragEndDetails details) {
     final velocity = details.primaryVelocity;
     if (velocity == null) return;
@@ -268,7 +308,8 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   }
 
   // ── Submit with validation (amount + label + category) ──
-  void _submit() {
+  Future<void> _submit() async {
+    if (_isSubmitting) return;
     final amount = _parsedAmount;
     bool hasError = false;
 
@@ -297,6 +338,8 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       return;
     }
 
+    setState(() => _isSubmitting = true);
+
     final now = DateTime.now().toUtc();
     final finalAmount = _type == RecordType.expense ? -amount : amount;
 
@@ -314,17 +357,34 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     context.read<RecordBloc>().add(AddRecordEvent(record));
 
     if (_isRecurring) {
-      unawaited(_createRecurringTransaction(finalAmount));
+      final created = await _createRecurringTransaction(finalAmount);
+      if (!created) {
+        if (mounted) {
+          setState(() => _isSubmitting = false);
+        }
+        return;
+      }
     }
 
-    Navigator.pop(context);
+    if (mounted) {
+      Navigator.pop(context);
+    }
   }
 
   // ── Fire-and-forget recurring creation (primary record already saved) ──
-  Future<void> _createRecurringTransaction(double finalAmount) async {
+  Future<bool> _createRecurringTransaction(double finalAmount) async {
     try {
       await di.featureDependenciesReady;
-      if (!di.getIt.isRegistered<RecurringRepository>()) return;
+      if (!di.getIt.isRegistered<RecurringRepository>()) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Recurring transactions are not ready yet.'),
+            ),
+          );
+        }
+        return false;
+      }
       final repo = di.getIt<RecurringRepository>();
 
       // First occurrence was just saved manually; advance to next period
@@ -345,7 +405,11 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
           dayOfMonth: _selectedDate.day,
         ),
       );
-    } catch (_) {
+      return true;
+    } catch (e) {
+      debugPrint(
+        'NewTransactionSheet: Failed to create recurring transaction: $e',
+      );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -357,91 +421,20 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
           ),
         );
       }
+      return false;
     }
   }
 
   /// Returns the next scheduled occurrence after [date] based on frequency.
-  /// Currently only monthly frequency is exposed in the sheet UI.
   DateTime _nextOccurrenceAfter(DateTime date) {
     // monthly: advance by one month, preserving the day-of-month
     return DateTime(date.year, date.month + 1, date.day);
   }
 
-  // ── Typewriter engine (type → pause → erase → next) ──
-  List<String> get _twPhrases =>
-      _type == RecordType.expense ? _expensePlaceholders : _incomePlaceholders;
-
-  void _startTypewriter() {
-    _stopTypewriter();
-    _twPhraseIndex = 0;
-    _twCharIndex = 0;
-    _twDisplayText = '';
-    _twIsErasing = false;
-    _tickTypewriter();
-  }
-
-  void _stopTypewriter() {
-    _typewriterTimer?.cancel();
-    _typewriterTimer = null;
-  }
-
-  void _tickTypewriter() {
-    if (_twIsPaused || !mounted) return;
-
-    final phrases = _twPhrases;
-    if (phrases.isEmpty) return;
-
-    final currentPhrase = phrases[_twPhraseIndex % phrases.length];
-
-    if (!_twIsErasing) {
-      // Typing phase
-      if (_twCharIndex < currentPhrase.length) {
-        _twCharIndex++;
-        _twDisplayText = currentPhrase.substring(0, _twCharIndex);
-        setState(() {});
-        _typewriterTimer = Timer(
-          const Duration(milliseconds: 80),
-          _tickTypewriter,
-        );
-      } else {
-        // Phrase complete — pause 2 seconds, then erase
-        _typewriterTimer = Timer(const Duration(seconds: 2), () {
-          if (!_twIsPaused && mounted) {
-            _twIsErasing = true;
-            _tickTypewriter();
-          }
-        });
-      }
-    } else {
-      // Erasing phase
-      if (_twCharIndex > 0) {
-        _twCharIndex--;
-        _twDisplayText = currentPhrase.substring(0, _twCharIndex);
-        setState(() {});
-        _typewriterTimer = Timer(
-          const Duration(milliseconds: 40),
-          _tickTypewriter,
-        );
-      } else {
-        // Fully erased — next phrase after brief gap
-        _twIsErasing = false;
-        _twPhraseIndex = (_twPhraseIndex + 1) % phrases.length;
-        _twCharIndex = 0;
-        _twDisplayText = '';
-        setState(() {});
-        _typewriterTimer = Timer(const Duration(milliseconds: 300), () {
-          if (!_twIsPaused && mounted) {
-            _tickTypewriter();
-          }
-        });
-      }
-    }
-  }
-
   // ── Dynamic hint text (typewriter or static fallback) ──
   String _getHintText() {
-    if (!_twIsPaused && _twDisplayText.isNotEmpty) {
-      return _twDisplayText;
+    if (!isTypewriterPaused && typewriterDisplayText.isNotEmpty) {
+      return typewriterDisplayText;
     }
     return _type == RecordType.expense ? 'Name of expense' : 'Name of income';
   }
@@ -484,7 +477,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                     horizontal: 24,
                     vertical: 12,
                   ),
-                  child: _TypeToggle(type: _type, onSwitch: _switchType),
+                  child: TypeToggle(type: _type, onSwitch: _switchType),
                 ),
                 // Amount display
                 ValueListenableBuilder<String>(
@@ -510,7 +503,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                   },
                 ),
                 // Numeric keypad with hold-to-delete
-                _NumericKeypad(
+                NumericKeypad(
                   onDigit: _appendDigit,
                   onBackspace: _backspace,
                   color: colors,
@@ -525,7 +518,9 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                     width: double.infinity,
                     height: 52,
                     child: FilledButton(
-                      onPressed: _submit,
+                      onPressed: _isSubmitting
+                          ? null
+                          : () => unawaited(_submit()),
                       style: FilledButton.styleFrom(
                         backgroundColor: _type == RecordType.expense
                             ? colors.error
@@ -583,7 +578,11 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(
-                  color: _labelError ? borderColor : colors.primary,
+                  color: _labelError
+                      ? borderColor
+                      : _type == RecordType.expense
+                      ? colors.error
+                      : colors.primary,
                   width: 2.0,
                 ),
               ),
@@ -623,7 +622,9 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                     data: Theme.of(ctx).copyWith(
                       colorScheme: isDark
                           ? ColorScheme.dark(
-                              primary: AppColors.secondary,
+                              primary: _type == RecordType.expense
+                                  ? AppColors.expense
+                                  : AppColors.secondary,
                               onPrimary: Colors.black,
                               surface: AppColors.surfaceDark,
                               onSurface: Colors.white,
@@ -690,7 +691,9 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  activeColor: colors.primary,
+                  activeColor: _type == RecordType.expense
+                      ? colors.error
+                      : colors.primary,
                   side: BorderSide(
                     color: colors.onSurface.withAlpha(120),
                     width: 1.5,
@@ -751,7 +754,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
           );
         }
 
-        final displayCats = allCats.take(5).toList();
+        final displayCats = allCats.take(4).toList();
         if (_selectedCategoryId != null &&
             !displayCats.any((c) => c.id == _selectedCategoryId)) {
           Category? selected;
@@ -767,15 +770,9 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
           }
         }
 
-        // Task 4: Wrap with AnimatedBuilder for per-chip glow
         return AnimatedBuilder(
           animation: _glowCurve,
           builder: (context, _) {
-            final errorBorderColor = _resolveGlowBorderColor(
-              _categoryError,
-              colors,
-            );
-
             return Container(
               height: 50,
               margin: const EdgeInsets.symmetric(vertical: 8),
@@ -784,25 +781,41 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 children: [
                   ...displayCats.map((cat) {
-                    final sel = _selectedCategoryId == cat.id;
-                    return _CategoryPickerItem(
+                    return CategoryPickerItem(
                       category: cat,
-                      isSelected: sel,
-                      errorBorderColor: errorBorderColor,
-                      onTap: () => setState(() {
-                        _selectedCategoryId = sel ? null : cat.id;
-                        if (sel) _hasManuallyDeselected = true;
-                        if (!sel) {
+                      isSelected: cat.id == _selectedCategoryId,
+                      errorBorderColor: _resolveGlowBorderColor(
+                        _categoryError,
+                        colors,
+                        fallback: Colors.transparent,
+                      ),
+                      selectedColor: _type == RecordType.expense
+                          ? colors.error
+                          : colors.primary,
+                      onTap: () {
+                        setState(() {
+                          _selectedCategoryId = cat.id;
                           _categoryError = false;
-                          _hasManuallyDeselected = false;
-                        }
-                      }),
+                        });
+                      },
                     );
                   }),
-                  if (_selectedCategoryId == null)
-                    _MoreButton(
-                      onTap: () => _showAllCategories(context, allCats),
+                  GestureDetector(
+                    onTap: () => _showAllCategories(context, allCats, _type),
+                    child: Container(
+                      width: 50,
+                      margin: const EdgeInsets.only(left: 4),
+                      decoration: BoxDecoration(
+                        color: colors.onSurface.withAlpha(10),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        PhosphorIcons.gridFour(PhosphorIconsStyle.bold),
+                        size: 20,
+                        color: colors.onSurface.withAlpha(150),
+                      ),
                     ),
+                  ),
                 ],
               ),
             );
@@ -824,528 +837,6 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
         child: CircularProgressIndicator(
           strokeWidth: 2,
           color: colors.onSurface.withAlpha(80),
-        ),
-      ),
-    );
-  }
-}
-
-class _CategoryPickerItem extends StatelessWidget {
-  final Category category;
-  final bool isSelected;
-  final Color errorBorderColor;
-  final VoidCallback onTap;
-
-  const _CategoryPickerItem({
-    required this.category,
-    required this.isSelected,
-    required this.errorBorderColor,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    final isLight = Theme.of(context).brightness == Brightness.light;
-
-    final iconColor = isSelected
-        ? colors.primary
-        : colors.onSurface.withAlpha(150);
-
-    final textColor = (isSelected && isLight) ? Colors.black : iconColor;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOutCubic,
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? colors.primary.withAlpha(25)
-              : colors.onSurface.withAlpha(10),
-          borderRadius: BorderRadius.circular(25),
-          border: Border.all(
-            color: isSelected
-                ? colors.primary.withAlpha(50)
-                : errorBorderColor != Colors.transparent
-                ? errorBorderColor
-                : colors.onSurface.withAlpha(40),
-            width: 1,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              AppIcons.getCategoryIcon(category.emoji),
-              size: 20,
-              color: iconColor,
-            ),
-            ClipRect(
-              child: AnimatedSize(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOutCubic,
-                child: isSelected
-                    ? Padding(
-                        padding: const EdgeInsets.only(left: 8),
-                        child: Text(
-                          category.name,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            color: textColor,
-                          ),
-                          maxLines: 1,
-                        ),
-                      )
-                    : const SizedBox.shrink(),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _MoreButton extends StatelessWidget {
-  final VoidCallback onTap;
-  const _MoreButton({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 50,
-        margin: const EdgeInsets.only(left: 4),
-        decoration: BoxDecoration(
-          color: colors.onSurface.withAlpha(10),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(
-          PhosphorIcons.dotsThree(PhosphorIconsStyle.bold),
-          size: 20,
-          color: colors.onSurface.withAlpha(150),
-        ),
-      ),
-    );
-  }
-}
-
-class _AllCategoriesPicker extends StatelessWidget {
-  final List<Category> categories;
-  final String? selectedId;
-  final ValueChanged<String> onSelect;
-
-  const _AllCategoriesPicker({
-    required this.categories,
-    required this.selectedId,
-    required this.onSelect,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    return Container(
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 36,
-            height: 4,
-            margin: const EdgeInsets.only(bottom: 24),
-            decoration: BoxDecoration(
-              color: colors.onSurface.withAlpha(50),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const Text(
-            'Select Category',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 24),
-          Flexible(
-            child: GridView.builder(
-              shrinkWrap: true,
-              itemCount: categories.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                childAspectRatio: 0.8,
-              ),
-              itemBuilder: (context, index) {
-                final cat = categories[index];
-                final isSel = cat.id == selectedId;
-                return GestureDetector(
-                  onTap: () => onSelect(cat.id!),
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 56,
-                        height: 56,
-                        decoration: BoxDecoration(
-                          color: isSel
-                              ? colors.primary.withAlpha(40)
-                              : colors.onSurface.withAlpha(10),
-                          shape: BoxShape.circle,
-                          border: isSel
-                              ? Border.all(color: colors.primary, width: 2)
-                              : null,
-                        ),
-                        child: Icon(
-                          AppIcons.getCategoryIcon(cat.emoji),
-                          color: isSel ? colors.primary : colors.onSurface,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        cat.name,
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: isSel
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                        ),
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 24),
-        ],
-      ),
-    );
-  }
-}
-
-// ──────────────────────────────────
-// Type Toggle with sliding pill animation (500ms)
-// ──────────────────────────────────
-class _TypeToggle extends StatelessWidget {
-  final RecordType type;
-  final ValueChanged<RecordType> onSwitch;
-
-  const _TypeToggle({required this.type, required this.onSwitch});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    final isExpense = type == RecordType.expense;
-    const expenseColor = Color(0xFFFF3B30);
-    const incomeColor = Color(0xFF34C759);
-    const animDuration = Duration(milliseconds: 500);
-
-    return Container(
-      decoration: BoxDecoration(
-        color: colors.onSurface.withAlpha(12),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      padding: const EdgeInsets.all(4),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final pillWidth = constraints.maxWidth / 2 - 8;
-          final pillLeft = isExpense ? 4.0 : constraints.maxWidth / 2;
-
-          return SizedBox(
-            height: 44,
-            child: Stack(
-              children: [
-                // Animated sliding pill highlight
-                AnimatedPositioned(
-                  duration: animDuration,
-                  curve: Curves.easeInOut,
-                  left: pillLeft,
-                  top: 4,
-                  bottom: 4,
-                  child: AnimatedContainer(
-                    duration: animDuration,
-                    curve: Curves.easeInOut,
-                    width: pillWidth,
-                    decoration: BoxDecoration(
-                      color: (isExpense ? expenseColor : incomeColor).withAlpha(
-                        25,
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                // Tab buttons (on top of pill)
-                Row(
-                  children: [
-                    Expanded(
-                      child: _ToggleTab(
-                        icon: PhosphorIcons.trendDown(PhosphorIconsStyle.fill),
-                        label: 'Expense',
-                        isActive: isExpense,
-                        activeColor: expenseColor,
-                        colors: colors,
-                        onTap: () => onSwitch(RecordType.expense),
-                      ),
-                    ),
-                    Expanded(
-                      child: _ToggleTab(
-                        icon: PhosphorIcons.trendUp(PhosphorIconsStyle.fill),
-                        label: 'Income',
-                        isActive: !isExpense,
-                        activeColor: incomeColor,
-                        colors: colors,
-                        onTap: () => onSwitch(RecordType.income),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _ToggleTab extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool isActive;
-  final Color activeColor;
-  final ColorScheme colors;
-  final VoidCallback onTap;
-
-  const _ToggleTab({
-    required this.icon,
-    required this.label,
-    required this.isActive,
-    required this.activeColor,
-    required this.colors,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final fgColor = isActive ? activeColor : colors.onSurface.withAlpha(100);
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 18, color: fgColor),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: fgColor,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ──────────────────────────────────
-// Numeric Keypad with hold-to-delete
-// ──────────────────────────────────
-class _NumericKeypad extends StatefulWidget {
-  final void Function(String) onDigit;
-  final VoidCallback onBackspace;
-  final ColorScheme color;
-
-  const _NumericKeypad({
-    required this.onDigit,
-    required this.onBackspace,
-    required this.color,
-  });
-
-  @override
-  State<_NumericKeypad> createState() => _NumericKeypadState();
-}
-
-class _NumericKeypadState extends State<_NumericKeypad> {
-  Timer? _backspaceTimer;
-  Timer? _initialDelayTimer;
-
-  @override
-  void dispose() {
-    _cancelBackspaceTimers();
-    super.dispose();
-  }
-
-  void _cancelBackspaceTimers() {
-    _initialDelayTimer?.cancel();
-    _initialDelayTimer = null;
-    _backspaceTimer?.cancel();
-    _backspaceTimer = null;
-  }
-
-  void _onBackspaceLongPressStart(LongPressStartDetails _) {
-    _cancelBackspaceTimers();
-    widget.onBackspace();
-    _initialDelayTimer = Timer(const Duration(milliseconds: 300), () {
-      _backspaceTimer = Timer.periodic(
-        const Duration(milliseconds: 100),
-        (_) => widget.onBackspace(),
-      );
-    });
-  }
-
-  void _onBackspaceLongPressEnd(LongPressEndDetails _) {
-    _cancelBackspaceTimers();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final btnColor = widget.color.onSurface.withAlpha(12);
-    final txtColor = widget.color.onSurface;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              _KeypadButton(
-                color: btnColor,
-                onTap: () => widget.onDigit('1'),
-                child: Text('1', style: _keypadTextStyle(txtColor)),
-              ),
-              _KeypadButton(
-                color: btnColor,
-                onTap: () => widget.onDigit('2'),
-                child: Text('2', style: _keypadTextStyle(txtColor)),
-              ),
-              _KeypadButton(
-                color: btnColor,
-                onTap: () => widget.onDigit('3'),
-                child: Text('3', style: _keypadTextStyle(txtColor)),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              _KeypadButton(
-                color: btnColor,
-                onTap: () => widget.onDigit('4'),
-                child: Text('4', style: _keypadTextStyle(txtColor)),
-              ),
-              _KeypadButton(
-                color: btnColor,
-                onTap: () => widget.onDigit('5'),
-                child: Text('5', style: _keypadTextStyle(txtColor)),
-              ),
-              _KeypadButton(
-                color: btnColor,
-                onTap: () => widget.onDigit('6'),
-                child: Text('6', style: _keypadTextStyle(txtColor)),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              _KeypadButton(
-                color: btnColor,
-                onTap: () => widget.onDigit('7'),
-                child: Text('7', style: _keypadTextStyle(txtColor)),
-              ),
-              _KeypadButton(
-                color: btnColor,
-                onTap: () => widget.onDigit('8'),
-                child: Text('8', style: _keypadTextStyle(txtColor)),
-              ),
-              _KeypadButton(
-                color: btnColor,
-                onTap: () => widget.onDigit('9'),
-                child: Text('9', style: _keypadTextStyle(txtColor)),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              _KeypadButton(
-                color: btnColor,
-                onTap: () => widget.onDigit('.'),
-                child: Text('.', style: _keypadTextStyle(txtColor)),
-              ),
-              _KeypadButton(
-                color: btnColor,
-                onTap: () => widget.onDigit('0'),
-                child: Text('0', style: _keypadTextStyle(txtColor)),
-              ),
-              _KeypadButton(
-                color: btnColor,
-                onTap: widget.onBackspace,
-                onLongPressStart: _onBackspaceLongPressStart,
-                onLongPressEnd: _onBackspaceLongPressEnd,
-                onLongPressCancel: _cancelBackspaceTimers,
-                child: Icon(
-                  PhosphorIcons.backspace(PhosphorIconsStyle.light),
-                  color: txtColor,
-                  size: 22,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  static TextStyle _keypadTextStyle(Color color) =>
-      TextStyle(fontSize: 22, fontWeight: FontWeight.w500, color: color);
-}
-
-class _KeypadButton extends StatelessWidget {
-  final Color color;
-  final Widget child;
-  final VoidCallback onTap;
-  final void Function(LongPressStartDetails)? onLongPressStart;
-  final void Function(LongPressEndDetails)? onLongPressEnd;
-  final VoidCallback? onLongPressCancel;
-
-  const _KeypadButton({
-    required this.color,
-    required this.child,
-    required this.onTap,
-    this.onLongPressStart,
-    this.onLongPressEnd,
-    this.onLongPressCancel,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        onLongPressStart: onLongPressStart,
-        onLongPressEnd: onLongPressEnd,
-        onLongPressCancel: onLongPressCancel,
-        child: Container(
-          height: 52,
-          margin: const EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Center(child: child),
         ),
       ),
     );

@@ -1,30 +1,29 @@
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
-import 'package:expense_tracker/core/database/app_database.dart'
-    hide Category, Record;
+import 'package:expense_tracker/core/database/app_database.dart' as db;
 import 'package:expense_tracker/core/database/daos/record_dao.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
-import '../../domain/entities/record.dart';
+import '../../domain/entities/record.dart' as rec;
 import "package:expense_tracker/core/constants/source_types.dart";
 import '../../domain/repositories/record_repository.dart';
 
 abstract class RecordLocalDatasource {
-  Future<List<Record>> getRecords({
+  Future<List<rec.Record>> getRecords({
     DateTimeRange? dateRange,
     String? categoryId,
     int? limit,
     int? offset,
   });
-  Future<Record?> getRecordById(String id);
-  Future<Record> addRecord(Record record);
-  Future<Record> updateRecord(Record record);
+  Future<rec.Record?> getRecordById(String id);
+  Future<rec.Record> addRecord(rec.Record record);
+  Future<rec.Record> updateRecord(rec.Record record);
   Future<void> deleteRecord(String id);
-  Stream<List<Record>> watchRecords({int? limit, int? offset});
+  Stream<List<rec.Record>> watchRecords({int? limit, int? offset});
   Future<bool> recordExistsBySourceId(String sourceId);
   Future<Set<String>> getExistingSourceIds(List<String> sourceIds);
-  Future<void> addRecordsBatch(List<Record> records);
-  Future<List<Record>> getRecordsByCategoryAndDateRange(
+  Future<void> addRecordsBatch(List<rec.Record> records);
+  Future<List<rec.Record>> getRecordsByCategoryAndDateRange(
     String categoryId,
     DateTime start,
     DateTime end,
@@ -35,8 +34,8 @@ abstract class RecordLocalDatasource {
     DateTime end,
   );
   Future<double> getTotalSpending(DateTime start, DateTime end);
-  Future<List<Record>> getRecordsByDateRangeOnly(DateTime start, DateTime end);
-  Future<List<Record>> getFilteredRecords({
+  Future<List<rec.Record>> getRecordsByDateRangeOnly(DateTime start, DateTime end);
+  Future<List<rec.Record>> getFilteredRecords({
     DateTime? startDate,
     DateTime? endDate,
     List<String>? categoryIds,
@@ -52,7 +51,7 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
   RecordLocalDatasourceImpl({required this.recordDao});
 
   @override
-  Future<List<Record>> getRecords({
+  Future<List<rec.Record>> getRecords({
     DateTimeRange? dateRange,
     String? categoryId,
     int? limit,
@@ -64,16 +63,16 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
           dateRange.start,
           dateRange.end,
         );
-        return records.map(_mapToEntity).toList();
+        return records.map<rec.Record>((e) => _mapToEntity(e)).toList();
       } else if (categoryId != null) {
         final records = await recordDao.getRecordsByCategory(categoryId);
-        return records.map(_mapToEntity).toList();
+        return records.map<rec.Record>((e) => _mapToEntity(e)).toList();
       } else {
         final records = await recordDao.getAllRecords(
           limit: limit,
           offset: offset,
         );
-        return records.map(_mapToEntity).toList();
+        return records.map<rec.Record>((e) => _mapToEntity(e)).toList();
       }
     } catch (e) {
       throw CacheException(message: e.toString());
@@ -81,7 +80,7 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
   }
 
   @override
-  Future<Record?> getRecordById(String id) async {
+  Future<rec.Record?> getRecordById(String id) async {
     try {
       final record = await recordDao.getRecordById(id);
       return record != null ? _mapToEntity(record) : null;
@@ -91,11 +90,11 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
   }
 
   @override
-  Future<Record> addRecord(Record record) async {
+  Future<rec.Record> addRecord(rec.Record record) async {
     try {
       final now = DateTime.now().toUtc();
       final id = record.id ?? const Uuid().v4();
-      final companion = RecordsCompanion(
+      final companion = db.RecordsCompanion(
         id: Value(id),
         amount: Value(record.amount),
         description: Value(record.description),
@@ -115,10 +114,10 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
   }
 
   @override
-  Future<Record> updateRecord(Record record) async {
+  Future<rec.Record> updateRecord(rec.Record record) async {
     try {
       final now = DateTime.now().toUtc();
-      final companion = RecordsCompanion(
+      final companion = db.RecordsCompanion(
         id: Value(record.id!),
         amount: Value(record.amount),
         description: Value(record.description),
@@ -147,10 +146,10 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
   }
 
   @override
-  Stream<List<Record>> watchRecords({int? limit, int? offset}) {
+  Stream<List<rec.Record>> watchRecords({int? limit, int? offset}) {
     return recordDao
         .watchRecords(limit: limit, offset: offset)
-        .map((records) => records.map(_mapToEntity).toList());
+        .map((records) => records.map<rec.Record>((e) => _mapToEntity(e)).toList());
   }
 
   @override
@@ -172,7 +171,7 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
   }
 
   @override
-  Future<List<Record>> getRecordsByCategoryAndDateRange(
+  Future<List<rec.Record>> getRecordsByCategoryAndDateRange(
     String categoryId,
     DateTime start,
     DateTime end,
@@ -183,7 +182,7 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
         start,
         end,
       );
-      return records.map(_mapToEntity).toList();
+      return records.map<rec.Record>((e) => _mapToEntity(e)).toList();
     } catch (e) {
       throw CacheException(message: e.toString());
     }
@@ -212,25 +211,25 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
   }
 
   @override
-  Future<List<Record>> getRecordsByDateRangeOnly(
+  Future<List<rec.Record>> getRecordsByDateRangeOnly(
     DateTime start,
     DateTime end,
   ) async {
     try {
       final records = await recordDao.getRecordsByDateRangeOnly(start, end);
-      return records.map(_mapToEntity).toList();
+      return records.map<rec.Record>((e) => _mapToEntity(e)).toList();
     } catch (e) {
       throw CacheException(message: e.toString());
     }
   }
 
   @override
-  Future<void> addRecordsBatch(List<Record> records) async {
+  Future<void> addRecordsBatch(List<rec.Record> records) async {
     try {
       final now = DateTime.now().toUtc();
       final companions = records.map((record) {
         final id = record.id ?? const Uuid().v4();
-        return RecordsCompanion(
+        return db.RecordsCompanion(
           id: Value(id),
           amount: Value(record.amount),
           description: Value(record.description),
@@ -251,7 +250,7 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
 
   /// Combined filter query for offline filtering.
   @override
-  Future<List<Record>> getFilteredRecords({
+  Future<List<rec.Record>> getFilteredRecords({
     DateTime? startDate,
     DateTime? endDate,
     List<String>? categoryIds,
@@ -268,14 +267,14 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
         limit: limit,
         offset: offset,
       );
-      return records.map(_mapToEntity).toList();
+      return records.map<rec.Record>((e) => _mapToEntity(e)).toList();
     } catch (e) {
       throw CacheException(message: e.toString());
     }
   }
 
-  Record _mapToEntity(dynamic e) {
-    return Record(
+  rec.Record _mapToEntity(db.Record e) {
+    return rec.Record(
       id: e.id,
       amount: e.amount,
       description: e.description,

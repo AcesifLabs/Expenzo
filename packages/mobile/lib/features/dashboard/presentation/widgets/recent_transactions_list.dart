@@ -1,4 +1,5 @@
 import 'package:expense_tracker/core/constants/source_types.dart';
+import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/features/records/domain/entities/record.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -23,10 +24,7 @@ class RecentTransactionsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final currencyFormat = NumberFormat.currency(
-      symbol: '\$',
-      decimalDigits: 2,
-    );
+    final currencyFormat = CurrencyFormatter.getFormatter(decimalDigits: 2);
     final dateFormat = DateFormat('MMM dd, yyyy');
 
     if (transactions.isEmpty) {

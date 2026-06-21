@@ -100,7 +100,9 @@ class TimedRegex {
         if (RegExp(dangerous).hasMatch(pattern)) {
           return true;
         }
-      } catch (_) {}
+      } catch (e) {
+        debugPrint('RegexUtils: Failed to test dangerous pattern: $e');
+      }
     }
 
     if (pattern.contains('({')) {
