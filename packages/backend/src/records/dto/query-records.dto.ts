@@ -1,6 +1,6 @@
 import { IsOptional, IsUUID, IsInt, Min, Max, IsDateString, IsEnum } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
-import { RecordType } from './create-record.dto';
+import { CategoryType } from '../../common/enums/category-type.enum';
 
 export class QueryRecordsDto {
   @IsUUID('4') @IsOptional() cursor?: string;
@@ -15,5 +15,5 @@ export class QueryRecordsDto {
     return undefined;
   })
   categoryIds?: string[];
-  @IsEnum(RecordType) @IsOptional() recordType?: RecordType;
+  @IsEnum(CategoryType) @IsOptional() recordType?: CategoryType;
 }

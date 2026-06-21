@@ -1,7 +1,8 @@
-import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
 import { User } from '../../auth/entities/user.entity';
 
 @Entity('parsing_rules')
+@Index(['userId', 'updatedAt'])
 export class ParsingRule {
   @PrimaryColumn('text')
   id: string;

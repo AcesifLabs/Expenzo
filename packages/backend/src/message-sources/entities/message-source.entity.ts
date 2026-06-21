@@ -1,7 +1,9 @@
-import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
 import { User } from '../../auth/entities/user.entity';
+import { AutoCreateOption } from '../../common/enums/auto-create-option.enum';
 
 @Entity('message_sources')
+@Index(['userId', 'updatedAt'])
 export class MessageSource {
   @PrimaryColumn('text')
   id: string;
@@ -22,8 +24,8 @@ export class MessageSource {
   @Column({ default: false })
   isMonitored: boolean;
 
-  @Column({ default: 1 })
-  autoCreateOption: number;
+  @Column({ type: 'int', default: AutoCreateOption.AUTO })
+  autoCreateOption: AutoCreateOption;
 
   @CreateDateColumn()
   createdAt: Date;

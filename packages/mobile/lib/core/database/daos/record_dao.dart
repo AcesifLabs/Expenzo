@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import '../../constants/record_type.dart';
 import '../app_database.dart';
 import '../tables/records_table.dart';
 
@@ -121,7 +122,7 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
               (t) =>
                   t.categoryId.equals(categoryId) &
                   t.date.isBetweenValues(start, end) &
-                  t.recordType.equals('OUT'),
+                  t.recordType.equals(RecordType.expense.dbValue),
             ))
             .get();
     double total = 0;
@@ -136,7 +137,7 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
         await (select(records)..where(
               (t) =>
                   t.date.isBetweenValues(start, end) &
-                  t.recordType.equals('OUT'),
+                  t.recordType.equals(RecordType.expense.dbValue),
             ))
             .get();
     double total = 0;

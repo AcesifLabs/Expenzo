@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'package:expense_tracker/core/theme/app_colors.dart';
+import 'package:uuid/uuid.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_icons.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import '../../domain/entities/category.dart';
@@ -40,21 +39,6 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
     'gift',
   ];
 
-  static const List<String> _colors = [
-    '#E53935',
-    '#D81B60',
-    '#8E24AA',
-    '#5E35B1',
-    '#3949AB',
-    '#1E88E5',
-    '#00ACC1',
-    '#00897B',
-    '#43A047',
-    '#7CB342',
-    '#FDD835',
-    '#FFB300',
-  ];
-
   bool get _isEditing => widget.category != null;
 
   @override
@@ -76,6 +60,10 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final isExpense = _type == RecordType.expense;
+    final accentColor = isExpense ? colors.error : colors.primary;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -116,7 +104,7 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
                     decoration: BoxDecoration(
                       border: Border.all(
                         color: isSelected
-                            ? AppColors.primary
+                            ? accentColor
                             : Theme.of(
                                 context,
                               ).colorScheme.outline.withAlpha(40),
@@ -128,46 +116,20 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
                       child: Icon(
                         AppIcons.getCategoryIcon(name),
                         size: 24,
-                        color: isSelected ? AppColors.primary : Colors.grey,
+                        color: isSelected ? accentColor : Colors.grey,
                       ),
                     ),
                   ),
                 );
               }).toList(),
             ),
-            const SizedBox(height: 24),
-            const Text('Color', style: TextStyle(fontSize: 16)),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: _colors.map((color) {
-                final isSelected = color == _selectedColor;
-                return GestureDetector(
-                  onTap: () => setState(() => _selectedColor = color),
-                  child: Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: Color(int.parse(color.replaceFirst('#', '0xFF'))),
-                      border: Border.all(
-                        color: isSelected ? Colors.black : Colors.transparent,
-                        width: isSelected ? 3 : 0,
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: isSelected
-                        ? Icon(
-                            PhosphorIcons.check(PhosphorIconsStyle.regular),
-                            color: Colors.white,
-                          )
-                        : null,
-                  ),
-                );
-              }).toList(),
-            ),
+
             const SizedBox(height: 32),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: accentColor,
+                foregroundColor: colors.onError,
+              ),
               onPressed: _saveCategory,
               child: Text(_isEditing ? 'Update' : 'Create'),
             ),
@@ -180,8 +142,11 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
   void _saveCategory() {
     if (_formKey.currentState!.validate()) {
       final now = DateTime.now().toUtc();
+      // Generate UUID for new categories so the caller can identify it
+      // before the database insert completes (matches CategoryLocalDatasource).
+      final id = widget.category?.id ?? const Uuid().v4();
       final category = Category(
-        id: widget.category?.id,
+        id: id,
         name: _nameController.text,
         emoji: _selectedEmoji,
         color: _selectedColor,
@@ -195,7 +160,7 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
       } else {
         context.read<CategoryBloc>().add(CreateCategoryEvent(category));
       }
-      Navigator.pop(context);
+      Navigator.pop(context, category);
     }
   }
 }

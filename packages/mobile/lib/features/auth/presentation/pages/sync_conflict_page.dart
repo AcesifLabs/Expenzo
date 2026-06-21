@@ -24,7 +24,9 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
   void dispose() {
     try {
       di.getIt<SyncEngine>().onProgress = null;
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('SyncConflictPage: Failed to clear onProgress callback: $e');
+    }
     super.dispose();
   }
 

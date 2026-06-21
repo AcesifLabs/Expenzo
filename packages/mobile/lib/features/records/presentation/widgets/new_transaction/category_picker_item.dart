@@ -6,6 +6,7 @@ class CategoryPickerItem extends StatelessWidget {
   final Category category;
   final bool isSelected;
   final Color errorBorderColor;
+  final Color selectedColor;
   final VoidCallback onTap;
 
   const CategoryPickerItem({
@@ -13,6 +14,7 @@ class CategoryPickerItem extends StatelessWidget {
     required this.category,
     required this.isSelected,
     required this.errorBorderColor,
+    this.selectedColor = const Color(0xFFD1C4E9),
     required this.onTap,
   });
 
@@ -22,7 +24,7 @@ class CategoryPickerItem extends StatelessWidget {
     final isLight = Theme.of(context).brightness == Brightness.light;
 
     final iconColor = isSelected
-        ? colors.primary
+        ? selectedColor
         : colors.onSurface.withAlpha(150);
 
     final textColor = (isSelected && isLight) ? Colors.black : iconColor;
@@ -36,12 +38,12 @@ class CategoryPickerItem extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
           color: isSelected
-              ? colors.primary.withAlpha(25)
+              ? selectedColor.withAlpha(25)
               : colors.onSurface.withAlpha(10),
           borderRadius: BorderRadius.circular(25),
           border: Border.all(
             color: isSelected
-                ? colors.primary.withAlpha(50)
+                ? selectedColor.withAlpha(50)
                 : errorBorderColor != Colors.transparent
                 ? errorBorderColor
                 : colors.onSurface.withAlpha(40),

@@ -95,15 +95,9 @@ class BudgetLocalDatasourceImpl implements BudgetLocalDatasource {
   }
 
   domain.BudgetPeriod _parsePeriod(String period) {
-    switch (period) {
-      case 'weekly':
-        return domain.BudgetPeriod.weekly;
-      case 'monthly':
-        return domain.BudgetPeriod.monthly;
-      case 'yearly':
-        return domain.BudgetPeriod.yearly;
-      default:
-        return domain.BudgetPeriod.monthly;
+    for (final p in domain.BudgetPeriod.values) {
+      if (p.name == period) return p;
     }
+    return domain.BudgetPeriod.monthly;
   }
 }

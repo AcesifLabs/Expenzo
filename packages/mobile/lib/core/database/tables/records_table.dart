@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import '../../constants/source_types.dart';
 
 class Records extends Table {
   TextColumn get id => text()();
@@ -6,7 +7,8 @@ class Records extends Table {
   TextColumn get description => text()();
   DateTimeColumn get date => dateTime()();
   TextColumn get categoryId => text().nullable()();
-  TextColumn get source => text().withDefault(const Constant('manual'))();
+  TextColumn get source =>
+      text().withDefault(Constant(ExpenseSource.manual.name))();
   TextColumn get sourceId => text().nullable()();
   TextColumn get recordType => text()(); // IN or OUT
   IntColumn get userId => integer().nullable()();

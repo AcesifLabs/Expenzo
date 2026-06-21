@@ -62,7 +62,7 @@ class RecordRemoteDatasourceImpl implements RecordRemoteDatasource {
       final items = (body['data'] as List<dynamic>?) ?? [];
 
       final records = items.map((json) {
-        final rt = json['recordType'] as String? ?? 'IN';
+        final rt = json['recordType'] as String? ?? RecordType.income.dbValue;
         return entity.Record(
           id: json['id'] as String?,
           amount: json['amount'] != null
@@ -72,11 +72,11 @@ class RecordRemoteDatasourceImpl implements RecordRemoteDatasource {
           date: DateTime.parse(json['date'] as String),
           categoryId: json['categoryId'] as String?,
           source: ExpenseSource.values.firstWhere(
-            (s) => s.name == (json['source'] as String? ?? 'manual'),
+            (s) => s.name == (json['source'] as String? ?? ExpenseSource.manual.name),
             orElse: () => ExpenseSource.manual,
           ),
           sourceId: json['sourceId'] as String?,
-          recordType: rt == 'IN' ? RecordType.income : RecordType.expense,
+          recordType: rt == RecordType.income.dbValue ? RecordType.income : RecordType.expense,
           createdAt: json['createdAt'] != null
               ? DateTime.parse(json['createdAt'] as String)
               : DateTime.now().toUtc(),

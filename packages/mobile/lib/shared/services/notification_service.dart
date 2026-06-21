@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:expense_tracker/core/constants/source_types.dart';
 
 enum NotificationType {
   budgetAlert,
@@ -159,7 +160,7 @@ class NotificationService {
     required int foundCount,
     required String sourceType,
   }) async {
-    final deepLink = sourceType == 'sms'
+    final deepLink = sourceType == ExpenseSource.sms.name
         ? 'expenso://scan/sms'
         : 'expenso://scan/email';
 

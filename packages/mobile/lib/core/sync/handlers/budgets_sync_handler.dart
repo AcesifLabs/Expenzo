@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import '../../../features/budgets/domain/entities/budget.dart' show BudgetPeriod;
 import '../../database/app_database.dart';
 import '../sync_table_registry.dart';
 
@@ -28,7 +29,7 @@ class BudgetsSyncHandler extends SyncTableHandler<$BudgetsTable, Budget> {
             ? Value(data['categoryId'])
             : const Value.absent(),
         amount: double.parse(data['amount'].toString()),
-        period: data['period'] ?? 'monthly',
+        period: data['period'] ?? BudgetPeriod.monthly.name,
         startDate: DateTime.parse(data['startDate']).toLocal(),
         rolloverEnabled: data['rolloverEnabled'] != null
             ? Value(data['rolloverEnabled'])

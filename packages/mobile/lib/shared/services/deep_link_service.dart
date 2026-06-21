@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/constants/source_types.dart';
 
 enum DeepLinkPath {
   budgets,
@@ -75,9 +76,9 @@ class DeepLinkServiceImpl implements DeepLinkService {
 
       case 'scan':
         if (pathSegments.length > 1) {
-          if (pathSegments[1] == 'sms') {
+          if (pathSegments[1] == ExpenseSource.sms.name) {
             return const DeepLink(path: DeepLinkPath.scanSms);
-          } else if (pathSegments[1] == 'email') {
+          } else if (pathSegments[1] == ExpenseSource.email.name) {
             return const DeepLink(path: DeepLinkPath.scanEmail);
           }
         }
