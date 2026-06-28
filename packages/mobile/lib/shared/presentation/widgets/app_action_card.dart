@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Standard option card with icon + label on colored alpha background.
-/// Used for Expense/Income selection, category type choices, etc.
 class AppActionCard extends StatelessWidget {
   final IconData icon;
   final String label;

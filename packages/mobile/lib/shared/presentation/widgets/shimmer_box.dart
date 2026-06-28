@@ -2,15 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../core/theme/app_colors.dart';
 
-/// Base shimmer wrapper used across the app for loading skeletons.
-///
-/// Provides a consistent shimmer effect using the app's sage color scheme.
 class ShimmerBox extends StatelessWidget {
   final Widget child;
 
   const ShimmerBox({super.key, required this.child});
 
-  /// A circular placeholder (e.g., avatars, icons).
   static Widget circle({Key? key, required double size}) {
     return Container(
       key: key,
@@ -23,7 +19,6 @@ class ShimmerBox extends StatelessWidget {
     );
   }
 
-  /// A rectangular placeholder with rounded corners (e.g., cards, images).
   static Widget rectangle({
     Key? key,
     required double width,
@@ -41,7 +36,6 @@ class ShimmerBox extends StatelessWidget {
     );
   }
 
-  /// A horizontal line placeholder (e.g., text lines).
   static Widget textLine({
     Key? key,
     double width = double.infinity,
@@ -79,8 +73,6 @@ class ShimmerBox extends StatelessWidget {
   }
 }
 
-/// Convenience widget that wraps a [ShimmerBox] to build a list of
-/// repeating skeleton items.
 class ShimmerList extends StatelessWidget {
   final int itemCount;
   final IndexedWidgetBuilder itemBuilder;

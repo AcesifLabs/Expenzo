@@ -7,9 +7,7 @@ import '../../../message_templates/domain/entities/expense_template.dart';
 import '../../../message_templates/domain/entities/message_source.dart';
 import '../services/rule_evaluator.dart';
 
-/// Service to offload heavy message parsing to a background isolate.
 class ParsingIsolateService {
-  /// Parses all messages in a background isolate.
   Future<List<ParsedTransaction>> parseMessages({
     required List<ParseMessageInput> messages,
     required ParsingContext context,
@@ -29,7 +27,6 @@ class ParsingIsolateService {
   }
 }
 
-/// Input data for a single message to parse in the isolate.
 class ParseMessageInput {
   final String body;
   final String address;
@@ -44,7 +41,6 @@ class ParseMessageInput {
   });
 }
 
-/// Payload sent to the background isolate.
 class _IsolatePayload {
   final List<ParseMessageInput> messages;
   final List<ParsingRule> rules;
@@ -61,12 +57,10 @@ class _IsolatePayload {
   });
 }
 
-/// Helper (top-level, accessible from isolate)
 void _isolateLog(String message) {
   log(message, name: 'ParsingIsolate');
 }
 
-/// Top-level function executed in the background isolate.
 List<ParsedTransaction> _parseInIsolate(_IsolatePayload payload) {
   final context = ParsingContext(
     rules: payload.rules,

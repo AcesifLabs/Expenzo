@@ -30,7 +30,6 @@ class ReportsBloc extends Bloc<ReportsEvent, ReportsState> {
     on<ChangeDateRange>(_onChangeDateRange);
     on<ChangeGranularity>(_onChangeGranularity);
 
-    // Auto-load initial data
     add(
       LoadReports(
         startDate: startDate,

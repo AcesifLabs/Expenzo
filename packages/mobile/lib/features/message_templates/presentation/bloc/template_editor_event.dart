@@ -17,7 +17,7 @@ class LoadTemplate extends TemplateEditorEvent {
 
 class SaveTemplateEvent extends TemplateEditorEvent {
   final ExpenseTemplate template;
-  final MessageSource source; // Pass the source to be saved first
+  final MessageSource source;
 
   const SaveTemplateEvent(this.template, this.source);
   @override

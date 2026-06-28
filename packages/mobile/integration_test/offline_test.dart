@@ -13,10 +13,8 @@ void main() {
         app.main();
         await tester.pumpAndSettle(const Duration(seconds: 20));
 
-        // Should NOT show "Initialization Failed"
         expect(find.text('Initialization Failed'), findsNothing);
 
-        // Should show AppShell content (bottom nav exists)
         expect(find.byType(MaterialApp), findsOneWidget);
       },
     );
@@ -27,8 +25,6 @@ void main() {
       app.main();
       await tester.pumpAndSettle(const Duration(seconds: 20));
 
-      // Dashboard should be visible — check for common widgets
-      // Seeded categories: Food, Shopping, Transport, etc.
       final hasContent = find.byType(Scaffold).evaluate().isNotEmpty;
       expect(hasContent, isTrue);
     });

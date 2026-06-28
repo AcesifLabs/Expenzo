@@ -4,7 +4,6 @@ import 'package:expense_tracker/core/error/failures.dart';
 import '../entities/budget.dart';
 import '../repositories/budget_repository.dart';
 
-/// Enhanced progress info for a single budget, including category display data.
 class BudgetProgress {
   final String budgetId;
   final double budgetAmount;
@@ -31,8 +30,6 @@ class BudgetProgress {
   });
 }
 
-/// Deprecated — use [GetBudgetsWithProgress] for automatic calculation.
-/// Kept for backward compatibility.
 class GetBudgetProgress {
   final BudgetRepository repository;
 
@@ -52,7 +49,7 @@ class GetBudgetProgress {
           : 0.0;
       final now = DateTime.now();
       final periodRange = DateTimeRange(
-        start: now, // approximate; caller should use GetBudgetsWithProgress
+        start: now,
         end: now.add(const Duration(days: 30)),
       );
 

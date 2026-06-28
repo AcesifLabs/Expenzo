@@ -166,7 +166,7 @@ class SyncEngine {
         processed = end;
         onProgress?.call(processed / total);
       }
-      _retryCount = 0; // reset backoff on success
+      _retryCount = 0;
     } catch (e) {
       debugPrint('SyncEngine push failed: $e');
       _scheduleRetry();

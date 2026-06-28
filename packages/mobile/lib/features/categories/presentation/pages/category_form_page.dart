@@ -142,8 +142,7 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
   void _saveCategory() {
     if (_formKey.currentState!.validate()) {
       final now = DateTime.now().toUtc();
-      // Generate UUID for new categories so the caller can identify it
-      // before the database insert completes (matches CategoryLocalDatasource).
+
       final id = widget.category?.id ?? const Uuid().v4();
       final category = Category(
         id: id,

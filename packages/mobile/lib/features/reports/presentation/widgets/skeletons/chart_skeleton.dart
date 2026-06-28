@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../../shared/presentation/widgets/shimmer_box.dart';
 
-/// Skeleton for the Spending Trend chart tab.
-/// Mimics a line chart area with axis labels.
 class ChartSkeleton extends StatelessWidget {
   const ChartSkeleton({super.key});
 
@@ -13,7 +11,6 @@ class ChartSkeleton extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // Granularity selector
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -25,12 +22,11 @@ class ChartSkeleton extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            // Chart area
+
             Expanded(
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  // Y-axis labels
                   Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: List.generate(
@@ -39,7 +35,7 @@ class ChartSkeleton extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  // Chart body — wavy bar shapes
+
                   Expanded(
                     child: ShimmerBox.rectangle(
                       width: double.infinity,
@@ -51,7 +47,7 @@ class ChartSkeleton extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            // X-axis labels
+
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: List.generate(

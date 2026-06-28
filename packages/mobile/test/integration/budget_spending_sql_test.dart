@@ -23,7 +23,6 @@ void main() {
       final start = DateTime(now.year, now.month, 1);
       final end = DateTime(now.year, now.month + 1, 0);
 
-      // Insert OUT record (Expense)
       await recordDao.insertRecord(
         RecordsCompanion.insert(
           id: '1',
@@ -34,7 +33,6 @@ void main() {
         ),
       );
 
-      // Insert IN record (Income)
       await recordDao.insertRecord(
         RecordsCompanion.insert(
           id: '2',
@@ -47,7 +45,6 @@ void main() {
 
       final spending = await recordDao.getTotalSpending(start, end);
 
-      // Should be 100.0 (absolute of -100.0), ignoring the 500.0 income
       expect(spending, 100.0);
     });
 
@@ -59,7 +56,6 @@ void main() {
         final end = DateTime(now.year, now.month + 1, 0);
         const categoryId = 'cat1';
 
-        // Insert OUT record in category
         await recordDao.insertRecord(
           RecordsCompanion.insert(
             id: '1',
@@ -71,7 +67,6 @@ void main() {
           ),
         );
 
-        // Insert IN record in same category
         await recordDao.insertRecord(
           RecordsCompanion.insert(
             id: '2',
@@ -83,7 +78,6 @@ void main() {
           ),
         );
 
-        // Insert OUT record in different category
         await recordDao.insertRecord(
           RecordsCompanion.insert(
             id: '3',
@@ -101,7 +95,6 @@ void main() {
           end,
         );
 
-        // Should be 50.0, ignoring income in same category and expense in other category
         expect(spending, 50.0);
       },
     );

@@ -2,8 +2,7 @@ import 'package:drift/drift.dart';
 
 class SyncQueue extends Table {
   IntColumn get id => integer().autoIncrement()();
-  TextColumn get entityTable =>
-      text()(); // renamed from tableName to avoid Table.tableName conflict
+  TextColumn get entityTable => text()();
   TextColumn get recordId => text()();
   TextColumn get action => text()();
   TextColumn get payload => text()();

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../../shared/presentation/widgets/shimmer_box.dart';
 
-/// Skeleton matching [RecentTransactionsList] — header + 5 list tiles.
 class RecentTransactionsSkeleton extends StatelessWidget {
   final int itemCount;
 
@@ -13,12 +12,11 @@ class RecentTransactionsSkeleton extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
           Padding(
             padding: const EdgeInsets.all(16),
             child: ShimmerBox.textLine(width: 180, height: 18),
           ),
-          // Transaction tiles
+
           ...List.generate(itemCount, (index) {
             return const _TransactionTileSkeleton();
           }),

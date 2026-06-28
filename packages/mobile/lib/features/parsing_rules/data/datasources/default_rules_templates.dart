@@ -39,7 +39,6 @@ class DefaultRuleTemplate {
 
 class DefaultRulesTemplates {
   static const List<DefaultRuleTemplate> templates = [
-    // SMS Templates
     DefaultRuleTemplate(
       name: 'HDFC Bank SMS',
       description: 'Parses debit notifications from HDFC Bank',
@@ -85,7 +84,7 @@ class DefaultRulesTemplates {
       sourceType: SourceType.sms,
       priority: 5,
     ),
-    // Email Templates
+
     DefaultRuleTemplate(
       name: 'Amazon Order Email',
       description: 'Parses Amazon order emails',

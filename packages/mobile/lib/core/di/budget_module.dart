@@ -15,7 +15,6 @@ import 'package:expense_tracker/features/categories/domain/repositories/category
 import 'package:expense_tracker/features/budgets/presentation/bloc/budget_bloc.dart';
 
 void initBudgetModule(GetIt getIt) {
-  // BudgetDao registered in initCriticalDependencies
   getIt.registerLazySingleton<BudgetLocalDatasource>(
     () => BudgetLocalDatasourceImpl(budgetDao: getIt<BudgetDao>()),
   );

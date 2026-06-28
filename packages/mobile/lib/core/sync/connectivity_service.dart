@@ -14,9 +14,6 @@ class ConnectivityService {
   bool _isOnline = false;
   bool get isOnline => _isOnline;
 
-  /// Stream of connectivity state that gracefully handles platform errors
-  /// (e.g. SecurityException from registerDefaultNetworkCallback on Android 14+).
-  /// On error, the last known state is preserved and the error is logged.
   Stream<bool> get onlineStream => _connectivity.onConnectivityChanged
       .handleError((Object error, StackTrace stack) {
         debugPrint('[ConnectivityService] stream error: $error');

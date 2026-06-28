@@ -4,7 +4,6 @@ import 'package:equatable/equatable.dart';
 import '../../../sms_parser/data/datasources/sms_local_datasource.dart';
 import '../../../sms_parser/domain/entities/sms_message.dart';
 
-// Events
 abstract class SampleAnalyzerEvent extends Equatable {
   const SampleAnalyzerEvent();
   @override
@@ -25,7 +24,6 @@ class LoadMoreSamples extends SampleAnalyzerEvent {
   List<Object?> get props => [contactId];
 }
 
-// States
 abstract class SampleAnalyzerState extends Equatable {
   const SampleAnalyzerState();
   @override
@@ -70,7 +68,6 @@ class SampleAnalyzerError extends SampleAnalyzerState {
   List<Object?> get props => [message];
 }
 
-// BLoC
 class SampleAnalyzerBloc
     extends Bloc<SampleAnalyzerEvent, SampleAnalyzerState> {
   final SmsLocalDatasource smsDatasource;

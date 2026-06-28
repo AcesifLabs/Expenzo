@@ -7,7 +7,6 @@ class CategoryBreakdownWidget extends StatelessWidget {
   final List<CategoryAmount> categories;
   final String currencySymbol;
 
-  // Memoized formatter — created once per currency symbol
   static final _currencyFormats = <String, NumberFormat>{};
 
   const CategoryBreakdownWidget({
@@ -61,8 +60,6 @@ class CategoryBreakdownWidget extends StatelessWidget {
   }
 }
 
-/// Extracted widget that receives a pre-built formatter to avoid
-/// repeated NumberFormat allocation per category row.
 class _CategoryRow extends StatelessWidget {
   final CategoryAmount category;
   final NumberFormat currencyFormat;

@@ -43,8 +43,6 @@ void main() {
               Stream<List<ConnectivityResult>>.error(Exception('test error')),
         );
 
-        // The stream should not emit an error event — handleError swallows it.
-        // Since no data follows the error, the stream completes quietly.
         await expectLater(service.onlineStream, emitsDone);
       },
     );
@@ -55,8 +53,6 @@ void main() {
             Stream<List<ConnectivityResult>>.value([ConnectivityResult.none]),
       );
 
-      // _checkConnectivity sees [none] and returns false immediately
-      // without calling the health check endpoint.
       await expectLater(service.onlineStream, emits(false));
     });
 
@@ -68,12 +64,9 @@ void main() {
           () => mockConnectivity.onConnectivityChanged,
         ).thenAnswer((_) => controller.stream);
 
-        // First send an error, then valid data
         controller.addError(Exception('transient error'));
         controller.add([ConnectivityResult.none]);
 
-        // Error is swallowed by handleError; the none event triggers
-        // _checkConnectivity which returns false without hitting health check.
         await expectLater(service.onlineStream, emits(false));
 
         await controller.close();
@@ -89,7 +82,6 @@ void main() {
 
       final result = await service.checkNow();
 
-      // Default _isOnline is false; returns that instead of throwing.
       expect(result, false);
     });
 
@@ -98,9 +90,6 @@ void main() {
         () => mockConnectivity.checkConnectivity(),
       ).thenAnswer((_) async => [ConnectivityResult.wifi]);
 
-      // The health check inside _checkConnectivity will fail (no server),
-      // so the result will be false — but the point is no exception
-      // propagates from checkNow().
       final result = await service.checkNow();
       expect(result, false);
     });

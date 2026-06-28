@@ -61,10 +61,9 @@ class _InteractiveTemplateBuilderState
   @override
   void initState() {
     super.initState();
-    // Split message by spaces or newlines to create bubbles
+
     _words = widget.sampleMessage.body.split(RegExp(r'\s+'));
 
-    // Extract all numbers/currencies
     final numRegex = RegExp(
       r'(?:Rs\.?|INR|BDT|৳)?\s*[\d,]+(?:\.\d+)?',
       caseSensitive: false,
@@ -80,7 +79,6 @@ class _InteractiveTemplateBuilderState
   void _generateAndSaveTemplate() {
     if (_selectedTrigger == null || _selectedAmount == null) return;
 
-    // Pattern requires currency prefix (Rs, INR, BDT, ৳) to distinguish amounts from IDs/numbers
     final amountPattern = r'(Rs\.?|INR|BDT|৳)\s*([\d,]+(?:\.\d+)?)';
 
     _savedTemplate = ExpenseTemplate(
@@ -89,14 +87,13 @@ class _InteractiveTemplateBuilderState
       sampleMessage: widget.sampleMessage.body,
       triggerWord: _selectedTrigger!,
       amountPattern: amountPattern,
-      // Store numeric portion only (without currency prefix) for reliable comparison
+
       selectedAmount: _stripCurrencyPrefix(_selectedAmount!),
-      descriptionPattern: widget.source.contactName, // Default to sender name
+      descriptionPattern: widget.source.contactName,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );
 
-    // Also pass the MessageSource so the Bloc can save it first to satisfy foreign key
     final monitoredSource = widget.source.copyWith(isMonitored: true);
     context.read<TemplateEditorBloc>().add(
       SaveTemplateEvent(_savedTemplate!, monitoredSource),
@@ -152,7 +149,6 @@ class _InteractiveTemplateBuilderState
   }
 
   static String _stripCurrencyPrefix(String amount) {
-    // Remove common currency prefixes/symbols and whitespace for display
     return amount.replaceAll(
       RegExp(r'^(?:Rs\.?|INR|BDT|৳)\s*', caseSensitive: false),
       '',
@@ -281,7 +277,6 @@ class _InteractiveTemplateBuilderState
             BlocConsumer<TemplateEditorBloc, TemplateEditorState>(
               listener: (context, state) async {
                 if (state is TemplateEditorSaved && _savedTemplate != null) {
-                  // Show the retroactive scan dialog first
                   await RetroactiveScanDialog.show(
                     context,
                     widget.source,
@@ -294,7 +289,7 @@ class _InteractiveTemplateBuilderState
                         content: Text('Template saved successfully!'),
                       ),
                     );
-                    Navigator.of(context).pop(); // Back to templates list
+                    Navigator.of(context).pop();
                   }
                 } else if (state is TemplateEditorError) {
                   ScaffoldMessenger.of(context).showSnackBar(

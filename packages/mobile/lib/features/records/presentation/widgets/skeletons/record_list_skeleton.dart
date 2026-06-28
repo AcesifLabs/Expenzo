@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../../shared/presentation/widgets/shimmer_box.dart';
 
-/// Skeleton matching [ExpenseCard] layout — icon, title, date, amount.
 class ExpenseListSkeleton extends StatelessWidget {
   final int itemCount;
 
@@ -21,10 +20,9 @@ class ExpenseListSkeleton extends StatelessWidget {
               padding: const EdgeInsets.all(12),
               child: Row(
                 children: [
-                  // Category icon
                   ShimmerBox.rectangle(width: 48, height: 48, borderRadius: 8),
                   const SizedBox(width: 12),
-                  // Title + date
+
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -36,7 +34,7 @@ class ExpenseListSkeleton extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  // Amount
+
                   ShimmerBox.textLine(width: 70, height: 16),
                 ],
               ),

@@ -32,13 +32,9 @@ import 'dashboard_module.dart';
 
 final getIt = GetIt.instance;
 
-/// Future that completes when [initCriticalDependencies] finishes.
-/// Fetched from get_it so that [GetIt.I.reset] (during hardReset) naturally
-/// wipes it, forcing consumers to wait for re-initialization.
 Future<void> get criticalDependenciesReady =>
     getIt.get<Future<void>>(instanceName: 'criticalReady');
 
-/// Future that completes when [initFeatureDependencies] finishes.
 Future<void> get featureDependenciesReady =>
     getIt.get<Future<void>>(instanceName: 'featureReady');
 
@@ -56,9 +52,6 @@ void _registerDaoFactories() {
   getIt.registerFactory<SyncQueueDao>(() => SyncQueueDao(getIt<AppDatabase>()));
 }
 
-/// Registers ONLY the dependencies needed for the first visible screen
-/// (Auth + Database + Categories + Records + Settings). Returns immediately so
-/// the splash screen can render without waiting for the full DI graph.
 Future<void> initCriticalDependencies() async {
   if (getIt.isRegistered<Future<void>>(instanceName: 'criticalReady')) return;
 
@@ -68,7 +61,6 @@ Future<void> initCriticalDependencies() async {
     instanceName: 'criticalReady',
   );
 
-  // ── Infrastructure ──
   getIt.registerLazySingleton<GoogleSignIn>(
     () => GoogleSignIn(
       scopes: [
@@ -82,10 +74,8 @@ Future<void> initCriticalDependencies() async {
   getIt.registerLazySingleton<http.Client>(() => http.Client());
   getIt.registerLazySingleton<AppDatabase>(() => AppDatabase());
 
-  // DAOs
   _registerDaoFactories();
 
-  // API & Sync
   getIt.registerLazySingleton<ApiClient>(() => ApiClient());
   getIt.registerLazySingleton<ConnectivityService>(() => ConnectivityService());
   getIt.registerLazySingleton<SyncTableRegistry>(
@@ -100,12 +90,10 @@ Future<void> initCriticalDependencies() async {
     ),
   );
 
-  // ── Settings (needed immediately for theme) ──
   final prefs = await SharedPreferences.getInstance();
   getIt.registerLazySingleton<SharedPreferences>(() => prefs);
   initSettingsModule(getIt);
 
-  // ── Feature Modules (Critical) ──
   initAuthModule(getIt);
   initCategoryModule(getIt);
   initRecordModule(getIt);
@@ -122,13 +110,10 @@ Future<void> resetDatabaseInstance() async {
     await db.clearAllTables();
     await DatabaseSeeder.seedInitialCategories(db);
   }
-  // Reset sync cursor so next pull uses epoch (full re-sync)
+
   await TokenStorage.clearSyncState();
 }
 
-/// Registers feature-level dependencies (Budgets).
-/// Called in the background after the first frame renders.
-/// Idempotent — safe to call multiple times.
 Future<void> initFeatureDependencies() async {
   if (getIt.isRegistered<Future<void>>(instanceName: 'featureReady')) return;
 
@@ -148,8 +133,6 @@ Future<void> initFeatureDependencies() async {
   }
 }
 
-/// Backwards-compatible call that registers everything at once.
-/// Used by integration tests or scenarios where layered init isn't needed.
 Future<void> initDependencies() async {
   await initCriticalDependencies();
   await initFeatureDependencies();

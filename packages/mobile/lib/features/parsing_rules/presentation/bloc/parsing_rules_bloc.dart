@@ -108,7 +108,6 @@ class ParsingRulesBloc extends Bloc<ParsingRulesEvent, ParsingRulesState> {
   }
 }
 
-/// Internal event fired by the reactive stream subscription.
 class _RulesUpdated extends ParsingRulesEvent {
   final List<ParsingRule> rules;
   const _RulesUpdated(this.rules);

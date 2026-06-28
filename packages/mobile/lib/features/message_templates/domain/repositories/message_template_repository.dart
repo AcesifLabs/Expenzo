@@ -4,7 +4,6 @@ import '../entities/message_source.dart';
 import '../entities/expense_template.dart';
 
 abstract class MessageTemplateRepository {
-  // Message Sources
   Future<Either<Failure, List<MessageSource>>> getMessageSources();
   Future<Either<Failure, MessageSource>> saveMessageSource(
     MessageSource source,
@@ -12,7 +11,6 @@ abstract class MessageTemplateRepository {
   Future<Either<Failure, Unit>> deleteMessageSource(String id);
   Stream<List<MessageSource>> watchMessageSources();
 
-  // Expense Templates
   Future<Either<Failure, List<ExpenseTemplate>>> getTemplatesForSource(
     String sourceId,
   );

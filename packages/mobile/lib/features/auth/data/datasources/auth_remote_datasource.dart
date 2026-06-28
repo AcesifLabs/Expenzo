@@ -40,7 +40,6 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
   Future<User> signInWithGoogle() async {
     debugPrint('AuthRemoteDatasource: signInWithGoogle started');
 
-    // Check existing Google account
     final googleAccount = await googleSignIn.signInSilently();
     debugPrint('AuthRemoteDatasource: signInSilently result: $googleAccount');
 
@@ -74,7 +73,6 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
     final user = _mapFirebaseUserToEntity(firebaseUser);
     await _syncUserToLocalDb(firebaseUser);
 
-    // Get backend JWT
     try {
       final firebaseToken = await firebaseUser.getIdToken(true);
       final apiClient = di.getIt<ApiClient>();
@@ -182,7 +180,6 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
       );
     } catch (e) {
       debugPrint('AuthRemoteDatasource: Failed to sync user to local DB: $e');
-      // Non-fatal: user is already authenticated at Firebase level
     }
   }
 }

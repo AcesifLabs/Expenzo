@@ -24,7 +24,6 @@ class ScanSmsUseCase
       final offset = params.offset ?? 0;
       final limit = params.limit ?? 10;
 
-      // Fetch a paginated batch of SMS messages
       final messages = await smsDatasource.getSmsBatched(
         start: offset,
         count: limit,
@@ -34,7 +33,6 @@ class ScanSmsUseCase
         return const Right([]);
       }
 
-      // Filter messages by the 'since' date
       List<SmsMessage> filteredMessages = messages;
       if (params.since != null) {
         filteredMessages = messages
@@ -42,10 +40,8 @@ class ScanSmsUseCase
             .toList();
       }
 
-      // Pre-fetch ALL rules, templates, and sources ONCE (was N queries, now 3)
       final context = await evaluateRules.loadContext();
 
-      // Prepare lightweight input objects for the isolate
       final parseInputs = filteredMessages.map((message) {
         return ParseMessageInput(
           body: message.body,
@@ -55,7 +51,6 @@ class ScanSmsUseCase
         );
       }).toList();
 
-      // Offload heavy parsing to background isolate — keeps UI responsive
       final results = await _isolateService.parseMessages(
         messages: parseInputs,
         context: context,

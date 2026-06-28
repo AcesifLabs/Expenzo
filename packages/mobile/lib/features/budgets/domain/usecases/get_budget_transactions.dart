@@ -6,7 +6,6 @@ import 'package:expense_tracker/features/records/domain/entities/record.dart';
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
 import '../repositories/budget_repository.dart';
 
-/// Fetches all records (transactions) for a given budget's current period.
 class GetBudgetTransactions {
   final BudgetRepository budgetRepository;
   final RecordRepository recordRepository;
@@ -38,7 +37,6 @@ class GetBudgetTransactions {
         );
       }
 
-      // Overall budget: fetch all expense records in the period
       final result = await recordRepository.getRecordsByDateRangeOnly(
         periodRange.start,
         periodRange.end,

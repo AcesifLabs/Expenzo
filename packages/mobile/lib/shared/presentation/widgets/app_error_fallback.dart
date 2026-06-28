@@ -1,72 +1,25 @@
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 
-/// Where the fallback was invoked from. Drives copy and which actions appear.
-enum AppFallbackContext {
-  /// Build-time error from `ErrorWidget.builder`.
-  build,
+enum AppFallbackContext { build, framework, async, init }
 
-  /// Framework error from `FlutterError.onError`.
-  framework,
-
-  /// Async / uncaught error from `PlatformDispatcher.instance.onError`.
-  async,
-
-  /// Fatal init failure from `_AppLoaderState` (DI / DB never came up).
-  init,
-}
-
-/// A self-contained, theme-riding error screen that is safe to render
-/// from any of the four top-level error paths in `main.dart`.
-///
-/// **Hard invariant:** this widget never renders `exception` (via
-/// `toString()` or otherwise) and never renders `stack`. The only
-/// exception-derived information that may appear on screen is
-/// `formatDebugType(exception)` (which defaults to
-/// `exception.runtimeType.toString()`) and only inside the debug-only
-/// expander.
-///
-/// The widget imports no `app_*.dart` siblings, no `phosphor_flutter`, and
-/// no `google_fonts` — so it can never fail to render due to a broken
-/// theme, asset, or font.
 class AppErrorFallback extends StatelessWidget {
-  /// Where this fallback is being shown. Affects copy and action set.
   final AppFallbackContext fallbackContext;
 
-  /// Short, opaque reference shown to the user (e.g. "Ref: 8F2A3C").
-  /// Generated via [generateReferenceId] by callers, or supplied directly.
   final String referenceId;
 
-  /// The exception captured at the call site. Stored for the lifetime
-  /// of the widget so the debug expander can show its `runtimeType`.
-  /// Intentionally not destructively discarded — we are choosing
-  /// *not* to render the contents, not to throw them away.
   final Object? exception;
 
-  /// The stack trace captured at the call site. Held for symmetry
-  /// with [exception] and for future logging hooks. Never rendered.
   final StackTrace? stack;
 
-  /// Strategy for converting the exception to a debug-friendly string.
-  /// Defaults to `e.runtimeType.toString()`. Override in tests to
-  /// decouple the assertion from the runtime type.
   final String Function(Object exception)? formatDebugType;
 
-  /// "Try Again" tap. In build/async contexts this typically rebuilds the
-  /// broken subtree; in init it re-runs `_startInitialization`.
   final VoidCallback? onRetry;
 
-  /// Long-press on "Try Again" — the escape hatch. Clears `get_it` and
-  /// re-runs init from scratch. May be null when not applicable.
   final VoidCallback? onHardReset;
 
-  /// "Close App" tap. On Android, exits the process via SystemNavigator.pop().
-  /// On iOS / other, performs a full get_it reset + root widget re-mount.
   final VoidCallback? onRestart;
 
-  /// Builder for the page pushed when the user taps "Send Feedback".
-  /// Hidden when null (e.g. from `ErrorWidget.builder` where a
-  /// Navigator push is not safe).
   final WidgetBuilder? feedbackBuilder;
 
   const AppErrorFallback({
@@ -82,8 +35,6 @@ class AppErrorFallback extends StatelessWidget {
     this.feedbackBuilder,
   });
 
-  /// Stable 6-char reference ID. No PII, no internals — safe to render.
-  /// Uses the trailing slice of a microsecond timestamp in base-36.
   static String generateReferenceId() {
     final raw = DateTime.now().microsecondsSinceEpoch.toRadixString(36);
     final tail = raw.length <= 6 ? raw : raw.substring(raw.length - 6);
@@ -184,8 +135,6 @@ class AppErrorFallback extends StatelessWidget {
     );
   }
 
-  /// Returns a handler that pushes the feedback page, or null when no
-  /// `feedbackBuilder` was supplied.
   VoidCallback? _buildSendFeedbackHandler(BuildContext context) {
     final builder = feedbackBuilder;
     if (builder == null) return null;
@@ -260,8 +209,7 @@ class _FallbackButton extends StatelessWidget {
       width: double.infinity,
       child: Material(
         color: bg,
-        // Intentionally not `AppTheme._buttonBorderRadius` so the
-        // fallback renders even if the theme breaks.
+
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
           side: border ?? BorderSide.none,
@@ -271,9 +219,6 @@ class _FallbackButton extends StatelessWidget {
           onLongPress: onLongPress,
           borderRadius: BorderRadius.circular(8),
           child: Padding(
-            // Matches `AppTheme._buttonPadding` so the fallback reads
-            // as part of the same design language as the rest of the
-            // app.
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -357,10 +302,6 @@ class _DebugDetailsState extends State<_DebugDetails> {
               borderRadius: BorderRadius.circular(6),
             ),
             child: Text(
-              // ONLY the formatted type — never toString(), never the
-              // stack. Intentionally not `Lato`/`Browni` — the
-              // monospace contrast makes stack-trace-style debug
-              // output readable at a glance.
               _format(widget.exception),
               style: TextStyle(
                 fontFamily: 'monospace',

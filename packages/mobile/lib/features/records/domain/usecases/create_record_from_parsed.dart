@@ -14,18 +14,15 @@ class CreateRecordFromParsed extends UseCase<Record?, ParsedTransaction> {
 
   @override
   Future<Either<Failure, Record?>> call(ParsedTransaction parsed) async {
-    // Check if already exists by sourceId
     final existsResult = await repository.recordExistsBySourceId(
       parsed.sourceId,
     );
 
     return existsResult.fold((failure) => Left(failure), (alreadyExists) async {
       if (alreadyExists) {
-        // Skip silently - return success with null
         return const Right(null);
       }
 
-      // Create new record (SMS/Email parsed are always OUT/Expense)
       final record = Record(
         amount: -(parsed.amount?.abs() ?? 0),
         description: parsed.description ?? parsed.rawMessage,

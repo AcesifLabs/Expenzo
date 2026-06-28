@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Standard page header with title, optional subtitle, and trailing actions.
 class AppPageHeader extends StatelessWidget {
   final String title;
   final String? subtitle;

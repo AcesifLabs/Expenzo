@@ -65,7 +65,7 @@ dependencies:
   flutter_sms_inbox: ^1.0.4
   googleapis: ^13.2.0
   flutter_local_notifications: ^17.2.2
-  shared_preferences: ^2.2.3
+  shared_preferences: ^2.5.5
   html: ^0.15.4
   http: ^1.2.1
 
@@ -162,3 +162,6 @@ flutter_launcher_icons:
   image_path: "assets/images/logo.png"
   adaptive_icon_background: "#1C1C1E"
   adaptive_icon_foreground: "assets/images/logo.png"
+
+dependency_overrides:
+  shared_preferences_android: ^2.4.24

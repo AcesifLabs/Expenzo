@@ -27,12 +27,10 @@ class CreateRecordsFromParsedList
     int skippedDuplicates = 0;
     final List<String> errors = [];
 
-    // 1. Batch check all sourceIds in ONE query
     final allSourceIds = transactions.map((t) => t.sourceId).toList();
     final existingResult = await repository.getExistingSourceIds(allSourceIds);
 
     return existingResult.fold((failure) => Left(failure), (existingIds) async {
-      // 2. Filter to only non-duplicate transactions
       final toCreate = transactions
           .where((t) => !existingIds.contains(t.sourceId))
           .toList();
@@ -48,7 +46,6 @@ class CreateRecordsFromParsedList
         );
       }
 
-      // 3. Map to Record entities (Parsed are always OUT/Expense)
       final now = DateTime.now();
       final recordsToCreate = toCreate
           .map(
@@ -68,7 +65,6 @@ class CreateRecordsFromParsedList
           )
           .toList();
 
-      // 4. Batch create records
       final batchResult = await repository.addRecordsBatch(recordsToCreate);
 
       return batchResult.fold((failure) => Left(failure), (_) {

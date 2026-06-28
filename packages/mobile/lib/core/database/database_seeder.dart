@@ -13,17 +13,14 @@ class DatabaseSeeder {
   ];
 
   static Future<void> seedInitialCategories(AppDatabase db) async {
-    // Check if any categories exist
     final existingCategories = await db.select(db.categories).get();
     if (existingCategories.isNotEmpty) {
-      // Ensure all income categories exist for existing users
       await _ensureIncomeCategoriesExist(db);
       return;
     }
 
     final now = DateTime.now();
 
-    // Expense categories (id, name, emoji, color)
     final expenseCategories = [
       ('default_out_food', 'Food', 'forkKnife', '#FF9800'),
       ('default_out_shopping', 'Shopping', 'shoppingCart', '#D81B60'),
@@ -44,7 +41,6 @@ class DatabaseSeeder {
       ('default_out_general', 'General', 'package', '#1E88E5'),
     ];
 
-    // Income categories
     final incomeCategories = _incomeCategories;
 
     await db.batch((batch) {
@@ -81,10 +77,7 @@ class DatabaseSeeder {
     });
   }
 
-  /// Ensures all income categories exist for existing users who were seeded
-  /// before income category support was added.
   static Future<void> _ensureIncomeCategoriesExist(AppDatabase db) async {
-    // Query existing seeded income categories by their stable IDs
     final existingIn = await (db.select(
       db.categories,
     )..where((t) => t.categoryType.equals('IN'))).get();

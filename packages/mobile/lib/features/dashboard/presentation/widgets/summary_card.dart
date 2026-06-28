@@ -9,7 +9,6 @@ class SummaryCard extends StatelessWidget {
   final String currencySymbol;
   final bool isLoading;
 
-  // Memoized formatters — created once per currency symbol
   static final _currencyFormats = <String, NumberFormat>{};
 
   const SummaryCard({
