@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:picons/picons.dart';
 import '../../domain/entities/expense_template.dart';
 import '../../domain/entities/message_source.dart';
 
@@ -73,11 +73,7 @@ class _RetroactiveScanDialogState extends State<RetroactiveScanDialog> {
           : Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  PhosphorIcons.checkCircle(PhosphorIconsStyle.fill),
-                  color: Colors.green,
-                  size: 48,
-                ),
+                Icon(PiconsFill.checkCircle, color: Colors.green, size: 48),
                 SizedBox(height: 16),
                 Text(
                   'Template active! Future messages will be parsed automatically.',

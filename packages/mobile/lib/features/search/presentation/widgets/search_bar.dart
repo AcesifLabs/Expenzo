@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:picons/picons.dart';
 
 class SearchBarWidget extends StatefulWidget {
   final TextEditingController controller;
@@ -48,10 +48,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
       ),
       child: Row(
         children: [
-          Icon(
-            PhosphorIcons.magnifyingGlass(PhosphorIconsStyle.regular),
-            color: Colors.grey,
-          ),
+          Icon(PiconsRegular.magnifyingGlass, color: Colors.grey),
           const SizedBox(width: 12),
           Expanded(
             child: TextField(
@@ -66,17 +63,14 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
           ),
           if (_showClear)
             IconButton(
-              icon: Icon(PhosphorIcons.x(PhosphorIconsStyle.regular), size: 20),
+              icon: Icon(PiconsRegular.x, size: 20),
               onPressed: () {
                 widget.controller.clear();
                 widget.onClear();
               },
             ),
           IconButton(
-            icon: Icon(
-              PhosphorIcons.slidersHorizontal(PhosphorIconsStyle.regular),
-              size: 20,
-            ),
+            icon: Icon(PiconsRegular.slidersHorizontal, size: 20),
             onPressed: widget.onFilterTap,
           ),
         ],

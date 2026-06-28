@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:picons/picons.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_stat_tile.dart';
 import '../../domain/entities/spending_insights.dart';
 
@@ -14,7 +14,7 @@ class InsightsCard extends StatelessWidget {
     return ListView(
       children: [
         AppStatTile(
-          icon: PhosphorIcons.trendUp(PhosphorIconsStyle.regular),
+          icon: PiconsRegular.trendUp,
           title: 'Highest Spending Day',
           value: insights.highestDayDate != null
               ? DateFormat('dd MMM yyyy').format(insights.highestDayDate!)
@@ -23,21 +23,21 @@ class InsightsCard extends StatelessWidget {
           color: Colors.orange,
         ),
         AppStatTile(
-          icon: PhosphorIcons.chartLineUp(PhosphorIconsStyle.regular),
+          icon: PiconsRegular.chartLineUp,
           title: 'Average Daily Spending',
           value: '\$${insights.avgDailySpending.toStringAsFixed(2)}',
           subtitle: 'Per day in selected period',
           color: Colors.blue,
         ),
         AppStatTile(
-          icon: PhosphorIcons.invoice(PhosphorIconsStyle.regular),
+          icon: PiconsRegular.invoice,
           title: 'Total Transactions',
           value: insights.totalTransactionCount.toString(),
           subtitle: 'In selected period',
           color: Colors.green,
         ),
         AppStatTile(
-          icon: PhosphorIcons.wallet(PhosphorIconsStyle.regular),
+          icon: PiconsRegular.wallet,
           title: 'Total Spent',
           value: '\$${insights.totalSpent.toStringAsFixed(2)}',
           subtitle: 'In selected period',

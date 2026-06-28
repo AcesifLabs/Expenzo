@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:picons/picons.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_icons.dart';
 import 'package:expense_tracker/features/categories/domain/entities/category.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
@@ -77,7 +77,7 @@ class AllCategoriesPicker extends StatelessWidget {
                             ),
                           ),
                           child: Icon(
-                            PhosphorIcons.plus(PhosphorIconsStyle.regular),
+                            PiconsRegular.plus,
                             color: colors.onSurface.withAlpha(150),
                           ),
                         ),

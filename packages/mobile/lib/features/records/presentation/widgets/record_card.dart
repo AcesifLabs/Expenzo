@@ -3,7 +3,7 @@ import 'package:expense_tracker/features/categories/presentation/bloc/category_s
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/utils/color_utils.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
 import '../../domain/entities/record.dart';
@@ -68,11 +68,7 @@ class RecordCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Center(
-                  child: Icon(
-                    PhosphorIcons.receipt(PhosphorIconsStyle.light),
-                    size: 22,
-                    color: catColor,
-                  ),
+                  child: Icon(PiconsLight.receipt, size: 22, color: catColor),
                 ),
               ),
               const SizedBox(width: 12),

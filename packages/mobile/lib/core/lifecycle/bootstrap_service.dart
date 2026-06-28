@@ -40,7 +40,8 @@ class BootstrapService {
     // `catchError` is a safety net: the user must always be able to
     // recover, even if reset() or remountRoot() throws.
     unawaited(
-      GetIt.I.reset()
+      GetIt.I
+          .reset()
           .then((_) => remountRoot())
           .catchError((Object _) => remountRoot()),
     );

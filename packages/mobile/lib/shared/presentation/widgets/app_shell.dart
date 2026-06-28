@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/core/utils/navigation_utils.dart';
 import 'package:expense_tracker/features/dashboard/presentation/bloc/dashboard_bloc.dart';
@@ -31,26 +31,34 @@ class _AppShellState extends State<AppShell> {
   int _currentIndex = 0;
   DateTime? _lastFabPress;
 
-  static const _labels = [
-    'Home',
-    'Activity',
-    'Scan',
-    'Budgets',
-  ];
+  static const _labels = ['Home', 'Activity', 'Scan', 'Budgets'];
 
   IconData _navIcon(int i, {bool fill = false}) {
-    final s = fill ? PhosphorIconsStyle.fill : PhosphorIconsStyle.light;
+    if (fill) {
+      switch (i) {
+        case 0:
+          return PiconsFill.house;
+        case 1:
+          return PiconsFill.listDashes;
+        case 2:
+          return PiconsFill.listMagnifyingGlass;
+        case 3:
+          return PiconsFill.wallet;
+        default:
+          return PiconsFill.circle;
+      }
+    }
     switch (i) {
       case 0:
-        return PhosphorIcons.house(s);
+        return PiconsLight.house;
       case 1:
-        return PhosphorIcons.listDashes(s);
+        return PiconsLight.listDashes;
       case 2:
-        return PhosphorIcons.listMagnifyingGlass(s);
+        return PiconsLight.listMagnifyingGlass;
       case 3:
-        return PhosphorIcons.wallet(s);
+        return PiconsLight.wallet;
       default:
-        return PhosphorIcons.circle(s);
+        return PiconsLight.circle;
     }
   }
 
@@ -79,7 +87,7 @@ class _AppShellState extends State<AppShell> {
               heroTag: 'shell_fab',
               onPressed: () => _onFabPressed(context),
               shape: const CircleBorder(),
-              child: Icon(PhosphorIcons.plus(PhosphorIconsStyle.bold)),
+              child: Icon(PiconsBold.plus),
             )
           : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -194,7 +202,6 @@ class _AppShellState extends State<AppShell> {
       ),
     );
   }
-
 }
 
 // ──────────────────────────────────
@@ -244,9 +251,7 @@ class _ScanPageWithFabState extends State<_ScanPageWithFab> {
               child: FloatingActionButton(
                 heroTag: 'scan_fab',
                 onPressed: () => _showScanOptions(context),
-                child: Icon(
-                  PhosphorIcons.fileMagnifyingGlass(PhosphorIconsStyle.bold),
-                ),
+                child: Icon(PiconsBold.fileMagnifyingGlass),
               ),
             )
           : const SizedBox.shrink(),
@@ -269,11 +274,7 @@ class _ScanPageWithFabState extends State<_ScanPageWithFab> {
                 ),
               ),
               ListTile(
-                leading: Icon(
-                  PhosphorIcons.clockCounterClockwise(
-                    PhosphorIconsStyle.regular,
-                  ),
-                ),
+                leading: Icon(PiconsRegular.clockCounterClockwise),
                 title: const Text('Last 7 Days'),
                 onTap: () {
                   Navigator.pop(bottomSheetContext);
@@ -284,9 +285,7 @@ class _ScanPageWithFabState extends State<_ScanPageWithFab> {
                 },
               ),
               ListTile(
-                leading: Icon(
-                  PhosphorIcons.calendar(PhosphorIconsStyle.regular),
-                ),
+                leading: Icon(PiconsRegular.calendar),
                 title: const Text('Last 30 Days'),
                 onTap: () {
                   Navigator.pop(bottomSheetContext);
@@ -297,9 +296,7 @@ class _ScanPageWithFabState extends State<_ScanPageWithFab> {
                 },
               ),
               ListTile(
-                leading: Icon(
-                  PhosphorIcons.calendarDots(PhosphorIconsStyle.regular),
-                ),
+                leading: Icon(PiconsRegular.calendarDots),
                 title: const Text('Last 3 Months'),
                 onTap: () {
                   Navigator.pop(bottomSheetContext);
@@ -310,9 +307,7 @@ class _ScanPageWithFabState extends State<_ScanPageWithFab> {
                 },
               ),
               ListTile(
-                leading: Icon(
-                  PhosphorIcons.infinity(PhosphorIconsStyle.regular),
-                ),
+                leading: Icon(PiconsRegular.infinity),
                 title: const Text('All Time'),
                 onTap: () {
                   Navigator.pop(bottomSheetContext);

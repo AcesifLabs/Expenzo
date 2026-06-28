@@ -1,7 +1,7 @@
 import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/constants/app_constants.dart';
 import 'package:expense_tracker/core/utils/navigation_utils.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
@@ -60,7 +60,7 @@ class _RecordListPageState extends State<RecordListPage> {
       title: 'Activity',
       actions: [
         IconButton(
-          icon: Icon(PhosphorIcons.funnel(PhosphorIconsStyle.light)),
+          icon: Icon(PiconsLight.funnel),
           color: Theme.of(context).colorScheme.onSurface.withAlpha(160),
           onPressed: () => _showFilterModal(context),
         ),
@@ -127,7 +127,7 @@ class _RecordListPageState extends State<RecordListPage> {
 
         if (records.isEmpty) {
           return AppEmptyState(
-            icon: PhosphorIcons.list(PhosphorIconsStyle.regular),
+            icon: PiconsRegular.list,
             message: 'No transactions found',
           );
         }

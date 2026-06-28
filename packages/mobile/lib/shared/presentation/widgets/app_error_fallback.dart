@@ -108,11 +108,7 @@ class AppErrorFallback extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      Icons.error_outline,
-                      color: scheme.error,
-                      size: 64,
-                    ),
+                    Icon(Icons.error_outline, color: scheme.error, size: 64),
                     const SizedBox(height: 24),
                     Text(
                       _title,
@@ -194,9 +190,9 @@ class AppErrorFallback extends StatelessWidget {
     final builder = feedbackBuilder;
     if (builder == null) return null;
     return () {
-      Navigator.of(context).push<void>(
-        MaterialPageRoute<void>(builder: builder),
-      );
+      Navigator.of(
+        context,
+      ).push<void>(MaterialPageRoute<void>(builder: builder));
     };
   }
 
@@ -213,10 +209,11 @@ class AppErrorFallback extends StatelessWidget {
     return switch (fallbackContext) {
       AppFallbackContext.init =>
         'We could not finish setting up the app. '
-        'This is usually temporary — please try again, or restart the app.',
-      _ => 'We hit an unexpected error. '
-          'You can try again, restart the app, or send us feedback '
-          'so we can fix it.',
+            'This is usually temporary — please try again, or restart the app.',
+      _ =>
+        'We hit an unexpected error. '
+            'You can try again, restart the app, or send us feedback '
+            'so we can fix it.',
     };
   }
 }

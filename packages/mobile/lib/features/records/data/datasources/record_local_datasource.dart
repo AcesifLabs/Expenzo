@@ -34,7 +34,10 @@ abstract class RecordLocalDatasource {
     DateTime end,
   );
   Future<double> getTotalSpending(DateTime start, DateTime end);
-  Future<List<rec.Record>> getRecordsByDateRangeOnly(DateTime start, DateTime end);
+  Future<List<rec.Record>> getRecordsByDateRangeOnly(
+    DateTime start,
+    DateTime end,
+  );
   Future<List<rec.Record>> getFilteredRecords({
     DateTime? startDate,
     DateTime? endDate,
@@ -149,7 +152,9 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
   Stream<List<rec.Record>> watchRecords({int? limit, int? offset}) {
     return recordDao
         .watchRecords(limit: limit, offset: offset)
-        .map((records) => records.map<rec.Record>((e) => _mapToEntity(e)).toList());
+        .map(
+          (records) => records.map<rec.Record>((e) => _mapToEntity(e)).toList(),
+        );
   }
 
   @override

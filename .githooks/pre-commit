@@ -1,0 +1,11 @@
+#!/bin/sh
+# Pre-commit hook: auto-format Dart files in packages/mobile
+set -eu
+
+MOBILE="$(git rev-parse --show-toplevel)/packages/mobile"
+
+if [ -d "$MOBILE" ]; then
+  echo "→ dart format packages/mobile..."
+  cd "$MOBILE"
+  dart format --set-exit-if-changed .
+fi

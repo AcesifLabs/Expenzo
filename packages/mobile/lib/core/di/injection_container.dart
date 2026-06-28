@@ -63,7 +63,10 @@ Future<void> initCriticalDependencies() async {
   if (getIt.isRegistered<Future<void>>(instanceName: 'criticalReady')) return;
 
   final completer = Completer<void>();
-  getIt.registerSingleton<Future<void>>(completer.future, instanceName: 'criticalReady');
+  getIt.registerSingleton<Future<void>>(
+    completer.future,
+    instanceName: 'criticalReady',
+  );
 
   // ── Infrastructure ──
   getIt.registerLazySingleton<GoogleSignIn>(
@@ -130,7 +133,10 @@ Future<void> initFeatureDependencies() async {
   if (getIt.isRegistered<Future<void>>(instanceName: 'featureReady')) return;
 
   final completer = Completer<void>();
-  getIt.registerSingleton<Future<void>>(completer.future, instanceName: 'featureReady');
+  getIt.registerSingleton<Future<void>>(
+    completer.future,
+    instanceName: 'featureReady',
+  );
 
   try {
     initBudgetModule(getIt);

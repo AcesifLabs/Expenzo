@@ -56,7 +56,9 @@ class AuthRepositoryImpl implements AuthRepository {
       if (e.code == 'sign_in_canceled' || e.code == 'sign_in_failed') {
         return 'Sign-in was cancelled.';
       }
-      debugPrint('AuthRepositoryImpl: Unhandled PlatformException code: ${e.code}');
+      debugPrint(
+        'AuthRepositoryImpl: Unhandled PlatformException code: ${e.code}',
+      );
       return 'Authentication failed. Please try again.';
     }
 

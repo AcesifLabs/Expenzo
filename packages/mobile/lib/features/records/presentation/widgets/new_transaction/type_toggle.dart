@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 
 class TypeToggle extends StatelessWidget {
@@ -55,7 +55,7 @@ class TypeToggle extends StatelessWidget {
                   children: [
                     Expanded(
                       child: _ToggleTab(
-                        icon: PhosphorIcons.trendDown(PhosphorIconsStyle.fill),
+                        icon: PiconsFill.trendDown,
                         label: 'Expense',
                         isActive: isExpense,
                         activeColor: expenseColor,
@@ -65,7 +65,7 @@ class TypeToggle extends StatelessWidget {
                     ),
                     Expanded(
                       child: _ToggleTab(
-                        icon: PhosphorIcons.trendUp(PhosphorIconsStyle.fill),
+                        icon: PiconsFill.trendUp,
                         label: 'Income',
                         isActive: !isExpense,
                         activeColor: incomeColor,

@@ -42,18 +42,19 @@ class BudgetLoaded extends BudgetState {
       selectedBudgetId: selectedBudgetId ?? this.selectedBudgetId,
       selectedBudgetTransactions:
           selectedBudgetTransactions ?? this.selectedBudgetTransactions,
-      isLoadingTransactions: isLoadingTransactions ?? this.isLoadingTransactions,
+      isLoadingTransactions:
+          isLoadingTransactions ?? this.isLoadingTransactions,
     );
   }
 
   @override
   List<Object?> get props => [
-        budgets,
-        progressByBudgetId,
-        selectedBudgetId,
-        selectedBudgetTransactions,
-        isLoadingTransactions,
-      ];
+    budgets,
+    progressByBudgetId,
+    selectedBudgetId,
+    selectedBudgetTransactions,
+    isLoadingTransactions,
+  ];
 }
 
 class BudgetError extends BudgetState {

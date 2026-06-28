@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:picons/picons.dart';
 
 class SummaryCard extends StatelessWidget {
   final String title;
@@ -63,8 +63,8 @@ class SummaryCard extends StatelessWidget {
                   children: [
                     Icon(
                       percentChange! >= 0
-                          ? PhosphorIcons.trendUp(PhosphorIconsStyle.regular)
-                          : PhosphorIcons.trendDown(PhosphorIconsStyle.regular),
+                          ? PiconsRegular.trendUp
+                          : PiconsRegular.trendDown,
                       size: 16,
                       color: percentChange! >= 0 ? Colors.red : Colors.green,
                     ),

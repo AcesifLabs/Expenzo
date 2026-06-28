@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:picons/picons.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_icons.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import '../../../../shared/presentation/widgets/shimmer_box.dart';
@@ -171,9 +171,7 @@ class _RecordFormPageState extends State<RecordFormPage> {
               contentPadding: EdgeInsets.zero,
               title: const Text('Date'),
               subtitle: Text(_dateFormat.format(_selectedDate)),
-              trailing: Icon(
-                PhosphorIcons.calendar(PhosphorIconsStyle.regular),
-              ),
+              trailing: Icon(PiconsRegular.calendar),
               onTap: _selectDate,
             ),
             const Divider(),

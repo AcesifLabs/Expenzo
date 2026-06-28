@@ -9,8 +9,8 @@ class ConnectivityService {
   final ApiClient _apiClient;
 
   ConnectivityService({Connectivity? connectivity, ApiClient? apiClient})
-      : _connectivity = connectivity ?? Connectivity(),
-        _apiClient = apiClient ?? ApiClient();
+    : _connectivity = connectivity ?? Connectivity(),
+      _apiClient = apiClient ?? ApiClient();
   bool _isOnline = false;
   bool get isOnline => _isOnline;
 
