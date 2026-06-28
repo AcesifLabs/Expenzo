@@ -24,7 +24,6 @@ class MessageTemplateLocalDatasourceImpl
 
   MessageTemplateLocalDatasourceImpl(this.dao);
 
-  // Message Sources
   @override
   Future<List<domain.MessageSource>> getMessageSources() async {
     final sources = await dao.getAllMessageSources();
@@ -66,7 +65,6 @@ class MessageTemplateLocalDatasourceImpl
     );
   }
 
-  // Expense Templates
   @override
   Future<List<domain.ExpenseTemplate>> getTemplatesForSource(
     String sourceId,
@@ -116,7 +114,6 @@ class MessageTemplateLocalDatasourceImpl
         .map((list) => list.map(_mapTemplateToDomain).toList());
   }
 
-  // Mappers
   domain.MessageSource _mapSourceToDomain(MessageSource source) {
     return domain.MessageSource(
       id: source.id,

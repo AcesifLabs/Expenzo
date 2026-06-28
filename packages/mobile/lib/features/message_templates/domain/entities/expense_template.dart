@@ -2,15 +2,14 @@ import 'package:equatable/equatable.dart';
 
 class ExpenseTemplate extends Equatable {
   final String id;
-  final String sourceId; // Refers to MessageSource.id
+  final String sourceId;
   final String sampleMessage;
   final String triggerWord;
   final String amountPattern;
   final String? descriptionPattern;
   final String? datePattern;
   final String? categoryId;
-  final String?
-  selectedAmount; // The exact amount value the user selected during template creation
+  final String? selectedAmount;
   final DateTime createdAt;
   final DateTime updatedAt;
 

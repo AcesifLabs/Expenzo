@@ -32,7 +32,7 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async {
-          if (call.method == 'checkPermissionStatus') return 1; // granted
+          if (call.method == 'checkPermissionStatus') return 1;
           if (call.method == 'requestPermissions') return <int, int>{13: 1};
           return null;
         });
@@ -53,7 +53,7 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async {
-          if (call.method == 'checkPermissionStatus') return 0; // denied
+          if (call.method == 'checkPermissionStatus') return 0;
           return null;
         });
 

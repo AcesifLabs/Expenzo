@@ -1,15 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Slot-based dark summary card with title, large value, and optional bottom child.
-///
-/// Example usage:
-/// ```dart
-/// AppSummaryCard(
-///   title: 'Total Balance',
-///   value: '\$1,234.56',
-///   bottomChild: Row(children: [...incomeRow, ...expenseRow]),
-/// )
-/// ```
 class AppSummaryCard extends StatelessWidget {
   final String title;
   final String value;

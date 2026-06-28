@@ -61,7 +61,7 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
           ? RecordType.income
           : RecordType.expense;
     }
-    // Ensure categories are loaded
+
     context.read<CategoryBloc>().add(const LoadCategories());
   }
 
@@ -105,7 +105,6 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
 
     return Stack(
       children: [
-        // Blurred background overlay
         Positioned.fill(
           child: GestureDetector(
             onTap: () => Navigator.of(context).pop(),
@@ -115,7 +114,7 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
             ),
           ),
         ),
-        // Modal card
+
         Center(
           child: ConstrainedBox(
             constraints: BoxConstraints(
@@ -134,7 +133,6 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Header
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -161,7 +159,6 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
                       ),
                       const SizedBox(height: 24),
 
-                      // ── Date Range ──
                       Text('Date Range', style: theme.textTheme.titleSmall),
                       const SizedBox(height: 8),
                       InkWell(
@@ -208,7 +205,6 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
                       ),
                       const SizedBox(height: 24),
 
-                      // ── Record Type ──
                       Text('Record Type', style: theme.textTheme.titleSmall),
                       const SizedBox(height: 8),
                       Wrap(
@@ -222,13 +218,11 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
                       ),
                       const SizedBox(height: 24),
 
-                      // ── Categories ──
                       Text('Categories', style: theme.textTheme.titleSmall),
                       const SizedBox(height: 8),
                       _buildCategoryDropdown(theme),
                       const SizedBox(height: 24),
 
-                      // ── Buttons ──
                       Row(
                         children: [
                           Expanded(
@@ -415,7 +409,6 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
   }
 }
 
-/// Show the filter modal as a full-screen overlay route with blur.
 Future<void> showRecordFilterModal(
   BuildContext context, {
   required RecordBloc recordBloc,

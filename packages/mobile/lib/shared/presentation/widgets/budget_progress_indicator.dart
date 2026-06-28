@@ -1,11 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// A colored progress bar for budget utilization.
-///
-/// Colors:
-/// - Green (< 80%): spending is under control
-/// - Orange (80–100%): approaching limit
-/// - Red (> 100%): over budget
 class BudgetProgressIndicator extends StatelessWidget {
   final double percentage;
   final double height;
@@ -18,11 +12,11 @@ class BudgetProgressIndicator extends StatelessWidget {
 
   Color _color(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    if (percentage > 100) return colors.error; // rose
+    if (percentage > 100) return colors.error;
     if (percentage >= 80) {
-      return const Color(0xFFFF9F0A); // keep orange for warning
+      return const Color(0xFFFF9F0A);
     }
-    return colors.secondary; // mint
+    return colors.secondary;
   }
 
   @override

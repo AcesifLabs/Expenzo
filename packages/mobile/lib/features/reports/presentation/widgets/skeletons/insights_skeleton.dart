@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../../shared/presentation/widgets/shimmer_box.dart';
 
-/// Skeleton for the Insights tab.
-/// Mimics 4 insight cards with icon + title + value.
 class InsightsSkeleton extends StatelessWidget {
   final int itemCount;
 

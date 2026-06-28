@@ -80,9 +80,8 @@ class _BudgetListPageContentState extends State<_BudgetListPageContent> {
               ),
             ],
             slivers: [
-              // Summary card
               SliverToBoxAdapter(child: _buildSummaryCard(context, state, fmt)),
-              // Budget list
+
               if (state.budgets.isEmpty)
                 SliverToBoxAdapter(
                   child: Padding(
@@ -100,7 +99,7 @@ class _BudgetListPageContentState extends State<_BudgetListPageContent> {
                     delegate: SliverChildBuilderDelegate((context, index) {
                       final budget = state.budgets[index];
                       final progress = _findProgress(state, budget);
-                      // Fallback: create a basic progress if not loaded yet
+
                       final displayProgress =
                           progress ??
                           BudgetProgress(

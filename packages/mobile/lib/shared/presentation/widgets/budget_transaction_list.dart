@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:expense_tracker/features/records/domain/entities/record.dart';
 import 'read_only_record_tile.dart';
 
-/// A scrollable list of read-only transaction tiles for budget drill-down.
 class BudgetTransactionList extends StatelessWidget {
   final List<Record> records;
   final String emptyMessage;

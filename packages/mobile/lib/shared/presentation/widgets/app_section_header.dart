@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Standardized section title with optional trailing action.
 class AppSectionHeader extends StatelessWidget {
   final String title;
   final String? actionLabel;

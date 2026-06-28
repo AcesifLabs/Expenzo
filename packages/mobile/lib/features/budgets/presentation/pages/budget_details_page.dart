@@ -11,7 +11,6 @@ import '../bloc/budget_bloc.dart';
 import '../bloc/budget_event.dart';
 import '../bloc/budget_state.dart';
 
-/// Full-screen detail view for a single budget, showing its transactions.
 class BudgetDetailsPage extends StatefulWidget {
   final BudgetProgress progress;
 
@@ -43,7 +42,6 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
       title: title,
       child: Column(
         children: [
-          // Budget summary header
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
             child: AppCard(
@@ -96,7 +94,7 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
               ),
             ),
           ),
-          // Section label
+
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
             child: Row(
@@ -118,7 +116,7 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
               ],
             ),
           ),
-          // Transaction list from Bloc state
+
           Expanded(
             child: BlocBuilder<BudgetBloc, BudgetState>(
               builder: (context, state) {

@@ -4,12 +4,12 @@ enum BudgetPeriod { weekly, monthly, yearly }
 
 class Budget extends Equatable {
   final String? id;
-  final String? categoryId; // null = overall budget
+  final String? categoryId;
   final double amount;
   final BudgetPeriod period;
   final DateTime startDate;
   final bool rolloverEnabled;
-  final double rolloverAmount; // unspent carry-forward amount
+  final double rolloverAmount;
   final bool isEnabled;
 
   const Budget({

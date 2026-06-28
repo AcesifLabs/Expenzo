@@ -33,9 +33,7 @@ class DeepLinkServiceImpl implements DeepLinkService {
   final _deepLinkController = StreamController<DeepLink?>.broadcast();
   StreamSubscription? _uriSubscription;
 
-  DeepLinkServiceImpl() {
-    // Listen to Flutter's navigation stream
-  }
+  DeepLinkServiceImpl();
 
   @override
   Stream<DeepLink?> get onDeepLinkReceived => _deepLinkController.stream;
@@ -114,8 +112,5 @@ class DeepLinkHandler {
 
   DeepLinkHandler({required this.navigatorKey});
 
-  void handleDeepLink(DeepLink deepLink) {
-    // Navigation would be handled here
-    // For now, just log the deep link
-  }
+  void handleDeepLink(DeepLink deepLink) {}
 }

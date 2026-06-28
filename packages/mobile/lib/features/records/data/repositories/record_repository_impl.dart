@@ -89,7 +89,7 @@ class RecordRepositoryImpl implements RecordRepository {
         );
         return Right(resp.data);
       }
-      // Offline: query local DB
+
       final records = await localDatasource.getFilteredRecords(
         startDate: startDate,
         endDate: endDate,

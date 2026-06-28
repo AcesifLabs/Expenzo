@@ -1,17 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Standardized stats/insight tile with icon, label, value, and optional subtitle.
-///
-/// Usage:
-/// ```dart
-/// AppStatTile(
-///   icon: PhosphorIcons.trendUp(PhosphorIconsStyle.regular),
-///   title: 'Highest Spending Day',
-///   value: '\$450.00',
-///   subtitle: 'In selected period',
-///   color: Colors.orange,
-/// )
-/// ```
 class AppStatTile extends StatelessWidget {
   final IconData icon;
   final String title;

@@ -10,7 +10,6 @@ class MessageTemplateDao extends DatabaseAccessor<AppDatabase>
     with _$MessageTemplateDaoMixin {
   MessageTemplateDao(super.db);
 
-  // Message Sources
   Future<List<MessageSource>> getAllMessageSources() =>
       select(messageSources).get();
 

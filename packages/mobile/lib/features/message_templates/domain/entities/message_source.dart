@@ -4,8 +4,8 @@ enum AutoCreateOption { autoCreate, promptUser, manualOnly }
 
 class MessageSource extends Equatable {
   final String id;
-  final String contactId; // Address/Sender string
-  final String contactName; // Display name if available, else address
+  final String contactId;
+  final String contactName;
   final bool isMonitored;
   final AutoCreateOption autoCreateOption;
   final DateTime createdAt;

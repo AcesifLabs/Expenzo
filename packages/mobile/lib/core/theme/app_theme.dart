@@ -5,7 +5,6 @@ import 'app_typography.dart';
 class AppTheme {
   AppTheme._();
 
-  // Shared shape values — subtle rounding
   static const _cardBorderRadius = BorderRadius.all(Radius.circular(10));
   static const _buttonBorderRadius = BorderRadius.all(Radius.circular(8));
   static const _dialogBorderRadius = BorderRadius.all(Radius.circular(10));
@@ -16,7 +15,6 @@ class AppTheme {
     vertical: 14,
   );
 
-  // Shared text theme
   static final TextTheme _textTheme = TextTheme(
     headlineLarge: AppTypography.headlineLarge,
     headlineMedium: AppTypography.headlineMedium,

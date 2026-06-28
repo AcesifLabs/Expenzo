@@ -72,8 +72,6 @@ class _DashboardPageState extends State<DashboardPage> {
     _budgetsFuture ??= _loadBudgets();
   }
 
-  /// Reset the cached budgets future so the next [FutureBuilder] rebuild
-  /// fetches fresh data. Called on pull-to-refresh and after budget edits.
   void _invalidateBudgetsFuture() {
     _budgetsFuture = null;
   }
@@ -188,14 +186,13 @@ class _DashboardPageState extends State<DashboardPage> {
 
     if (state is DashboardLoading) {
       return [
-        // Balance skeleton
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: _buildBalanceSkeleton(),
           ),
         ),
-        // Budgets section skeleton
+
         const SliverToBoxAdapter(child: SizedBox(height: 2)),
         const SliverToBoxAdapter(child: AppSectionHeader(title: 'Budgets')),
         SliverToBoxAdapter(
@@ -204,7 +201,7 @@ class _DashboardPageState extends State<DashboardPage> {
             child: _buildBudgetSkeleton(context),
           ),
         ),
-        // Recent Activity skeleton
+
         const SliverToBoxAdapter(child: SizedBox(height: 5)),
         const SliverToBoxAdapter(
           child: AppSectionHeader(title: 'Recent Activity'),
@@ -246,7 +243,6 @@ class _DashboardPageState extends State<DashboardPage> {
     if (state is DashboardLoaded) {
       final s = state.summary;
       return [
-        // Balance Card
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
@@ -275,11 +271,11 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
           ),
         ),
-        // Budgets section
+
         const SliverToBoxAdapter(child: SizedBox(height: 2)),
         const SliverToBoxAdapter(child: AppSectionHeader(title: 'Budgets')),
         _buildBudgetCards(context),
-        // Recent Activity
+
         const SliverToBoxAdapter(child: SizedBox(height: 5)),
         const SliverToBoxAdapter(
           child: AppSectionHeader(title: 'Recent Activity'),
@@ -318,16 +314,14 @@ class _DashboardPageState extends State<DashboardPage> {
       ];
     }
 
-    // DashboardInitial — pure skeleton, no side effects
     return [
-      // Balance skeleton
       SliverToBoxAdapter(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: _buildBalanceSkeleton(),
         ),
       ),
-      // Budgets section skeleton
+
       const SliverToBoxAdapter(child: SizedBox(height: 2)),
       const SliverToBoxAdapter(child: AppSectionHeader(title: 'Budgets')),
       SliverToBoxAdapter(
@@ -336,7 +330,7 @@ class _DashboardPageState extends State<DashboardPage> {
           child: _buildBudgetSkeleton(context),
         ),
       ),
-      // Recent Activity skeleton
+
       const SliverToBoxAdapter(child: SizedBox(height: 5)),
       const SliverToBoxAdapter(
         child: AppSectionHeader(title: 'Recent Activity'),
@@ -453,7 +447,6 @@ class _DashboardPageState extends State<DashboardPage> {
             builder: (context, scrollController) {
               return Column(
                 children: [
-                  // Drag handle
                   Padding(
                     padding: const EdgeInsets.only(top: 12, bottom: 8),
                     child: Container(
@@ -467,7 +460,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       ),
                     ),
                   ),
-                  // Title
+
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Row(
@@ -492,7 +485,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     ),
                   ),
                   const Divider(height: 24),
-                  // Transaction list
+
                   Expanded(
                     child: FutureBuilder<List<Record>>(
                       future: di
@@ -533,13 +526,12 @@ class _DashboardPageState extends State<DashboardPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Title
               ShimmerBox.textLine(width: 100, height: 12),
               const SizedBox(height: 8),
-              // Value
+
               ShimmerBox.textLine(width: 160, height: 32),
               const Spacer(),
-              // Income/Expense rows
+
               Row(
                 children: [
                   ShimmerBox.rectangle(width: 80, height: 36, borderRadius: 8),
@@ -573,9 +565,6 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  /// Tries to resolve [GetBudgetsWithProgress] from the DI container.
-  /// Returns `null` if the lazy-registered budget module hasn't been initialized yet.
-  /// This prevents a synchronous `getIt` throw from crashing the entire dashboard.
   GetBudgetsWithProgress? _tryGetBudgetsWithProgress() {
     try {
       return di.getIt<GetBudgetsWithProgress>();
@@ -665,9 +654,6 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 }
 
-// ──────────────────────────────────
-// Recent Transaction Tile
-// ──────────────────────────────────
 class _RecentTile extends StatelessWidget {
   final Record record;
   final NumberFormat fmt;
@@ -685,9 +671,6 @@ class _RecentTile extends StatelessWidget {
   }
 }
 
-// ──────────────────────────────────
-// Recent Activity Tile Skeleton
-// ──────────────────────────────────
 class _RecentActivityTileSkeleton extends StatelessWidget {
   const _RecentActivityTileSkeleton();
 

@@ -10,7 +10,7 @@ class Records extends Table {
   TextColumn get source =>
       text().withDefault(Constant(ExpenseSource.manual.name))();
   TextColumn get sourceId => text().nullable()();
-  TextColumn get recordType => text()(); // IN or OUT
+  TextColumn get recordType => text()();
   IntColumn get userId => integer().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();

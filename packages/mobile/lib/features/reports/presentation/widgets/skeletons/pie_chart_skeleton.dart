@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../../shared/presentation/widgets/shimmer_box.dart';
 
-/// Skeleton for the Category Pie chart tab.
-/// Mimics a donut chart with legend items.
 class PieChartSkeleton extends StatelessWidget {
   const PieChartSkeleton({super.key});
 
@@ -13,10 +11,9 @@ class PieChartSkeleton extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // Pie chart circle
             Expanded(child: Center(child: ShimmerBox.circle(size: 200))),
             const SizedBox(height: 16),
-            // Legend items
+
             Wrap(
               spacing: 16,
               runSpacing: 8,

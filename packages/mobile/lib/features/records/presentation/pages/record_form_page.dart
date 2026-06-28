@@ -48,7 +48,6 @@ class _RecordFormPageState extends State<RecordFormPage> {
     _recordType =
         widget.record?.recordType ?? widget.initialType ?? RecordType.expense;
 
-    // Ensure categories are loaded — the global load might race with init
     context.read<CategoryBloc>().add(LoadCategories(type: _recordType));
   }
 
@@ -203,7 +202,7 @@ class _RecordFormPageState extends State<RecordFormPage> {
     if (_formKey.currentState!.validate()) {
       final now = DateTime.now().toUtc();
       final rawAmount = double.parse(_amountController.text).abs();
-      // Expense (OUT) is stored as negative, Income (IN) as positive
+
       final finalAmount = _recordType == RecordType.expense
           ? -rawAmount
           : rawAmount;

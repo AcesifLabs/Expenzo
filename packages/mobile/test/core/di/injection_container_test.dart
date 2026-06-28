@@ -20,7 +20,6 @@ void main() {
     });
 
     test('returns a Future<void> when registered in get_it', () async {
-      // Simulate what initCriticalDependencies does: register a completed future.
       final completer = Completer<void>();
       completer.complete();
       GetIt.I.registerSingleton<Future<void>>(
@@ -28,11 +27,10 @@ void main() {
         instanceName: 'criticalReady',
       );
 
-      await di.criticalDependenciesReady; // should complete immediately
+      await di.criticalDependenciesReady;
     });
 
     test('throws again after GetIt.I.reset()', () async {
-      // Register
       final completer = Completer<void>();
       completer.complete();
       GetIt.I.registerSingleton<Future<void>>(
@@ -42,13 +40,10 @@ void main() {
 
       await di.criticalDependenciesReady;
 
-      // Wipe
       await GetIt.I.reset();
 
-      // Should throw — no longer registered
       expect(() => di.criticalDependenciesReady, throwsA(isA<Object>()));
 
-      // Re-register and it works again
       final completer2 = Completer<void>();
       completer2.complete();
       GetIt.I.registerSingleton<Future<void>>(

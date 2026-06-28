@@ -59,7 +59,6 @@ class AllCategoriesPicker extends StatelessWidget {
                 childAspectRatio: 0.8,
               ),
               itemBuilder: (context, index) {
-                // First item is the "Add New" tile
                 if (index == 0) {
                   return GestureDetector(
                     onTap: onAddNew,
@@ -95,7 +94,6 @@ class AllCategoriesPicker extends StatelessWidget {
                   );
                 }
 
-                // Regular category tiles (shifted by 1)
                 final cat = categories[index - 1];
                 final isSel = cat.id == selectedId;
                 return GestureDetector(

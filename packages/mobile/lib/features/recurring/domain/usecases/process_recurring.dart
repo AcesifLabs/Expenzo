@@ -36,7 +36,6 @@ class ProcessRecurring {
           updates.add(recurring.copyWith(nextOccurrence: nextDate));
         }
 
-        // Batch update all next occurrence dates
         final updateResult = await repository.updateRecurringBatch(updates);
 
         return updateResult.fold(

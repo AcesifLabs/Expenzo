@@ -102,9 +102,7 @@ class _ReportsPageContentState extends State<_ReportsPageContent>
   Widget _buildDateRangeSelector(BuildContext context) {
     return PopupMenuButton<String>(
       icon: const Icon(Icons.calendar_today),
-      onSelected: (value) {
-        // Selector logic
-      },
+      onSelected: (value) {},
       itemBuilder: (context) => [
         const PopupMenuItem(value: 'week', child: Text('Last 7 Days')),
         const PopupMenuItem(value: 'month', child: Text('Last 30 Days')),

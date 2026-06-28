@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../../shared/presentation/widgets/shimmer_box.dart';
 
-/// Skeleton for a single parsed transaction card during infinite scroll loading.
 class TransactionCardSkeleton extends StatelessWidget {
   const TransactionCardSkeleton({super.key});
 
@@ -13,14 +12,12 @@ class TransactionCardSkeleton extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
-            // Checkbox placeholder
             ShimmerBox.rectangle(width: 24, height: 24, borderRadius: 4),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Amount + source
                   Row(
                     children: [
                       ShimmerBox.textLine(width: 80, height: 18),
@@ -29,12 +26,12 @@ class TransactionCardSkeleton extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 6),
-                  // Message preview
+
                   ShimmerBox.textLine(height: 14),
                   const SizedBox(height: 4),
                   ShimmerBox.textLine(width: 200, height: 12),
                   const SizedBox(height: 6),
-                  // Confidence badge
+
                   ShimmerBox.rectangle(width: 60, height: 18, borderRadius: 9),
                 ],
               ),
@@ -46,7 +43,6 @@ class TransactionCardSkeleton extends StatelessWidget {
   }
 }
 
-/// A list of skeleton transaction cards shown during scan loading.
 class TransactionListSkeleton extends StatelessWidget {
   final int itemCount;
 

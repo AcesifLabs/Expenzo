@@ -31,7 +31,6 @@ class TypeToggle extends StatelessWidget {
             height: 44,
             child: Stack(
               children: [
-                // Animated sliding pill highlight
                 AnimatedPositioned(
                   duration: animDuration,
                   curve: Curves.easeInOut,
@@ -50,7 +49,7 @@ class TypeToggle extends StatelessWidget {
                     ),
                   ),
                 ),
-                // Tab buttons (on top of pill)
+
                 Row(
                   children: [
                     Expanded(

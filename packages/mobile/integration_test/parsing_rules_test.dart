@@ -169,7 +169,7 @@ void main() {
         id: 'dangerous_rule',
         name: 'Dangerous Rule',
         triggerWords: ['test'],
-        amountPattern: r'(.*)*', // Catastrophic backtracking pattern
+        amountPattern: r'(.*)*',
         sourceType: SourceType.sms,
         isEnabled: true,
         priority: 1,

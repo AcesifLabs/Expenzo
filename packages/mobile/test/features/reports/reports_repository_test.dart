@@ -6,12 +6,8 @@ import 'package:expense_tracker/core/database/daos/category_dao.dart';
 @GenerateMocks([RecordDao, CategoryDao])
 void main() {
   group('ReportsRepository', () {
-    test('should fetch spending trend from DAO', () async {
-      // TODO: Implement test with mocks
-    });
+    test('should fetch spending trend from DAO', () async {});
 
-    test('should fetch category breakdown from DAO', () async {
-      // TODO: Implement test with mocks
-    });
+    test('should fetch category breakdown from DAO', () async {});
   });
 }

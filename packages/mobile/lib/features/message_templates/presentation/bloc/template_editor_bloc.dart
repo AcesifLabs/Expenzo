@@ -21,11 +21,7 @@ class TemplateEditorBloc
   Future<void> _onLoadTemplate(
     LoadTemplate event,
     Emitter<TemplateEditorState> emit,
-  ) async {
-    // We only load an existing template here, otherwise Initial handles creation mode.
-    // For simplicity, if we needed to load from repository we would do it here.
-    // But usually we pass the template object to the page if it exists.
-  }
+  ) async {}
 
   Future<void> _onSaveTemplate(
     SaveTemplateEvent event,
@@ -33,19 +29,16 @@ class TemplateEditorBloc
   ) async {
     emit(TemplateEditorSaving());
 
-    // First, save the MessageSource to ensure Foreign Key constraints are satisfied
     final sourceResult = await repository.saveMessageSource(event.source);
 
-    // Check if the source save failed
     if (sourceResult.isLeft()) {
       sourceResult.fold(
         (failure) => emit(TemplateEditorError(failure.message)),
         (_) {},
       );
-      return; // Stop execution if the source could not be saved
+      return;
     }
 
-    // Then save the Template
     final result = await saveTemplateUseCase(event.template);
     result.fold(
       (failure) => emit(TemplateEditorError(failure.message)),

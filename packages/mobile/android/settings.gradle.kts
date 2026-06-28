@@ -25,3 +25,31 @@ plugins {
 }
 
 include(":app")
+
+// ── workaround: patch workmanager_android build.gradle ──
+// workmanager_android applies `kotlin-android` in its build.gradle, but
+// Flutter's built-in Kotlin already provides it. Removing the redundant
+// application silences the KGP warning. Runs before project evaluation.
+val pubCache = providers.environmentVariable("PUB_CACHE")
+    .orElse(providers.gradleProperty("PUB_CACHE"))
+    .orElse(System.getProperty("user.home") + "/.pub-cache")
+    .get()
+val pubCacheDir = file(pubCache)
+if (pubCacheDir.isDirectory) {
+    pubCacheDir.walkTopDown().maxDepth(4).forEach { candidate ->
+        if (candidate.name == "build.gradle"
+            && candidate.parentFile?.name == "android"
+            && candidate.parentFile?.parentFile?.name?.startsWith("workmanager_android") == true
+        ) {
+            val text = candidate.readText()
+            val patched = text.replace(
+                "apply plugin: 'kotlin-android'",
+                "// apply plugin: 'kotlin-android'  // removed — Flutter's built-in Kotlin provides this"
+            )
+            if (text != patched) {
+                candidate.writeText(patched)
+                logger.lifecycle(":: patched KGP in ${candidate.absolutePath}")
+            }
+        }
+    }
+}

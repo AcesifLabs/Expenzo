@@ -53,7 +53,6 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
   ) async {
     emit(const RecordLoading());
 
-    // Start listening to the reactive stream — DB changes auto-propagate
     await _recordsSubscription?.cancel();
     _recordsSubscription = recordRepository
         .watchRecords(limit: _pageSize)
@@ -63,7 +62,6 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
           }
         });
 
-    // Also do a manual fetch for the initial page load
     final result = await getRecords(const GetRecordsParams(limit: _pageSize));
     result.fold(
       (failure) => emit(RecordError(failure.message)),
@@ -77,8 +75,6 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     );
   }
 
-  /// Handles reactive stream updates — when DB changes (add/update/delete),
-  /// this fires automatically without needing explicit reloads.
   Future<void> _onRecordsUpdated(
     _RecordsUpdated event,
     Emitter<RecordState> emit,
@@ -115,7 +111,6 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     );
 
     if (_hasActiveFilters(currentState)) {
-      // Filtered pagination: use getFilteredRecords with offset
       final result = await recordRepository.getFilteredRecords(
         startDate: currentState.filterStartDate,
         endDate: currentState.filterEndDate,
@@ -138,7 +133,6 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
         );
       });
     } else {
-      // Normal pagination: use getRecords
       final result = await getRecords(
         GetRecordsParams(limit: _pageSize, offset: currentState.records.length),
       );
@@ -164,11 +158,7 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     Emitter<RecordState> emit,
   ) async {
     final result = await addRecord(event.record);
-    result.fold(
-      (failure) => emit(RecordError(failure.message)),
-      // No manual reload needed — stream will auto-trigger _RecordsUpdated
-      (_) {},
-    );
+    result.fold((failure) => emit(RecordError(failure.message)), (_) {});
   }
 
   Future<void> _onUpdateRecord(
@@ -176,11 +166,7 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     Emitter<RecordState> emit,
   ) async {
     final result = await updateRecord(event.record);
-    result.fold(
-      (failure) => emit(RecordError(failure.message)),
-      // No manual reload needed — stream will auto-trigger _RecordsUpdated
-      (_) {},
-    );
+    result.fold((failure) => emit(RecordError(failure.message)), (_) {});
   }
 
   Future<void> _onDeleteRecord(
@@ -188,18 +174,13 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     Emitter<RecordState> emit,
   ) async {
     final result = await deleteRecord(event.id);
-    result.fold(
-      (failure) => emit(RecordError(failure.message)),
-      // No manual reload needed — stream will auto-trigger _RecordsUpdated
-      (_) {},
-    );
+    result.fold((failure) => emit(RecordError(failure.message)), (_) {});
   }
 
   Future<void> _onRefreshRecords(
     RefreshRecords event,
     Emitter<RecordState> emit,
   ) async {
-    // Re-trigger initial load (which also re-subscribes to the stream)
     add(const LoadRecords());
   }
 
@@ -219,7 +200,6 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
 
     emit(const RecordLoading());
 
-    // Cancel stream subscription — switch to manual filtered fetch
     await _recordsSubscription?.cancel();
     _recordsSubscription = null;
 
@@ -252,7 +232,6 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     ClearFilters event,
     Emitter<RecordState> emit,
   ) async {
-    // Reset to unfiltered: restart the reactive stream
     add(const LoadRecords());
   }
 
@@ -263,7 +242,6 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
   }
 }
 
-/// Internal event fired by the reactive stream subscription.
 class _RecordsUpdated extends RecordEvent {
   final List<Record> records;
   const _RecordsUpdated(this.records);

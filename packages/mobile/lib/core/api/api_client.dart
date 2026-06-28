@@ -55,7 +55,6 @@ class _AuthInterceptor extends Interceptor {
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     if (err.response?.statusCode == 401) {
       try {
-        // Skip token refresh if offline
         final connectivity = di.getIt<ConnectivityService>();
         if (!await connectivity.checkNow()) {
           debugPrint('AuthInterceptor: Offline, skipping token refresh');

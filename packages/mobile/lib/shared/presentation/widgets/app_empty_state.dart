@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Unified empty state with icon and message.
 class AppEmptyState extends StatelessWidget {
   final IconData icon;
   final String message;

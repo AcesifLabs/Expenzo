@@ -2,18 +2,15 @@ import 'package:expense_tracker/core/constants/source_types.dart';
 import 'package:flutter/material.dart';
 import 'package:picons/picons.dart';
 
-/// Centralized icon helper for Phosphor Icons integration
 class AppIcons {
   AppIcons._();
 
-  // ============ NAVIGATION ICONS ============
   static IconData get home => PiconsRegular.house;
   static IconData get dashboard => PiconsRegular.squaresFour;
   static IconData get scan => PiconsRegular.listMagnifyingGlass;
   static IconData get search => PiconsRegular.magnifyingGlass;
   static IconData get settings => PiconsRegular.faders;
 
-  // ============ ACTION ICONS ============
   static IconData get add => PiconsRegular.plus;
   static IconData get delete => PiconsRegular.trash;
   static IconData get edit => PiconsRegular.pencilSimple;
@@ -27,20 +24,17 @@ class AppIcons {
   static IconData get download => PiconsRegular.downloadSimple;
   static IconData get upload => PiconsRegular.uploadSimple;
 
-  // ============ STATUS ICONS ============
   static IconData get warning => PiconsRegular.warning;
   static IconData get error => PiconsRegular.warningCircle;
   static IconData get success => PiconsRegular.checkCircle;
   static IconData get info => PiconsRegular.info;
   static IconData get help => PiconsRegular.question;
 
-  // ============ NAVIGATION ARROWS ============
   static IconData get back => PiconsRegular.arrowLeft;
   static IconData get forward => PiconsRegular.arrowRight;
   static IconData get chevronRight => PiconsRegular.caretRight;
   static IconData get chevronDown => PiconsRegular.caretDown;
 
-  // ============ FINANCE ICONS ============
   static IconData get wallet => PiconsRegular.wallet;
   static IconData get money => PiconsRegular.currencyDollar;
   static IconData get receipt => PiconsRegular.invoice;
@@ -50,7 +44,6 @@ class AppIcons {
   static IconData get chart => PiconsRegular.chartBar;
   static IconData get pieChart => PiconsRegular.chartPie;
 
-  // ============ CATEGORY ICONS ============
   static const Map<String, IconData> _categoryIconMap = {
     'package': PiconsRegular.package,
     'shoppingCart': PiconsRegular.shoppingCart,
@@ -64,15 +57,13 @@ class AppIcons {
     'graduationCap': PiconsRegular.graduationCap,
     'currencyDollar': PiconsRegular.currencyDollar,
     'gift': PiconsRegular.gift,
-    // Income category icons
+
     'briefcase': PiconsRegular.briefcase,
     'laptop': PiconsRegular.laptop,
     'chartLineUp': PiconsRegular.chartLineUp,
     'arrowULeftDown': PiconsRegular.arrowULeftDown,
   };
 
-  /// Resolves an icon identifier (stored in Category.emoji) to Phosphor IconData.
-  /// Falls back to package icon for unknown names or legacy emoji data.
   static IconData getCategoryIcon(String iconName) {
     final iconData = _categoryIconMap[iconName];
     if (iconData != null) return iconData;
@@ -98,28 +89,23 @@ class AppIcons {
   static IconData get deviceMobile => PiconsRegular.deviceMobile;
   static IconData get graduationCap => PiconsRegular.graduationCap;
 
-  // ============ SOURCE ICONS ============
   static IconData get sms => PiconsRegular.chatDots;
   static IconData get email => PiconsRegular.envelope;
   static IconData get manual => PiconsRegular.pencilSimpleLine;
   static IconData get repeat => PiconsRegular.arrowsClockwise;
 
-  // ============ TIME ICONS ============
   static IconData get calendar => PiconsRegular.calendar;
   static IconData get clock => PiconsRegular.clock;
   static IconData get schedule => PiconsRegular.calendarBlank;
   static IconData get history => PiconsRegular.clockCounterClockwise;
 
-  // ============ USER ICONS ============
   static IconData get user => PiconsRegular.user;
   static IconData get profile => PiconsRegular.userCircle;
 
-  // ============ NOTIFICATION ICONS ============
   static IconData get notification => PiconsRegular.bell;
   static IconData get cloudDone => PiconsRegular.cloud;
   static IconData get cloudOff => PiconsRegular.cloudX;
 
-  // ============ DEVICE/COMM ICONS ============
   static IconData get phone => PiconsRegular.phone;
   static IconData get location => PiconsRegular.mapPin;
   static IconData get image => PiconsRegular.image;
@@ -127,14 +113,12 @@ class AppIcons {
   static IconData get wifi => PiconsRegular.wifiHigh;
   static IconData get printer => PiconsRegular.printer;
 
-  // ============ SECURITY ICONS ============
   static IconData get lock => PiconsRegular.lock;
   static IconData get unlock => PiconsRegular.lockOpen;
   static IconData get security => PiconsRegular.shield;
   static IconData get visibility => PiconsRegular.eye;
   static IconData get visibilityOff => PiconsRegular.eyeClosed;
 
-  // ============ MISC ICONS ============
   static IconData get empty => PiconsRegular.empty;
   static IconData get apps => PiconsRegular.squaresFour;
   static IconData get copy => PiconsRegular.copy;
@@ -144,7 +128,6 @@ class AppIcons {
   static IconData get heart => PiconsRegular.heart;
   static IconData get globe => PiconsRegular.globe;
 
-  /// Maps source enum to icons
   static IconData getSourceIcon(ExpenseSource source) {
     switch (source) {
       case ExpenseSource.sms:
@@ -158,10 +141,8 @@ class AppIcons {
     }
   }
 
-  /// Get icon by name - returns IconData
   static IconData get(String name) {
     switch (name.toLowerCase()) {
-      // Navigation
       case 'home':
         return home;
       case 'dashboard':
@@ -172,7 +153,7 @@ class AppIcons {
         return search;
       case 'settings':
         return settings;
-      // Actions
+
       case 'add':
       case 'plus':
         return add;
@@ -200,7 +181,7 @@ class AppIcons {
         return download;
       case 'upload':
         return upload;
-      // Status
+
       case 'warning':
         return warning;
       case 'error':
@@ -211,7 +192,7 @@ class AppIcons {
         return info;
       case 'help':
         return help;
-      // Navigation arrows
+
       case 'back':
         return back;
       case 'forward':
@@ -220,7 +201,7 @@ class AppIcons {
         return chevronRight;
       case 'chevron_down':
         return chevronDown;
-      // Finance
+
       case 'wallet':
         return wallet;
       case 'money':
@@ -237,11 +218,11 @@ class AppIcons {
         return chart;
       case 'pie_chart':
         return pieChart;
-      // Category
+
       case 'category':
       case 'tag':
         return category;
-      // Source
+
       case 'sms':
       case 'message':
         return sms;
@@ -251,7 +232,7 @@ class AppIcons {
       case 'sync':
       case 'repeat':
         return repeat;
-      // Time
+
       case 'calendar':
         return calendar;
       case 'clock':
@@ -260,12 +241,12 @@ class AppIcons {
         return schedule;
       case 'history':
         return history;
-      // User
+
       case 'user':
         return user;
       case 'profile':
         return profile;
-      // Notification
+
       case 'notification':
       case 'bell':
         return notification;
@@ -273,7 +254,7 @@ class AppIcons {
         return cloudDone;
       case 'cloud_off':
         return cloudOff;
-      // Device
+
       case 'phone':
         return phone;
       case 'location':
@@ -285,7 +266,7 @@ class AppIcons {
         return link;
       case 'wifi':
         return wifi;
-      // Security
+
       case 'lock':
         return lock;
       case 'unlock':
@@ -297,7 +278,7 @@ class AppIcons {
         return visibility;
       case 'visibility_off':
         return visibilityOff;
-      // Misc
+
       case 'empty':
       case 'inbox':
         return empty;

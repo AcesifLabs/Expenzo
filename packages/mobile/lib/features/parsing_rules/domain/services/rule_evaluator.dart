@@ -6,7 +6,6 @@ import '../entities/parsing_types.dart';
 import '../../../message_templates/domain/entities/expense_template.dart';
 import '../../../message_templates/domain/entities/message_source.dart';
 
-/// Pure-Dart evaluation functions — works in isolates and main thread.
 class RuleEvaluator {
   static String normalizeAmount(String amount) =>
       amount.replaceAll(RegExp(r'[^\d.]'), '');
@@ -15,7 +14,6 @@ class RuleEvaluator {
     ParsingContext context,
     EvaluateRulesParams params,
   ) {
-    // 1. Check all user-defined templates across all monitored sources
     for (final source in context.sources) {
       if (!source.isMonitored) continue;
       if (source.contactId != params.address) continue;
@@ -41,7 +39,6 @@ class RuleEvaluator {
       }
     }
 
-    // 2. Fall back to global parsing rules (already sorted by priority)
     for (final rule in context.rules) {
       if (rule.sourceType == SourceType.sms &&
           params.sourceType != AppSourceType.sms) {
@@ -229,9 +226,9 @@ class RuleEvaluator {
       if (n1 == null || n2 == null || n3 == null) continue;
 
       if (n1 > 31) {
-        return _safeDateTime(n1, n2, n3); // year, month, day
+        return _safeDateTime(n1, n2, n3);
       } else {
-        return _safeDateTime(n3, n1, n2); // month, day, year → year, month, day
+        return _safeDateTime(n3, n1, n2);
       }
     }
     return null;

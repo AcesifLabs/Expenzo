@@ -61,7 +61,6 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                // Amount
                 TextFormField(
                   controller: _amountController,
                   keyboardType: const TextInputType.numberWithOptions(
@@ -84,7 +83,6 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
                 ),
                 const SizedBox(height: 16),
 
-                // Period
                 DropdownButtonFormField<BudgetPeriod>(
                   initialValue: _selectedPeriod,
                   decoration: const InputDecoration(
@@ -113,7 +111,6 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
                 ),
                 const SizedBox(height: 16),
 
-                // Rollover toggle
                 SwitchListTile(
                   title: const Text('Enable Rollover'),
                   subtitle: const Text(
@@ -126,7 +123,6 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
                 ),
                 const SizedBox(height: 24),
 
-                // Submit button
                 ElevatedButton(
                   onPressed: state is BudgetLoading ? null : _submit,
                   child: Text(isEditing ? 'Update Budget' : 'Create Budget'),

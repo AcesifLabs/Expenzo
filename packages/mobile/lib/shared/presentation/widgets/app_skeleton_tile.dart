@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'shimmer_box.dart';
 
-/// Standardized skeleton tile with optional leading circle and 1–2 text lines.
 class AppSkeletonTile extends StatelessWidget {
   final double circleSize;
   final double line1Width;

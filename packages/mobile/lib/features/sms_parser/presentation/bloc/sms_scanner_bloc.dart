@@ -44,7 +44,6 @@ class SmsScannerBloc extends Bloc<SmsScannerEvent, SmsScannerState> {
     result.fold((failure) => emit(SmsScannerError(message: failure.message)), (
       creationResult,
     ) {
-      // Notify budget to reload — scan may have added expenses
       try {
         di.getIt<BudgetBloc>().add(LoadBudgets());
       } catch (e) {
@@ -60,7 +59,6 @@ class SmsScannerBloc extends Bloc<SmsScannerEvent, SmsScannerState> {
   ) async {
     emit(const SmsScannerScanning(processedMessages: 0, totalMessages: 0));
 
-    // 1. Fetch all monitored sources (MessageSources)
     final context = await di.getIt<EvaluateRulesUseCase>().loadContext();
     final monitoredSources = context.sources
         .where((s) => s.isMonitored)
@@ -80,12 +78,10 @@ class SmsScannerBloc extends Bloc<SmsScannerEvent, SmsScannerState> {
 
     final monitoredAddresses = monitoredSources.map((s) => s.contactId).toSet();
 
-    // 2. Fetch recent SMS messages in ONE batch instead of per-address
     final allRecentMessages = await di
         .getIt<SmsLocalDatasource>()
         .getSmsBatched(count: 200);
 
-    // 3. Filter by monitored addresses and date in memory
     final filteredMessages = allRecentMessages.where((m) {
       final isMonitored = monitoredAddresses.contains(m.address);
       final isRecent = event.since == null || m.date.isAfter(event.since!);
@@ -105,7 +101,6 @@ class SmsScannerBloc extends Bloc<SmsScannerEvent, SmsScannerState> {
       return;
     }
 
-    // 4. Prepare input for isolate and parse
     final parseInputs = filteredMessages.map((message) {
       return ParseMessageInput(
         body: message.body,
@@ -124,7 +119,6 @@ class SmsScannerBloc extends Bloc<SmsScannerEvent, SmsScannerState> {
       sourceType: AppSourceType.sms,
     );
 
-    // 5. Filter duplicates against existing DB records
     final finalResults = await _filterDuplicates(
       results,
       event.filterDuplicates,
@@ -151,7 +145,6 @@ class SmsScannerBloc extends Bloc<SmsScannerEvent, SmsScannerState> {
 
     emit(currentState.copyWith(isLoadingMore: true));
 
-    // Iteratively fetch batches until we find new valid results or reach the end.
     List<ParsedTransaction> newFiltered = [];
     int offset = currentState.currentOffset;
     bool hasReachedMax = false;
@@ -195,7 +188,6 @@ class SmsScannerBloc extends Bloc<SmsScannerEvent, SmsScannerState> {
     );
   }
 
-  /// Filters out transactions whose sourceId already exists in the DB.
   Future<List<ParsedTransaction>> _filterDuplicates(
     List<ParsedTransaction> transactions,
     bool filterDuplicates,

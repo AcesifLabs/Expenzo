@@ -63,7 +63,7 @@ class BudgetLocalDatasourceImpl implements BudgetLocalDatasource {
         rolloverEnabled: Value(budget.rolloverEnabled),
         rolloverAmount: Value(budget.rolloverAmount),
         isEnabled: Value(budget.isEnabled),
-        createdAt: Value(budget.startDate), // Keep original
+        createdAt: Value(budget.startDate),
         updatedAt: Value(now),
       ),
     );

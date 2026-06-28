@@ -30,10 +30,10 @@ class CurrencyConfig {
 
   static bool isValidUnicode(String symbol) {
     if (symbol.isEmpty) return false;
-    // Accepts any non-control character (U+0020 through U+10FFFF)
+
     for (final rune in symbol.runes) {
-      if (rune < 0x20) return false; // reject control chars
-      if (rune >= 0xD800 && rune <= 0xDFFF) return false; // reject surrogates
+      if (rune < 0x20) return false;
+      if (rune >= 0xD800 && rune <= 0xDFFF) return false;
     }
     return true;
   }

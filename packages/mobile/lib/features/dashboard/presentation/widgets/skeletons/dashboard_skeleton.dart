@@ -3,8 +3,6 @@ import 'summary_card_skeleton.dart';
 import 'category_breakdown_skeleton.dart';
 import 'recent_transactions_skeleton.dart';
 
-/// Combined skeleton for the entire Dashboard page.
-/// Matches the layout of [DashboardPage] when loaded.
 class DashboardSkeleton extends StatelessWidget {
   const DashboardSkeleton({super.key});
 

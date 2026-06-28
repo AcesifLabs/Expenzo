@@ -46,7 +46,6 @@ class NotificationService {
       onDidReceiveNotificationResponse: _onNotificationTapped,
     );
 
-    // Create notification channel for Android
     const androidChannel = AndroidNotificationChannel(
       _channelId,
       _channelName,
