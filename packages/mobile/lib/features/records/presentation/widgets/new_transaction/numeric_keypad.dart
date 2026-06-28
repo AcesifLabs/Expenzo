@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:picons/picons.dart';
 import 'keypad_button.dart';
 
 class NumericKeypad extends StatefulWidget {
@@ -135,11 +135,7 @@ class _NumericKeypadState extends State<NumericKeypad> {
                 onLongPressStart: _onBackspaceLongPressStart,
                 onLongPressEnd: _onBackspaceLongPressEnd,
                 onLongPressCancel: _cancelBackspaceTimers,
-                child: Icon(
-                  PhosphorIcons.backspace(PhosphorIconsStyle.light),
-                  color: txtColor,
-                  size: 22,
-                ),
+                child: Icon(PiconsLight.backspace, color: txtColor, size: 22),
               ),
             ],
           ),

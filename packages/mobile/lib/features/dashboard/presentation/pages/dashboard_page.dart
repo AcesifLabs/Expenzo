@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/core/utils/navigation_utils.dart';
@@ -62,13 +62,10 @@ class _DashboardPageState extends State<DashboardPage> {
     final getBudgetsWithProgress = _tryGetBudgetsWithProgress();
     if (getBudgetsWithProgress == null) return [];
     final result = await getBudgetsWithProgress(limit: 5);
-    return result.fold(
-      (failure) {
-        debugPrint('DashboardPage: Failed to load budgets: ${failure.message}');
-        return <BudgetProgress>[];
-      },
-      (budgets) => budgets,
-    );
+    return result.fold((failure) {
+      debugPrint('DashboardPage: Failed to load budgets: ${failure.message}');
+      return <BudgetProgress>[];
+    }, (budgets) => budgets);
   }
 
   void _ensureBudgetsFuture() {
@@ -150,9 +147,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                           ),
                                         )
                                       : Icon(
-                                          PhosphorIcons.user(
-                                            PhosphorIconsStyle.regular,
-                                          ),
+                                          PiconsRegular.user,
                                           color: Theme.of(
                                             context,
                                           ).colorScheme.primary,
@@ -230,7 +225,7 @@ class _DashboardPageState extends State<DashboardPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                PhosphorIcons.warningCircle(PhosphorIconsStyle.light),
+                PiconsLight.warningCircle,
                 size: 48,
                 color: Theme.of(context).colorScheme.error,
               ),
@@ -261,7 +256,7 @@ class _DashboardPageState extends State<DashboardPage> {
               bottomChild: Row(
                 children: [
                   BalanceRow(
-                    icon: PhosphorIcons.trendUp(PhosphorIconsStyle.fill),
+                    icon: PiconsFill.trendUp,
                     label: 'Income',
                     amount: s.totalIncome,
                     color: colors.secondary,
@@ -269,7 +264,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   ),
                   const SizedBox(width: 24),
                   BalanceRow(
-                    icon: PhosphorIcons.trendDown(PhosphorIconsStyle.fill),
+                    icon: PiconsFill.trendDown,
                     label: 'Expense',
                     amount: s.totalExpense,
                     color: colors.error,
@@ -296,7 +291,7 @@ class _DashboardPageState extends State<DashboardPage> {
               child: AppCard(
                 padding: const EdgeInsets.symmetric(vertical: 32),
                 child: AppEmptyState(
-                  icon: PhosphorIcons.tray(PhosphorIconsStyle.regular),
+                  icon: PiconsRegular.tray,
                   message: 'No transactions yet',
                 ),
               ),
@@ -379,7 +374,7 @@ class _DashboardPageState extends State<DashboardPage> {
               child: AppCard(
                 padding: const EdgeInsets.symmetric(vertical: 24),
                 child: AppEmptyState(
-                  icon: PhosphorIcons.tray(PhosphorIconsStyle.regular),
+                  icon: PiconsRegular.tray,
                   message: 'No budgets set',
                 ),
               ),
@@ -598,62 +593,40 @@ class _DashboardPageState extends State<DashboardPage> {
       if (isAuth)
         PopupMenuItem(
           value: 'account',
-          child: MenuRow(
-            icon: PhosphorIcons.user(PhosphorIconsStyle.light),
-            text: 'Profile',
-          ),
+          child: MenuRow(icon: PiconsLight.user, text: 'Profile'),
         )
       else
         PopupMenuItem(
           value: 'sign_in',
-          child: MenuRow(
-            icon: PhosphorIcons.signIn(PhosphorIconsStyle.light),
-            text: 'Sign In',
-          ),
+          child: MenuRow(icon: PiconsLight.signIn, text: 'Sign In'),
         ),
       const PopupMenuDivider(),
       PopupMenuItem(
         value: 'settings',
-        child: MenuRow(
-          icon: PhosphorIcons.gear(PhosphorIconsStyle.light),
-          text: 'Settings',
-        ),
+        child: MenuRow(icon: PiconsLight.gear, text: 'Settings'),
       ),
       PopupMenuItem(
         value: 'theme',
         child: MenuRow(
-          icon: isDark
-              ? PhosphorIcons.moon(PhosphorIconsStyle.fill)
-              : PhosphorIcons.sun(PhosphorIconsStyle.fill),
+          icon: isDark ? PiconsFill.moon : PiconsFill.sun,
           text: isDark ? 'Dark Mode' : 'Light Mode',
-          trailing: isDark
-              ? PhosphorIcons.check(PhosphorIconsStyle.bold)
-              : null,
+          trailing: isDark ? PiconsBold.check : null,
         ),
       ),
       PopupMenuItem(
         value: 'language',
-        child: MenuRow(
-          icon: PhosphorIcons.translate(PhosphorIconsStyle.light),
-          text: 'Language',
-        ),
+        child: MenuRow(icon: PiconsLight.translate, text: 'Language'),
       ),
       const PopupMenuDivider(),
       PopupMenuItem(
         value: 'feedback',
-        child: MenuRow(
-          icon: PhosphorIcons.chatTeardrop(PhosphorIconsStyle.light),
-          text: 'Feedback',
-        ),
+        child: MenuRow(icon: PiconsLight.chatTeardrop, text: 'Feedback'),
       ),
       if (isAuth) ...[
         const PopupMenuDivider(),
         PopupMenuItem(
           value: 'sign_out',
-          child: MenuRow(
-            icon: PhosphorIcons.signOut(PhosphorIconsStyle.light),
-            text: 'Sign Out',
-          ),
+          child: MenuRow(icon: PiconsLight.signOut, text: 'Sign Out'),
         ),
       ],
     ];

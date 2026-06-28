@@ -65,9 +65,7 @@ void main() async {
   // fallback can use it from the first frame onward without a
   // placeholder-then-rebind dance.
   di.getIt.registerSingleton<BootstrapService>(
-    BootstrapService(
-      remountRoot: () async => runApp(const ExpenzoApp()),
-    ),
+    BootstrapService(remountRoot: () async => runApp(const ExpenzoApp())),
   );
 
   runApp(const ExpenzoApp());
@@ -126,9 +124,7 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
           darkTheme: AppTheme.darkTheme,
           themeMode: themeMode,
           debugShowCheckedModeBanner: false,
-          home: AppLoader(
-            feedbackBuilder: (_) => const FeedbackPage(),
-          ),
+          home: AppLoader(feedbackBuilder: (_) => const FeedbackPage()),
         );
       },
     );

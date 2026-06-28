@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/features/sms_parser/application/realtime_sms_processor.dart';
 
@@ -113,11 +113,7 @@ class _SmsPermissionGateState extends State<SmsPermissionGate> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              PhosphorIcons.warningCircle(PhosphorIconsStyle.regular),
-              size: 80,
-              color: Colors.grey,
-            ),
+            Icon(PiconsRegular.warningCircle, size: 80, color: Colors.grey),
             const SizedBox(height: 24),
             const Text(
               'SMS Access Required',
@@ -133,7 +129,7 @@ class _SmsPermissionGateState extends State<SmsPermissionGate> {
             ),
             const SizedBox(height: 32),
             ElevatedButton.icon(
-              icon: Icon(PhosphorIcons.check(PhosphorIconsStyle.regular)),
+              icon: Icon(PiconsRegular.check),
               label: const Text('Grant Access', style: TextStyle(fontSize: 18)),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(

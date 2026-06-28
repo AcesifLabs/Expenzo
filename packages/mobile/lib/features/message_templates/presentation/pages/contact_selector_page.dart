@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
 import 'package:expense_tracker/core/utils/navigation_utils.dart';
 import '../bloc/contact_selector_bloc.dart';
@@ -81,9 +81,7 @@ class _ContactSelectorViewState extends State<ContactSelectorView> {
             child: TextField(
               decoration: InputDecoration(
                 hintText: 'Search contacts...',
-                prefixIcon: Icon(
-                  PhosphorIcons.magnifyingGlass(PhosphorIconsStyle.regular),
-                ),
+                prefixIcon: Icon(PiconsRegular.magnifyingGlass),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -153,12 +151,8 @@ class _ContactSelectorViewState extends State<ContactSelectorView> {
                             leading: CircleAvatar(
                               child: Icon(
                                 contact.sourceType == ExpenseSource.sms
-                                    ? PhosphorIcons.chat(
-                                        PhosphorIconsStyle.regular,
-                                      )
-                                    : PhosphorIcons.envelope(
-                                        PhosphorIconsStyle.regular,
-                                      ),
+                                    ? PiconsRegular.chat
+                                    : PiconsRegular.envelope,
                               ),
                             ),
                             title: Row(
@@ -204,11 +198,7 @@ class _ContactSelectorViewState extends State<ContactSelectorView> {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            trailing: Icon(
-                              PhosphorIcons.caretRight(
-                                PhosphorIconsStyle.regular,
-                              ),
-                            ),
+                            trailing: Icon(PiconsRegular.caretRight),
                             onTap: () {
                               final source =
                                   existingSource ??

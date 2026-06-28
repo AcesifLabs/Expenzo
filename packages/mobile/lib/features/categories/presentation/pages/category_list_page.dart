@@ -1,4 +1,4 @@
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:picons/picons.dart';
 import 'package:expense_tracker/features/categories/domain/entities/category.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -33,7 +33,7 @@ class CategoryListPage extends StatelessWidget {
           if (state is CategoryLoaded) {
             if (state.categories.isEmpty) {
               return AppEmptyState(
-                icon: PhosphorIcons.tag(PhosphorIconsStyle.regular),
+                icon: PiconsRegular.tag,
                 message: 'No categories created',
               );
             }

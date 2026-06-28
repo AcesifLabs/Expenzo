@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_badge.dart';
@@ -53,7 +52,7 @@ class ParsedTransactionCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     AppBadge(
                       label: 'SMS',
-                      icon: PhosphorIcons.chat(PhosphorIconsStyle.regular),
+                      icon: PiconsRegular.chat,
                       size: AppBadgeSize.small,
                     ),
                   ],

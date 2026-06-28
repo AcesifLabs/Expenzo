@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:expense_tracker/core/theme/app_typography.dart';
 import '../bloc/auth_bloc.dart';
@@ -39,7 +39,7 @@ class SignUpPage extends StatelessWidget {
                   children: [
                     const Spacer(),
                     Icon(
-                      PhosphorIcons.userPlus(PhosphorIconsStyle.regular),
+                      PiconsRegular.userPlus,
                       size: 80,
                       color: AppColors.primary,
                     ),

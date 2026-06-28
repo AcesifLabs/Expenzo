@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/theme/app_colors.dart';
 import '../bloc/sms_permission_bloc.dart';
 import '../bloc/sms_permission_event.dart';
@@ -34,11 +34,7 @@ class SmsPermissionPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Spacer(),
-                  Icon(
-                    PhosphorIcons.chat(PhosphorIconsStyle.regular),
-                    size: 80,
-                    color: AppColors.primary,
-                  ),
+                  Icon(PiconsRegular.chat, size: 80, color: AppColors.primary),
                   const SizedBox(height: 24),
                   Text(
                     'Enable SMS Scanning',
@@ -53,23 +49,21 @@ class SmsPermissionPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
                   _buildInfoCard(
-                    icon: PhosphorIcons.lock(PhosphorIconsStyle.regular),
+                    icon: PiconsRegular.lock,
                     title: 'Your Privacy Protected',
                     description:
                         'All SMS data is processed locally on your device. We never upload your messages to any server.',
                   ),
                   const SizedBox(height: 12),
                   _buildInfoCard(
-                    icon: PhosphorIcons.database(PhosphorIconsStyle.regular),
+                    icon: PiconsRegular.database,
                     title: 'Local Storage Only',
                     description:
                         'Detected expenses are stored locally. No personal messages are saved.',
                   ),
                   const SizedBox(height: 12),
                   _buildInfoCard(
-                    icon: PhosphorIcons.slidersHorizontal(
-                      PhosphorIconsStyle.regular,
-                    ),
+                    icon: PiconsRegular.slidersHorizontal,
                     title: 'You\'re in Control',
                     description:
                         'Choose which SMS to convert to expenses. You can always edit or delete them.',
@@ -110,10 +104,7 @@ class SmsPermissionPage extends StatelessWidget {
                       ),
                       child: Column(
                         children: [
-                          Icon(
-                            PhosphorIcons.warning(PhosphorIconsStyle.regular),
-                            color: AppColors.warning,
-                          ),
+                          Icon(PiconsRegular.warning, color: AppColors.warning),
                           const SizedBox(height: 8),
                           const Text(
                             'SMS permission was permanently denied. Please enable it in app settings.',
@@ -146,9 +137,7 @@ class SmsPermissionPage extends StatelessWidget {
                       child: Column(
                         children: [
                           Icon(
-                            PhosphorIcons.warningCircle(
-                              PhosphorIconsStyle.regular,
-                            ),
+                            PiconsRegular.warningCircle,
                             color: AppColors.error,
                           ),
                           const SizedBox(height: 8),

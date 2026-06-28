@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:picons/picons.dart';
 import '../../services/sync/sync_status.dart';
 
 class SyncStatusIndicator extends StatelessWidget {
@@ -29,11 +29,7 @@ class SyncStatusIndicator extends StatelessWidget {
   Widget _buildIcon() {
     switch (status) {
       case SyncStatus.idle:
-        return Icon(
-          PhosphorIcons.cloud(PhosphorIconsStyle.regular),
-          size: 18,
-          color: Colors.grey,
-        );
+        return Icon(PiconsRegular.cloud, size: 18, color: Colors.grey);
       case SyncStatus.syncing:
         return const SizedBox(
           width: 18,
@@ -41,17 +37,9 @@ class SyncStatusIndicator extends StatelessWidget {
           child: CircularProgressIndicator(strokeWidth: 2),
         );
       case SyncStatus.success:
-        return Icon(
-          PhosphorIcons.cloud(PhosphorIconsStyle.regular),
-          size: 18,
-          color: Colors.green,
-        );
+        return Icon(PiconsRegular.cloud, size: 18, color: Colors.green);
       case SyncStatus.error:
-        return Icon(
-          PhosphorIcons.cloudSlash(PhosphorIconsStyle.regular),
-          size: 18,
-          color: Colors.red,
-        );
+        return Icon(PiconsRegular.cloudSlash, size: 18, color: Colors.red);
     }
   }
 }

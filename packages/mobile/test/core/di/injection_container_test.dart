@@ -16,10 +16,7 @@ void main() {
 
   group('criticalDependenciesReady', () {
     test('throws when not yet registered', () async {
-      expect(
-        () => di.criticalDependenciesReady,
-        throwsA(isA<Object>()),
-      );
+      expect(() => di.criticalDependenciesReady, throwsA(isA<Object>()));
     });
 
     test('returns a Future<void> when registered in get_it', () async {
@@ -49,10 +46,7 @@ void main() {
       await GetIt.I.reset();
 
       // Should throw — no longer registered
-      expect(
-        () => di.criticalDependenciesReady,
-        throwsA(isA<Object>()),
-      );
+      expect(() => di.criticalDependenciesReady, throwsA(isA<Object>()));
 
       // Re-register and it works again
       final completer2 = Completer<void>();
@@ -68,10 +62,7 @@ void main() {
 
   group('featureDependenciesReady', () {
     test('throws when not yet registered', () async {
-      expect(
-        () => di.featureDependenciesReady,
-        throwsA(isA<Object>()),
-      );
+      expect(() => di.featureDependenciesReady, throwsA(isA<Object>()));
     });
   });
 }

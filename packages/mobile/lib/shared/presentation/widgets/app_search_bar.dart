@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:picons/picons.dart';
 
 /// Standardized search input with icon prefix and reactive clear suffix.
 class AppSearchBar extends StatefulWidget {
@@ -65,16 +65,13 @@ class _AppSearchBarState extends State<AppSearchBar> {
           hintText: widget.hintText,
           hintStyle: TextStyle(color: colors.onSurface.withAlpha(80)),
           prefixIcon: Icon(
-            PhosphorIcons.magnifyingGlass(PhosphorIconsStyle.light),
+            PiconsLight.magnifyingGlass,
             color: colors.onSurface.withAlpha(80),
             size: 20,
           ),
           suffixIcon: _hasText
               ? IconButton(
-                  icon: Icon(
-                    PhosphorIcons.x(PhosphorIconsStyle.light),
-                    size: 18,
-                  ),
+                  icon: Icon(PiconsLight.x, size: 18),
                   onPressed: () {
                     widget.controller.clear();
                     widget.onChanged('');

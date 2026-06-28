@@ -3,7 +3,7 @@ import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/theme/app_colors.dart';
 import '../../domain/entities/search_filters.dart';
 import '../bloc/search_bloc.dart';
@@ -69,7 +69,7 @@ class _RecordSearchPageState extends State<RecordSearchPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            PhosphorIcons.magnifyingGlass(PhosphorIconsStyle.regular),
+            PiconsRegular.magnifyingGlass,
             size: 64,
             color: Colors.grey[400],
           ),
@@ -95,7 +95,7 @@ class _RecordSearchPageState extends State<RecordSearchPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              PhosphorIcons.magnifyingGlass(PhosphorIconsStyle.regular),
+              PiconsRegular.magnifyingGlass,
               size: 64,
               color: Colors.grey[400],
             ),
@@ -170,11 +170,7 @@ class _RecordSearchPageState extends State<RecordSearchPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            PhosphorIcons.warningCircle(PhosphorIconsStyle.regular),
-            size: 64,
-            color: Colors.red[400],
-          ),
+          Icon(PiconsRegular.warningCircle, size: 64, color: Colors.red[400]),
           const SizedBox(height: 16),
           Text(
             'Error',
