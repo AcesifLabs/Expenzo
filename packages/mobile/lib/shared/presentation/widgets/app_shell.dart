@@ -41,7 +41,7 @@ class _AppShellState extends State<AppShell> {
         case 1:
           return PiconsFill.listDashes;
         case 2:
-          return PiconsFill.listMagnifyingGlass;
+          return PiconsFill.chat;
         case 3:
           return PiconsFill.wallet;
         default:
@@ -54,7 +54,7 @@ class _AppShellState extends State<AppShell> {
       case 1:
         return PiconsLight.listDashes;
       case 2:
-        return PiconsLight.listMagnifyingGlass;
+        return PiconsLight.chat;
       case 3:
         return PiconsLight.wallet;
       default:
@@ -106,7 +106,7 @@ class _AppShellState extends State<AppShell> {
           height: 72,
           decoration: BoxDecoration(
             color: colors.surface.withAlpha(240),
-            borderRadius: BorderRadius.circular(32),
+            borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withAlpha(20),
@@ -246,7 +246,7 @@ class _ScanPageWithFabState extends State<_ScanPageWithFab> {
               child: FloatingActionButton(
                 heroTag: 'scan_fab',
                 onPressed: () => _showScanOptions(context),
-                child: Icon(PiconsBold.fileMagnifyingGlass),
+                child: Icon(PiconsBold.scan),
               ),
             )
           : const SizedBox.shrink(),

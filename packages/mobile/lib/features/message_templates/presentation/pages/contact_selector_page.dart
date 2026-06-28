@@ -72,20 +72,62 @@ class _ContactSelectorViewState extends State<ContactSelectorView> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Select Sources')),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Custom header matching ScanScreen design
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.fromLTRB(24, 48, 24, 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Scan SMS',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w600,
+                    color: colors.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Monitor SMS for expenses',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.normal,
+                    color: colors.onSurface.withAlpha(140),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
             child: TextField(
               decoration: InputDecoration(
                 hintText: 'Search contacts...',
-                prefixIcon: Icon(PiconsRegular.magnifyingGlass),
+                hintStyle: TextStyle(color: colors.onSurface.withAlpha(100)),
+                prefixIcon: Icon(
+                  PiconsRegular.magnifyingGlass,
+                  color: colors.onSurface.withAlpha(100),
+                  size: 20,
+                ),
+                filled: true,
+                fillColor: colors.surface,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
                 ),
               ),
+              style: TextStyle(fontSize: 15, color: colors.onSurface),
               onChanged: (value) {
                 setState(() {
                   _searchQuery = value.toLowerCase();
@@ -93,6 +135,7 @@ class _ContactSelectorViewState extends State<ContactSelectorView> {
               },
             ),
           ),
+          const SizedBox(height: 16),
           Expanded(
             child: BlocBuilder<MessageSourcesBloc, MessageSourcesState>(
               builder: (context, sourcesState) {
@@ -147,84 +190,152 @@ class _ContactSelectorViewState extends State<ContactSelectorView> {
                               );
                           final isMonitored = existingSource != null;
 
-                          return ListTile(
-                            leading: CircleAvatar(
-                              child: Icon(
-                                contact.sourceType == ExpenseSource.sms
-                                    ? PiconsRegular.chat
-                                    : PiconsRegular.envelope,
-                              ),
+                          // Design-matching SMS source card
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 6,
                             ),
-                            title: Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    contact.displayName,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: colors.surface,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(16),
+                                onTap: () {
+                                  final source =
+                                      existingSource ??
+                                      MessageSource(
+                                        id: 'src_${DateTime.now().millisecondsSinceEpoch}',
+                                        contactId: contact.address,
+                                        contactName: contact.displayName,
+                                        createdAt: DateTime.now(),
+                                        updatedAt: DateTime.now(),
+                                      );
+
+                                  Navigator.of(context)
+                                      .push(
+                                        SlidePageRoute(
+                                          builder: (_) => SampleAnalyzerPage(
+                                            source: source,
+                                          ),
+                                        ),
+                                      )
+                                      .then((_) {
+                                        if (context.mounted) {
+                                          context
+                                              .read<MessageSourcesBloc>()
+                                              .add(LoadMessageSources());
+                                        }
+                                      });
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    16,
+                                    12,
+                                    16,
+                                    12,
                                   ),
-                                ),
-                                if (isMonitored)
-                                  Container(
-                                    margin: const EdgeInsets.only(left: 8),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 6,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.green.withValues(
-                                        alpha: 0.1,
-                                      ),
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(
-                                        color: Colors.green.withValues(
-                                          alpha: 0.5,
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      // Icon tile
+                                      Container(
+                                        width: 40,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF2B292C),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          contact.sourceType ==
+                                                  ExpenseSource.sms
+                                              ? PiconsRegular.chatCircle
+                                              : PiconsRegular.envelope,
+                                          color: colors.secondary,
+                                          size: 20,
                                         ),
                                       ),
-                                    ),
-                                    child: const Text(
-                                      'Active',
-                                      style: TextStyle(
-                                        color: Colors.green,
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
+                                      const SizedBox(width: 12),
+                                      // Details column
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            // Name row: display name + Active badge
+                                            Row(
+                                              children: [
+                                                Expanded(
+                                                  child: Text(
+                                                    contact.displayName,
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      color: colors.onSurface,
+                                                    ),
+                                                  ),
+                                                ),
+                                                if (isMonitored) ...[
+                                                  const SizedBox(width: 8),
+                                                  Container(
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                          horizontal: 6,
+                                                          vertical: 2,
+                                                        ),
+                                                    decoration: BoxDecoration(
+                                                      color: colors.primary
+                                                          .withValues(
+                                                            alpha: 0.13,
+                                                          ),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            8,
+                                                          ),
+                                                    ),
+                                                    child: Text(
+                                                      'Active',
+                                                      style: TextStyle(
+                                                        color: colors.primary,
+                                                        fontSize: 10,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ],
+                                            ),
+                                            const SizedBox(height: 4),
+                                            // Preview text
+                                            Text(
+                                              contact.lastMessage,
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.normal,
+                                                color: colors.onSurface
+                                                    .withAlpha(120),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
+                                    ],
                                   ),
-                              ],
+                                ),
+                              ),
                             ),
-                            subtitle: Text(
-                              contact.lastMessage,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            trailing: Icon(PiconsRegular.caretRight),
-                            onTap: () {
-                              final source =
-                                  existingSource ??
-                                  MessageSource(
-                                    id: 'src_${DateTime.now().millisecondsSinceEpoch}',
-                                    contactId: contact.address,
-                                    contactName: contact.displayName,
-                                    createdAt: DateTime.now(),
-                                    updatedAt: DateTime.now(),
-                                  );
-
-                              Navigator.of(context)
-                                  .push(
-                                    SlidePageRoute(
-                                      builder: (_) =>
-                                          SampleAnalyzerPage(source: source),
-                                    ),
-                                  )
-                                  .then((_) {
-                                    if (context.mounted) {
-                                      context.read<MessageSourcesBloc>().add(
-                                        LoadMessageSources(),
-                                      );
-                                    }
-                                  });
-                            },
                           );
                         },
                       );
