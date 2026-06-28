@@ -41,20 +41,16 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   List<Category> _categories = [];
   bool _hasManuallyDeselected = false;
 
-  // ── Validation error flags ──
   bool _labelError = false;
   bool _categoryError = false;
   bool _isSubmitting = false;
 
-  // ── Date picker + recurring ──
   DateTime _selectedDate = DateTime.now();
   bool _isRecurring = false;
 
-  // ── Validation glow animation ──
   late final AnimationController _glowController;
   late final CurvedAnimation _glowCurve;
 
-  // ── Typewriter placeholder state ──
   static const _expensePlaceholders = [
     'Groceries',
     'Uber to office',
@@ -79,13 +75,10 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     _type = RecordType.expense;
     _loadCategories();
 
-    // Initialize typewriter with expense placeholders
     initTypewriter(_expensePlaceholders);
 
-    // Unified note controller listener (label validation + typewriter)
     _noteCtrl.addListener(_onNoteChanged);
 
-    // Validation glow animation setup
     _glowController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
@@ -106,7 +99,6 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       }
     });
 
-    // Start typewriter after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) startTypewriter();
     });
@@ -121,14 +113,11 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     super.dispose();
   }
 
-  // ── Note change handler (clear label error + pause/resume typewriter) ──
   void _onNoteChanged() {
-    // Clear label error when user types
     if (_labelError && _noteCtrl.text.trim().isNotEmpty) {
       setState(() => _labelError = false);
     }
 
-    // Typewriter pause/resume
     if (_noteCtrl.text.isNotEmpty && !isTypewriterPaused) {
       pauseTypewriter();
     } else if (_noteCtrl.text.isEmpty && isTypewriterPaused) {
@@ -161,10 +150,9 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
         type: type,
         accentColor: accentColor,
         onAddNew: () {
-          // Capture bloc from outer context BEFORE popping
           final categoryBloc = context.read<CategoryBloc>();
-          Navigator.pop(ctx); // Close the picker
-          _addNewCategory(context, type, categoryBloc); // Use outer context
+          Navigator.pop(ctx);
+          _addNewCategory(context, type, categoryBloc);
         },
         onSelect: (id) {
           setState(() {
@@ -194,14 +182,12 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     if (created != null && context.mounted) {
       setState(() {
         _selectedCategoryId = created.id;
-        // Prepend to _categories so the chip bar shows the new category
-        // immediately, even before the BlocBuilder reloads from the DB.
+
         _categories = [created, ..._categories];
       });
     }
   }
 
-  // ── Pre-select default "General" category ──
   void _selectDefaultCategory(List<Category> categories) {
     if (_selectedCategoryId != null) return;
     if (_hasManuallyDeselected) return;
@@ -217,7 +203,6 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
 
     final targetId = generalCat?.id ?? categories.first.id;
     if (targetId != null) {
-      // Use post-frame callback to avoid setState during build
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && _selectedCategoryId == null) {
           setState(() => _selectedCategoryId = targetId);
@@ -238,7 +223,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       _categoryError = false;
     });
     _loadCategories();
-    // Update typewriter phrases for new type
+
     initTypewriter(
       t == RecordType.expense ? _expensePlaceholders : _incomePlaceholders,
     );
@@ -247,7 +232,6 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     }
   }
 
-  // ── Swipe gesture handler (left→right = expense, right→left = income) ──
   void _onHorizontalSwipe(DragEndDetails details) {
     final velocity = details.primaryVelocity;
     if (velocity == null) return;
@@ -267,9 +251,9 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       _amountText.value = d;
       return;
     }
-    // Limit to 2 decimal places
+
     if (current.contains('.') && current.split('.')[1].length >= 2) return;
-    // Limit total digits
+
     if (current.replaceAll('.', '').length >= 10) return;
     _amountText.value = current + d;
   }
@@ -285,7 +269,6 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
 
   double get _parsedAmount => double.tryParse(_amountText.value) ?? 0;
 
-  // Resolve animated glow border color for validation error fields
   Color _resolveGlowBorderColor(
     bool hasError,
     ColorScheme colors, {
@@ -302,12 +285,10 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     return colors.error.withAlpha(150);
   }
 
-  // ── Validation glow trigger ──
   void _triggerValidationGlow() {
     _glowController.forward(from: 0.0);
   }
 
-  // ── Submit with validation (amount + label + category) ──
   Future<void> _submit() async {
     if (_isSubmitting) return;
     final amount = _parsedAmount;
@@ -371,7 +352,6 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     }
   }
 
-  // ── Fire-and-forget recurring creation (primary record already saved) ──
   Future<bool> _createRecurringTransaction(double finalAmount) async {
     try {
       await di.featureDependenciesReady;
@@ -387,8 +367,6 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       }
       final repo = di.getIt<RecurringRepository>();
 
-      // First occurrence was just saved manually; advance to next period
-      // so the recurring processor doesn't immediately duplicate it.
       final nextOccurrence = _nextOccurrenceAfter(_selectedDate);
 
       await repo.createRecurring(
@@ -425,13 +403,10 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     }
   }
 
-  /// Returns the next scheduled occurrence after [date] based on frequency.
   DateTime _nextOccurrenceAfter(DateTime date) {
-    // monthly: advance by one month, preserving the day-of-month
     return DateTime(date.year, date.month + 1, date.day);
   }
 
-  // ── Dynamic hint text (typewriter or static fallback) ──
   String _getHintText() {
     if (!isTypewriterPaused && typewriterDisplayText.isNotEmpty) {
       return typewriterDisplayText;
@@ -459,7 +434,6 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Drag handle
                 Padding(
                   padding: const EdgeInsets.only(top: 12, bottom: 4),
                   child: Container(
@@ -471,7 +445,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                     ),
                   ),
                 ),
-                // Toggle
+
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24,
@@ -479,7 +453,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                   ),
                   child: TypeToggle(type: _type, onSwitch: _switchType),
                 ),
-                // Amount display
+
                 ValueListenableBuilder<String>(
                   valueListenable: _amountText,
                   builder: (_, val, child) {
@@ -502,13 +476,13 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                     );
                   },
                 ),
-                // Numeric keypad with hold-to-delete
+
                 NumericKeypad(
                   onDigit: _appendDigit,
                   onBackspace: _backspace,
                   color: colors,
                 ),
-                // Note field (required, animated error border, typewriter hint)
+
                 _buildNoteField(colors),
                 _buildCategoryChips(colors),
                 _buildDateAndRecurringRow(colors),
@@ -548,7 +522,6 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     );
   }
 
-  // ── Note field with animated validation border & typewriter hint ──
   Widget _buildNoteField(ColorScheme colors) {
     return AnimatedBuilder(
       animation: _glowCurve,
@@ -600,7 +573,6 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     );
   }
 
-  // ── Date picker + recurring checkbox row ──
   Widget _buildDateAndRecurringRow(ColorScheme colors) {
     final dateFmt = DateFormat('MMM dd, yyyy');
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -609,7 +581,6 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       padding: const EdgeInsets.fromLTRB(24, 12, 24, 4),
       child: Row(
         children: [
-          // Date button
           Expanded(
             child: InkWell(
               onTap: () async {
@@ -678,7 +649,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
             ),
           ),
           const SizedBox(width: 12),
-          // Recurring checkbox + info icon
+
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -728,12 +699,10 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     );
   }
 
-  // ── Category chips with default selection & animated error glow ──
   Widget _buildCategoryChips(ColorScheme colors) {
     return BlocBuilder<CategoryBloc, CategoryState>(
       builder: (ctx, state) {
         if (state is CategoryLoaded) {
-          // Ignore if loaded for a different record type (race with _switchType)
           if (state.type != null && state.type != _type) {
             return _buildCategoryLoadingSpinner(colors);
           }

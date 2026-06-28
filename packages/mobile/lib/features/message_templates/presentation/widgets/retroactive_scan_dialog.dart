@@ -39,15 +39,6 @@ class _RetroactiveScanDialogState extends State<RetroactiveScanDialog> {
   }
 
   Future<void> _runScan() async {
-    // 1. Fetch SMS
-    // 2. Evaluate template
-    // 3. Create Expenses
-    // We will simulate it here to just trigger the generic ScanSmsUseCase
-
-    // Instead of full manual implementation here, we'll just fire the global SMS scan event
-    // and let the SmsScannerBloc handle evaluating everything.
-
-    // Simulating the run process for the user feedback
     await Future.delayed(const Duration(seconds: 2));
 
     if (mounted) {

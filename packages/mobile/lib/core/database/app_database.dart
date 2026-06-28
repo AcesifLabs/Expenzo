@@ -83,7 +83,6 @@ class AppDatabase extends _$AppDatabase {
           await _createFtsTriggers(customStatement);
         }
         if (from < 6) {
-          // Rename expenses to records
           await m.renameTable(records, 'expenses');
           await m.addColumn(records, records.recordType);
           await m.addColumn(categories, categories.categoryType);
@@ -91,7 +90,6 @@ class AppDatabase extends _$AppDatabase {
           await customStatement("UPDATE records SET record_type = 'OUT'");
           await customStatement("UPDATE categories SET category_type = 'OUT'");
 
-          // Update FTS triggers
           await customStatement("DROP TRIGGER IF EXISTS expenses_ai");
           await customStatement("DROP TRIGGER IF EXISTS expenses_ad");
           await customStatement("DROP TRIGGER IF EXISTS expenses_au");
@@ -115,7 +113,6 @@ class AppDatabase extends _$AppDatabase {
           await m.createTable(appSettings);
         }
         if (from < 12) {
-          // ── Categories: int id → text id ──
           await customStatement('DROP TRIGGER IF EXISTS records_ai');
           await customStatement('DROP TRIGGER IF EXISTS records_ad');
           await customStatement('DROP TRIGGER IF EXISTS records_au');
@@ -246,7 +243,7 @@ class AppDatabase extends _$AppDatabase {
     // INSERT Trigger
     await executor('''
       CREATE TRIGGER IF NOT EXISTS records_ai AFTER INSERT ON records BEGIN
-        INSERT INTO expense_fts(expense_id, description) 
+        INSERT INTO expense_fts(expense_id, description)
         VALUES (new.id, new.description);
       END;
     ''');
@@ -261,7 +258,7 @@ class AppDatabase extends _$AppDatabase {
     // UPDATE Trigger
     await executor('''
       CREATE TRIGGER IF NOT EXISTS records_au AFTER UPDATE ON records BEGIN
-        UPDATE expense_fts SET description = new.description 
+        UPDATE expense_fts SET description = new.description
         WHERE expense_id = old.id;
       END;
     ''');

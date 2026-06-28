@@ -31,10 +31,8 @@ class BudgetProgressSummaryCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header row
               Row(
                 children: [
-                  // Budget name (from categoryId for now)
                   Expanded(
                     child: Text(
                       progress.categoryId ?? 'Overall Budget',
@@ -45,7 +43,7 @@ class BudgetProgressSummaryCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // Spent vs Budget
+
                   Text(
                     '$spent / $budget',
                     style: TextStyle(
@@ -57,10 +55,10 @@ class BudgetProgressSummaryCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 8),
-              // Progress bar
+
               BudgetProgressIndicator(percentage: progress.percentage),
               const SizedBox(height: 4),
-              // Percentage text
+
               Text(
                 '${progress.percentage.toStringAsFixed(0)}% used',
                 style: TextStyle(

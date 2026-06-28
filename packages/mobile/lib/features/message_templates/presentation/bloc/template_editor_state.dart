@@ -12,7 +12,7 @@ class TemplateEditorInitial extends TemplateEditorState {}
 class TemplateEditorLoading extends TemplateEditorState {}
 
 class TemplateEditorLoaded extends TemplateEditorState {
-  final ExpenseTemplate? template; // null if creating new
+  final ExpenseTemplate? template;
   const TemplateEditorLoaded({this.template});
   @override
   List<Object?> get props => [template];

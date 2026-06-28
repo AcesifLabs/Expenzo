@@ -177,7 +177,6 @@ void main() {
 
         expect(result.isRight(), true);
         result.fold((failure) => fail('Should not return failure'), (progress) {
-          // 2750 / (5000 + 500) = 50%
           expect(progress.percentage, 50.0);
         });
       },
@@ -186,8 +185,6 @@ void main() {
     test(
       'should block delete if budget has expenses (future implementation)',
       () async {
-        // This test verifies the delete flow
-        // Actual blocking would require checking expense counts
         when(
           () => mockRepository.deleteBudget(any()),
         ).thenAnswer((_) async => const Right(unit));

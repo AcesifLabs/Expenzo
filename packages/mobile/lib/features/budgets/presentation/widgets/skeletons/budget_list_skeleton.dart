@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../../shared/presentation/widgets/shimmer_box.dart';
 
-/// Skeleton matching [BudgetProgressCard] layout — title, amount, progress bar.
 class BudgetListSkeleton extends StatelessWidget {
   final int itemCount;
 
@@ -22,7 +21,6 @@ class BudgetListSkeleton extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Title row
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -31,17 +29,17 @@ class BudgetListSkeleton extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  // Amount line
+
                   ShimmerBox.textLine(width: 120, height: 14),
                   const SizedBox(height: 12),
-                  // Progress bar
+
                   ShimmerBox.rectangle(
                     width: double.infinity,
                     height: 8,
                     borderRadius: 4,
                   ),
                   const SizedBox(height: 4),
-                  // Sub-text
+
                   ShimmerBox.textLine(width: 150, height: 12),
                 ],
               ),

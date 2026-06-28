@@ -115,28 +115,28 @@ void main() {
         date: now,
         categoryId: cat1,
         type: 'IN',
-      ); // Match
+      );
       await insertRecord(
         id: '2',
         amount: 20,
         date: now,
         categoryId: cat1,
         type: 'OUT',
-      ); // Wrong type
+      );
       await insertRecord(
         id: '3',
         amount: 30,
         date: now,
         categoryId: 'other',
         type: 'IN',
-      ); // Wrong category
+      );
       await insertRecord(
         id: '4',
         amount: 40,
         date: now.subtract(const Duration(days: 10)),
         categoryId: cat1,
         type: 'IN',
-      ); // Wrong date
+      );
 
       final results = await dao.getFilteredRecords(
         startDate: now.subtract(const Duration(days: 1)),

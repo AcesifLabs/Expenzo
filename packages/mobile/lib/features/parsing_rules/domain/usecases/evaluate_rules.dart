@@ -14,7 +14,6 @@ class EvaluateRulesUseCase
 
   EvaluateRulesUseCase(this.rulesRepository, this.templateRepository);
 
-  /// Pre-fetches all rules, templates, and sources needed for batch scanning.
   Future<ParsingContext> loadContext() async {
     final rulesResult = await rulesRepository.getRules(isEnabled: true);
     final templatesResult = await templateRepository.getAllTemplates();
@@ -24,7 +23,6 @@ class EvaluateRulesUseCase
     final templates = templatesResult.getOrElse(() => []);
     final sources = sourcesResult.getOrElse(() => []);
 
-    // Pre-sort rules by priority (highest first) once
     rules.sort((a, b) => b.priority.compareTo(a.priority));
 
     return ParsingContext(
@@ -34,7 +32,6 @@ class EvaluateRulesUseCase
     ).withPrecompiledRegex();
   }
 
-  /// Evaluates a single message using pre-loaded context (no DB queries).
   ParsedTransaction? evaluateWithPreloadedContext(
     ParsingContext context,
     EvaluateRulesParams params,

@@ -17,11 +17,8 @@ class AuthRepositoryImpl implements AuthRepository {
 
   AuthRepositoryImpl({required this.remoteDatasource});
 
-  /// Maps raw exceptions to user-friendly error messages.
-  /// Raw exception details are still logged via debugPrint before mapping.
   @visibleForTesting
   static String mapExceptionToMessage(Object e) {
-    // DioException — network/server errors
     if (e is DioException) {
       final type = e.type;
       if (type == DioExceptionType.connectionTimeout ||
@@ -33,7 +30,6 @@ class AuthRepositoryImpl implements AuthRepository {
       return 'Something went wrong on our end. Please try again later.';
     }
 
-    // FirebaseAuthException — Firebase auth errors
     if (e is fb.FirebaseAuthException) {
       switch (e.code) {
         case 'user-cancelled':
@@ -48,7 +44,6 @@ class AuthRepositoryImpl implements AuthRepository {
       }
     }
 
-    // PlatformException — native plugin errors (Google Sign-In, etc.)
     if (e is PlatformException) {
       if (e.code == 'network_error' || e.code == 'network-error') {
         return 'Network error. Please check your connection and try again.';
@@ -62,12 +57,10 @@ class AuthRepositoryImpl implements AuthRepository {
       return 'Authentication failed. Please try again.';
     }
 
-    // TimeoutException — async timeout
     if (e is TimeoutException) {
       return 'The request timed out. Please check your connection and try again.';
     }
 
-    // Fallback — no toString parsing, just a generic message
     debugPrint('AuthRepositoryImpl: Unmapped exception type: ${e.runtimeType}');
     return 'Something went wrong. Please try again.';
   }

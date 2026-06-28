@@ -253,7 +253,6 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
     }
   }
 
-  /// Combined filter query for offline filtering.
   @override
   Future<List<rec.Record>> getFilteredRecords({
     DateTime? startDate,

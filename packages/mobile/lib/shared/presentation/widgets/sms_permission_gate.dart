@@ -63,7 +63,6 @@ class _SmsPermissionGateState extends State<SmsPermissionGate> {
     }
 
     if (!status.isGranted && status.isPermanentlyDenied && mounted) {
-      // Show dialog asking to open settings
       showDialog(
         context: context,
         builder: (context) => AlertDialog(

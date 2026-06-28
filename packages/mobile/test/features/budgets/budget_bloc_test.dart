@@ -172,7 +172,7 @@ void main() {
       );
 
       bloc.add(LoadBudgets());
-      // Let the first load complete
+
       await Future.delayed(Duration.zero);
       bloc.add(const LoadBudgetTransactions('budget-1'));
     });

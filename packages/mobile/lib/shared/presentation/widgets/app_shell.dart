@@ -96,7 +96,6 @@ class _AppShellState extends State<AppShell> {
   }
 
   Widget _buildBottomNav(ColorScheme colors, bool showFab) {
-    // Items after index 1 are rendered on the right of the FAB
     final leftCount = 2;
     final rightCount = 2;
 
@@ -121,15 +120,14 @@ class _AppShellState extends State<AppShell> {
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(
               children: [
-                // Left side: Home, Activity, Budgets
                 ...List.generate(leftCount, (i) => _navItem(i, colors)),
-                // FAB spacer — animated width for smooth transition
+
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.easeInOut,
                   width: showFab ? 48 : 0,
                 ),
-                // Right side: Trends, Scan, Profile
+
                 ...List.generate(
                   rightCount,
                   (i) => _navItem(leftCount + i, colors),
@@ -204,9 +202,6 @@ class _AppShellState extends State<AppShell> {
   }
 }
 
-// ──────────────────────────────────
-// Scan Page with FAB
-// ──────────────────────────────────
 class _ScanPageWithFab extends StatefulWidget {
   @override
   State<_ScanPageWithFab> createState() => _ScanPageWithFabState();

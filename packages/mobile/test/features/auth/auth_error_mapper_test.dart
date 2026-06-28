@@ -84,8 +84,7 @@ void main() {
         requestOptions: RequestOptions(path: ''),
       );
       final msg = AuthRepositoryImpl.mapExceptionToMessage(e);
-      // Falls through to generic server error because error is FormatException,
-      // not SocketException, and type is unknown (not timeout/connectionError)
+
       expect(msg, contains('our end'));
     });
   });

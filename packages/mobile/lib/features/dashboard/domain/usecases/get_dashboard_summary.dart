@@ -21,7 +21,6 @@ class GetDashboardSummaryUseCase
   @override
   Future<Either<Failure, DashboardSummary>> call(DateRange dateRange) async {
     try {
-      // Get current period records
       final currentResult = await recordRepository.getRecords(
         dateRange: DateTimeRange(
           start: dateRange.startDate,
@@ -34,7 +33,6 @@ class GetDashboardSummaryUseCase
         (records) => records,
       );
 
-      // Get previous period records
       final previousDateRange = dateRange.previousPeriod;
       final previousResult = await recordRepository.getRecords(
         dateRange: DateTimeRange(
@@ -48,25 +46,21 @@ class GetDashboardSummaryUseCase
         (records) => records,
       );
 
-      // Calculate income, expense & totals
       final totalIncome = _calculateByType(currentRecords, RecordType.income);
       final totalExpense = _calculateByType(currentRecords, RecordType.expense);
       final totalSpent = totalIncome + totalExpense;
       final previousPeriodTotal = _calculateTotal(previousRecords);
 
-      // Calculate percent change
       double percentChange = 0;
       if (previousPeriodTotal > 0) {
         percentChange =
             ((totalSpent - previousPeriodTotal) / previousPeriodTotal) * 100;
       }
 
-      // Calculate category breakdown
       final categoryBreakdown = await _calculateCategoryBreakdown(
         currentRecords,
       );
 
-      // Get recent transactions (last 5)
       final sortedRecords = List<Record>.from(currentRecords)
         ..sort((a, b) => b.date.compareTo(a.date));
       final recentTransactions = sortedRecords.take(5).toList();
@@ -131,7 +125,7 @@ class GetDashboardSummaryUseCase
           ),
         );
       }
-      // Sort by amount descending
+
       breakdown.sort((a, b) => b.amount.compareTo(a.amount));
       return breakdown;
     });

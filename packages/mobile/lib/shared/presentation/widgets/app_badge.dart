@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Reusable badge with optional leading icon.
-/// Supports small and normal sizes.
 class AppBadge extends StatelessWidget {
   final String label;
   final IconData? icon;

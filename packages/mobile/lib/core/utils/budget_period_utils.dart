@@ -1,17 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/features/budgets/domain/entities/budget.dart';
 
-/// Utilities for calculating budget period date ranges.
 class BudgetPeriodUtils {
   BudgetPeriodUtils._();
 
-  /// Calculates the current [DateTimeRange] for a budget based on its
-  /// [startDate] and [period].
-  ///
-  /// Examples:
-  /// - Weekly starting Wednesday: returns the Wed–Tue range containing today.
-  /// - Monthly starting 15th: returns the 15th–14th range containing today.
-  /// - Yearly starting March 1: returns the Mar 1–Feb 28/29 range for this year.
   static DateTimeRange calculateCurrentPeriod(
     DateTime startDate,
     BudgetPeriod period,
@@ -27,20 +19,18 @@ class BudgetPeriodUtils {
     }
   }
 
-  /// Weekly: 7-day blocks anchored on [startDate]'s weekday.
   static DateTimeRange _calculateWeeklyPeriod(
     DateTime startDate,
     DateTime now,
   ) {
     final diff = now.difference(startDate).inDays;
-    // Number of days since the most recent anchor
+
     final offset = diff % 7;
     final periodStart = DateTime(now.year, now.month, now.day - offset);
     final periodEnd = DateTime(now.year, now.month, now.day - offset + 7);
     return DateTimeRange(start: periodStart, end: periodEnd);
   }
 
-  /// Monthly: same day-of-month blocks as the [startDate].
   static DateTimeRange _calculateMonthlyPeriod(
     DateTime startDate,
     DateTime now,
@@ -50,14 +40,12 @@ class BudgetPeriodUtils {
     final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
     final effectiveStartDay = startDay > daysInMonth ? daysInMonth : startDay;
 
-    // Determine period start
     DateTime periodStart;
     final thisMonthStart = DateTime(now.year, now.month, effectiveStartDay);
 
     if (now.isAtSameMomentAs(thisMonthStart) || now.isAfter(thisMonthStart)) {
       periodStart = thisMonthStart;
     } else {
-      // Go back to previous month
       final prevMonth = now.month == 1 ? 12 : now.month - 1;
       final prevYear = now.month == 1 ? now.year - 1 : now.year;
       final daysInPrevMonth = DateTime(prevYear, prevMonth + 1, 0).day;
@@ -67,7 +55,6 @@ class BudgetPeriodUtils {
       periodStart = DateTime(prevYear, prevMonth, prevStartDay);
     }
 
-    // Calculate period end (one full period later)
     DateTime periodEnd;
     if (periodStart.month == 12) {
       final daysInNextMonth = DateTime(periodStart.year + 1, 2, 0).day;
@@ -90,7 +77,6 @@ class BudgetPeriodUtils {
     return DateTimeRange(start: periodStart, end: periodEnd);
   }
 
-  /// Yearly: same month+day blocks as the [startDate].
   static DateTimeRange _calculateYearlyPeriod(
     DateTime startDate,
     DateTime now,
@@ -100,7 +86,6 @@ class BudgetPeriodUtils {
     final daysInMonth = DateTime(now.year, startMonth + 1, 0).day;
     final effectiveStartDay = startDay > daysInMonth ? daysInMonth : startDay;
 
-    // Determine period start year
     final thisYearStart = DateTime(now.year, startMonth, effectiveStartDay);
     final periodStartYear =
         now.isAtSameMomentAs(thisYearStart) || now.isAfter(thisYearStart)
@@ -113,7 +98,6 @@ class BudgetPeriodUtils {
       effectiveStartDay,
     );
 
-    // Period end is one year later
     final endYear = periodStartYear + 1;
     final daysInEndMonth = DateTime(endYear, startMonth + 1, 0).day;
     final endDay = startDay > daysInEndMonth ? daysInEndMonth : startDay;

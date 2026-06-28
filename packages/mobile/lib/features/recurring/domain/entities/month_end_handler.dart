@@ -1,11 +1,8 @@
 class MonthEndHandler {
-  /// Get the last day of a given month
   static int getLastDayOfMonth(int year, int month) {
     return DateTime(year, month + 1, 0).day;
   }
 
-  /// Calculate the next occurrence date for a monthly recurring transaction
-  /// Handles the 31st edge case by moving to the last day of the month
   static DateTime getNextOccurrenceForMonthly({
     required DateTime current,
     int? dayOfMonth,
@@ -27,7 +24,6 @@ class MonthEndHandler {
     return DateTime(nextYear, nextMonth, effectiveDay);
   }
 
-  /// Calculate the next occurrence based on frequency
   static DateTime getNextOccurrence({
     required RecurringFrequencyType frequency,
     required DateTime current,

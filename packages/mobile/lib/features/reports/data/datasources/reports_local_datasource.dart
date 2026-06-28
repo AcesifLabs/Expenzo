@@ -4,20 +4,17 @@ import 'package:expense_tracker/core/error/failures.dart';
 enum Granularity { daily, weekly, monthly }
 
 abstract class ReportsLocalDatasource {
-  /// Get spending trend data for a date range with specified granularity
   Future<Either<Failure, List<DateAmount>>> getSpendingTrend({
     required DateTime startDate,
     required DateTime endDate,
     required Granularity granularity,
   });
 
-  /// Get category breakdown for a date range
   Future<Either<Failure, List<CategoryAmount>>> getCategoryBreakdown({
     required DateTime startDate,
     required DateTime endDate,
   });
 
-  /// Get spending insights for a date range
   Future<Either<Failure, SpendingInsights>> getSpendingInsights({
     required DateTime startDate,
     required DateTime endDate,

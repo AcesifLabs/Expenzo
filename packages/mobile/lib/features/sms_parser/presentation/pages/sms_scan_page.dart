@@ -337,7 +337,6 @@ class _SmsScanResultsPageState extends State<SmsScanResultsPage> {
               padding: const EdgeInsets.symmetric(vertical: 8),
               itemCount: state.results.length + (state.isLoadingMore ? 10 : 0),
               itemBuilder: (context, index) {
-                // Show skeleton items at the bottom while loading more
                 if (index >= state.results.length) {
                   return const TransactionCardSkeleton();
                 }

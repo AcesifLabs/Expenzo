@@ -20,17 +20,14 @@ class CheckBudgetAlerts {
       final result = await budgetRepository.getBudgetById(budgetId);
 
       return result.fold((failure) => Left(failure), (budget) async {
-        // Calculate effective budget with rollover
         final effectiveBudget =
             budget.amount +
             (budget.rolloverEnabled ? budget.rolloverAmount : 0);
 
-        // Calculate percentage
         final percentage = effectiveBudget > 0
             ? (spentAmount / effectiveBudget) * 100
             : 0.0;
 
-        // Check thresholds and show notification
         if (percentage >= 100) {
           await notificationService.showBudgetAlert(
             budgetId: budgetId,

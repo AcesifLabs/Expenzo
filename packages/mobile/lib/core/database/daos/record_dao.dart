@@ -43,7 +43,6 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
     return into(records).insert(record);
   }
 
-  /// Bulk insert with transaction for efficiency on low-end storage.
   Future<void> insertRecordsBatch(List<RecordsCompanion> companions) async {
     await transaction(() async {
       for (final companion in companions) {
@@ -81,8 +80,6 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
     return cnt > 0;
   }
 
-  /// Batch lookup: returns the set of sourceIds that already exist in the DB.
-  /// Uses a single SQL query with IN clause instead of N individual queries.
   Future<Set<String>> getExistingSourceIds(List<String> sourceIds) async {
     if (sourceIds.isEmpty) return {};
 
@@ -157,8 +154,6 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
         .get();
   }
 
-  /// Combined filter query: date range + multiple categories + record type.
-  /// All filters optional. Use NULL / empty to skip a filter.
   Future<List<Record>> getFilteredRecords({
     DateTime? startDate,
     DateTime? endDate,
@@ -169,7 +164,6 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
   }) {
     final q = select(records);
 
-    // Build a single where clause with all conditions chained via &
     q.where((t) {
       Expression<bool>? where;
       void and(Expression<bool> e) {

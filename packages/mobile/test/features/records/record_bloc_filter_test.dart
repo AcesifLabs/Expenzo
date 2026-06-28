@@ -37,7 +37,6 @@ Record _testRecord({String id = 'rec-1'}) => Record(
   updatedAt: DateTime(2024, 1, 1),
 );
 
-/// Helper: collect all emitted states until bloc closes, then verify.
 Future<List<RecordState>> collectStates(RecordBloc bloc, {int count = 3}) {
   final states = <RecordState>[];
   final sub = bloc.stream.listen(states.add);
@@ -102,7 +101,6 @@ void main() {
 
       bloc.add(const ApplyFilters(categoryIds: ['cat-1'], recordType: 'OUT'));
 
-      // Wait for async processing
       await Future.delayed(const Duration(milliseconds: 100));
       sub.cancel();
 

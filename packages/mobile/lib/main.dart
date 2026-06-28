@@ -35,25 +35,16 @@ void main() async {
   try {
     await dotenv.load(fileName: isProd ? '.env.prod' : '.env.dev');
   } catch (e) {
-    // App works without .env — falls back to localhost
     debugPrint('Failed to load .env: $e');
   }
 
-  // Framework error UI swap — never leaks the exception message or stack
-  // to the user. Shows a brief "Unexpected error occurred" message, then
-  // closes the app. Full details go to the console only.
   ErrorWidget.builder = (details) => AppCriticalError(details: details);
 
-  // Global error logging — full details go to the device log / future
-  // crash reporter, never into the UI. The UI swap is handled above.
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
-    if (kReleaseMode) {
-      // Log to service (Sentry / Crashlytics) when wired up.
-    }
+    if (kReleaseMode) {}
   };
 
-  // Async error catch — full details to the device log, never into the UI.
   PlatformDispatcher.instance.onError = (error, stack) {
     if (kDebugMode) {
       debugPrint('Async Error: $error\n$stack');
@@ -61,9 +52,6 @@ void main() async {
     return true;
   };
 
-  // Register the lifecycle service once, before `runApp`, so the
-  // fallback can use it from the first frame onward without a
-  // placeholder-then-rebind dance.
   di.getIt.registerSingleton<BootstrapService>(
     BootstrapService(remountRoot: () async => runApp(const ExpenzoApp())),
   );
@@ -89,10 +77,6 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
   }
 
   Future<void> _initSettingsWhenReady() async {
-    // Wait for initCriticalDependencies() to complete (it registers
-    // SettingsBloc, SharedPreferences, and all critical modules).
-    // This avoids the per-frame polling retry loop that was spamming
-    // the device log and causing main-thread congestion.
     await di.criticalDependenciesReady;
     if (!mounted) return;
 
@@ -142,10 +126,6 @@ ThemeMode _themeModeFromString(String theme) {
 class AppLoader extends StatefulWidget {
   const AppLoader({super.key, this.feedbackBuilder});
 
-  /// Builder for the page pushed when the user taps "Send Feedback"
-  /// on the init-failure fallback. Defaults to null (button hidden).
-  /// `main.dart` passes the real builder so the loader itself
-  /// doesn't import any feature page.
   final WidgetBuilder? feedbackBuilder;
 
   @override
@@ -178,7 +158,6 @@ class _AppLoaderState extends State<AppLoader> with WidgetsBindingObserver {
   }
 
   Future<void> _startInitialization() async {
-    // Firebase init — non-fatal. App works offline without Firebase.
     try {
       await Firebase.initializeApp().timeout(
         const Duration(seconds: 15),
@@ -191,7 +170,6 @@ class _AppLoaderState extends State<AppLoader> with WidgetsBindingObserver {
       debugPrint('Firebase init failed (non-fatal): $e');
     }
 
-    // DI + DB — fatal. App cannot function without local database.
     try {
       await di.initCriticalDependencies();
 
@@ -213,9 +191,6 @@ class _AppLoaderState extends State<AppLoader> with WidgetsBindingObserver {
         di.initFeatureDependencies();
       });
     } catch (e, stack) {
-      // Sanitize: never propagate raw exception text or stack trace to the
-      // UI. Full details go to the device log; the user gets a stable
-      // reference ID they can quote in support.
       debugPrint('AppLoader: init failed: $e\n$stack');
       if (mounted) {
         setState(() {
@@ -281,10 +256,6 @@ class _AppLoaderState extends State<AppLoader> with WidgetsBindingObserver {
     );
   }
 
-  // ── Error-recovery handlers (Plan F) ────────────────────────────
-  // Extracted from `build` so the build method is a pure layout.
-  // Each handler is independently testable.
-
   void _handleRetry() {
     setState(() {
       _error = false;
@@ -297,9 +268,7 @@ class _AppLoaderState extends State<AppLoader> with WidgetsBindingObserver {
     unawaited(
       di.getIt<BootstrapService>().hardReset().then((_) {
         if (!mounted) return;
-        // Re-mount the root widget tree so all bloc subscriptions
-        // (including _ExpenzoAppState._settingsSubscription) are
-        // rebuilt against the fresh get_it registrations.
+
         di.getIt<BootstrapService>().remountRoot();
       }),
     );
@@ -377,7 +346,7 @@ class _InitialDataLoaderState extends State<_InitialDataLoader> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      // Stagger to avoid GC spike from concurrent DB queries
+
       context.read<AuthBloc>().add(const AuthCheckRequested());
       Future.delayed(const Duration(milliseconds: 150), () {
         if (mounted) {
@@ -397,7 +366,6 @@ class _InitialDataLoaderState extends State<_InitialDataLoader> {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthError) {
-          // Only show error snackbar if user explicitly tried to sign in
           if (state.isUserInitiated) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -407,16 +375,13 @@ class _InitialDataLoaderState extends State<_InitialDataLoader> {
               ),
             );
           }
-        } else if (state is AuthLoading) {
-          // Optionally show a loading indicator — currently AppShell renders normally
-        }
+        } else if (state is AuthLoading) {}
       },
       builder: (context, state) {
         if (state is AuthSyncConflictPending) {
           return const SyncConflictPage();
         }
-        // Unauthenticated, AuthInitial, Authenticated, AuthLoading,
-        // AuthError — all render AppShell (app accessible without sign-in)
+
         return const AppShell();
       },
     );

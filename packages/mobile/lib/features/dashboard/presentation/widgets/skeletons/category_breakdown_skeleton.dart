@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../../shared/presentation/widgets/shimmer_box.dart';
 
-/// Skeleton matching [CategoryBreakdownWidget] layout — title + 4 category rows.
 class CategoryBreakdownSkeleton extends StatelessWidget {
   final int rowCount;
 
@@ -15,10 +14,9 @@ class CategoryBreakdownSkeleton extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Title
             ShimmerBox.textLine(width: 160, height: 18),
             const SizedBox(height: 16),
-            // Category rows
+
             ...List.generate(rowCount, (index) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 12),
@@ -39,18 +37,17 @@ class _CategoryRowSkeleton extends StatelessWidget {
       children: [
         Row(
           children: [
-            // Emoji circle
             ShimmerBox.circle(size: 20),
             const SizedBox(width: 8),
-            // Category name
+
             Expanded(child: ShimmerBox.textLine(height: 14)),
             const SizedBox(width: 8),
-            // Amount
+
             ShimmerBox.textLine(width: 70, height: 14),
           ],
         ),
         const SizedBox(height: 4),
-        // Progress bar
+
         Row(
           children: [
             Expanded(

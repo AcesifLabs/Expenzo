@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../../shared/presentation/widgets/shimmer_box.dart';
 
-/// Skeleton matching [SummaryCard] layout — title line + amount line.
 class SummaryCardSkeleton extends StatelessWidget {
   const SummaryCardSkeleton({super.key});
 

@@ -28,7 +28,6 @@ import 'package:expense_tracker/features/records/domain/repositories/record_repo
 import 'package:expense_tracker/features/records/domain/usecases/create_records_from_parsed_list.dart';
 
 void initParsingModule(GetIt getIt) {
-  // ── Parsing Rules ──
   getIt.registerLazySingleton<ParsingIsolateService>(
     () => ParsingIsolateService(),
   );
@@ -44,7 +43,6 @@ void initParsingModule(GetIt getIt) {
     ),
   );
 
-  // ── Message Templates ──
   getIt.registerLazySingleton<MessageTemplateLocalDatasource>(
     () => MessageTemplateLocalDatasourceImpl(getIt<MessageTemplateDao>()),
   );
@@ -83,7 +81,6 @@ void initParsingModule(GetIt getIt) {
     ),
   );
 
-  // ── Evaluate Rules ──
   getIt.registerLazySingleton(
     () => EvaluateRulesUseCase(
       getIt<ParsingRulesRepository>(),
@@ -91,7 +88,6 @@ void initParsingModule(GetIt getIt) {
     ),
   );
 
-  // ── SMS Scanner ──
   getIt.registerLazySingleton<SmsLocalDatasource>(
     () => SmsLocalDatasourceImpl(),
   );
@@ -109,7 +105,6 @@ void initParsingModule(GetIt getIt) {
     ),
   );
 
-  // ── Realtime SMS Processing ──
   getIt.registerLazySingleton<RealtimeSmsListener>(
     () => MethodChannelRealtimeSmsListener(),
   );

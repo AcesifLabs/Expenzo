@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:picons/picons.dart';
 
-/// Standardized search input with icon prefix and reactive clear suffix.
 class AppSearchBar extends StatefulWidget {
   final TextEditingController controller;
   final ValueChanged<String> onChanged;

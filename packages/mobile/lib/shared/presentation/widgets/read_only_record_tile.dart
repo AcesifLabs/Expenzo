@@ -4,8 +4,6 @@ import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/features/records/domain/entities/record.dart';
 
-/// A non-interactive, read-only tile for displaying a record/transaction.
-/// Has no InkWell, no onTap, no dismiss — purely for display.
 class ReadOnlyRecordTile extends StatelessWidget {
   final Record record;
   final NumberFormat? amountFormat;

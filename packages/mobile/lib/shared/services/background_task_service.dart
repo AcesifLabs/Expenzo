@@ -14,7 +14,6 @@ void callbackDispatcher() {
 
         final scanSmsUseCase = di.getIt<ScanSmsUseCase>();
 
-        // Scan SMS from the last 24 hours
         final since = DateTime.now().subtract(const Duration(hours: 24));
         final result = await scanSmsUseCase(ScanSmsParams(since: since));
 

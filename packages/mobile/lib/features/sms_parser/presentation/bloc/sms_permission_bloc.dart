@@ -34,7 +34,6 @@ class SmsPermissionBloc extends Bloc<SmsPermissionEvent, SmsPermissionState> {
   ) async {
     emit(const SmsPermissionLoading());
 
-    // Start timeout timer
     final timeoutCompleter = Completer<SmsPermissionState>();
     _timeoutTimer = Timer(_timeoutDuration, () {
       if (!timeoutCompleter.isCompleted) {

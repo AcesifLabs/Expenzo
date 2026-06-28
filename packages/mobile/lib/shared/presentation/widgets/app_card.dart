@@ -1,17 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:picons/picons.dart';
 
-/// Standardized list card with optional dismissible swipe-to-delete.
-///
-/// Usage:
-/// ```dart
-/// AppCard(
-///   onTap: () => ...,
-///   dismissibleKey: Key('record_$id'),
-///   onDismissed: () => ...,
-///   child: Row(...),
-/// )
-/// ```
 class AppCard extends StatelessWidget {
   final Widget child;
   final VoidCallback? onTap;
