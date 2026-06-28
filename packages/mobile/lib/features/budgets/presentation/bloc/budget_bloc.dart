@@ -39,22 +39,22 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
 
     final result = await getBudgets();
 
-    await result.fold(
-      (failure) async => emit(BudgetError(failure.message)),
-      (budgets) async {
-        final progressResult =
-            await getBudgetsWithProgress(limit: budgets.length);
-        final progressList = progressResult.getOrElse(() => []);
-        emit(
-          BudgetLoaded(
-            budgets,
-            progressByBudgetId: {
-              for (final progress in progressList) progress.budgetId: progress,
-            },
-          ),
-        );
-      },
-    );
+    await result.fold((failure) async => emit(BudgetError(failure.message)), (
+      budgets,
+    ) async {
+      final progressResult = await getBudgetsWithProgress(
+        limit: budgets.length,
+      );
+      final progressList = progressResult.getOrElse(() => []);
+      emit(
+        BudgetLoaded(
+          budgets,
+          progressByBudgetId: {
+            for (final progress in progressList) progress.budgetId: progress,
+          },
+        ),
+      );
+    });
   }
 
   Future<void> _onCreateBudget(

@@ -31,12 +31,7 @@ class _AppShellState extends State<AppShell> {
   int _currentIndex = 0;
   DateTime? _lastFabPress;
 
-  static const _labels = [
-    'Home',
-    'Activity',
-    'Scan',
-    'Budgets',
-  ];
+  static const _labels = ['Home', 'Activity', 'Scan', 'Budgets'];
 
   IconData _navIcon(int i, {bool fill = false}) {
     final s = fill ? PhosphorIconsStyle.fill : PhosphorIconsStyle.light;
@@ -194,7 +189,6 @@ class _AppShellState extends State<AppShell> {
       ),
     );
   }
-
 }
 
 // ──────────────────────────────────

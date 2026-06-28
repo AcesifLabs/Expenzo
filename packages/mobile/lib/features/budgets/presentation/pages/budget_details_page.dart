@@ -27,9 +27,9 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      context
-          .read<BudgetBloc>()
-          .add(LoadBudgetTransactions(widget.progress.budgetId));
+      context.read<BudgetBloc>().add(
+        LoadBudgetTransactions(widget.progress.budgetId),
+      );
     });
   }
 

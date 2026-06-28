@@ -20,9 +20,7 @@ void main() {
     const secret = 'BOOM_TEST_MARKER_leaked_to_ui';
 
     Widget wrap(Widget child) {
-      return MaterialApp(
-        home: child,
-      );
+      return MaterialApp(home: child);
     }
 
     testWidgets('renders without throwing in all four contexts', (
@@ -42,9 +40,7 @@ void main() {
       }
     });
 
-    testWidgets('never renders the exception message or stack', (
-      tester,
-    ) async {
+    testWidgets('never renders the exception message or stack', (tester) async {
       // Runs in the test target (debug-mode branch of kDebugMode). The
       // invariant we are checking is that the secret and the stack-trace
       // file marker are absent from the widget tree *before* the user
@@ -201,29 +197,28 @@ void main() {
       },
     );
 
-    testWidgets(
-      'formatDebugType strategy overrides the default runtimeType',
-      (tester) async {
-        await tester.pumpWidget(
-          wrap(
-            AppErrorFallback(
-              fallbackContext: AppFallbackContext.init,
-              referenceId: 'ABC123',
-              exception: _TestBoomException(secret),
-              formatDebugType: (Object e) => 'FAKE',
-            ),
+    testWidgets('formatDebugType strategy overrides the default runtimeType', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(
+          AppErrorFallback(
+            fallbackContext: AppFallbackContext.init,
+            referenceId: 'ABC123',
+            exception: _TestBoomException(secret),
+            formatDebugType: (Object e) => 'FAKE',
           ),
-        );
+        ),
+      );
 
-        await tester.tap(find.byIcon(Icons.expand_more));
-        await tester.pump();
+      await tester.tap(find.byIcon(Icons.expand_more));
+      await tester.pump();
 
-        // The strategy's output is shown instead of the runtime type.
-        expect(find.text('FAKE'), findsOneWidget);
-        // The runtime type is NOT shown.
-        expect(find.text('_TestBoomException'), findsNothing);
-      },
-    );
+      // The strategy's output is shown instead of the runtime type.
+      expect(find.text('FAKE'), findsOneWidget);
+      // The runtime type is NOT shown.
+      expect(find.text('_TestBoomException'), findsNothing);
+    });
 
     test('generateReferenceId is six uppercase chars', () {
       final id = AppErrorFallback.generateReferenceId();

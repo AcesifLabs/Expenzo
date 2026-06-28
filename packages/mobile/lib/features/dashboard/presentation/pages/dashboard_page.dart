@@ -62,13 +62,10 @@ class _DashboardPageState extends State<DashboardPage> {
     final getBudgetsWithProgress = _tryGetBudgetsWithProgress();
     if (getBudgetsWithProgress == null) return [];
     final result = await getBudgetsWithProgress(limit: 5);
-    return result.fold(
-      (failure) {
-        debugPrint('DashboardPage: Failed to load budgets: ${failure.message}');
-        return <BudgetProgress>[];
-      },
-      (budgets) => budgets,
-    );
+    return result.fold((failure) {
+      debugPrint('DashboardPage: Failed to load budgets: ${failure.message}');
+      return <BudgetProgress>[];
+    }, (budgets) => budgets);
   }
 
   void _ensureBudgetsFuture() {

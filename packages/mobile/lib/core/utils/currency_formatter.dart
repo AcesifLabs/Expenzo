@@ -6,11 +6,7 @@ import 'package:expense_tracker/core/theme/currency_config.dart';
 class CurrencyFormatter {
   /// Format a number as currency with the given symbol.
   /// Defaults to the app's default currency symbol (৳ BDT).
-  static String format(
-    double amount, {
-    String? symbol,
-    int decimalDigits = 2,
-  }) {
+  static String format(double amount, {String? symbol, int decimalDigits = 2}) {
     return NumberFormat.currency(
       symbol: symbol ?? CurrencyConfig.defaultSymbol,
       decimalDigits: decimalDigits,
@@ -31,10 +27,7 @@ class CurrencyFormatter {
 
   /// Get a NumberFormat instance for currency formatting.
   /// Useful when you need the formatter object for custom formatting.
-  static NumberFormat getFormatter({
-    String? symbol,
-    int decimalDigits = 2,
-  }) {
+  static NumberFormat getFormatter({String? symbol, int decimalDigits = 2}) {
     return NumberFormat.currency(
       symbol: symbol ?? CurrencyConfig.defaultSymbol,
       decimalDigits: decimalDigits,

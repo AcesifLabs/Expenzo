@@ -62,11 +62,7 @@ class _AppCriticalErrorState extends State<AppCriticalError> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.error_outline,
-                    color: scheme.error,
-                    size: 64,
-                  ),
+                  Icon(Icons.error_outline, color: scheme.error, size: 64),
                   const SizedBox(height: 24),
                   Text(
                     'Unexpected error occurred',

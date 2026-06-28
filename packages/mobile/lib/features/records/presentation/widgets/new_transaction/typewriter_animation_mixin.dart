@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 
 /// Mixin that provides typewriter animation functionality for text placeholders.
 /// Used in NewTransactionSheet to animate placeholder text.
-mixin TypewriterAnimationMixin<T extends StatefulWidget> on State<T>, TickerProviderStateMixin<T> {
+mixin TypewriterAnimationMixin<T extends StatefulWidget>
+    on State<T>, TickerProviderStateMixin<T> {
   Timer? _typewriterTimer;
   int _twPhraseIndex = 0;
   int _twCharIndex = 0;

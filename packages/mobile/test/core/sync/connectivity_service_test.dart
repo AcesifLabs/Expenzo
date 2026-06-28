@@ -49,28 +49,24 @@ void main() {
       },
     );
 
-    test(
-      'emits false when connectivity result is none',
-      () async {
-        when(() => mockConnectivity.onConnectivityChanged).thenAnswer(
-          (_) => Stream<List<ConnectivityResult>>.value(
-            [ConnectivityResult.none],
-          ),
-        );
+    test('emits false when connectivity result is none', () async {
+      when(() => mockConnectivity.onConnectivityChanged).thenAnswer(
+        (_) =>
+            Stream<List<ConnectivityResult>>.value([ConnectivityResult.none]),
+      );
 
-        // _checkConnectivity sees [none] and returns false immediately
-        // without calling the health check endpoint.
-        await expectLater(service.onlineStream, emits(false));
-      },
-    );
+      // _checkConnectivity sees [none] and returns false immediately
+      // without calling the health check endpoint.
+      await expectLater(service.onlineStream, emits(false));
+    });
 
     test(
       'recovers and processes subsequent data after a stream error',
       () async {
         final controller = StreamController<List<ConnectivityResult>>();
-        when(() => mockConnectivity.onConnectivityChanged).thenAnswer(
-          (_) => controller.stream,
-        );
+        when(
+          () => mockConnectivity.onConnectivityChanged,
+        ).thenAnswer((_) => controller.stream);
 
         // First send an error, then valid data
         controller.addError(Exception('transient error'));
@@ -86,33 +82,27 @@ void main() {
   });
 
   group('checkNow', () {
-    test(
-      'returns last known state when checkConnectivity throws',
-      () async {
-        when(() => mockConnectivity.checkConnectivity()).thenThrow(
-          Exception('platform error'),
-        );
+    test('returns last known state when checkConnectivity throws', () async {
+      when(
+        () => mockConnectivity.checkConnectivity(),
+      ).thenThrow(Exception('platform error'));
 
-        final result = await service.checkNow();
+      final result = await service.checkNow();
 
-        // Default _isOnline is false; returns that instead of throwing.
-        expect(result, false);
-      },
-    );
+      // Default _isOnline is false; returns that instead of throwing.
+      expect(result, false);
+    });
 
-    test(
-      'does not throw when checkConnectivity succeeds',
-      () async {
-        when(() => mockConnectivity.checkConnectivity()).thenAnswer(
-          (_) async => [ConnectivityResult.wifi],
-        );
+    test('does not throw when checkConnectivity succeeds', () async {
+      when(
+        () => mockConnectivity.checkConnectivity(),
+      ).thenAnswer((_) async => [ConnectivityResult.wifi]);
 
-        // The health check inside _checkConnectivity will fail (no server),
-        // so the result will be false — but the point is no exception
-        // propagates from checkNow().
-        final result = await service.checkNow();
-        expect(result, false);
-      },
-    );
+      // The health check inside _checkConnectivity will fail (no server),
+      // so the result will be false — but the point is no exception
+      // propagates from checkNow().
+      final result = await service.checkNow();
+      expect(result, false);
+    });
   });
 }
