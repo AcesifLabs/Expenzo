@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:picons/picons.dart';
 
 /// Standardized list card with optional dismissible swipe-to-delete.
 ///
@@ -85,7 +85,7 @@ class AppCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(radius),
           ),
           child: Icon(
-            PhosphorIcons.trash(PhosphorIconsStyle.regular),
+            PiconsRegular.trash,
             color: theme.colorScheme.onSecondary,
           ),
         ),

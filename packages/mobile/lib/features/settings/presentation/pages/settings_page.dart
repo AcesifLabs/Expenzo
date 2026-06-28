@@ -1,6 +1,6 @@
 import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/theme/app_colors.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -14,24 +14,24 @@ class SettingsPage extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         children: [
           _SettingTile(
-            icon: PhosphorIcons.currencyDollar(PhosphorIconsStyle.light),
+            icon: PiconsLight.currencyDollar,
             title: 'Currency',
             subtitle: 'USD (\$)',
             onTap: () {},
           ),
           _SettingTile(
-            icon: PhosphorIcons.bell(PhosphorIconsStyle.light),
+            icon: PiconsLight.bell,
             title: 'Notifications',
             onTap: () {},
           ),
           _SettingTile(
-            icon: PhosphorIcons.sun(PhosphorIconsStyle.light),
+            icon: PiconsLight.sun,
             title: 'Appearance',
             subtitle: 'System',
             onTap: () {},
           ),
           _SettingTile(
-            icon: PhosphorIcons.trash(PhosphorIconsStyle.light),
+            icon: PiconsLight.trash,
             title: 'Delete Account',
             titleColor: AppColors.error,
             onTap: () {},
@@ -72,7 +72,7 @@ class _SettingTile extends StatelessWidget {
       ),
       subtitle: subtitle != null ? Text(subtitle!) : null,
       trailing: Icon(
-        PhosphorIcons.caretRight(PhosphorIconsStyle.regular),
+        PiconsRegular.caretRight,
         size: 16,
         color: colors.onSurface.withAlpha(100),
       ),

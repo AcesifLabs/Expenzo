@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/core/utils/navigation_utils.dart';
@@ -74,7 +74,7 @@ class _BudgetListPageContentState extends State<_BudgetListPageContent> {
             title: 'Budgets',
             actions: [
               IconButton(
-                icon: Icon(PhosphorIcons.plus(PhosphorIconsStyle.light)),
+                icon: Icon(PiconsLight.plus),
                 color: Theme.of(context).colorScheme.onSurface.withAlpha(160),
                 onPressed: () => _navigateToCreate(context),
               ),
@@ -88,7 +88,7 @@ class _BudgetListPageContentState extends State<_BudgetListPageContent> {
                   child: Padding(
                     padding: const EdgeInsets.all(40),
                     child: AppEmptyState(
-                      icon: PhosphorIcons.tray(PhosphorIconsStyle.regular),
+                      icon: PiconsRegular.tray,
                       message: 'No budgets yet. Tap + to create one.',
                     ),
                   ),

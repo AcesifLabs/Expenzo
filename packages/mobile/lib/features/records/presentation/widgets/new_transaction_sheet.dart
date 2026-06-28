@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/core/theme/app_colors.dart';
@@ -653,7 +653,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                 child: Row(
                   children: [
                     Icon(
-                      PhosphorIcons.calendar(PhosphorIconsStyle.light),
+                      PiconsLight.calendar,
                       size: 20,
                       color: colors.onSurface.withAlpha(180),
                     ),
@@ -668,7 +668,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                     ),
                     const Spacer(),
                     Icon(
-                      PhosphorIcons.caretDown(PhosphorIconsStyle.light),
+                      PiconsLight.caretDown,
                       size: 14,
                       color: colors.onSurface.withAlpha(100),
                     ),
@@ -716,7 +716,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                 preferBelow: false,
                 triggerMode: TooltipTriggerMode.tap,
                 child: Icon(
-                  PhosphorIcons.info(PhosphorIconsStyle.light),
+                  PiconsLight.info,
                   size: 14,
                   color: colors.onSurface.withAlpha(120),
                 ),
@@ -810,7 +810,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        PhosphorIcons.gridFour(PhosphorIconsStyle.bold),
+                        PiconsBold.gridFour,
                         size: 20,
                         color: colors.onSurface.withAlpha(150),
                       ),

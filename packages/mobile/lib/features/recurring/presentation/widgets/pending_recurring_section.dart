@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/core/database/daos/pending_recurring_dao.dart';
 import '../bloc/recurring_bloc.dart';
@@ -44,10 +44,7 @@ class _PendingRecurringSectionState extends State<PendingRecurringSection> {
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
-                    Icon(
-                      PhosphorIcons.clock(PhosphorIconsStyle.regular),
-                      color: Colors.orange,
-                    ),
+                    Icon(PiconsRegular.clock, color: Colors.orange),
                     const SizedBox(width: 8),
                     const Text(
                       'Pending Recurring',
@@ -77,19 +74,14 @@ class _PendingRecurringSectionState extends State<PendingRecurringSection> {
                   return ListTile(
                     leading: CircleAvatar(
                       backgroundColor: Colors.orange.withAlpha(51),
-                      child: Icon(
-                        PhosphorIcons.calendar(PhosphorIconsStyle.regular),
-                        color: Colors.orange,
-                      ),
+                      child: Icon(PiconsRegular.calendar, color: Colors.orange),
                     ),
                     title: Text(item.description),
                     subtitle: Text(
                       '\$${item.amount.toStringAsFixed(2)} - Due: ${dateFormat.format(item.dueDate)}',
                     ),
                     trailing: IconButton(
-                      icon: Icon(
-                        PhosphorIcons.checkCircle(PhosphorIconsStyle.regular),
-                      ),
+                      icon: Icon(PiconsRegular.checkCircle),
                       color: Colors.green,
                       onPressed: () async {
                         await _pendingDao.removePending(item.id);

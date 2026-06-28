@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:picons/picons.dart';
 
 import '../../../categories/presentation/bloc/category_bloc.dart';
 import '../../../categories/presentation/bloc/category_event.dart';
@@ -146,7 +146,7 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
                           ),
                           IconButton(
                             icon: Icon(
-                              PhosphorIcons.x(PhosphorIconsStyle.regular),
+                              PiconsRegular.x,
                               color: theme.colorScheme.onSurface.withAlpha(120),
                             ),
                             onPressed: () => Navigator.of(context).pop(),
@@ -183,9 +183,7 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
                           child: Row(
                             children: [
                               Icon(
-                                PhosphorIcons.calendar(
-                                  PhosphorIconsStyle.regular,
-                                ),
+                                PiconsRegular.calendar,
                                 size: 20,
                                 color: theme.colorScheme.onSurface.withAlpha(
                                   160,
@@ -321,7 +319,7 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
             child: Row(
               children: [
                 Icon(
-                  PhosphorIcons.tag(PhosphorIconsStyle.regular),
+                  PiconsRegular.tag,
                   size: 20,
                   color: theme.colorScheme.onSurface.withAlpha(160),
                 ),
@@ -337,7 +335,7 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
                   ),
                 ),
                 Icon(
-                  PhosphorIcons.caretDown(PhosphorIconsStyle.regular),
+                  PiconsRegular.caretDown,
                   size: 16,
                   color: theme.colorScheme.onSurface.withAlpha(120),
                 ),

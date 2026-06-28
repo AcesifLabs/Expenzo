@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budget_progress.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
@@ -102,7 +102,7 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
             child: Row(
               children: [
                 Icon(
-                  PhosphorIcons.listDashes(PhosphorIconsStyle.light),
+                  PiconsLight.listDashes,
                   size: 18,
                   color: colors.onSurface.withAlpha(120),
                 ),

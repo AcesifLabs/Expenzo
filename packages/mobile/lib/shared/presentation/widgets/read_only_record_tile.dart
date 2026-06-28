@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/features/records/domain/entities/record.dart';
 
@@ -44,9 +44,7 @@ class ReadOnlyRecordTile extends StatelessWidget {
             radius: avatarRadius,
             backgroundColor: amtColor.withAlpha(25),
             child: Icon(
-              isExpense
-                  ? PhosphorIcons.trendDown(PhosphorIconsStyle.fill)
-                  : PhosphorIcons.trendUp(PhosphorIconsStyle.fill),
+              isExpense ? PiconsFill.trendDown : PiconsFill.trendUp,
               color: amtColor,
               size: iconSize,
             ),
