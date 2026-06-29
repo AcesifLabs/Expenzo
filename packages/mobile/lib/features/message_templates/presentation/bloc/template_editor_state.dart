@@ -1,16 +1,20 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/expense_template.dart';
 
-abstract class TemplateEditorState extends Equatable {
+sealed class TemplateEditorState extends Equatable {
   @override
   List<Object?> get props => [];
 
   const TemplateEditorState();
 }
 
-class TemplateEditorInitial extends TemplateEditorState {}
+class TemplateEditorInitial extends TemplateEditorState {
+  const TemplateEditorInitial();
+}
 
-class TemplateEditorLoading extends TemplateEditorState {}
+class TemplateEditorLoading extends TemplateEditorState {
+  const TemplateEditorLoading();
+}
 
 class TemplateEditorLoaded extends TemplateEditorState {
   final ExpenseTemplate? template;
@@ -21,11 +25,17 @@ class TemplateEditorLoaded extends TemplateEditorState {
   const TemplateEditorLoaded({this.template});
 }
 
-class TemplateEditorSaving extends TemplateEditorState {}
+class TemplateEditorSaving extends TemplateEditorState {
+  const TemplateEditorSaving();
+}
 
-class TemplateEditorSaved extends TemplateEditorState {}
+class TemplateEditorSaved extends TemplateEditorState {
+  const TemplateEditorSaved();
+}
 
-class TemplateEditorDeleted extends TemplateEditorState {}
+class TemplateEditorDeleted extends TemplateEditorState {
+  const TemplateEditorDeleted();
+}
 
 class TemplateEditorError extends TemplateEditorState {
   final String message;

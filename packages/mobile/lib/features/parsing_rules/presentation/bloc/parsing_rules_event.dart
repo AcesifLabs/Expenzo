@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../domain/entities/parsing_rule.dart';
 
 abstract class ParsingRulesEvent extends Equatable {
   @override
@@ -19,6 +20,15 @@ class ToggleRule extends ParsingRulesEvent {
   List<Object?> get props => [ruleId, isEnabled];
 
   const ToggleRule({required this.ruleId, required this.isEnabled});
+}
+
+class CreateRuleEvent extends ParsingRulesEvent {
+  final ParsingRule rule;
+
+  @override
+  List<Object?> get props => [rule];
+
+  const CreateRuleEvent(this.rule);
 }
 
 class DeleteRuleRequested extends ParsingRulesEvent {

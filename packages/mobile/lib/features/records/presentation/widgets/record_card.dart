@@ -1,18 +1,23 @@
-import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
-import 'package:expense_tracker/features/categories/presentation/bloc/category_state.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:picons/picons.dart';
+import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:expense_tracker/core/utils/color_utils.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
 import '../../domain/entities/record.dart';
 import 'source_badge.dart';
 
+/// Interactive record card with tap/delete actions for the records list.
+///
+/// Unlike [ReadOnlyRecordTile] which is a lightweight read-only tile for
+/// dashboard summaries, this widget supports dismiss-to-delete, tap-to-edit,
+/// and category icon display. Requires [categoryInfo] to be resolved by
+/// the parent widget to avoid per-card BlocBuilder rebuilds.
 class RecordCard extends StatelessWidget {
   final Record record;
   final VoidCallback onTap;
   final VoidCallback onDelete;
+  final CategoryInfo? categoryInfo;
 
   static final _dateFormat = DateFormat('MMM dd, yyyy');
 
@@ -21,19 +26,8 @@ class RecordCard extends StatelessWidget {
     required this.record,
     required this.onTap,
     required this.onDelete,
+    this.categoryInfo,
   });
-
-  _CategoryInfo _resolveCategory(CategoryState state) {
-    if (state is! CategoryLoaded) return const _CategoryInfo();
-    final matched = state.categories.where((c) => c.id == record.categoryId);
-    if (matched.isEmpty) return const _CategoryInfo();
-
-    return _CategoryInfo(
-      name: matched.first.name,
-      emoji: matched.first.emoji,
-      color: matched.first.color,
-    );
-  }
 
   Widget _buildLeading(Color leadingBg, Color catColor) {
     return Container(
@@ -49,7 +43,7 @@ class RecordCard extends StatelessWidget {
     );
   }
 
-  Widget _buildInfo() {
+  Widget _buildInfo(ColorScheme colors) {
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,14 +57,14 @@ class RecordCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             _dateFormat.format(record.date),
-            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+            style: TextStyle(fontSize: 12, color: colors.onSurfaceVariant),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildAmount(bool isNegative, _CategoryInfo catInfo, Object? _) {
+  Widget _buildAmount(bool isNegative, CategoryInfo catInfo, Object? _) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisSize: MainAxisSize.min,
@@ -80,9 +74,7 @@ class RecordCard extends StatelessWidget {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: isNegative
-                ? const Color(0xFFFF3B30)
-                : const Color(0xFF34C759),
+            color: isNegative ? AppColors.expense : AppColors.success,
           ),
         ),
         const SizedBox(height: 4),
@@ -98,46 +90,42 @@ class RecordCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<CategoryBloc, CategoryState>(
-      builder: (context, state) {
-        final catInfo = _resolveCategory(state);
-        final isNegative = record.amount < 0;
-        final catColorHex = catInfo.color;
-        final colors = Theme.of(context).colorScheme;
+    final catInfo = categoryInfo ?? const CategoryInfo();
+    final isNegative = record.amount < 0;
+    final catColorHex = catInfo.color;
+    final colors = Theme.of(context).colorScheme;
 
-        final catColor = catColorHex != null
-            ? ColorUtils.fromHex(catColorHex)
-            : colors.primary;
+    final catColor = catColorHex != null
+        ? ColorUtils.fromHex(catColorHex)
+        : colors.primary;
 
-        final leadingBg = catColorHex != null
-            ? ColorUtils.fromHexWithAlpha(catColorHex)
-            : catColor.withAlpha(25);
+    final leadingBg = catColorHex != null
+        ? ColorUtils.fromHexWithAlpha(catColorHex)
+        : catColor.withAlpha(25);
 
-        return AppCard(
-          onTap: onTap,
-          dismissibleKey: Key('record_${record.id}'),
-          onDismissed: onDelete,
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              _buildLeading(leadingBg, catColor),
-              const SizedBox(width: 12),
-              _buildInfo(),
-              const SizedBox(width: 12),
-              _buildAmount(isNegative, catInfo, catColor),
-            ],
-          ),
-        );
-      },
+    return AppCard(
+      onTap: onTap,
+      dismissibleKey: Key('record_${record.id}'),
+      onDismissed: onDelete,
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        children: [
+          _buildLeading(leadingBg, catColor),
+          const SizedBox(width: 12),
+          _buildInfo(colors),
+          const SizedBox(width: 12),
+          _buildAmount(isNegative, catInfo, catColor),
+        ],
+      ),
     );
   }
 }
 
-class _CategoryInfo {
+class CategoryInfo {
   final String? name;
   final String? emoji;
   final String? color;
 
-  const _CategoryInfo({this.name, this.emoji, this.color});
+  const CategoryInfo({this.name, this.emoji, this.color});
 }

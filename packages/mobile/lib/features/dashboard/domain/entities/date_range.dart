@@ -67,6 +67,18 @@ class DateRange extends Equatable {
 
   const DateRange({required this.preset, this.customStart, this.customEnd});
 
+  DateRange copyWith({
+    DateRangePreset? preset,
+    DateTime? customStart,
+    DateTime? customEnd,
+  }) {
+    return DateRange(
+      preset: preset ?? this.preset,
+      customStart: customStart ?? this.customStart,
+      customEnd: customEnd ?? this.customEnd,
+    );
+  }
+
   factory DateRange.thisMonth() =>
       const DateRange(preset: DateRangePreset.thisMonth);
 

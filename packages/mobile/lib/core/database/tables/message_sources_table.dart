@@ -8,8 +8,8 @@ class MessageSources extends Table {
   TextColumn get contactName => text()();
   BoolColumn get isMonitored => boolean().withDefault(const Constant(false))();
   IntColumn get autoCreateOption => integer().withDefault(const Constant(1))();
-  DateTimeColumn get createdAt => dateTime()();
-  DateTimeColumn get updatedAt => dateTime()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 
   @override
   Set<Column> get primaryKey => {id};

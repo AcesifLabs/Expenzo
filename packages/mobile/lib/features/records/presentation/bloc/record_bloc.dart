@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:expense_tracker/core/bloc/transformers.dart';
 import '../../domain/entities/record.dart';
 import '../../domain/repositories/record_repository.dart';
 import '../../domain/usecases/add_record.dart';
@@ -27,16 +28,16 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     required this.deleteRecord,
     required this.recordRepository,
   }) : super(const RecordInitial()) {
-    on<LoadRecords>(_onLoadRecords);
-    on<LoadMoreRecords>(_onLoadMoreRecords);
-    on<AddRecordEvent>(_onAddRecord);
-    on<UpdateRecordEvent>(_onUpdateRecord);
-    on<DeleteRecordEvent>(_onDeleteRecord);
-    on<RefreshRecords>(_onRefreshRecords);
-    on<SearchRecords>(_onSearchRecords);
-    on<ApplyFilters>(_onApplyFilters);
-    on<ClearFilters>(_onClearFilters);
-    on<_RecordsUpdated>(_onRecordsUpdated);
+    on<LoadRecords>(_onLoadRecords, transformer: sequential());
+    on<LoadMoreRecords>(_onLoadMoreRecords, transformer: sequential());
+    on<AddRecordEvent>(_onAddRecord, transformer: sequential());
+    on<UpdateRecordEvent>(_onUpdateRecord, transformer: sequential());
+    on<DeleteRecordEvent>(_onDeleteRecord, transformer: sequential());
+    on<RefreshRecords>(_onRefreshRecords, transformer: concurrent());
+    on<SearchRecords>(_onSearchRecords, transformer: concurrent());
+    on<ApplyFilters>(_onApplyFilters, transformer: concurrent());
+    on<ClearFilters>(_onClearFilters, transformer: concurrent());
+    on<_RecordsUpdated>(_onRecordsUpdated, transformer: concurrent());
   }
 
   @override
@@ -180,9 +181,7 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
   ) async {
     final result = await addRecord(event.record);
 
-    if (result.isLeft()) {
-      result.fold((failure) => emit(RecordError(failure.message)), (_) => null);
-    }
+    result.fold((failure) => emit(RecordError(failure.message)), (_) {});
   }
 
   Future<void> _onUpdateRecord(
@@ -191,9 +190,7 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
   ) async {
     final result = await updateRecord(event.record);
 
-    if (result.isLeft()) {
-      result.fold((failure) => emit(RecordError(failure.message)), (_) => null);
-    }
+    result.fold((failure) => emit(RecordError(failure.message)), (_) {});
   }
 
   Future<void> _onDeleteRecord(
@@ -202,9 +199,7 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
   ) async {
     final result = await deleteRecord(event.id);
 
-    if (result.isLeft()) {
-      result.fold((failure) => emit(RecordError(failure.message)), (_) => null);
-    }
+    result.fold((failure) => emit(RecordError(failure.message)), (_) {});
   }
 
   void _onRefreshRecords(RefreshRecords event, Emitter<RecordState> emit) {

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import '../../domain/entities/date_amount.dart';
-import '../../domain/repositories/reports_repository.dart';
+import '../../domain/entities/granularity.dart';
 
 class SpendingTrendChart extends StatelessWidget {
   final List<DateAmount> data;

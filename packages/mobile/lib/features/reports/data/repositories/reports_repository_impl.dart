@@ -7,6 +7,7 @@ import 'package:expense_tracker/core/error/failures.dart';
 import '../../domain/entities/date_amount.dart';
 import '../../domain/entities/category_amount.dart';
 import '../../domain/entities/spending_insights.dart';
+import '../../domain/entities/granularity.dart';
 import '../../domain/repositories/reports_repository.dart';
 
 class ReportsRepositoryImpl implements ReportsRepository {
@@ -15,6 +16,7 @@ class ReportsRepositoryImpl implements ReportsRepository {
 
   ReportsRepositoryImpl({required this.recordDao, required this.categoryDao});
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, List<DateAmount>>> getSpendingTrend({
     required DateTime startDate,
@@ -46,11 +48,13 @@ class ReportsRepositoryImpl implements ReportsRepository {
       trend.sort((a, b) => a.date.compareTo(b.date));
 
       return Right(trend);
-    } catch (e) {
+    } catch (e, s) {
+      print('Error: $e\n$s');
       return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, List<CategoryAmount>>> getCategoryBreakdown({
     required DateTime startDate,
@@ -75,11 +79,13 @@ class ReportsRepositoryImpl implements ReportsRepository {
       breakdown.sort((a, b) => b.amount.compareTo(a.amount));
 
       return Right(breakdown);
-    } catch (e) {
+    } catch (e, s) {
+      print('Error: $e\n$s');
       return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, SpendingInsights>> getSpendingInsights({
     required DateTime startDate,
@@ -120,7 +126,8 @@ class ReportsRepositoryImpl implements ReportsRepository {
           totalSpent: totalSpent,
         ),
       );
-    } catch (e) {
+    } catch (e, s) {
+      print('Error: $e\n$s');
       return Left(CacheFailure(message: e.toString()));
     }
   }

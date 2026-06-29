@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
-import 'package:expense_tracker/core/utils/navigation_utils.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_event.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_state.dart';
@@ -14,7 +14,6 @@ import 'package:expense_tracker/features/budgets/domain/usecases/get_budget_tran
 import 'package:expense_tracker/features/records/domain/entities/record.dart';
 import 'package:expense_tracker/features/settings/presentation/bloc/settings_bloc.dart';
 import 'package:expense_tracker/features/settings/presentation/bloc/settings_event.dart';
-import 'package:expense_tracker/features/settings/presentation/pages/settings_page.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_summary_card.dart';
@@ -26,20 +25,34 @@ import 'package:expense_tracker/shared/presentation/widgets/read_only_record_til
 import 'package:expense_tracker/features/dashboard/presentation/widgets/menu_row.dart';
 import 'package:expense_tracker/features/dashboard/presentation/widgets/balance_row.dart';
 import 'package:expense_tracker/features/dashboard/presentation/widgets/budget_progress_summary_card.dart';
-import 'package:expense_tracker/shared/presentation/pages/feedback_page.dart';
 import '../../domain/entities/date_range.dart';
 import '../bloc/dashboard_bloc.dart';
 import '../bloc/dashboard_event.dart';
 import '../bloc/dashboard_state.dart';
 
-class DashboardPage extends StatefulWidget {
+class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
 
   @override
-  State<DashboardPage> createState() => _DashboardPageState();
+  Widget build(BuildContext context) {
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => di.getIt<DashboardBloc>()),
+        BlocProvider(create: (_) => di.getIt<AuthBloc>()),
+      ],
+      child: const DashboardView(),
+    );
+  }
 }
 
-class _DashboardPageState extends State<DashboardPage> {
+class DashboardView extends StatefulWidget {
+  const DashboardView({super.key});
+
+  @override
+  State<DashboardView> createState() => _DashboardViewState();
+}
+
+class _DashboardViewState extends State<DashboardView> {
   bool _initialLoadScheduled = false;
   Future<List<BudgetProgress>>? _budgetsFuture;
 
@@ -148,15 +161,12 @@ class _DashboardPageState extends State<DashboardPage> {
   List<Widget> _buildContent(BuildContext context, DashboardState state) {
     final currencyFmt = CurrencyFormatter.getFormatter(decimalDigits: 2);
 
-    if (state is DashboardLoading) return _buildLoadingContent(context);
-
-    if (state is DashboardError) return _buildErrorContent(context, state);
-
-    if (state is DashboardLoaded) {
-      return _buildLoadedContent(context, state, currencyFmt);
-    }
-
-    return _buildLoadingContent(context);
+    return switch (state) {
+      DashboardLoading() => _buildLoadingContent(context),
+      DashboardError() => _buildErrorContent(context, state),
+      DashboardLoaded() => _buildLoadedContent(context, state, currencyFmt),
+      _ => _buildLoadingContent(context),
+    };
   }
 
   List<Widget> _buildLoadingContent(BuildContext context) {
@@ -528,7 +538,8 @@ class _DashboardPageState extends State<DashboardPage> {
   GetBudgetsWithProgress? _tryGetBudgetsWithProgress() {
     try {
       return di.getIt<GetBudgetsWithProgress>();
-    } catch (_) {
+    } catch (e, s) {
+      debugPrint('Dashboard error: $e\n$s');
       return null;
     }
   }
@@ -536,7 +547,7 @@ class _DashboardPageState extends State<DashboardPage> {
   List<PopupMenuEntry<String>> _buildMenuItems(BuildContext context) {
     final authState = context.read<AuthBloc>().state;
     final isAuth = authState is Authenticated;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = Theme.of(context).colorScheme.brightness == Brightness.dark;
 
     return [
       if (isAuth)
@@ -584,30 +595,17 @@ class _DashboardPageState extends State<DashboardPage> {
   void _handleMenuAction(BuildContext context, String value) {
     switch (value) {
       case 'account':
-        Navigator.push(
-          context,
-          SlidePageRoute(builder: (_) => const SettingsPage()),
-        );
+      case 'settings':
+      case 'language':
+        context.push('/settings');
       case 'sign_in':
         context.read<AuthBloc>().add(const SignInWithGoogleRequested());
-      case 'settings':
-        Navigator.push(
-          context,
-          SlidePageRoute(builder: (_) => const SettingsPage()),
-        );
       case 'theme':
-        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final isDark =
+            Theme.of(context).colorScheme.brightness == Brightness.dark;
         di.getIt<SettingsBloc>().add(UpdateTheme(isDark ? 'light' : 'dark'));
-      case 'language':
-        Navigator.push(
-          context,
-          SlidePageRoute(builder: (_) => const SettingsPage()),
-        );
       case 'feedback':
-        Navigator.push(
-          context,
-          SlidePageRoute(builder: (_) => const FeedbackPage()),
-        );
+        context.push('/feedback');
       case 'sign_out':
         context.read<AuthBloc>().add(const SignOutRequested());
     }

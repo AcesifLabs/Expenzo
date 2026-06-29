@@ -1,16 +1,20 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/recurring_transaction.dart';
 
-abstract class RecurringState extends Equatable {
+sealed class RecurringState extends Equatable {
   @override
   List<Object?> get props => [];
 
   const RecurringState();
 }
 
-class RecurringInitial extends RecurringState {}
+class RecurringInitial extends RecurringState {
+  const RecurringInitial();
+}
 
-class RecurringLoading extends RecurringState {}
+class RecurringLoading extends RecurringState {
+  const RecurringLoading();
+}
 
 class RecurringLoaded extends RecurringState {
   final List<RecurringTransaction> recurringList;
@@ -19,6 +23,10 @@ class RecurringLoaded extends RecurringState {
   List<Object?> get props => [recurringList];
 
   const RecurringLoaded(this.recurringList);
+
+  RecurringLoaded copyWith({List<RecurringTransaction>? recurringList}) {
+    return RecurringLoaded(recurringList ?? this.recurringList);
+  }
 }
 
 class RecurringError extends RecurringState {
@@ -31,10 +39,8 @@ class RecurringError extends RecurringState {
 }
 
 class RecurringOperationSuccess extends RecurringState {
-  final String message;
-
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [];
 
-  const RecurringOperationSuccess(this.message);
+  const RecurringOperationSuccess();
 }

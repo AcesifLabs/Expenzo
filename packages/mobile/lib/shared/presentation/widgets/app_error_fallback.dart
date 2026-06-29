@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class AppErrorFallback extends StatelessWidget {
   static String generateReferenceId() {
@@ -58,9 +59,7 @@ class AppErrorFallback extends StatelessWidget {
     if (builder == null) return null;
 
     return () {
-      Navigator.of(
-        context,
-      ).push<void>(MaterialPageRoute<void>(builder: builder));
+      context.push('/feedback');
     };
   }
 
@@ -207,12 +206,12 @@ class _FallbackButton extends StatelessWidget {
 
   (Color, Color, BorderSide?) _resolveStyle(ColorScheme scheme) {
     if (textOnly) {
-      return (Colors.transparent, scheme.primary, null);
+      return (const Color(0x00000000), scheme.primary, null);
     } else if (filled) {
       return (scheme.primary, scheme.onPrimary, null);
     } else {
       return (
-        Colors.transparent,
+        const Color(0x00000000),
         scheme.primary,
         BorderSide(color: scheme.primary, width: 1),
       );

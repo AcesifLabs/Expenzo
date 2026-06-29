@@ -45,7 +45,8 @@ class TimedRegex {
         if (RegExp(dangerous).hasMatch(pattern)) {
           return true;
         }
-      } catch (e) {
+      } catch (e, s) {
+        debugPrint('Error: $e\n$s');
         debugPrint('RegexUtils: Failed to test dangerous pattern: $e');
       }
     }
@@ -68,7 +69,8 @@ class TimedRegex {
       }
 
       return null;
-    } catch (e) {
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
       return 'Invalid regex pattern: $e';
     }
   }
@@ -76,7 +78,8 @@ class TimedRegex {
   void _compile() {
     try {
       _compiled = RegExp(pattern);
-    } catch (e) {
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
       debugPrint('TimedRegex: Failed to compile pattern: $e');
     }
   }

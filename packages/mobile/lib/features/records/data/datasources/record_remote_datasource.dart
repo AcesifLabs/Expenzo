@@ -6,6 +6,7 @@ import 'package:expense_tracker/core/constants/record_type.dart';
 import '../../domain/entities/record.dart' as entity;
 
 abstract class RecordRemoteDatasource {
+  /// Throws: [ServerException] if the API request fails.
   Future<RecordRemoteResponse> getRecords(RemoteRecordQuery query);
 }
 
@@ -44,6 +45,7 @@ class RecordRemoteDatasourceImpl implements RecordRemoteDatasource {
 
   RecordRemoteDatasourceImpl({required this.apiClient});
 
+  /// Throws: [ServerException] if the API request fails.
   @override
   Future<RecordRemoteResponse> getRecords(RemoteRecordQuery query) async {
     try {
@@ -54,7 +56,13 @@ class RecordRemoteDatasourceImpl implements RecordRemoteDatasource {
         queryParameters: queryParams.isNotEmpty ? queryParams : null,
       );
 
-      final body = response.data as Map<String, dynamic>;
+      final rawData = response.data;
+      if (rawData is! Map<String, dynamic>) {
+        throw ServerException(
+          message: 'Unexpected server response shape: ${rawData.runtimeType}',
+        );
+      }
+      final body = rawData;
       final items = (body['data'] as List<dynamic>?) ?? [];
       final records = items
           .map((json) => _parseRecord(json as Map<String, dynamic>))
@@ -65,7 +73,8 @@ class RecordRemoteDatasourceImpl implements RecordRemoteDatasource {
         nextCursor: body['nextCursor'] as String?,
         total: body['total'] as int? ?? records.length,
       );
-    } catch (e) {
+    } catch (e, s) {
+      print('Error: $e\n$s');
       throw ServerException(message: e.toString());
     }
   }

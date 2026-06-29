@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:expense_tracker/core/bloc/transformers.dart';
 import '../../domain/usecases/get_budgets.dart';
 import '../../domain/usecases/create_budget.dart';
 import '../../domain/usecases/update_budget.dart';
@@ -24,11 +25,14 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
     required this.getBudgetsWithProgress,
     required this.getBudgetTransactions,
   }) : super(BudgetInitial()) {
-    on<LoadBudgets>(_onLoadBudgets);
-    on<CreateBudgetEvent>(_onCreateBudget);
-    on<UpdateBudgetEvent>(_onUpdateBudget);
-    on<DeleteBudgetEvent>(_onDeleteBudget);
-    on<LoadBudgetTransactions>(_onLoadBudgetTransactions);
+    on<LoadBudgets>(_onLoadBudgets, transformer: concurrent());
+    on<CreateBudgetEvent>(_onCreateBudget, transformer: sequential());
+    on<UpdateBudgetEvent>(_onUpdateBudget, transformer: sequential());
+    on<DeleteBudgetEvent>(_onDeleteBudget, transformer: sequential());
+    on<LoadBudgetTransactions>(
+      _onLoadBudgetTransactions,
+      transformer: concurrent(),
+    );
   }
 
   Future<void> _onLoadBudgets(
@@ -66,7 +70,7 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
     final result = await createBudget(event.budget);
 
     result.fold((failure) => emit(BudgetError(failure.message)), (budget) {
-      emit(const BudgetOperationSuccess('Budget created successfully'));
+      emit(const BudgetOperationSuccess());
       add(LoadBudgets());
     });
   }
@@ -80,7 +84,7 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
     final result = await updateBudget(event.budget);
 
     result.fold((failure) => emit(BudgetError(failure.message)), (budget) {
-      emit(const BudgetOperationSuccess('Budget updated successfully'));
+      emit(const BudgetOperationSuccess());
       add(LoadBudgets());
     });
   }
@@ -94,7 +98,7 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
     final result = await deleteBudget(event.id);
 
     result.fold((failure) => emit(BudgetError(failure.message)), (_) {
-      emit(const BudgetOperationSuccess('Budget deleted successfully'));
+      emit(const BudgetOperationSuccess());
       add(LoadBudgets());
     });
   }

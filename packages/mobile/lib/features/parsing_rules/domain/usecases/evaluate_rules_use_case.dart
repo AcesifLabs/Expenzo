@@ -40,6 +40,7 @@ class EvaluateRulesUseCase
     return RuleEvaluator.evaluateWithContext(context, params);
   }
 
+  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, ParsedTransaction?>> call(
     EvaluateRulesParams params,
@@ -49,7 +50,8 @@ class EvaluateRulesUseCase
       final result = evaluateWithPreloadedContext(context, params);
 
       return Right(result);
-    } catch (e) {
+    } catch (e, s) {
+      print('Error: $e\n$s');
       return Left(CacheFailure(message: e.toString()));
     }
   }

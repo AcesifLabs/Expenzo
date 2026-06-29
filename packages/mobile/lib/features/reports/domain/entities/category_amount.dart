@@ -1,4 +1,6 @@
-class CategoryAmount {
+import 'package:equatable/equatable.dart';
+
+class CategoryAmount extends Equatable {
   final String categoryId;
   final String categoryName;
   final String emoji;
@@ -12,4 +14,13 @@ class CategoryAmount {
     required this.amount,
     required this.percentage,
   });
+
+  @override
+  List<Object?> get props => [
+    categoryId,
+    categoryName,
+    emoji,
+    amount,
+    percentage,
+  ];
 }

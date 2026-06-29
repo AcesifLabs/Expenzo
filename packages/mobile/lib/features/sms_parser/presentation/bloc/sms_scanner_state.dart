@@ -1,14 +1,16 @@
 import 'package:equatable/equatable.dart';
 import '../../../parsing_rules/domain/entities/parsed_transaction.dart';
 
-abstract class SmsScannerState extends Equatable {
+sealed class SmsScannerState extends Equatable {
   @override
   List<Object?> get props => [];
 
   const SmsScannerState();
 }
 
-class SmsScannerInitial extends SmsScannerState {}
+class SmsScannerInitial extends SmsScannerState {
+  const SmsScannerInitial();
+}
 
 class SmsScannerScanning extends SmsScannerState {
   final int totalMessages;

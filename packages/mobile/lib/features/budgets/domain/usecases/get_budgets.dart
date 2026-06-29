@@ -8,6 +8,8 @@ class GetBudgets {
 
   GetBudgets({required this.repository});
 
+  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
+
   Future<Either<Failure, List<Budget>>> call() {
     return repository.getBudgets();
   }

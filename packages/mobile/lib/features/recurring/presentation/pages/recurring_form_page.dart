@@ -3,19 +3,23 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:picons/picons.dart';
+import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import '../../../categories/presentation/bloc/category_bloc.dart';
 import '../../../categories/presentation/bloc/category_event.dart';
 import '../../domain/entities/recurring_transaction.dart';
+import '../../domain/repositories/recurring_repository.dart';
 import '../bloc/recurring_bloc.dart';
 import '../bloc/recurring_event.dart';
 import '../bloc/recurring_state.dart';
 
 class RecurringFormPage extends StatefulWidget {
   final RecurringTransaction? recurring;
+  final String? recurringId;
 
-  const RecurringFormPage({super.key, this.recurring});
+  const RecurringFormPage({super.key, this.recurring, this.recurringId});
 
   @override
   State<RecurringFormPage> createState() => _RecurringFormPageState();
@@ -31,14 +35,49 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
   var _autoCreateExpense = true;
   int? _dayOfMonth;
   var _isActive = true;
+  var _isLoading = false;
 
-  bool get _isEditing => widget.recurring != null;
+  bool get _isEditing => widget.recurring != null || widget.recurringId != null;
 
   @override
   void initState() {
     super.initState();
-    _initFromRecurring(widget.recurring);
+    final recurringId = widget.recurringId;
+    if (recurringId != null) {
+      _isLoading = true;
+      _loadRecurring(recurringId);
+    } else {
+      _initFromRecurring(widget.recurring);
+    }
     context.read<CategoryBloc>().add(const LoadCategories());
+  }
+
+  Future<void> _loadRecurring(String id) async {
+    try {
+      await di.featureDependenciesReady;
+      if (!mounted) return;
+      final repo = di.getIt<RecurringRepository>();
+      final result = await repo.getRecurringById(id);
+      if (!mounted) return;
+      result.fold(
+        (failure) {
+          debugPrint(
+            'RecurringFormPage: Failed to load recurring: ${failure.message}',
+          );
+          setState(() => _isLoading = false);
+        },
+        (recurring) {
+          setState(() {
+            _initFromRecurring(recurring);
+            _isLoading = false;
+          });
+        },
+      );
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
+      debugPrint('RecurringFormPage: Failed to load recurring: $e');
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   void _initFromRecurring(RecurringTransaction? recurring) {
@@ -65,12 +104,15 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
   }
 
   void _onRecurringListener(BuildContext context, RecurringState state) {
-    if (state is RecurringOperationSuccess) {
-      Navigator.pop(context, true);
-    } else if (state is RecurringError) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(state.message)));
+    switch (state) {
+      case RecurringOperationSuccess():
+        context.pop(true);
+      case RecurringError(:final message):
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(message)));
+      default:
+        break;
     }
   }
 
@@ -95,7 +137,7 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
     if (formState == null || !formState.validate()) return;
 
     final recurring = RecurringTransaction(
-      id: widget.recurring?.id,
+      id: widget.recurring?.id ?? widget.recurringId,
       description: _descriptionController.text,
       amount: double.parse(_amountController.text),
       categoryId: widget.recurring?.categoryId,
@@ -272,6 +314,15 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
   @override
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('MMM dd, yyyy');
+
+    if (_isLoading) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(_isEditing ? 'Edit Recurring' : 'New Recurring'),
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(

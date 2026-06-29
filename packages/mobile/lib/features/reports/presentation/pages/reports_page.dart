@@ -114,33 +114,28 @@ class _ReportsPageContentState extends State<_ReportsPageContent>
           Expanded(
             child: BlocBuilder<ReportsBloc, ReportsState>(
               builder: (context, state) {
-                if (state is ReportsLoading) {
-                  return TabBarView(
+                return switch (state) {
+                  ReportsLoading() => TabBarView(
                     controller: _tabController,
                     children: const [
                       ChartSkeleton(),
                       PieChartSkeleton(),
                       InsightsSkeleton(),
                     ],
-                  );
-                }
-
-                if (state is ReportsError) {
-                  return Center(child: Text('Error: ${state.message}'));
-                }
-
-                if (state is ReportsLoaded) {
-                  return TabBarView(
+                  ),
+                  ReportsError(:final message) => Center(
+                    child: Text('Error: $message'),
+                  ),
+                  ReportsLoaded() => TabBarView(
                     controller: _tabController,
                     children: [
                       _buildTrendTab(state),
                       _buildCategoriesTab(state),
                       _buildInsightsTab(state),
                     ],
-                  );
-                }
-
-                return const Center(child: Text('Load reports to see data'));
+                  ),
+                  _ => const Center(child: Text('Load reports to see data')),
+                };
               },
             ),
           ),

@@ -109,7 +109,8 @@ class RuleEvaluator {
         parseFailed: false,
         parseError: null,
       );
-    } catch (e) {
+    } catch (e, s) {
+      print('Error: $e\n$s');
       return null;
     }
   }
@@ -190,7 +191,8 @@ class RuleEvaluator {
         parseFailed: false,
         parseError: null,
       );
-    } catch (e) {
+    } catch (e, s) {
+      print('Error: $e\n$s');
       return ParsedTransaction(
         rawMessage: params.rawMessage,
         amount: null,
@@ -267,7 +269,8 @@ class RuleEvaluator {
     if (day < 1 || day > 31) return null;
     try {
       return DateTime(year, month, day);
-    } catch (_) {
+    } catch (e) {
+      print('Rule evaluation error: $e');
       return null;
     }
   }

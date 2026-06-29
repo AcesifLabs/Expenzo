@@ -54,10 +54,12 @@ class CategoryDao extends DatabaseAccessor<AppDatabase>
   }
 
   Future<void> incrementUsageCount(String id) async {
-    await customStatement(
-      'UPDATE categories SET usage_count = usage_count + 1 WHERE id = ?',
-      [id],
-    );
+    final category = await getCategoryById(id);
+    if (category != null) {
+      await (update(categories)..where((t) => t.id.equals(id))).write(
+        CategoriesCompanion(usageCount: Value(category.usageCount + 1)),
+      );
+    }
   }
 
   Future<Category?> getCategoryById(String id) {

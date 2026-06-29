@@ -1,4 +1,7 @@
 import 'package:dartz/dartz.dart';
+import 'package:expense_tracker/core/database/daos/pending_recurring_dao.dart';
+import 'package:expense_tracker/core/database/app_database.dart'
+    show PendingRecurringData;
 import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import '../../domain/entities/recurring_transaction.dart';
@@ -7,9 +10,14 @@ import '../datasources/recurring_local_datasource.dart';
 
 class RecurringRepositoryImpl implements RecurringRepository {
   final RecurringLocalDatasource localDatasource;
+  final PendingRecurringDao pendingRecurringDao;
 
-  RecurringRepositoryImpl({required this.localDatasource});
+  RecurringRepositoryImpl({
+    required this.localDatasource,
+    required this.pendingRecurringDao,
+  });
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, List<RecurringTransaction>>> getRecurringList() async {
     try {
@@ -18,9 +26,13 @@ class RecurringRepositoryImpl implements RecurringRepository {
       return Right(recurring);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      print('Error: $e\n$s');
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, RecurringTransaction>> getRecurringById(
     String id,
@@ -36,9 +48,13 @@ class RecurringRepositoryImpl implements RecurringRepository {
       return Right(recurring);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      print('Error: $e\n$s');
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, RecurringTransaction>> createRecurring(
     RecurringTransaction recurring,
@@ -49,9 +65,13 @@ class RecurringRepositoryImpl implements RecurringRepository {
       return Right(recurring);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      print('Error: $e\n$s');
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, RecurringTransaction>> updateRecurring(
     RecurringTransaction recurring,
@@ -62,22 +82,30 @@ class RecurringRepositoryImpl implements RecurringRepository {
       return Right(recurring);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      print('Error: $e\n$s');
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
-  Future<Either<Failure, void>> updateRecurringBatch(
+  Future<Either<Failure, Unit>> updateRecurringBatch(
     List<RecurringTransaction> transactions,
   ) async {
     try {
       await localDatasource.updateRecurringBatch(transactions);
 
-      return const Right(null);
+      return const Right(unit);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      print('Error: $e\n$s');
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, Unit>> deleteRecurring(String id) async {
     try {
@@ -86,6 +114,9 @@ class RecurringRepositoryImpl implements RecurringRepository {
       return const Right(unit);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      print('Error: $e\n$s');
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
@@ -94,6 +125,7 @@ class RecurringRepositoryImpl implements RecurringRepository {
     return localDatasource.watchRecurringList();
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, List<RecurringTransaction>>> getDueRecurring() async {
     try {
@@ -102,6 +134,19 @@ class RecurringRepositoryImpl implements RecurringRepository {
       return Right(dueRecurring);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      print('Error: $e\n$s');
+      return Left(CacheFailure(message: e.toString()));
     }
+  }
+
+  @override
+  Stream<List<PendingRecurringData>> watchPendingRecurring() {
+    return pendingRecurringDao.watchPending();
+  }
+
+  @override
+  Future<void> removePendingRecurring(String id) async {
+    await pendingRecurringDao.removePending(id);
   }
 }

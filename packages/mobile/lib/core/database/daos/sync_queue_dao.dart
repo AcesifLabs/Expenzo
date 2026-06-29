@@ -21,7 +21,7 @@ class SyncQueueDao extends DatabaseAccessor<AppDatabase>
         recordId: recordId,
         action: action,
         payload: payload,
-        createdAt: DateTime.now().toUtc(),
+        createdAt: Value(DateTime.now().toUtc()),
       ),
     );
   }

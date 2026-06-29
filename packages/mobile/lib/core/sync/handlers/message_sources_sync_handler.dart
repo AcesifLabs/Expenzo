@@ -33,12 +33,16 @@ class MessageSourcesSyncHandler
     autoCreateOption: data['autoCreateOption'] != null
         ? Value(int.parse(data['autoCreateOption'].toString()))
         : const Value.absent(),
-    createdAt: data['createdAt'] != null
-        ? DateTime.parse(data['createdAt']).toLocal()
-        : DateTime.now(),
-    updatedAt: data['updatedAt'] != null
-        ? DateTime.parse(data['updatedAt']).toLocal()
-        : DateTime.now(),
+    createdAt: Value(
+      data['createdAt'] != null
+          ? DateTime.parse(data['createdAt']).toLocal()
+          : DateTime.now(),
+    ),
+    updatedAt: Value(
+      data['updatedAt'] != null
+          ? DateTime.parse(data['updatedAt']).toLocal()
+          : DateTime.now(),
+    ),
   );
   @override
   Future<void> deleteById(AppDatabase db, String id) async =>

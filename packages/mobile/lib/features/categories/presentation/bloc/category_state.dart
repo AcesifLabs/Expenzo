@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import '../../domain/entities/category.dart';
 
-abstract class CategoryState extends Equatable {
+sealed class CategoryState extends Equatable {
   @override
   List<Object?> get props => [];
 
@@ -34,13 +34,4 @@ class CategoryError extends CategoryState {
   List<Object?> get props => [message];
 
   const CategoryError(this.message);
-}
-
-class CategoryInUseError extends CategoryState {
-  final String message;
-
-  @override
-  List<Object?> get props => [message];
-
-  const CategoryInUseError(this.message);
 }

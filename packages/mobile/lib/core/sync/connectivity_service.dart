@@ -27,7 +27,8 @@ class ConnectivityService {
       final results = await _connectivity.checkConnectivity();
 
       return _checkConnectivity(results);
-    } catch (e) {
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
       debugPrint('[ConnectivityService] checkNow error: $e');
 
       return _isOnline;
@@ -47,7 +48,8 @@ class ConnectivityService {
       _isOnline = true;
 
       return true;
-    } catch (_) {
+    } catch (e, s) {
+      debugPrint('Connectivity error: $e\n$s');
       _isOnline = false;
 
       return false;

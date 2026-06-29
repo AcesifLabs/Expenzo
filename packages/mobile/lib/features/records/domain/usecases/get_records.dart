@@ -9,6 +9,7 @@ class GetRecords extends UseCase<List<Record>, GetRecordsParams> {
 
   GetRecords(this.repository);
 
+  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, List<Record>>> call(GetRecordsParams params) {
     return repository.getRecords(

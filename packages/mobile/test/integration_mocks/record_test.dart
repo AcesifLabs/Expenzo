@@ -93,7 +93,7 @@ void main() {
       ).thenAnswer((_) async => Right(testRecord));
       when(
         () => mockCategoryRepository.incrementUsageCount(any()),
-      ).thenAnswer((_) async => const Right(null));
+      ).thenAnswer((_) async => const Right(unit));
 
       final result = await addRecordUseCase(testRecord);
 

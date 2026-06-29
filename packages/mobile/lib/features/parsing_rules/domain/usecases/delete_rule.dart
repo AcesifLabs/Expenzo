@@ -8,6 +8,7 @@ class DeleteRule implements UseCase<Unit, String> {
 
   DeleteRule(this.repository);
 
+  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, Unit>> call(String id) {
     return repository.deleteRule(id);

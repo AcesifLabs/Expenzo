@@ -9,6 +9,7 @@ class UpdateRecord extends UseCase<Record, Record> {
 
   UpdateRecord(this.repository);
 
+  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, Record>> call(Record record) {
     return repository.updateRecord(record);

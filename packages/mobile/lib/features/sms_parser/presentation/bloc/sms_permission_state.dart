@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-abstract class SmsPermissionState extends Equatable {
+sealed class SmsPermissionState extends Equatable {
   @override
   List<Object?> get props => [];
 

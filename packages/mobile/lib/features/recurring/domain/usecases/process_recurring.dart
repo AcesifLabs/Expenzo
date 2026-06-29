@@ -9,6 +9,8 @@ class ProcessRecurring {
 
   ProcessRecurring(this.repository);
 
+  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
+
   Future<Either<Failure, List<RecurringTransaction>>> call() async {
     try {
       final dueRecurringResult = await repository.getDueRecurring();
@@ -17,7 +19,7 @@ class ProcessRecurring {
         (failure) => Left(failure),
         _processDueRecurring,
       );
-    } on CacheException catch (e) {
+    } on CacheException catch (e, s) {
       return Left(e.toFailure());
     }
   }

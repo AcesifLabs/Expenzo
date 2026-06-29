@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
+import 'package:expense_tracker/core/theme/app_colors.dart';
 
 class TypeToggle extends StatelessWidget {
   final RecordType type;
@@ -14,8 +15,8 @@ class TypeToggle extends StatelessWidget {
     Duration animDuration,
     bool isExpense,
   ) {
-    const expenseColor = Color(0xFFFF3B30);
-    const incomeColor = Color(0xFF34C759);
+    const expenseColor = AppColors.expense;
+    const incomeColor = AppColors.success;
 
     return AnimatedPositioned(
       duration: animDuration,
@@ -64,7 +65,7 @@ class TypeToggle extends StatelessWidget {
                         icon: PiconsFill.trendDown,
                         label: 'Expense',
                         isActive: isExpense,
-                        activeColor: const Color(0xFFFF3B30),
+                        activeColor: AppColors.expense,
                         colors: colors,
                         onTap: () => onSwitch(RecordType.expense),
                       ),
@@ -74,7 +75,7 @@ class TypeToggle extends StatelessWidget {
                         icon: PiconsFill.trendUp,
                         label: 'Income',
                         isActive: !isExpense,
-                        activeColor: const Color(0xFF34C759),
+                        activeColor: AppColors.success,
                         colors: colors,
                         onTap: () => onSwitch(RecordType.income),
                       ),

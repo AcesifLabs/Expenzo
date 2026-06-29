@@ -45,12 +45,3 @@ class LoadBudgetTransactions extends BudgetEvent {
 
   const LoadBudgetTransactions(this.budgetId);
 }
-
-class LoadBudgetTransactions extends BudgetEvent {
-  final String budgetId;
-
-  const LoadBudgetTransactions(this.budgetId);
-
-  @override
-  List<Object?> get props => [budgetId];
-}

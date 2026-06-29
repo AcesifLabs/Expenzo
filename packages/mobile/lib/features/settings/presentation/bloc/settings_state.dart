@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/user_settings.dart';
 
-abstract class SettingsState extends Equatable {
+sealed class SettingsState extends Equatable {
   @override
   List<Object?> get props => [];
 
@@ -23,6 +23,10 @@ class SettingsLoaded extends SettingsState {
   List<Object?> get props => [settings];
 
   const SettingsLoaded(this.settings);
+
+  SettingsLoaded copyWith({UserSettings? settings}) {
+    return SettingsLoaded(settings ?? this.settings);
+  }
 }
 
 class SettingsError extends SettingsState {
@@ -41,6 +45,10 @@ class SettingsUpdateSuccess extends SettingsState {
   List<Object?> get props => [settings];
 
   const SettingsUpdateSuccess(this.settings);
+
+  SettingsUpdateSuccess copyWith({UserSettings? settings}) {
+    return SettingsUpdateSuccess(settings ?? this.settings);
+  }
 }
 
 class AccountDeleted extends SettingsState {

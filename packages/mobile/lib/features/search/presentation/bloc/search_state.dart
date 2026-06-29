@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/search_result.dart';
 
-abstract class SearchState extends Equatable {
+sealed class SearchState extends Equatable {
   @override
   List<Object?> get props => [];
 

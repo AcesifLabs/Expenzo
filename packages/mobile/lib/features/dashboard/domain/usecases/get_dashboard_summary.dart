@@ -17,6 +17,7 @@ class GetDashboardSummary implements UseCase<DashboardSummary, DateRange> {
     required this.categoryRepository,
   });
 
+  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, DashboardSummary>> call(DateRange dateRange) async {
     try {
@@ -53,7 +54,8 @@ class GetDashboardSummary implements UseCase<DashboardSummary, DateRange> {
           recentTransactions: recentTransactions,
         ),
       );
-    } catch (e) {
+    } catch (e, s) {
+      print('Error: $e\n$s');
       return Left(ServerFailure(message: e.toString()));
     }
   }
@@ -101,7 +103,7 @@ class GetDashboardSummary implements UseCase<DashboardSummary, DateRange> {
       for (final entry in categoryMap.entries) {
         final category = categories.firstWhere(
           (c) => c.id == entry.key,
-          orElse: () => throw Exception('Category not found'),
+          orElse: () => throw ArgumentError('Category not found: ${entry.key}'),
         );
         final amount = entry.value;
         breakdown.add(

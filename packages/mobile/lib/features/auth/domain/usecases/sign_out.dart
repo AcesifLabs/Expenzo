@@ -8,6 +8,7 @@ class SignOut extends UseCase<Unit, NoParams> {
 
   SignOut(this.repository);
 
+  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, Unit>> call(NoParams params) {
     return repository.signOut();

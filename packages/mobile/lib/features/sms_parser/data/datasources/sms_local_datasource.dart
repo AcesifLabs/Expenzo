@@ -2,6 +2,7 @@ import 'package:flutter_sms_inbox/flutter_sms_inbox.dart' as fsms;
 import '../../domain/entities/sms_message.dart';
 
 abstract class SmsLocalDatasource {
+  /// Throws: [CacheException] if a database error occurs.
   Future<List<SmsMessage>> getAllSms();
   Future<List<SmsMessage>> getSmsFromDateRange(DateTime start, DateTime end);
   Future<List<SmsMessage>> getSmsFromAddress(String address);
@@ -15,19 +16,23 @@ abstract class SmsLocalDatasource {
 class SmsLocalDatasourceImpl implements SmsLocalDatasource {
   final fsms.SmsQuery _smsQuery;
 
-  SmsLocalDatasourceImpl() : _smsQuery = fsms.SmsQuery();
+  SmsLocalDatasourceImpl({required fsms.SmsQuery smsQuery})
+    : _smsQuery = smsQuery;
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<List<SmsMessage>> getAllSms() async {
     try {
       final messages = await _smsQuery.getAllSms;
 
       return messages.map(_mapToEntity).toList();
-    } catch (e) {
+    } catch (e, s) {
+      print('Error: $e\n$s');
       return [];
     }
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<List<SmsMessage>> getSmsFromDateRange(
     DateTime start,
@@ -44,22 +49,26 @@ class SmsLocalDatasourceImpl implements SmsLocalDatasource {
           })
           .map(_mapToEntity)
           .toList();
-    } catch (e) {
+    } catch (e, s) {
+      print('Error: $e\n$s');
       return [];
     }
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<List<SmsMessage>> getSmsFromAddress(String address) async {
     try {
       final messages = await _smsQuery.querySms(address: address);
 
       return messages.map(_mapToEntity).toList();
-    } catch (e) {
+    } catch (e, s) {
+      print('Error: $e\n$s');
       return [];
     }
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<List<SmsMessage>> getSmsBatched({
     int start = 0,
@@ -75,7 +84,8 @@ class SmsLocalDatasourceImpl implements SmsLocalDatasource {
       );
 
       return messages.map(_mapToEntity).toList();
-    } catch (e) {
+    } catch (e, s) {
+      print('Error: $e\n$s');
       return [];
     }
   }

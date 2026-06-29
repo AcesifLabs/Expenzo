@@ -1,6 +1,5 @@
 import 'package:drift/drift.dart';
-import '../../../features/budgets/domain/entities/budget.dart'
-    show BudgetPeriod;
+import 'package:expense_tracker/core/constants/budget_period.dart';
 import '../../database/app_database.dart';
 import '../sync_table_registry.dart';
 

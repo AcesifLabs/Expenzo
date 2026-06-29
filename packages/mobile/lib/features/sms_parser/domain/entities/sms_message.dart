@@ -19,6 +19,24 @@ class SmsMessage extends Equatable {
     required this.read,
     required this.type,
   });
+
+  SmsMessage copyWith({
+    String? id,
+    String? address,
+    String? body,
+    DateTime? date,
+    bool? read,
+    SmsType? type,
+  }) {
+    return SmsMessage(
+      id: id ?? this.id,
+      address: address ?? this.address,
+      body: body ?? this.body,
+      date: date ?? this.date,
+      read: read ?? this.read,
+      type: type ?? this.type,
+    );
+  }
 }
 
 enum SmsType { received, sent, draft }

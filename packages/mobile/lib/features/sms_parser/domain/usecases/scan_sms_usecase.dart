@@ -13,10 +13,15 @@ class ScanSmsUseCase
     implements UseCase<List<ParsedTransaction>, ScanSmsParams> {
   final SmsLocalDatasource smsDatasource;
   final eval.EvaluateRulesUseCase evaluateRules;
-  final ParsingIsolateService _isolateService = ParsingIsolateService();
+  final ParsingIsolateService _isolateService;
 
-  ScanSmsUseCase({required this.smsDatasource, required this.evaluateRules});
+  ScanSmsUseCase({
+    required this.smsDatasource,
+    required this.evaluateRules,
+    required ParsingIsolateService parsingIsolateService,
+  }) : _isolateService = parsingIsolateService;
 
+  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, List<ParsedTransaction>>> call(
     ScanSmsParams params,
@@ -60,7 +65,8 @@ class ScanSmsUseCase
       );
 
       return Right(results);
-    } catch (e) {
+    } catch (e, s) {
+      print('Error: $e\n$s');
       return Left(SmsScanFailure(message: e.toString()));
     }
   }

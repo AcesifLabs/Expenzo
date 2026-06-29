@@ -58,10 +58,12 @@ class CategoryPickerItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final isLight = Theme.of(context).brightness == Brightness.light;
     final iconColor = _iconColor(colors);
     // ignore: unused_local_variable
-    final textColor = _resolveTextColor(iconColor, isLight);
+    final textColor = _resolveTextColor(
+      iconColor,
+      Theme.of(context).colorScheme.brightness == Brightness.light,
+    );
     final borderColor = _resolveBorderColor(colors);
 
     return GestureDetector(

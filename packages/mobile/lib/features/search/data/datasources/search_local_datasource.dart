@@ -2,13 +2,12 @@ import 'package:drift/drift.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/database/app_database.dart'
     hide Category, Record;
-import 'package:expense_tracker/core/constants/record_type.dart';
 import '../../domain/entities/search_filters.dart';
 import '../../domain/entities/search_result.dart';
 import '../../../records/domain/entities/record.dart';
-import "package:expense_tracker/core/constants/source_types.dart";
 
 abstract class SearchLocalDatasource {
+  /// Throws: [CacheException] if a database error occurs.
   Future<List<SearchResult>> searchRecords(SearchFilters filters);
   Future<void> indexRecord(Record record);
   Future<void> removeRecordFromIndex(String recordId);
@@ -20,6 +19,7 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
 
   SearchLocalDatasourceImpl({required this.db});
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<List<SearchResult>> searchRecords(SearchFilters filters) async {
     try {
@@ -42,16 +42,22 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
           .get();
 
       return result.map((row) {
+        final data = row.data;
         return SearchResult(
-          record: _mapToRecord(row),
-          relevanceScore: _computeRelevanceScore(row.data, filters.query),
+          recordId: data['id'] as String,
+          amount: _toDouble(data['amount']),
+          description: data['description'] as String,
+          date: _intToDateTime(data['date']),
+          relevanceScore: _computeRelevanceScore(data, filters.query),
         );
       }).toList();
-    } catch (e) {
+    } catch (e, s) {
+      print('Error: $e\n$s');
       throw CacheException(message: e.toString());
     }
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<void> indexRecord(Record record) async {
     try {
@@ -59,22 +65,26 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
         'INSERT INTO expense_fts (expense_id, description) VALUES (?, ?)',
         [record.id, record.description],
       );
-    } catch (e) {
+    } catch (e, s) {
+      print('Error: $e\n$s');
       throw CacheException(message: e.toString());
     }
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<void> removeRecordFromIndex(String recordId) async {
     try {
       await db.customStatement('DELETE FROM expense_fts WHERE expense_id = ?', [
         recordId,
       ]);
-    } catch (e) {
+    } catch (e, s) {
+      print('Error: $e\n$s');
       throw CacheException(message: e.toString());
     }
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<void> rebuildIndex() async {
     try {
@@ -84,7 +94,8 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
         INSERT INTO expense_fts (expense_id, description)
         SELECT id, description FROM records
       ''');
-    } catch (e) {
+    } catch (e, s) {
+      print('Error: $e\n$s');
       throw CacheException(message: e.toString());
     }
   }
@@ -179,26 +190,6 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
     if (value is String) return double.tryParse(value) ?? 0.0;
     throw CacheException(
       message: 'Unexpected amount type: ${value.runtimeType}',
-    );
-  }
-
-  Record _mapToRecord(QueryRow row) {
-    final data = row.data;
-
-    return Record(
-      id: data['id'] as String?,
-      amount: _toDouble(data['amount']),
-      description: data['description'] as String,
-      date: _intToDateTime(data['date']),
-      categoryId: data['category_id'] as String?,
-      source: ExpenseSource.values.firstWhere(
-        (s) => s.name == data['source'],
-        orElse: () => ExpenseSource.manual,
-      ),
-      sourceId: data['source_id'] as String?,
-      recordType: RecordType.fromDbValue(data['record_type'] as String),
-      createdAt: _intToDateTime(data['created_at']),
-      updatedAt: _intToDateTime(data['updated_at']),
     );
   }
 

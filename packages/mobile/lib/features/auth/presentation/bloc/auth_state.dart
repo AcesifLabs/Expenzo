@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/user.dart';
 
-abstract class AuthState extends Equatable {
+sealed class AuthState extends Equatable {
   @override
   List<Object?> get props => [];
 
@@ -23,6 +23,10 @@ class Authenticated extends AuthState {
   List<Object?> get props => [user];
 
   const Authenticated(this.user);
+
+  Authenticated copyWith({User? user}) {
+    return Authenticated(user ?? this.user);
+  }
 }
 
 class Unauthenticated extends AuthState {
@@ -46,4 +50,8 @@ class AuthSyncConflictPending extends AuthState {
   List<Object?> get props => [user];
 
   const AuthSyncConflictPending(this.user);
+
+  AuthSyncConflictPending copyWith({User? user}) {
+    return AuthSyncConflictPending(user ?? this.user);
+  }
 }

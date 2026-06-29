@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:expense_tracker/core/theme/app_colors.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:expense_tracker/core/theme/app_typography.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/core/sync/sync_engine.dart';
@@ -63,7 +64,7 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
         _decisionButton(
           'Overwrite Cloud with Local',
           'Replace cloud data with this device',
-          Colors.orange,
+          Theme.of(context).colorScheme.tertiary,
           _onOverwritePressed,
         ),
       ],
@@ -83,7 +84,7 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
         style: ElevatedButton.styleFrom(
           backgroundColor: color.withAlpha(25),
           foregroundColor: color,
-          padding: const EdgeInsets.all(16),
+          padding: AppSpacing.paddingMd,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
             side: BorderSide(color: color.withAlpha(50)),
@@ -163,7 +164,10 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
           ),
           TextButton(
             onPressed: _onConfirmReplace,
-            child: const Text('Replace', style: TextStyle(color: Colors.red)),
+            child: Text(
+              'Replace',
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
           ),
         ],
       ),
@@ -171,6 +175,7 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
   }
 
   void _onConfirmReplace() {
+    if (!mounted) return;
     Navigator.pop(context);
     _executeDecision(SyncMode.cloudWins);
   }
@@ -212,7 +217,8 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
       if (mounted) {
         context.read<AuthBloc>().add(const AuthCheckRequested());
       }
-    } catch (e) {
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
       if (mounted) {
         setState(() {
           _syncing = false;
@@ -236,7 +242,8 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
   void dispose() {
     try {
       di.getIt<SyncEngine>().onProgress = null;
-    } catch (e) {
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
       debugPrint('SyncConflictPage: Failed to clear onProgress callback: $e');
     }
     super.dispose();
@@ -250,7 +257,7 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
         backgroundColor: Theme.of(context).colorScheme.surface,
         body: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding: AppSpacing.paddingLg,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

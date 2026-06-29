@@ -23,7 +23,7 @@ class CategoryCard extends StatelessWidget {
     return AppCard(
       onTap: onTap,
       onLongPress: onLongPress,
-      backgroundColor: Colors.transparent,
+      backgroundColor: const Color(0x00000000),
       borderColor: parsedColor,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

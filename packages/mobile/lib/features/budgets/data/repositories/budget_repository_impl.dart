@@ -17,6 +17,7 @@ class BudgetRepositoryImpl implements BudgetRepository {
     SyncQueueDao? syncQueueDao,
   }) : _syncQueueDao = syncQueueDao;
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, List<Budget>>> getBudgets() async {
     try {
@@ -25,9 +26,13 @@ class BudgetRepositoryImpl implements BudgetRepository {
       return Right(budgets);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      print('Error: $e\n$s');
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, Budget>> getBudgetById(String id) async {
     try {
@@ -39,9 +44,13 @@ class BudgetRepositoryImpl implements BudgetRepository {
       return Right(budget);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      print('Error: $e\n$s');
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, Budget>> createBudget(Budget budget) async {
     try {
@@ -63,9 +72,13 @@ class BudgetRepositoryImpl implements BudgetRepository {
       return Right(budget);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      print('Error: $e\n$s');
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, Budget>> updateBudget(Budget budget) async {
     try {
@@ -87,9 +100,13 @@ class BudgetRepositoryImpl implements BudgetRepository {
       return Right(budget);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      print('Error: $e\n$s');
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, Unit>> deleteBudget(String id) async {
     try {
@@ -99,6 +116,9 @@ class BudgetRepositoryImpl implements BudgetRepository {
       return const Right(unit);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      print('Error: $e\n$s');
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 

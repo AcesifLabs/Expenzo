@@ -11,6 +11,8 @@ import 'package:expense_tracker/core/error/failures.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_datasource.dart';
+import 'package:expense_tracker/core/sync/sync_engine.dart';
+import 'package:expense_tracker/core/di/injection_container.dart' as di;
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDatasource remoteDatasource;
@@ -48,6 +50,7 @@ class AuthRepositoryImpl implements AuthRepository {
     return 'Something went wrong. Please try again.';
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<AuthFailure, User>> signInWithGoogle() async {
     try {
@@ -67,6 +70,7 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<AuthFailure, Unit>> signOut() async {
     try {
@@ -75,11 +79,13 @@ class AuthRepositoryImpl implements AuthRepository {
       return const Right(unit);
     } on AuthException catch (e) {
       return Left(e.toFailure());
-    } catch (e) {
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
       return Left(AuthFailure(message: mapExceptionToMessage(e)));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<AuthFailure, User?>> getCurrentUser() async {
     try {
@@ -88,22 +94,26 @@ class AuthRepositoryImpl implements AuthRepository {
       return Right(user);
     } on AuthException catch (e) {
       return Left(e.toFailure());
-    } catch (e) {
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
       return Left(AuthFailure(message: mapExceptionToMessage(e)));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<AuthFailure, bool>> isSignedIn() async {
     try {
       final isSignedIn = await remoteDatasource.isSignedIn();
 
       return Right(isSignedIn);
-    } catch (e) {
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
       return Left(AuthFailure(message: mapExceptionToMessage(e)));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<AuthFailure, Unit>> deleteAccount() async {
     try {
@@ -112,19 +122,47 @@ class AuthRepositoryImpl implements AuthRepository {
       return const Right(unit);
     } on AuthException catch (e) {
       return Left(e.toFailure());
-    } catch (e) {
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
       return Left(AuthFailure(message: mapExceptionToMessage(e)));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<AuthFailure, bool>> hasGmailScope() async {
     try {
       final hasScope = await remoteDatasource.hasGmailScope();
 
       return Right(hasScope);
-    } catch (e) {
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
       return Left(AuthFailure(message: mapExceptionToMessage(e)));
+    }
+  }
+
+  @override
+  Future<SyncConflictType> checkConflict() async {
+    return di.getIt<SyncEngine>().checkConflict();
+  }
+
+  @override
+  Future<void> stopSyncEngine() async {
+    try {
+      await di.getIt<SyncEngine>().stop();
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
+      debugPrint('AuthRepositoryImpl: Failed to stop sync engine: $e');
+    }
+  }
+
+  @override
+  Future<void> startSyncEngine() async {
+    try {
+      await di.getIt<SyncEngine>().start();
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
+      debugPrint('AuthRepositoryImpl: Failed to start sync engine: $e');
     }
   }
 

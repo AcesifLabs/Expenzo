@@ -9,6 +9,7 @@ class CreateCategory extends UseCase<Category, Category> {
 
   CreateCategory(this.repository);
 
+  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, Category>> call(Category category) {
     return repository.createCategory(category);

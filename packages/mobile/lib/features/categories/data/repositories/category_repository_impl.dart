@@ -18,6 +18,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
     SyncQueueDao? syncQueueDao,
   }) : _syncQueueDao = syncQueueDao;
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, List<Category>>> getCategories({
     RecordType? type,
@@ -32,9 +33,13 @@ class CategoryRepositoryImpl implements CategoryRepository {
       return Right(categories);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      print('Error: $e\n$s');
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, Category>> getCategoryById(String id) async {
     try {
@@ -46,9 +51,13 @@ class CategoryRepositoryImpl implements CategoryRepository {
       return Right(category);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      print('Error: $e\n$s');
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, Category>> createCategory(
     Category category,
@@ -69,9 +78,13 @@ class CategoryRepositoryImpl implements CategoryRepository {
       return Right(created);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      print('Error: $e\n$s');
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, Category>> updateCategory(
     Category category,
@@ -92,20 +105,29 @@ class CategoryRepositoryImpl implements CategoryRepository {
       return Right(updated);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      print('Error: $e\n$s');
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
-  Future<Either<CacheFailure, void>> incrementUsageCount(String id) async {
+  Future<Either<CacheFailure, Unit>> incrementUsageCount(String id) async {
     try {
       await localDatasource.incrementUsageCount(id);
+      _enqueueSync('update', id);
 
-      return const Right(null);
+      return const Right(unit);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      print('Error: $e\n$s');
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, Unit>> deleteCategory(String id) async {
     try {
@@ -115,6 +137,9 @@ class CategoryRepositoryImpl implements CategoryRepository {
       return const Right(unit);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      print('Error: $e\n$s');
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 

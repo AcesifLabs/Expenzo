@@ -9,6 +9,7 @@ class UpdateSettings extends UseCase<UserSettings, UserSettings> {
 
   UpdateSettings(this.repository);
 
+  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, UserSettings>> call(UserSettings settings) {
     return repository.updateSettings(settings);

@@ -2,32 +2,30 @@ import 'package:equatable/equatable.dart';
 import '../../domain/entities/dashboard_summary.dart';
 import '../../domain/entities/date_range.dart';
 
-abstract class DashboardState extends Equatable {
-  @override
-  List<Object?> get props => [];
-
-  const DashboardState();
-}
-
-class DashboardInitial extends DashboardState {}
-
-class DashboardLoading extends DashboardState {
-  final DateRange dateRange;
+sealed class DashboardState extends Equatable {
+  final DateRange? dateRange;
 
   @override
   List<Object?> get props => [dateRange];
 
-  const DashboardLoading({required this.dateRange});
+  const DashboardState({this.dateRange});
+}
+
+class DashboardInitial extends DashboardState {
+  const DashboardInitial();
+}
+
+class DashboardLoading extends DashboardState {
+  const DashboardLoading({super.dateRange});
 }
 
 class DashboardLoaded extends DashboardState {
   final DashboardSummary summary;
-  final DateRange dateRange;
 
   @override
-  List<Object?> get props => [summary, dateRange];
+  List<Object?> get props => [summary];
 
-  const DashboardLoaded({required this.summary, required this.dateRange});
+  const DashboardLoaded({required this.summary, required super.dateRange});
 }
 
 class DashboardError extends DashboardState {

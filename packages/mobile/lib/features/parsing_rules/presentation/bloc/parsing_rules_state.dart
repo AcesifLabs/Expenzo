@@ -1,16 +1,20 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/parsing_rule.dart';
 
-abstract class ParsingRulesState extends Equatable {
+sealed class ParsingRulesState extends Equatable {
   @override
   List<Object?> get props => [];
 
   const ParsingRulesState();
 }
 
-class ParsingRulesInitial extends ParsingRulesState {}
+class ParsingRulesInitial extends ParsingRulesState {
+  const ParsingRulesInitial();
+}
 
-class ParsingRulesLoading extends ParsingRulesState {}
+class ParsingRulesLoading extends ParsingRulesState {
+  const ParsingRulesLoading();
+}
 
 class ParsingRulesLoaded extends ParsingRulesState {
   final List<ParsingRule> rules;

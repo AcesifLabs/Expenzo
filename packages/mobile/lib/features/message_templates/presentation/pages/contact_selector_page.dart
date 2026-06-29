@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
+import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:expense_tracker/core/utils/navigation_utils.dart';
 import '../bloc/contact_selector_bloc.dart';
 import '../bloc/contact_selector_event.dart';
@@ -212,7 +213,7 @@ class _ContactSelectorViewState extends State<ContactSelectorView> {
       width: 40,
       height: 40,
       decoration: BoxDecoration(
-        color: const Color(0xFF2B292C),
+        color: AppColors.surfaceDark,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Icon(
@@ -349,21 +350,17 @@ class _ContactSelectorViewState extends State<ContactSelectorView> {
 
                 return BlocBuilder<ContactSelectorBloc, ContactSelectorState>(
                   builder: (context, state) {
-                    if (state is ContactSelectorLoading) {
-                      return const TransactionListSkeleton(itemCount: 8);
-                    }
-                    if (state is ContactSelectorError) {
-                      return Center(child: Text(state.message));
-                    }
-                    if (state is ContactSelectorLoaded) {
-                      return _buildContactList(
-                        state.contacts,
-                        monitoredSources,
-                        theme,
-                      );
-                    }
-
-                    return const SizedBox.shrink();
+                    return switch (state) {
+                      ContactSelectorLoading() => const TransactionListSkeleton(
+                        itemCount: 8,
+                      ),
+                      ContactSelectorError(:final message) => Center(
+                        child: Text(message),
+                      ),
+                      ContactSelectorLoaded(:final contacts) =>
+                        _buildContactList(contacts, monitoredSources, theme),
+                      _ => const SizedBox.shrink(),
+                    };
                   },
                 );
               },

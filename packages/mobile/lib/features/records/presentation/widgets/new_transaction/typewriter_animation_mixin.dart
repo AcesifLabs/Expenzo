@@ -65,9 +65,7 @@ mixin TypewriterAnimationMixin<T extends StatefulWidget>
     if (_twCharIndex < currentPhrase.length) {
       _twCharIndex++;
       _twDisplayText = currentPhrase.substring(0, _twCharIndex);
-      setState(() {
-        _twDisplayText = _twDisplayText;
-      });
+      setState(() {});
       _typewriterTimer = Timer(
         const Duration(milliseconds: 80),
         _tickTypewriter,
@@ -86,9 +84,7 @@ mixin TypewriterAnimationMixin<T extends StatefulWidget>
     if (_twCharIndex > 0) {
       _twCharIndex--;
       _twDisplayText = currentPhrase.substring(0, _twCharIndex);
-      setState(() {
-        _twDisplayText = _twDisplayText;
-      });
+      setState(() {});
       _typewriterTimer = Timer(
         const Duration(milliseconds: 40),
         _tickTypewriter,
@@ -98,9 +94,7 @@ mixin TypewriterAnimationMixin<T extends StatefulWidget>
       _twPhraseIndex = (_twPhraseIndex + 1) % _twPhrases.length;
       _twCharIndex = 0;
       _twDisplayText = '';
-      setState(() {
-        _twDisplayText = _twDisplayText;
-      });
+      setState(() {});
       _typewriterTimer = Timer(const Duration(milliseconds: 300), () {
         if (!_twIsPaused && mounted) {
           _tickTypewriter();

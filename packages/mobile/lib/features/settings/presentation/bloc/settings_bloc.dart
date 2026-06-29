@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:expense_tracker/core/bloc/transformers.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
 import '../../domain/usecases/get_settings.dart';
 import '../../domain/usecases/update_settings.dart';
@@ -11,12 +12,22 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
 
   SettingsBloc({required this.getSettings, required this.updateSettings})
     : super(const SettingsInitial()) {
-    on<LoadSettings>(_onLoadSettings);
-    on<UpdateSettingsEvent>(_onUpdateSettings);
-    on<UpdateCurrencySymbol>(_onUpdateCurrencySymbol);
-    on<UpdateEmailFetchLimit>(_onUpdateEmailFetchLimit);
-    on<UpdateNotificationsEnabled>(_onUpdateNotificationsEnabled);
-    on<UpdateTheme>(_onUpdateTheme);
+    on<LoadSettings>(_onLoadSettings, transformer: concurrent());
+    on<UpdateSettingsEvent>(_onUpdateSettings, transformer: concurrent());
+    on<UpdateCurrencySymbol>(
+      _onUpdateCurrencySymbol,
+      transformer: concurrent(),
+    );
+    on<UpdateEmailFetchLimit>(
+      _onUpdateEmailFetchLimit,
+      transformer: concurrent(),
+    );
+    on<UpdateNotificationsEnabled>(
+      _onUpdateNotificationsEnabled,
+      transformer: concurrent(),
+    );
+    on<UpdateTheme>(_onUpdateTheme, transformer: concurrent());
+    on<DeleteAccountEvent>(_onDeleteAccountEvent, transformer: concurrent());
   }
 
   Future<void> _onLoadSettings(
@@ -88,5 +99,15 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       final updated = currentState.settings.copyWith(theme: event.theme);
       add(UpdateSettingsEvent(updated));
     }
+  }
+
+  Future<void> _onDeleteAccountEvent(
+    DeleteAccountEvent event,
+    Emitter<SettingsState> emit,
+  ) async {
+    emit(const SettingsLoading());
+    // Account deletion would call a remote API here
+    // For now, emit an informative state
+    emit(const SettingsError('Account deletion not yet implemented'));
   }
 }

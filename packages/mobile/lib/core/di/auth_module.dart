@@ -31,6 +31,7 @@ void initAuthModule(GetIt getIt) {
       signInWithGoogle: getIt<SignInWithGoogle>(),
       signOut: getIt<SignOut>(),
       getCurrentUser: getIt<GetCurrentUser>(),
+      authRepository: getIt<AuthRepository>(),
     ),
   );
 }

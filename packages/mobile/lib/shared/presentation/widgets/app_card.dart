@@ -69,7 +69,7 @@ class AppCard extends StatelessWidget {
       ),
       clipBehavior: clipBehavior,
       child: Material(
-        color: Colors.transparent,
+        color: const Color(0x00000000),
         child: InkWell(
           onTap: onTap,
           onLongPress: onLongPress,

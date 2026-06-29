@@ -8,7 +8,8 @@ class ColorUtils {
       final sanitized = hex.replaceFirst('#', '');
 
       return Color(int.parse('0xFF$sanitized'));
-    } catch (_) {
+    } catch (e) {
+      debugPrint('Color parse error: $e');
       return fallback;
     }
   }

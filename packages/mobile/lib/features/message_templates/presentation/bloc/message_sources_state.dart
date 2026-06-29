@@ -1,16 +1,20 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/message_source.dart';
 
-abstract class MessageSourcesState extends Equatable {
+sealed class MessageSourcesState extends Equatable {
   @override
   List<Object?> get props => [];
 
   const MessageSourcesState();
 }
 
-class MessageSourcesInitial extends MessageSourcesState {}
+class MessageSourcesInitial extends MessageSourcesState {
+  const MessageSourcesInitial();
+}
 
-class MessageSourcesLoading extends MessageSourcesState {}
+class MessageSourcesLoading extends MessageSourcesState {
+  const MessageSourcesLoading();
+}
 
 class MessageSourcesLoaded extends MessageSourcesState {
   final List<MessageSource> sources;

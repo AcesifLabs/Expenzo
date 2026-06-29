@@ -2,18 +2,22 @@ import 'package:equatable/equatable.dart';
 import '../../domain/entities/date_amount.dart';
 import '../../domain/entities/category_amount.dart';
 import '../../domain/entities/spending_insights.dart';
-import '../../domain/repositories/reports_repository.dart';
+import '../../domain/entities/granularity.dart';
 
-abstract class ReportsState extends Equatable {
+sealed class ReportsState extends Equatable {
   @override
   List<Object?> get props => [];
 
   const ReportsState();
 }
 
-class ReportsInitial extends ReportsState {}
+class ReportsInitial extends ReportsState {
+  const ReportsInitial();
+}
 
-class ReportsLoading extends ReportsState {}
+class ReportsLoading extends ReportsState {
+  const ReportsLoading();
+}
 
 class ReportsLoaded extends ReportsState {
   final List<DateAmount> spendingTrend;

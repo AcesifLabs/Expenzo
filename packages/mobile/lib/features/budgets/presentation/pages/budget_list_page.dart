@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
+import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
-import 'package:expense_tracker/core/utils/navigation_utils.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_summary_card.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_empty_state.dart';
@@ -15,8 +16,6 @@ import '../bloc/budget_event.dart';
 import '../bloc/budget_state.dart';
 import '../widgets/budget_progress_card.dart';
 import '../widgets/skeletons/budget_list_skeleton.dart';
-import 'budget_form_page.dart';
-import 'budget_details_page.dart';
 
 class BudgetListPage extends StatelessWidget {
   const BudgetListPage({super.key});
@@ -25,28 +24,31 @@ class BudgetListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => di.getIt<BudgetBloc>()..add(LoadBudgets()),
-      child: const _BudgetListPageContent(),
+      child: const BudgetListView(),
     );
   }
 }
 
-class _BudgetListPageContent extends StatefulWidget {
-  const _BudgetListPageContent();
+class BudgetListView extends StatefulWidget {
+  const BudgetListView({super.key});
 
   @override
-  State<_BudgetListPageContent> createState() => _BudgetListPageContentState();
+  State<BudgetListView> createState() => _BudgetListViewState();
 }
 
-class _BudgetListPageContentState extends State<_BudgetListPageContent> {
+class _BudgetListViewState extends State<BudgetListView> {
   void _onStateChanged(BuildContext context, BudgetState state) {
-    if (state is BudgetOperationSuccess) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(state.message)));
-    } else if (state is BudgetError) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(state.message)));
+    switch (state) {
+      case BudgetOperationSuccess():
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Budget operation successful')),
+        );
+      case BudgetError(:final message):
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(message)));
+      default:
+        break;
     }
   }
 
@@ -59,13 +61,13 @@ class _BudgetListPageContentState extends State<_BudgetListPageContent> {
 
   Color _getIndicatorColor(double percentage) {
     if (percentage > 100) {
-      return const Color(0xFFFF3B30);
+      return AppColors.expense;
     }
     if (percentage >= 80) {
-      return const Color(0xFFFF9F0A);
+      return AppColors.warning;
     }
 
-    return const Color(0xFF34C759);
+    return AppColors.success;
   }
 
   Widget _buildLoadedState(
@@ -194,43 +196,18 @@ class _BudgetListPageContentState extends State<_BudgetListPageContent> {
   }
 
   void _navigateToDetails(BuildContext context, BudgetProgress progress) {
-    final bloc = context.read<BudgetBloc>();
-    Navigator.push(
-      context,
-      SlidePageRoute(
-        builder: (_) => BlocProvider.value(
-          value: bloc,
-          child: BudgetDetailsPage(progress: progress),
-        ),
-      ),
-    );
+    context.push('/budgets/${progress.budgetId}');
   }
 
-  void _navigateToCreate(BuildContext context) async {
-    final result = await Navigator.push(
-      context,
-      SlidePageRoute(
-        builder: (_) => BlocProvider.value(
-          value: context.read<BudgetBloc>(),
-          child: const BudgetFormPage(),
-        ),
-      ),
-    );
+  Future<void> _navigateToCreate(BuildContext context) async {
+    final result = await context.push<bool>('/budgets/new');
     if (result == true && context.mounted) {
       context.read<BudgetBloc>().add(LoadBudgets());
     }
   }
 
-  void _navigateToEdit(BuildContext context, Budget budget) async {
-    final result = await Navigator.push(
-      context,
-      SlidePageRoute(
-        builder: (_) => BlocProvider.value(
-          value: context.read<BudgetBloc>(),
-          child: BudgetFormPage(budget: budget),
-        ),
-      ),
-    );
+  Future<void> _navigateToEdit(BuildContext context, Budget budget) async {
+    final result = await context.push<bool>('/budgets/${budget.id}/edit');
     if (result == true && context.mounted) {
       context.read<BudgetBloc>().add(LoadBudgets());
     }
@@ -248,7 +225,7 @@ class _BudgetListPageContentState extends State<_BudgetListPageContent> {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () => _onConfirmDelete(context, budget),
+            onPressed: () => _onConfirmDelete(dialogContext, context, budget),
             child: const Text('Delete'),
           ),
         ],
@@ -256,9 +233,13 @@ class _BudgetListPageContentState extends State<_BudgetListPageContent> {
     );
   }
 
-  void _onConfirmDelete(BuildContext context, Budget budget) {
-    Navigator.pop(context);
-    context.read<BudgetBloc>().add(DeleteBudgetEvent(budget.id ?? ''));
+  void _onConfirmDelete(
+    BuildContext dialogContext,
+    BuildContext pageContext,
+    Budget budget,
+  ) {
+    if (dialogContext.mounted) Navigator.pop(dialogContext);
+    pageContext.read<BudgetBloc>().add(DeleteBudgetEvent(budget.id ?? ''));
   }
 
   @override
@@ -268,19 +249,12 @@ class _BudgetListPageContentState extends State<_BudgetListPageContent> {
     return BlocConsumer<BudgetBloc, BudgetState>(
       listener: _onStateChanged,
       builder: (context, state) {
-        if (state is BudgetLoading) {
-          return const BudgetListSkeleton();
-        }
-
-        if (state is BudgetError) {
-          return Center(child: Text('Error: ${state.message}'));
-        }
-
-        if (state is BudgetLoaded) {
-          return _buildLoadedState(context, state, fmt);
-        }
-
-        return const Center(child: Text('Load budgets to see data'));
+        return switch (state) {
+          BudgetLoading() => const BudgetListSkeleton(),
+          BudgetError(:final message) => Center(child: Text('Error: $message')),
+          BudgetLoaded() => _buildLoadedState(context, state, fmt),
+          _ => const Center(child: Text('Load budgets to see data')),
+        };
       },
     );
   }
