@@ -22,14 +22,3 @@ class SmsMessage extends Equatable {
 }
 
 enum SmsType { received, sent, draft }
-
-SmsType smsTypeFromInt(int type) {
-  switch (type) {
-    case 1:
-      return SmsType.received;
-    case 2:
-      return SmsType.sent;
-    default:
-      return SmsType.received;
-  }
-}
