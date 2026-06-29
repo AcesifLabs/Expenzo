@@ -19,7 +19,7 @@ void main() {
 
   group('RecordDao spending filters', () {
     test('getTotalSpending should only include OUT records', () async {
-      final now = DateTime.now();
+      final now = DateTime(2026, 6, 15, 12);
       final start = DateTime(now.year, now.month, 1);
       final end = DateTime(now.year, now.month + 1, 0);
 
@@ -51,7 +51,7 @@ void main() {
     test(
       'getCategorySpending should only include OUT records for specific category',
       () async {
-        final now = DateTime.now();
+        final now = DateTime(2026, 6, 15, 12);
         final start = DateTime(now.year, now.month, 1);
         final end = DateTime(now.year, now.month + 1, 0);
         const categoryId = 'cat1';

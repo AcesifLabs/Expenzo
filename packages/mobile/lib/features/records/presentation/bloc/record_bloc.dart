@@ -116,48 +116,62 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     );
 
     if (_hasActiveFilters(currentState)) {
-      final result = await recordRepository.getFilteredRecords(
-        RecordFilter(
-          startDate: currentState.filterStartDate,
-          endDate: currentState.filterEndDate,
-          categoryIds: currentState.filterCategoryIds,
-          recordType: currentState.filterRecordType,
-          limit: _pageSize,
-          offset: currentState.records.length,
+      await _loadMoreFiltered(currentState, emit);
+
+      return;
+    }
+
+    await _loadMoreUnfiltered(currentState, emit);
+  }
+
+  Future<void> _loadMoreFiltered(
+    RecordLoaded currentState,
+    Emitter<RecordState> emit,
+  ) async {
+    final result = await recordRepository.getFilteredRecords(
+      RecordFilter(
+        startDate: currentState.filterStartDate,
+        endDate: currentState.filterEndDate,
+        categoryIds: currentState.filterCategoryIds,
+        recordType: currentState.filterRecordType,
+        limit: _pageSize,
+        offset: currentState.records.length,
+      ),
+    );
+
+    result.fold((failure) => emit(RecordError(failure.message)), (newRecords) {
+      final allRecords = [...currentState.records, ...newRecords];
+
+      emit(
+        currentState.copyWith(
+          records: allRecords,
+          total: allRecords.length,
+          hasMore: newRecords.length >= _pageSize,
         ),
       );
+    });
+  }
 
-      result.fold((failure) => emit(RecordError(failure.message)), (
-        newRecords,
-      ) {
-        final allRecords = [...currentState.records, ...newRecords];
-        emit(
-          currentState.copyWith(
-            records: allRecords,
-            total: allRecords.length,
-            hasMore: newRecords.length >= _pageSize,
-          ),
-        );
-      });
-    } else {
-      final result = await getRecords(
-        GetRecordsParams(limit: _pageSize, offset: currentState.records.length),
+  Future<void> _loadMoreUnfiltered(
+    RecordLoaded currentState,
+    Emitter<RecordState> emit,
+  ) async {
+    final result = await getRecords(
+      GetRecordsParams(limit: _pageSize, offset: currentState.records.length),
+    );
+
+    result.fold((failure) => emit(RecordError(failure.message)), (newRecords) {
+      final allRecords = [...currentState.records, ...newRecords];
+
+      emit(
+        RecordLoaded(
+          records: allRecords,
+          total: allRecords.length,
+          hasMore: newRecords.length >= _pageSize,
+          searchQuery: currentState.searchQuery,
+        ),
       );
-
-      result.fold((failure) => emit(RecordError(failure.message)), (
-        newRecords,
-      ) {
-        final allRecords = [...currentState.records, ...newRecords];
-        emit(
-          RecordLoaded(
-            records: allRecords,
-            total: allRecords.length,
-            hasMore: newRecords.length >= _pageSize,
-            searchQuery: currentState.searchQuery,
-          ),
-        );
-      });
-    }
+    });
   }
 
   Future<void> _onAddRecord(

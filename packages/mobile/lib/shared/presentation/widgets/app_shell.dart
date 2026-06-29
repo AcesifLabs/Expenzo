@@ -13,7 +13,7 @@ import 'package:expense_tracker/features/records/presentation/widgets/new_transa
 import 'package:expense_tracker/features/budgets/presentation/pages/budget_list_page.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanner_event.dart';
-import 'package:expense_tracker/features/sms_parser/presentation/pages/sms_scan_page.dart';
+import 'package:expense_tracker/features/sms_parser/presentation/pages/sms_scan_results_page.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:expense_tracker/shared/presentation/widgets/sms_permission_gate.dart';

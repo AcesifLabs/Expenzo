@@ -32,7 +32,6 @@ dart_code_linter:
     - prefer-last
     - prefer-match-file-name
     - prefer-moving-to-variable
-    - prefer-trailing-comma
 
   metrics:
     cyclomatic-complexity: 10
