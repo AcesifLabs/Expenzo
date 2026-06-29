@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:expense_tracker/core/bloc/transformers.dart';
 import '../../domain/usecases/get_message_sources.dart';
 import '../../domain/usecases/save_message_source.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
@@ -15,9 +16,15 @@ class MessageSourcesBloc
     required this.getMessageSources,
     required this.saveMessageSource,
   }) : super(MessageSourcesInitial()) {
-    on<LoadMessageSources>(_onLoadMessageSources);
-    on<ToggleSourceMonitoring>(_onToggleSourceMonitoring);
-    on<UpdateSourceAutoCreate>(_onUpdateSourceAutoCreate);
+    on<LoadMessageSources>(_onLoadMessageSources, transformer: concurrent());
+    on<ToggleSourceMonitoring>(
+      _onToggleSourceMonitoring,
+      transformer: concurrent(),
+    );
+    on<UpdateSourceAutoCreate>(
+      _onUpdateSourceAutoCreate,
+      transformer: concurrent(),
+    );
   }
 
   Future<void> _onLoadMessageSources(

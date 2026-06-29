@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:expense_tracker/core/bloc/transformers.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
 import '../../../sms_parser/data/datasources/sms_local_datasource.dart';
 import 'contact_selector_event.dart';
@@ -15,8 +16,8 @@ class ContactSelectorBloc
 
   ContactSelectorBloc({required this.smsDatasource})
     : super(ContactSelectorInitial()) {
-    on<LoadContacts>(_onLoadContacts);
-    on<LoadMoreContacts>(_onLoadMoreContacts);
+    on<LoadContacts>(_onLoadContacts, transformer: concurrent());
+    on<LoadMoreContacts>(_onLoadMoreContacts, transformer: concurrent());
   }
 
   Future<void> _onLoadContacts(
@@ -46,7 +47,8 @@ class ContactSelectorBloc
       );
 
       _currentOffset += messages.length;
-    } catch (e) {
+    } catch (e, s) {
+      addError(e, s);
       emit(ContactSelectorError(message: e.toString()));
     }
   }
@@ -69,6 +71,7 @@ class ContactSelectorBloc
 
       if (messages.isEmpty) {
         emit(currentState.copyWith(hasReachedMax: true, isLoadingMore: false));
+
         return;
       }
 
@@ -86,7 +89,8 @@ class ContactSelectorBloc
       );
 
       _currentOffset += messages.length;
-    } catch (e) {
+    } catch (e, s) {
+      addError(e, s);
       emit(ContactSelectorError(message: e.toString()));
     }
   }

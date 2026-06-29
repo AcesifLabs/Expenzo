@@ -8,6 +8,7 @@ class DeleteRecord extends UseCase<Unit, String> {
 
   DeleteRecord(this.repository);
 
+  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, Unit>> call(String id) {
     return repository.deleteRecord(id);

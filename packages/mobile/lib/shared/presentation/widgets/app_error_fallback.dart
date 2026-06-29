@@ -1,25 +1,23 @@
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
-
-enum AppFallbackContext { build, framework, async, init }
+import 'package:go_router/go_router.dart';
 
 class AppErrorFallback extends StatelessWidget {
+  static String generateReferenceId() {
+    final raw = DateTime.now().microsecondsSinceEpoch.toRadixString(36);
+    final tail = raw.length <= 6 ? raw : raw.substring(raw.length - 6);
+
+    return tail.toUpperCase();
+  }
+
   final AppFallbackContext fallbackContext;
-
   final String referenceId;
-
   final Object? exception;
-
   final StackTrace? stack;
-
   final String Function(Object exception)? formatDebugType;
-
   final VoidCallback? onRetry;
-
   final VoidCallback? onHardReset;
-
   final VoidCallback? onRestart;
-
   final WidgetBuilder? feedbackBuilder;
 
   const AppErrorFallback({
@@ -34,116 +32,6 @@ class AppErrorFallback extends StatelessWidget {
     this.onRestart,
     this.feedbackBuilder,
   });
-
-  static String generateReferenceId() {
-    final raw = DateTime.now().microsecondsSinceEpoch.toRadixString(36);
-    final tail = raw.length <= 6 ? raw : raw.substring(raw.length - 6);
-    return tail.toUpperCase();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final onSendFeedback = _buildSendFeedbackHandler(context);
-
-    return Material(
-      color: scheme.surface,
-      child: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.error_outline, color: scheme.error, size: 64),
-                    const SizedBox(height: 24),
-                    Text(
-                      _title,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: scheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      _body,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 14,
-                        height: 1.5,
-                        color: scheme.onSurface.withAlpha(140),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    SelectableText(
-                      'Ref: $referenceId',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 12,
-                        letterSpacing: 0.5,
-                        color: scheme.onSurface.withAlpha(100),
-                        fontFeatures: const [FontFeature.tabularFigures()],
-                      ),
-                    ),
-                    if (kDebugMode && exception != null) ...[
-                      const SizedBox(height: 16),
-                      _DebugDetails(
-                        exception: exception!,
-                        formatDebugType: formatDebugType,
-                      ),
-                    ],
-                    const SizedBox(height: 32),
-                    _FallbackButton(
-                      label: 'Try Again',
-                      icon: Icons.refresh,
-                      filled: true,
-                      onTap: onRetry,
-                      onLongPress: onHardReset,
-                    ),
-                    if (onRestart != null) ...[
-                      const SizedBox(height: 8),
-                      _FallbackButton(
-                        label: 'Close App',
-                        icon: Icons.power_settings_new,
-                        filled: false,
-                        onTap: onRestart,
-                      ),
-                    ],
-                    if (onSendFeedback != null) ...[
-                      const SizedBox(height: 8),
-                      _FallbackButton(
-                        label: 'Send Feedback',
-                        icon: Icons.feedback_outlined,
-                        filled: false,
-                        textOnly: true,
-                        onTap: onSendFeedback,
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  VoidCallback? _buildSendFeedbackHandler(BuildContext context) {
-    final builder = feedbackBuilder;
-    if (builder == null) return null;
-    return () {
-      Navigator.of(
-        context,
-      ).push<void>(MaterialPageRoute<void>(builder: builder));
-    };
-  }
 
   String get _title {
     return switch (fallbackContext) {
@@ -165,7 +53,139 @@ class AppErrorFallback extends StatelessWidget {
             'so we can fix it.',
     };
   }
+
+  VoidCallback? _buildSendFeedbackHandler(BuildContext context) {
+    final builder = feedbackBuilder;
+    if (builder == null) return null;
+
+    return () {
+      context.push('/feedback');
+    };
+  }
+
+  Widget _errorIcon(ColorScheme scheme) {
+    return Icon(Icons.error_outline, color: scheme.error, size: 64);
+  }
+
+  Widget _errorTitle(ColorScheme scheme) {
+    return Text(
+      _title,
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+        color: scheme.onSurface,
+      ),
+    );
+  }
+
+  Widget _errorBody(ColorScheme scheme) {
+    return Text(
+      _body,
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontSize: 14,
+        height: 1.5,
+        color: scheme.onSurface.withAlpha(140),
+      ),
+    );
+  }
+
+  Widget _referenceLabel(ColorScheme scheme) {
+    return SelectableText(
+      'Ref: $referenceId',
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontSize: 12,
+        letterSpacing: 0.5,
+        color: scheme.onSurface.withAlpha(100),
+        fontFeatures: const [FontFeature.tabularFigures()],
+      ),
+    );
+  }
+
+  Widget _retryButton() {
+    return _FallbackButton(
+      label: 'Try Again',
+      icon: Icons.refresh,
+      filled: true,
+      onTap: onRetry,
+      onLongPress: onHardReset,
+    );
+  }
+
+  List<Widget> _buildActions(VoidCallback? onSendFeedback) {
+    return [
+      _retryButton(),
+      if (onRestart != null) ...[
+        const SizedBox(height: 8),
+        _FallbackButton(
+          label: 'Close App',
+          icon: Icons.power_settings_new,
+          filled: false,
+          onTap: onRestart,
+        ),
+      ],
+      if (onSendFeedback != null) ...[
+        const SizedBox(height: 8),
+        _FallbackButton(
+          label: 'Send Feedback',
+          icon: Icons.feedback_outlined,
+          filled: false,
+          textOnly: true,
+          onTap: onSendFeedback,
+        ),
+      ],
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final onSendFeedback = _buildSendFeedbackHandler(context);
+    final localException = exception;
+
+    return Material(
+      color: scheme.surface,
+      child: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _errorIcon(scheme),
+                    const SizedBox(height: 24),
+                    _errorTitle(scheme),
+                    const SizedBox(height: 12),
+                    _errorBody(scheme),
+                    const SizedBox(height: 12),
+                    _referenceLabel(scheme),
+                    if (kDebugMode && localException != null) ...[
+                      const SizedBox(height: 16),
+                      _DebugDetails(
+                        exception: localException,
+                        formatDebugType: formatDebugType,
+                      ),
+                    ],
+                    const SizedBox(height: 32),
+                    ..._buildActions(onSendFeedback),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
+
+enum AppFallbackContext { build, framework, async, init }
 
 class _FallbackButton extends StatelessWidget {
   final String label;
@@ -184,32 +204,29 @@ class _FallbackButton extends StatelessWidget {
     this.onLongPress,
   });
 
+  (Color, Color, BorderSide?) _resolveStyle(ColorScheme scheme) {
+    if (textOnly) {
+      return (const Color(0x00000000), scheme.primary, null);
+    } else if (filled) {
+      return (scheme.primary, scheme.onPrimary, null);
+    } else {
+      return (
+        const Color(0x00000000),
+        scheme.primary,
+        BorderSide(color: scheme.primary, width: 1),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-
-    final Color bg;
-    final Color fg;
-    final BorderSide? border;
-    if (textOnly) {
-      bg = Colors.transparent;
-      fg = scheme.primary;
-      border = null;
-    } else if (filled) {
-      bg = scheme.primary;
-      fg = scheme.onPrimary;
-      border = null;
-    } else {
-      bg = Colors.transparent;
-      fg = scheme.primary;
-      border = BorderSide(color: scheme.primary, width: 1);
-    }
+    final (bg, fg, border) = _resolveStyle(scheme);
 
     return SizedBox(
       width: double.infinity,
       child: Material(
         color: bg,
-
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
           side: border ?? BorderSide.none,
@@ -258,59 +275,64 @@ class _DebugDetailsState extends State<_DebugDetails> {
 
   String _format(Object exception) {
     final fn = widget.formatDebugType;
+
     return fn != null ? fn(exception) : exception.runtimeType.toString();
+  }
+
+  Widget _expandToggle(Color mutedColor) {
+    return InkWell(
+      onTap: () => setState(() => _expanded = !_expanded),
+      borderRadius: BorderRadius.circular(4),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              _expanded ? Icons.expand_less : Icons.expand_more,
+              size: 18,
+              color: mutedColor,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              'Details (debug)',
+              style: TextStyle(fontSize: 12, color: mutedColor),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _detailContent(ColorScheme scheme) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: scheme.onSurface.withAlpha(10),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        _format(widget.exception),
+        style: TextStyle(
+          fontFamily: 'monospace',
+          fontSize: 11,
+          color: scheme.onSurface.withAlpha(150),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final mutedColor = scheme.onSurface.withAlpha(120);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        InkWell(
-          onTap: () => setState(() => _expanded = !_expanded),
-          borderRadius: BorderRadius.circular(4),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  _expanded ? Icons.expand_less : Icons.expand_more,
-                  size: 18,
-                  color: scheme.onSurface.withAlpha(120),
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  'Details (debug)',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: scheme.onSurface.withAlpha(120),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        if (_expanded) ...[
-          const SizedBox(height: 4),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: scheme.onSurface.withAlpha(10),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Text(
-              _format(widget.exception),
-              style: TextStyle(
-                fontFamily: 'monospace',
-                fontSize: 11,
-                color: scheme.onSurface.withAlpha(150),
-              ),
-            ),
-          ),
-        ],
+        _expandToggle(mutedColor),
+        if (_expanded) ...[const SizedBox(height: 4), _detailContent(scheme)],
       ],
     );
   }

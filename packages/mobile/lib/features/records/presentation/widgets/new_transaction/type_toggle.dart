@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
+import 'package:expense_tracker/core/theme/app_colors.dart';
 
 class TypeToggle extends StatelessWidget {
   final RecordType type;
@@ -8,12 +9,37 @@ class TypeToggle extends StatelessWidget {
 
   const TypeToggle({super.key, required this.type, required this.onSwitch});
 
+  Widget _buildPill(
+    double pillLeft,
+    double pillWidth,
+    Duration animDuration,
+    bool isExpense,
+  ) {
+    const expenseColor = AppColors.expense;
+    const incomeColor = AppColors.success;
+
+    return AnimatedPositioned(
+      duration: animDuration,
+      curve: Curves.easeInOut,
+      left: pillLeft,
+      top: 4,
+      bottom: 4,
+      child: AnimatedContainer(
+        duration: animDuration,
+        curve: Curves.easeInOut,
+        width: pillWidth,
+        decoration: BoxDecoration(
+          color: (isExpense ? expenseColor : incomeColor).withAlpha(25),
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final isExpense = type == RecordType.expense;
-    const expenseColor = Color(0xFFFF3B30);
-    const incomeColor = Color(0xFF34C759);
     const animDuration = Duration(milliseconds: 500);
 
     return Container(
@@ -31,25 +57,7 @@ class TypeToggle extends StatelessWidget {
             height: 44,
             child: Stack(
               children: [
-                AnimatedPositioned(
-                  duration: animDuration,
-                  curve: Curves.easeInOut,
-                  left: pillLeft,
-                  top: 4,
-                  bottom: 4,
-                  child: AnimatedContainer(
-                    duration: animDuration,
-                    curve: Curves.easeInOut,
-                    width: pillWidth,
-                    decoration: BoxDecoration(
-                      color: (isExpense ? expenseColor : incomeColor).withAlpha(
-                        25,
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-
+                _buildPill(pillLeft, pillWidth, animDuration, isExpense),
                 Row(
                   children: [
                     Expanded(
@@ -57,7 +65,7 @@ class TypeToggle extends StatelessWidget {
                         icon: PiconsFill.trendDown,
                         label: 'Expense',
                         isActive: isExpense,
-                        activeColor: expenseColor,
+                        activeColor: AppColors.expense,
                         colors: colors,
                         onTap: () => onSwitch(RecordType.expense),
                       ),
@@ -67,7 +75,7 @@ class TypeToggle extends StatelessWidget {
                         icon: PiconsFill.trendUp,
                         label: 'Income',
                         isActive: !isExpense,
-                        activeColor: incomeColor,
+                        activeColor: AppColors.success,
                         colors: colors,
                         onTap: () => onSwitch(RecordType.income),
                       ),
@@ -103,6 +111,7 @@ class _ToggleTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fgColor = isActive ? activeColor : colors.onSurface.withAlpha(100);
+
     return GestureDetector(
       onTap: onTap,
       child: Container(

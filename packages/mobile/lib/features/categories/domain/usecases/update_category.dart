@@ -9,6 +9,7 @@ class UpdateCategory extends UseCase<Category, Category> {
 
   UpdateCategory(this.repository);
 
+  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, Category>> call(Category category) {
     return repository.updateCategory(category);

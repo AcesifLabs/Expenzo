@@ -65,25 +65,7 @@ class _SmsPermissionGateState extends State<SmsPermissionGate> {
     if (!status.isGranted && status.isPermanentlyDenied && mounted) {
       showDialog(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Permission Required'),
-          content: const Text(
-            'SMS permission is permanently denied. Please enable it in app settings to use the smart scanner.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-                openAppSettings();
-              },
-              child: const Text('Open Settings'),
-            ),
-          ],
-        ),
+        builder: (_) => const _PermissionRequiredDialog(),
       );
     }
   }
@@ -91,7 +73,8 @@ class _SmsPermissionGateState extends State<SmsPermissionGate> {
   Future<void> _startRealtimeProcessor() async {
     try {
       await di.getIt<RealtimeSmsProcessor>().start();
-    } catch (e) {
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
       debugPrint('SmsPermissionGate start skipped: $e');
     }
   }
@@ -112,7 +95,11 @@ class _SmsPermissionGateState extends State<SmsPermissionGate> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(PiconsRegular.warningCircle, size: 80, color: Colors.grey),
+            Icon(
+              PiconsRegular.warningCircle,
+              size: 80,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
             const SizedBox(height: 24),
             const Text(
               'SMS Access Required',
@@ -136,11 +123,39 @@ class _SmsPermissionGateState extends State<SmsPermissionGate> {
                   vertical: 16,
                 ),
               ),
-              onPressed: _requestPermission,
+              onPressed: () => _requestPermission(),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _PermissionRequiredDialog extends StatelessWidget {
+  const _PermissionRequiredDialog();
+
+  void _openAppSettings() {
+    openAppSettings();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Permission Required'),
+      content: const Text(
+        'SMS permission is permanently denied. Please enable it in app settings to use the smart scanner.',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: _openAppSettings,
+          child: const Text('Open Settings'),
+        ),
+      ],
     );
   }
 }

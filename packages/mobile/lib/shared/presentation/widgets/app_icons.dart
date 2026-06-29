@@ -3,7 +3,107 @@ import 'package:flutter/material.dart';
 import 'package:picons/picons.dart';
 
 class AppIcons {
-  AppIcons._();
+  static const Map<String, IconData> _categoryIconMap = {
+    'package': PiconsRegular.package,
+    'shoppingCart': PiconsRegular.shoppingCart,
+    'forkKnife': PiconsRegular.forkKnife,
+    'car': PiconsRegular.car,
+    'house': PiconsRegular.house,
+    'heartbeat': PiconsRegular.heartbeat,
+    'gameController': PiconsRegular.gameController,
+    'deviceMobile': PiconsRegular.deviceMobile,
+    'airplane': PiconsRegular.airplane,
+    'graduationCap': PiconsRegular.graduationCap,
+    'currencyDollar': PiconsRegular.currencyDollar,
+    'gift': PiconsRegular.gift,
+    'briefcase': PiconsRegular.briefcase,
+    'laptop': PiconsRegular.laptop,
+    'chartLineUp': PiconsRegular.chartLineUp,
+    'arrowULeftDown': PiconsRegular.arrowULeftDown,
+  };
+
+  static const Map<String, IconData> _iconNameLookup = {
+    'home': PiconsRegular.house,
+    'dashboard': PiconsRegular.squaresFour,
+    'scan': PiconsRegular.listMagnifyingGlass,
+    'search': PiconsRegular.magnifyingGlass,
+    'settings': PiconsRegular.faders,
+    'add': PiconsRegular.plus,
+    'plus': PiconsRegular.plus,
+    'delete': PiconsRegular.trash,
+    'trash': PiconsRegular.trash,
+    'edit': PiconsRegular.pencilSimple,
+    'check': PiconsRegular.check,
+    'close': PiconsRegular.x,
+    'x': PiconsRegular.x,
+    'menu': PiconsRegular.list,
+    'filter': PiconsRegular.funnel,
+    'refresh': PiconsRegular.arrowsClockwise,
+    'save': PiconsRegular.floppyDisk,
+    'share': PiconsRegular.shareNetwork,
+    'download': PiconsRegular.downloadSimple,
+    'upload': PiconsRegular.uploadSimple,
+    'warning': PiconsRegular.warning,
+    'error': PiconsRegular.warningCircle,
+    'success': PiconsRegular.checkCircle,
+    'info': PiconsRegular.info,
+    'help': PiconsRegular.question,
+    'back': PiconsRegular.arrowLeft,
+    'forward': PiconsRegular.arrowRight,
+    'chevron_right': PiconsRegular.caretRight,
+    'chevron_down': PiconsRegular.caretDown,
+    'wallet': PiconsRegular.wallet,
+    'money': PiconsRegular.currencyDollar,
+    'receipt': PiconsRegular.invoice,
+    'card': PiconsRegular.creditCard,
+    'trending_up': PiconsRegular.trendUp,
+    'trending_down': PiconsRegular.trendDown,
+    'chart': PiconsRegular.chartBar,
+    'pie_chart': PiconsRegular.chartPie,
+    'category': PiconsRegular.tag,
+    'tag': PiconsRegular.tag,
+    'sms': PiconsRegular.chatDots,
+    'message': PiconsRegular.chatDots,
+    'email': PiconsRegular.envelope,
+    'mail': PiconsRegular.envelope,
+    'sync': PiconsRegular.arrowsClockwise,
+    'repeat': PiconsRegular.arrowsClockwise,
+    'calendar': PiconsRegular.calendar,
+    'clock': PiconsRegular.clock,
+    'schedule': PiconsRegular.calendarBlank,
+    'history': PiconsRegular.clockCounterClockwise,
+    'user': PiconsRegular.user,
+    'profile': PiconsRegular.userCircle,
+    'notification': PiconsRegular.bell,
+    'bell': PiconsRegular.bell,
+    'cloud_done': PiconsRegular.cloud,
+    'cloud_off': PiconsRegular.cloudX,
+    'phone': PiconsRegular.phone,
+    'location': PiconsRegular.mapPin,
+    'map': PiconsRegular.mapPin,
+    'image': PiconsRegular.image,
+    'link': PiconsRegular.link,
+    'wifi': PiconsRegular.wifiHigh,
+    'lock': PiconsRegular.lock,
+    'unlock': PiconsRegular.lockOpen,
+    'security': PiconsRegular.shield,
+    'shield': PiconsRegular.shield,
+    'visibility': PiconsRegular.eye,
+    'visibility_off': PiconsRegular.eyeClosed,
+    'empty': PiconsRegular.empty,
+    'inbox': PiconsRegular.empty,
+    'apps': PiconsRegular.squaresFour,
+    'copy': PiconsRegular.copy,
+    'document': PiconsRegular.fileText,
+    'file': PiconsRegular.fileText,
+    'folder': PiconsRegular.folder,
+    'star': PiconsRegular.star,
+    'favorite': PiconsRegular.star,
+    'heart': PiconsRegular.heart,
+    'globe': PiconsRegular.globe,
+    'earth': PiconsRegular.globe,
+    'printer': PiconsRegular.printer,
+  };
 
   static IconData get home => PiconsRegular.house;
   static IconData get dashboard => PiconsRegular.squaresFour;
@@ -43,32 +143,6 @@ class AppIcons {
   static IconData get trendingDown => PiconsRegular.trendDown;
   static IconData get chart => PiconsRegular.chartBar;
   static IconData get pieChart => PiconsRegular.chartPie;
-
-  static const Map<String, IconData> _categoryIconMap = {
-    'package': PiconsRegular.package,
-    'shoppingCart': PiconsRegular.shoppingCart,
-    'forkKnife': PiconsRegular.forkKnife,
-    'car': PiconsRegular.car,
-    'house': PiconsRegular.house,
-    'heartbeat': PiconsRegular.heartbeat,
-    'gameController': PiconsRegular.gameController,
-    'deviceMobile': PiconsRegular.deviceMobile,
-    'airplane': PiconsRegular.airplane,
-    'graduationCap': PiconsRegular.graduationCap,
-    'currencyDollar': PiconsRegular.currencyDollar,
-    'gift': PiconsRegular.gift,
-
-    'briefcase': PiconsRegular.briefcase,
-    'laptop': PiconsRegular.laptop,
-    'chartLineUp': PiconsRegular.chartLineUp,
-    'arrowULeftDown': PiconsRegular.arrowULeftDown,
-  };
-
-  static IconData getCategoryIcon(String iconName) {
-    final iconData = _categoryIconMap[iconName];
-    if (iconData != null) return iconData;
-    return PiconsRegular.package;
-  }
 
   static IconData get category => PiconsRegular.tag;
   static IconData get food => PiconsRegular.forkKnife;
@@ -128,6 +202,15 @@ class AppIcons {
   static IconData get heart => PiconsRegular.heart;
   static IconData get globe => PiconsRegular.globe;
 
+  AppIcons._();
+
+  static IconData getCategoryIcon(String iconName) {
+    final iconData = _categoryIconMap[iconName];
+    if (iconData != null) return iconData;
+
+    return PiconsRegular.package;
+  }
+
   static IconData getSourceIcon(ExpenseSource source) {
     switch (source) {
       case ExpenseSource.sms:
@@ -142,167 +225,8 @@ class AppIcons {
   }
 
   static IconData get(String name) {
-    switch (name.toLowerCase()) {
-      case 'home':
-        return home;
-      case 'dashboard':
-        return dashboard;
-      case 'scan':
-        return scan;
-      case 'search':
-        return search;
-      case 'settings':
-        return settings;
+    final icon = _iconNameLookup[name.toLowerCase()];
 
-      case 'add':
-      case 'plus':
-        return add;
-      case 'delete':
-      case 'trash':
-        return delete;
-      case 'edit':
-        return edit;
-      case 'check':
-        return check;
-      case 'close':
-      case 'x':
-        return close;
-      case 'menu':
-        return menu;
-      case 'filter':
-        return filter;
-      case 'refresh':
-        return refresh;
-      case 'save':
-        return save;
-      case 'share':
-        return share;
-      case 'download':
-        return download;
-      case 'upload':
-        return upload;
-
-      case 'warning':
-        return warning;
-      case 'error':
-        return error;
-      case 'success':
-        return success;
-      case 'info':
-        return info;
-      case 'help':
-        return help;
-
-      case 'back':
-        return back;
-      case 'forward':
-        return forward;
-      case 'chevron_right':
-        return chevronRight;
-      case 'chevron_down':
-        return chevronDown;
-
-      case 'wallet':
-        return wallet;
-      case 'money':
-        return money;
-      case 'receipt':
-        return receipt;
-      case 'card':
-        return card;
-      case 'trending_up':
-        return trendingUp;
-      case 'trending_down':
-        return trendingDown;
-      case 'chart':
-        return chart;
-      case 'pie_chart':
-        return pieChart;
-
-      case 'category':
-      case 'tag':
-        return category;
-
-      case 'sms':
-      case 'message':
-        return sms;
-      case 'email':
-      case 'mail':
-        return email;
-      case 'sync':
-      case 'repeat':
-        return repeat;
-
-      case 'calendar':
-        return calendar;
-      case 'clock':
-        return clock;
-      case 'schedule':
-        return schedule;
-      case 'history':
-        return history;
-
-      case 'user':
-        return user;
-      case 'profile':
-        return profile;
-
-      case 'notification':
-      case 'bell':
-        return notification;
-      case 'cloud_done':
-        return cloudDone;
-      case 'cloud_off':
-        return cloudOff;
-
-      case 'phone':
-        return phone;
-      case 'location':
-      case 'map':
-        return location;
-      case 'image':
-        return image;
-      case 'link':
-        return link;
-      case 'wifi':
-        return wifi;
-
-      case 'lock':
-        return lock;
-      case 'unlock':
-        return unlock;
-      case 'security':
-      case 'shield':
-        return security;
-      case 'visibility':
-        return visibility;
-      case 'visibility_off':
-        return visibilityOff;
-
-      case 'empty':
-      case 'inbox':
-        return empty;
-      case 'apps':
-        return apps;
-      case 'copy':
-        return copy;
-      case 'document':
-      case 'file':
-        return document;
-      case 'folder':
-        return folder;
-      case 'star':
-      case 'favorite':
-        return star;
-      case 'heart':
-        return heart;
-      case 'globe':
-      case 'earth':
-        return globe;
-      case 'printer':
-        return printer;
-      default:
-        return PiconsRegular.question;
-    }
+    return icon ?? PiconsRegular.question;
   }
 }

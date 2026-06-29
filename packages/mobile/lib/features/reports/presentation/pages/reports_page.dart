@@ -32,17 +32,67 @@ class _ReportsPageContent extends StatefulWidget {
 
 class _ReportsPageContentState extends State<_ReportsPageContent>
     with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+  TabController? _tabController;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 3, vsync: this)
+      ..addListener(_onTabChanged);
+  }
+
+  void _onTabChanged() {
+    setState(() => _tabController);
+  }
+
+  void _handleDateRangeSelected(String _) {
+    // TODO: handle date range selection
+  }
+
+  Widget _buildDateRangeSelector(BuildContext _) {
+    return PopupMenuButton<String>(
+      icon: const Icon(Icons.calendar_today),
+      onSelected: _handleDateRangeSelected,
+      itemBuilder: (context) => [
+        const PopupMenuItem(value: 'week', child: Text('Last 7 Days')),
+        const PopupMenuItem(value: 'month', child: Text('Last 30 Days')),
+      ],
+    );
+  }
+
+  Widget _buildTrendTab(ReportsLoaded state) {
+    return Column(
+      children: [
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: SpendingTrendChart(
+              data: state.spendingTrend,
+              granularity: state.granularity,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCategoriesTab(ReportsLoaded state) {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: CategoryPieChart(data: state.categoryBreakdown),
+    );
+  }
+
+  Widget _buildInsightsTab(ReportsLoaded state) {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: InsightsCard(insights: state.insights),
+    );
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
+    _tabController?.dispose();
     super.dispose();
   }
 
@@ -64,79 +114,33 @@ class _ReportsPageContentState extends State<_ReportsPageContent>
           Expanded(
             child: BlocBuilder<ReportsBloc, ReportsState>(
               builder: (context, state) {
-                if (state is ReportsLoading) {
-                  return TabBarView(
+                return switch (state) {
+                  ReportsLoading() => TabBarView(
                     controller: _tabController,
                     children: const [
                       ChartSkeleton(),
                       PieChartSkeleton(),
                       InsightsSkeleton(),
                     ],
-                  );
-                }
-
-                if (state is ReportsError) {
-                  return Center(child: Text('Error: ${state.message}'));
-                }
-
-                if (state is ReportsLoaded) {
-                  return TabBarView(
+                  ),
+                  ReportsError(:final message) => Center(
+                    child: Text('Error: $message'),
+                  ),
+                  ReportsLoaded() => TabBarView(
                     controller: _tabController,
                     children: [
-                      _buildTrendTab(context, state),
-                      _buildCategoriesTab(context, state),
-                      _buildInsightsTab(context, state),
+                      _buildTrendTab(state),
+                      _buildCategoriesTab(state),
+                      _buildInsightsTab(state),
                     ],
-                  );
-                }
-
-                return const Center(child: Text('Load reports to see data'));
+                  ),
+                  _ => const Center(child: Text('Load reports to see data')),
+                };
               },
             ),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildDateRangeSelector(BuildContext context) {
-    return PopupMenuButton<String>(
-      icon: const Icon(Icons.calendar_today),
-      onSelected: (value) {},
-      itemBuilder: (context) => [
-        const PopupMenuItem(value: 'week', child: Text('Last 7 Days')),
-        const PopupMenuItem(value: 'month', child: Text('Last 30 Days')),
-      ],
-    );
-  }
-
-  Widget _buildTrendTab(BuildContext context, ReportsLoaded state) {
-    return Column(
-      children: [
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: SpendingTrendChart(
-              data: state.spendingTrend,
-              granularity: state.granularity,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCategoriesTab(BuildContext context, ReportsLoaded state) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: CategoryPieChart(data: state.categoryBreakdown),
-    );
-  }
-
-  Widget _buildInsightsTab(BuildContext context, ReportsLoaded state) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: InsightsCard(insights: state.insights),
     );
   }
 }

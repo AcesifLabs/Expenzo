@@ -18,12 +18,14 @@ class CategoryBreakdownWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (categories.isEmpty) {
-      return const Card(
+      return Card(
         child: Padding(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           child: Text(
             'No records in this period',
-            style: TextStyle(color: Colors.grey),
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ),
       );
@@ -69,6 +71,8 @@ class _CategoryRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final bodyMedium = theme.textTheme.bodyMedium;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -78,17 +82,10 @@ class _CategoryRow extends StatelessWidget {
             children: [
               Icon(AppIcons.getCategoryIcon(category.emoji), size: 20),
               const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  category.categoryName,
-                  style: theme.textTheme.bodyMedium,
-                ),
-              ),
+              Expanded(child: Text(category.categoryName, style: bodyMedium)),
               Text(
                 currencyFormat.format(category.amount),
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: bodyMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -100,7 +97,7 @@ class _CategoryRow extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4),
                   child: LinearProgressIndicator(
                     value: category.percentage / 100,
-                    backgroundColor: Colors.grey[200],
+                    backgroundColor: colors.onSurface.withAlpha(25),
                     minHeight: 8,
                   ),
                 ),
@@ -109,7 +106,7 @@ class _CategoryRow extends StatelessWidget {
               Text(
                 '${category.percentage.toStringAsFixed(1)}%',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[600],
+                  color: colors.onSurfaceVariant,
                 ),
               ),
             ],

@@ -1,12 +1,42 @@
 import 'package:equatable/equatable.dart';
-import '../../../records/domain/entities/record.dart';
 
 class SearchResult extends Equatable {
-  final Record record;
+  final String recordId;
+  final double amount;
+  final String description;
+  final DateTime date;
   final double? relevanceScore;
 
-  const SearchResult({required this.record, this.relevanceScore});
-
   @override
-  List<Object?> get props => [record, relevanceScore];
+  List<Object?> get props => [
+    recordId,
+    amount,
+    description,
+    date,
+    relevanceScore,
+  ];
+
+  const SearchResult({
+    required this.recordId,
+    required this.amount,
+    required this.description,
+    required this.date,
+    this.relevanceScore,
+  });
+
+  SearchResult copyWith({
+    String? recordId,
+    double? amount,
+    String? description,
+    DateTime? date,
+    double? relevanceScore,
+  }) {
+    return SearchResult(
+      recordId: recordId ?? this.recordId,
+      amount: amount ?? this.amount,
+      description: description ?? this.description,
+      date: date ?? this.date,
+      relevanceScore: relevanceScore ?? this.relevanceScore,
+    );
+  }
 }

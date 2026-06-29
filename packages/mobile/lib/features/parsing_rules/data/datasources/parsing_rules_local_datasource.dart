@@ -5,11 +5,14 @@ import 'package:expense_tracker/core/database/daos/parsing_rule_dao.dart';
 import '../../domain/entities/parsing_rule.dart' as domain;
 
 abstract class ParsingRulesLocalDatasource {
+  /// Throws: [CacheException] if a database error occurs.
   Future<List<domain.ParsingRule>> getRules({
     domain.SourceType? sourceType,
     bool? isEnabled,
   });
   Future<domain.ParsingRule?> getRuleById(String id);
+
+  /// Throws: [CacheException] if a database error occurs.
   Future<domain.ParsingRule> createRule(domain.ParsingRule rule);
   Future<domain.ParsingRule> updateRule(domain.ParsingRule rule);
   Future<void> deleteRule(String id);
@@ -21,6 +24,7 @@ class ParsingRulesLocalDatasourceImpl implements ParsingRulesLocalDatasource {
 
   ParsingRulesLocalDatasourceImpl(this.dao);
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<List<domain.ParsingRule>> getRules({
     domain.SourceType? sourceType,
@@ -28,36 +32,46 @@ class ParsingRulesLocalDatasourceImpl implements ParsingRulesLocalDatasource {
   }) async {
     if (isEnabled == true) {
       final rules = await dao.getEnabledRules();
+
       return rules.map(_mapToEntity).toList();
     }
     if (sourceType != null) {
       final rules = await dao.getRulesBySourceType(sourceType.name);
+
       return rules.map(_mapToEntity).toList();
     }
     final rules = await dao.getAllRules();
+
     return rules.map(_mapToEntity).toList();
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<domain.ParsingRule?> getRuleById(String id) async {
     final rule = await dao.getRuleById(id);
+
     return rule != null ? _mapToEntity(rule) : null;
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<domain.ParsingRule> createRule(domain.ParsingRule rule) async {
     final companion = _toCompanion(rule);
     await dao.insertRule(companion);
+
     return rule;
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<domain.ParsingRule> updateRule(domain.ParsingRule rule) async {
     final companion = _toCompanion(rule);
     await dao.updateRule(companion);
+
     return rule;
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<void> deleteRule(String id) async {
     await dao.deleteRule(id);

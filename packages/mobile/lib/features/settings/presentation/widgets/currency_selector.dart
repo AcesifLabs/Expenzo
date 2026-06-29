@@ -38,14 +38,72 @@ class _CurrencySelectorState extends State<CurrencySelector> {
     '฿',
   ];
 
-  late TextEditingController _customController;
+  final TextEditingController _customController = TextEditingController();
   bool _isCustom = false;
 
   @override
   void initState() {
     super.initState();
-    _customController = TextEditingController(text: widget.currentSymbol);
+    _customController.text = widget.currentSymbol;
     _isCustom = !presetCurrencies.contains(widget.currentSymbol);
+  }
+
+  void _onChipSelected(bool selected, String symbol) {
+    if (selected) {
+      setState(() => _isCustom = false);
+      widget.onSymbolSelected(symbol);
+    }
+  }
+
+  void _onCustomCheckboxChanged(bool? value) {
+    setState(() => _isCustom = value ?? false);
+
+    if (_isCustom) {
+      widget.onSymbolSelected(_customController.text);
+    } else {
+      widget.onSymbolSelected('\$_');
+    }
+  }
+
+  void _onCustomSymbolSubmit() {
+    widget.onSymbolSelected(_customController.text);
+  }
+
+  Widget _buildChip(String symbol) {
+    final isSelected = widget.currentSymbol == symbol && !_isCustom;
+
+    return ChoiceChip(
+      label: Text(symbol),
+      selected: isSelected,
+      onSelected: (selected) => _onChipSelected(selected, symbol),
+    );
+  }
+
+  Widget _buildCustomRow() {
+    return Row(
+      children: [
+        Checkbox(value: _isCustom, onChanged: _onCustomCheckboxChanged),
+        const SizedBox(width: 8),
+        Expanded(
+          child: TextField(
+            controller: _customController,
+            enabled: _isCustom,
+            decoration: InputDecoration(
+              labelText: 'Custom currency symbol',
+              hintText: 'Enter custom symbol',
+              border: const OutlineInputBorder(),
+              suffixIcon: _isCustom
+                  ? IconButton(
+                      icon: const Icon(Icons.check),
+                      onPressed: _onCustomSymbolSubmit,
+                    )
+                  : null,
+            ),
+            onSubmitted: _isCustom ? widget.onSymbolSelected : null,
+          ),
+        ),
+      ],
+    );
   }
 
   @override
@@ -62,57 +120,10 @@ class _CurrencySelectorState extends State<CurrencySelector> {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: presetCurrencies.map((symbol) {
-            final isSelected = widget.currentSymbol == symbol && !_isCustom;
-            return ChoiceChip(
-              label: Text(symbol),
-              selected: isSelected,
-              onSelected: (selected) {
-                if (selected) {
-                  setState(() => _isCustom = false);
-                  widget.onSymbolSelected(symbol);
-                }
-              },
-            );
-          }).toList(),
+          children: presetCurrencies.map(_buildChip).toList(),
         ),
         const SizedBox(height: 16),
-        Row(
-          children: [
-            Checkbox(
-              value: _isCustom,
-              onChanged: (value) {
-                setState(() => _isCustom = value ?? false);
-                if (_isCustom) {
-                  widget.onSymbolSelected(_customController.text);
-                } else {
-                  widget.onSymbolSelected('\$_');
-                }
-              },
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: TextField(
-                controller: _customController,
-                enabled: _isCustom,
-                decoration: InputDecoration(
-                  labelText: 'Custom currency symbol',
-                  hintText: 'Enter custom symbol',
-                  border: const OutlineInputBorder(),
-                  suffixIcon: _isCustom
-                      ? IconButton(
-                          icon: const Icon(Icons.check),
-                          onPressed: () {
-                            widget.onSymbolSelected(_customController.text);
-                          },
-                        )
-                      : null,
-                ),
-                onSubmitted: _isCustom ? widget.onSymbolSelected : null,
-              ),
-            ),
-          ],
-        ),
+        _buildCustomRow(),
       ],
     );
   }

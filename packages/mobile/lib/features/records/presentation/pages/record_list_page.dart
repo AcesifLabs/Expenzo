@@ -1,10 +1,12 @@
 import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/constants/app_constants.dart';
-import 'package:expense_tracker/core/utils/navigation_utils.dart';
+import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
+import 'package:expense_tracker/features/categories/presentation/bloc/category_state.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_search_bar.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_empty_state.dart';
@@ -15,16 +17,32 @@ import '../bloc/record_event.dart';
 import '../bloc/record_state.dart';
 import '../widgets/record_card.dart';
 import '../widgets/record_filter_modal.dart';
-import 'record_form_page.dart';
 
-class RecordListPage extends StatefulWidget {
+class RecordListPage extends StatelessWidget {
   const RecordListPage({super.key});
 
   @override
-  State<RecordListPage> createState() => _RecordListPageState();
+  Widget build(BuildContext context) {
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => di.getIt<RecordBloc>()..add(const LoadRecords()),
+        ),
+        BlocProvider(create: (_) => di.getIt<CategoryBloc>()),
+      ],
+      child: const RecordListView(),
+    );
+  }
 }
 
-class _RecordListPageState extends State<RecordListPage> {
+class RecordListView extends StatefulWidget {
+  const RecordListView({super.key});
+
+  @override
+  State<RecordListView> createState() => _RecordListViewState();
+}
+
+class _RecordListViewState extends State<RecordListView> {
   final _scrollController = ScrollController();
   final _searchCtrl = TextEditingController();
 
@@ -34,11 +52,12 @@ class _RecordListPageState extends State<RecordListPage> {
     _scrollController.addListener(_onScroll);
   }
 
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    _searchCtrl.dispose();
-    super.dispose();
+  bool get _isBottom {
+    if (!_scrollController.hasClients) return false;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.offset;
+
+    return currentScroll >= (maxScroll * 0.9);
   }
 
   void _onScroll() {
@@ -47,11 +66,212 @@ class _RecordListPageState extends State<RecordListPage> {
     }
   }
 
-  bool get _isBottom {
-    if (!_scrollController.hasClients) return false;
-    final maxScroll = _scrollController.position.maxScrollExtent;
-    final currentScroll = _scrollController.offset;
-    return currentScroll >= (maxScroll * 0.9);
+  void _onRefresh() {
+    context.read<RecordBloc>().add(const RefreshRecords());
+  }
+
+  CategoryInfo _resolveCategory(Record record, CategoryState catState) {
+    if (catState is! CategoryLoaded) return const CategoryInfo();
+    final matched = catState.categories.where((c) => c.id == record.categoryId);
+    if (matched.isEmpty) return const CategoryInfo();
+    return CategoryInfo(
+      name: matched.first.name,
+      emoji: matched.first.emoji,
+      color: matched.first.color,
+    );
+  }
+
+  Widget _buildRecordsList() {
+    return BlocBuilder<RecordBloc, RecordState>(
+      buildWhen: (previous, current) =>
+          current is RecordLoaded ||
+          current is RecordError ||
+          current is RecordLoading ||
+          current is RecordLoadingMore,
+      builder: (context, state) {
+        if (state is RecordLoading) return _buildShimmerList();
+        if (state is RecordError) return Center(child: Text(state.message));
+
+        final listState = _extractListState(state);
+        final records = listState.$1;
+        final hasMore = listState.$2;
+        final isLoadingMore = listState.$3;
+
+        if (records.isEmpty) {
+          return AppEmptyState(
+            icon: PiconsRegular.list,
+            message: 'No transactions found',
+          );
+        }
+
+        final catState = context.watch<CategoryBloc>().state;
+
+        return RefreshIndicator(
+          onRefresh: () async => _onRefresh(),
+          child: ListView.builder(
+            controller: _scrollController,
+            padding: const EdgeInsets.fromLTRB(0, 4, 0, 100),
+            itemCount: records.length + (hasMore ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index >= records.length) {
+                return _buildLoadMore(isLoadingMore);
+              }
+
+              final record = records[index];
+
+              return RecordCard(
+                record: record,
+                onTap: () => _navigateToForm(context, record),
+                onDelete: () => _handleDelete(context, record),
+                categoryInfo: _resolveCategory(record, catState),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildShimmerList() {
+    return ShimmerList(
+      itemCount: 6,
+      itemBuilder: (context, index) => AppCard(
+        margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
+        child: ListTile(
+          leading: ShimmerBox.circle(size: 40),
+          title: ShimmerBox.textLine(width: 150),
+          subtitle: ShimmerBox.textLine(width: 100),
+        ),
+      ),
+    );
+  }
+
+  (List<Record>, bool, bool) _extractListState(RecordState state) {
+    return switch (state) {
+      RecordLoaded(:final filteredRecords, :final hasMore) => (
+        filteredRecords,
+        hasMore,
+        false,
+      ),
+      RecordLoadingMore(:final currentRecords) => (currentRecords, true, true),
+      _ => (<Record>[], false, false),
+    };
+  }
+
+  Widget _buildLoadMore(bool isLoadingMore) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      alignment: Alignment.center,
+      child: isLoadingMore
+          ? const CircularProgressIndicator()
+          : Text(
+              'Scroll for more...',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface.withAlpha(100),
+              ),
+            ),
+    );
+  }
+
+  void _navigateToForm(BuildContext context, Record? record) {
+    final extra = <String, dynamic>{
+      'recordBloc': context.read<RecordBloc>(),
+      'categoryBloc': context.read<CategoryBloc>(),
+    };
+    if (record?.id != null) {
+      context.push('/records/${record!.id}/edit', extra: extra);
+    } else {
+      context.push('/records/new', extra: extra);
+    }
+  }
+
+  void _onUndoDelete(Record record) {
+    context.read<RecordBloc>().add(AddRecordEvent(record));
+  }
+
+  void _handleDelete(BuildContext context, Record record) {
+    final bloc = context.read<RecordBloc>();
+    final recordId = record.id;
+    if (recordId == null) return;
+    bloc.add(DeleteRecordEvent(recordId));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Record deleted'),
+        duration: AppConstants.briefSnackbarDuration,
+        action: SnackBarAction(
+          label: 'Undo',
+          onPressed: () => _onUndoDelete(record),
+        ),
+      ),
+    );
+  }
+
+  void Function({
+    DateTime? startDate,
+    DateTime? endDate,
+    List<String>? categoryIds,
+    String? recordType,
+  })
+  _onApplyFilters(RecordBloc recordBloc) {
+    return ({startDate, endDate, categoryIds, recordType}) {
+      recordBloc.add(
+        ApplyFilters(
+          startDate: startDate,
+          endDate: endDate,
+          categoryIds: categoryIds,
+          recordType: recordType,
+        ),
+      );
+    };
+  }
+
+  VoidCallback _onClearFilters(RecordBloc recordBloc) {
+    return () {
+      recordBloc.add(const ClearFilters());
+    };
+  }
+
+  void _showFilterModal(BuildContext context) {
+    final recordBloc = context.read<RecordBloc>();
+    final categoryBloc = context.read<CategoryBloc>();
+    final state = recordBloc.state;
+    DateTime? startDate;
+    DateTime? endDate;
+    List<String>? categoryIds;
+    String? recordType;
+
+    if (state case RecordLoaded(
+      :final filterStartDate,
+      :final filterEndDate,
+      :final filterCategoryIds,
+      :final filterRecordType,
+    )) {
+      startDate = filterStartDate;
+      endDate = filterEndDate;
+      categoryIds = filterCategoryIds;
+      recordType = filterRecordType;
+    }
+
+    showRecordFilterModal(
+      context,
+      FilterModalParams(
+        recordBloc: recordBloc,
+        categoryBloc: categoryBloc,
+        startDate: startDate,
+        endDate: endDate,
+        categoryIds: categoryIds,
+        recordType: recordType,
+        onApply: _onApplyFilters(recordBloc),
+        onClear: _onClearFilters(recordBloc),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _searchCtrl.dispose();
+    super.dispose();
   }
 
   @override
@@ -84,165 +304,6 @@ class _RecordListPageState extends State<RecordListPage> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildRecordsList() {
-    return BlocBuilder<RecordBloc, RecordState>(
-      buildWhen: (previous, current) =>
-          current is RecordLoaded ||
-          current is RecordError ||
-          current is RecordLoading ||
-          current is RecordLoadingMore,
-      builder: (context, state) {
-        if (state is RecordLoading) {
-          return ShimmerList(
-            itemCount: 6,
-            itemBuilder: (context, index) => AppCard(
-              margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
-              child: ListTile(
-                leading: ShimmerBox.circle(size: 40),
-                title: ShimmerBox.textLine(width: 150),
-                subtitle: ShimmerBox.textLine(width: 100),
-              ),
-            ),
-          );
-        }
-        if (state is RecordError) {
-          return Center(child: Text(state.message));
-        }
-
-        List<Record> records = [];
-        bool hasMore = false;
-        bool isLoadingMore = false;
-
-        if (state is RecordLoaded) {
-          records = state.filteredRecords;
-          hasMore = state.hasMore;
-        } else if (state is RecordLoadingMore) {
-          records = state.currentRecords;
-          hasMore = true;
-          isLoadingMore = true;
-        }
-
-        if (records.isEmpty) {
-          return AppEmptyState(
-            icon: PiconsRegular.list,
-            message: 'No transactions found',
-          );
-        }
-
-        return RefreshIndicator(
-          onRefresh: () async {
-            context.read<RecordBloc>().add(const RefreshRecords());
-          },
-          child: ListView.builder(
-            controller: _scrollController,
-            padding: const EdgeInsets.fromLTRB(0, 4, 0, 100),
-            itemCount: records.length + (hasMore ? 1 : 0),
-            itemBuilder: (context, index) {
-              if (index >= records.length) {
-                return _buildLoadMore(isLoadingMore);
-              }
-              final record = records[index];
-              return RecordCard(
-                record: record,
-                onTap: () => _navigateToForm(context, record),
-                onDelete: () => _handleDelete(context, record),
-              );
-            },
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildLoadMore(bool isLoadingMore) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      alignment: Alignment.center,
-      child: isLoadingMore
-          ? const CircularProgressIndicator()
-          : Text(
-              'Scroll for more...',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface.withAlpha(100),
-              ),
-            ),
-    );
-  }
-
-  void _navigateToForm(BuildContext context, Record? record) {
-    final recordBloc = context.read<RecordBloc>();
-    final categoryBloc = context.read<CategoryBloc>();
-    Navigator.push(
-      context,
-      SlidePageRoute(
-        builder: (_) => MultiBlocProvider(
-          providers: [
-            BlocProvider.value(value: recordBloc),
-            BlocProvider.value(value: categoryBloc),
-          ],
-          child: RecordFormPage(record: record),
-        ),
-      ),
-    );
-  }
-
-  void _handleDelete(BuildContext context, Record record) {
-    final bloc = context.read<RecordBloc>();
-    bloc.add(DeleteRecordEvent(record.id!));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Record deleted'),
-        duration: AppConstants.briefSnackbarDuration,
-        action: SnackBarAction(
-          label: 'Undo',
-          onPressed: () {
-            bloc.add(AddRecordEvent(record));
-          },
-        ),
-      ),
-    );
-  }
-
-  void _showFilterModal(BuildContext context) {
-    final recordBloc = context.read<RecordBloc>();
-    final categoryBloc = context.read<CategoryBloc>();
-    final state = recordBloc.state;
-    DateTime? startDate;
-    DateTime? endDate;
-    List<String>? categoryIds;
-    String? recordType;
-
-    if (state is RecordLoaded) {
-      startDate = state.filterStartDate;
-      endDate = state.filterEndDate;
-      categoryIds = state.filterCategoryIds;
-      recordType = state.filterRecordType;
-    }
-
-    showRecordFilterModal(
-      context,
-      recordBloc: recordBloc,
-      categoryBloc: categoryBloc,
-      startDate: startDate,
-      endDate: endDate,
-      categoryIds: categoryIds,
-      recordType: recordType,
-      onApply: ({startDate, endDate, categoryIds, recordType}) {
-        recordBloc.add(
-          ApplyFilters(
-            startDate: startDate,
-            endDate: endDate,
-            categoryIds: categoryIds,
-            recordType: recordType,
-          ),
-        );
-      },
-      onClear: () {
-        recordBloc.add(const ClearFilters());
-      },
     );
   }
 }

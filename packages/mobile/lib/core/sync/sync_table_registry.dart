@@ -1,3 +1,5 @@
+// ignore_for_file: prefer-match-file-name
+
 import 'package:drift/drift.dart';
 import '../database/app_database.dart';
 
@@ -13,11 +15,13 @@ abstract class SyncTableHandler<TTable extends Table, TRow extends DataClass> {
 
 class SyncTableRegistry {
   final Map<String, SyncTableHandler> _handlers = {};
+
+  Iterable<SyncTableHandler> get all => _handlers.values;
+  Iterable<String> get tableNames => _handlers.keys;
+
   void register(SyncTableHandler handler) {
     _handlers[handler.tableName] = handler;
   }
 
   SyncTableHandler? operator [](String tableName) => _handlers[tableName];
-  Iterable<SyncTableHandler> get all => _handlers.values;
-  Iterable<String> get tableNames => _handlers.keys;
 }

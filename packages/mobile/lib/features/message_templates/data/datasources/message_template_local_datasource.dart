@@ -5,12 +5,14 @@ import '../../domain/entities/message_source.dart' as domain;
 import '../../domain/entities/expense_template.dart' as domain;
 
 abstract class MessageTemplateLocalDatasource {
+  /// Throws: [CacheException] if a database error occurs.
   Future<List<domain.MessageSource>> getMessageSources();
   Future<domain.MessageSource?> getMessageSourceById(String id);
   Future<domain.MessageSource> saveMessageSource(domain.MessageSource source);
   Future<void> deleteMessageSource(String id);
   Stream<List<domain.MessageSource>> watchMessageSources();
 
+  /// Throws: [CacheException] if a database error occurs.
   Future<List<domain.ExpenseTemplate>> getTemplatesForSource(String sourceId);
   Future<List<domain.ExpenseTemplate>> getAllTemplates();
   Future<domain.ExpenseTemplate> saveTemplate(domain.ExpenseTemplate template);
@@ -24,18 +26,23 @@ class MessageTemplateLocalDatasourceImpl
 
   MessageTemplateLocalDatasourceImpl(this.dao);
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<List<domain.MessageSource>> getMessageSources() async {
     final sources = await dao.getAllMessageSources();
+
     return sources.map(_mapSourceToDomain).toList();
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<domain.MessageSource?> getMessageSourceById(String id) async {
     final source = await dao.getMessageSourceById(id);
+
     return source != null ? _mapSourceToDomain(source) : null;
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<domain.MessageSource> saveMessageSource(
     domain.MessageSource source,
@@ -50,9 +57,11 @@ class MessageTemplateLocalDatasourceImpl
       updatedAt: Value(source.updatedAt),
     );
     await dao.insertMessageSource(companion);
+
     return source;
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<void> deleteMessageSource(String id) async {
     await dao.deleteMessageSource(id);
@@ -65,20 +74,25 @@ class MessageTemplateLocalDatasourceImpl
     );
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<List<domain.ExpenseTemplate>> getTemplatesForSource(
     String sourceId,
   ) async {
     final templates = await dao.getTemplatesForSource(sourceId);
+
     return templates.map(_mapTemplateToDomain).toList();
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<List<domain.ExpenseTemplate>> getAllTemplates() async {
     final templates = await dao.getAllTemplates();
+
     return templates.map(_mapTemplateToDomain).toList();
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<domain.ExpenseTemplate> saveTemplate(
     domain.ExpenseTemplate template,
@@ -97,9 +111,11 @@ class MessageTemplateLocalDatasourceImpl
       updatedAt: Value(template.updatedAt),
     );
     await dao.insertTemplate(companion);
+
     return template;
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<void> deleteTemplate(String id) async {
     await dao.deleteTemplate(id);

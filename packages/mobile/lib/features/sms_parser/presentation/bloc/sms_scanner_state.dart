@@ -1,31 +1,33 @@
 import 'package:equatable/equatable.dart';
 import '../../../parsing_rules/domain/entities/parsed_transaction.dart';
 
-abstract class SmsScannerState extends Equatable {
-  const SmsScannerState();
-
+sealed class SmsScannerState extends Equatable {
   @override
   List<Object?> get props => [];
+
+  const SmsScannerState();
 }
 
-class SmsScannerInitial extends SmsScannerState {}
+class SmsScannerInitial extends SmsScannerState {
+  const SmsScannerInitial();
+}
 
 class SmsScannerScanning extends SmsScannerState {
   final int totalMessages;
   final int processedMessages;
   final DateTime? scanStartTime;
 
-  const SmsScannerScanning({
-    required this.totalMessages,
-    required this.processedMessages,
-    this.scanStartTime,
-  });
-
   double get progress =>
       totalMessages > 0 ? processedMessages / totalMessages : 0;
 
   @override
   List<Object?> get props => [totalMessages, processedMessages, scanStartTime];
+
+  const SmsScannerScanning({
+    required this.totalMessages,
+    required this.processedMessages,
+    this.scanStartTime,
+  });
 }
 
 class SmsScannerScanComplete extends SmsScannerState {
@@ -36,6 +38,20 @@ class SmsScannerScanComplete extends SmsScannerState {
   final bool hasReachedMax;
   final bool isLoadingMore;
   final DateTime? since;
+
+  List<ParsedTransaction> get selectedTransactions =>
+      results.where((r) => selectedIds.contains(r.sourceId)).toList();
+
+  @override
+  List<Object?> get props => [
+    results,
+    lastScanTimestamp,
+    selectedIds,
+    currentOffset,
+    hasReachedMax,
+    isLoadingMore,
+    since,
+  ];
 
   const SmsScannerScanComplete({
     required this.results,
@@ -66,27 +82,13 @@ class SmsScannerScanComplete extends SmsScannerState {
       since: since ?? this.since,
     );
   }
-
-  List<ParsedTransaction> get selectedTransactions =>
-      results.where((r) => selectedIds.contains(r.sourceId)).toList();
-
-  @override
-  List<Object?> get props => [
-    results,
-    lastScanTimestamp,
-    selectedIds,
-    currentOffset,
-    hasReachedMax,
-    isLoadingMore,
-    since,
-  ];
 }
 
 class SmsScannerError extends SmsScannerState {
   final String message;
 
-  const SmsScannerError({required this.message});
-
   @override
   List<Object?> get props => [message];
+
+  const SmsScannerError({required this.message});
 }

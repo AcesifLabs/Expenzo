@@ -1,3 +1,5 @@
+// ignore_for_file: prefer-match-file-name
+
 import 'package:drift/drift.dart';
 
 class Users extends Table {
@@ -6,6 +8,7 @@ class Users extends Table {
   TextColumn get email => text()();
   TextColumn get displayName => text().nullable()();
   TextColumn get photoUrl => text().nullable()();
-  DateTimeColumn get createdAt => dateTime()();
-  DateTimeColumn get lastLoginAt => dateTime()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get lastLoginAt =>
+      dateTime().withDefault(currentDateAndTime)();
 }

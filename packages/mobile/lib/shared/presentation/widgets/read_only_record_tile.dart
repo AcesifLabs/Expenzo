@@ -2,8 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
+import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:expense_tracker/features/records/domain/entities/record.dart';
 
+/// A read-only record tile for dashboard summary lists.
+///
+/// Unlike [RecordCard] which supports interactive actions (onTap, onDelete),
+/// this widget is a lightweight, presentational tile optimized for use in
+/// dashboard recent-activity sections and other read-only contexts.
 class ReadOnlyRecordTile extends StatelessWidget {
   final Record record;
   final NumberFormat? amountFormat;
@@ -22,67 +28,89 @@ class ReadOnlyRecordTile extends StatelessWidget {
     this.iconSize = 16,
   });
 
+  String _formatAmount() {
+    final localAmountFormat = amountFormat;
+    if (localAmountFormat != null) {
+      return localAmountFormat.format(record.amount);
+    }
+    final prefix = record.recordType == RecordType.expense ? '-' : '+';
+
+    return '$prefix\$${record.amount.abs().toStringAsFixed(2)}';
+  }
+
+  String _description() {
+    if (record.description.isNotEmpty) return record.description;
+
+    return record.recordType == RecordType.expense ? 'Expense' : 'Income';
+  }
+
+  Widget _leadingIcon(Color amtColor) {
+    return CircleAvatar(
+      radius: avatarRadius,
+      backgroundColor: amtColor.withAlpha(25),
+      child: Icon(
+        record.recordType == RecordType.expense
+            ? PiconsFill.trendDown
+            : PiconsFill.trendUp,
+        color: amtColor,
+        size: iconSize,
+      ),
+    );
+  }
+
+  Widget _titleAndDate(ColorScheme colors) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            _description(),
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: colors.onSurface,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 2),
+          Text(
+            _dateFormat.format(record.date),
+            style: TextStyle(
+              fontSize: 12,
+              color: colors.onSurface.withAlpha(120),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _amountText(Color amtColor) {
+    return Text(
+      _formatAmount(),
+      style: TextStyle(
+        fontSize: 15,
+        fontWeight: FontWeight.w600,
+        color: amtColor,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isExpense = record.recordType == RecordType.expense;
-    final amtColor = isExpense
-        ? const Color(0xFFFF3B30)
-        : const Color(0xFF34C759);
+    final amtColor = isExpense ? AppColors.expense : AppColors.success;
     final colors = Theme.of(context).colorScheme;
-
-    final amountText = amountFormat != null
-        ? amountFormat!.format(record.amount)
-        : '${isExpense ? '-' : '+'}\$${record.amount.abs().toStringAsFixed(2)}';
 
     return Padding(
       padding: padding,
       child: Row(
         children: [
-          CircleAvatar(
-            radius: avatarRadius,
-            backgroundColor: amtColor.withAlpha(25),
-            child: Icon(
-              isExpense ? PiconsFill.trendDown : PiconsFill.trendUp,
-              color: amtColor,
-              size: iconSize,
-            ),
-          ),
+          _leadingIcon(amtColor),
           const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  record.description.isNotEmpty
-                      ? record.description
-                      : (isExpense ? 'Expense' : 'Income'),
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: colors.onSurface,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  _dateFormat.format(record.date),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: colors.onSurface.withAlpha(120),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Text(
-            amountText,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              color: amtColor,
-            ),
-          ),
+          _titleAndDate(colors),
+          _amountText(amtColor),
         ],
       ),
     );

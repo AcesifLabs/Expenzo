@@ -16,42 +16,20 @@ class CategoryPieChart extends StatefulWidget {
 class _CategoryPieChartState extends State<CategoryPieChart> {
   int touchedIndex = -1;
 
-  @override
-  Widget build(BuildContext context) {
-    if (widget.data.isEmpty) {
-      return const Center(child: Text('No data available'));
-    }
+  void _onTouch(FlTouchEvent event, PieTouchResponse? pieTouchResponse) {
+    setState(() {
+      if (!event.isInterestedForInteractions ||
+          pieTouchResponse == null ||
+          pieTouchResponse.touchedSection == null) {
+        touchedIndex = -1;
 
-    return Column(
-      children: [
-        Expanded(
-          child: PieChart(
-            PieChartData(
-              pieTouchData: PieTouchData(
-                touchCallback: (FlTouchEvent event, pieTouchResponse) {
-                  setState(() {
-                    if (!event.isInterestedForInteractions ||
-                        pieTouchResponse == null ||
-                        pieTouchResponse.touchedSection == null) {
-                      touchedIndex = -1;
-                      return;
-                    }
-                    touchedIndex =
-                        pieTouchResponse.touchedSection!.touchedSectionIndex;
-                  });
-                },
-              ),
-              borderData: FlBorderData(show: false),
-              sectionsSpace: 2,
-              centerSpaceRadius: 40,
-              sections: _buildSections(),
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        _buildLegend(),
-      ],
-    );
+        return;
+      }
+      final touchedSection = pieTouchResponse.touchedSection;
+      if (touchedSection != null) {
+        touchedIndex = touchedSection.touchedSectionIndex;
+      }
+    });
   }
 
   List<PieChartSectionData> _buildSections() {
@@ -62,9 +40,10 @@ class _CategoryPieChartState extends State<CategoryPieChart> {
       final item = entry.value;
       final isTouched = index == touchedIndex;
       final radius = isTouched ? 70.0 : 60.0;
+      final color = colors[index % colors.length];
 
       return PieChartSectionData(
-        color: colors[index % colors.length],
+        color: color,
         value: item.amount,
         title: isTouched ? '${item.percentage.toStringAsFixed(1)}%' : '',
         radius: radius,
@@ -77,7 +56,7 @@ class _CategoryPieChartState extends State<CategoryPieChart> {
             ? _Badge(
                 AppIcons.getCategoryIcon(item.emoji),
                 size: 32,
-                borderColor: colors[index % colors.length],
+                borderColor: color,
               )
             : null,
         badgePositionPercentageOffset: 0.98,
@@ -87,6 +66,7 @@ class _CategoryPieChartState extends State<CategoryPieChart> {
 
   Widget _buildLegend() {
     final colors = AppColors.categoryColors;
+    final onSurface = Theme.of(context).colorScheme.onSurface;
 
     return Wrap(
       spacing: 16,
@@ -95,6 +75,7 @@ class _CategoryPieChartState extends State<CategoryPieChart> {
       children: widget.data.asMap().entries.map((entry) {
         final index = entry.key;
         final item = entry.value;
+        final color = colors[index % colors.length];
 
         return Row(
           mainAxisSize: MainAxisSize.min,
@@ -103,7 +84,7 @@ class _CategoryPieChartState extends State<CategoryPieChart> {
               width: 10,
               height: 10,
               decoration: BoxDecoration(
-                color: colors[index % colors.length],
+                color: color,
                 borderRadius: BorderRadius.circular(3),
               ),
             ),
@@ -113,20 +94,42 @@ class _CategoryPieChartState extends State<CategoryPieChart> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: Theme.of(context).colorScheme.onSurface.withAlpha(200),
+                color: onSurface.withAlpha(200),
               ),
             ),
             const SizedBox(width: 4),
             Text(
               '(${item.percentage.toStringAsFixed(0)}%)',
-              style: TextStyle(
-                fontSize: 10,
-                color: Theme.of(context).colorScheme.onSurface.withAlpha(120),
-              ),
+              style: TextStyle(fontSize: 10, color: onSurface.withAlpha(120)),
             ),
           ],
         );
       }).toList(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.data.isEmpty) {
+      return const Center(child: Text('No data available'));
+    }
+
+    return Column(
+      children: [
+        Expanded(
+          child: PieChart(
+            PieChartData(
+              pieTouchData: PieTouchData(touchCallback: _onTouch),
+              borderData: FlBorderData(show: false),
+              sectionsSpace: 2,
+              centerSpaceRadius: 40,
+              sections: _buildSections(),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        _buildLegend(),
+      ],
     );
   }
 }

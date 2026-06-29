@@ -1,3 +1,5 @@
+// ignore_for_file: prefer-match-file-name
+
 import 'package:drift/drift.dart';
 import 'message_sources_table.dart';
 
@@ -11,8 +13,8 @@ class ExpenseTemplates extends Table {
   TextColumn get datePattern => text().nullable()();
   TextColumn get categoryId => text().nullable()();
   TextColumn get selectedAmount => text().nullable()();
-  DateTimeColumn get createdAt => dateTime()();
-  DateTimeColumn get updatedAt => dateTime()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 
   @override
   Set<Column> get primaryKey => {id};

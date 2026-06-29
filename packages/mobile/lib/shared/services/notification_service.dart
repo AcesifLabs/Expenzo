@@ -3,26 +3,18 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
 
-enum NotificationType {
-  budgetAlert,
-  recurringDue,
-  syncError,
-  scanComplete,
-  general,
-}
-
 class NotificationService {
-  static final NotificationService _instance = NotificationService._internal();
-  factory NotificationService() => _instance;
-  NotificationService._internal();
+  static const String _channelId = 'app_notifications';
+  static const String _channelName = 'App Notifications';
+  static const String _channelDescription = 'All app notifications';
 
   final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
   bool _isInitialized = false;
 
-  static const String _channelId = 'app_notifications';
-  static const String _channelName = 'App Notifications';
-  static const String _channelDescription = 'All app notifications';
+  static final NotificationService _instance = NotificationService._internal();
+  factory NotificationService() => _instance;
+  NotificationService._internal();
 
   Future<void> initialize() async {
     if (_isInitialized) return;
@@ -65,28 +57,6 @@ class NotificationService {
     }
   }
 
-  static void _onNotificationTapped(NotificationResponse response) {
-    final payload = response.payload;
-    if (payload != null) {
-      try {
-        final data = jsonDecode(payload) as Map<String, dynamic>;
-        final deepLink = data['deepLink'] as String?;
-        if (deepLink != null) {
-          if (kDebugMode) {
-            debugPrint('Notification tapped with deep link: $deepLink');
-            debugPrint(
-              'Notification deep link received but navigation is not wired here: $deepLink',
-            );
-          }
-        }
-      } catch (e) {
-        if (kDebugMode) {
-          debugPrint('Failed to parse notification payload: $e');
-        }
-      }
-    }
-  }
-
   Future<void> showNotification({
     required String title,
     required String body,
@@ -125,12 +95,9 @@ class NotificationService {
   }) async {
     final deepLink = 'expenso://budgets/$budgetId';
 
-    String body;
-    if (percentage >= 100) {
-      body = 'Budget "$budgetName" has been exceeded!';
-    } else {
-      body = 'Budget "$budgetName" is at ${percentage.toStringAsFixed(0)}%';
-    }
+    final body = percentage >= 100
+        ? 'Budget "$budgetName" has been exceeded!'
+        : 'Budget "$budgetName" is at ${percentage.toStringAsFixed(0)}%';
 
     await showNotification(
       title: 'Budget Alert',
@@ -143,7 +110,6 @@ class NotificationService {
   Future<void> showRecurringDue({
     required String recurringId,
     required String description,
-    required DateTime dueDate,
   }) async {
     final deepLink = 'expenso://recurring/$recurringId';
 
@@ -179,6 +145,44 @@ class NotificationService {
     );
   }
 
+  Future<void> cancelAll() async {
+    await _notifications.cancelAll();
+  }
+
+  Future<void> cancel(int id) async {
+    await _notifications.cancel(id);
+  }
+
+  static void _onNotificationTapped(NotificationResponse response) {
+    final payload = response.payload;
+    if (payload == null) return;
+
+    final deepLink = _parseDeepLink(payload);
+    if (!kDebugMode) return;
+
+    if (deepLink != null) {
+      debugPrint('Notification tapped with deep link: $deepLink');
+      debugPrint(
+        'Notification deep link received but navigation is not wired here: $deepLink',
+      );
+    }
+  }
+
+  static String? _parseDeepLink(String payload) {
+    try {
+      final data = jsonDecode(payload) as Map<String, dynamic>;
+
+      return data['deepLink'] as String?;
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
+      if (kDebugMode) {
+        debugPrint('Failed to parse notification payload: $e');
+      }
+
+      return null;
+    }
+  }
+
   String _getTagForType(NotificationType type) {
     switch (type) {
       case NotificationType.budgetAlert:
@@ -193,12 +197,12 @@ class NotificationService {
         return 'general';
     }
   }
+}
 
-  Future<void> cancelAll() async {
-    await _notifications.cancelAll();
-  }
-
-  Future<void> cancel(int id) async {
-    await _notifications.cancel(id);
-  }
+enum NotificationType {
+  budgetAlert,
+  recurringDue,
+  syncError,
+  scanComplete,
+  general,
 }

@@ -1,11 +1,11 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/search_result.dart';
 
-abstract class SearchState extends Equatable {
-  const SearchState();
-
+sealed class SearchState extends Equatable {
   @override
   List<Object?> get props => [];
+
+  const SearchState();
 }
 
 class SearchInitial extends SearchState {
@@ -20,17 +20,17 @@ class SearchLoaded extends SearchState {
   final List<SearchResult> results;
   final String query;
 
-  const SearchLoaded({required this.results, required this.query});
-
   @override
   List<Object?> get props => [results, query];
+
+  const SearchLoaded({required this.results, required this.query});
 }
 
 class SearchError extends SearchState {
   final String message;
 
-  const SearchError(this.message);
-
   @override
   List<Object?> get props => [message];
+
+  const SearchError(this.message);
 }

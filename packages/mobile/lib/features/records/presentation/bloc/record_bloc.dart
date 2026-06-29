@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:expense_tracker/core/bloc/transformers.dart';
 import '../../domain/entities/record.dart';
 import '../../domain/repositories/record_repository.dart';
 import '../../domain/usecases/add_record.dart';
@@ -20,14 +21,6 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
 
   StreamSubscription<List<Record>>? _recordsSubscription;
 
-  bool _hasActiveFilters(RecordLoaded state) {
-    return state.filterStartDate != null ||
-        state.filterEndDate != null ||
-        (state.filterCategoryIds != null &&
-            state.filterCategoryIds!.isNotEmpty) ||
-        state.filterRecordType != null;
-  }
-
   RecordBloc({
     required this.getRecords,
     required this.addRecord,
@@ -35,16 +28,32 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     required this.deleteRecord,
     required this.recordRepository,
   }) : super(const RecordInitial()) {
-    on<LoadRecords>(_onLoadRecords);
-    on<LoadMoreRecords>(_onLoadMoreRecords);
-    on<AddRecordEvent>(_onAddRecord);
-    on<UpdateRecordEvent>(_onUpdateRecord);
-    on<DeleteRecordEvent>(_onDeleteRecord);
-    on<RefreshRecords>(_onRefreshRecords);
-    on<SearchRecords>(_onSearchRecords);
-    on<ApplyFilters>(_onApplyFilters);
-    on<ClearFilters>(_onClearFilters);
-    on<_RecordsUpdated>(_onRecordsUpdated);
+    on<LoadRecords>(_onLoadRecords, transformer: sequential());
+    on<LoadMoreRecords>(_onLoadMoreRecords, transformer: sequential());
+    on<AddRecordEvent>(_onAddRecord, transformer: sequential());
+    on<UpdateRecordEvent>(_onUpdateRecord, transformer: sequential());
+    on<DeleteRecordEvent>(_onDeleteRecord, transformer: sequential());
+    on<RefreshRecords>(_onRefreshRecords, transformer: concurrent());
+    on<SearchRecords>(_onSearchRecords, transformer: concurrent());
+    on<ApplyFilters>(_onApplyFilters, transformer: concurrent());
+    on<ClearFilters>(_onClearFilters, transformer: concurrent());
+    on<_RecordsUpdated>(_onRecordsUpdated, transformer: concurrent());
+  }
+
+  @override
+  Future<void> close() {
+    _recordsSubscription?.cancel();
+
+    return super.close();
+  }
+
+  bool _hasActiveFilters(RecordLoaded state) {
+    final catIds = state.filterCategoryIds;
+
+    return state.filterStartDate != null ||
+        state.filterEndDate != null ||
+        (catIds != null && catIds.isNotEmpty) ||
+        state.filterRecordType != null;
   }
 
   Future<void> _onLoadRecords(
@@ -75,10 +84,7 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     );
   }
 
-  Future<void> _onRecordsUpdated(
-    _RecordsUpdated event,
-    Emitter<RecordState> emit,
-  ) async {
+  void _onRecordsUpdated(_RecordsUpdated event, Emitter<RecordState> emit) {
     final records = event.records;
     final currentQuery = state is RecordLoaded
         ? (state as RecordLoaded).searchQuery
@@ -99,7 +105,7 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     Emitter<RecordState> emit,
   ) async {
     final currentState = state;
-    if (currentState is! RecordLoaded || currentState.hasMore == false) {
+    if (currentState is! RecordLoaded || !currentState.hasMore) {
       return;
     }
 
@@ -111,46 +117,62 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     );
 
     if (_hasActiveFilters(currentState)) {
-      final result = await recordRepository.getFilteredRecords(
+      await _loadMoreFiltered(currentState, emit);
+
+      return;
+    }
+
+    await _loadMoreUnfiltered(currentState, emit);
+  }
+
+  Future<void> _loadMoreFiltered(
+    RecordLoaded currentState,
+    Emitter<RecordState> emit,
+  ) async {
+    final result = await recordRepository.getFilteredRecords(
+      RecordFilter(
         startDate: currentState.filterStartDate,
         endDate: currentState.filterEndDate,
         categoryIds: currentState.filterCategoryIds,
         recordType: currentState.filterRecordType,
         limit: _pageSize,
         offset: currentState.records.length,
-      );
+      ),
+    );
 
-      result.fold((failure) => emit(RecordError(failure.message)), (
-        newRecords,
-      ) {
-        final allRecords = [...currentState.records, ...newRecords];
-        emit(
-          currentState.copyWith(
-            records: allRecords,
-            total: allRecords.length,
-            hasMore: newRecords.length >= _pageSize,
-          ),
-        );
-      });
-    } else {
-      final result = await getRecords(
-        GetRecordsParams(limit: _pageSize, offset: currentState.records.length),
-      );
+    result.fold((failure) => emit(RecordError(failure.message)), (newRecords) {
+      final allRecords = [...currentState.records, ...newRecords];
 
-      result.fold((failure) => emit(RecordError(failure.message)), (
-        newRecords,
-      ) {
-        final allRecords = [...currentState.records, ...newRecords];
-        emit(
-          RecordLoaded(
-            records: allRecords,
-            total: allRecords.length,
-            hasMore: newRecords.length >= _pageSize,
-            searchQuery: currentState.searchQuery,
-          ),
-        );
-      });
-    }
+      emit(
+        currentState.copyWith(
+          records: allRecords,
+          total: allRecords.length,
+          hasMore: newRecords.length >= _pageSize,
+        ),
+      );
+    });
+  }
+
+  Future<void> _loadMoreUnfiltered(
+    RecordLoaded currentState,
+    Emitter<RecordState> emit,
+  ) async {
+    final result = await getRecords(
+      GetRecordsParams(limit: _pageSize, offset: currentState.records.length),
+    );
+
+    result.fold((failure) => emit(RecordError(failure.message)), (newRecords) {
+      final allRecords = [...currentState.records, ...newRecords];
+
+      emit(
+        RecordLoaded(
+          records: allRecords,
+          total: allRecords.length,
+          hasMore: newRecords.length >= _pageSize,
+          searchQuery: currentState.searchQuery,
+        ),
+      );
+    });
   }
 
   Future<void> _onAddRecord(
@@ -158,6 +180,7 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     Emitter<RecordState> emit,
   ) async {
     final result = await addRecord(event.record);
+
     result.fold((failure) => emit(RecordError(failure.message)), (_) {});
   }
 
@@ -166,6 +189,7 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     Emitter<RecordState> emit,
   ) async {
     final result = await updateRecord(event.record);
+
     result.fold((failure) => emit(RecordError(failure.message)), (_) {});
   }
 
@@ -174,13 +198,11 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     Emitter<RecordState> emit,
   ) async {
     final result = await deleteRecord(event.id);
+
     result.fold((failure) => emit(RecordError(failure.message)), (_) {});
   }
 
-  Future<void> _onRefreshRecords(
-    RefreshRecords event,
-    Emitter<RecordState> emit,
-  ) async {
+  void _onRefreshRecords(RefreshRecords event, Emitter<RecordState> emit) {
     add(const LoadRecords());
   }
 
@@ -204,11 +226,13 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     _recordsSubscription = null;
 
     final result = await recordRepository.getFilteredRecords(
-      startDate: event.startDate,
-      endDate: event.endDate,
-      categoryIds: event.categoryIds,
-      recordType: event.recordType,
-      limit: _pageSize,
+      RecordFilter(
+        startDate: event.startDate,
+        endDate: event.endDate,
+        categoryIds: event.categoryIds,
+        recordType: event.recordType,
+        limit: _pageSize,
+      ),
     );
 
     result.fold(
@@ -228,24 +252,16 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     );
   }
 
-  Future<void> _onClearFilters(
-    ClearFilters event,
-    Emitter<RecordState> emit,
-  ) async {
+  void _onClearFilters(ClearFilters event, Emitter<RecordState> emit) {
     add(const LoadRecords());
-  }
-
-  @override
-  Future<void> close() {
-    _recordsSubscription?.cancel();
-    return super.close();
   }
 }
 
 class _RecordsUpdated extends RecordEvent {
   final List<Record> records;
-  const _RecordsUpdated(this.records);
 
   @override
   List<Object?> get props => [records];
+
+  const _RecordsUpdated(this.records);
 }

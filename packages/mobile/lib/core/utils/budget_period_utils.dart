@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:expense_tracker/features/budgets/domain/entities/budget.dart';
+import 'package:expense_tracker/core/constants/budget_period.dart';
 
 class BudgetPeriodUtils {
   BudgetPeriodUtils._();
@@ -28,6 +28,7 @@ class BudgetPeriodUtils {
     final offset = diff % 7;
     final periodStart = DateTime(now.year, now.month, now.day - offset);
     final periodEnd = DateTime(now.year, now.month, now.day - offset + 7);
+
     return DateTimeRange(start: periodStart, end: periodEnd);
   }
 

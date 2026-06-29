@@ -60,7 +60,7 @@ void main() {
             mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
       ).thenAnswer((_) async => mockResponse);
 
-      final result = await datasource.getRecords();
+      final result = await datasource.getRecords(const RemoteRecordQuery());
       expect(result.data.length, 1);
       expect(result.data.first.amount, 42.50);
     });
@@ -91,7 +91,7 @@ void main() {
             mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
       ).thenAnswer((_) async => mockResponse);
 
-      final result = await datasource.getRecords();
+      final result = await datasource.getRecords(const RemoteRecordQuery());
       expect(result.data.first.amount, 100.0);
     });
 
@@ -121,7 +121,7 @@ void main() {
             mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
       ).thenAnswer((_) async => mockResponse);
 
-      final result = await datasource.getRecords();
+      final result = await datasource.getRecords(const RemoteRecordQuery());
       expect(result.data.first.amount, 0.0);
     });
 
@@ -151,7 +151,7 @@ void main() {
             mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
       ).thenAnswer((_) async => mockResponse);
 
-      final result = await datasource.getRecords();
+      final result = await datasource.getRecords(const RemoteRecordQuery());
       expect(result.data.first.createdAt, DateTime.utc(2024, 1, 15, 9, 0, 0));
       expect(result.data.first.updatedAt, DateTime.utc(2024, 1, 15, 11, 30, 0));
     });
@@ -183,7 +183,7 @@ void main() {
             mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
       ).thenAnswer((_) async => mockResponse);
 
-      final result = await datasource.getRecords();
+      final result = await datasource.getRecords(const RemoteRecordQuery());
       expect(result.data.first.source, ExpenseSource.sms);
     });
 
@@ -214,7 +214,7 @@ void main() {
             mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
       ).thenAnswer((_) async => mockResponse);
 
-      final result = await datasource.getRecords();
+      final result = await datasource.getRecords(const RemoteRecordQuery());
       expect(result.data.first.source, ExpenseSource.manual);
     });
 
@@ -244,7 +244,7 @@ void main() {
             mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
       ).thenAnswer((_) async => mockResponse);
 
-      final result = await datasource.getRecords();
+      final result = await datasource.getRecords(const RemoteRecordQuery());
       expect(result.data.first.recordType, RecordType.income);
     });
 
@@ -274,7 +274,7 @@ void main() {
             mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
       ).thenAnswer((_) async => mockResponse);
 
-      final result = await datasource.getRecords();
+      final result = await datasource.getRecords(const RemoteRecordQuery());
       expect(result.data.first.recordType, RecordType.expense);
     });
 
@@ -289,7 +289,10 @@ void main() {
         ),
       );
 
-      expect(() => datasource.getRecords(), throwsA(isA<ServerException>()));
+      expect(
+        () => datasource.getRecords(const RemoteRecordQuery()),
+        throwsA(isA<ServerException>()),
+      );
     });
 
     test('returns correct nextCursor and total from response', () async {
@@ -318,7 +321,7 @@ void main() {
             mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
       ).thenAnswer((_) async => mockResponse);
 
-      final result = await datasource.getRecords();
+      final result = await datasource.getRecords(const RemoteRecordQuery());
       expect(result.nextCursor, 'cursor-123');
       expect(result.total, 100);
     });

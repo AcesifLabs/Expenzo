@@ -1,3 +1,5 @@
+// ignore_for_file: prefer-match-file-name
+
 import 'package:flutter/material.dart';
 
 class SlidePageRoute<T> extends PageRouteBuilder<T> {

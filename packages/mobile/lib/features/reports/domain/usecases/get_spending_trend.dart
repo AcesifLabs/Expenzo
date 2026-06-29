@@ -1,12 +1,15 @@
 import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import '../entities/date_amount.dart';
+import '../entities/granularity.dart';
 import '../repositories/reports_repository.dart';
 
 class GetSpendingTrend {
   final ReportsRepository repository;
 
   GetSpendingTrend({required this.repository});
+
+  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
 
   Future<Either<Failure, List<DateAmount>>> call({
     required DateTime startDate,

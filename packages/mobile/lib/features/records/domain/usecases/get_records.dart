@@ -9,6 +9,7 @@ class GetRecords extends UseCase<List<Record>, GetRecordsParams> {
 
   GetRecords(this.repository);
 
+  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, List<Record>>> call(GetRecordsParams params) {
     return repository.getRecords(
@@ -26,13 +27,13 @@ class GetRecordsParams extends Params {
   final int? limit;
   final int? offset;
 
+  @override
+  List<Object?> get props => [dateRange, categoryId, limit, offset];
+
   const GetRecordsParams({
     this.dateRange,
     this.categoryId,
     this.limit,
     this.offset,
   });
-
-  @override
-  List<Object?> get props => [dateRange, categoryId, limit, offset];
 }

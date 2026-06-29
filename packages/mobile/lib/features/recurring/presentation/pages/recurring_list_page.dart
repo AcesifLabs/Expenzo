@@ -1,36 +1,73 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:picons/picons.dart';
-import 'package:expense_tracker/core/di/injection_container.dart' as di;
-import 'package:expense_tracker/core/utils/navigation_utils.dart';
+
 import '../../domain/entities/recurring_transaction.dart';
 import '../bloc/recurring_bloc.dart';
 import '../bloc/recurring_event.dart';
 import '../bloc/recurring_state.dart';
-import 'package:expense_tracker/features/recurring/presentation/pages/recurring_form_page.dart';
 
-class RecurringListPage extends StatefulWidget {
-  const RecurringListPage({super.key});
+class RecurringListPage extends StatelessWidget {
+  final RecurringBloc bloc;
+
+  const RecurringListPage({super.key, required this.bloc});
 
   @override
-  State<RecurringListPage> createState() => _RecurringListPageState();
+  Widget build(BuildContext context) {
+    return BlocProvider.value(value: bloc, child: const RecurringListView());
+  }
 }
 
-class _RecurringListPageState extends State<RecurringListPage> {
-  late RecurringBloc _bloc;
+class RecurringListView extends StatefulWidget {
+  const RecurringListView({super.key});
 
+  @override
+  State<RecurringListView> createState() => _RecurringListViewState();
+}
+
+class _RecurringListViewState extends State<RecurringListView> {
   @override
   void initState() {
     super.initState();
-    _bloc = di.getIt<RecurringBloc>();
-    _bloc.add(LoadRecurring());
+    context.read<RecurringBloc>().add(LoadRecurring());
   }
 
-  @override
-  void dispose() {
-    _bloc.close();
-    super.dispose();
+  void _onListener(BuildContext context, RecurringState state) {
+    switch (state) {
+      case RecurringOperationSuccess():
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Operation successful')));
+      case RecurringError(:final message):
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(message)));
+      default:
+        break;
+    }
+  }
+
+  void _onRefresh() {
+    context.read<RecurringBloc>().add(LoadRecurring());
+  }
+
+  void _onSwitchChanged(RecurringTransaction recurring, bool value) {
+    context.read<RecurringBloc>().add(
+      UpdateRecurring(recurring.copyWith(isActive: value)),
+    );
+  }
+
+  void _onDeleteDialogConfirm(
+    BuildContext context,
+    RecurringTransaction recurring,
+  ) {
+    final id = recurring.id;
+    if (id == null) return;
+    if (!context.mounted) return;
+    Navigator.pop(context);
+    context.read<RecurringBloc>().add(DeleteRecurring(id));
   }
 
   String _frequencyLabel(RecurringFrequency frequency) {
@@ -46,173 +83,104 @@ class _RecurringListPageState extends State<RecurringListPage> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final dateFormat = DateFormat('MMM dd, yyyy');
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            PiconsRegular.arrowsCounterClockwise,
+            size: 64,
+            color: Theme.of(context).colorScheme.onSurface.withAlpha(100),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No recurring transactions',
+            style: TextStyle(
+              fontSize: 18,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Tap + to create your first recurring expense',
+            style: TextStyle(color: Theme.of(context).colorScheme.outline),
+          ),
+        ],
+      ),
+    );
+  }
 
-    return BlocProvider.value(
-      value: _bloc,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Recurring Transactions'),
-          actions: [
-            IconButton(
-              icon: Icon(PiconsRegular.arrowsClockwise),
-              onPressed: () => _bloc.add(const ProcessRecurring()),
-              tooltip: 'Process pending',
+  Widget _buildRecurringItem(
+    RecurringTransaction recurring,
+    DateFormat dateFormat,
+  ) {
+    final isDue = recurring.isDue();
+
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: isDue
+              ? Theme.of(context).colorScheme.tertiary.withAlpha(51)
+              : Theme.of(context).colorScheme.onSurface.withAlpha(26),
+          child: Icon(
+            PiconsRegular.arrowsCounterClockwise,
+            color: isDue
+                ? Theme.of(context).colorScheme.tertiary
+                : Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+        title: Text(recurring.description),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '\$${recurring.amount.toStringAsFixed(2)} - ${_frequencyLabel(recurring.frequency)}',
+            ),
+            Text(
+              'Next: ${dateFormat.format(recurring.nextOccurrence)}',
+              style: TextStyle(
+                color: isDue
+                    ? Theme.of(context).colorScheme.tertiary
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
+                fontSize: 12,
+              ),
             ),
           ],
         ),
-        body: BlocConsumer<RecurringBloc, RecurringState>(
-          listener: (context, state) {
-            if (state is RecurringOperationSuccess) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(state.message)));
-            } else if (state is RecurringError) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(state.message)));
-            }
-          },
-          builder: (context, state) {
-            if (state is RecurringLoading) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            if (state is RecurringError) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      PiconsRegular.warningCircle,
-                      size: 48,
-                      color: Colors.red,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(state.message),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () => _bloc.add(LoadRecurring()),
-                      child: const Text('Retry'),
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            if (state is RecurringLoaded) {
-              final items = state.recurringList;
-
-              if (items.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        PiconsRegular.arrowsCounterClockwise,
-                        size: 64,
-                        color: Colors.grey[400],
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'No recurring transactions',
-                        style: TextStyle(fontSize: 18, color: Colors.grey[600]),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Tap + to create your first recurring expense',
-                        style: TextStyle(color: Colors.grey[500]),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              return RefreshIndicator(
-                onRefresh: () async {
-                  _bloc.add(LoadRecurring());
-                },
-                child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  itemCount: items.length,
-                  itemBuilder: (context, index) {
-                    final recurring = items[index];
-                    final isDue = recurring.isDue();
-
-                    return Card(
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 4,
-                      ),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: isDue
-                              ? Colors.orange.withAlpha(51)
-                              : Colors.grey.withAlpha(26),
-                          child: Icon(
-                            PiconsRegular.arrowsCounterClockwise,
-                            color: isDue ? Colors.orange : Colors.grey,
-                          ),
-                        ),
-                        title: Text(recurring.description),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '\$${recurring.amount.toStringAsFixed(2)} - ${_frequencyLabel(recurring.frequency)}',
-                            ),
-                            Text(
-                              'Next: ${dateFormat.format(recurring.nextOccurrence)}',
-                              style: TextStyle(
-                                color: isDue ? Colors.orange : Colors.grey,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                        trailing: Switch(
-                          value: recurring.isActive,
-                          onChanged: (value) {
-                            _bloc.add(
-                              UpdateRecurring(
-                                recurring.copyWith(isActive: value),
-                              ),
-                            );
-                          },
-                        ),
-                        onTap: () => _navigateToForm(context, recurring),
-                        onLongPress: () =>
-                            _showDeleteDialog(context, recurring),
-                      ),
-                    );
-                  },
-                ),
-              );
-            }
-
-            return const SizedBox.shrink();
-          },
+        trailing: Switch(
+          value: recurring.isActive,
+          onChanged: (value) => _onSwitchChanged(recurring, value),
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () => _navigateToForm(context, null),
-          child: Icon(PiconsRegular.plus),
-        ),
+        onTap: () => _navigateToForm(context, recurring),
+        onLongPress: () => _showDeleteDialog(context, recurring),
+      ),
+    );
+  }
+
+  Widget _buildLoadedState(RecurringLoaded state, DateFormat dateFormat) {
+    final items = state.recurringList;
+
+    if (items.isEmpty) return _buildEmptyState();
+
+    return RefreshIndicator(
+      onRefresh: () async => _onRefresh(),
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        itemCount: items.length,
+        itemBuilder: (context, index) =>
+            _buildRecurringItem(items[index], dateFormat),
       ),
     );
   }
 
   void _navigateToForm(BuildContext context, RecurringTransaction? recurring) {
-    Navigator.push(
-      context,
-      SlidePageRoute(
-        builder: (_) => BlocProvider.value(
-          value: _bloc,
-          child: RecurringFormPage(recurring: recurring),
-        ),
-      ),
-    );
+    if (recurring?.id != null) {
+      context.push('/recurring/${recurring!.id}/edit');
+    } else {
+      context.push('/recurring/new');
+    }
   }
 
   void _showDeleteDialog(BuildContext context, RecurringTransaction recurring) {
@@ -229,13 +197,69 @@ class _RecurringListPageState extends State<RecurringListPage> {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
-              Navigator.pop(dialogContext);
-              _bloc.add(DeleteRecurring(recurring.id!));
-            },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            onPressed: () => _onDeleteDialogConfirm(dialogContext, recurring),
+            child: Text(
+              'Delete',
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState(RecurringError state) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            PiconsRegular.warningCircle,
+            size: 48,
+            color: Theme.of(context).colorScheme.error,
+          ),
+          const SizedBox(height: 16),
+          Text(state.message),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () => context.read<RecurringBloc>().add(LoadRecurring()),
+            child: const Text('Retry'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBody(BuildContext _, RecurringState state) {
+    return switch (state) {
+      RecurringLoading() => const Center(child: CircularProgressIndicator()),
+      RecurringError() => _buildErrorState(state),
+      RecurringLoaded() => _buildLoadedState(state, DateFormat('MMM dd, yyyy')),
+      _ => const SizedBox.shrink(),
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Recurring Transactions'),
+        actions: [
+          IconButton(
+            icon: Icon(PiconsRegular.arrowsCounterClockwise),
+            onPressed: () =>
+                context.read<RecurringBloc>().add(const ProcessRecurring()),
+            tooltip: 'Process pending',
+          ),
+        ],
+      ),
+      body: BlocConsumer<RecurringBloc, RecurringState>(
+        listener: _onListener,
+        builder: _buildBody,
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _navigateToForm(context, null),
+        child: Icon(PiconsRegular.plus),
       ),
     );
   }

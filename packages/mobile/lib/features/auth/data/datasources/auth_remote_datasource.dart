@@ -8,15 +8,19 @@ import '../../../../core/database/daos/user_dao.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import '../../../../core/api/api_client.dart';
 import '../../../../core/api/api_constants.dart';
+import 'package:expense_tracker/core/error/exceptions.dart';
 import '../../../../core/api/token_storage.dart';
 import '../../domain/entities/user.dart';
 
 abstract class AuthRemoteDatasource {
+  /// Throws: [ServerException] if the API request fails.
   Future<User> signInWithGoogle();
   Future<void> signOut();
   Future<User?> getCurrentUser();
   Future<bool> isSignedIn();
   Future<void> deleteAccount();
+
+  /// Throws: [ServerException] if the API request fails.
   Future<bool> hasGmailScope();
 }
 
@@ -36,6 +40,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
     return isDebugMode;
   }
 
+  /// Throws: [ServerException] if the API request fails.
   @override
   Future<User> signInWithGoogle() async {
     debugPrint('AuthRemoteDatasource: signInWithGoogle started');
@@ -48,7 +53,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
 
     if (googleUser == null) {
       debugPrint('AuthRemoteDatasource: Google sign in was cancelled by user');
-      throw Exception('Google sign in was cancelled');
+      throw AuthException(message: 'Google sign in was cancelled');
     }
 
     final googleAuth = await googleUser.authentication;
@@ -67,12 +72,100 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
     debugPrint('AuthRemoteDatasource: Firebase user: $firebaseUser');
 
     if (firebaseUser == null) {
-      throw Exception('Firebase sign in failed');
+      throw AuthException(message: 'Firebase sign in failed');
     }
 
     final user = _mapFirebaseUserToEntity(firebaseUser);
     await _syncUserToLocalDb(firebaseUser);
+    await _obtainJwtToken(firebaseUser);
 
+    return user;
+  }
+
+  /// Throws: [ServerException] if the API request fails.
+  @override
+  Future<void> signOut() async {
+    await TokenStorage.clearAll();
+    await userDao.clearUser();
+    await googleSignIn.signOut();
+    await firebaseAuth.signOut();
+  }
+
+  /// Throws: [ServerException] if the API request fails.
+  @override
+  Future<User?> getCurrentUser() async {
+    debugPrint('AuthRemoteDatasource: getCurrentUser called');
+    final firebaseUser = firebaseAuth.currentUser;
+    debugPrint('AuthRemoteDatasource: currentUser: $firebaseUser');
+
+    if (firebaseUser == null) return null;
+    await _syncUserToLocalDb(firebaseUser);
+
+    return _mapFirebaseUserToEntity(firebaseUser);
+  }
+
+  /// Throws: [ServerException] if the API request fails.
+  @override
+  Future<bool> isSignedIn() async {
+    final currentUser = firebaseAuth.currentUser;
+
+    return currentUser != null;
+  }
+
+  /// Throws: [ServerException] if the API request fails.
+  @override
+  Future<void> deleteAccount() async {
+    final user = firebaseAuth.currentUser;
+    if (user != null) {
+      await user.delete();
+      await userDao.clearUser();
+    }
+  }
+
+  /// Throws: [ServerException] if the API request fails.
+  @override
+  Future<bool> hasGmailScope() async {
+    try {
+      return await googleSignIn.canAccessScopes([
+        'https://www.googleapis.com/auth/gmail.readonly',
+      ]);
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
+      return false;
+    }
+  }
+
+  User _mapFirebaseUserToEntity(fb.User user) {
+    return User(
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName,
+      photoUrl: user.photoURL,
+    );
+  }
+
+  /// Throws: [ServerException] if the API request fails.
+  Future<void> _syncUserToLocalDb(fb.User firebaseUser) async {
+    try {
+      final now = DateTime.now().toUtc();
+      await userDao.upsertUser(
+        UsersCompanion.insert(
+          uid: firebaseUser.uid,
+          email: firebaseUser.email ?? '',
+          displayName: Value(firebaseUser.displayName),
+          photoUrl: Value(firebaseUser.photoURL),
+          createdAt: Value(now),
+          lastLoginAt: Value(now),
+        ),
+      );
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
+      debugPrint('AuthRemoteDatasource: Failed to sync user to local DB: $e');
+    }
+  }
+
+  /// Throws: [ServerException] if the API request fails.
+  Future<void> _obtainJwtToken(fb.User firebaseUser) async {
     try {
       final firebaseToken = await firebaseUser.getIdToken(true);
       final apiClient = di.getIt<ApiClient>();
@@ -82,7 +175,8 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
       );
       await TokenStorage.saveToken(response.data['accessToken']);
       debugPrint('AuthRemoteDatasource: Backend JWT obtained');
-    } catch (e) {
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
       debugPrint('AuthRemoteDatasource: Backend JWT with Firebase failed: $e');
 
       if (!isDevTokenFallbackAllowed(isDebugMode: kDebugMode)) {
@@ -107,79 +201,6 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
         debugPrint('AuthRemoteDatasource: Dev JWT also failed: $e2');
         rethrow;
       }
-    }
-
-    return user;
-  }
-
-  @override
-  Future<void> signOut() async {
-    await TokenStorage.clearAll();
-    await userDao.clearUser();
-    await googleSignIn.signOut();
-    await firebaseAuth.signOut();
-  }
-
-  @override
-  Future<User?> getCurrentUser() async {
-    debugPrint('AuthRemoteDatasource: getCurrentUser called');
-    final firebaseUser = firebaseAuth.currentUser;
-    debugPrint('AuthRemoteDatasource: currentUser: $firebaseUser');
-    if (firebaseUser == null) return null;
-    await _syncUserToLocalDb(firebaseUser);
-    return _mapFirebaseUserToEntity(firebaseUser);
-  }
-
-  @override
-  Future<bool> isSignedIn() async {
-    final currentUser = firebaseAuth.currentUser;
-    return currentUser != null;
-  }
-
-  @override
-  Future<void> deleteAccount() async {
-    final user = firebaseAuth.currentUser;
-    if (user != null) {
-      await user.delete();
-      await userDao.clearUser();
-    }
-  }
-
-  @override
-  Future<bool> hasGmailScope() async {
-    try {
-      return await googleSignIn.canAccessScopes([
-        'https://www.googleapis.com/auth/gmail.readonly',
-      ]);
-    } catch (e) {
-      return false;
-    }
-  }
-
-  User _mapFirebaseUserToEntity(fb.User user) {
-    return User(
-      uid: user.uid,
-      email: user.email,
-      displayName: user.displayName,
-      photoUrl: user.photoURL,
-    );
-  }
-
-  Future<void> _syncUserToLocalDb(fb.User firebaseUser) async {
-    try {
-      final now = DateTime.now().toUtc();
-      await userDao.upsertUser(
-        UsersCompanion.insert(
-          uid: firebaseUser.uid,
-          email: firebaseUser.email ?? '',
-          displayName: Value(firebaseUser.displayName),
-          photoUrl: Value(firebaseUser.photoURL),
-          createdAt: now,
-          lastLoginAt: now,
-        ),
-      );
-    } catch (e) {
-      debugPrint('AuthRemoteDatasource: Failed to sync user to local DB: $e');
     }
   }
 }

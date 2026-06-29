@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import '../../constants/record_type.dart';
 import '../app_database.dart';
 import '../tables/records_table.dart';
+import '../../../features/records/domain/filters/record_filter.dart';
 
 part 'record_dao.g.dart';
 
@@ -12,12 +13,14 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
   Stream<List<Record>> watchRecords({int? limit, int? offset}) {
     var query = select(records)..orderBy([(t) => OrderingTerm.desc(t.date)]);
     if (limit != null) query = query..limit(limit, offset: offset);
+
     return query.watch();
   }
 
   Future<List<Record>> getAllRecords({int? limit, int? offset}) {
     final query = select(records)..orderBy([(t) => OrderingTerm.desc(t.date)]);
     if (limit != null) query.limit(limit, offset: offset);
+
     return query.get();
   }
 
@@ -67,6 +70,7 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
       ..addColumns([count])
       ..where(records.categoryId.equals(categoryId));
     final result = await query.getSingle();
+
     return result.read(count) ?? 0;
   }
 
@@ -77,6 +81,7 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
       ..where(records.sourceId.equals(sourceId));
     final result = await query.getSingle();
     final cnt = result.read(count) ?? 0;
+
     return cnt > 0;
   }
 
@@ -88,6 +93,7 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
       ..where(records.sourceId.isIn(sourceIds));
 
     final results = await query.get();
+
     return results
         .map((row) => row.read(records.sourceId))
         .whereType<String>()
@@ -126,6 +132,7 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
     for (final item in items) {
       total += item.amount.abs();
     }
+
     return total;
   }
 
@@ -141,56 +148,40 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
     for (final item in items) {
       total += item.amount.abs();
     }
+
     return total;
   }
 
-  Future<List<Record>> getRecordsByDateRangeOnly(
-    DateTime start,
-    DateTime end,
-  ) async {
+  Future<List<Record>> getRecordsByDateRangeOnly(DateTime start, DateTime end) {
     return (select(records)
           ..where((t) => t.date.isBetweenValues(start, end))
           ..orderBy([(t) => OrderingTerm.desc(t.date)]))
         .get();
   }
 
-  Future<List<Record>> getFilteredRecords({
-    DateTime? startDate,
-    DateTime? endDate,
-    List<String>? categoryIds,
-    String? recordType,
-    int? limit,
-    int? offset,
-  }) {
+  Future<List<Record>> getFilteredRecords(RecordFilter filter) {
     final q = select(records);
 
     q.where((t) {
-      Expression<bool>? where;
-      void and(Expression<bool> e) {
-        where = where == null ? e : where! & e;
+      final dateFilter = _buildDateFilter(t, filter.startDate, filter.endDate);
+      Expression<bool> where = dateFilter;
+
+      final catIds = filter.categoryIds;
+      if (catIds != null && catIds.isNotEmpty) {
+        where = where & t.categoryId.isIn(catIds);
       }
 
-      if (startDate != null && endDate != null) {
-        and(t.date.isBetweenValues(startDate, endDate));
-      } else if (startDate != null) {
-        and(t.date.isBiggerOrEqualValue(startDate));
-      } else if (endDate != null) {
-        and(t.date.isSmallerOrEqualValue(endDate));
+      final rt = filter.recordType;
+      if (rt != null && rt.isNotEmpty) {
+        where = where & t.recordType.equals(rt);
       }
 
-      if (categoryIds != null && categoryIds.isNotEmpty) {
-        and(t.categoryId.isIn(categoryIds));
-      }
-
-      if (recordType != null && recordType.isNotEmpty) {
-        and(t.recordType.equals(recordType));
-      }
-
-      return where ?? const Constant(true);
+      return where;
     });
 
     q.orderBy([(t) => OrderingTerm.desc(t.date)]);
-    if (limit != null) q.limit(limit, offset: offset);
+    final limit = filter.limit;
+    if (limit != null) q.limit(limit, offset: filter.offset);
 
     return q.get();
   }
@@ -201,6 +192,7 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
       ..addColumns([records.categoryId, amountSum])
       ..where(records.date.isBetweenValues(start, end))
       ..groupBy([records.categoryId]);
+
     return query.get();
   }
 
@@ -210,6 +202,21 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
       ..addColumns([records.date, amountSum])
       ..where(records.date.isBetweenValues(start, end))
       ..groupBy([records.date]);
+
     return query.get();
+  }
+
+  Expression<bool> _buildDateFilter(
+    Records t,
+    DateTime? startDate,
+    DateTime? endDate,
+  ) {
+    if (startDate != null && endDate != null) {
+      return t.date.isBetweenValues(startDate, endDate);
+    }
+    if (startDate != null) return t.date.isBiggerOrEqualValue(startDate);
+    if (endDate != null) return t.date.isSmallerOrEqualValue(endDate);
+
+    return const Constant(true);
   }
 }

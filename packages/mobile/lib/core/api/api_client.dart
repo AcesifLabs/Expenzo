@@ -7,48 +7,58 @@ import '../sync/connectivity_service.dart';
 import '../di/injection_container.dart' as di;
 
 class ApiClient {
+  Dio dio;
   static final ApiClient _instance = ApiClient._internal();
+
   factory ApiClient() => _instance;
 
-  late final Dio dio;
-
-  ApiClient._internal() {
-    dio = Dio(
-      BaseOptions(
-        baseUrl: ApiConstants.baseUrl,
-        connectTimeout: const Duration(seconds: 30),
-        receiveTimeout: const Duration(seconds: 30),
-        sendTimeout: const Duration(seconds: 30),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'bypass-tunnel-reminder': 'true',
-        },
-      ),
-    );
+  ApiClient._internal()
+    : dio = Dio(
+        BaseOptions(
+          baseUrl: ApiConstants.baseUrl,
+          connectTimeout: const Duration(seconds: 30),
+          receiveTimeout: const Duration(seconds: 30),
+          sendTimeout: const Duration(seconds: 30),
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'bypass-tunnel-reminder': 'true',
+          },
+        ),
+      ) {
     _setupInterceptors();
-  }
-
-  void _setupInterceptors() {
-    dio.interceptors.addAll([_AuthInterceptor(), _LoggingInterceptor()]);
   }
 
   void updateBaseUrl() {
     dio.options.baseUrl = ApiConstants.baseUrl;
   }
+
+  void _setupInterceptors() {
+    dio.interceptors.addAll([_AuthInterceptor(dio), _LoggingInterceptor()]);
+  }
 }
 
 class _AuthInterceptor extends Interceptor {
+  final Dio _dio;
+
+  _AuthInterceptor(this._dio);
+
   @override
   void onRequest(
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    final token = await TokenStorage.getToken();
-    if (token != null && token.isNotEmpty) {
-      options.headers['Authorization'] = 'Bearer $token';
+    try {
+      final token = await TokenStorage.getToken();
+      if (token != null && token.isNotEmpty) {
+        options.headers['Authorization'] = 'Bearer $token';
+      }
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
+      debugPrint('AuthInterceptor.onRequest error: $e');
+    } finally {
+      handler.next(options);
     }
-    handler.next(options);
   }
 
   @override
@@ -59,6 +69,7 @@ class _AuthInterceptor extends Interceptor {
         if (!await connectivity.checkNow()) {
           debugPrint('AuthInterceptor: Offline, skipping token refresh');
           handler.next(err);
+
           return;
         }
         final firebaseUser = FirebaseAuth.instance.currentUser;
@@ -73,11 +84,13 @@ class _AuthInterceptor extends Interceptor {
           await TokenStorage.saveToken(newJwt);
           final opts = err.requestOptions;
           opts.headers['Authorization'] = 'Bearer $newJwt';
-          final retryResponse = await Dio().fetch(opts);
+          final retryResponse = await _dio.fetch(opts);
           handler.resolve(retryResponse);
+
           return;
         }
-      } catch (e) {
+      } catch (e, s) {
+        debugPrint('Error: $e\n$s');
         debugPrint('Token refresh failed: $e');
         await TokenStorage.clearAll();
       }

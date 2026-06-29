@@ -9,6 +9,7 @@ class UpdateRule implements UseCase<ParsingRule, ParsingRule> {
 
   UpdateRule(this.repository);
 
+  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, ParsingRule>> call(ParsingRule rule) {
     return repository.updateRule(rule);

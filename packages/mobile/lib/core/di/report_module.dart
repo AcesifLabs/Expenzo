@@ -2,6 +2,7 @@ import 'package:get_it/get_it.dart';
 import 'package:expense_tracker/core/database/daos/record_dao.dart';
 import 'package:expense_tracker/core/database/daos/category_dao.dart';
 import 'package:expense_tracker/features/reports/data/repositories/reports_repository_impl.dart';
+import 'package:expense_tracker/features/reports/domain/entities/granularity.dart';
 import 'package:expense_tracker/features/reports/domain/repositories/reports_repository.dart';
 import 'package:expense_tracker/features/reports/domain/usecases/get_spending_trend.dart';
 import 'package:expense_tracker/features/reports/domain/usecases/get_category_breakdown.dart';

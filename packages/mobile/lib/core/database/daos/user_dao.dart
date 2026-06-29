@@ -9,8 +9,7 @@ class UserDao extends DatabaseAccessor<AppDatabase> with _$UserDaoMixin {
   UserDao(super.db);
 
   Future<void> upsertUser(UsersCompanion user) async {
-    await delete(users).go();
-    await into(users).insert(user);
+    await into(users).insertOnConflictUpdate(user);
   }
 
   Future<User?> getActiveUser() {

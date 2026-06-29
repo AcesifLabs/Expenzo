@@ -14,46 +14,7 @@ class Record extends Equatable {
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  const Record({
-    this.id,
-    required this.amount,
-    required this.description,
-    required this.date,
-    this.categoryId,
-    this.source = ExpenseSource.manual,
-    this.sourceId,
-    required this.recordType,
-    required this.createdAt,
-    required this.updatedAt,
-  });
-
   bool get isFromScan => source != ExpenseSource.manual;
-
-  Record copyWith({
-    String? id,
-    double? amount,
-    String? description,
-    DateTime? date,
-    String? categoryId,
-    ExpenseSource? source,
-    String? sourceId,
-    RecordType? recordType,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-  }) {
-    return Record(
-      id: id ?? this.id,
-      amount: amount ?? this.amount,
-      description: description ?? this.description,
-      date: date ?? this.date,
-      categoryId: categoryId ?? this.categoryId,
-      source: source ?? this.source,
-      sourceId: sourceId ?? this.sourceId,
-      recordType: recordType ?? this.recordType,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-    );
-  }
 
   @override
   List<Object?> get props => [
@@ -68,4 +29,45 @@ class Record extends Equatable {
     createdAt,
     updatedAt,
   ];
+
+  const Record({
+    this.id,
+    required this.amount,
+    required this.description,
+    required this.date,
+    this.categoryId,
+    this.source = ExpenseSource.manual,
+    this.sourceId,
+    required this.recordType,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  Record copyWith({
+    String? id,
+    double? amount,
+    String? description,
+    DateTime? date,
+    String? categoryId,
+    ExpenseSource? source,
+    String? sourceId,
+    RecordType? recordType,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return Record(
+      id: _v(id, this.id),
+      amount: _v(amount, this.amount),
+      description: _v(description, this.description),
+      date: _v(date, this.date),
+      categoryId: _v(categoryId, this.categoryId),
+      source: _v(source, this.source),
+      sourceId: _v(sourceId, this.sourceId),
+      recordType: _v(recordType, this.recordType),
+      createdAt: _v(createdAt, this.createdAt),
+      updatedAt: _v(updatedAt, this.updatedAt),
+    );
+  }
+
+  static T _v<T>(T? value, T defaultValue) => value ?? defaultValue;
 }

@@ -5,3 +5,6 @@ export 'pages/dashboard_page.dart';
 export 'widgets/summary_card.dart';
 export 'widgets/category_breakdown_widget.dart';
 export 'widgets/recent_transactions_list.dart';
+export 'widgets/menu_row.dart';
+export 'widgets/budget_progress_summary_card.dart';
+export 'widgets/balance_row.dart';

@@ -4,7 +4,8 @@ import 'package:expense_tracker/core/error/usecase.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
 import '../../../parsing_rules/domain/entities/parsed_transaction.dart';
 import '../../../parsing_rules/domain/services/parsing_isolate_service.dart';
-import '../../../parsing_rules/domain/usecases/evaluate_rules.dart' as eval;
+import '../../../parsing_rules/domain/usecases/evaluate_rules_use_case.dart'
+    as eval;
 import '../../data/datasources/sms_local_datasource.dart';
 import '../entities/sms_message.dart';
 
@@ -12,10 +13,15 @@ class ScanSmsUseCase
     implements UseCase<List<ParsedTransaction>, ScanSmsParams> {
   final SmsLocalDatasource smsDatasource;
   final eval.EvaluateRulesUseCase evaluateRules;
-  final ParsingIsolateService _isolateService = ParsingIsolateService();
+  final ParsingIsolateService _isolateService;
 
-  ScanSmsUseCase({required this.smsDatasource, required this.evaluateRules});
+  ScanSmsUseCase({
+    required this.smsDatasource,
+    required this.evaluateRules,
+    required ParsingIsolateService parsingIsolateService,
+  }) : _isolateService = parsingIsolateService;
 
+  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, List<ParsedTransaction>>> call(
     ScanSmsParams params,
@@ -34,9 +40,10 @@ class ScanSmsUseCase
       }
 
       List<SmsMessage> filteredMessages = messages;
-      if (params.since != null) {
+      final since = params.since;
+      if (since != null) {
         filteredMessages = messages
-            .where((m) => m.date.isAfter(params.since!))
+            .where((m) => m.date.isAfter(since))
             .toList();
       }
 
@@ -58,13 +65,15 @@ class ScanSmsUseCase
       );
 
       return Right(results);
-    } catch (e) {
+    } catch (e, s) {
+      print('Error: $e\n$s');
       return Left(SmsScanFailure(message: e.toString()));
     }
   }
 
   String _generateSourceId(SmsMessage message) {
     final combined = '${message.address}_${message.date.toIso8601String()}';
+
     return combined.hashCode.abs().toString();
   }
 }

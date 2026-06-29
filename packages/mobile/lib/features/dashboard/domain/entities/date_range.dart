@@ -1,20 +1,9 @@
 import 'package:equatable/equatable.dart';
 
-enum DateRangePreset { thisMonth, lastMonth, thisYear }
-
 class DateRange extends Equatable {
   final DateRangePreset preset;
   final DateTime? customStart;
   final DateTime? customEnd;
-
-  const DateRange({required this.preset, this.customStart, this.customEnd});
-
-  factory DateRange.thisMonth() =>
-      const DateRange(preset: DateRangePreset.thisMonth);
-  factory DateRange.lastMonth() =>
-      const DateRange(preset: DateRangePreset.lastMonth);
-  factory DateRange.thisYear() =>
-      const DateRange(preset: DateRangePreset.thisYear);
 
   DateTime get startDate {
     final now = DateTime.now();
@@ -39,11 +28,6 @@ class DateRange extends Equatable {
       case DateRangePreset.thisYear:
         return DateTime(now.year, 12, 31, 23, 59, 59);
     }
-  }
-
-  bool isInRange(DateTime date) {
-    return date.isAfter(startDate.subtract(const Duration(days: 1))) &&
-        date.isBefore(endDate.add(const Duration(days: 1)));
   }
 
   DateRange get previousPeriod {
@@ -80,4 +64,34 @@ class DateRange extends Equatable {
 
   @override
   List<Object?> get props => [preset, customStart, customEnd];
+
+  const DateRange({required this.preset, this.customStart, this.customEnd});
+
+  DateRange copyWith({
+    DateRangePreset? preset,
+    DateTime? customStart,
+    DateTime? customEnd,
+  }) {
+    return DateRange(
+      preset: preset ?? this.preset,
+      customStart: customStart ?? this.customStart,
+      customEnd: customEnd ?? this.customEnd,
+    );
+  }
+
+  factory DateRange.thisMonth() =>
+      const DateRange(preset: DateRangePreset.thisMonth);
+
+  factory DateRange.lastMonth() =>
+      const DateRange(preset: DateRangePreset.lastMonth);
+
+  factory DateRange.thisYear() =>
+      const DateRange(preset: DateRangePreset.thisYear);
+
+  bool isInRange(DateTime date) {
+    return date.isAfter(startDate.subtract(const Duration(days: 1))) &&
+        date.isBefore(endDate.add(const Duration(days: 1)));
+  }
 }
+
+enum DateRangePreset { thisMonth, lastMonth, thisYear }

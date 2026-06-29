@@ -21,18 +21,25 @@ class RegexPatternValidator extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.orange.shade50,
+        color: Theme.of(context).colorScheme.tertiaryContainer,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.orange),
+        border: Border.all(color: Theme.of(context).colorScheme.tertiary),
       ),
       child: Row(
         children: [
-          const Icon(Icons.warning, color: Colors.orange, size: 20),
+          Icon(
+            Icons.warning,
+            color: Theme.of(context).colorScheme.tertiary,
+            size: 20,
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               validation,
-              style: const TextStyle(color: Colors.orange, fontSize: 12),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.tertiary,
+                fontSize: 12,
+              ),
             ),
           ),
         ],
@@ -61,20 +68,13 @@ class _RegexValidatorIndicatorState extends State<RegexValidatorIndicator> {
     _validatePattern();
   }
 
-  @override
-  void didUpdateWidget(RegexValidatorIndicator oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.pattern != widget.pattern) {
-      _validatePattern();
-    }
-  }
-
   void _validatePattern() {
     if (widget.pattern.isEmpty) {
       setState(() {
         _isValid = true;
         _errorMessage = null;
       });
+
       return;
     }
 
@@ -85,11 +85,20 @@ class _RegexValidatorIndicatorState extends State<RegexValidatorIndicator> {
         _isValid = warning == null;
         _errorMessage = warning;
       });
-    } catch (e) {
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
       setState(() {
         _isValid = false;
         _errorMessage = 'Invalid regex: ${e.toString()}';
       });
+    }
+  }
+
+  @override
+  void didUpdateWidget(RegexValidatorIndicator oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.pattern != widget.pattern) {
+      _validatePattern();
     }
   }
 
@@ -106,7 +115,9 @@ class _RegexValidatorIndicatorState extends State<RegexValidatorIndicator> {
           children: [
             Icon(
               _isValid ? Icons.warning : Icons.error,
-              color: _isValid ? Colors.orange : Colors.red,
+              color: _isValid
+                  ? Theme.of(context).colorScheme.tertiary
+                  : Theme.of(context).colorScheme.error,
               size: 16,
             ),
             const SizedBox(width: 4),
@@ -114,7 +125,9 @@ class _RegexValidatorIndicatorState extends State<RegexValidatorIndicator> {
               child: Text(
                 _errorMessage ?? '',
                 style: TextStyle(
-                  color: _isValid ? Colors.orange : Colors.red,
+                  color: _isValid
+                      ? Theme.of(context).colorScheme.tertiary
+                      : Theme.of(context).colorScheme.error,
                   fontSize: 12,
                 ),
               ),
@@ -124,13 +137,20 @@ class _RegexValidatorIndicatorState extends State<RegexValidatorIndicator> {
       );
     }
 
-    return const Row(
+    return Row(
       children: [
-        Icon(Icons.check_circle, color: Colors.green, size: 16),
-        SizedBox(width: 4),
+        Icon(
+          Icons.check_circle,
+          color: Theme.of(context).colorScheme.secondary,
+          size: 16,
+        ),
+        const SizedBox(width: 4),
         Text(
           'Valid pattern',
-          style: TextStyle(color: Colors.green, fontSize: 12),
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.secondary,
+            fontSize: 12,
+          ),
         ),
       ],
     );

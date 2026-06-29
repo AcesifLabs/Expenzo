@@ -10,6 +10,7 @@ class GetCategories extends UseCase<List<Category>, GetCategoriesParams> {
 
   GetCategories(this.repository);
 
+  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, List<Category>>> call(GetCategoriesParams params) {
     return repository.getCategories(
@@ -22,8 +23,9 @@ class GetCategories extends UseCase<List<Category>, GetCategoriesParams> {
 class GetCategoriesParams extends Params {
   final RecordType? type;
   final bool sortByUsage;
-  const GetCategoriesParams({this.type, this.sortByUsage = false});
 
   @override
   List<Object?> get props => [type, sortByUsage];
+
+  const GetCategoriesParams({this.type, this.sortByUsage = false});
 }

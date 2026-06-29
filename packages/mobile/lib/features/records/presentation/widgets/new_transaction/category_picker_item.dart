@@ -18,16 +18,53 @@ class CategoryPickerItem extends StatelessWidget {
     required this.onTap,
   });
 
+  Color _resolveTextColor(Color iconColor, bool isLight) {
+    return (isSelected && isLight) ? Colors.black : iconColor;
+  }
+
+  Color _resolveBorderColor(ColorScheme colors) {
+    if (isSelected) return selectedColor.withAlpha(50);
+    if (errorBorderColor != Colors.transparent) return errorBorderColor;
+
+    return colors.onSurface.withAlpha(40);
+  }
+
+  Color _iconColor(ColorScheme colors) {
+    return isSelected ? selectedColor : colors.onSurface.withAlpha(150);
+  }
+
+  Widget _label() {
+    return ClipRect(
+      child: AnimatedSize(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOutCubic,
+        child: isSelected
+            ? Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: Text(
+                  category.name,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 1,
+                ),
+              )
+            : const SizedBox.shrink(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final isLight = Theme.of(context).brightness == Brightness.light;
-
-    final iconColor = isSelected
-        ? selectedColor
-        : colors.onSurface.withAlpha(150);
-
-    final textColor = (isSelected && isLight) ? Colors.black : iconColor;
+    final iconColor = _iconColor(colors);
+    // ignore: unused_local_variable
+    final textColor = _resolveTextColor(
+      iconColor,
+      Theme.of(context).colorScheme.brightness == Brightness.light,
+    );
+    final borderColor = _resolveBorderColor(colors);
 
     return GestureDetector(
       onTap: onTap,
@@ -41,14 +78,7 @@ class CategoryPickerItem extends StatelessWidget {
               ? selectedColor.withAlpha(25)
               : colors.onSurface.withAlpha(10),
           borderRadius: BorderRadius.circular(25),
-          border: Border.all(
-            color: isSelected
-                ? selectedColor.withAlpha(50)
-                : errorBorderColor != Colors.transparent
-                ? errorBorderColor
-                : colors.onSurface.withAlpha(40),
-            width: 1,
-          ),
+          border: Border.all(color: borderColor, width: 1),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -58,26 +88,7 @@ class CategoryPickerItem extends StatelessWidget {
               size: 20,
               color: iconColor,
             ),
-            ClipRect(
-              child: AnimatedSize(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOutCubic,
-                child: isSelected
-                    ? Padding(
-                        padding: const EdgeInsets.only(left: 8),
-                        child: Text(
-                          category.name,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            color: textColor,
-                          ),
-                          maxLines: 1,
-                        ),
-                      )
-                    : const SizedBox.shrink(),
-              ),
-            ),
+            _label(),
           ],
         ),
       ),

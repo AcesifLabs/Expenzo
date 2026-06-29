@@ -12,7 +12,9 @@ class CheckBudgetAlerts {
     required this.notificationService,
   });
 
-  Future<Either<Failure, void>> call({
+  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
+
+  Future<Either<Failure, Unit>> call({
     required String budgetId,
     required double spentAmount,
   }) async {
@@ -42,9 +44,10 @@ class CheckBudgetAlerts {
           );
         }
 
-        return const Right(null);
+        return const Right(unit);
       });
-    } catch (e) {
+    } catch (e, s) {
+      print('Error: $e\n$s');
       return Left(CacheFailure(message: e.toString()));
     }
   }

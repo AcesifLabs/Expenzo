@@ -18,22 +18,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
     SyncQueueDao? syncQueueDao,
   }) : _syncQueueDao = syncQueueDao;
 
-  void _enqueueSync(
-    String action,
-    String recordId, [
-    Map<String, dynamic>? data,
-  ]) {
-    final syncQueueDao = _syncQueueDao;
-    if (syncQueueDao == null) return;
-    syncQueueDao.enqueue(
-      tableName: 'categories',
-      recordId: recordId,
-      action: action,
-      payload: data != null ? jsonEncode(data) : '',
-    );
-    SyncEventBus().trigger();
-  }
-
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, List<Category>>> getCategories({
     RecordType? type,
@@ -44,12 +29,17 @@ class CategoryRepositoryImpl implements CategoryRepository {
         type: type,
         sortByUsage: sortByUsage,
       );
+
       return Right(categories);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      print('Error: $e\n$s');
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, Category>> getCategoryById(String id) async {
     try {
@@ -57,58 +47,99 @@ class CategoryRepositoryImpl implements CategoryRepository {
       if (category == null) {
         return const Left(CacheFailure(message: 'Category not found'));
       }
+
       return Right(category);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      print('Error: $e\n$s');
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, Category>> createCategory(
     Category category,
   ) async {
     try {
       final created = await localDatasource.createCategory(category);
-      _enqueueSync('insert', created.id!, {
-        'name': created.name,
-        'emoji': created.emoji,
-        'color': created.color,
-        'type': created.type.dbValue,
-        'isDefault': created.isDefault,
-      });
+      final createdId = created.id;
+      if (createdId != null) {
+        _enqueueSync('insert', createdId, {
+          'name': created.name,
+          'emoji': created.emoji,
+          'color': created.color,
+          'type': created.type.dbValue,
+          'isDefault': created.isDefault,
+        });
+      }
+
       return Right(created);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      print('Error: $e\n$s');
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, Category>> updateCategory(
     Category category,
   ) async {
     try {
       final updated = await localDatasource.updateCategory(category);
-      _enqueueSync('update', updated.id!, {
-        'name': updated.name,
-        'emoji': updated.emoji,
-        'color': updated.color,
-        'type': updated.type.dbValue,
-        'isDefault': updated.isDefault,
-      });
+      final updatedId = updated.id;
+      if (updatedId != null) {
+        _enqueueSync('update', updatedId, {
+          'name': updated.name,
+          'emoji': updated.emoji,
+          'color': updated.color,
+          'type': updated.type.dbValue,
+          'isDefault': updated.isDefault,
+        });
+      }
+
       return Right(updated);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      print('Error: $e\n$s');
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
+  @override
+  Future<Either<CacheFailure, Unit>> incrementUsageCount(String id) async {
+    try {
+      await localDatasource.incrementUsageCount(id);
+      _enqueueSync('update', id);
+
+      return const Right(unit);
+    } on CacheException catch (e) {
+      return Left(e.toFailure());
+    } catch (e, s) {
+      print('Error: $e\n$s');
+      return Left(CacheFailure(message: e.toString()));
+    }
+  }
+
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, Unit>> deleteCategory(String id) async {
     try {
       await localDatasource.deleteCategory(id);
       _enqueueSync('delete', id);
+
       return const Right(unit);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      print('Error: $e\n$s');
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
@@ -123,13 +154,19 @@ class CategoryRepositoryImpl implements CategoryRepository {
     );
   }
 
-  @override
-  Future<Either<CacheFailure, void>> incrementUsageCount(String id) async {
-    try {
-      await localDatasource.incrementUsageCount(id);
-      return const Right(null);
-    } on CacheException catch (e) {
-      return Left(e.toFailure());
-    }
+  void _enqueueSync(
+    String action,
+    String recordId, [
+    Map<String, dynamic>? data,
+  ]) {
+    final syncQueueDao = _syncQueueDao;
+    if (syncQueueDao == null) return;
+    syncQueueDao.enqueue(
+      tableName: 'categories',
+      recordId: recordId,
+      action: action,
+      payload: data != null ? jsonEncode(data) : '',
+    );
+    SyncEventBus().trigger();
   }
 }

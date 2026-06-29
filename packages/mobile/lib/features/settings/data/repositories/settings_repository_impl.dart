@@ -10,25 +10,35 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
   SettingsRepositoryImpl({required this.localDatasource});
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, UserSettings>> getSettings() async {
     try {
       final settings = await localDatasource.getSettings();
+
       return Right(settings);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      print('Error: $e\n$s');
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, UserSettings>> updateSettings(
     UserSettings settings,
   ) async {
     try {
       final updated = await localDatasource.updateSettings(settings);
+
       return Right(updated);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      print('Error: $e\n$s');
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 }

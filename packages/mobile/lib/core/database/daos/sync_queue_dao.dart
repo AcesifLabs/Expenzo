@@ -21,7 +21,7 @@ class SyncQueueDao extends DatabaseAccessor<AppDatabase>
         recordId: recordId,
         action: action,
         payload: payload,
-        createdAt: DateTime.now().toUtc(),
+        createdAt: Value(DateTime.now().toUtc()),
       ),
     );
   }
@@ -47,6 +47,7 @@ class SyncQueueDao extends DatabaseAccessor<AppDatabase>
     final query = selectOnly(syncQueue)
       ..addColumns([c])
       ..where(syncQueue.syncedAt.isNull());
+
     return (await query.getSingle()).read(c) ?? 0;
   }
 }

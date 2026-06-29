@@ -1,3 +1,5 @@
+// ignore_for_file: prefer-match-file-name
+
 import 'package:drift/drift.dart';
 
 class Budgets extends Table {

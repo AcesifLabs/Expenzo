@@ -3,18 +3,25 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:expense_tracker/core/utils/navigation_utils.dart';
 import '../bloc/sample_analyzer_bloc.dart';
+import '../bloc/sample_analyzer_event.dart';
+import '../bloc/sample_analyzer_state.dart';
 import '../../domain/entities/message_source.dart';
 import 'template_editor_page.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/features/sms_parser/domain/entities/sms_message.dart';
 
-// Design tokens from SampleAnalyzerScreen (.pen)
 const Color _background = Color(0xFF141315);
 const Color _surface = Color(0xFF1C1B1D);
 const Color _primary = Color(0xFFD1C4E9);
 const Color _primaryGlow = Color(0x1FD1C4E9);
 const Color _textPrimary = Color(0xFFF5F7FA);
 const Color _textSecondary = Color(0xFF8E8E93);
+const AlwaysStoppedAnimation<Color> _indicatorColor =
+    AlwaysStoppedAnimation<Color>(_primary);
+const TextStyle _textSecondaryStyle = TextStyle(
+  color: _textSecondary,
+  fontFamily: 'Work Sans',
+);
 
 class SampleAnalyzerPage extends StatelessWidget {
   final MessageSource source;
@@ -50,10 +57,12 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
     _scrollController.addListener(_onScroll);
   }
 
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
+  bool get _isBottom {
+    if (!_scrollController.hasClients) return false;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.offset;
+
+    return currentScroll >= (maxScroll * 0.9);
   }
 
   void _onScroll() {
@@ -64,32 +73,20 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
     }
   }
 
-  bool get _isBottom {
-    if (!_scrollController.hasClients) return false;
-    final maxScroll = _scrollController.position.maxScrollExtent;
-    final currentScroll = _scrollController.offset;
-    return currentScroll >= (maxScroll * 0.9);
+  void _onMessageTap(SmsMessage msg) {
+    Navigator.of(context).push(
+      SlidePageRoute(
+        builder: (_) =>
+            TemplateEditorPage(source: widget.source, sampleMessage: msg),
+      ),
+    );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _background,
-      body: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildTopBar(),
-              const SizedBox(height: 12),
-              _buildInfoBanner(),
-              const SizedBox(height: 12),
-              Expanded(child: _buildContent()),
-            ],
-          ),
-        ),
+  void _onTemplateButtonTap(SmsMessage msg) {
+    Navigator.of(context).push(
+      SlidePageRoute(
+        builder: (_) =>
+            TemplateEditorPage(source: widget.source, sampleMessage: msg),
       ),
     );
   }
@@ -137,71 +134,6 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
     );
   }
 
-  Widget _buildContent() {
-    return BlocBuilder<SampleAnalyzerBloc, SampleAnalyzerState>(
-      builder: (context, state) {
-        if (state is SampleAnalyzerLoading) {
-          return const Center(
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(_primary),
-            ),
-          );
-        }
-        if (state is SampleAnalyzerError) {
-          return Center(
-            child: Text(
-              state.message,
-              style: const TextStyle(
-                color: _textSecondary,
-                fontFamily: 'Work Sans',
-              ),
-            ),
-          );
-        }
-        if (state is SampleAnalyzerLoaded) {
-          if (state.messages.isEmpty) {
-            return const Center(
-              child: Text(
-                'No recent messages found.',
-                style: TextStyle(
-                  color: _textSecondary,
-                  fontFamily: 'Work Sans',
-                ),
-              ),
-            );
-          }
-
-          return ListView.builder(
-            controller: _scrollController,
-            padding: const EdgeInsets.only(top: 16),
-            itemCount: state.hasReachedMax
-                ? state.messages.length
-                : state.messages.length + 1,
-            itemBuilder: (context, index) {
-              if (index >= state.messages.length) {
-                return const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(_primary),
-                    ),
-                  ),
-                );
-              }
-
-              final msg = state.messages[index];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: _buildMessageCard(msg),
-              );
-            },
-          );
-        }
-        return const SizedBox.shrink();
-      },
-    );
-  }
-
   Widget _buildMessageCard(SmsMessage msg) {
     return Container(
       decoration: BoxDecoration(
@@ -209,19 +141,10 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
         borderRadius: BorderRadius.circular(16),
       ),
       child: Material(
-        color: Colors.transparent,
+        color: const Color(0x00000000),
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () {
-            Navigator.of(context).push(
-              SlidePageRoute(
-                builder: (_) => TemplateEditorPage(
-                  source: widget.source,
-                  sampleMessage: msg,
-                ),
-              ),
-            );
-          },
+          onTap: () => _onMessageTap(msg),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -259,14 +182,7 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
 
   Widget _buildTemplateButton(SmsMessage msg) {
     return GestureDetector(
-      onTap: () {
-        Navigator.of(context).push(
-          SlidePageRoute(
-            builder: (_) =>
-                TemplateEditorPage(source: widget.source, sampleMessage: msg),
-          ),
-        );
-      },
+      onTap: () => _onTemplateButtonTap(msg),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
@@ -288,6 +204,92 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoading() {
+    return const Center(
+      child: CircularProgressIndicator(valueColor: _indicatorColor),
+    );
+  }
+
+  Widget _buildError(String message) {
+    return Center(child: Text(message, style: _textSecondaryStyle));
+  }
+
+  Widget _buildLoaded(SampleAnalyzerLoaded state) {
+    if (state.messages.isEmpty) {
+      return const Center(
+        child: Text(
+          'No recent messages found.',
+          style: TextStyle(color: _textSecondary, fontFamily: 'Work Sans'),
+        ),
+      );
+    }
+
+    final messageCount = state.messages.length;
+
+    return ListView.builder(
+      controller: _scrollController,
+      padding: const EdgeInsets.only(top: 16),
+      itemCount: state.hasReachedMax ? messageCount : messageCount + 1,
+      itemBuilder: (context, index) {
+        if (index >= state.messages.length) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(16.0),
+              child: CircularProgressIndicator(valueColor: _indicatorColor),
+            ),
+          );
+        }
+
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: _buildMessageCard(state.messages[index]),
+        );
+      },
+    );
+  }
+
+  Widget _buildContent() {
+    return BlocBuilder<SampleAnalyzerBloc, SampleAnalyzerState>(
+      builder: (context, state) {
+        return switch (state) {
+          SampleAnalyzerLoading() => _buildLoading(),
+          SampleAnalyzerError(:final message) => _buildError(message),
+          SampleAnalyzerLoaded() => _buildLoaded(state),
+          _ => const SizedBox.shrink(),
+        };
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: _background,
+      body: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildTopBar(),
+              const SizedBox(height: 12),
+              _buildInfoBanner(),
+              const SizedBox(height: 12),
+              Expanded(child: _buildContent()),
+            ],
+          ),
         ),
       ),
     );

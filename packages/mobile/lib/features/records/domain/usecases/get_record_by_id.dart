@@ -9,6 +9,7 @@ class GetRecordById extends UseCase<Record, String> {
 
   GetRecordById(this.repository);
 
+  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, Record>> call(String id) {
     return repository.getRecordById(id);

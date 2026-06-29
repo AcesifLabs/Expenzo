@@ -9,6 +9,7 @@ class ParsingRulesRepositoryImpl implements ParsingRulesRepository {
 
   ParsingRulesRepositoryImpl({required this.localDatasource});
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, List<ParsingRule>>> getRules({
     SourceType? sourceType,
@@ -19,12 +20,15 @@ class ParsingRulesRepositoryImpl implements ParsingRulesRepository {
         sourceType: sourceType,
         isEnabled: isEnabled,
       );
+
       return Right(rules);
-    } catch (e) {
+    } catch (e, s) {
+      print('Error: $e\n$s');
       return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, ParsingRule>> getRuleById(String id) async {
     try {
@@ -32,38 +36,49 @@ class ParsingRulesRepositoryImpl implements ParsingRulesRepository {
       if (rule == null) {
         return Left(CacheFailure(message: 'Rule not found'));
       }
+
       return Right(rule);
-    } catch (e) {
+    } catch (e, s) {
+      print('Error: $e\n$s');
       return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, ParsingRule>> createRule(ParsingRule rule) async {
     try {
       final createdRule = await localDatasource.createRule(rule);
+
       return Right(createdRule);
-    } catch (e) {
+    } catch (e, s) {
+      print('Error: $e\n$s');
       return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, ParsingRule>> updateRule(ParsingRule rule) async {
     try {
       final updatedRule = await localDatasource.updateRule(rule);
+
       return Right(updatedRule);
-    } catch (e) {
+    } catch (e, s) {
+      print('Error: $e\n$s');
       return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, Unit>> deleteRule(String id) async {
     try {
       await localDatasource.deleteRule(id);
+
       return const Right(unit);
-    } catch (e) {
+    } catch (e, s) {
+      print('Error: $e\n$s');
       return Left(CacheFailure(message: e.toString()));
     }
   }

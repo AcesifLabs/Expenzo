@@ -1,6 +1,6 @@
-import 'package:equatable/equatable.dart';
+// ignore_for_file: cyclomatic-complexity
 
-enum RecurringFrequency { daily, weekly, monthly, yearly }
+import 'package:equatable/equatable.dart';
 
 class RecurringTransaction extends Equatable {
   final String? id;
@@ -14,6 +14,21 @@ class RecurringTransaction extends Equatable {
   final bool isActive;
   final bool autoCreateExpense;
   final int? dayOfMonth;
+
+  @override
+  List<Object?> get props => [
+    id,
+    description,
+    amount,
+    categoryId,
+    frequency,
+    startDate,
+    endDate,
+    nextOccurrence,
+    isActive,
+    autoCreateExpense,
+    dayOfMonth,
+  ];
 
   const RecurringTransaction({
     this.id,
@@ -60,19 +75,6 @@ class RecurringTransaction extends Equatable {
       dayOfMonth: dayOfMonth ?? this.dayOfMonth,
     );
   }
-
-  @override
-  List<Object?> get props => [
-    id,
-    description,
-    amount,
-    categoryId,
-    frequency,
-    startDate,
-    endDate,
-    nextOccurrence,
-    isActive,
-    autoCreateExpense,
-    dayOfMonth,
-  ];
 }
+
+enum RecurringFrequency { daily, weekly, monthly, yearly }

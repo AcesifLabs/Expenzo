@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:expense_tracker/core/bloc/transformers.dart';
 import '../../domain/entities/parsing_rule.dart';
 import '../../domain/usecases/get_rules.dart';
 import '../../domain/usecases/update_rule.dart';
@@ -21,11 +22,19 @@ class ParsingRulesBloc extends Bloc<ParsingRulesEvent, ParsingRulesState> {
     required this.deleteRuleUseCase,
     required this.repository,
   }) : super(ParsingRulesInitial()) {
-    on<LoadRules>(_onLoadRules);
-    on<RefreshRules>(_onRefreshRules);
-    on<ToggleRule>(_onToggleRule);
-    on<DeleteRuleRequested>(_onDeleteRule);
-    on<_RulesUpdated>(_onRulesUpdated);
+    on<LoadRules>(_onLoadRules, transformer: concurrent());
+    on<CreateRuleEvent>(_onCreateRule, transformer: concurrent());
+    on<RefreshRules>(_onRefreshRules, transformer: concurrent());
+    on<ToggleRule>(_onToggleRule, transformer: concurrent());
+    on<DeleteRuleRequested>(_onDeleteRule, transformer: concurrent());
+    on<_RulesUpdated>(_onRulesUpdated, transformer: concurrent());
+  }
+
+  @override
+  Future<void> close() {
+    _rulesSubscription?.cancel();
+
+    return super.close();
   }
 
   Future<void> _onLoadRules(
@@ -48,11 +57,19 @@ class ParsingRulesBloc extends Bloc<ParsingRulesEvent, ParsingRulesState> {
     );
   }
 
-  Future<void> _onRulesUpdated(
-    _RulesUpdated event,
+  void _onRulesUpdated(_RulesUpdated event, Emitter<ParsingRulesState> emit) {
+    emit(ParsingRulesLoaded(rules: event.rules));
+  }
+
+  Future<void> _onCreateRule(
+    CreateRuleEvent event,
     Emitter<ParsingRulesState> emit,
   ) async {
-    emit(ParsingRulesLoaded(rules: event.rules));
+    final result = await repository.createRule(event.rule);
+    result.fold(
+      (failure) => emit(ParsingRulesError(message: failure.message)),
+      (_) => add(RefreshRules()),
+    );
   }
 
   Future<void> _onRefreshRules(
@@ -74,7 +91,7 @@ class ParsingRulesBloc extends Bloc<ParsingRulesEvent, ParsingRulesState> {
     if (currentState is ParsingRulesLoaded) {
       final rule = currentState.rules.firstWhere(
         (r) => r.id == event.ruleId,
-        orElse: () => throw Exception('Rule not found'),
+        orElse: () => throw ArgumentError('Rule not found: ${event.ruleId}'),
       );
 
       final updatedRule = rule.copyWith(
@@ -85,7 +102,7 @@ class ParsingRulesBloc extends Bloc<ParsingRulesEvent, ParsingRulesState> {
       final result = await updateRule(updatedRule);
       result.fold(
         (failure) => emit(ParsingRulesError(message: failure.message)),
-        (_) {},
+        (_) => null,
       );
     }
   }
@@ -97,21 +114,16 @@ class ParsingRulesBloc extends Bloc<ParsingRulesEvent, ParsingRulesState> {
     final result = await deleteRuleUseCase(event.ruleId);
     result.fold(
       (failure) => emit(ParsingRulesError(message: failure.message)),
-      (_) {},
+      (_) => null,
     );
-  }
-
-  @override
-  Future<void> close() {
-    _rulesSubscription?.cancel();
-    return super.close();
   }
 }
 
 class _RulesUpdated extends ParsingRulesEvent {
   final List<ParsingRule> rules;
-  const _RulesUpdated(this.rules);
 
   @override
   List<Object?> get props => [rules];
+
+  const _RulesUpdated(this.rules);
 }

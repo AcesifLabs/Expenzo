@@ -29,6 +29,18 @@ class AppCard extends StatelessWidget {
     this.clipBehavior = Clip.none,
   });
 
+  Widget _buildDismissibleBackground(ColorScheme colors, double radius) {
+    return Container(
+      alignment: Alignment.centerRight,
+      padding: const EdgeInsets.only(right: 20),
+      decoration: BoxDecoration(
+        color: colors.error,
+        borderRadius: BorderRadius.circular(radius),
+      ),
+      child: Icon(PiconsRegular.trash, color: colors.onSecondary),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -40,50 +52,47 @@ class AppCard extends StatelessWidget {
             .x ??
         10.0;
 
+    final localBorderColor = borderColor;
+    final effectiveBorder = localBorderColor != null
+        ? Border.all(color: localBorderColor, width: 1.5)
+        : null;
+    final localPadding = padding;
+    final paddedChild = localPadding != null
+        ? Padding(padding: localPadding, child: child)
+        : child;
+
     Widget inner = Container(
       decoration: BoxDecoration(
         color: backgroundColor ?? theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(radius),
-        border: borderColor != null
-            ? Border.all(color: borderColor!, width: 1.5)
-            : null,
+        border: effectiveBorder,
       ),
       clipBehavior: clipBehavior,
       child: Material(
-        color: Colors.transparent,
+        color: const Color(0x00000000),
         child: InkWell(
           onTap: onTap,
           onLongPress: onLongPress,
-          child: padding != null
-              ? Padding(padding: padding!, child: child)
-              : child,
+          child: paddedChild,
         ),
       ),
     );
 
-    if (dismissibleKey != null && onDismissed != null) {
+    final localDismissibleKey = dismissibleKey;
+    final localOnDismissed = onDismissed;
+    if (localDismissibleKey != null && localOnDismissed != null) {
       inner = Dismissible(
-        key: dismissibleKey!,
+        key: localDismissibleKey,
         direction: DismissDirection.endToStart,
-        onDismissed: (_) => onDismissed!(),
-        background: Container(
-          alignment: Alignment.centerRight,
-          padding: const EdgeInsets.only(right: 20),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.error,
-            borderRadius: BorderRadius.circular(radius),
-          ),
-          child: Icon(
-            PiconsRegular.trash,
-            color: theme.colorScheme.onSecondary,
-          ),
-        ),
+        onDismissed: (_) => localOnDismissed(),
+        background: _buildDismissibleBackground(theme.colorScheme, radius),
         child: inner,
       );
     }
 
-    if (margin != null) {
-      return Padding(padding: margin!, child: inner);
+    final localMargin = margin;
+    if (localMargin != null) {
+      return Padding(padding: localMargin, child: inner);
     }
 
     return inner;

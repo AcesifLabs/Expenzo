@@ -1,11 +1,11 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/user_settings.dart';
 
-abstract class SettingsState extends Equatable {
-  const SettingsState();
-
+sealed class SettingsState extends Equatable {
   @override
   List<Object?> get props => [];
+
+  const SettingsState();
 }
 
 class SettingsInitial extends SettingsState {
@@ -19,28 +19,36 @@ class SettingsLoading extends SettingsState {
 class SettingsLoaded extends SettingsState {
   final UserSettings settings;
 
-  const SettingsLoaded(this.settings);
-
   @override
   List<Object?> get props => [settings];
+
+  const SettingsLoaded(this.settings);
+
+  SettingsLoaded copyWith({UserSettings? settings}) {
+    return SettingsLoaded(settings ?? this.settings);
+  }
 }
 
 class SettingsError extends SettingsState {
   final String message;
 
-  const SettingsError(this.message);
-
   @override
   List<Object?> get props => [message];
+
+  const SettingsError(this.message);
 }
 
 class SettingsUpdateSuccess extends SettingsState {
   final UserSettings settings;
 
-  const SettingsUpdateSuccess(this.settings);
-
   @override
   List<Object?> get props => [settings];
+
+  const SettingsUpdateSuccess(this.settings);
+
+  SettingsUpdateSuccess copyWith({UserSettings? settings}) {
+    return SettingsUpdateSuccess(settings ?? this.settings);
+  }
 }
 
 class AccountDeleted extends SettingsState {

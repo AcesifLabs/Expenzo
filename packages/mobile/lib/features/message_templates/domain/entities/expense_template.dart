@@ -13,6 +13,21 @@ class ExpenseTemplate extends Equatable {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  @override
+  List<Object?> get props => [
+    id,
+    sourceId,
+    sampleMessage,
+    triggerWord,
+    amountPattern,
+    descriptionPattern,
+    datePattern,
+    categoryId,
+    selectedAmount,
+    createdAt,
+    updatedAt,
+  ];
+
   const ExpenseTemplate({
     required this.id,
     required this.sourceId,
@@ -54,19 +69,4 @@ class ExpenseTemplate extends Equatable {
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
-
-  @override
-  List<Object?> get props => [
-    id,
-    sourceId,
-    sampleMessage,
-    triggerWord,
-    amountPattern,
-    descriptionPattern,
-    datePattern,
-    categoryId,
-    selectedAmount,
-    createdAt,
-    updatedAt,
-  ];
 }

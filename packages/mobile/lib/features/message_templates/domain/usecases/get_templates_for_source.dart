@@ -9,6 +9,7 @@ class GetTemplatesForSource implements UseCase<List<ExpenseTemplate>, String> {
 
   GetTemplatesForSource(this.repository);
 
+  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, List<ExpenseTemplate>>> call(String sourceId) {
     return repository.getTemplatesForSource(sourceId);

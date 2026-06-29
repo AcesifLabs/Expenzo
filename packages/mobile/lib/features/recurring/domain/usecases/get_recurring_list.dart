@@ -9,6 +9,7 @@ class GetRecurringList extends UseCase<List<RecurringTransaction>, NoParams> {
 
   GetRecurringList(this.repository);
 
+  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, List<RecurringTransaction>>> call(NoParams params) {
     return repository.getRecurringList();

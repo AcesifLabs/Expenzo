@@ -1,11 +1,11 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/user.dart';
 
-abstract class AuthState extends Equatable {
-  const AuthState();
-
+sealed class AuthState extends Equatable {
   @override
   List<Object?> get props => [];
+
+  const AuthState();
 }
 
 class AuthInitial extends AuthState {
@@ -19,10 +19,14 @@ class AuthLoading extends AuthState {
 class Authenticated extends AuthState {
   final User user;
 
-  const Authenticated(this.user);
-
   @override
   List<Object?> get props => [user];
+
+  const Authenticated(this.user);
+
+  Authenticated copyWith({User? user}) {
+    return Authenticated(user ?? this.user);
+  }
 }
 
 class Unauthenticated extends AuthState {
@@ -33,16 +37,21 @@ class AuthError extends AuthState {
   final String message;
   final bool isUserInitiated;
 
-  const AuthError(this.message, {this.isUserInitiated = false});
-
   @override
   List<Object?> get props => [message, isUserInitiated];
+
+  const AuthError(this.message, {this.isUserInitiated = false});
 }
 
 class AuthSyncConflictPending extends AuthState {
   final User user;
-  const AuthSyncConflictPending(this.user);
 
   @override
   List<Object?> get props => [user];
+
+  const AuthSyncConflictPending(this.user);
+
+  AuthSyncConflictPending copyWith({User? user}) {
+    return AuthSyncConflictPending(user ?? this.user);
+  }
 }

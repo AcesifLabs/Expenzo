@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
+import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
-import 'package:expense_tracker/core/utils/navigation_utils.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_summary_card.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_empty_state.dart';
@@ -15,8 +16,6 @@ import '../bloc/budget_event.dart';
 import '../bloc/budget_state.dart';
 import '../widgets/budget_progress_card.dart';
 import '../widgets/skeletons/budget_list_skeleton.dart';
-import 'budget_form_page.dart';
-import 'budget_details_page.dart';
 
 class BudgetListPage extends StatelessWidget {
   const BudgetListPage({super.key});
@@ -25,119 +24,121 @@ class BudgetListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => di.getIt<BudgetBloc>()..add(LoadBudgets()),
-      child: const _BudgetListPageContent(),
+      child: const BudgetListView(),
     );
   }
 }
 
-class _BudgetListPageContent extends StatefulWidget {
-  const _BudgetListPageContent();
+class BudgetListView extends StatefulWidget {
+  const BudgetListView({super.key});
 
   @override
-  State<_BudgetListPageContent> createState() => _BudgetListPageContentState();
+  State<BudgetListView> createState() => _BudgetListViewState();
 }
 
-class _BudgetListPageContentState extends State<_BudgetListPageContent> {
+class _BudgetListViewState extends State<BudgetListView> {
+  void _onStateChanged(BuildContext context, BudgetState state) {
+    switch (state) {
+      case BudgetOperationSuccess():
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Budget operation successful')),
+        );
+      case BudgetError(:final message):
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(message)));
+      default:
+        break;
+    }
+  }
+
   BudgetProgress? _findProgress(BudgetLoaded state, Budget budget) {
     final id = budget.id;
     if (id == null) return null;
+
     return state.progressByBudgetId[id];
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final fmt = CurrencyFormatter.getFormatter(decimalDigits: 0);
+  Color _getIndicatorColor(double percentage) {
+    if (percentage > 100) {
+      return AppColors.expense;
+    }
+    if (percentage >= 80) {
+      return AppColors.warning;
+    }
 
-    return BlocConsumer<BudgetBloc, BudgetState>(
-      listener: (context, state) {
-        if (state is BudgetOperationSuccess) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.message)));
-        } else if (state is BudgetError) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.message)));
-        }
-      },
-      builder: (context, state) {
-        if (state is BudgetLoading) {
-          return const BudgetListSkeleton();
-        }
+    return AppColors.success;
+  }
 
-        if (state is BudgetError) {
-          return Center(child: Text('Error: ${state.message}'));
-        }
+  Widget _buildLoadedState(
+    BuildContext context,
+    BudgetLoaded state,
+    NumberFormat fmt,
+  ) {
+    return AppScaffold.slivers(
+      title: 'Budgets',
+      actions: [
+        IconButton(
+          icon: const Icon(PiconsLight.plus),
+          color: Theme.of(context).colorScheme.onSurface.withAlpha(160),
+          onPressed: () => _navigateToCreate(context),
+        ),
+      ],
+      slivers: [
+        SliverToBoxAdapter(child: _buildSummaryCard(context, state, fmt)),
 
-        if (state is BudgetLoaded) {
-          return AppScaffold.slivers(
-            title: 'Budgets',
-            actions: [
-              IconButton(
-                icon: Icon(PiconsLight.plus),
-                color: Theme.of(context).colorScheme.onSurface.withAlpha(160),
-                onPressed: () => _navigateToCreate(context),
+        if (state.budgets.isEmpty)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(40),
+              child: AppEmptyState(
+                icon: PiconsRegular.tray,
+                message: 'No budgets yet. Tap + to create one.',
               ),
-            ],
-            slivers: [
-              SliverToBoxAdapter(child: _buildSummaryCard(context, state, fmt)),
+            ),
+          )
+        else
+          _buildBudgetList(state),
+      ],
+    );
+  }
 
-              if (state.budgets.isEmpty)
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.all(40),
-                    child: AppEmptyState(
-                      icon: PiconsRegular.tray,
-                      message: 'No budgets yet. Tap + to create one.',
-                    ),
-                  ),
-                )
-              else
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate((context, index) {
-                      final budget = state.budgets[index];
-                      final progress = _findProgress(state, budget);
+  Widget _buildBudgetList(BudgetLoaded state) {
+    return SliverPadding(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+      sliver: SliverList(
+        delegate: SliverChildBuilderDelegate((context, index) {
+          final budget = state.budgets[index];
+          final progress = _findProgress(state, budget);
 
-                      final displayProgress =
-                          progress ??
-                          BudgetProgress(
-                            budgetId: budget.id ?? '',
-                            budgetAmount: budget.amount,
-                            effectiveAmount:
-                                budget.amount +
-                                (budget.rolloverEnabled
-                                    ? budget.rolloverAmount
-                                    : 0),
-                            spentAmount: 0,
-                            rolloverAmount: budget.rolloverAmount,
-                            percentage: 0,
-                            isOverBudget: false,
-                            categoryId: budget.categoryId,
-                            periodRange: DateTimeRange(
-                              start: budget.startDate,
-                              end: budget.startDate,
-                            ),
-                            period: budget.period,
-                          );
-
-                      return BudgetProgressCard(
-                        progress: displayProgress,
-                        onTap: () =>
-                            _navigateToDetails(context, displayProgress),
-                        onEdit: () => _navigateToEdit(context, budget),
-                        onDelete: () => _confirmDelete(context, budget),
-                      );
-                    }, childCount: state.budgets.length),
-                  ),
+          final displayProgress =
+              progress ??
+              BudgetProgress(
+                budgetId: budget.id ?? '',
+                budgetAmount: budget.amount,
+                effectiveAmount:
+                    budget.amount +
+                    (budget.rolloverEnabled ? budget.rolloverAmount : 0),
+                spentAmount: 0,
+                rolloverAmount: budget.rolloverAmount,
+                percentage: 0,
+                isOverBudget: false,
+                categoryId: budget.categoryId,
+                periodRange: DateTimeRange(
+                  start: budget.startDate,
+                  end: budget.startDate,
                 ),
-            ],
-          );
-        }
+                period: budget.period,
+              );
 
-        return const Center(child: Text('Load budgets to see data'));
-      },
+          return BudgetProgressCard(
+            progress: displayProgress,
+            onTap: () => _navigateToDetails(context, displayProgress),
+            onEdit: () => _navigateToEdit(context, budget),
+            onDelete: () => _confirmDelete(context, budget),
+          );
+        }, childCount: state.budgets.length),
+      ),
     );
   }
 
@@ -157,6 +158,9 @@ class _BudgetListPageContentState extends State<_BudgetListPageContent> {
     final overallPercentage = totalBudget > 0
         ? (totalSpent / totalBudget) * 100
         : 0.0;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    final indicatorColor = _getIndicatorColor(overallPercentage);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
@@ -171,14 +175,8 @@ class _BudgetListPageContentState extends State<_BudgetListPageContent> {
                     borderRadius: BorderRadius.circular(6),
                     child: LinearProgressIndicator(
                       value: (overallPercentage / 100).clamp(0.0, 1.0),
-                      backgroundColor: Theme.of(
-                        context,
-                      ).colorScheme.onSurface.withAlpha(25),
-                      color: overallPercentage > 100
-                          ? const Color(0xFFFF3B30)
-                          : overallPercentage >= 80
-                          ? const Color(0xFFFF9F0A)
-                          : const Color(0xFF34C759),
+                      backgroundColor: colorScheme.onSurface.withAlpha(25),
+                      color: indicatorColor,
                       minHeight: 8,
                     ),
                   ),
@@ -187,9 +185,7 @@ class _BudgetListPageContentState extends State<_BudgetListPageContent> {
                     '${state.budgets.length} budgets active',
                     style: TextStyle(
                       fontSize: 12,
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onSurface.withAlpha(140),
+                      color: colorScheme.onSurface.withAlpha(140),
                     ),
                   ),
                 ],
@@ -200,43 +196,18 @@ class _BudgetListPageContentState extends State<_BudgetListPageContent> {
   }
 
   void _navigateToDetails(BuildContext context, BudgetProgress progress) {
-    final bloc = context.read<BudgetBloc>();
-    Navigator.push(
-      context,
-      SlidePageRoute(
-        builder: (_) => BlocProvider.value(
-          value: bloc,
-          child: BudgetDetailsPage(progress: progress),
-        ),
-      ),
-    );
+    context.push('/budgets/${progress.budgetId}');
   }
 
-  void _navigateToCreate(BuildContext context) async {
-    final result = await Navigator.push(
-      context,
-      SlidePageRoute(
-        builder: (_) => BlocProvider.value(
-          value: context.read<BudgetBloc>(),
-          child: const BudgetFormPage(),
-        ),
-      ),
-    );
+  Future<void> _navigateToCreate(BuildContext context) async {
+    final result = await context.push<bool>('/budgets/new');
     if (result == true && context.mounted) {
       context.read<BudgetBloc>().add(LoadBudgets());
     }
   }
 
-  void _navigateToEdit(BuildContext context, Budget budget) async {
-    final result = await Navigator.push(
-      context,
-      SlidePageRoute(
-        builder: (_) => BlocProvider.value(
-          value: context.read<BudgetBloc>(),
-          child: BudgetFormPage(budget: budget),
-        ),
-      ),
-    );
+  Future<void> _navigateToEdit(BuildContext context, Budget budget) async {
+    final result = await context.push<bool>('/budgets/${budget.id}/edit');
     if (result == true && context.mounted) {
       context.read<BudgetBloc>().add(LoadBudgets());
     }
@@ -254,14 +225,37 @@ class _BudgetListPageContentState extends State<_BudgetListPageContent> {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
-              Navigator.pop(dialogContext);
-              context.read<BudgetBloc>().add(DeleteBudgetEvent(budget.id!));
-            },
+            onPressed: () => _onConfirmDelete(dialogContext, context, budget),
             child: const Text('Delete'),
           ),
         ],
       ),
+    );
+  }
+
+  void _onConfirmDelete(
+    BuildContext dialogContext,
+    BuildContext pageContext,
+    Budget budget,
+  ) {
+    if (dialogContext.mounted) Navigator.pop(dialogContext);
+    pageContext.read<BudgetBloc>().add(DeleteBudgetEvent(budget.id ?? ''));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final fmt = CurrencyFormatter.getFormatter(decimalDigits: 0);
+
+    return BlocConsumer<BudgetBloc, BudgetState>(
+      listener: _onStateChanged,
+      builder: (context, state) {
+        return switch (state) {
+          BudgetLoading() => const BudgetListSkeleton(),
+          BudgetError(:final message) => Center(child: Text('Error: $message')),
+          BudgetLoaded() => _buildLoadedState(context, state, fmt),
+          _ => const Center(child: Text('Load budgets to see data')),
+        };
+      },
     );
   }
 }

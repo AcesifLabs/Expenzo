@@ -1,14 +1,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:expense_tracker/core/bloc/transformers.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/entities/parsed_transaction.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/services/parsing_isolate_service.dart';
-import 'package:expense_tracker/features/parsing_rules/domain/usecases/evaluate_rules.dart';
+import 'package:expense_tracker/features/parsing_rules/domain/entities/parsing_context.dart';
+import 'package:expense_tracker/features/parsing_rules/domain/usecases/evaluate_rules_use_case.dart';
 import 'package:expense_tracker/features/sms_parser/data/datasources/sms_local_datasource.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
-import 'package:expense_tracker/features/budgets/presentation/bloc/budget_bloc.dart';
-import 'package:expense_tracker/features/budgets/presentation/bloc/budget_event.dart';
+import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets_with_progress.dart';
 import '../../domain/usecases/scan_sms_usecase.dart';
 import 'package:expense_tracker/features/records/domain/usecases/create_records_from_parsed_list.dart';
 import 'sms_scanner_event.dart';
@@ -20,37 +21,24 @@ class SmsScannerBloc extends Bloc<SmsScannerEvent, SmsScannerState> {
   final ScanSmsUseCase scanSmsUseCase;
   final RecordRepository recordRepository;
   final CreateRecordsFromParsedList createRecordsFromParsedList;
+  final GetBudgetsWithProgress getBudgetsWithProgress;
 
   SmsScannerBloc({
     required this.scanSmsUseCase,
     required this.recordRepository,
     required this.createRecordsFromParsedList,
+    required this.getBudgetsWithProgress,
   }) : super(SmsScannerInitial()) {
-    on<StartScan>(_onStartScan);
-    on<LoadMoreScanResults>(_onLoadMore);
-    on<ToggleSelection>(_onToggleSelection);
-    on<SelectAll>(_onSelectAll);
-    on<DeselectAll>(_onDeselectAll);
-    on<ClearResults>(_onClearResults);
-    on<CreateSelectedExpenses>(_onCreateSelectedExpenses);
-  }
-
-  Future<void> _onCreateSelectedExpenses(
-    CreateSelectedExpenses event,
-    Emitter<SmsScannerState> emit,
-  ) async {
-    final result = await createRecordsFromParsedList(event.transactions);
-
-    result.fold((failure) => emit(SmsScannerError(message: failure.message)), (
-      creationResult,
-    ) {
-      try {
-        di.getIt<BudgetBloc>().add(LoadBudgets());
-      } catch (e) {
-        debugPrint('SmsScannerBloc: Failed to reload budgets: $e');
-      }
-      add(ClearResults());
-    });
+    on<StartScan>(_onStartScan, transformer: droppable());
+    on<LoadMoreScanResults>(_onLoadMore, transformer: concurrent());
+    on<ToggleSelection>(_onToggleSelection, transformer: concurrent());
+    on<SelectAll>(_onSelectAll, transformer: concurrent());
+    on<DeselectAll>(_onDeselectAll, transformer: concurrent());
+    on<ClearResults>(_onClearResults, transformer: concurrent());
+    on<CreateSelectedExpenses>(
+      _onCreateSelectedExpenses,
+      transformer: concurrent(),
+    );
   }
 
   Future<void> _onStartScan(
@@ -60,64 +48,19 @@ class SmsScannerBloc extends Bloc<SmsScannerEvent, SmsScannerState> {
     emit(const SmsScannerScanning(processedMessages: 0, totalMessages: 0));
 
     final context = await di.getIt<EvaluateRulesUseCase>().loadContext();
-    final monitoredSources = context.sources
-        .where((s) => s.isMonitored)
-        .toList();
-    if (monitoredSources.isEmpty) {
-      emit(
-        SmsScannerScanComplete(
-          results: const [],
-          selectedIds: const {},
-          lastScanTimestamp: DateTime.now(),
-          hasReachedMax: true,
-          since: event.since,
-        ),
-      );
+    final hasMonitoredSources = context.sources.any((s) => s.isMonitored);
+    if (!hasMonitoredSources) {
+      _emitEmptyResults(emit, event);
+
       return;
     }
 
-    final monitoredAddresses = monitoredSources.map((s) => s.contactId).toSet();
+    final results = await _scanAndParse(context, event);
+    if (results.isEmpty) {
+      _emitEmptyResults(emit, event);
 
-    final allRecentMessages = await di
-        .getIt<SmsLocalDatasource>()
-        .getSmsBatched(count: 200);
-
-    final filteredMessages = allRecentMessages.where((m) {
-      final isMonitored = monitoredAddresses.contains(m.address);
-      final isRecent = event.since == null || m.date.isAfter(event.since!);
-      return isMonitored && isRecent;
-    }).toList();
-
-    if (filteredMessages.isEmpty) {
-      emit(
-        SmsScannerScanComplete(
-          results: const [],
-          selectedIds: const {},
-          lastScanTimestamp: DateTime.now(),
-          hasReachedMax: true,
-          since: event.since,
-        ),
-      );
       return;
     }
-
-    final parseInputs = filteredMessages.map((message) {
-      return ParseMessageInput(
-        body: message.body,
-        address: message.address,
-        date: message.date,
-        sourceId: '${message.address}_${message.date.toIso8601String()}'
-            .hashCode
-            .abs()
-            .toString(),
-      );
-    }).toList();
-
-    final results = await di.getIt<ParsingIsolateService>().parseMessages(
-      messages: parseInputs,
-      context: context,
-      sourceType: AppSourceType.sms,
-    );
 
     final finalResults = await _filterDuplicates(
       results,
@@ -188,27 +131,6 @@ class SmsScannerBloc extends Bloc<SmsScannerEvent, SmsScannerState> {
     );
   }
 
-  Future<List<ParsedTransaction>> _filterDuplicates(
-    List<ParsedTransaction> transactions,
-    bool filterDuplicates,
-  ) async {
-    if (!filterDuplicates || transactions.isEmpty) return transactions;
-
-    final sourceIds = transactions.map((t) => t.sourceId).toList();
-    final existingIdsResult = await recordRepository.getExistingSourceIds(
-      sourceIds,
-    );
-    final existingIds = existingIdsResult.getOrElse(() => <String>{});
-
-    return transactions
-        .where((t) => !existingIds.contains(t.sourceId))
-        .toList();
-  }
-
-  void _onClearResults(ClearResults event, Emitter<SmsScannerState> emit) {
-    emit(SmsScannerInitial());
-  }
-
   void _onToggleSelection(
     ToggleSelection event,
     Emitter<SmsScannerState> emit,
@@ -238,5 +160,103 @@ class SmsScannerBloc extends Bloc<SmsScannerEvent, SmsScannerState> {
     if (currentState is SmsScannerScanComplete) {
       emit(currentState.copyWith(selectedIds: {}));
     }
+  }
+
+  void _onClearResults(ClearResults event, Emitter<SmsScannerState> emit) {
+    emit(SmsScannerInitial());
+  }
+
+  Future<void> _onCreateSelectedExpenses(
+    CreateSelectedExpenses event,
+    Emitter<SmsScannerState> emit,
+  ) async {
+    final result = await createRecordsFromParsedList(event.transactions);
+
+    await result.fold(
+      (failure) async {
+        emit(SmsScannerError(message: failure.message));
+      },
+      (creationResult) async {
+        try {
+          await getBudgetsWithProgress();
+        } catch (e, s) {
+          addError(e, s);
+          debugPrint('SmsScannerBloc: Failed to reload budgets: $e');
+        }
+        add(ClearResults());
+      },
+    );
+  }
+
+  void _emitEmptyResults(Emitter<SmsScannerState> emit, StartScan event) {
+    emit(
+      SmsScannerScanComplete(
+        results: const [],
+        selectedIds: const {},
+        lastScanTimestamp: DateTime.now(),
+        hasReachedMax: true,
+        since: event.since,
+      ),
+    );
+  }
+
+  Future<List<ParsedTransaction>> _scanAndParse(
+    ParsingContext context,
+    StartScan event,
+  ) async {
+    final monitoredSources = context.sources
+        .where((s) => s.isMonitored)
+        .toList();
+
+    final monitoredAddresses = monitoredSources.map((s) => s.contactId).toSet();
+
+    final allRecentMessages = await di
+        .getIt<SmsLocalDatasource>()
+        .getSmsBatched(count: 200);
+
+    final filteredMessages = allRecentMessages.where((m) {
+      final isMonitored = monitoredAddresses.contains(m.address);
+      final since = event.since;
+      final isRecent = since == null || m.date.isAfter(since);
+
+      return isMonitored && isRecent;
+    }).toList();
+
+    if (filteredMessages.isEmpty) return [];
+
+    final parseInputs = filteredMessages.map((message) {
+      return ParseMessageInput(
+        body: message.body,
+        address: message.address,
+        date: message.date,
+        sourceId: '${message.address}_${message.date.toIso8601String()}'
+            .hashCode
+            .abs()
+            .toString(),
+      );
+    }).toList();
+
+    return di.getIt<ParsingIsolateService>().parseMessages(
+      messages: parseInputs,
+      context: context,
+      sourceType: AppSourceType.sms,
+    );
+  }
+
+  Future<List<ParsedTransaction>> _filterDuplicates(
+    List<ParsedTransaction> transactions,
+    bool filterDuplicates,
+  ) async {
+    if (!filterDuplicates || transactions.isEmpty) return transactions;
+
+    final sourceIds = transactions.map((t) => t.sourceId).toList();
+    final existingIdsResult = await recordRepository.getExistingSourceIds(
+      sourceIds,
+    );
+    final existingIds = existingIdsResult.getOrElse(() => <String>{});
+
+    return transactions
+        .where((t) => !existingIds.contains(t.sourceId))
+        .toList();
   }
 }

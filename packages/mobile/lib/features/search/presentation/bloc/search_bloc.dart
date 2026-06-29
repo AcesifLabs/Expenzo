@@ -1,5 +1,5 @@
-import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:expense_tracker/core/bloc/transformers.dart';
 import '../../domain/entities/search_filters.dart';
 import '../../domain/usecases/search_records.dart';
 import 'search_event.dart';
@@ -7,34 +7,27 @@ import 'search_state.dart';
 
 class SearchBloc extends Bloc<SearchEvent, SearchState> {
   final SearchRecords searchRecords;
-  final SearchFilters _currentFilters = const SearchFilters();
-  Timer? _debounceTimer;
+  SearchFilters _currentFilters = const SearchFilters();
 
   SearchBloc({required this.searchRecords}) : super(const SearchInitial()) {
-    on<SearchQueryChanged>(_onSearchQueryChanged);
-    on<SearchFiltersChanged>(_onSearchFiltersChanged);
-    on<ClearSearch>(_onClearSearch);
+    on<SearchQueryChanged>(_onSearchQueryChanged, transformer: restartable());
+    on<SearchFiltersChanged>(
+      _onSearchFiltersChanged,
+      transformer: restartable(),
+    );
+    on<ClearSearch>(_onClearSearch, transformer: concurrent());
   }
 
   Future<void> _onSearchQueryChanged(
     SearchQueryChanged event,
     Emitter<SearchState> emit,
   ) async {
-    _debounceTimer?.cancel();
-
     final updatedFilters = _currentFilters.copyWith(
       query: event.query,
       clearQuery: event.query.isEmpty,
     );
 
-    if (event.query.isEmpty) {
-      await _performSearch(updatedFilters, emit);
-      return;
-    }
-
-    _debounceTimer = Timer(const Duration(milliseconds: 300), () async {
-      await _performSearch(updatedFilters, emit);
-    });
+    await _performSearch(updatedFilters, emit);
   }
 
   Future<void> _onSearchFiltersChanged(
@@ -48,7 +41,6 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     ClearSearch event,
     Emitter<SearchState> emit,
   ) async {
-    _debounceTimer?.cancel();
     await _performSearch(const SearchFilters(), emit);
   }
 
@@ -56,8 +48,11 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     SearchFilters filters,
     Emitter<SearchState> emit,
   ) async {
+    _currentFilters = filters;
+
     if (filters.isEmpty) {
       emit(const SearchInitial());
+
       return;
     }
 
@@ -70,11 +65,5 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       (results) =>
           emit(SearchLoaded(results: results, query: filters.query ?? '')),
     );
-  }
-
-  @override
-  Future<void> close() {
-    _debounceTimer?.cancel();
-    return super.close();
   }
 }

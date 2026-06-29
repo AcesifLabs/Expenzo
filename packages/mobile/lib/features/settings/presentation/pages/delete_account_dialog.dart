@@ -13,6 +13,19 @@ class DeleteAccountDialog extends StatefulWidget {
 class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
   bool _confirmed = false;
 
+  void _onCheckboxChanged(bool? value) {
+    setState(() => _confirmed = value ?? false);
+  }
+
+  void _onCancel() {
+    Navigator.pop(context);
+  }
+
+  void _onDelete() {
+    Navigator.pop(context);
+    widget.onConfirm();
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -43,12 +56,7 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
           const SizedBox(height: 16),
           Row(
             children: [
-              Checkbox(
-                value: _confirmed,
-                onChanged: (value) {
-                  setState(() => _confirmed = value ?? false);
-                },
-              ),
+              Checkbox(value: _confirmed, onChanged: _onCheckboxChanged),
               const Expanded(
                 child: Text('I understand and want to delete my account'),
               ),
@@ -57,17 +65,9 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
         ],
       ),
       actions: [
+        TextButton(onPressed: _onCancel, child: const Text('Cancel')),
         TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        TextButton(
-          onPressed: _confirmed
-              ? () {
-                  Navigator.pop(context);
-                  widget.onConfirm();
-                }
-              : null,
+          onPressed: _confirmed ? _onDelete : null,
           style: TextButton.styleFrom(foregroundColor: AppColors.error),
           child: const Text('Delete'),
         ),

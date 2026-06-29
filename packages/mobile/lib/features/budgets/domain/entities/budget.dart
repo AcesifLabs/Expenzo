@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
-
-enum BudgetPeriod { weekly, monthly, yearly }
+import 'package:expense_tracker/core/constants/budget_period.dart';
 
 class Budget extends Equatable {
   final String? id;
@@ -11,6 +10,18 @@ class Budget extends Equatable {
   final bool rolloverEnabled;
   final double rolloverAmount;
   final bool isEnabled;
+
+  @override
+  List<Object?> get props => [
+    id,
+    categoryId,
+    amount,
+    period,
+    startDate,
+    rolloverEnabled,
+    rolloverAmount,
+    isEnabled,
+  ];
 
   const Budget({
     this.id,
@@ -44,16 +55,4 @@ class Budget extends Equatable {
       isEnabled: isEnabled ?? this.isEnabled,
     );
   }
-
-  @override
-  List<Object?> get props => [
-    id,
-    categoryId,
-    amount,
-    period,
-    startDate,
-    rolloverEnabled,
-    rolloverAmount,
-    isEnabled,
-  ];
 }

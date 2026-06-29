@@ -2,10 +2,10 @@ import 'package:equatable/equatable.dart';
 import '../../domain/entities/record.dart';
 
 abstract class RecordEvent extends Equatable {
-  const RecordEvent();
-
   @override
   List<Object?> get props => [];
+
+  const RecordEvent();
 }
 
 class LoadRecords extends RecordEvent {
@@ -19,28 +19,28 @@ class LoadMoreRecords extends RecordEvent {
 class AddRecordEvent extends RecordEvent {
   final Record record;
 
-  const AddRecordEvent(this.record);
-
   @override
   List<Object?> get props => [record];
+
+  const AddRecordEvent(this.record);
 }
 
 class UpdateRecordEvent extends RecordEvent {
   final Record record;
 
-  const UpdateRecordEvent(this.record);
-
   @override
   List<Object?> get props => [record];
+
+  const UpdateRecordEvent(this.record);
 }
 
 class DeleteRecordEvent extends RecordEvent {
   final String id;
 
-  const DeleteRecordEvent(this.id);
-
   @override
   List<Object?> get props => [id];
+
+  const DeleteRecordEvent(this.id);
 }
 
 class RefreshRecords extends RecordEvent {
@@ -49,10 +49,11 @@ class RefreshRecords extends RecordEvent {
 
 class SearchRecords extends RecordEvent {
   final String query;
-  const SearchRecords(this.query);
 
   @override
   List<Object?> get props => [query];
+
+  const SearchRecords(this.query);
 }
 
 class ApplyFilters extends RecordEvent {
@@ -61,20 +62,20 @@ class ApplyFilters extends RecordEvent {
   final List<String>? categoryIds;
   final String? recordType;
 
+  @override
+  List<Object?> get props => [startDate, endDate, categoryIds, recordType];
+
   const ApplyFilters({
     this.startDate,
     this.endDate,
     this.categoryIds,
     this.recordType,
   });
-
-  @override
-  List<Object?> get props => [startDate, endDate, categoryIds, recordType];
 }
 
 class ClearFilters extends RecordEvent {
-  const ClearFilters();
-
   @override
   List<Object?> get props => [];
+
+  const ClearFilters();
 }

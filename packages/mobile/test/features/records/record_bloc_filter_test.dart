@@ -56,6 +56,7 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(FakeGetRecordsParams());
+    registerFallbackValue(RecordFilter());
   });
 
   setUp(() {
@@ -87,13 +88,7 @@ void main() {
       final records = [_testRecord(id: 'filtered-1')];
 
       when(
-        () => mockRepo.getFilteredRecords(
-          startDate: any(named: 'startDate'),
-          endDate: any(named: 'endDate'),
-          categoryIds: any(named: 'categoryIds'),
-          recordType: any(named: 'recordType'),
-          limit: any(named: 'limit'),
-        ),
+        () => mockRepo.getFilteredRecords(any()),
       ).thenAnswer((_) async => Right(records));
 
       final states = <RecordState>[];
@@ -118,13 +113,7 @@ void main() {
       final records = [_testRecord()];
 
       when(
-        () => mockRepo.getFilteredRecords(
-          startDate: any(named: 'startDate'),
-          endDate: any(named: 'endDate'),
-          categoryIds: any(named: 'categoryIds'),
-          recordType: any(named: 'recordType'),
-          limit: any(named: 'limit'),
-        ),
+        () => mockRepo.getFilteredRecords(any()),
       ).thenAnswer((_) async => Right(records));
 
       final states = <RecordState>[];
@@ -141,15 +130,7 @@ void main() {
     });
 
     test('emits RecordError on repository failure', () async {
-      when(
-        () => mockRepo.getFilteredRecords(
-          startDate: any(named: 'startDate'),
-          endDate: any(named: 'endDate'),
-          categoryIds: any(named: 'categoryIds'),
-          recordType: any(named: 'recordType'),
-          limit: any(named: 'limit'),
-        ),
-      ).thenAnswer(
+      when(() => mockRepo.getFilteredRecords(any())).thenAnswer(
         (_) async => const Left(ServerFailure(message: 'Server error')),
       );
 
@@ -198,14 +179,7 @@ void main() {
       final secondPage = [_testRecord(id: 'rec-50')];
 
       when(
-        () => mockRepo.getFilteredRecords(
-          startDate: any(named: 'startDate'),
-          endDate: any(named: 'endDate'),
-          categoryIds: any(named: 'categoryIds'),
-          recordType: any(named: 'recordType'),
-          limit: 50,
-          offset: 50,
-        ),
+        () => mockRepo.getFilteredRecords(any()),
       ).thenAnswer((_) async => Right(secondPage));
 
       final states = <RecordState>[];
@@ -229,16 +203,15 @@ void main() {
       expect(loaded.records.length, 51);
       expect(loaded.filterCategoryIds, ['cat-1']);
 
-      verify(
-        () => mockRepo.getFilteredRecords(
-          startDate: null,
-          endDate: null,
-          categoryIds: ['cat-1'],
-          recordType: null,
-          limit: 50,
-          offset: 50,
-        ),
-      ).called(1);
+      final captured = verify(
+        () => mockRepo.getFilteredRecords(captureAny()),
+      ).captured;
+
+      expect(captured.length, 1);
+      final filter = captured.first as RecordFilter;
+      expect(filter.categoryIds, ['cat-1']);
+      expect(filter.limit, 50);
+      expect(filter.offset, 50);
     });
 
     test('calls getRecords when no filters active', () async {

@@ -20,6 +20,34 @@ class SummaryCard extends StatelessWidget {
     this.isLoading = false,
   });
 
+  Widget _buildPercentChangeRow(ThemeData theme, double change) {
+    final isPositive = change >= 0;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Row(
+        children: [
+          Icon(
+            isPositive ? PiconsRegular.trendUp : PiconsRegular.trendDown,
+            size: 16,
+            color: isPositive
+                ? theme.colorScheme.error
+                : theme.colorScheme.secondary,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            '${change.abs().toStringAsFixed(1)}% vs last period',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: isPositive
+                  ? theme.colorScheme.error
+                  : theme.colorScheme.secondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -27,6 +55,7 @@ class SummaryCard extends StatelessWidget {
       currencySymbol,
       () => NumberFormat.currency(symbol: currencySymbol, decimalDigits: 2),
     );
+    final change = percentChange;
 
     return RepaintBoundary(
       child: Card(
@@ -38,7 +67,7 @@ class SummaryCard extends StatelessWidget {
               Text(
                 title,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[600],
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: 8),
@@ -56,27 +85,8 @@ class SummaryCard extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-              if (percentChange != null && !isLoading) ...[
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Icon(
-                      percentChange! >= 0
-                          ? PiconsRegular.trendUp
-                          : PiconsRegular.trendDown,
-                      size: 16,
-                      color: percentChange! >= 0 ? Colors.red : Colors.green,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${percentChange!.abs().toStringAsFixed(1)}% vs last period',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: percentChange! >= 0 ? Colors.red : Colors.green,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+              if (change != null && !isLoading)
+                _buildPercentChangeRow(theme, change),
             ],
           ),
         ),

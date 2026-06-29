@@ -6983,7 +6983,8 @@
               "fill": "$--text-secondary",
               "content": "Home",
               "fontFamily": "$--font-primary",
-              "fontSize": 10
+              "fontSize": 10,
+              "fontWeight": "normal"
             }
           ]
         },
@@ -7029,7 +7030,8 @@
               "fill": "$--text-secondary",
               "content": "Activity",
               "fontFamily": "$--font-primary",
-              "fontSize": 10
+              "fontSize": 10,
+              "fontWeight": "normal"
             }
           ]
         },
@@ -7122,7 +7124,8 @@
               "fill": "$--text-secondary",
               "content": "Budgets",
               "fontFamily": "$--font-primary",
-              "fontSize": 10
+              "fontSize": 10,
+              "fontWeight": "normal"
             }
           ]
         }
@@ -7234,7 +7237,8 @@
                   "fill": "#F5F7FA",
                   "content": "Light",
                   "fontFamily": "Work Sans",
-                  "fontSize": 16
+                  "fontSize": 16,
+                  "fontWeight": "normal"
                 },
                 {
                   "type": "frame",
@@ -7346,7 +7350,8 @@
                   "fill": "#F5F7FA",
                   "content": "System",
                   "fontFamily": "Work Sans",
-                  "fontSize": 16
+                  "fontSize": 16,
+                  "fontWeight": "normal"
                 },
                 {
                   "type": "frame",
@@ -7644,7 +7649,8 @@
                   "fill": "#1C1C1E",
                   "content": "Dark",
                   "fontFamily": "Work Sans",
-                  "fontSize": 16
+                  "fontSize": 16,
+                  "fontWeight": "normal"
                 },
                 {
                   "type": "frame",
@@ -7698,7 +7704,8 @@
                   "fill": "#1C1C1E",
                   "content": "System",
                   "fontFamily": "Work Sans",
-                  "fontSize": 16
+                  "fontSize": 16,
+                  "fontWeight": "normal"
                 },
                 {
                   "type": "frame",
@@ -10985,7 +10992,8 @@
                       "fill": "#F5F7FA",
                       "content": "0 places",
                       "fontFamily": "Work Sans",
-                      "fontSize": 15
+                      "fontSize": 15,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -11165,7 +11173,8 @@
                       "fill": "#F5F7FA",
                       "content": "123.456.789",
                       "fontFamily": "Work Sans",
-                      "fontSize": 15
+                      "fontSize": 15,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -11209,7 +11218,8 @@
                       "fill": "#F5F7FA",
                       "content": "123 456 789",
                       "fontFamily": "Work Sans",
-                      "fontSize": 15
+                      "fontSize": 15,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -11253,7 +11263,8 @@
                       "fill": "#F5F7FA",
                       "content": "123456789",
                       "fontFamily": "Work Sans",
-                      "fontSize": 15
+                      "fontSize": 15,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -11522,7 +11533,8 @@
                       "fill": "#F5F7FA",
                       "content": "Dot",
                       "fontFamily": "Work Sans",
-                      "fontSize": 15
+                      "fontSize": 15,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -11589,7 +11601,8 @@
                       "fill": "#F5F7FA",
                       "content": "Space",
                       "fontFamily": "Work Sans",
-                      "fontSize": 15
+                      "fontSize": 15,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -11656,7 +11669,8 @@
                       "fill": "#F5F7FA",
                       "content": "Apostrophe",
                       "fontFamily": "Work Sans",
-                      "fontSize": 15
+                      "fontSize": 15,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -11723,7 +11737,8 @@
                       "fill": "#F5F7FA",
                       "content": "None (1234567)",
                       "fontFamily": "Work Sans",
-                      "fontSize": 15
+                      "fontSize": 15,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -11915,7 +11930,8 @@
                       "fill": "#F5F7FA",
                       "content": "Small",
                       "fontFamily": "Work Sans",
-                      "fontSize": 15
+                      "fontSize": 15,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -12040,7 +12056,8 @@
                       "fill": "#F5F7FA",
                       "content": "Large",
                       "fontFamily": "Work Sans",
-                      "fontSize": 15
+                      "fontSize": 15,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -12097,7 +12114,8 @@
                       "fill": "#F5F7FA",
                       "content": "Extra Large",
                       "fontFamily": "Work Sans",
-                      "fontSize": 15
+                      "fontSize": 15,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -12248,7 +12266,8 @@
                       "fill": "#F5F7FA",
                       "content": "Inter",
                       "fontFamily": "Work Sans",
-                      "fontSize": 15
+                      "fontSize": 15,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -12305,7 +12324,8 @@
                       "fill": "#F5F7FA",
                       "content": "Lato",
                       "fontFamily": "Work Sans",
-                      "fontSize": 15
+                      "fontSize": 15,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -12482,7 +12502,8 @@
                   "fill": "#F5F7FA",
                   "content": "Monday",
                   "fontFamily": "Work Sans",
-                  "fontSize": 15
+                  "fontSize": 15,
+                  "fontWeight": "normal"
                 }
               ]
             },
@@ -12519,7 +12540,8 @@
                   "fill": "#F5F7FA",
                   "content": "Saturday",
                   "fontFamily": "Work Sans",
-                  "fontSize": 15
+                  "fontSize": 15,
+                  "fontWeight": "normal"
                 }
               ]
             }
@@ -12658,7 +12680,8 @@
                       "fill": "#F5F7FA",
                       "content": "Hijri",
                       "fontFamily": "Work Sans",
-                      "fontSize": 15
+                      "fontSize": 15,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -13066,7 +13089,8 @@
                       "fill": "#8E8E93",
                       "content": "Dark",
                       "fontFamily": "Work Sans",
-                      "fontSize": 13
+                      "fontSize": 13,
+                      "fontWeight": "normal"
                     }
                   ]
                 },
@@ -13114,7 +13138,8 @@
                       "fill": "#8E8E93",
                       "content": "Mint",
                       "fontFamily": "Work Sans",
-                      "fontSize": 13
+                      "fontSize": 13,
+                      "fontWeight": "normal"
                     }
                   ]
                 }
@@ -13175,7 +13200,8 @@
                       "fill": "#8E8E93",
                       "content": "Rose",
                       "fontFamily": "Work Sans",
-                      "fontSize": 13
+                      "fontSize": 13,
+                      "fontWeight": "normal"
                     }
                   ]
                 },
@@ -13223,7 +13249,8 @@
                       "fill": "#8E8E93",
                       "content": "Lavender",
                       "fontFamily": "Work Sans",
-                      "fontSize": 13
+                      "fontSize": 13,
+                      "fontWeight": "normal"
                     }
                   ]
                 },
@@ -13271,7 +13298,8 @@
                       "fill": "#8E8E93",
                       "content": "Navy",
                       "fontFamily": "Work Sans",
-                      "fontSize": 13
+                      "fontSize": 13,
+                      "fontWeight": "normal"
                     }
                   ]
                 }
@@ -13398,7 +13426,8 @@
                       "fill": "#F5F7FA",
                       "content": "Weekly",
                       "fontFamily": "Work Sans",
-                      "fontSize": 15
+                      "fontSize": 15,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -13523,7 +13552,8 @@
                       "fill": "#F5F7FA",
                       "content": "Yearly",
                       "fontFamily": "Work Sans",
-                      "fontSize": 15
+                      "fontSize": 15,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -14165,7 +14195,8 @@
                       "fill": "#F5F7FA",
                       "content": "This Year",
                       "fontFamily": "Work Sans",
-                      "fontSize": 15
+                      "fontSize": 15,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -14222,7 +14253,8 @@
                       "fill": "#F5F7FA",
                       "content": "Last 6 Months",
                       "fontFamily": "Work Sans",
-                      "fontSize": 15
+                      "fontSize": 15,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -14279,7 +14311,8 @@
                       "fill": "#F5F7FA",
                       "content": "Last 3 Months",
                       "fontFamily": "Work Sans",
-                      "fontSize": 15
+                      "fontSize": 15,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -14336,7 +14369,8 @@
                       "fill": "#F5F7FA",
                       "content": "Custom Range",
                       "fontFamily": "Work Sans",
-                      "fontSize": 15
+                      "fontSize": 15,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -14487,7 +14521,8 @@
                       "fill": "#F5F7FA",
                       "content": "PDF",
                       "fontFamily": "Work Sans",
-                      "fontSize": 15
+                      "fontSize": 15,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -15548,7 +15583,8 @@
                       "fill": "#F5F7FA",
                       "content": "Weekly",
                       "fontFamily": "Work Sans",
-                      "fontSize": 15
+                      "fontSize": 15,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -15605,7 +15641,8 @@
                       "fill": "#F5F7FA",
                       "content": "Monthly",
                       "fontFamily": "Work Sans",
-                      "fontSize": 15
+                      "fontSize": 15,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -16630,7 +16667,8 @@
                       "fill": "#F5F7FA",
                       "content": "Activity",
                       "fontFamily": "Work Sans",
-                      "fontSize": 15
+                      "fontSize": 15,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -16712,7 +16750,8 @@
                       "fill": "#F5F7FA",
                       "content": "Budgets",
                       "fontFamily": "Work Sans",
-                      "fontSize": 15
+                      "fontSize": 15,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -16794,7 +16833,8 @@
                       "fill": "#F5F7FA",
                       "content": "Scan SMS",
                       "fontFamily": "Work Sans",
-                      "fontSize": 15
+                      "fontSize": 15,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -24496,7 +24536,8 @@
                           "fill": "#F5F7FA",
                           "content": "Tk",
                           "fontFamily": "Work Sans",
-                          "fontSize": 14
+                          "fontSize": 14,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -24522,7 +24563,8 @@
                           "fill": "#F5F7FA",
                           "content": "500.00",
                           "fontFamily": "Work Sans",
-                          "fontSize": 14
+                          "fontSize": 14,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -24575,7 +24617,8 @@
                           "fill": "#F5F7FA",
                           "content": "from",
                           "fontFamily": "Work Sans",
-                          "fontSize": 14
+                          "fontSize": 14,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -24601,7 +24644,8 @@
                           "fill": "#F5F7FA",
                           "content": "A/C",
                           "fontFamily": "Work Sans",
-                          "fontSize": 14
+                          "fontSize": 14,
+                          "fontWeight": "normal"
                         }
                       ]
                     }
@@ -24636,7 +24680,8 @@
                           "fill": "#F5F7FA",
                           "content": "XX1234",
                           "fontFamily": "Work Sans",
-                          "fontSize": 14
+                          "fontSize": 14,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -24662,7 +24707,8 @@
                           "fill": "#F5F7FA",
                           "content": "at",
                           "fontFamily": "Work Sans",
-                          "fontSize": 14
+                          "fontSize": 14,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -24688,7 +24734,8 @@
                           "fill": "#F5F7FA",
                           "content": "bKash",
                           "fontFamily": "Work Sans",
-                          "fontSize": 14
+                          "fontSize": 14,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -24714,7 +24761,8 @@
                           "fill": "#F5F7FA",
                           "content": "Fee",
                           "fontFamily": "Work Sans",
-                          "fontSize": 14
+                          "fontSize": 14,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -24740,7 +24788,8 @@
                           "fill": "#F5F7FA",
                           "content": "Merchant",
                           "fontFamily": "Work Sans",
-                          "fontSize": 14
+                          "fontSize": 14,
+                          "fontWeight": "normal"
                         }
                       ]
                     }
@@ -24775,7 +24824,8 @@
                           "fill": "#F5F7FA",
                           "content": "Tk",
                           "fontFamily": "Work Sans",
-                          "fontSize": 14
+                          "fontSize": 14,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -24801,7 +24851,8 @@
                           "fill": "#F5F7FA",
                           "content": "0",
                           "fontFamily": "Work Sans",
-                          "fontSize": 14
+                          "fontSize": 14,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -24827,7 +24878,8 @@
                           "fill": "#F5F7FA",
                           "content": "Balance",
                           "fontFamily": "Work Sans",
-                          "fontSize": 14
+                          "fontSize": 14,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -24853,7 +24905,8 @@
                           "fill": "#F5F7FA",
                           "content": "Tk",
                           "fontFamily": "Work Sans",
-                          "fontSize": 14
+                          "fontSize": 14,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -24879,7 +24932,8 @@
                           "fill": "#F5F7FA",
                           "content": "12,340.00",
                           "fontFamily": "Work Sans",
-                          "fontSize": 14
+                          "fontSize": 14,
+                          "fontWeight": "normal"
                         }
                       ]
                     }
@@ -27724,7 +27778,8 @@
                       "fill": "#F5F7FA",
                       "content": "Dining Out",
                       "fontFamily": "Work Sans",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -27804,7 +27859,8 @@
                       "fill": "#F5F7FA",
                       "content": "Transport",
                       "fontFamily": "Work Sans",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -27884,7 +27940,8 @@
                       "fill": "#F5F7FA",
                       "content": "Shopping",
                       "fontFamily": "Work Sans",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -27964,7 +28021,8 @@
                       "fill": "#F5F7FA",
                       "content": "Entertainment",
                       "fontFamily": "Work Sans",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -28044,7 +28102,8 @@
                       "fill": "#F5F7FA",
                       "content": "General",
                       "fontFamily": "Work Sans",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -28675,7 +28734,8 @@
                           "fill": "#8E8E93",
                           "content": "Bi-weekly",
                           "fontFamily": "Work Sans",
-                          "fontSize": 14
+                          "fontSize": 14,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -28701,7 +28761,8 @@
                           "fill": "#8E8E93",
                           "content": "Weekly",
                           "fontFamily": "Work Sans",
-                          "fontSize": 14
+                          "fontSize": 14,
+                          "fontWeight": "normal"
                         }
                       ]
                     }
@@ -30282,7 +30343,8 @@
                       "fill": "#8E8E93",
                       "content": "$1,999/mo",
                       "fontFamily": "Work Sans",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -30377,7 +30439,8 @@
                       "fill": "#8E8E93",
                       "content": "$377/mo",
                       "fontFamily": "Work Sans",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -30424,7 +30487,8 @@
                       "fill": "#8E8E93",
                       "content": "$189/mo",
                       "fontFamily": "Work Sans",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -30471,7 +30535,8 @@
                       "fill": "#8E8E93",
                       "content": "Set your own",
                       "fontFamily": "Work Sans",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     }
                   ]
                 }

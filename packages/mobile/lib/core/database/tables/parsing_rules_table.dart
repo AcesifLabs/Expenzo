@@ -1,3 +1,5 @@
+// ignore_for_file: prefer-match-file-name
+
 import 'package:drift/drift.dart';
 
 class ParsingRules extends Table {
@@ -10,8 +12,8 @@ class ParsingRules extends Table {
   TextColumn get sourceType => text()();
   BoolColumn get isEnabled => boolean().withDefault(const Constant(true))();
   IntColumn get priority => integer().withDefault(const Constant(0))();
-  DateTimeColumn get createdAt => dateTime()();
-  DateTimeColumn get updatedAt => dateTime()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 
   @override
   Set<Column> get primaryKey => {id};
