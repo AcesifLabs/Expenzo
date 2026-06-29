@@ -18,5 +18,6 @@ SyncTableRegistry createDefaultSyncRegistry() {
   registry.register(ParsingRulesSyncHandler());
   registry.register(RecurringTransactionsSyncHandler());
   registry.register(PendingRecurringSyncHandler());
+
   return registry;
 }

@@ -19,6 +19,9 @@ class MethodChannelRealtimeSmsListener implements RealtimeSmsListener {
   final StreamController<IncomingSmsEvent> _messagesController =
       StreamController<IncomingSmsEvent>.broadcast();
 
+  @override
+  Stream<IncomingSmsEvent> get messages => _messagesController.stream;
+
   MethodChannelRealtimeSmsListener({
     EventChannel? eventChannel,
     MethodChannel? methodChannel,
@@ -26,45 +29,30 @@ class MethodChannelRealtimeSmsListener implements RealtimeSmsListener {
        _methodChannel = methodChannel ?? const MethodChannel(methodChannelName);
 
   @override
-  Stream<IncomingSmsEvent> get messages => _messagesController.stream;
-
-  @override
   Future<List<IncomingSmsEvent>> drainPendingMessages() async {
-    List<dynamic>? raw;
     try {
-      raw = await _methodChannel.invokeMethod<List<dynamic>>(
+      final raw = await _methodChannel.invokeMethod<List<Object?>>(
         _drainPendingMethod,
       );
+
+      return (raw ?? const <Object?>[])
+          .whereType<Map<Object?, Object?>>()
+          .map(mapIncomingSmsEventPayload)
+          .toList(growable: false);
     } on MissingPluginException {
       debugPrint(
         'MethodChannelRealtimeSmsListener: method channel unavailable',
       );
+
       return const <IncomingSmsEvent>[];
     }
-
-    return (raw ?? const <dynamic>[])
-        .whereType<Map<dynamic, dynamic>>()
-        .map(mapIncomingSmsEventPayload)
-        .toList(growable: false);
   }
 
   @override
   Future<void> start() async {
     _subscription ??= _eventChannel.receiveBroadcastStream().listen(
-      (payload) {
-        if (payload is Map<dynamic, dynamic>) {
-          _messagesController.add(mapIncomingSmsEventPayload(payload));
-        }
-      },
-      onError: (Object error, StackTrace stackTrace) {
-        if (error is MissingPluginException) {
-          debugPrint(
-            'MethodChannelRealtimeSmsListener: event channel unavailable',
-          );
-          return;
-        }
-        _messagesController.addError(error, stackTrace);
-      },
+      _onEventPayload,
+      onError: _onEventError,
     );
   }
 
@@ -72,5 +60,20 @@ class MethodChannelRealtimeSmsListener implements RealtimeSmsListener {
   Future<void> stop() async {
     await _subscription?.cancel();
     _subscription = null;
+  }
+
+  void _onEventPayload(Object? payload) {
+    if (payload is Map<Object?, Object?>) {
+      _messagesController.add(mapIncomingSmsEventPayload(payload));
+    }
+  }
+
+  void _onEventError(Object error, StackTrace stackTrace) {
+    if (error is MissingPluginException) {
+      debugPrint('MethodChannelRealtimeSmsListener: event channel unavailable');
+
+      return;
+    }
+    _messagesController.addError(error, stackTrace);
   }
 }

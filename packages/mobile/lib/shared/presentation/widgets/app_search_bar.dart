@@ -20,13 +20,25 @@ class AppSearchBar extends StatefulWidget {
 }
 
 class _AppSearchBarState extends State<AppSearchBar> {
-  late bool _hasText;
+  bool _hasText = false;
 
   @override
   void initState() {
     super.initState();
     _hasText = widget.controller.text.isNotEmpty;
     widget.controller.addListener(_onControllerChanged);
+  }
+
+  void _onClearPressed() {
+    widget.controller.clear();
+    widget.onChanged('');
+  }
+
+  void _onControllerChanged() {
+    final hasText = widget.controller.text.isNotEmpty;
+    if (hasText != _hasText) {
+      setState(() => _hasText = hasText);
+    }
   }
 
   @override
@@ -44,16 +56,11 @@ class _AppSearchBarState extends State<AppSearchBar> {
     super.dispose();
   }
 
-  void _onControllerChanged() {
-    final hasText = widget.controller.text.isNotEmpty;
-    if (hasText != _hasText) {
-      setState(() => _hasText = hasText);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final mutedColor = colors.onSurface.withAlpha(80);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       child: TextField(
@@ -62,19 +69,16 @@ class _AppSearchBarState extends State<AppSearchBar> {
         onChanged: widget.onChanged,
         decoration: InputDecoration(
           hintText: widget.hintText,
-          hintStyle: TextStyle(color: colors.onSurface.withAlpha(80)),
+          hintStyle: TextStyle(color: mutedColor),
           prefixIcon: Icon(
             PiconsLight.magnifyingGlass,
-            color: colors.onSurface.withAlpha(80),
+            color: mutedColor,
             size: 20,
           ),
           suffixIcon: _hasText
               ? IconButton(
                   icon: Icon(PiconsLight.x, size: 18),
-                  onPressed: () {
-                    widget.controller.clear();
-                    widget.onChanged('');
-                  },
+                  onPressed: _onClearPressed,
                 )
               : null,
           filled: true,

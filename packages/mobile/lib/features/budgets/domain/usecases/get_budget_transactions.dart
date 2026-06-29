@@ -17,6 +17,7 @@ class GetBudgetTransactions {
 
   Future<Either<Failure, List<Record>>> call(String budgetId) async {
     final budgetResult = await budgetRepository.getBudgetById(budgetId);
+
     return budgetResult.fold((failure) => Left(failure), (budget) async {
       final periodRange = BudgetPeriodUtils.calculateCurrentPeriod(
         budget.startDate,
@@ -31,6 +32,7 @@ class GetBudgetTransactions {
           periodRange.start,
           periodRange.end,
         );
+
         return result.fold(
           (failure) => Left<Failure, List<Record>>(failure),
           (records) => Right<Failure, List<Record>>(records),
@@ -41,6 +43,7 @@ class GetBudgetTransactions {
         periodRange.start,
         periodRange.end,
       );
+
       return result.fold(
         (failure) => Left<Failure, List<Record>>(failure),
         (records) => Right<Failure, List<Record>>(

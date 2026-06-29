@@ -28,6 +28,7 @@ class BudgetPeriodUtils {
     final offset = diff % 7;
     final periodStart = DateTime(now.year, now.month, now.day - offset);
     final periodEnd = DateTime(now.year, now.month, now.day - offset + 7);
+
     return DateTimeRange(start: periodStart, end: periodEnd);
   }
 

@@ -69,6 +69,7 @@ class ContactSelectorBloc
 
       if (messages.isEmpty) {
         emit(currentState.copyWith(hasReachedMax: true, isLoadingMore: false));
+
         return;
       }
 

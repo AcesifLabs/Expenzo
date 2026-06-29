@@ -5,7 +5,7 @@ import 'dashboard_event.dart';
 import 'dashboard_state.dart';
 
 class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
-  final GetDashboardSummaryUseCase getDashboardSummary;
+  final GetDashboardSummary getDashboardSummary;
 
   DashboardBloc({required this.getDashboardSummary})
     : super(DashboardInitial()) {
@@ -29,18 +29,15 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     );
   }
 
-  Future<void> _onChangeDateRange(
-    ChangeDateRange event,
-    Emitter<DashboardState> emit,
-  ) async {
+  void _onChangeDateRange(ChangeDateRange event, Emitter<DashboardState> emit) {
     final dateRange = DateRange(preset: event.preset);
     add(LoadDashboard(dateRange: dateRange));
   }
 
-  Future<void> _onRefreshDashboard(
+  void _onRefreshDashboard(
     RefreshDashboard event,
     Emitter<DashboardState> emit,
-  ) async {
+  ) {
     final currentState = state;
     if (currentState is DashboardLoaded) {
       add(LoadDashboard(dateRange: currentState.dateRange));

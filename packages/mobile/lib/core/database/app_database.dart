@@ -56,176 +56,209 @@ part 'app_database.g.dart';
   ],
 )
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(_openConnection());
-  AppDatabase.forTesting(super.e);
-
   @override
   int get schemaVersion => 13;
 
   @override
-  MigrationStrategy get migration {
-    return MigrationStrategy(
-      onCreate: (Migrator m) async {
-        await m.createAll();
-        await _createFtsTable(customStatement);
-        await _createFtsTriggers(customStatement);
-      },
-      onUpgrade: (Migrator m, int from, int to) async {
-        if (from < 2) {
-          await m.createTable(messageSources);
-          await m.createTable(expenseTemplates);
-        }
-        if (from < 3) {
-          await m.createTable(budgets);
-        }
-        if (from < 5) {
-          await _createFtsTable(customStatement);
-          await _createFtsTriggers(customStatement);
-        }
-        if (from < 6) {
-          await m.renameTable(records, 'expenses');
-          await m.addColumn(records, records.recordType);
-          await m.addColumn(categories, categories.categoryType);
+  MigrationStrategy get migration => MigrationStrategy(
+    onCreate: (Migrator m) async {
+      await m.createAll();
+      await _createFtsTable(customStatement);
+      await _createFtsTriggers(customStatement);
+    },
+    onUpgrade: (Migrator m, int from, int to) async {
+      await _runMigrations(m, from);
+    },
+  );
 
-          await customStatement("UPDATE records SET record_type = 'OUT'");
-          await customStatement("UPDATE categories SET category_type = 'OUT'");
+  AppDatabase() : super(_openConnection());
+  AppDatabase.forTesting(super.e);
 
-          await customStatement("DROP TRIGGER IF EXISTS expenses_ai");
-          await customStatement("DROP TRIGGER IF EXISTS expenses_ad");
-          await customStatement("DROP TRIGGER IF EXISTS expenses_au");
-          await _createFtsTriggers(customStatement);
+  Future<void> clearAllTables() async {
+    await customStatement('PRAGMA foreign_keys = OFF');
+    try {
+      await transaction(() async {
+        for (final table in allTables) {
+          await delete(table).go();
         }
-        if (from < 7) {
-          await m.addColumn(categories, categories.usageCount);
-        }
-        if (from < 8) {
-          await m.createTable(users);
-        }
-        if (from < 9) {
-          await m.addColumn(records, records.userId);
-          await m.addColumn(categories, categories.userId);
-          await m.addColumn(budgets, budgets.userId);
-        }
-        if (from < 10) {
-          await m.createTable(syncQueue);
-        }
-        if (from < 11) {
-          await m.createTable(appSettings);
-        }
-        if (from < 12) {
-          await customStatement('DROP TRIGGER IF EXISTS records_ai');
-          await customStatement('DROP TRIGGER IF EXISTS records_ad');
-          await customStatement('DROP TRIGGER IF EXISTS records_au');
+        await customStatement('DELETE FROM expense_fts');
+      });
+    } finally {
+      await customStatement('PRAGMA foreign_keys = ON');
+    }
+  }
 
-          await customStatement('''
-            CREATE TABLE categories_new (
-              id TEXT NOT NULL PRIMARY KEY,
-              name TEXT NOT NULL,
-              emoji TEXT NOT NULL DEFAULT 'package',
-              color TEXT NOT NULL DEFAULT '#2196F3',
-              is_default INTEGER NOT NULL DEFAULT 0,
-              category_type TEXT NOT NULL DEFAULT 'OUT',
-              usage_count INTEGER NOT NULL DEFAULT 0,
-              user_id INTEGER,
-              created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
-              updated_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
-            )
-          ''');
-          await customStatement('''
-            INSERT INTO categories_new
-            SELECT CAST(id AS TEXT), name, emoji, color, is_default,
-                   category_type, usage_count, user_id, created_at, updated_at
-            FROM categories
-          ''');
-          await customStatement('DROP TABLE categories');
-          await customStatement(
-            'ALTER TABLE categories_new RENAME TO categories',
-          );
+  Future<void> _runMigrations(Migrator m, int from) async {
+    final steps = <_MigrationStep>[
+      _MigrationStep(2, () => _migrateToV2(m)),
+      _MigrationStep(3, () => _migrateToV3(m)),
+      _MigrationStep(5, _migrateToV5),
+      _MigrationStep(6, () => _migrateToV6(m)),
+      _MigrationStep(7, () => _migrateToV7(m)),
+      _MigrationStep(8, () => _migrateToV8(m)),
+      _MigrationStep(9, () => _migrateToV9(m)),
+      _MigrationStep(10, () => _migrateToV10(m)),
+      _MigrationStep(11, () => _migrateToV11(m)),
+      _MigrationStep(12, _migrateV12),
+      _MigrationStep(13, _migrateV13),
+    ];
 
-          // ── Records: int id → text, int categoryId → text ──
-          await customStatement('''
-            CREATE TABLE records_new (
-              id TEXT NOT NULL PRIMARY KEY,
-              amount REAL NOT NULL,
-              description TEXT NOT NULL,
-              date INTEGER NOT NULL,
-              category_id TEXT,
-              source TEXT NOT NULL DEFAULT 'manual',
-              source_id TEXT,
-              record_type TEXT NOT NULL,
-              user_id INTEGER,
-              created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
-              updated_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
-            )
-          ''');
-          await customStatement('''
-            INSERT INTO records_new
-            SELECT CAST(id AS TEXT), amount, description, date,
-                   CAST(category_id AS TEXT), source, source_id,
-                   record_type, user_id, created_at, updated_at
-            FROM records
-          ''');
-          await customStatement('DROP TABLE records');
-          await customStatement('ALTER TABLE records_new RENAME TO records');
+    for (final step in steps) {
+      if (from < step.version) {
+        await step.migrate();
+      }
+    }
+  }
 
-          // Recreate indexes
-          await customStatement(
-            'CREATE INDEX idx_records_date ON records (date)',
-          );
-          await customStatement(
-            'CREATE INDEX idx_records_category ON records (category_id)',
-          );
-          await customStatement(
-            'CREATE INDEX idx_records_source_id ON records (source_id)',
-          );
+  Future<void> _migrateToV2(Migrator m) async {
+    await m.createTable(messageSources);
+    await m.createTable(expenseTemplates);
+  }
 
-          // ── PendingRecurring: int id → text ──
-          await customStatement('''
-            CREATE TABLE pending_recurring_new (
-              id TEXT NOT NULL PRIMARY KEY,
-              recurring_id TEXT NOT NULL,
-              due_date INTEGER NOT NULL,
-              amount REAL NOT NULL,
-              description TEXT NOT NULL,
-              category_id TEXT,
-              created_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
-            )
-          ''');
-          await customStatement('''
-            INSERT INTO pending_recurring_new
-            SELECT CAST(id AS TEXT), recurring_id, due_date, amount,
-                   description, category_id, created_at
-            FROM pending_recurring
-          ''');
-          await customStatement('DROP TABLE pending_recurring');
-          await customStatement(
-            'ALTER TABLE pending_recurring_new RENAME TO pending_recurring',
-          );
+  Future<void> _migrateToV3(Migrator m) async {
+    await m.createTable(budgets);
+  }
 
-          // ── FTS: rebuild with text IDs ──
-          await customStatement('DELETE FROM expense_fts');
-          await customStatement('''
-            INSERT INTO expense_fts (expense_id, description)
-            SELECT id, description FROM records
-          ''');
+  Future<void> _migrateToV5() async {
+    await _createFtsTable(customStatement);
+    await _createFtsTriggers(customStatement);
+  }
 
-          // Recreate FTS triggers
-          await _createFtsTriggers(customStatement);
-        }
-        if (from < 13) {
-          // ── FTS: Drift managed ExpenseFtsTable as regular table ──
-          // Drop the regular table (created by m.createAll() pre-v13).
-          // Recreate as proper virtual FTS5 table.
-          await customStatement('DROP TABLE IF EXISTS expense_fts');
-          await _createFtsTable(customStatement);
-          await customStatement('''
-            INSERT INTO expense_fts (expense_id, description)
-            SELECT id, description FROM records
-          ''');
-          await _createFtsTriggers(customStatement);
-        }
-      },
+  Future<void> _migrateToV6(Migrator m) async {
+    await m.renameTable(records, 'expenses');
+    await m.addColumn(records, records.recordType);
+    await m.addColumn(categories, categories.categoryType);
+
+    await customStatement("UPDATE records SET record_type = 'OUT'");
+    await customStatement("UPDATE categories SET category_type = 'OUT'");
+
+    await customStatement("DROP TRIGGER IF EXISTS expenses_ai");
+    await customStatement("DROP TRIGGER IF EXISTS expenses_ad");
+    await customStatement("DROP TRIGGER IF EXISTS expenses_au");
+    await _createFtsTriggers(customStatement);
+  }
+
+  Future<void> _migrateToV7(Migrator m) async {
+    await m.addColumn(categories, categories.usageCount);
+  }
+
+  Future<void> _migrateToV8(Migrator m) async {
+    await m.createTable(users);
+  }
+
+  Future<void> _migrateToV9(Migrator m) async {
+    await m.addColumn(records, records.userId);
+    await m.addColumn(categories, categories.userId);
+    await m.addColumn(budgets, budgets.userId);
+  }
+
+  Future<void> _migrateToV10(Migrator m) async {
+    await m.createTable(syncQueue);
+  }
+
+  Future<void> _migrateToV11(Migrator m) async {
+    await m.createTable(appSettings);
+  }
+
+  Future<void> _migrateV12() async {
+    await customStatement('DROP TRIGGER IF EXISTS records_ai');
+    await customStatement('DROP TRIGGER IF EXISTS records_ad');
+    await customStatement('DROP TRIGGER IF EXISTS records_au');
+
+    await customStatement('''
+      CREATE TABLE categories_new (
+        id TEXT NOT NULL PRIMARY KEY,
+        name TEXT NOT NULL,
+        emoji TEXT NOT NULL DEFAULT 'package',
+        color TEXT NOT NULL DEFAULT '#2196F3',
+        is_default INTEGER NOT NULL DEFAULT 0,
+        category_type TEXT NOT NULL DEFAULT 'OUT',
+        usage_count INTEGER NOT NULL DEFAULT 0,
+        user_id INTEGER,
+        created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
+        updated_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
+      )
+    ''');
+    await customStatement('''
+      INSERT INTO categories_new
+      SELECT CAST(id AS TEXT), name, emoji, color, is_default,
+             category_type, usage_count, user_id, created_at, updated_at
+      FROM categories
+    ''');
+    await customStatement('DROP TABLE categories');
+    await customStatement('ALTER TABLE categories_new RENAME TO categories');
+
+    await customStatement('''
+      CREATE TABLE records_new (
+        id TEXT NOT NULL PRIMARY KEY,
+        amount REAL NOT NULL,
+        description TEXT NOT NULL,
+        date INTEGER NOT NULL,
+        category_id TEXT,
+        source TEXT NOT NULL DEFAULT 'manual',
+        source_id TEXT,
+        record_type TEXT NOT NULL,
+        user_id INTEGER,
+        created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
+        updated_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
+      )
+    ''');
+    await customStatement('''
+      INSERT INTO records_new
+      SELECT CAST(id AS TEXT), amount, description, date,
+             CAST(category_id AS TEXT), source, source_id,
+             record_type, user_id, created_at, updated_at
+      FROM records
+    ''');
+    await customStatement('DROP TABLE records');
+    await customStatement('ALTER TABLE records_new RENAME TO records');
+
+    await customStatement('CREATE INDEX idx_records_date ON records (date)');
+    await customStatement(
+      'CREATE INDEX idx_records_category ON records (category_id)',
     );
+    await customStatement(
+      'CREATE INDEX idx_records_source_id ON records (source_id)',
+    );
+
+    await customStatement('''
+      CREATE TABLE pending_recurring_new (
+        id TEXT NOT NULL PRIMARY KEY,
+        recurring_id TEXT NOT NULL,
+        due_date INTEGER NOT NULL,
+        amount REAL NOT NULL,
+        description TEXT NOT NULL,
+        category_id TEXT,
+        created_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
+      )
+    ''');
+    await customStatement('''
+      INSERT INTO pending_recurring_new
+      SELECT CAST(id AS TEXT), recurring_id, due_date, amount,
+             description, category_id, created_at
+      FROM pending_recurring
+    ''');
+    await customStatement('DROP TABLE pending_recurring');
+    await customStatement(
+      'ALTER TABLE pending_recurring_new RENAME TO pending_recurring',
+    );
+
+    await customStatement('DELETE FROM expense_fts');
+    await customStatement('''
+      INSERT INTO expense_fts (expense_id, description)
+      SELECT id, description FROM records
+    ''');
+    await _createFtsTriggers(customStatement);
+  }
+
+  Future<void> _migrateV13() async {
+    await customStatement('DROP TABLE IF EXISTS expense_fts');
+    await _createFtsTable(customStatement);
+    await customStatement('''
+      INSERT INTO expense_fts (expense_id, description)
+      SELECT id, description FROM records
+    ''');
+    await _createFtsTriggers(customStatement);
   }
 
   Future<void> _createFtsTable(Future<void> Function(String) executor) async {
@@ -240,7 +273,6 @@ class AppDatabase extends _$AppDatabase {
   Future<void> _createFtsTriggers(
     Future<void> Function(String) executor,
   ) async {
-    // INSERT Trigger
     await executor('''
       CREATE TRIGGER IF NOT EXISTS records_ai AFTER INSERT ON records BEGIN
         INSERT INTO expense_fts(expense_id, description)
@@ -248,14 +280,12 @@ class AppDatabase extends _$AppDatabase {
       END;
     ''');
 
-    // DELETE Trigger
     await executor('''
       CREATE TRIGGER IF NOT EXISTS records_ad AFTER DELETE ON records BEGIN
         DELETE FROM expense_fts WHERE expense_id = old.id;
       END;
     ''');
 
-    // UPDATE Trigger
     await executor('''
       CREATE TRIGGER IF NOT EXISTS records_au AFTER UPDATE ON records BEGIN
         UPDATE expense_fts SET description = new.description
@@ -263,27 +293,20 @@ class AppDatabase extends _$AppDatabase {
       END;
     ''');
   }
+}
 
-  Future<void> clearAllTables() async {
-    await customStatement('PRAGMA foreign_keys = OFF');
-    try {
-      await transaction(() async {
-        for (final table in allTables) {
-          await delete(table).go();
-        }
-        // Virtual FTS5 table (not managed by Drift, deleted separately)
-        await customStatement('DELETE FROM expense_fts');
-      });
-    } finally {
-      await customStatement('PRAGMA foreign_keys = ON');
-    }
-  }
+class _MigrationStep {
+  final int version;
+  final Future<void> Function() migrate;
+
+  const _MigrationStep(this.version, this.migrate);
 }
 
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {
     final dbFolder = await getApplicationDocumentsDirectory();
     final file = File(p.join(dbFolder.path, 'expenzo_db.sqlite'));
+
     return NativeDatabase.createInBackground(file);
   });
 }

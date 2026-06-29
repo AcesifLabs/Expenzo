@@ -7,34 +7,34 @@ import '../sync/connectivity_service.dart';
 import '../di/injection_container.dart' as di;
 
 class ApiClient {
+  Dio dio;
   static final ApiClient _instance = ApiClient._internal();
+
   factory ApiClient() => _instance;
 
-  late final Dio dio;
-
-  ApiClient._internal() {
-    dio = Dio(
-      BaseOptions(
-        baseUrl: ApiConstants.baseUrl,
-        connectTimeout: const Duration(seconds: 30),
-        receiveTimeout: const Duration(seconds: 30),
-        sendTimeout: const Duration(seconds: 30),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'bypass-tunnel-reminder': 'true',
-        },
-      ),
-    );
+  ApiClient._internal()
+    : dio = Dio(
+        BaseOptions(
+          baseUrl: ApiConstants.baseUrl,
+          connectTimeout: const Duration(seconds: 30),
+          receiveTimeout: const Duration(seconds: 30),
+          sendTimeout: const Duration(seconds: 30),
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'bypass-tunnel-reminder': 'true',
+          },
+        ),
+      ) {
     _setupInterceptors();
-  }
-
-  void _setupInterceptors() {
-    dio.interceptors.addAll([_AuthInterceptor(), _LoggingInterceptor()]);
   }
 
   void updateBaseUrl() {
     dio.options.baseUrl = ApiConstants.baseUrl;
+  }
+
+  void _setupInterceptors() {
+    dio.interceptors.addAll([_AuthInterceptor(), _LoggingInterceptor()]);
   }
 }
 
@@ -59,6 +59,7 @@ class _AuthInterceptor extends Interceptor {
         if (!await connectivity.checkNow()) {
           debugPrint('AuthInterceptor: Offline, skipping token refresh');
           handler.next(err);
+
           return;
         }
         final firebaseUser = FirebaseAuth.instance.currentUser;
@@ -75,6 +76,7 @@ class _AuthInterceptor extends Interceptor {
           opts.headers['Authorization'] = 'Bearer $newJwt';
           final retryResponse = await Dio().fetch(opts);
           handler.resolve(retryResponse);
+
           return;
         }
       } catch (e) {

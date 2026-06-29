@@ -2,7 +2,8 @@ import 'dart:isolate';
 import 'dart:developer' show log;
 import '../entities/parsed_transaction.dart';
 import '../entities/parsing_rule.dart';
-import '../entities/parsing_types.dart';
+import '../entities/evaluate_rules_params.dart';
+import '../entities/parsing_context.dart';
 import '../../../message_templates/domain/entities/expense_template.dart';
 import '../../../message_templates/domain/entities/message_source.dart';
 import '../services/rule_evaluator.dart';
@@ -99,5 +100,6 @@ List<ParsedTransaction> _parseInIsolate(_IsolatePayload payload) {
   }
 
   results.sort((a, b) => b.confidenceScore.compareTo(a.confidenceScore));
+
   return results;
 }

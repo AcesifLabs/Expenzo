@@ -41,6 +41,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.11.3"
+  ansicolor:
+    dependency: transitive
+    description:
+      name: ansicolor
+      sha256: "50e982d500bc863e1d703448afdbf9e5a72eb48840a4f766fa361ffd6877055f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.3"
   archive:
     dependency: transitive
     description:
@@ -281,6 +289,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.9"
+  dart_code_linter:
+    dependency: "direct dev"
+    description:
+      name: dart_code_linter
+      sha256: "74f8eeaae7c02fcf8b45222dc9ed60df22b41847721822d6152226c8070302e9"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   dart_style:
     dependency: transitive
     description:
@@ -1071,6 +1087,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.0"
+  pub_updater:
+    dependency: transitive
+    description:
+      name: pub_updater
+      sha256: "739a0161d73a6974c0675b864fb0cf5147305f7b077b7f03a58fa7a9ab3e7e7d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.0"
   pubspec_parse:
     dependency: transitive
     description:

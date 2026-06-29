@@ -1,3 +1,5 @@
+// ignore_for_file: prefer-match-file-name
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
@@ -42,13 +44,16 @@ void main() async {
 
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
-    if (kReleaseMode) {}
+    if (kReleaseMode) {
+      // TODO: report to crash reporting service
+    }
   };
 
   PlatformDispatcher.instance.onError = (error, stack) {
     if (kDebugMode) {
       debugPrint('Async Error: $error\n$stack');
     }
+
     return true;
   };
 
@@ -144,17 +149,33 @@ class _AppLoaderState extends State<AppLoader> with WidgetsBindingObserver {
     _startInitialization();
   }
 
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
+  Widget _buildSplash(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      body: const Center(child: _SplashIcon()),
+    );
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      unawaited(_tryDrainRealtimeSms());
-    }
+  void _handleRetry() {
+    setState(() {
+      _error = false;
+      _initialized = false;
+    });
+    _startInitialization();
+  }
+
+  void _handleHardReset() {
+    unawaited(
+      di.getIt<BootstrapService>().hardReset().then((_) {
+        if (!mounted) return;
+
+        di.getIt<BootstrapService>().remountRoot();
+      }),
+    );
+  }
+
+  void _handleRestart() {
+    di.getIt<BootstrapService>().restart();
   }
 
   Future<void> _startInitialization() async {
@@ -186,9 +207,13 @@ class _AppLoaderState extends State<AppLoader> with WidgetsBindingObserver {
 
       unawaited(_tryStartRealtimeSmsProcessing());
 
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        await Future.delayed(const Duration(milliseconds: 500));
-        di.initFeatureDependencies();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        unawaited(
+          Future.delayed(
+            const Duration(milliseconds: 500),
+            _initFeatureDependencies,
+          ),
+        );
       });
     } catch (e, stack) {
       debugPrint('AppLoader: init failed: $e\n$stack');
@@ -221,6 +246,23 @@ class _AppLoaderState extends State<AppLoader> with WidgetsBindingObserver {
     }
   }
 
+  void _initFeatureDependencies() {
+    di.initFeatureDependencies();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      unawaited(_tryDrainRealtimeSms());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_error) {
@@ -248,35 +290,6 @@ class _AppLoaderState extends State<AppLoader> with WidgetsBindingObserver {
       child: const _InitialDataLoader(),
     );
   }
-
-  Widget _buildSplash(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      body: const Center(child: _SplashIcon()),
-    );
-  }
-
-  void _handleRetry() {
-    setState(() {
-      _error = false;
-      _initialized = false;
-    });
-    _startInitialization();
-  }
-
-  void _handleHardReset() {
-    unawaited(
-      di.getIt<BootstrapService>().hardReset().then((_) {
-        if (!mounted) return;
-
-        di.getIt<BootstrapService>().remountRoot();
-      }),
-    );
-  }
-
-  void _handleRestart() {
-    di.getIt<BootstrapService>().restart();
-  }
 }
 
 class _SplashIcon extends StatefulWidget {
@@ -288,33 +301,40 @@ class _SplashIcon extends StatefulWidget {
 
 class _SplashIconState extends State<_SplashIcon>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
+  AnimationController? _controller;
+  Animation<double>? _animation;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
+    final controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
     )..repeat(reverse: true);
 
+    _controller = controller;
     _animation = Tween<double>(
       begin: 0.9,
       end: 1.1,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    ).animate(CurvedAnimation(parent: controller, curve: Curves.easeInOut));
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final controller = _controller;
+    final animation = _animation;
+    if (controller == null || animation == null) {
+      return const SizedBox.shrink();
+    }
+
     return ScaleTransition(
-      scale: _animation,
+      scale: animation,
       alignment: Alignment.center,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -344,39 +364,47 @@ class _InitialDataLoaderState extends State<_InitialDataLoader> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
+    WidgetsBinding.instance.addPostFrameCallback(_onPostFrameCallback);
+  }
 
-      context.read<AuthBloc>().add(const AuthCheckRequested());
-      Future.delayed(const Duration(milliseconds: 150), () {
-        if (mounted) {
-          context.read<CategoryBloc>().add(const LoadCategories());
-        }
-      });
-      Future.delayed(const Duration(milliseconds: 300), () {
-        if (mounted) {
-          context.read<RecordBloc>().add(const LoadRecords());
-        }
-      });
-    });
+  void _onPostFrameCallback(_) {
+    if (!mounted) return;
+
+    context.read<AuthBloc>().add(const AuthCheckRequested());
+    Future.delayed(const Duration(milliseconds: 150), _loadCategories);
+    Future.delayed(const Duration(milliseconds: 300), _loadRecords);
+  }
+
+  void _loadCategories() {
+    if (mounted) {
+      context.read<CategoryBloc>().add(const LoadCategories());
+    }
+  }
+
+  void _loadRecords() {
+    if (mounted) {
+      context.read<RecordBloc>().add(const LoadRecords());
+    }
+  }
+
+  void _onAuthStateChanged(BuildContext context, AuthState state) {
+    if (state is AuthError) {
+      if (state.isUserInitiated) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Sign-in failed: ${state.message}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AuthBloc, AuthState>(
-      listener: (context, state) {
-        if (state is AuthError) {
-          if (state.isUserInitiated) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Sign-in failed: ${state.message}'),
-                backgroundColor: Colors.red,
-                duration: const Duration(seconds: 5),
-              ),
-            );
-          }
-        } else if (state is AuthLoading) {}
-      },
+      listener: _onAuthStateChanged,
       builder: (context, state) {
         if (state is AuthSyncConflictPending) {
           return const SyncConflictPage();

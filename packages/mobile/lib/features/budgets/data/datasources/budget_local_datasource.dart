@@ -20,12 +20,14 @@ class BudgetLocalDatasourceImpl implements BudgetLocalDatasource {
   @override
   Future<List<domain.Budget>> getBudgets() async {
     final budgets = await budgetDao.getAllBudgets();
+
     return budgets.map(_mapToEntity).toList();
   }
 
   @override
   Future<domain.Budget?> getBudgetById(String id) async {
     final budget = await budgetDao.getBudgetById(id);
+
     return budget != null ? _mapToEntity(budget) : null;
   }
 
@@ -53,9 +55,11 @@ class BudgetLocalDatasourceImpl implements BudgetLocalDatasource {
   @override
   Future<void> updateBudget(domain.Budget budget) async {
     final now = DateTime.now().toUtc();
+    final id = budget.id;
+    if (id == null) return;
     await budgetDao.updateBudget(
       BudgetsCompanion(
-        id: Value(budget.id!),
+        id: Value(id),
         categoryId: Value(budget.categoryId),
         amount: Value(budget.amount),
         period: Value(budget.period.name),
@@ -98,6 +102,7 @@ class BudgetLocalDatasourceImpl implements BudgetLocalDatasource {
     for (final p in domain.BudgetPeriod.values) {
       if (p.name == period) return p;
     }
+
     return domain.BudgetPeriod.monthly;
   }
 }

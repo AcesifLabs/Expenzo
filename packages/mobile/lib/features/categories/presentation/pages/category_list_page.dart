@@ -15,50 +15,29 @@ import 'category_form_page.dart';
 class CategoryListPage extends StatelessWidget {
   const CategoryListPage({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return AppScaffold(
-      title: 'Categories',
-      onRefresh: () async {
-        context.read<CategoryBloc>().add(const LoadCategories());
-      },
-      child: BlocBuilder<CategoryBloc, CategoryState>(
-        builder: (context, state) {
-          if (state is CategoryLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (state is CategoryError) {
-            return Center(child: Text(state.message));
-          }
-          if (state is CategoryLoaded) {
-            if (state.categories.isEmpty) {
-              return AppEmptyState(
-                icon: PiconsRegular.tag,
-                message: 'No categories created',
-              );
-            }
-            return GridView.builder(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 120),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                childAspectRatio: 1.78,
-              ),
-              itemCount: state.categories.length,
-              itemBuilder: (context, index) {
-                final category = state.categories[index];
-                return CategoryCard(
-                  category: category,
-                  onTap: () => _navigateToForm(context, category),
-                  onLongPress: () => _showDeleteDialog(context, category),
-                );
-              },
-            );
-          }
-          return const SizedBox.shrink();
-        },
+  void _refreshCategories(BuildContext context) {
+    context.read<CategoryBloc>().add(const LoadCategories());
+  }
+
+  Widget _buildCategoryGrid(CategoryLoaded state) {
+    return GridView.builder(
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 120),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+        childAspectRatio: 1.78,
       ),
+      itemCount: state.categories.length,
+      itemBuilder: (context, index) {
+        final category = state.categories[index];
+
+        return CategoryCard(
+          category: category,
+          onTap: () => _navigateToForm(context, category),
+          onLongPress: () => _showDeleteDialog(context, category),
+        );
+      },
     );
   }
 
@@ -86,16 +65,53 @@ class CategoryListPage extends StatelessWidget {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
-              Navigator.pop(dialogContext);
-              context.read<CategoryBloc>().add(
-                DeleteCategoryEvent(category.id!),
-              );
-            },
+            onPressed: () => _onDeleteConfirm(dialogContext, context, category),
             style: TextButton.styleFrom(foregroundColor: AppColors.error),
             child: const Text('Delete'),
           ),
         ],
+      ),
+    );
+  }
+
+  void _onDeleteConfirm(
+    BuildContext dialogContext,
+    BuildContext context,
+    Category category,
+  ) {
+    Navigator.pop(dialogContext);
+    final id = category.id;
+    if (id != null) {
+      context.read<CategoryBloc>().add(DeleteCategoryEvent(id));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AppScaffold(
+      title: 'Categories',
+      onRefresh: () async => _refreshCategories(context),
+      child: BlocBuilder<CategoryBloc, CategoryState>(
+        builder: (context, state) {
+          if (state is CategoryLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (state is CategoryError) {
+            return Center(child: Text(state.message));
+          }
+          if (state is CategoryLoaded) {
+            if (state.categories.isEmpty) {
+              return AppEmptyState(
+                icon: PiconsRegular.tag,
+                message: 'No categories created',
+              );
+            }
+
+            return _buildCategoryGrid(state);
+          }
+
+          return const SizedBox.shrink();
+        },
       ),
     );
   }

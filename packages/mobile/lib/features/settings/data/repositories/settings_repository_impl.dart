@@ -14,6 +14,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
   Future<Either<CacheFailure, UserSettings>> getSettings() async {
     try {
       final settings = await localDatasource.getSettings();
+
       return Right(settings);
     } on CacheException catch (e) {
       return Left(e.toFailure());
@@ -26,6 +27,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
   ) async {
     try {
       final updated = await localDatasource.updateSettings(settings);
+
       return Right(updated);
     } on CacheException catch (e) {
       return Left(e.toFailure());

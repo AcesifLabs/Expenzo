@@ -24,12 +24,14 @@ class RecurringLocalDatasourceImpl implements RecurringLocalDatasource {
   @override
   Future<List<domain.RecurringTransaction>> getRecurringList() async {
     final results = await recurringDao.getAllRecurring();
+
     return results.map(_mapToEntity).toList();
   }
 
   @override
   Future<domain.RecurringTransaction?> getRecurringById(String id) async {
     final result = await recurringDao.getRecurringById(id);
+
     return result != null ? _mapToEntity(result) : null;
   }
 
@@ -85,14 +87,20 @@ class RecurringLocalDatasourceImpl implements RecurringLocalDatasource {
   @override
   Future<List<domain.RecurringTransaction>> getDueRecurring() async {
     final results = await recurringDao.getDueRecurring();
+
     return results.map(_mapToEntity).toList();
   }
 
   RecurringTransactionsCompanion _toCompanion(
     domain.RecurringTransaction recurring,
   ) {
+    final id = recurring.id;
+    if (id == null) {
+      throw ArgumentError('RecurringTransaction id must not be null');
+    }
+
     return RecurringTransactionsCompanion(
-      id: Value(recurring.id!),
+      id: Value(id),
       description: Value(recurring.description),
       amount: Value(recurring.amount),
       categoryId: Value(recurring.categoryId),

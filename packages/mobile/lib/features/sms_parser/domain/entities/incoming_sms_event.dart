@@ -5,12 +5,6 @@ class IncomingSmsEvent {
   final String body;
   final DateTime receivedAt;
 
-  const IncomingSmsEvent({
-    required this.address,
-    required this.body,
-    required this.receivedAt,
-  });
-
   String get sourceId {
     final bodyHash = _fnv1a32(body);
     final timestamp = receivedAt.toUtc().millisecondsSinceEpoch;
@@ -18,6 +12,12 @@ class IncomingSmsEvent {
 
     return '$normalizedAddress:$timestamp:$bodyHash';
   }
+
+  const IncomingSmsEvent({
+    required this.address,
+    required this.body,
+    required this.receivedAt,
+  });
 
   static String _fnv1a32(String input) {
     const int offsetBasis = 0x811C9DC5;

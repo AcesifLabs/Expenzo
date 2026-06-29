@@ -11,6 +11,18 @@ class Category extends Equatable {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  @override
+  List<Object?> get props => [
+    id,
+    name,
+    emoji,
+    color,
+    isDefault,
+    type,
+    createdAt,
+    updatedAt,
+  ];
+
   const Category({
     this.id,
     required this.name,
@@ -43,16 +55,4 @@ class Category extends Equatable {
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
-
-  @override
-  List<Object?> get props => [
-    id,
-    name,
-    emoji,
-    color,
-    isDefault,
-    type,
-    createdAt,
-    updatedAt,
-  ];
 }

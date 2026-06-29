@@ -15,6 +15,10 @@ class AppPageHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final localSubtitle = subtitle;
+    final hasSubtitle = localSubtitle != null;
+    final localActions = actions;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 48, 24, 8),
       child: Row(
@@ -25,11 +29,11 @@ class AppPageHeader extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (subtitle != null)
+                if (localSubtitle != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 2),
                     child: Text(
-                      subtitle!,
+                      localSubtitle,
                       style: TextStyle(
                         fontSize: 14,
                         color: colors.onSurface.withAlpha(140),
@@ -39,7 +43,7 @@ class AppPageHeader extends StatelessWidget {
                 Text(
                   title,
                   style: TextStyle(
-                    fontSize: subtitle != null ? 22 : 28,
+                    fontSize: hasSubtitle ? 22 : 28,
                     fontWeight: FontWeight.w700,
                     color: colors.onSurface,
                   ),
@@ -47,8 +51,8 @@ class AppPageHeader extends StatelessWidget {
               ],
             ),
           ),
-          if (actions != null)
-            Row(mainAxisSize: MainAxisSize.min, children: actions!),
+          if (localActions != null)
+            Row(mainAxisSize: MainAxisSize.min, children: localActions),
         ],
       ),
     );

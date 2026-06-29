@@ -20,6 +20,7 @@ class BalanceRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final onSurface = Theme.of(context).colorScheme.onSurface;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [

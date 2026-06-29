@@ -2,12 +2,10 @@ import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import '../entities/record.dart';
 
-class DateTimeRange {
-  final DateTime start;
-  final DateTime end;
-
-  const DateTimeRange({required this.start, required this.end});
-}
+import 'date_time_range.dart';
+export 'date_time_range.dart';
+import 'record_filter.dart';
+export 'record_filter.dart';
 
 abstract class RecordRepository {
   Future<Either<CacheFailure, List<Record>>> getRecords({
@@ -16,14 +14,7 @@ abstract class RecordRepository {
     int? limit,
     int? offset,
   });
-  Future<Either<Failure, List<Record>>> getFilteredRecords({
-    DateTime? startDate,
-    DateTime? endDate,
-    List<String>? categoryIds,
-    String? recordType,
-    int? limit,
-    int? offset,
-  });
+  Future<Either<Failure, List<Record>>> getFilteredRecords(RecordFilter filter);
   Future<Either<CacheFailure, Record>> getRecordById(String id);
   Future<Either<CacheFailure, Record>> addRecord(Record record);
   Future<Either<CacheFailure, Record>> updateRecord(Record record);

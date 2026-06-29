@@ -19,16 +19,19 @@ class ParsingContext {
     final cache = <String, RegExp>{};
     for (final rule in rules) {
       cache[rule.amountPattern] = RegExp(rule.amountPattern);
-      if (rule.datePattern != null) {
-        cache[rule.datePattern!] = RegExp(rule.datePattern!);
+      final rdp = rule.datePattern;
+      if (rdp != null) {
+        cache[rdp] = RegExp(rdp);
       }
     }
     for (final template in templates) {
       cache[template.amountPattern] = RegExp(template.amountPattern);
-      if (template.datePattern != null) {
-        cache[template.datePattern!] = RegExp(template.datePattern!);
+      final tdp = template.datePattern;
+      if (tdp != null) {
+        cache[tdp] = RegExp(tdp);
       }
     }
+
     return ParsingContext(
       rules: rules,
       templates: templates,
@@ -36,20 +39,4 @@ class ParsingContext {
       regexCache: cache,
     );
   }
-}
-
-class EvaluateRulesParams {
-  final String rawMessage;
-  final String sourceType;
-  final String sourceId;
-  final String? address;
-  final DateTime? messageDate;
-
-  EvaluateRulesParams({
-    required this.rawMessage,
-    required this.sourceType,
-    required this.sourceId,
-    this.address,
-    this.messageDate,
-  });
 }

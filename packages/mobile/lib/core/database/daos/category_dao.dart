@@ -27,6 +27,7 @@ class CategoryDao extends DatabaseAccessor<AppDatabase>
     if (type != null) {
       query.where((t) => t.categoryType.equals(type));
     }
+
     return query.watch();
   }
 
@@ -48,6 +49,7 @@ class CategoryDao extends DatabaseAccessor<AppDatabase>
     if (type != null) {
       query.where((t) => t.categoryType.equals(type));
     }
+
     return query.get();
   }
 

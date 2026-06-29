@@ -19,6 +19,8 @@ class AppStatTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final localSubtitle = subtitle;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
@@ -27,7 +29,7 @@ class AppStatTile extends StatelessWidget {
           child: Icon(icon, color: color),
         ),
         title: Text(title),
-        subtitle: subtitle != null ? Text(subtitle!) : null,
+        subtitle: localSubtitle != null ? Text(localSubtitle) : null,
         trailing: Text(
           value,
           style: theme.textTheme.titleMedium?.copyWith(

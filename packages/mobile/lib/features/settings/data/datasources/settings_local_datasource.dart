@@ -28,9 +28,11 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
           createdAt: now,
           updatedAt: now,
         );
+
         return await updateSettings(defaultSettings);
       }
       final json = jsonDecode(jsonString) as Map<String, dynamic>;
+
       return _mapFromJson(json);
     } catch (e) {
       throw CacheException(message: e.toString());
@@ -42,6 +44,7 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
     try {
       final json = _mapToJson(settings);
       await sharedPreferences.setString(_settingsKey, jsonEncode(json));
+
       return settings;
     } catch (e) {
       throw CacheException(message: e.toString());

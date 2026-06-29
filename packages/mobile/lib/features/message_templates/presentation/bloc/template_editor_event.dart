@@ -3,30 +3,36 @@ import '../../domain/entities/expense_template.dart';
 import '../../domain/entities/message_source.dart';
 
 abstract class TemplateEditorEvent extends Equatable {
-  const TemplateEditorEvent();
   @override
   List<Object?> get props => [];
+
+  const TemplateEditorEvent();
 }
 
 class LoadTemplate extends TemplateEditorEvent {
   final String templateId;
-  const LoadTemplate(this.templateId);
+
   @override
   List<Object?> get props => [templateId];
+
+  const LoadTemplate(this.templateId);
 }
 
 class SaveTemplateEvent extends TemplateEditorEvent {
   final ExpenseTemplate template;
   final MessageSource source;
 
-  const SaveTemplateEvent(this.template, this.source);
   @override
   List<Object?> get props => [template, source];
+
+  const SaveTemplateEvent(this.template, this.source);
 }
 
 class DeleteTemplateEvent extends TemplateEditorEvent {
   final String templateId;
-  const DeleteTemplateEvent(this.templateId);
+
   @override
   List<Object?> get props => [templateId];
+
+  const DeleteTemplateEvent(this.templateId);
 }

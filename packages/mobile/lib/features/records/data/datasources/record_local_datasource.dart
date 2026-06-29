@@ -38,14 +38,7 @@ abstract class RecordLocalDatasource {
     DateTime start,
     DateTime end,
   );
-  Future<List<rec.Record>> getFilteredRecords({
-    DateTime? startDate,
-    DateTime? endDate,
-    List<String>? categoryIds,
-    String? recordType,
-    int? limit,
-    int? offset,
-  });
+  Future<List<rec.Record>> getFilteredRecords(RecordFilter filter);
 }
 
 class RecordLocalDatasourceImpl implements RecordLocalDatasource {
@@ -66,15 +59,18 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
           dateRange.start,
           dateRange.end,
         );
+
         return records.map<rec.Record>((e) => _mapToEntity(e)).toList();
       } else if (categoryId != null) {
         final records = await recordDao.getRecordsByCategory(categoryId);
+
         return records.map<rec.Record>((e) => _mapToEntity(e)).toList();
       } else {
         final records = await recordDao.getAllRecords(
           limit: limit,
           offset: offset,
         );
+
         return records.map<rec.Record>((e) => _mapToEntity(e)).toList();
       }
     } catch (e) {
@@ -86,6 +82,7 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
   Future<rec.Record?> getRecordById(String id) async {
     try {
       final record = await recordDao.getRecordById(id);
+
       return record != null ? _mapToEntity(record) : null;
     } catch (e) {
       throw CacheException(message: e.toString());
@@ -110,6 +107,7 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
         updatedAt: Value(now),
       );
       await recordDao.insertRecord(companion);
+
       return record.copyWith(id: id, createdAt: now, updatedAt: now);
     } catch (e) {
       throw CacheException(message: e.toString());
@@ -120,8 +118,12 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
   Future<rec.Record> updateRecord(rec.Record record) async {
     try {
       final now = DateTime.now().toUtc();
+      final recordId = record.id;
+      if (recordId == null) {
+        throw const CacheException(message: 'Record ID is required for update');
+      }
       final companion = db.RecordsCompanion(
-        id: Value(record.id!),
+        id: Value(recordId),
         amount: Value(record.amount),
         description: Value(record.description),
         date: Value(record.date),
@@ -133,6 +135,7 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
         updatedAt: Value(now),
       );
       await recordDao.updateRecord(companion);
+
       return record.copyWith(updatedAt: now);
     } catch (e) {
       throw CacheException(message: e.toString());
@@ -187,6 +190,7 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
         start,
         end,
       );
+
       return records.map<rec.Record>((e) => _mapToEntity(e)).toList();
     } catch (e) {
       throw CacheException(message: e.toString());
@@ -222,6 +226,7 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
   ) async {
     try {
       final records = await recordDao.getRecordsByDateRangeOnly(start, end);
+
       return records.map<rec.Record>((e) => _mapToEntity(e)).toList();
     } catch (e) {
       throw CacheException(message: e.toString());
@@ -234,6 +239,7 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
       final now = DateTime.now().toUtc();
       final companions = records.map((record) {
         final id = record.id ?? const Uuid().v4();
+
         return db.RecordsCompanion(
           id: Value(id),
           amount: Value(record.amount),
@@ -254,23 +260,10 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
   }
 
   @override
-  Future<List<rec.Record>> getFilteredRecords({
-    DateTime? startDate,
-    DateTime? endDate,
-    List<String>? categoryIds,
-    String? recordType,
-    int? limit,
-    int? offset,
-  }) async {
+  Future<List<rec.Record>> getFilteredRecords(RecordFilter filter) async {
     try {
-      final records = await recordDao.getFilteredRecords(
-        startDate: startDate,
-        endDate: endDate,
-        categoryIds: categoryIds,
-        recordType: recordType,
-        limit: limit,
-        offset: offset,
-      );
+      final records = await recordDao.getFilteredRecords(filter);
+
       return records.map<rec.Record>((e) => _mapToEntity(e)).toList();
     } catch (e) {
       throw CacheException(message: e.toString());

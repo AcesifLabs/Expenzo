@@ -23,33 +23,94 @@ class RecordCard extends StatelessWidget {
     required this.onDelete,
   });
 
+  _CategoryInfo _resolveCategory(CategoryState state) {
+    if (state is! CategoryLoaded) return const _CategoryInfo();
+    final matched = state.categories.where((c) => c.id == record.categoryId);
+    if (matched.isEmpty) return const _CategoryInfo();
+
+    return _CategoryInfo(
+      name: matched.first.name,
+      emoji: matched.first.emoji,
+      color: matched.first.color,
+    );
+  }
+
+  Widget _buildLeading(Color leadingBg, Color catColor) {
+    return Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        color: leadingBg,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Center(
+        child: Icon(PiconsLight.receipt, size: 22, color: catColor),
+      ),
+    );
+  }
+
+  Widget _buildInfo() {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            record.description,
+            style: const TextStyle(fontWeight: FontWeight.w500),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            _dateFormat.format(record.date),
+            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAmount(bool isNegative, _CategoryInfo catInfo, Object? _) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          '${isNegative ? '-' : ''}\$${record.amount.abs().toStringAsFixed(2)}',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: isNegative
+                ? const Color(0xFFFF3B30)
+                : const Color(0xFF34C759),
+          ),
+        ),
+        const SizedBox(height: 4),
+        SourceBadge(
+          source: record.source,
+          categoryName: catInfo.name,
+          categoryIconName: catInfo.emoji,
+          categoryColor: catInfo.color,
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<CategoryBloc, CategoryState>(
       builder: (context, state) {
-        String? categoryName;
-        String? categoryEmoji;
-        String? categoryColor;
-
-        if (state is CategoryLoaded) {
-          final matchedCategories = state.categories.where(
-            (c) => c.id == record.categoryId,
-          );
-          if (matchedCategories.isNotEmpty) {
-            categoryName = matchedCategories.first.name;
-            categoryEmoji = matchedCategories.first.emoji;
-            categoryColor = matchedCategories.first.color;
-          }
-        }
-
+        final catInfo = _resolveCategory(state);
         final isNegative = record.amount < 0;
+        final catColorHex = catInfo.color;
+        final colors = Theme.of(context).colorScheme;
 
-        final catColor = categoryColor != null
-            ? ColorUtils.fromHex(categoryColor)
-            : Theme.of(context).colorScheme.primary;
+        final catColor = catColorHex != null
+            ? ColorUtils.fromHex(catColorHex)
+            : colors.primary;
 
-        final leadingBg = categoryColor != null
-            ? ColorUtils.fromHexWithAlpha(categoryColor)
+        final leadingBg = catColorHex != null
+            ? ColorUtils.fromHexWithAlpha(catColorHex)
             : catColor.withAlpha(25);
 
         return AppCard(
@@ -60,64 +121,23 @@ class RecordCard extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           child: Row(
             children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: leadingBg,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Center(
-                  child: Icon(PiconsLight.receipt, size: 22, color: catColor),
-                ),
-              ),
+              _buildLeading(leadingBg, catColor),
               const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      record.description,
-                      style: const TextStyle(fontWeight: FontWeight.w500),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _dateFormat.format(record.date),
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                    ),
-                  ],
-                ),
-              ),
+              _buildInfo(),
               const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    '${isNegative ? '-' : ''}\$${record.amount.abs().toStringAsFixed(2)}',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: isNegative
-                          ? const Color(0xFFFF3B30)
-                          : const Color(0xFF34C759),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  SourceBadge(
-                    source: record.source,
-                    categoryName: categoryName,
-                    categoryIconName: categoryEmoji,
-                    categoryColor: categoryColor,
-                  ),
-                ],
-              ),
+              _buildAmount(isNegative, catInfo, catColor),
             ],
           ),
         );
       },
     );
   }
+}
+
+class _CategoryInfo {
+  final String? name;
+  final String? emoji;
+  final String? color;
+
+  const _CategoryInfo({this.name, this.emoji, this.color});
 }

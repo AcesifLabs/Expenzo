@@ -8,3 +8,33 @@ analyzer:
 
 linter:
   rules: []
+
+dart_code_linter:
+  rules:
+    - avoid-dynamic
+    - avoid-late-keyword
+    - avoid-nested-conditional-expressions
+    - avoid-non-null-assertion
+    - avoid-passing-async-when-sync-expected
+    - avoid-redundant-async
+    - avoid-unnecessary-type-assertions
+    - avoid-unnecessary-type-casts
+    - avoid-unrelated-type-assertions
+    - avoid-unused-parameters
+    - member-ordering
+    - newline-before-return
+    - no-boolean-literal-compare
+    - no-empty-block
+    - no-equal-then-else
+    - prefer-conditional-expressions
+    - prefer-extracting-callbacks
+    - prefer-first
+    - prefer-last
+    - prefer-match-file-name
+    - prefer-moving-to-variable
+
+  metrics:
+    cyclomatic-complexity: 10
+    maximum-nesting-level: 4
+    number-of-parameters: 4
+    source-lines-of-code: 50

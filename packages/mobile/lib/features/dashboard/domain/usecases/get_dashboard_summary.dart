@@ -8,12 +8,11 @@ import '../../../categories/domain/repositories/category_repository.dart';
 import '../../domain/entities/dashboard_summary.dart';
 import '../../domain/entities/date_range.dart';
 
-class GetDashboardSummaryUseCase
-    implements UseCase<DashboardSummary, DateRange> {
+class GetDashboardSummary implements UseCase<DashboardSummary, DateRange> {
   final RecordRepository recordRepository;
   final CategoryRepository categoryRepository;
 
-  GetDashboardSummaryUseCase({
+  GetDashboardSummary({
     required this.recordRepository,
     required this.categoryRepository,
   });
@@ -21,30 +20,8 @@ class GetDashboardSummaryUseCase
   @override
   Future<Either<Failure, DashboardSummary>> call(DateRange dateRange) async {
     try {
-      final currentResult = await recordRepository.getRecords(
-        dateRange: DateTimeRange(
-          start: dateRange.startDate,
-          end: dateRange.endDate,
-        ),
-      );
-
-      final List<Record> currentRecords = currentResult.fold(
-        (failure) => [],
-        (records) => records,
-      );
-
-      final previousDateRange = dateRange.previousPeriod;
-      final previousResult = await recordRepository.getRecords(
-        dateRange: DateTimeRange(
-          start: previousDateRange.startDate,
-          end: previousDateRange.endDate,
-        ),
-      );
-
-      final List<Record> previousRecords = previousResult.fold(
-        (failure) => [],
-        (records) => records,
-      );
+      final currentRecords = await _fetchRecords(dateRange);
+      final previousRecords = await _fetchRecords(dateRange.previousPeriod);
 
       final totalIncome = _calculateByType(currentRecords, RecordType.income);
       final totalExpense = _calculateByType(currentRecords, RecordType.expense);
@@ -81,6 +58,17 @@ class GetDashboardSummaryUseCase
     }
   }
 
+  Future<List<Record>> _fetchRecords(DateRange dateRange) async {
+    final result = await recordRepository.getRecords(
+      dateRange: DateTimeRange(
+        start: dateRange.startDate,
+        end: dateRange.endDate,
+      ),
+    );
+
+    return result.fold((failure) => [], (records) => records);
+  }
+
   double _calculateTotal(List<Record> records) {
     return records.fold(0.0, (sum, record) => sum + record.amount.abs());
   }
@@ -95,13 +83,14 @@ class GetDashboardSummaryUseCase
     List<Record> records,
   ) async {
     final totalSpent = _calculateTotal(records);
+
     if (totalSpent == 0) return [];
 
     final categoryMap = <String, double>{};
     for (final record in records) {
-      if (record.categoryId != null) {
-        categoryMap[record.categoryId!] =
-            (categoryMap[record.categoryId!] ?? 0) + record.amount.abs();
+      final catId = record.categoryId;
+      if (catId != null) {
+        categoryMap[catId] = (categoryMap[catId] ?? 0) + record.amount.abs();
       }
     }
 
@@ -117,7 +106,7 @@ class GetDashboardSummaryUseCase
         final amount = entry.value;
         breakdown.add(
           CategoryAmount(
-            categoryId: category.id!,
+            categoryId: category.id ?? '',
             emoji: category.emoji,
             categoryName: category.name,
             amount: amount,
@@ -127,6 +116,7 @@ class GetDashboardSummaryUseCase
       }
 
       breakdown.sort((a, b) => b.amount.compareTo(a.amount));
+
       return breakdown;
     });
   }

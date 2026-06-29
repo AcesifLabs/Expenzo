@@ -18,6 +18,13 @@ class SmsPermissionBloc extends Bloc<SmsPermissionEvent, SmsPermissionState> {
     on<OpenAppSettings>(_onOpenSettings);
   }
 
+  @override
+  Future<void> close() {
+    _timeoutTimer?.cancel();
+
+    return super.close();
+  }
+
   Future<void> _onCheckPermission(
     CheckSmsPermission event,
     Emitter<SmsPermissionState> emit,
@@ -104,11 +111,5 @@ class SmsPermissionBloc extends Bloc<SmsPermissionEvent, SmsPermissionState> {
     }
 
     await prefs.setString(_smsPermissionStatusKey, statusString);
-  }
-
-  @override
-  Future<void> close() {
-    _timeoutTimer?.cancel();
-    return super.close();
   }
 }

@@ -1,0 +1,54 @@
+#!/bin/sh
+# Pre-push hook: enforce mobile code quality gates
+set -eu
+
+ROOT="$(git rev-parse --show-toplevel)"
+MOBILE="$ROOT/packages/mobile"
+
+if [ ! -d "$MOBILE" ]; then
+  exit 0
+fi
+
+echo ""
+echo "═══════════════════════════════════════════════"
+echo "  Mobile code quality gate (pre-push)"
+echo "═══════════════════════════════════════════════"
+echo ""
+
+cd "$MOBILE"
+
+echo "→ 1/5  dart format..."
+dart format --output=none --set-exit-if-changed .
+echo "   ✅"
+
+echo ""
+echo "→ 2/5  flutter analyze..."
+flutter analyze --no-fatal-infos
+echo "   ✅"
+
+echo ""
+echo "→ 3/5  dart_code_linter metrics..."
+dart run dart_code_linter:metrics analyze lib > /tmp/dcl-output.txt 2>&1 || true
+if grep -q "ALARM" /tmp/dcl-output.txt; then
+  cat /tmp/dcl-output.txt
+  echo ""
+  echo "   ✋  ALARM-level violations found — fix before push"
+  exit 1
+fi
+echo "   ✅"
+
+echo ""
+echo "→ 4/5  dart_code_linter unused code..."
+dart run dart_code_linter:metrics check-unused-code lib || true
+echo "   ✅"
+
+echo ""
+echo "→ 5/5  flutter test..."
+flutter test
+echo "   ✅"
+
+echo ""
+echo "═══════════════════════════════════════════════"
+echo "  All quality gates passed!                   "
+echo "═══════════════════════════════════════════════"
+echo ""

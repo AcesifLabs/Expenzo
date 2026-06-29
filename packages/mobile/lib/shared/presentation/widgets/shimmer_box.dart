@@ -3,10 +3,6 @@ import 'package:shimmer/shimmer.dart';
 import '../../../core/theme/app_colors.dart';
 
 class ShimmerBox extends StatelessWidget {
-  final Widget child;
-
-  const ShimmerBox({super.key, required this.child});
-
   static Widget circle({Key? key, required double size}) {
     return Container(
       key: key,
@@ -51,6 +47,10 @@ class ShimmerBox extends StatelessWidget {
       ),
     );
   }
+
+  final Widget child;
+
+  const ShimmerBox({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {

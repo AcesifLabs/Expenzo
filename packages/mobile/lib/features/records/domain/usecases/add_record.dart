@@ -15,8 +15,11 @@ class AddRecord extends UseCase<Record, Record> {
   Future<Either<Failure, Record>> call(Record record) async {
     final result = await repository.addRecord(record);
 
-    if (result.isRight() && record.categoryId != null) {
-      await categoryRepository.incrementUsageCount(record.categoryId!);
+    if (result.isRight()) {
+      final categoryId = record.categoryId;
+      if (categoryId != null) {
+        await categoryRepository.incrementUsageCount(categoryId);
+      }
     }
 
     return result;

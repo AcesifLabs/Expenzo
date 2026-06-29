@@ -1,7 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-enum SourceType { sms, email, both }
-
 class ParsingRule extends Equatable {
   final String id;
   final String name;
@@ -14,6 +12,21 @@ class ParsingRule extends Equatable {
   final int priority;
   final DateTime createdAt;
   final DateTime updatedAt;
+
+  @override
+  List<Object?> get props => [
+    id,
+    name,
+    triggerWords,
+    amountPattern,
+    datePattern,
+    categoryId,
+    sourceType,
+    isEnabled,
+    priority,
+    createdAt,
+    updatedAt,
+  ];
 
   const ParsingRule({
     required this.id,
@@ -43,37 +56,27 @@ class ParsingRule extends Equatable {
     DateTime? updatedAt,
   }) {
     return ParsingRule(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      triggerWords: triggerWords ?? this.triggerWords,
-      amountPattern: amountPattern ?? this.amountPattern,
-      datePattern: datePattern ?? this.datePattern,
-      categoryId: categoryId ?? this.categoryId,
-      sourceType: sourceType ?? this.sourceType,
-      isEnabled: isEnabled ?? this.isEnabled,
-      priority: priority ?? this.priority,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
+      id: _v(id, this.id),
+      name: _v(name, this.name),
+      triggerWords: _v(triggerWords, this.triggerWords),
+      amountPattern: _v(amountPattern, this.amountPattern),
+      datePattern: _v(datePattern, this.datePattern),
+      categoryId: _v(categoryId, this.categoryId),
+      sourceType: _v(sourceType, this.sourceType),
+      isEnabled: _v(isEnabled, this.isEnabled),
+      priority: _v(priority, this.priority),
+      createdAt: _v(createdAt, this.createdAt),
+      updatedAt: _v(updatedAt, this.updatedAt),
     );
   }
 
   bool matchesTriggerWord(String text) {
     final lowerText = text.toLowerCase();
+
     return triggerWords.any((word) => lowerText.contains(word.toLowerCase()));
   }
 
-  @override
-  List<Object?> get props => [
-    id,
-    name,
-    triggerWords,
-    amountPattern,
-    datePattern,
-    categoryId,
-    sourceType,
-    isEnabled,
-    priority,
-    createdAt,
-    updatedAt,
-  ];
+  static T _v<T>(T? value, T defaultValue) => value ?? defaultValue;
 }
+
+enum SourceType { sms, email, both }

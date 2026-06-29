@@ -23,11 +23,8 @@ class _NumericKeypadState extends State<NumericKeypad> {
   Timer? _backspaceTimer;
   Timer? _initialDelayTimer;
 
-  @override
-  void dispose() {
-    _cancelBackspaceTimers();
-    super.dispose();
-  }
+  static TextStyle _keypadTextStyle(Color color) =>
+      TextStyle(fontSize: 22, fontWeight: FontWeight.w500, color: color);
 
   void _cancelBackspaceTimers() {
     _initialDelayTimer?.cancel();
@@ -36,114 +33,91 @@ class _NumericKeypadState extends State<NumericKeypad> {
     _backspaceTimer = null;
   }
 
+  void _onInitialDelayComplete() {
+    _backspaceTimer = Timer.periodic(
+      const Duration(milliseconds: 100),
+      (_) => widget.onBackspace(),
+    );
+  }
+
   void _onBackspaceLongPressStart(LongPressStartDetails _) {
     _cancelBackspaceTimers();
     widget.onBackspace();
-    _initialDelayTimer = Timer(const Duration(milliseconds: 300), () {
-      _backspaceTimer = Timer.periodic(
-        const Duration(milliseconds: 100),
-        (_) => widget.onBackspace(),
-      );
-    });
+    _initialDelayTimer = Timer(
+      const Duration(milliseconds: 300),
+      _onInitialDelayComplete,
+    );
   }
 
   void _onBackspaceLongPressEnd(LongPressEndDetails _) {
     _cancelBackspaceTimers();
   }
 
+  Widget _buildKeypadRow(List<Widget> buttons) {
+    return Row(children: buttons);
+  }
+
+  KeypadButton _buildDigitButton(
+    String digit,
+    TextStyle style,
+    Color btnColor,
+  ) {
+    return KeypadButton(
+      color: btnColor,
+      onTap: () => widget.onDigit(digit),
+      child: Text(digit, style: style),
+    );
+  }
+
+  KeypadButton _buildBackspaceButton(Color btnColor, Color txtColor) {
+    return KeypadButton(
+      color: btnColor,
+      onTap: widget.onBackspace,
+      onLongPressStart: _onBackspaceLongPressStart,
+      onLongPressEnd: _onBackspaceLongPressEnd,
+      onLongPressCancel: _cancelBackspaceTimers,
+      child: Icon(PiconsLight.backspace, color: txtColor, size: 22),
+    );
+  }
+
+  @override
+  void dispose() {
+    _cancelBackspaceTimers();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final btnColor = widget.color.onSurface.withAlpha(12);
     final txtColor = widget.color.onSurface;
+    final style = _keypadTextStyle(txtColor);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         children: [
-          Row(
-            children: [
-              KeypadButton(
-                color: btnColor,
-                onTap: () => widget.onDigit('1'),
-                child: Text('1', style: _keypadTextStyle(txtColor)),
-              ),
-              KeypadButton(
-                color: btnColor,
-                onTap: () => widget.onDigit('2'),
-                child: Text('2', style: _keypadTextStyle(txtColor)),
-              ),
-              KeypadButton(
-                color: btnColor,
-                onTap: () => widget.onDigit('3'),
-                child: Text('3', style: _keypadTextStyle(txtColor)),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              KeypadButton(
-                color: btnColor,
-                onTap: () => widget.onDigit('4'),
-                child: Text('4', style: _keypadTextStyle(txtColor)),
-              ),
-              KeypadButton(
-                color: btnColor,
-                onTap: () => widget.onDigit('5'),
-                child: Text('5', style: _keypadTextStyle(txtColor)),
-              ),
-              KeypadButton(
-                color: btnColor,
-                onTap: () => widget.onDigit('6'),
-                child: Text('6', style: _keypadTextStyle(txtColor)),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              KeypadButton(
-                color: btnColor,
-                onTap: () => widget.onDigit('7'),
-                child: Text('7', style: _keypadTextStyle(txtColor)),
-              ),
-              KeypadButton(
-                color: btnColor,
-                onTap: () => widget.onDigit('8'),
-                child: Text('8', style: _keypadTextStyle(txtColor)),
-              ),
-              KeypadButton(
-                color: btnColor,
-                onTap: () => widget.onDigit('9'),
-                child: Text('9', style: _keypadTextStyle(txtColor)),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              KeypadButton(
-                color: btnColor,
-                onTap: () => widget.onDigit('.'),
-                child: Text('.', style: _keypadTextStyle(txtColor)),
-              ),
-              KeypadButton(
-                color: btnColor,
-                onTap: () => widget.onDigit('0'),
-                child: Text('0', style: _keypadTextStyle(txtColor)),
-              ),
-              KeypadButton(
-                color: btnColor,
-                onTap: widget.onBackspace,
-                onLongPressStart: _onBackspaceLongPressStart,
-                onLongPressEnd: _onBackspaceLongPressEnd,
-                onLongPressCancel: _cancelBackspaceTimers,
-                child: Icon(PiconsLight.backspace, color: txtColor, size: 22),
-              ),
-            ],
-          ),
+          _buildKeypadRow([
+            _buildDigitButton('1', style, btnColor),
+            _buildDigitButton('2', style, btnColor),
+            _buildDigitButton('3', style, btnColor),
+          ]),
+          _buildKeypadRow([
+            _buildDigitButton('4', style, btnColor),
+            _buildDigitButton('5', style, btnColor),
+            _buildDigitButton('6', style, btnColor),
+          ]),
+          _buildKeypadRow([
+            _buildDigitButton('7', style, btnColor),
+            _buildDigitButton('8', style, btnColor),
+            _buildDigitButton('9', style, btnColor),
+          ]),
+          _buildKeypadRow([
+            _buildDigitButton('.', style, btnColor),
+            _buildDigitButton('0', style, btnColor),
+            _buildBackspaceButton(btnColor, txtColor),
+          ]),
         ],
       ),
     );
   }
-
-  static TextStyle _keypadTextStyle(Color color) =>
-      TextStyle(fontSize: 22, fontWeight: FontWeight.w500, color: color);
 }

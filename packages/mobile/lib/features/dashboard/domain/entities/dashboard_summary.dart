@@ -10,16 +10,6 @@ class DashboardSummary extends Equatable {
   final List<CategoryAmount> categoryBreakdown;
   final List<Record> recentTransactions;
 
-  const DashboardSummary({
-    required this.totalIncome,
-    required this.totalExpense,
-    required this.totalSpent,
-    required this.previousPeriodTotal,
-    required this.percentChange,
-    required this.categoryBreakdown,
-    required this.recentTransactions,
-  });
-
   double get totalBalance => totalIncome - totalExpense;
 
   bool get isIncreased => percentChange > 0;
@@ -36,6 +26,16 @@ class DashboardSummary extends Equatable {
     categoryBreakdown,
     recentTransactions,
   ];
+
+  const DashboardSummary({
+    required this.totalIncome,
+    required this.totalExpense,
+    required this.totalSpent,
+    required this.previousPeriodTotal,
+    required this.percentChange,
+    required this.categoryBreakdown,
+    required this.recentTransactions,
+  });
 }
 
 class CategoryAmount extends Equatable {
@@ -45,14 +45,6 @@ class CategoryAmount extends Equatable {
   final double amount;
   final double percentage;
 
-  const CategoryAmount({
-    required this.categoryId,
-    required this.emoji,
-    required this.categoryName,
-    required this.amount,
-    required this.percentage,
-  });
-
   @override
   List<Object?> get props => [
     categoryId,
@@ -61,4 +53,12 @@ class CategoryAmount extends Equatable {
     amount,
     percentage,
   ];
+
+  const CategoryAmount({
+    required this.categoryId,
+    required this.emoji,
+    required this.categoryName,
+    required this.amount,
+    required this.percentage,
+  });
 }

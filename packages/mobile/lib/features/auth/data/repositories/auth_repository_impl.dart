@@ -27,34 +27,16 @@ class AuthRepositoryImpl implements AuthRepository {
           e.error is SocketException) {
         return 'Unable to connect. Please check your internet connection and try again.';
       }
+
       return 'Something went wrong on our end. Please try again later.';
     }
 
     if (e is fb.FirebaseAuthException) {
-      switch (e.code) {
-        case 'user-cancelled':
-        case 'cancelled':
-          return 'Sign-in was cancelled.';
-        case 'network-request-failed':
-          return 'Network error. Please check your connection and try again.';
-        case 'too-many-requests':
-          return 'Too many attempts. Please try again later.';
-        default:
-          return 'Authentication failed. Please try again.';
-      }
+      return _mapFirebaseAuthException(e);
     }
 
     if (e is PlatformException) {
-      if (e.code == 'network_error' || e.code == 'network-error') {
-        return 'Network error. Please check your connection and try again.';
-      }
-      if (e.code == 'sign_in_canceled' || e.code == 'sign_in_failed') {
-        return 'Sign-in was cancelled.';
-      }
-      debugPrint(
-        'AuthRepositoryImpl: Unhandled PlatformException code: ${e.code}',
-      );
-      return 'Authentication failed. Please try again.';
+      return _mapPlatformException(e);
     }
 
     if (e is TimeoutException) {
@@ -62,6 +44,7 @@ class AuthRepositoryImpl implements AuthRepository {
     }
 
     debugPrint('AuthRepositoryImpl: Unmapped exception type: ${e.runtimeType}');
+
     return 'Something went wrong. Please try again.';
   }
 
@@ -71,12 +54,15 @@ class AuthRepositoryImpl implements AuthRepository {
       debugPrint('AuthRepositoryImpl: signInWithGoogle called');
       final user = await remoteDatasource.signInWithGoogle();
       debugPrint('AuthRepositoryImpl: signInWithGoogle success, user: $user');
+
       return Right(user);
     } on AuthException catch (e) {
       debugPrint('AuthRepositoryImpl: AuthException: ${e.message}');
+
       return Left(e.toFailure());
     } catch (e, stackTrace) {
       debugPrint('AuthRepositoryImpl: Exception: $e\n$stackTrace');
+
       return Left(AuthFailure(message: mapExceptionToMessage(e)));
     }
   }
@@ -85,6 +71,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<AuthFailure, Unit>> signOut() async {
     try {
       await remoteDatasource.signOut();
+
       return const Right(unit);
     } on AuthException catch (e) {
       return Left(e.toFailure());
@@ -97,6 +84,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<AuthFailure, User?>> getCurrentUser() async {
     try {
       final user = await remoteDatasource.getCurrentUser();
+
       return Right(user);
     } on AuthException catch (e) {
       return Left(e.toFailure());
@@ -109,6 +97,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<AuthFailure, bool>> isSignedIn() async {
     try {
       final isSignedIn = await remoteDatasource.isSignedIn();
+
       return Right(isSignedIn);
     } catch (e) {
       return Left(AuthFailure(message: mapExceptionToMessage(e)));
@@ -119,6 +108,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<AuthFailure, Unit>> deleteAccount() async {
     try {
       await remoteDatasource.deleteAccount();
+
       return const Right(unit);
     } on AuthException catch (e) {
       return Left(e.toFailure());
@@ -131,9 +121,40 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<AuthFailure, bool>> hasGmailScope() async {
     try {
       final hasScope = await remoteDatasource.hasGmailScope();
+
       return Right(hasScope);
     } catch (e) {
       return Left(AuthFailure(message: mapExceptionToMessage(e)));
     }
+  }
+
+  static String _mapFirebaseAuthException(fb.FirebaseAuthException e) {
+    switch (e.code) {
+      case 'user-cancelled':
+      case 'cancelled':
+        return 'Sign-in was cancelled.';
+      case 'network-request-failed':
+        return 'Network error. Please check your connection and try again.';
+      case 'too-many-requests':
+        return 'Too many attempts. Please try again later.';
+      default:
+        return 'Authentication failed. Please try again.';
+    }
+  }
+
+  static String _mapPlatformException(PlatformException e) {
+    if (e.code == 'network_error' || e.code == 'network-error') {
+      return 'Network error. Please check your connection and try again.';
+    }
+
+    if (e.code == 'sign_in_canceled' || e.code == 'sign_in_failed') {
+      return 'Sign-in was cancelled.';
+    }
+
+    debugPrint(
+      'AuthRepositoryImpl: Unhandled PlatformException code: ${e.code}',
+    );
+
+    return 'Authentication failed. Please try again.';
   }
 }

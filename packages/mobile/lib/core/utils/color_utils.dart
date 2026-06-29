@@ -6,6 +6,7 @@ class ColorUtils {
   static Color fromHex(String hex, {Color fallback = const Color(0xFF5A7863)}) {
     try {
       final sanitized = hex.replaceFirst('#', '');
+
       return Color(int.parse('0xFF$sanitized'));
     } catch (_) {
       return fallback;

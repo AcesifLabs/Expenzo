@@ -27,48 +27,15 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
         return [];
       }
 
-      String query = '''
-        SELECT r.*, expense_fts.description as fts_description
-        FROM records r
-        INNER JOIN expense_fts ON expense_fts.expense_id = r.id
-      ''';
-
       final conditions = <String>[];
-      final args = <dynamic>[];
+      final args = <Object>[];
 
-      if (filters.query != null && filters.query!.isNotEmpty) {
-        final ftsQuery = '"${filters.query!}"*';
-        conditions.add('expense_fts.description MATCH ?');
-        args.add(ftsQuery);
-      }
+      _addQueryCondition(filters, conditions, args);
+      _addCategoryCondition(filters, conditions, args);
+      _addDateRangeCondition(filters, conditions, args);
+      _addAmountConditions(filters, conditions, args);
 
-      if (filters.categoryId != null) {
-        conditions.add('r.category_id = ?');
-        args.add(filters.categoryId);
-      }
-
-      if (filters.dateRange != null) {
-        // Drift stores dateTime() as unix seconds; convert from milliseconds.
-        conditions.add('r.date >= ? AND r.date <= ?');
-        args.add(filters.dateRange!.start.millisecondsSinceEpoch ~/ 1000);
-        args.add(filters.dateRange!.end.millisecondsSinceEpoch ~/ 1000);
-      }
-
-      if (filters.minAmount != null) {
-        conditions.add('r.amount >= ?');
-        args.add(filters.minAmount);
-      }
-
-      if (filters.maxAmount != null) {
-        conditions.add('r.amount <= ?');
-        args.add(filters.maxAmount);
-      }
-
-      if (conditions.isNotEmpty) {
-        query += ' WHERE ${conditions.join(' AND ')}';
-      }
-
-      query += ' ORDER BY r.date DESC';
+      final query = _buildQuery(conditions);
 
       final result = await db
           .customSelect(query, variables: args.map((a) => Variable(a)).toList())
@@ -77,14 +44,7 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
       return result.map((row) {
         return SearchResult(
           record: _mapToRecord(row),
-          relevanceScore: filters.query != null
-              ? (row.data['fts_description'] as String?)
-                        ?.split(' ')
-                        .where((word) => word.contains(filters.query!))
-                        .length
-                        .toDouble() ??
-                    0
-              : null,
+          relevanceScore: _computeRelevanceScore(row.data, filters.query),
         );
       }).toList();
     } catch (e) {
@@ -120,7 +80,6 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
     try {
       await db.customStatement('DELETE FROM expense_fts');
 
-      // Single INSERT...SELECT — no per-row round-trips
       await db.customStatement('''
         INSERT INTO expense_fts (expense_id, description)
         SELECT id, description FROM records
@@ -130,7 +89,90 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
     }
   }
 
-  /// SQLite may return whole-number floats as int; coerce safely.
+  String _buildQuery(List<String> conditions) {
+    String query = '''
+      SELECT r.*, expense_fts.description as fts_description
+      FROM records r
+      INNER JOIN expense_fts ON expense_fts.expense_id = r.id
+    ''';
+
+    if (conditions.isNotEmpty) {
+      query += ' WHERE ${conditions.join(' AND ')}';
+    }
+
+    query += ' ORDER BY r.date DESC';
+
+    return query;
+  }
+
+  void _addQueryCondition(
+    SearchFilters filters,
+    List<String> conditions,
+    List<Object> args,
+  ) {
+    final query = filters.query;
+    if (query != null && query.isNotEmpty) {
+      conditions.add('expense_fts.description MATCH ?');
+      args.add('"$query"*');
+    }
+  }
+
+  void _addCategoryCondition(
+    SearchFilters filters,
+    List<String> conditions,
+    List<Object> args,
+  ) {
+    final categoryId = filters.categoryId;
+    if (categoryId != null) {
+      conditions.add('r.category_id = ?');
+      args.add(categoryId);
+    }
+  }
+
+  void _addDateRangeCondition(
+    SearchFilters filters,
+    List<String> conditions,
+    List<Object> args,
+  ) {
+    final dateRange = filters.dateRange;
+    if (dateRange != null) {
+      conditions.add('r.date >= ? AND r.date <= ?');
+      args.add(dateRange.start.millisecondsSinceEpoch ~/ 1000);
+      args.add(dateRange.end.millisecondsSinceEpoch ~/ 1000);
+    }
+  }
+
+  void _addAmountConditions(
+    SearchFilters filters,
+    List<String> conditions,
+    List<Object> args,
+  ) {
+    final minAmount = filters.minAmount;
+    if (minAmount != null) {
+      conditions.add('r.amount >= ?');
+      args.add(minAmount);
+    }
+
+    final maxAmount = filters.maxAmount;
+    if (maxAmount != null) {
+      conditions.add('r.amount <= ?');
+      args.add(maxAmount);
+    }
+  }
+
+  double _computeRelevanceScore(Map<String, dynamic> row, String? query) {
+    if (query == null) return 0;
+
+    final description = row['fts_description'] as String?;
+    if (description == null) return 0;
+
+    return description
+        .split(' ')
+        .where((word) => word.contains(query))
+        .length
+        .toDouble();
+  }
+
   double _toDouble(Object value) {
     if (value is double) return value;
     if (value is int) return value.toDouble();
@@ -142,6 +184,7 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
 
   Record _mapToRecord(QueryRow row) {
     final data = row.data;
+
     return Record(
       id: data['id'] as String?,
       amount: _toDouble(data['amount']),
@@ -159,7 +202,6 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
     );
   }
 
-  /// Convert raw SQLite integer (Drift stores dateTime() as unix seconds).
   DateTime _intToDateTime(Object value) {
     if (value is int) return DateTime.fromMillisecondsSinceEpoch(value * 1000);
     if (value is DateTime) return value;

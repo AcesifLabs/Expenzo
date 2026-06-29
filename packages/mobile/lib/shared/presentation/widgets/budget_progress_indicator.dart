@@ -16,6 +16,7 @@ class BudgetProgressIndicator extends StatelessWidget {
     if (percentage >= 80) {
       return const Color(0xFFFF9F0A);
     }
+
     return colors.secondary;
   }
 

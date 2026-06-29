@@ -19,6 +19,7 @@ class ParsingRulesRepositoryImpl implements ParsingRulesRepository {
         sourceType: sourceType,
         isEnabled: isEnabled,
       );
+
       return Right(rules);
     } catch (e) {
       return Left(CacheFailure(message: e.toString()));
@@ -32,6 +33,7 @@ class ParsingRulesRepositoryImpl implements ParsingRulesRepository {
       if (rule == null) {
         return Left(CacheFailure(message: 'Rule not found'));
       }
+
       return Right(rule);
     } catch (e) {
       return Left(CacheFailure(message: e.toString()));
@@ -42,6 +44,7 @@ class ParsingRulesRepositoryImpl implements ParsingRulesRepository {
   Future<Either<Failure, ParsingRule>> createRule(ParsingRule rule) async {
     try {
       final createdRule = await localDatasource.createRule(rule);
+
       return Right(createdRule);
     } catch (e) {
       return Left(CacheFailure(message: e.toString()));
@@ -52,6 +55,7 @@ class ParsingRulesRepositoryImpl implements ParsingRulesRepository {
   Future<Either<Failure, ParsingRule>> updateRule(ParsingRule rule) async {
     try {
       final updatedRule = await localDatasource.updateRule(rule);
+
       return Right(updatedRule);
     } catch (e) {
       return Left(CacheFailure(message: e.toString()));
@@ -62,6 +66,7 @@ class ParsingRulesRepositoryImpl implements ParsingRulesRepository {
   Future<Either<Failure, Unit>> deleteRule(String id) async {
     try {
       await localDatasource.deleteRule(id);
+
       return const Right(unit);
     } catch (e) {
       return Left(CacheFailure(message: e.toString()));

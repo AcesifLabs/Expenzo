@@ -5,10 +5,10 @@ import '../../domain/entities/spending_insights.dart';
 import '../../domain/repositories/reports_repository.dart';
 
 abstract class ReportsState extends Equatable {
-  const ReportsState();
-
   @override
   List<Object?> get props => [];
+
+  const ReportsState();
 }
 
 class ReportsInitial extends ReportsState {}
@@ -23,15 +23,6 @@ class ReportsLoaded extends ReportsState {
   final DateTime endDate;
   final Granularity granularity;
 
-  const ReportsLoaded({
-    required this.spendingTrend,
-    required this.categoryBreakdown,
-    required this.insights,
-    required this.startDate,
-    required this.endDate,
-    required this.granularity,
-  });
-
   @override
   List<Object?> get props => [
     spendingTrend,
@@ -41,13 +32,22 @@ class ReportsLoaded extends ReportsState {
     endDate,
     granularity,
   ];
+
+  const ReportsLoaded({
+    required this.spendingTrend,
+    required this.categoryBreakdown,
+    required this.insights,
+    required this.startDate,
+    required this.endDate,
+    required this.granularity,
+  });
 }
 
 class ReportsError extends ReportsState {
   final String message;
 
-  const ReportsError({required this.message});
-
   @override
   List<Object?> get props => [message];
+
+  const ReportsError({required this.message});
 }

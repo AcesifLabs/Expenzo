@@ -28,6 +28,13 @@ class ParsingRulesBloc extends Bloc<ParsingRulesEvent, ParsingRulesState> {
     on<_RulesUpdated>(_onRulesUpdated);
   }
 
+  @override
+  Future<void> close() {
+    _rulesSubscription?.cancel();
+
+    return super.close();
+  }
+
   Future<void> _onLoadRules(
     LoadRules event,
     Emitter<ParsingRulesState> emit,
@@ -48,10 +55,7 @@ class ParsingRulesBloc extends Bloc<ParsingRulesEvent, ParsingRulesState> {
     );
   }
 
-  Future<void> _onRulesUpdated(
-    _RulesUpdated event,
-    Emitter<ParsingRulesState> emit,
-  ) async {
+  void _onRulesUpdated(_RulesUpdated event, Emitter<ParsingRulesState> emit) {
     emit(ParsingRulesLoaded(rules: event.rules));
   }
 
@@ -85,7 +89,7 @@ class ParsingRulesBloc extends Bloc<ParsingRulesEvent, ParsingRulesState> {
       final result = await updateRule(updatedRule);
       result.fold(
         (failure) => emit(ParsingRulesError(message: failure.message)),
-        (_) {},
+        (_) => null,
       );
     }
   }
@@ -97,21 +101,16 @@ class ParsingRulesBloc extends Bloc<ParsingRulesEvent, ParsingRulesState> {
     final result = await deleteRuleUseCase(event.ruleId);
     result.fold(
       (failure) => emit(ParsingRulesError(message: failure.message)),
-      (_) {},
+      (_) => null,
     );
-  }
-
-  @override
-  Future<void> close() {
-    _rulesSubscription?.cancel();
-    return super.close();
   }
 }
 
 class _RulesUpdated extends ParsingRulesEvent {
   final List<ParsingRule> rules;
-  const _RulesUpdated(this.rules);
 
   @override
   List<Object?> get props => [rules];
+
+  const _RulesUpdated(this.rules);
 }

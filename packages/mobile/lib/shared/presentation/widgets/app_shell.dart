@@ -13,7 +13,7 @@ import 'package:expense_tracker/features/records/presentation/widgets/new_transa
 import 'package:expense_tracker/features/budgets/presentation/pages/budget_list_page.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanner_event.dart';
-import 'package:expense_tracker/features/sms_parser/presentation/pages/sms_scan_page.dart';
+import 'package:expense_tracker/features/sms_parser/presentation/pages/sms_scan_results_page.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:expense_tracker/shared/presentation/widgets/sms_permission_gate.dart';
@@ -62,6 +62,115 @@ class _AppShellState extends State<AppShell> {
     }
   }
 
+  Widget _navIconTransition(Widget child, Animation<double> animation) {
+    return ScaleTransition(scale: animation, child: child);
+  }
+
+  Widget _buildBottomNav(ColorScheme colors, bool showFab) {
+    const leftCount = 2;
+    const rightCount = 2;
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        child: Container(
+          height: 72,
+          decoration: BoxDecoration(
+            color: colors.surface.withAlpha(240),
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(20),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
+            border: Border.all(color: colors.onSurface.withAlpha(10), width: 1),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              children: [
+                ...List.generate(leftCount, (i) => _navItem(i, colors)),
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  width: showFab ? 48 : 0,
+                ),
+                ...List.generate(
+                  rightCount,
+                  (i) => _navItem(leftCount + i, colors),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _navItem(int i, ColorScheme colors) {
+    final sel = _currentIndex == i;
+    final mutedColor = colors.onSurface.withAlpha(120);
+
+    return Expanded(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => setState(() => _currentIndex = i),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                transitionBuilder: _navIconTransition,
+                child: Icon(
+                  _navIcon(i, fill: sel),
+                  key: ValueKey('nav_icon_${i}_$sel'),
+                  color: sel ? colors.primary : mutedColor,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(height: 2),
+              AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 200),
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: sel ? FontWeight.w600 : FontWeight.w400,
+                  color: sel ? colors.primary : mutedColor,
+                ),
+                child: Text(_labels[i]),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _onFabPressed(BuildContext context) {
+    final now = DateTime.now();
+    final lastPress = _lastFabPress;
+    if (lastPress != null &&
+        now.difference(lastPress) < const Duration(seconds: 1)) {
+      return;
+    }
+    _lastFabPress = now;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => MultiBlocProvider(
+        providers: [
+          BlocProvider.value(value: context.read<RecordBloc>()),
+          BlocProvider.value(value: context.read<CategoryBloc>()),
+        ],
+        child: const NewTransactionSheet(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
@@ -94,112 +203,6 @@ class _AppShellState extends State<AppShell> {
       bottomNavigationBar: _buildBottomNav(colors, showFab),
     );
   }
-
-  Widget _buildBottomNav(ColorScheme colors, bool showFab) {
-    final leftCount = 2;
-    final rightCount = 2;
-
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        child: Container(
-          height: 72,
-          decoration: BoxDecoration(
-            color: colors.surface.withAlpha(240),
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withAlpha(20),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              ),
-            ],
-            border: Border.all(color: colors.onSurface.withAlpha(10), width: 1),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Row(
-              children: [
-                ...List.generate(leftCount, (i) => _navItem(i, colors)),
-
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                  width: showFab ? 48 : 0,
-                ),
-
-                ...List.generate(
-                  rightCount,
-                  (i) => _navItem(leftCount + i, colors),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _navItem(int i, ColorScheme colors) {
-    final sel = _currentIndex == i;
-    return Expanded(
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () => setState(() => _currentIndex = i),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
-                transitionBuilder: (child, animation) {
-                  return ScaleTransition(scale: animation, child: child);
-                },
-                child: Icon(
-                  _navIcon(i, fill: sel),
-                  key: ValueKey('nav_icon_${i}_$sel'),
-                  color: sel ? colors.primary : colors.onSurface.withAlpha(120),
-                  size: 24,
-                ),
-              ),
-              const SizedBox(height: 2),
-              AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 200),
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: sel ? FontWeight.w600 : FontWeight.w400,
-                  color: sel ? colors.primary : colors.onSurface.withAlpha(120),
-                ),
-                child: Text(_labels[i]),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _onFabPressed(BuildContext context) {
-    final now = DateTime.now();
-    if (_lastFabPress != null &&
-        now.difference(_lastFabPress!) < const Duration(seconds: 1)) {
-      return;
-    }
-    _lastFabPress = now;
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => MultiBlocProvider(
-        providers: [
-          BlocProvider.value(value: context.read<RecordBloc>()),
-          BlocProvider.value(value: context.read<CategoryBloc>()),
-        ],
-        child: const NewTransactionSheet(),
-      ),
-    );
-  }
 }
 
 class _ScanPageWithFab extends StatefulWidget {
@@ -219,6 +222,7 @@ class _ScanPageWithFabState extends State<_ScanPageWithFab> {
   Future<void> _loadInitialPermission() async {
     final status = await Permission.sms.status;
     if (!mounted) return;
+
     setState(() {
       _hasSmsPermission = status.isGranted;
     });
@@ -231,6 +235,36 @@ class _ScanPageWithFabState extends State<_ScanPageWithFab> {
     setState(() {
       _hasSmsPermission = granted;
     });
+  }
+
+  void _showScanOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) =>
+          _ScanOptionsSheet(parentContext: context, onTap: _onScanOptionTap),
+    );
+  }
+
+  void _onScanOptionTap(
+    BuildContext bottomSheetContext,
+    BuildContext context,
+    DateTime since,
+  ) {
+    Navigator.pop(bottomSheetContext);
+    _startScan(context, since);
+  }
+
+  void _startScan(BuildContext context, DateTime since) {
+    final smsBloc = di.getIt<SmsScannerBloc>();
+    smsBloc.add(StartScan(since: since, filterDuplicates: true));
+    Navigator.of(context).push(
+      SlidePageRoute(
+        builder: (_) => BlocProvider.value(
+          value: smsBloc,
+          child: const SmsScanResultsPage(),
+        ),
+      ),
+    );
   }
 
   @override
@@ -252,79 +286,65 @@ class _ScanPageWithFabState extends State<_ScanPageWithFab> {
           : const SizedBox.shrink(),
     );
   }
+}
 
-  void _showScanOptions(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (bottomSheetContext) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text(
-                  'Scan past SMS for records',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-              ListTile(
-                leading: Icon(PiconsRegular.clockCounterClockwise),
-                title: const Text('Last 7 Days'),
-                onTap: () {
-                  Navigator.pop(bottomSheetContext);
-                  _startScan(
-                    context,
-                    DateTime.now().subtract(const Duration(days: 7)),
-                  );
-                },
-              ),
-              ListTile(
-                leading: Icon(PiconsRegular.calendar),
-                title: const Text('Last 30 Days'),
-                onTap: () {
-                  Navigator.pop(bottomSheetContext);
-                  _startScan(
-                    context,
-                    DateTime.now().subtract(const Duration(days: 30)),
-                  );
-                },
-              ),
-              ListTile(
-                leading: Icon(PiconsRegular.calendarDots),
-                title: const Text('Last 3 Months'),
-                onTap: () {
-                  Navigator.pop(bottomSheetContext);
-                  _startScan(
-                    context,
-                    DateTime.now().subtract(const Duration(days: 90)),
-                  );
-                },
-              ),
-              ListTile(
-                leading: Icon(PiconsRegular.infinity),
-                title: const Text('All Time'),
-                onTap: () {
-                  Navigator.pop(bottomSheetContext);
-                  _startScan(context, DateTime(2000));
-                },
-              ),
-            ],
-          ),
-        );
-      },
+class _ScanOptionsSheet extends StatelessWidget {
+  final BuildContext parentContext;
+  final void Function(BuildContext, BuildContext, DateTime) onTap;
+
+  const _ScanOptionsSheet({required this.parentContext, required this.onTap});
+
+  Widget _scanOptionTile(
+    BuildContext context,
+    String label,
+    IconData icon,
+    DateTime since,
+  ) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(label),
+      onTap: () => onTap(context, parentContext, since),
     );
   }
 
-  void _startScan(BuildContext context, DateTime since) {
-    final smsBloc = di.getIt<SmsScannerBloc>();
-    smsBloc.add(StartScan(since: since, filterDuplicates: true));
-    Navigator.of(context).push(
-      SlidePageRoute(
-        builder: (_) => BlocProvider.value(
-          value: smsBloc,
-          child: const SmsScanResultsPage(),
-        ),
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text(
+              'Scan past SMS for records',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+          _scanOptionTile(
+            context,
+            'Last 7 Days',
+            PiconsRegular.clockCounterClockwise,
+            DateTime.now().subtract(const Duration(days: 7)),
+          ),
+          _scanOptionTile(
+            context,
+            'Last 30 Days',
+            PiconsRegular.calendar,
+            DateTime.now().subtract(const Duration(days: 30)),
+          ),
+          _scanOptionTile(
+            context,
+            'Last 3 Months',
+            PiconsRegular.calendarDots,
+            DateTime.now().subtract(const Duration(days: 90)),
+          ),
+          _scanOptionTile(
+            context,
+            'All Time',
+            PiconsRegular.infinity,
+            DateTime(2000),
+          ),
+        ],
       ),
     );
   }

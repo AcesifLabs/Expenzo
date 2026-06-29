@@ -1,10 +1,10 @@
 import 'package:equatable/equatable.dart';
 
 abstract class ContactSelectorEvent extends Equatable {
-  const ContactSelectorEvent();
-
   @override
   List<Object?> get props => [];
+
+  const ContactSelectorEvent();
 }
 
 class LoadContacts extends ContactSelectorEvent {}

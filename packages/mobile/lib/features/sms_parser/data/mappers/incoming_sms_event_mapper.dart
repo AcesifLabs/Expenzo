@@ -1,6 +1,6 @@
 import 'package:expense_tracker/features/sms_parser/domain/entities/incoming_sms_event.dart';
 
-IncomingSmsEvent mapIncomingSmsEventPayload(Map<dynamic, dynamic> payload) {
+IncomingSmsEvent mapIncomingSmsEventPayload(Map<Object?, Object?> payload) {
   final address = (payload['address'] ?? payload['sender'] ?? '').toString();
   final body = (payload['body'] ?? payload['message'] ?? '').toString();
 
@@ -15,7 +15,7 @@ IncomingSmsEvent mapIncomingSmsEventPayload(Map<dynamic, dynamic> payload) {
   return IncomingSmsEvent(address: address, body: body, receivedAt: receivedAt);
 }
 
-DateTime _resolveTimestamp(dynamic value) {
+DateTime _resolveTimestamp(Object? value) {
   if (value is int) {
     return DateTime.fromMillisecondsSinceEpoch(value, isUtc: true);
   }

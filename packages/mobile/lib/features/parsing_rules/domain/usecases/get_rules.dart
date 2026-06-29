@@ -4,13 +4,6 @@ import 'package:expense_tracker/core/error/usecase.dart';
 import '../entities/parsing_rule.dart';
 import '../repositories/parsing_rules_repository.dart';
 
-class GetRulesParams {
-  final SourceType? sourceType;
-  final bool? isEnabled;
-
-  GetRulesParams({this.sourceType, this.isEnabled});
-}
-
 class GetRules implements UseCase<List<ParsingRule>, GetRulesParams> {
   final ParsingRulesRepository repository;
 
@@ -23,4 +16,11 @@ class GetRules implements UseCase<List<ParsingRule>, GetRulesParams> {
       isEnabled: params.isEnabled,
     );
   }
+}
+
+class GetRulesParams {
+  final SourceType? sourceType;
+  final bool? isEnabled;
+
+  GetRulesParams({this.sourceType, this.isEnabled});
 }

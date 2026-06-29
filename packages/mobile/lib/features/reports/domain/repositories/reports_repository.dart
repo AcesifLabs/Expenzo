@@ -4,8 +4,6 @@ import '../entities/date_amount.dart';
 import '../entities/category_amount.dart';
 import '../entities/spending_insights.dart';
 
-enum Granularity { daily, weekly, monthly }
-
 abstract class ReportsRepository {
   Future<Either<Failure, List<DateAmount>>> getSpendingTrend({
     required DateTime startDate,
@@ -23,3 +21,5 @@ abstract class ReportsRepository {
     required DateTime endDate,
   });
 }
+
+enum Granularity { daily, weekly, monthly }

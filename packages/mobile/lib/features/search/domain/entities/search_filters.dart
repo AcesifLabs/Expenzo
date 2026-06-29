@@ -1,21 +1,27 @@
 import 'package:equatable/equatable.dart';
 
-class DateRange extends Equatable {
-  final DateTime start;
-  final DateTime end;
-
-  const DateRange({required this.start, required this.end});
-
-  @override
-  List<Object?> get props => [start, end];
-}
-
 class SearchFilters extends Equatable {
   final String? query;
   final int? categoryId;
   final DateRange? dateRange;
   final double? minAmount;
   final double? maxAmount;
+
+  @override
+  List<Object?> get props => [
+    query,
+    categoryId,
+    dateRange,
+    minAmount,
+    maxAmount,
+  ];
+
+  bool get isEmpty =>
+      query == null &&
+      categoryId == null &&
+      dateRange == null &&
+      minAmount == null &&
+      maxAmount == null;
 
   const SearchFilters({
     this.query,
@@ -38,27 +44,24 @@ class SearchFilters extends Equatable {
     bool clearMaxAmount = false,
   }) {
     return SearchFilters(
-      query: clearQuery ? null : (query ?? this.query),
-      categoryId: clearCategoryId ? null : (categoryId ?? this.categoryId),
-      dateRange: clearDateRange ? null : (dateRange ?? this.dateRange),
-      minAmount: clearMinAmount ? null : (minAmount ?? this.minAmount),
-      maxAmount: clearMaxAmount ? null : (maxAmount ?? this.maxAmount),
+      query: _copyWithField(query, this.query, clearQuery),
+      categoryId: _copyWithField(categoryId, this.categoryId, clearCategoryId),
+      dateRange: _copyWithField(dateRange, this.dateRange, clearDateRange),
+      minAmount: _copyWithField(minAmount, this.minAmount, clearMinAmount),
+      maxAmount: _copyWithField(maxAmount, this.maxAmount, clearMaxAmount),
     );
   }
 
-  bool get isEmpty =>
-      query == null &&
-      categoryId == null &&
-      dateRange == null &&
-      minAmount == null &&
-      maxAmount == null;
+  static T? _copyWithField<T>(T? value, T? current, bool clear) =>
+      clear ? null : (value ?? current);
+}
+
+class DateRange extends Equatable {
+  final DateTime start;
+  final DateTime end;
 
   @override
-  List<Object?> get props => [
-    query,
-    categoryId,
-    dateRange,
-    minAmount,
-    maxAmount,
-  ];
+  List<Object?> get props => [start, end];
+
+  const DateRange({required this.start, required this.end});
 }

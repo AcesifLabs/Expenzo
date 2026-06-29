@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
 import 'package:expense_tracker/features/message_templates/domain/entities/message_source.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/services/parsing_isolate_service.dart';
-import 'package:expense_tracker/features/parsing_rules/domain/usecases/evaluate_rules.dart';
+import 'package:expense_tracker/features/parsing_rules/domain/usecases/evaluate_rules_use_case.dart';
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
 import 'package:expense_tracker/features/records/domain/usecases/create_records_from_parsed_list.dart';
 import 'package:expense_tracker/features/sms_parser/domain/entities/incoming_sms_event.dart';
@@ -82,6 +82,7 @@ class RealtimeSmsProcessor {
 
   Future<void> _enqueueProcessing(IncomingSmsEvent event) {
     _processingChain = _processingChain.then((_) => _processEvent(event));
+
     return _processingChain;
   }
 
@@ -117,6 +118,7 @@ class RealtimeSmsProcessor {
       );
       final existingIds = existingIdsResult.fold((failure) {
         _logError('source-id dedupe failed', failure, null);
+
         return null;
       }, (ids) => ids);
 
@@ -135,6 +137,7 @@ class RealtimeSmsProcessor {
       await _createRecordsFromParsedList(nonDuplicateResults);
     } catch (error, stackTrace) {
       _logError('event processing failed', error, stackTrace);
+
       return;
     }
   }

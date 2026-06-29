@@ -6,7 +6,7 @@ import 'package:expense_tracker/features/parsing_rules/domain/repositories/parsi
 import 'package:expense_tracker/features/parsing_rules/data/datasources/parsing_rules_local_datasource.dart';
 import 'package:expense_tracker/features/parsing_rules/data/repositories/parsing_rules_repository_impl.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/services/parsing_isolate_service.dart';
-import 'package:expense_tracker/features/parsing_rules/domain/usecases/evaluate_rules.dart';
+import 'package:expense_tracker/features/parsing_rules/domain/usecases/evaluate_rules_use_case.dart';
 import 'package:expense_tracker/features/message_templates/domain/repositories/message_template_repository.dart';
 import 'package:expense_tracker/features/message_templates/data/datasources/message_template_local_datasource.dart';
 import 'package:expense_tracker/features/message_templates/data/repositories/message_template_repository_impl.dart';
@@ -28,6 +28,12 @@ import 'package:expense_tracker/features/records/domain/repositories/record_repo
 import 'package:expense_tracker/features/records/domain/usecases/create_records_from_parsed_list.dart';
 
 void initParsingModule(GetIt getIt) {
+  _initParsingInfrastructure(getIt);
+  _initMessageTemplates(getIt);
+  _initSmsParsing(getIt);
+}
+
+void _initParsingInfrastructure(GetIt getIt) {
   getIt.registerLazySingleton<ParsingIsolateService>(
     () => ParsingIsolateService(),
   );
@@ -42,7 +48,9 @@ void initParsingModule(GetIt getIt) {
       localDatasource: getIt<ParsingRulesLocalDatasource>(),
     ),
   );
+}
 
+void _initMessageTemplates(GetIt getIt) {
   getIt.registerLazySingleton<MessageTemplateLocalDatasource>(
     () => MessageTemplateLocalDatasourceImpl(getIt<MessageTemplateDao>()),
   );
@@ -80,7 +88,9 @@ void initParsingModule(GetIt getIt) {
       repository: getIt<MessageTemplateRepository>(),
     ),
   );
+}
 
+void _initSmsParsing(GetIt getIt) {
   getIt.registerLazySingleton(
     () => EvaluateRulesUseCase(
       getIt<ParsingRulesRepository>(),

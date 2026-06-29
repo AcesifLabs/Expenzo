@@ -1,6 +1,7 @@
 import 'package:drift/native.dart';
 import 'package:expense_tracker/core/database/app_database.dart';
 import 'package:expense_tracker/core/database/daos/record_dao.dart';
+import 'package:expense_tracker/features/records/domain/repositories/record_filter.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:drift/drift.dart';
 
@@ -59,8 +60,10 @@ void main() {
       );
 
       final results = await dao.getFilteredRecords(
-        startDate: now.subtract(const Duration(days: 1)),
-        endDate: now.add(const Duration(days: 1)),
+        RecordFilter(
+          startDate: now.subtract(const Duration(days: 1)),
+          endDate: now.add(const Duration(days: 1)),
+        ),
       );
 
       expect(results.length, 1);
@@ -90,7 +93,9 @@ void main() {
         type: 'OUT',
       );
 
-      final results = await dao.getFilteredRecords(categoryIds: [cat1, cat2]);
+      final results = await dao.getFilteredRecords(
+        RecordFilter(categoryIds: [cat1, cat2]),
+      );
 
       expect(results.length, 2);
       final ids = results.map((e) => e.id).toSet();
@@ -102,7 +107,9 @@ void main() {
       await insertRecord(id: '1', amount: 10, date: now, type: 'IN');
       await insertRecord(id: '2', amount: 20, date: now, type: 'OUT');
 
-      final results = await dao.getFilteredRecords(recordType: 'IN');
+      final results = await dao.getFilteredRecords(
+        RecordFilter(recordType: 'IN'),
+      );
 
       expect(results.length, 1);
       expect(results.first.id, '1');
@@ -139,10 +146,12 @@ void main() {
       );
 
       final results = await dao.getFilteredRecords(
-        startDate: now.subtract(const Duration(days: 1)),
-        endDate: now.add(const Duration(days: 1)),
-        categoryIds: [cat1],
-        recordType: 'IN',
+        RecordFilter(
+          startDate: now.subtract(const Duration(days: 1)),
+          endDate: now.add(const Duration(days: 1)),
+          categoryIds: [cat1],
+          recordType: 'IN',
+        ),
       );
 
       expect(results.length, 1);
@@ -153,7 +162,7 @@ void main() {
       await insertRecord(id: '1', amount: 10, date: now, type: 'IN');
       await insertRecord(id: '2', amount: 20, date: now, type: 'OUT');
 
-      final results = await dao.getFilteredRecords();
+      final results = await dao.getFilteredRecords(const RecordFilter());
 
       expect(results.length, 2);
     });

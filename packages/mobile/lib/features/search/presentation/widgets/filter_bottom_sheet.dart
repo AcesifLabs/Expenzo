@@ -4,15 +4,6 @@ import 'package:expense_tracker/core/theme/app_colors.dart';
 import '../../domain/entities/search_filters.dart';
 
 class FilterBottomSheet extends StatefulWidget {
-  final SearchFilters currentFilters;
-  final ValueChanged<SearchFilters> onFiltersChanged;
-
-  const FilterBottomSheet({
-    super.key,
-    required this.currentFilters,
-    required this.onFiltersChanged,
-  });
-
   static Future<void> show({
     required BuildContext context,
     required SearchFilters currentFilters,
@@ -31,12 +22,21 @@ class FilterBottomSheet extends StatefulWidget {
     );
   }
 
+  final SearchFilters currentFilters;
+  final ValueChanged<SearchFilters> onFiltersChanged;
+
+  const FilterBottomSheet({
+    super.key,
+    required this.currentFilters,
+    required this.onFiltersChanged,
+  });
+
   @override
   State<FilterBottomSheet> createState() => _FilterBottomSheetState();
 }
 
 class _FilterBottomSheetState extends State<FilterBottomSheet> {
-  late SearchFilters _filters;
+  SearchFilters _filters = const SearchFilters();
   final _minAmountController = TextEditingController();
   final _maxAmountController = TextEditingController();
   DateTime? _startDate;
@@ -56,65 +56,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     _endDate = _filters.dateRange?.end;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return DraggableScrollableSheet(
-      initialChildSize: 0.6,
-      minChildSize: 0.4,
-      maxChildSize: 0.9,
-      expand: false,
-      builder: (context, scrollController) {
-        return Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Filters',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  TextButton(
-                    onPressed: _clearAll,
-                    child: const Text('Clear All'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Expanded(
-                child: ListView(
-                  controller: scrollController,
-                  children: [
-                    _buildSectionTitle('Date Range'),
-                    _buildDateRangePickers(),
-                    const SizedBox(height: 24),
-                    _buildSectionTitle('Amount Range'),
-                    _buildAmountRange(),
-                    const SizedBox(height: 24),
-                    _buildApplyButton(),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -127,19 +68,20 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
 
   Widget _buildDateRangePickers() {
     final dateFormat = DateFormat('MMM dd, yyyy');
+    final buttonStyle = OutlinedButton.styleFrom(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+    );
+    final startDate = _startDate;
+    final endDate = _endDate;
 
     return Row(
       children: [
         Expanded(
           child: OutlinedButton(
             onPressed: () => _pickDate(true),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-            ),
+            style: buttonStyle,
             child: Text(
-              _startDate != null
-                  ? dateFormat.format(_startDate!)
-                  : 'Start Date',
+              startDate != null ? dateFormat.format(startDate) : 'Start Date',
             ),
           ),
         ),
@@ -150,11 +92,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
         Expanded(
           child: OutlinedButton(
             onPressed: () => _pickDate(false),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-            ),
+            style: buttonStyle,
             child: Text(
-              _endDate != null ? dateFormat.format(_endDate!) : 'End Date',
+              endDate != null ? dateFormat.format(endDate) : 'End Date',
             ),
           ),
         ),
@@ -243,8 +183,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
 
   void _applyFilters() {
     DateRange? dateRange;
-    if (_startDate != null && _endDate != null) {
-      dateRange = DateRange(start: _startDate!, end: _endDate!);
+    final startDate = _startDate;
+    final endDate = _endDate;
+    if (startDate != null && endDate != null) {
+      dateRange = DateRange(start: startDate, end: endDate);
     }
 
     final minAmount = _minAmountController.text.isNotEmpty
@@ -266,10 +208,78 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     Navigator.pop(context);
   }
 
+  Widget _buildDragHandle() {
+    return Center(
+      child: Container(
+        width: 40,
+        height: 4,
+        decoration: BoxDecoration(
+          color: Colors.grey[300],
+          borderRadius: BorderRadius.circular(2),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        const Text(
+          'Filters',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        TextButton(onPressed: _clearAll, child: const Text('Clear All')),
+      ],
+    );
+  }
+
+  Widget _buildFilterContent(ScrollController scrollController) {
+    return Expanded(
+      child: ListView(
+        controller: scrollController,
+        children: [
+          _buildSectionTitle('Date Range'),
+          _buildDateRangePickers(),
+          const SizedBox(height: 24),
+          _buildSectionTitle('Amount Range'),
+          _buildAmountRange(),
+          const SizedBox(height: 24),
+          _buildApplyButton(),
+        ],
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _minAmountController.dispose();
     _maxAmountController.dispose();
     super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      initialChildSize: 0.6,
+      minChildSize: 0.4,
+      maxChildSize: 0.9,
+      expand: false,
+      builder: (context, scrollController) {
+        return Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildDragHandle(),
+              const SizedBox(height: 20),
+              _buildHeader(),
+              const SizedBox(height: 20),
+              _buildFilterContent(scrollController),
+            ],
+          ),
+        );
+      },
+    );
   }
 }

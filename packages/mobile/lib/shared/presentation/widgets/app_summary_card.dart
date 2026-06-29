@@ -15,6 +15,8 @@ class AppSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final localBottomChild = bottomChild;
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -40,9 +42,9 @@ class AppSummaryCard extends StatelessWidget {
               color: colors.onSurface,
             ),
           ),
-          if (bottomChild != null) ...[
+          if (localBottomChild != null) ...[
             const SizedBox(height: 16),
-            bottomChild!,
+            localBottomChild,
           ],
         ],
       ),

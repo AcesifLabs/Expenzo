@@ -37,6 +37,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final user = result.fold((f) => null, (u) => u);
     if (user == null) {
       emit(const Unauthenticated());
+
       return;
     }
     await _onAuthSuccess(user, emit);
@@ -57,6 +58,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             isUserInitiated: true,
           ),
         );
+
         return;
       }
       await _onAuthSuccess(user, emit);
@@ -89,6 +91,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         final conflict = await engine.checkConflict();
         if (conflict == SyncConflictType.conflict) {
           emit(AuthSyncConflictPending(user));
+
           return;
         }
       } catch (e) {

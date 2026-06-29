@@ -1,26 +1,28 @@
+// ignore_for_file: prefer-match-file-name
+
 import 'package:equatable/equatable.dart';
 
 abstract class Failure extends Equatable {
   final String message;
   final String errorCode;
 
-  const Failure({required this.message, required this.errorCode});
-
   @override
   List<Object> get props => [message, errorCode];
+
+  const Failure({required this.message, required this.errorCode});
 }
 
 class ServerFailure extends Failure {
   final int? statusCode;
+
+  @override
+  List<Object> get props => [message, errorCode, statusCode ?? 0];
 
   const ServerFailure({
     required super.message,
     super.errorCode = 'SERVER_ERROR',
     this.statusCode,
   });
-
-  @override
-  List<Object> get props => [message, errorCode, statusCode ?? 0];
 }
 
 class CacheFailure extends Failure {

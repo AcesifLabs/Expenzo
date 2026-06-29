@@ -37,6 +37,7 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
         type: type?.dbValue,
         sortByUsage: sortByUsage,
       );
+
       return categories.map(_mapToEntity).toList();
     } catch (e) {
       throw CacheException(message: e.toString());
@@ -47,6 +48,7 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
   Future<Category?> getCategoryById(String id) async {
     try {
       final category = await categoryDao.getCategoryById(id);
+
       return category != null ? _mapToEntity(category) : null;
     } catch (e) {
       throw CacheException(message: e.toString());
@@ -70,6 +72,7 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
         updatedAt: Value(now),
       );
       await categoryDao.insertCategory(companion);
+
       return category.copyWith(id: id, createdAt: now, updatedAt: now);
     } catch (e) {
       throw CacheException(message: e.toString());
@@ -80,8 +83,13 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
   Future<Category> updateCategory(Category category) async {
     try {
       final now = DateTime.now().toUtc();
+      final id = category.id;
+      if (id == null) {
+        throw CacheException(message: 'Category has no id');
+      }
+
       final companion = db.CategoriesCompanion(
-        id: Value(category.id!),
+        id: Value(id),
         name: Value(category.name),
         emoji: Value(category.emoji),
         color: Value(category.color),
@@ -91,6 +99,7 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
         updatedAt: Value(now),
       );
       await categoryDao.updateCategory(companion);
+
       return category.copyWith(updatedAt: now);
     } catch (e) {
       throw CacheException(message: e.toString());
