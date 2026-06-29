@@ -13,6 +13,21 @@ class ParsedTransaction extends Equatable {
   final bool parseFailed;
   final String? parseError;
 
+  @override
+  List<Object?> get props => [
+    rawMessage,
+    amount,
+    date,
+    description,
+    categoryId,
+    sourceType,
+    sourceId,
+    confidenceScore,
+    matchedRuleId,
+    parseFailed,
+    parseError,
+  ];
+
   const ParsedTransaction({
     required this.rawMessage,
     this.amount,
@@ -30,19 +45,4 @@ class ParsedTransaction extends Equatable {
   bool isHighConfidence() => confidenceScore >= 0.9;
   bool isMediumConfidence() => confidenceScore >= 0.7;
   bool isLowConfidence() => confidenceScore < 0.7;
-
-  @override
-  List<Object?> get props => [
-    rawMessage,
-    amount,
-    date,
-    description,
-    categoryId,
-    sourceType,
-    sourceId,
-    confidenceScore,
-    matchedRuleId,
-    parseFailed,
-    parseError,
-  ];
 }

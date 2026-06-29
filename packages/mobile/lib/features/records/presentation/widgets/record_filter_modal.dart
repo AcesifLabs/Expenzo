@@ -53,11 +53,13 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
     super.initState();
     _startDate = widget.startDate;
     _endDate = widget.endDate;
-    if (widget.categoryIds != null) {
-      _selectedCategoryIds.addAll(widget.categoryIds!);
+    final categoryIds = widget.categoryIds;
+    if (categoryIds != null) {
+      _selectedCategoryIds.addAll(categoryIds);
     }
-    if (widget.recordType != null) {
-      _recordType = widget.recordType == RecordType.income.dbValue
+    final recordTypeDb = widget.recordType;
+    if (recordTypeDb != null) {
+      _recordType = recordTypeDb == RecordType.income.dbValue
           ? RecordType.income
           : RecordType.expense;
     }
@@ -66,12 +68,14 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
   }
 
   void _pickDateRange() async {
+    final startDate = _startDate;
+    final endDate = _endDate;
     final picked = await showDateRangePicker(
       context: context,
       firstDate: DateTime(2020),
       lastDate: DateTime.now().add(const Duration(days: 365)),
-      initialDateRange: _startDate != null && _endDate != null
-          ? DateTimeRange(start: _startDate!, end: _endDate!)
+      initialDateRange: startDate != null && endDate != null
+          ? DateTimeRange(start: startDate, end: endDate)
           : null,
     );
     if (picked != null) {
@@ -99,152 +103,170 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
     Navigator.of(context).pop();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+  void _onTypeSelected(RecordType? type) {
+    setState(() => _recordType = type);
+  }
 
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: Container(color: Colors.black.withAlpha(60)),
-            ),
-          ),
+  Color _chipLabelColor(ThemeData theme, bool selected) {
+    if (!selected) return theme.colorScheme.onSurface;
+
+    if (theme.brightness == Brightness.dark) return Colors.black;
+
+    return AppColors.onPrimary;
+  }
+
+  String _categoryLabel(int selectedCount, int totalCount) {
+    if (selectedCount == 0) return 'All categories';
+
+    if (selectedCount == totalCount) return 'All ($selectedCount)';
+
+    return '$selectedCount selected';
+  }
+
+  String _formatDate(DateTime dt) {
+    return MaterialLocalizations.of(context).formatMediumDate(dt);
+  }
+
+  void _onCategoryToggle(Category cat, bool? val, StateSetter setDialogState) {
+    setDialogState(() {
+      if (val == true) {
+        final catId = cat.id;
+        if (catId != null) _selectedCategoryIds.add(catId);
+      } else {
+        final catId = cat.id;
+        if (catId != null) _selectedCategoryIds.remove(catId);
+      }
+    });
+  }
+
+  Widget _buildBackdrop() {
+    return Positioned.fill(
+      child: GestureDetector(
+        onTap: () => Navigator.of(context).pop(),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(color: Colors.black.withAlpha(60)),
         ),
+      ),
+    );
+  }
 
-        Center(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: 360,
-              maxHeight: MediaQuery.of(context).size.height * 0.82,
-            ),
-            child: SingleChildScrollView(
-              child: Material(
-                color: theme.colorScheme.surface,
-                borderRadius: BorderRadius.circular(20),
-                elevation: 4,
-                clipBehavior: Clip.antiAlias,
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              'Filter Records',
-                              style: theme.textTheme.titleLarge,
-                            ),
-                          ),
-                          IconButton(
-                            icon: Icon(
-                              PiconsRegular.x,
-                              color: theme.colorScheme.onSurface.withAlpha(120),
-                            ),
-                            onPressed: () => Navigator.of(context).pop(),
-                            visualDensity: VisualDensity.compact,
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(
-                              minWidth: 36,
-                              minHeight: 36,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
+  Widget _buildHeader(ThemeData theme) {
+    final onSurface120 = theme.colorScheme.onSurface.withAlpha(120);
 
-                      Text('Date Range', style: theme.textTheme.titleSmall),
-                      const SizedBox(height: 8),
-                      InkWell(
-                        onTap: _pickDateRange,
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 14,
-                          ),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.surface,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: theme.colorScheme.outline.withAlpha(60),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                PiconsRegular.calendar,
-                                size: 20,
-                                color: theme.colorScheme.onSurface.withAlpha(
-                                  160,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Text(
-                                _startDate != null && _endDate != null
-                                    ? '${_formatDate(_startDate!)} - ${_formatDate(_endDate!)}'
-                                    : 'Select date range',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: _startDate != null
-                                      ? theme.colorScheme.onSurface
-                                      : theme.colorScheme.onSurface.withAlpha(
-                                          120,
-                                        ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Text('Filter Records', style: theme.textTheme.titleLarge),
+        ),
+        IconButton(
+          icon: Icon(PiconsRegular.x, color: onSurface120),
+          onPressed: () => Navigator.of(context).pop(),
+          visualDensity: VisualDensity.compact,
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+        ),
+      ],
+    );
+  }
 
-                      Text('Record Type', style: theme.textTheme.titleSmall),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          _buildTypeChip('All', null, theme),
-                          _buildTypeChip('Income', RecordType.income, theme),
-                          _buildTypeChip('Expense', RecordType.expense, theme),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
+  Widget _buildDateRangeSection(ThemeData theme) {
+    final sd = _startDate;
+    final ed = _endDate;
 
-                      Text('Categories', style: theme.textTheme.titleSmall),
-                      const SizedBox(height: 8),
-                      _buildCategoryDropdown(theme),
-                      const SizedBox(height: 24),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Date Range', style: theme.textTheme.titleSmall),
+        const SizedBox(height: 8),
+        _buildDateRangeBox(theme, sd, ed),
+      ],
+    );
+  }
 
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: _handleClear,
-                              child: const Text('Clear Filter'),
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: _handleApply,
-                              child: const Text('Apply Filter'),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+  Widget _buildDateRangeBox(ThemeData theme, DateTime? sd, DateTime? ed) {
+    final colorScheme = theme.colorScheme;
+    final onSurface = colorScheme.onSurface;
+    final onSurface120 = onSurface.withAlpha(120);
+    final onSurface160 = onSurface.withAlpha(160);
+    final outline60 = colorScheme.outline.withAlpha(60);
+
+    return InkWell(
+      onTap: _pickDateRange,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: outline60),
+        ),
+        child: Row(
+          children: [
+            Icon(PiconsRegular.calendar, size: 20, color: onSurface160),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                sd != null && ed != null
+                    ? '${_formatDate(sd)} - ${_formatDate(ed)}'
+                    : 'Select date range',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: sd != null ? colorScheme.onSurface : onSurface120,
                 ),
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTypeSection(ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Record Type', style: theme.textTheme.titleSmall),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _buildTypeChip('All', null, theme),
+            _buildTypeChip('Income', RecordType.income, theme),
+            _buildTypeChip('Expense', RecordType.expense, theme),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCategorySection(ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Categories', style: theme.textTheme.titleSmall),
+        const SizedBox(height: 8),
+        _buildCategoryDropdown(theme),
+      ],
+    );
+  }
+
+  Widget _buildActions() {
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton(
+            onPressed: _handleClear,
+            child: const Text('Clear Filter'),
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: ElevatedButton(
+            onPressed: _handleApply,
+            child: const Text('Apply Filter'),
           ),
         ),
       ],
@@ -253,20 +275,71 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
 
   Widget _buildTypeChip(String label, RecordType? type, ThemeData theme) {
     final selected = _recordType == type;
+
     return ChoiceChip(
       label: Text(label),
       selected: selected,
-      onSelected: (_) {
-        setState(() => _recordType = type);
-      },
+      onSelected: (_) => _onTypeSelected(type),
       selectedColor: theme.colorScheme.primary,
       labelStyle: TextStyle(
-        color: selected
-            ? (theme.brightness == Brightness.dark
-                  ? Colors.black
-                  : AppColors.onPrimary)
-            : theme.colorScheme.onSurface,
+        color: _chipLabelColor(theme, selected),
         fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+      ),
+    );
+  }
+
+  Widget _buildCategoryDropdownLoading() {
+    return const SizedBox(
+      height: 40,
+      child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+    );
+  }
+
+  Widget _buildCategoryDropdownEmpty(ThemeData theme) {
+    return Text(
+      'No categories',
+      style: theme.textTheme.bodySmall?.copyWith(
+        color: theme.colorScheme.onSurface.withAlpha(100),
+      ),
+    );
+  }
+
+  Widget _buildCategoryDropdownContent(
+    ThemeData theme,
+    List<Category> categories,
+    int selectedCount,
+  ) {
+    final csOnSurface = theme.colorScheme.onSurface;
+    final csOnSurface120 = csOnSurface.withAlpha(120);
+    final csOnSurface160 = csOnSurface.withAlpha(160);
+    final csOutline60 = theme.colorScheme.outline.withAlpha(60);
+    final label = _categoryLabel(selectedCount, categories.length);
+
+    return InkWell(
+      onTap: () => _showCategoryDialog(context, categories, theme),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: csOutline60),
+        ),
+        child: Row(
+          children: [
+            Icon(PiconsRegular.tag, size: 20, color: csOnSurface160),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                label,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: selectedCount > 0 ? csOnSurface : csOnSurface120,
+                ),
+              ),
+            ),
+            Icon(PiconsRegular.caretDown, size: 16, color: csOnSurface120),
+          ],
+        ),
       ),
     );
   }
@@ -274,69 +347,14 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
   Widget _buildCategoryDropdown(ThemeData theme) {
     return BlocBuilder<CategoryBloc, CategoryState>(
       builder: (context, state) {
-        if (state is! CategoryLoaded) {
-          return const SizedBox(
-            height: 40,
-            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
-          );
-        }
+        if (state is! CategoryLoaded) return _buildCategoryDropdownLoading();
 
         final categories = state.categories;
-        if (categories.isEmpty) {
-          return Text(
-            'No categories',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurface.withAlpha(100),
-            ),
-          );
-        }
+        if (categories.isEmpty) return _buildCategoryDropdownEmpty(theme);
 
         final selectedCount = _selectedCategoryIds.length;
-        final label = selectedCount == 0
-            ? 'All categories'
-            : selectedCount == categories.length
-            ? 'All ($selectedCount)'
-            : '$selectedCount selected';
 
-        return InkWell(
-          onTap: () => _showCategoryDialog(context, categories, theme),
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: theme.colorScheme.outline.withAlpha(60),
-              ),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  PiconsRegular.tag,
-                  size: 20,
-                  color: theme.colorScheme.onSurface.withAlpha(160),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    label,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: selectedCount > 0
-                          ? theme.colorScheme.onSurface
-                          : theme.colorScheme.onSurface.withAlpha(120),
-                    ),
-                  ),
-                ),
-                Icon(
-                  PiconsRegular.caretDown,
-                  size: 16,
-                  color: theme.colorScheme.onSurface.withAlpha(120),
-                ),
-              ],
-            ),
-          ),
-        );
+        return _buildCategoryDropdownContent(theme, categories, selectedCount);
       },
     );
   }
@@ -361,18 +379,11 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
                   itemBuilder: (_, i) {
                     final cat = categories[i];
                     final selected = _selectedCategoryIds.contains(cat.id);
+
                     return CheckboxListTile(
                       value: selected,
-                      onChanged: (val) {
-                        setState(() {
-                          if (val == true) {
-                            _selectedCategoryIds.add(cat.id!);
-                          } else {
-                            _selectedCategoryIds.remove(cat.id);
-                          }
-                        });
-                        setDialogState(() {});
-                      },
+                      onChanged: (val) =>
+                          _onCategoryToggle(cat, val, setDialogState),
                       dense: true,
                       visualDensity: VisualDensity.compact,
                       title: Row(
@@ -404,51 +415,108 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
     );
   }
 
-  String _formatDate(DateTime dt) {
-    return MaterialLocalizations.of(context).formatMediumDate(dt);
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final surface = theme.colorScheme.surface;
+
+    return Stack(
+      children: [
+        _buildBackdrop(),
+        Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: 360,
+              maxHeight: MediaQuery.of(context).size.height * 0.82,
+            ),
+            child: SingleChildScrollView(
+              child: Material(
+                color: surface,
+                borderRadius: BorderRadius.circular(20),
+                elevation: 4,
+                clipBehavior: Clip.antiAlias,
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildHeader(theme),
+                      const SizedBox(height: 24),
+                      _buildDateRangeSection(theme),
+                      const SizedBox(height: 24),
+                      _buildTypeSection(theme),
+                      const SizedBox(height: 24),
+                      _buildCategorySection(theme),
+                      const SizedBox(height: 24),
+                      _buildActions(),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 
-Future<void> showRecordFilterModal(
-  BuildContext context, {
-  required RecordBloc recordBloc,
-  required CategoryBloc categoryBloc,
-  DateTime? startDate,
-  DateTime? endDate,
-  List<String>? categoryIds,
-  String? recordType,
-  required void Function({
+class FilterModalParams {
+  final RecordBloc recordBloc;
+  final CategoryBloc categoryBloc;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final List<String>? categoryIds;
+  final String? recordType;
+  final void Function({
     DateTime? startDate,
     DateTime? endDate,
     List<String>? categoryIds,
     String? recordType,
   })
-  onApply,
-  required VoidCallback onClear,
-}) {
+  onApply;
+  final VoidCallback onClear;
+
+  const FilterModalParams({
+    required this.recordBloc,
+    required this.categoryBloc,
+    this.startDate,
+    this.endDate,
+    this.categoryIds,
+    this.recordType,
+    required this.onApply,
+    required this.onClear,
+  });
+}
+
+Future<void> showRecordFilterModal(
+  BuildContext context,
+  FilterModalParams params,
+) {
   return Navigator.of(context).push(
     PageRouteBuilder(
       opaque: false,
       barrierDismissible: false,
       transitionDuration: const Duration(milliseconds: 300),
       reverseTransitionDuration: const Duration(milliseconds: 250),
-      pageBuilder: (_, anim, _) {
+      pageBuilder: (_, anim, secondaryAnim) {
         return MultiBlocProvider(
           providers: [
-            BlocProvider.value(value: recordBloc),
-            BlocProvider.value(value: categoryBloc),
+            BlocProvider.value(value: params.recordBloc),
+            BlocProvider.value(value: params.categoryBloc),
           ],
           child: RecordFilterModal(
-            startDate: startDate,
-            endDate: endDate,
-            categoryIds: categoryIds,
-            recordType: recordType,
-            onApply: onApply,
-            onClear: onClear,
+            startDate: params.startDate,
+            endDate: params.endDate,
+            categoryIds: params.categoryIds,
+            recordType: params.recordType,
+            onApply: params.onApply,
+            onClear: params.onClear,
           ),
         );
       },
-      transitionsBuilder: (_, anim, _, child) {
+      transitionsBuilder: (_, anim, secondaryAnim, child) {
         return FadeTransition(opacity: anim, child: child);
       },
     ),

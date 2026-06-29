@@ -13,6 +13,21 @@ class ExpenseTemplate extends Equatable {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  @override
+  List<Object?> get props => [
+    id,
+    sourceId,
+    sampleMessage,
+    triggerWord,
+    amountPattern,
+    descriptionPattern,
+    datePattern,
+    categoryId,
+    selectedAmount,
+    createdAt,
+    updatedAt,
+  ];
+
   const ExpenseTemplate({
     required this.id,
     required this.sourceId,
@@ -28,45 +43,30 @@ class ExpenseTemplate extends Equatable {
   });
 
   ExpenseTemplate copyWith({
-    String? id,
-    String? sourceId,
-    String? sampleMessage,
-    String? triggerWord,
-    String? amountPattern,
+    required String id,
+    required String sourceId,
+    required String sampleMessage,
+    required String triggerWord,
+    required String amountPattern,
     String? descriptionPattern,
     String? datePattern,
     String? categoryId,
     String? selectedAmount,
-    DateTime? createdAt,
-    DateTime? updatedAt,
+    required DateTime createdAt,
+    required DateTime updatedAt,
   }) {
     return ExpenseTemplate(
-      id: id ?? this.id,
-      sourceId: sourceId ?? this.sourceId,
-      sampleMessage: sampleMessage ?? this.sampleMessage,
-      triggerWord: triggerWord ?? this.triggerWord,
-      amountPattern: amountPattern ?? this.amountPattern,
+      id: id,
+      sourceId: sourceId,
+      sampleMessage: sampleMessage,
+      triggerWord: triggerWord,
+      amountPattern: amountPattern,
       descriptionPattern: descriptionPattern ?? this.descriptionPattern,
       datePattern: datePattern ?? this.datePattern,
       categoryId: categoryId ?? this.categoryId,
       selectedAmount: selectedAmount ?? this.selectedAmount,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
     );
   }
-
-  @override
-  List<Object?> get props => [
-    id,
-    sourceId,
-    sampleMessage,
-    triggerWord,
-    amountPattern,
-    descriptionPattern,
-    datePattern,
-    categoryId,
-    selectedAmount,
-    createdAt,
-    updatedAt,
-  ];
 }

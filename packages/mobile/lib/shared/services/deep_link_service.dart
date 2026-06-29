@@ -2,17 +2,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
 
-enum DeepLinkPath {
-  budgets,
-  budgetDetail,
-  expenses,
-  expenseDetail,
-  scanSms,
-  scanEmail,
-  notifications,
-  recurring,
-  recurringDetail,
-  unknown,
+abstract class DeepLinkService {
+  Stream<DeepLink?> get onDeepLinkReceived;
+  Future<void> handleDeepLink(Uri uri);
+  void dispose();
 }
 
 class DeepLink {
@@ -23,25 +16,25 @@ class DeepLink {
   const DeepLink({required this.path, this.id, this.queryParams = const {}});
 }
 
-abstract class DeepLinkService {
-  Stream<DeepLink?> get onDeepLinkReceived;
-  Future<void> handleDeepLink(Uri uri);
-  void dispose();
-}
-
 class DeepLinkServiceImpl implements DeepLinkService {
   final _deepLinkController = StreamController<DeepLink?>.broadcast();
   StreamSubscription? _uriSubscription;
 
-  DeepLinkServiceImpl();
-
   @override
   Stream<DeepLink?> get onDeepLinkReceived => _deepLinkController.stream;
+
+  DeepLinkServiceImpl();
 
   @override
   Future<void> handleDeepLink(Uri uri) async {
     final deepLink = _parseUri(uri);
     _deepLinkController.add(deepLink);
+  }
+
+  @override
+  void dispose() {
+    _uriSubscription?.cancel();
+    _deepLinkController.close();
   }
 
   DeepLink _parseUri(Uri uri) {
@@ -51,7 +44,7 @@ class DeepLinkServiceImpl implements DeepLinkService {
       return const DeepLink(path: DeepLinkPath.unknown);
     }
 
-    switch (pathSegments[0]) {
+    switch (pathSegments.first) {
       case 'budgets':
         if (pathSegments.length > 1) {
           return DeepLink(
@@ -99,18 +92,23 @@ class DeepLinkServiceImpl implements DeepLinkService {
         return const DeepLink(path: DeepLinkPath.unknown);
     }
   }
-
-  @override
-  void dispose() {
-    _uriSubscription?.cancel();
-    _deepLinkController.close();
-  }
 }
 
 class DeepLinkHandler {
   final GlobalKey<NavigatorState> navigatorKey;
 
   DeepLinkHandler({required this.navigatorKey});
+}
 
-  void handleDeepLink(DeepLink deepLink) {}
+enum DeepLinkPath {
+  budgets,
+  budgetDetail,
+  expenses,
+  expenseDetail,
+  scanSms,
+  scanEmail,
+  notifications,
+  recurring,
+  recurringDetail,
+  unknown,
 }

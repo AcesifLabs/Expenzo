@@ -15,6 +15,8 @@ class AppSectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final localActionLabel = actionLabel;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
       child: Row(
@@ -28,11 +30,11 @@ class AppSectionHeader extends StatelessWidget {
               color: colors.onSurface,
             ),
           ),
-          if (actionLabel != null)
+          if (localActionLabel != null)
             GestureDetector(
               onTap: onAction,
               child: Text(
-                actionLabel!,
+                localActionLabel,
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,

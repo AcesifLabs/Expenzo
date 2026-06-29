@@ -13,6 +13,7 @@ class AppSettingsDao extends DatabaseAccessor<AppDatabase>
     final row = await (select(
       appSettings,
     )..where((t) => t.key.equals(key))).getSingleOrNull();
+
     return row?.value;
   }
 
@@ -28,6 +29,7 @@ class AppSettingsDao extends DatabaseAccessor<AppDatabase>
 
   Future<Map<String, String>> getAll() async {
     final rows = await select(appSettings).get();
+
     return {for (final r in rows) r.key: r.value};
   }
 }

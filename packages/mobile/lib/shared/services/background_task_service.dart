@@ -5,34 +5,37 @@ import 'notification_service.dart';
 
 const backgroundScanTask = 'background_sms_scan_task';
 
+Future<bool> _handleScanTask() async {
+  await di.initDependencies();
+
+  final scanSmsUseCase = di.getIt<ScanSmsUseCase>();
+  final since = DateTime.now().subtract(const Duration(hours: 24));
+  final result = await scanSmsUseCase(ScanSmsParams(since: since));
+
+  return result.fold((failure) => false, (transactions) {
+    if (transactions.isEmpty) return true;
+
+    final notificationService = di.getIt<NotificationService>();
+    notificationService.showNotification(
+      title: 'New Expenses Found',
+      body:
+          'Found ${transactions.length} new expenses from your messages. Tap to view and confirm.',
+    );
+
+    return true;
+  });
+}
+
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
-    if (task == backgroundScanTask) {
-      try {
-        await di.initDependencies();
+    if (task != backgroundScanTask) return true;
 
-        final scanSmsUseCase = di.getIt<ScanSmsUseCase>();
-
-        final since = DateTime.now().subtract(const Duration(hours: 24));
-        final result = await scanSmsUseCase(ScanSmsParams(since: since));
-
-        return result.fold((failure) => false, (transactions) async {
-          if (transactions.isNotEmpty) {
-            final notificationService = di.getIt<NotificationService>();
-            await notificationService.showNotification(
-              title: 'New Expenses Found',
-              body:
-                  'Found ${transactions.length} new expenses from your messages. Tap to view and confirm.',
-            );
-          }
-          return true;
-        });
-      } catch (e) {
-        return false;
-      }
+    try {
+      return await _handleScanTask();
+    } catch (e) {
+      return false;
     }
-    return true;
   });
 }
 

@@ -2,10 +2,10 @@ import 'package:equatable/equatable.dart';
 import '../../domain/entities/user_settings.dart';
 
 abstract class SettingsEvent extends Equatable {
-  const SettingsEvent();
-
   @override
   List<Object?> get props => [];
+
+  const SettingsEvent();
 }
 
 class LoadSettings extends SettingsEvent {
@@ -15,46 +15,46 @@ class LoadSettings extends SettingsEvent {
 class UpdateSettingsEvent extends SettingsEvent {
   final UserSettings settings;
 
-  const UpdateSettingsEvent(this.settings);
-
   @override
   List<Object?> get props => [settings];
+
+  const UpdateSettingsEvent(this.settings);
 }
 
 class UpdateCurrencySymbol extends SettingsEvent {
   final String currencySymbol;
 
-  const UpdateCurrencySymbol(this.currencySymbol);
-
   @override
   List<Object?> get props => [currencySymbol];
+
+  const UpdateCurrencySymbol(this.currencySymbol);
 }
 
 class UpdateEmailFetchLimit extends SettingsEvent {
   final int limit;
 
-  const UpdateEmailFetchLimit(this.limit);
-
   @override
   List<Object?> get props => [limit];
+
+  const UpdateEmailFetchLimit(this.limit);
 }
 
 class UpdateNotificationsEnabled extends SettingsEvent {
   final bool enabled;
 
-  const UpdateNotificationsEnabled(this.enabled);
-
   @override
   List<Object?> get props => [enabled];
+
+  const UpdateNotificationsEnabled(this.enabled);
 }
 
 class UpdateTheme extends SettingsEvent {
   final String theme;
 
-  const UpdateTheme(this.theme);
-
   @override
   List<Object?> get props => [theme];
+
+  const UpdateTheme(this.theme);
 }
 
 class DeleteAccountEvent extends SettingsEvent {

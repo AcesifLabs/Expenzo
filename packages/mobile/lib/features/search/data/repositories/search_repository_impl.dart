@@ -17,6 +17,7 @@ class SearchRepositoryImpl implements SearchRepository {
   ) async {
     try {
       final results = await localDatasource.searchRecords(filters);
+
       return Right(results);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));

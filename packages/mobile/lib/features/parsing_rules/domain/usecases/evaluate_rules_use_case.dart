@@ -2,7 +2,8 @@ import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
 import '../entities/parsed_transaction.dart';
-import '../entities/parsing_types.dart';
+import '../entities/evaluate_rules_params.dart';
+import '../entities/parsing_context.dart';
 import '../repositories/parsing_rules_repository.dart';
 import '../../../message_templates/domain/repositories/message_template_repository.dart';
 import '../services/rule_evaluator.dart';
@@ -46,6 +47,7 @@ class EvaluateRulesUseCase
     try {
       final context = await loadContext();
       final result = evaluateWithPreloadedContext(context, params);
+
       return Right(result);
     } catch (e) {
       return Left(CacheFailure(message: e.toString()));

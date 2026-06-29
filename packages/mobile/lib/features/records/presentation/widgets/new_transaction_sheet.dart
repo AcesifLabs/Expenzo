@@ -34,23 +34,6 @@ class NewTransactionSheet extends StatefulWidget {
 
 class _NewTransactionSheetState extends State<NewTransactionSheet>
     with TickerProviderStateMixin, TypewriterAnimationMixin {
-  late RecordType _type;
-  final _amountText = ValueNotifier<String>('');
-  final _noteCtrl = TextEditingController();
-  String? _selectedCategoryId;
-  List<Category> _categories = [];
-  bool _hasManuallyDeselected = false;
-
-  bool _labelError = false;
-  bool _categoryError = false;
-  bool _isSubmitting = false;
-
-  DateTime _selectedDate = DateTime.now();
-  bool _isRecurring = false;
-
-  late final AnimationController _glowController;
-  late final CurvedAnimation _glowCurve;
-
   static const _expensePlaceholders = [
     'Groceries',
     'Uber to office',
@@ -69,15 +52,30 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     'Investment dividend',
   ];
 
+  // ignore: avoid-late-keyword
+  late final AnimationController _glowController;
+  // ignore: avoid-late-keyword
+  late final CurvedAnimation _glowCurve;
+
+  RecordType _type = RecordType.expense;
+  final _amountText = ValueNotifier<String>('');
+  final _noteCtrl = TextEditingController();
+  String? _selectedCategoryId;
+  List<Category> _categories = [];
+  var _hasManuallyDeselected = false;
+  var _labelError = false;
+  var _categoryError = false;
+  var _isSubmitting = false;
+  var _selectedDate = DateTime.now();
+  var _isRecurring = false;
+
+  double get _parsedAmount => double.tryParse(_amountText.value) ?? 0;
+
   @override
   void initState() {
     super.initState();
-    _type = RecordType.expense;
     _loadCategories();
-
     initTypewriter(_expensePlaceholders);
-
-    _noteCtrl.addListener(_onNoteChanged);
 
     _glowController = AnimationController(
       vsync: this,
@@ -88,36 +86,28 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       curve: Curves.easeIn,
       reverseCurve: Curves.easeOut,
     );
-    _glowController.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        _glowController.reverse();
-      } else if (status == AnimationStatus.dismissed) {
-        setState(() {
-          _labelError = false;
-          _categoryError = false;
-        });
-      }
-    });
-
+    _glowController.addStatusListener(_onGlowStatus);
+    _noteCtrl.addListener(_onNoteChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) startTypewriter();
     });
   }
 
-  @override
-  void dispose() {
-    _noteCtrl.removeListener(_onNoteChanged);
-    _glowController.dispose();
-    _amountText.dispose();
-    _noteCtrl.dispose();
-    super.dispose();
+  void _onGlowStatus(AnimationStatus status) {
+    if (status == AnimationStatus.completed) {
+      _glowController.reverse();
+    } else if (status == AnimationStatus.dismissed) {
+      setState(() {
+        _labelError = false;
+        _categoryError = false;
+      });
+    }
   }
 
   void _onNoteChanged() {
     if (_labelError && _noteCtrl.text.trim().isNotEmpty) {
       setState(() => _labelError = false);
     }
-
     if (_noteCtrl.text.isNotEmpty && !isTypewriterPaused) {
       pauseTypewriter();
     } else if (_noteCtrl.text.isEmpty && isTypewriterPaused) {
@@ -140,6 +130,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     final accentColor = type == RecordType.expense
         ? colors.error
         : colors.primary;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -149,20 +140,28 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
         selectedId: _selectedCategoryId,
         type: type,
         accentColor: accentColor,
-        onAddNew: () {
-          final categoryBloc = context.read<CategoryBloc>();
-          Navigator.pop(ctx);
-          _addNewCategory(context, type, categoryBloc);
-        },
-        onSelect: (id) {
-          setState(() {
-            _selectedCategoryId = id;
-            _categoryError = false;
-          });
-          Navigator.pop(ctx);
-        },
+        onAddNew: _onAddNew(ctx, type),
+        onSelect: _onCategorySelect(ctx),
       ),
     );
+  }
+
+  VoidCallback _onAddNew(BuildContext ctx, RecordType type) {
+    return () {
+      final categoryBloc = context.read<CategoryBloc>();
+      Navigator.pop(ctx);
+      _addNewCategory(context, type, categoryBloc);
+    };
+  }
+
+  void Function(String) _onCategorySelect(BuildContext ctx) {
+    return (id) {
+      setState(() {
+        _selectedCategoryId = id;
+        _categoryError = false;
+      });
+      Navigator.pop(ctx);
+    };
   }
 
   Future<void> _addNewCategory(
@@ -170,7 +169,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     RecordType type,
     CategoryBloc categoryBloc,
   ) async {
-    final Category? created = await Navigator.push<Category>(
+    final created = await Navigator.push<Category>(
       context,
       SlidePageRoute(
         builder: (_) => BlocProvider.value(
@@ -182,26 +181,19 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     if (created != null && context.mounted) {
       setState(() {
         _selectedCategoryId = created.id;
-
         _categories = [created, ..._categories];
       });
     }
   }
 
   void _selectDefaultCategory(List<Category> categories) {
-    if (_selectedCategoryId != null) return;
-    if (_hasManuallyDeselected) return;
-    if (categories.isEmpty) return;
-
-    Category? generalCat;
-    for (final c in categories) {
-      if (c.name == 'General' && c.isDefault) {
-        generalCat = c;
-        break;
-      }
+    if (_selectedCategoryId != null ||
+        _hasManuallyDeselected ||
+        categories.isEmpty) {
+      return;
     }
 
-    final targetId = generalCat?.id ?? categories.first.id;
+    final targetId = _findDefaultCategoryId(categories);
     if (targetId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && _selectedCategoryId == null) {
@@ -209,6 +201,14 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
         }
       });
     }
+  }
+
+  String? _findDefaultCategoryId(List<Category> categories) {
+    for (final c in categories) {
+      if (c.name == 'General' && c.isDefault) return c.id;
+    }
+
+    return categories.first.id;
   }
 
   void _switchType(RecordType t) {
@@ -223,36 +223,32 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       _categoryError = false;
     });
     _loadCategories();
-
     initTypewriter(
       t == RecordType.expense ? _expensePlaceholders : _incomePlaceholders,
     );
-    if (!isTypewriterPaused) {
-      startTypewriter();
-    }
+    if (!isTypewriterPaused) startTypewriter();
   }
 
   void _onHorizontalSwipe(DragEndDetails details) {
     final velocity = details.primaryVelocity;
-    if (velocity == null) return;
-    if (velocity.abs() < 100) return;
+    if (velocity == null || velocity.abs() < 100) return;
 
     final targetType = velocity > 0 ? RecordType.expense : RecordType.income;
-
-    if (targetType != _type) {
-      _switchType(targetType);
-    }
+    if (targetType != _type) _switchType(targetType);
   }
 
   void _appendDigit(String d) {
     final current = _amountText.value;
     if (d == '.' && current.contains('.')) return;
+
     if (current == '0' && d != '.') {
       _amountText.value = d;
+
       return;
     }
 
-    if (current.contains('.') && current.split('.')[1].length >= 2) return;
+    final dotIndex = current.indexOf('.');
+    if (dotIndex != -1 && current.substring(dotIndex + 1).length >= 2) return;
 
     if (current.replaceAll('.', '').length >= 10) return;
     _amountText.value = current + d;
@@ -267,21 +263,23 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     }
   }
 
-  double get _parsedAmount => double.tryParse(_amountText.value) ?? 0;
-
   Color _resolveGlowBorderColor(
     bool hasError,
     ColorScheme colors, {
     Color? fallback,
   }) {
     if (!hasError) return fallback ?? Colors.transparent;
+
     if (_glowController.isAnimating) {
-      return Color.lerp(
+      final lerped = Color.lerp(
         colors.error.withAlpha(80),
         colors.error,
         _glowCurve.value,
-      )!;
+      );
+
+      return lerped ?? colors.error;
     }
+
     return colors.error.withAlpha(150);
   }
 
@@ -289,33 +287,33 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     _glowController.forward(from: 0.0);
   }
 
-  Future<void> _submit() async {
-    if (_isSubmitting) return;
-    final amount = _parsedAmount;
-    bool hasError = false;
-
+  bool _validateInput(double amount, String description) {
+    var hasError = false;
     if (amount <= 0) {
       hasError = true;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Enter an amount')));
     }
+    if (description.isEmpty) hasError = true;
+    if (_selectedCategoryId == null) hasError = true;
 
-    if (_noteCtrl.text.trim().isEmpty) {
-      hasError = true;
-      _labelError = true;
-    }
+    return hasError;
+  }
 
-    if (_selectedCategoryId == null) {
-      hasError = true;
-      _categoryError = true;
-    }
+  Future<void> _submit() async {
+    if (_isSubmitting) return;
 
-    if (hasError) {
-      setState(() {});
-      if (_labelError || _categoryError) {
-        _triggerValidationGlow();
-      }
+    final amount = _parsedAmount;
+    final description = _noteCtrl.text.trim();
+
+    if (_validateInput(amount, description)) {
+      setState(() {
+        _labelError = description.isEmpty;
+        _categoryError = _selectedCategoryId == null;
+      });
+      if (_labelError || _categoryError) _triggerValidationGlow();
+
       return;
     }
 
@@ -326,7 +324,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
 
     final record = Record(
       amount: finalAmount,
-      description: _noteCtrl.text.trim(),
+      description: description,
       date: _selectedDate,
       categoryId: _selectedCategoryId,
       source: ExpenseSource.manual,
@@ -340,16 +338,13 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     if (_isRecurring) {
       final created = await _createRecurringTransaction(finalAmount);
       if (!created) {
-        if (mounted) {
-          setState(() => _isSubmitting = false);
-        }
+        if (mounted) setState(() => _isSubmitting = false);
+
         return;
       }
     }
 
-    if (mounted) {
-      Navigator.pop(context);
-    }
+    if (mounted) Navigator.pop(context);
   }
 
   Future<bool> _createRecurringTransaction(double finalAmount) async {
@@ -363,12 +358,11 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
             ),
           );
         }
+
         return false;
       }
+
       final repo = di.getIt<RecurringRepository>();
-
-      final nextOccurrence = _nextOccurrenceAfter(_selectedDate);
-
       await repo.createRecurring(
         RecurringTransaction(
           description: _noteCtrl.text.trim(),
@@ -377,12 +371,13 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
           frequency: RecurringFrequency.monthly,
           startDate: _selectedDate,
           endDate: null,
-          nextOccurrence: nextOccurrence,
+          nextOccurrence: _nextOccurrenceAfter(_selectedDate),
           isActive: true,
           autoCreateExpense: true,
           dayOfMonth: _selectedDate.day,
         ),
       );
+
       return true;
     } catch (e) {
       debugPrint(
@@ -392,137 +387,80 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
-              'Recurring transaction could not be saved. '
-              'You can set it up later from the Recurring tab.',
+              'Recurring transaction could not be saved. You can set it up later from the Recurring tab.',
             ),
             duration: Duration(seconds: 3),
           ),
         );
       }
+
       return false;
     }
   }
 
-  DateTime _nextOccurrenceAfter(DateTime date) {
-    return DateTime(date.year, date.month + 1, date.day);
-  }
+  DateTime _nextOccurrenceAfter(DateTime date) =>
+      DateTime(date.year, date.month + 1, date.day);
 
   String _getHintText() {
     if (!isTypewriterPaused && typewriterDisplayText.isNotEmpty) {
       return typewriterDisplayText;
     }
+
     return _type == RecordType.expense ? 'Name of expense' : 'Name of income';
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-
-    return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(),
-      onHorizontalDragEnd: _onHorizontalSwipe,
-      behavior: HitTestBehavior.translucent,
-      child: Padding(
-        padding: EdgeInsets.only(bottom: bottomInset),
-        child: Container(
-          decoration: BoxDecoration(
-            color: colors.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 12, bottom: 4),
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: colors.onSurface.withAlpha(50),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                  child: TypeToggle(type: _type, onSwitch: _switchType),
-                ),
-
-                ValueListenableBuilder<String>(
-                  valueListenable: _amountText,
-                  builder: (_, val, child) {
-                    final displayVal = val.isEmpty ? '0' : val;
-                    final sign = _type == RecordType.expense ? '-' : '+';
-                    final signColor = _type == RecordType.expense
-                        ? const Color(0xFFFF3B30)
-                        : const Color(0xFF34C759);
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Text(
-                        '$sign$displayVal',
-                        style: TextStyle(
-                          fontSize: 48,
-                          fontWeight: FontWeight.w700,
-                          color: signColor,
-                          letterSpacing: -1,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-
-                NumericKeypad(
-                  onDigit: _appendDigit,
-                  onBackspace: _backspace,
-                  color: colors,
-                ),
-
-                _buildNoteField(colors),
-                _buildCategoryChips(colors),
-                _buildDateAndRecurringRow(colors),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: FilledButton(
-                      onPressed: _isSubmitting
-                          ? null
-                          : () => unawaited(_submit()),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: _type == RecordType.expense
-                            ? colors.error
-                            : colors.primary,
-                        foregroundColor: colors.onPrimary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                      ),
-                      child: Text(
-                        'Add ${_type.displayName}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+  Widget _buildDragHandle(ColorScheme colors) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12, bottom: 4),
+      child: Container(
+        width: 40,
+        height: 4,
+        decoration: BoxDecoration(
+          color: colors.onSurface.withAlpha(50),
+          borderRadius: BorderRadius.circular(2),
         ),
       ),
     );
   }
 
+  Widget _buildTypeToggle() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      child: TypeToggle(type: _type, onSwitch: _switchType),
+    );
+  }
+
+  Widget _buildAmountDisplay(ColorScheme _) {
+    return ValueListenableBuilder<String>(
+      valueListenable: _amountText,
+      builder: (_, val, _) {
+        final displayVal = val.isEmpty ? '0' : val;
+        final sign = _type == RecordType.expense ? '-' : '+';
+        final signColor = _type == RecordType.expense
+            ? const Color(0xFFFF3B30)
+            : const Color(0xFF34C759);
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Text(
+            '$sign$displayVal',
+            style: TextStyle(
+              fontSize: 48,
+              fontWeight: FontWeight.w700,
+              color: signColor,
+              letterSpacing: -1,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildNoteField(ColorScheme colors) {
+    final typeColor = _type == RecordType.expense
+        ? colors.error
+        : colors.primary;
+
     return AnimatedBuilder(
       animation: _glowCurve,
       builder: (context, _) {
@@ -551,11 +489,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(
-                  color: _labelError
-                      ? borderColor
-                      : _type == RecordType.expense
-                      ? colors.error
-                      : colors.primary,
+                  color: _labelError ? borderColor : typeColor,
                   width: 2.0,
                 ),
               ),
@@ -573,224 +507,189 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     );
   }
 
+  Widget _buildDatePicker(ColorScheme colors, DateFormat dateFmt, bool isDark) {
+    return Expanded(
+      child: InkWell(
+        onTap: () => _pickDate(context, isDark),
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: colors.onSurface.withAlpha(30)),
+            color: colors.onSurface.withAlpha(6),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                PiconsLight.calendar,
+                size: 20,
+                color: colors.onSurface.withAlpha(180),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                dateFmt.format(_selectedDate),
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: colors.onSurface,
+                ),
+              ),
+              const Spacer(),
+              Icon(
+                PiconsLight.caretDown,
+                size: 14,
+                color: colors.onSurface.withAlpha(100),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRecurringCheckbox(ColorScheme colors, Color mutedIconColor) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          width: 24,
+          height: 24,
+          child: Checkbox(
+            value: _isRecurring,
+            onChanged: (v) => setState(() => _isRecurring = v ?? false),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
+            activeColor: _type == RecordType.expense
+                ? colors.error
+                : colors.primary,
+            side: BorderSide(color: mutedIconColor, width: 1.5),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          'Recurring?',
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: colors.onSurface.withAlpha(200),
+          ),
+        ),
+        const SizedBox(width: 4),
+        Tooltip(
+          message: 'Check this if your expense or income repeats every month',
+          preferBelow: false,
+          triggerMode: TooltipTriggerMode.tap,
+          child: Icon(PiconsLight.info, size: 14, color: mutedIconColor),
+        ),
+      ],
+    );
+  }
+
   Widget _buildDateAndRecurringRow(ColorScheme colors) {
     final dateFmt = DateFormat('MMM dd, yyyy');
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final mutedIconColor = colors.onSurface.withAlpha(120);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 12, 24, 4),
       child: Row(
         children: [
-          Expanded(
-            child: InkWell(
-              onTap: () async {
-                final picked = await showDatePicker(
-                  context: context,
-                  initialDate: _selectedDate,
-                  firstDate: DateTime(2000),
-                  lastDate: DateTime(2100),
-                  builder: (ctx, child) => Theme(
-                    data: Theme.of(ctx).copyWith(
-                      colorScheme: isDark
-                          ? ColorScheme.dark(
-                              primary: _type == RecordType.expense
-                                  ? AppColors.expense
-                                  : AppColors.secondary,
-                              onPrimary: Colors.black,
-                              surface: AppColors.surfaceDark,
-                              onSurface: Colors.white,
-                              onSurfaceVariant: Colors.white70,
-                            )
-                          : null,
-                    ),
-                    child: child!,
-                  ),
-                );
-                if (picked != null) {
-                  setState(() => _selectedDate = picked);
-                }
-              },
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: colors.onSurface.withAlpha(30)),
-                  color: colors.onSurface.withAlpha(6),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      PiconsLight.calendar,
-                      size: 20,
-                      color: colors.onSurface.withAlpha(180),
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      dateFmt.format(_selectedDate),
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: colors.onSurface,
-                      ),
-                    ),
-                    const Spacer(),
-                    Icon(
-                      PiconsLight.caretDown,
-                      size: 14,
-                      color: colors.onSurface.withAlpha(100),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
+          _buildDatePicker(colors, dateFmt, isDark),
           const SizedBox(width: 12),
-
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(
-                width: 24,
-                height: 24,
-                child: Checkbox(
-                  value: _isRecurring,
-                  onChanged: (v) => setState(() => _isRecurring = v ?? false),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  activeColor: _type == RecordType.expense
-                      ? colors.error
-                      : colors.primary,
-                  side: BorderSide(
-                    color: colors.onSurface.withAlpha(120),
-                    width: 1.5,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 6),
-              Text(
-                'Recurring?',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: colors.onSurface.withAlpha(200),
-                ),
-              ),
-              const SizedBox(width: 4),
-              Tooltip(
-                message:
-                    'Check this if your expense or income repeats every month',
-                preferBelow: false,
-                triggerMode: TooltipTriggerMode.tap,
-                child: Icon(
-                  PiconsLight.info,
-                  size: 14,
-                  color: colors.onSurface.withAlpha(120),
-                ),
-              ),
-            ],
-          ),
+          _buildRecurringCheckbox(colors, mutedIconColor),
         ],
       ),
     );
   }
 
-  Widget _buildCategoryChips(ColorScheme colors) {
-    return BlocBuilder<CategoryBloc, CategoryState>(
-      builder: (ctx, state) {
-        if (state is CategoryLoaded) {
-          if (state.type != null && state.type != _type) {
-            return _buildCategoryLoadingSpinner(colors);
-          }
-          _categories = state.categories;
-          _selectDefaultCategory(state.categories);
-        }
-        final allCats = _categories;
-        if (state is CategoryLoading) {
-          return _buildCategoryLoadingSpinner(colors);
-        }
-        if (allCats.isEmpty) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Text(
-              'No categories available',
-              style: TextStyle(color: colors.onSurface.withAlpha(80)),
-            ),
-          );
-        }
+  Future<void> _pickDate(BuildContext context, bool isDark) async {
+    final typePrimary = _type == RecordType.expense
+        ? AppColors.expense
+        : AppColors.secondary;
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+      builder: (ctx, child) => Theme(
+        data: Theme.of(ctx).copyWith(
+          colorScheme: isDark
+              ? ColorScheme.dark(
+                  primary: typePrimary,
+                  onPrimary: Colors.black,
+                  surface: AppColors.surfaceDark,
+                  onSurface: Colors.white,
+                  onSurfaceVariant: Colors.white70,
+                )
+              : null,
+        ),
+        child: child ?? const SizedBox.shrink(),
+      ),
+    );
+    if (picked != null) setState(() => _selectedDate = picked);
+  }
 
-        final displayCats = allCats.take(4).toList();
-        if (_selectedCategoryId != null &&
-            !displayCats.any((c) => c.id == _selectedCategoryId)) {
-          Category? selected;
-          for (final c in allCats) {
-            if (c.id == _selectedCategoryId) {
-              selected = c;
-              break;
-            }
-          }
-          if (selected != null) {
-            displayCats.removeLast();
-            displayCats.insert(0, selected);
-          }
-        }
+  Widget _buildAllCategoriesButton(List<Category> allCats, ColorScheme colors) {
+    return GestureDetector(
+      onTap: () => _showAllCategories(context, allCats, _type),
+      child: Container(
+        width: 50,
+        margin: const EdgeInsets.only(left: 4),
+        decoration: BoxDecoration(
+          color: colors.onSurface.withAlpha(10),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          PiconsBold.gridFour,
+          size: 20,
+          color: colors.onSurface.withAlpha(150),
+        ),
+      ),
+    );
+  }
 
-        return AnimatedBuilder(
-          animation: _glowCurve,
-          builder: (context, _) {
-            return Container(
-              height: 50,
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                children: [
-                  ...displayCats.map((cat) {
-                    return CategoryPickerItem(
-                      category: cat,
-                      isSelected: cat.id == _selectedCategoryId,
-                      errorBorderColor: _resolveGlowBorderColor(
-                        _categoryError,
-                        colors,
-                        fallback: Colors.transparent,
-                      ),
-                      selectedColor: _type == RecordType.expense
-                          ? colors.error
-                          : colors.primary,
-                      onTap: () {
-                        setState(() {
-                          _selectedCategoryId = cat.id;
-                          _categoryError = false;
-                        });
-                      },
-                    );
-                  }),
-                  GestureDetector(
-                    onTap: () => _showAllCategories(context, allCats, _type),
-                    child: Container(
-                      width: 50,
-                      margin: const EdgeInsets.only(left: 4),
-                      decoration: BoxDecoration(
-                        color: colors.onSurface.withAlpha(10),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        PiconsBold.gridFour,
-                        size: 20,
-                        color: colors.onSurface.withAlpha(150),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
+  List<Category> _buildDisplayCategories(List<Category> allCats) {
+    final displayCats = allCats.take(4).toList();
+    if (_selectedCategoryId != null &&
+        !displayCats.any((c) => c.id == _selectedCategoryId)) {
+      Category? selected;
+      for (final c in allCats) {
+        if (c.id == _selectedCategoryId) {
+          selected = c;
+          break;
+        }
+      }
+      if (selected != null) {
+        displayCats.removeLast();
+        displayCats.insert(0, selected);
+      }
+    }
+
+    return displayCats;
+  }
+
+  void _onCategoryChipTap(Category cat) {
+    setState(() {
+      _selectedCategoryId = cat.id;
+      _categoryError = false;
+    });
+  }
+
+  Widget _buildCategoryChip(Category cat, ColorScheme colors) {
+    return CategoryPickerItem(
+      category: cat,
+      isSelected: cat.id == _selectedCategoryId,
+      errorBorderColor: _resolveGlowBorderColor(
+        _categoryError,
+        colors,
+        fallback: Colors.transparent,
+      ),
+      selectedColor: _type == RecordType.expense
+          ? colors.error
+          : colors.primary,
+      onTap: () => _onCategoryChipTap(cat),
     );
   }
 
@@ -806,6 +705,128 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
         child: CircularProgressIndicator(
           strokeWidth: 2,
           color: colors.onSurface.withAlpha(80),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryChips(ColorScheme colors) {
+    return BlocBuilder<CategoryBloc, CategoryState>(
+      builder: (ctx, state) {
+        if (state is CategoryLoaded) {
+          if (state.type != null && state.type != _type) {
+            return _buildCategoryLoadingSpinner(colors);
+          }
+          _categories = state.categories;
+          _selectDefaultCategory(state.categories);
+        }
+
+        final allCats = _categories;
+        if (state is CategoryLoading || allCats.isEmpty) {
+          if (state is CategoryLoading) {
+            return _buildCategoryLoadingSpinner(colors);
+          }
+
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Text(
+              'No categories available',
+              style: TextStyle(color: colors.onSurface.withAlpha(80)),
+            ),
+          );
+        }
+
+        final displayCats = _buildDisplayCategories(allCats);
+
+        return AnimatedBuilder(
+          animation: _glowCurve,
+          builder: (context, _) => Container(
+            height: 50,
+            margin: const EdgeInsets.symmetric(vertical: 8),
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              children: [
+                ...displayCats.map((cat) => _buildCategoryChip(cat, colors)),
+                _buildAllCategoriesButton(allCats, colors),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSubmitButton(ColorScheme colors) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+      child: SizedBox(
+        width: double.infinity,
+        height: 52,
+        child: FilledButton(
+          onPressed: _isSubmitting ? null : () => unawaited(_submit()),
+          style: FilledButton.styleFrom(
+            backgroundColor: _type == RecordType.expense
+                ? colors.error
+                : colors.primary,
+            foregroundColor: colors.onPrimary,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+          ),
+          child: Text(
+            'Add ${_type.displayName}',
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _noteCtrl.removeListener(_onNoteChanged);
+    _glowController.dispose();
+    _amountText.dispose();
+    _noteCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      onHorizontalDragEnd: _onHorizontalSwipe,
+      behavior: HitTestBehavior.translucent,
+      child: Padding(
+        padding: EdgeInsets.only(bottom: bottomInset),
+        child: Container(
+          decoration: BoxDecoration(
+            color: colors.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildDragHandle(colors),
+                _buildTypeToggle(),
+                _buildAmountDisplay(colors),
+                NumericKeypad(
+                  onDigit: _appendDigit,
+                  onBackspace: _backspace,
+                  color: colors,
+                ),
+                _buildNoteField(colors),
+                _buildCategoryChips(colors),
+                _buildDateAndRecurringRow(colors),
+                _buildSubmitButton(colors),
+              ],
+            ),
+          ),
         ),
       ),
     );

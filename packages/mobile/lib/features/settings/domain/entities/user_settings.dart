@@ -9,6 +9,17 @@ class UserSettings extends Equatable {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  @override
+  List<Object?> get props => [
+    id,
+    currencySymbol,
+    emailFetchLimit,
+    notificationsEnabled,
+    theme,
+    createdAt,
+    updatedAt,
+  ];
+
   const UserSettings({
     this.id,
     required this.currencySymbol,
@@ -38,15 +49,4 @@ class UserSettings extends Equatable {
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
-
-  @override
-  List<Object?> get props => [
-    id,
-    currencySymbol,
-    emailFetchLimit,
-    notificationsEnabled,
-    theme,
-    createdAt,
-    updatedAt,
-  ];
 }

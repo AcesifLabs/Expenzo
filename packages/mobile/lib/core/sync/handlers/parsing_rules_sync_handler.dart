@@ -30,41 +30,45 @@ class ParsingRulesSyncHandler
     Map<String, dynamic> data,
   ) => ParsingRulesCompanion.insert(
     id: id,
-    name: data['name'] ?? '',
-    triggerWords: data['triggerWords'] ?? '',
-    amountPattern: data['amountPattern'] ?? '',
-    datePattern: data['datePattern'] != null
-        ? Value(data['datePattern'])
-        : const Value.absent(),
-    categoryId: data['categoryId'] != null
-        ? Value(data['categoryId'])
-        : const Value.absent(),
+    name: _str(data, 'name'),
+    triggerWords: _str(data, 'triggerWords'),
+    amountPattern: _str(data, 'amountPattern'),
+    datePattern: _optStr(data, 'datePattern'),
+    categoryId: _optStr(data, 'categoryId'),
     sourceType: data['sourceType'] ?? ExpenseSource.sms.name,
-    isEnabled: data['isEnabled'] != null
-        ? Value(data['isEnabled'])
-        : const Value.absent(),
-    priority: data['priority'] != null
-        ? Value(int.parse(data['priority'].toString()))
-        : const Value.absent(),
-    createdAt: data['createdAt'] != null
-        ? DateTime.parse(data['createdAt']).toLocal()
-        : DateTime.now(),
-    updatedAt: data['updatedAt'] != null
-        ? DateTime.parse(data['updatedAt']).toLocal()
-        : DateTime.now(),
+    isEnabled: _optBool(data, 'isEnabled'),
+    priority: _optInt(data, 'priority'),
+    createdAt: _dt(data, 'createdAt'),
+    updatedAt: _dt(data, 'updatedAt'),
   );
   @override
   Future<void> deleteById(AppDatabase db, String id) async =>
       await (db.delete(db.parsingRules)..where((t) => t.id.equals(id))).go();
+
   @override
   Future<int> countRows(AppDatabase db) async {
-    final count = countAll();
-    final query = db.selectOnly(db.parsingRules)..addColumns([count]);
+    final c = countAll();
+    final query = db.selectOnly(db.parsingRules)..addColumns([c]);
     final result = await query.getSingle();
-    return result.read(count) ?? 0;
+
+    return result.read(c) ?? 0;
   }
 
   @override
   Future<List<ParsingRule>> fetchAll(AppDatabase db) =>
       db.select(db.parsingRules).get();
+
+  static String _str(Map<String, dynamic> data, String key) => data[key] ?? '';
+  static Value<String> _optStr(Map<String, dynamic> data, String key) =>
+      data[key] != null ? Value(data[key] as String) : const Value.absent();
+  static Value<bool> _optBool(Map<String, dynamic> data, String key) =>
+      data[key] != null ? Value(data[key] as bool) : const Value.absent();
+  static Value<int> _optInt(Map<String, dynamic> data, String key) =>
+      data[key] != null
+      ? Value(int.parse(data[key].toString()))
+      : const Value.absent();
+  static DateTime _dt(Map<String, dynamic> data, String key) =>
+      data[key] != null
+      ? DateTime.parse(data[key] as String).toLocal()
+      : DateTime.now();
 }

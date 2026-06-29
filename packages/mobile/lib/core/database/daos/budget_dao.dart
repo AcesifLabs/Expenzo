@@ -8,7 +8,7 @@ part 'budget_dao.g.dart';
 class BudgetDao extends DatabaseAccessor<AppDatabase> with _$BudgetDaoMixin {
   BudgetDao(super.db);
 
-  Future<List<Budget>> getAllBudgets() async {
+  Future<List<Budget>> getAllBudgets() {
     return select(budgets).get();
   }
 
@@ -16,8 +16,9 @@ class BudgetDao extends DatabaseAccessor<AppDatabase> with _$BudgetDaoMixin {
     return select(budgets).watch();
   }
 
-  Future<Budget?> getBudgetById(String id) async {
+  Future<Budget?> getBudgetById(String id) {
     final query = select(budgets)..where((b) => b.id.equals(id));
+
     return query.getSingleOrNull();
   }
 

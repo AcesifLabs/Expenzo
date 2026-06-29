@@ -12,63 +12,24 @@ import '../../../parsing_rules/presentation/widgets/transaction_list_skeleton.da
 class SmsScanPage extends StatelessWidget {
   const SmsScanPage({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<SmsScannerBloc, SmsScannerState>(
-      buildWhen: (previous, current) =>
-          current is SmsScannerInitial ||
-          current is SmsScannerScanning ||
-          current is SmsScannerScanComplete ||
-          current is SmsScannerError,
-      builder: (context, state) {
-        return Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (state is SmsScannerScanComplete) ...[
-                _buildLastScanInfo(state),
-                const SizedBox(height: 16),
-                _buildResultsSummary(context, state),
-                const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  icon: Icon(PiconsRegular.arrowsClockwise),
-                  label: const Text('Scan Again'),
-                  onPressed: () {
-                    context.read<SmsScannerBloc>().add(const StartScan());
-                  },
-                ),
-                const SizedBox(height: 8),
-                OutlinedButton.icon(
-                  icon: Icon(PiconsRegular.eye),
-                  label: Text('View ${state.results.length} Results'),
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      SlidePageRoute(
-                        builder: (_) => BlocProvider.value(
-                          value: context.read<SmsScannerBloc>(),
-                          child: const SmsScanResultsPage(),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ] else if (state is SmsScannerScanning) ...[
-                _buildScanningIndicator(context, state),
-              ] else if (state is SmsScannerError) ...[
-                _buildError(context, state),
-              ] else ...[
-                _buildInitialState(context),
-              ],
-            ],
-          ),
-        );
-      },
+  void _onStartScan(BuildContext context) {
+    context.read<SmsScannerBloc>().add(const StartScan());
+  }
+
+  void _onViewResults(BuildContext context, SmsScannerScanComplete _) {
+    Navigator.of(context).push(
+      SlidePageRoute(
+        builder: (_) => BlocProvider.value(
+          value: context.read<SmsScannerBloc>(),
+          child: const SmsScanResultsPage(),
+        ),
+      ),
     );
   }
 
   Widget _buildLastScanInfo(SmsScannerScanComplete state) {
     final dateFormat = DateFormat('MMM dd, yyyy \'at\' h:mm a');
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -185,9 +146,7 @@ class SmsScanPage extends StatelessWidget {
             Text(state.message),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () {
-                context.read<SmsScannerBloc>().add(const StartScan());
-              },
+              onPressed: () => _onStartScan(context),
               child: const Text('Retry'),
             ),
           ],
@@ -217,13 +176,55 @@ class SmsScanPage extends StatelessWidget {
             ElevatedButton.icon(
               icon: Icon(PiconsRegular.listMagnifyingGlass),
               label: const Text('Scan SMS'),
-              onPressed: () {
-                context.read<SmsScannerBloc>().add(const StartScan());
-              },
+              onPressed: () => _onStartScan(context),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<SmsScannerBloc, SmsScannerState>(
+      buildWhen: (previous, current) =>
+          current is SmsScannerInitial ||
+          current is SmsScannerScanning ||
+          current is SmsScannerScanComplete ||
+          current is SmsScannerError,
+      builder: (context, state) {
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (state is SmsScannerScanComplete) ...[
+                _buildLastScanInfo(state),
+                const SizedBox(height: 16),
+                _buildResultsSummary(context, state),
+                const SizedBox(height: 16),
+                ElevatedButton.icon(
+                  icon: Icon(PiconsRegular.arrowsClockwise),
+                  label: const Text('Scan Again'),
+                  onPressed: () => _onStartScan(context),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  icon: Icon(PiconsRegular.eye),
+                  label: Text('View ${state.results.length} Results'),
+                  onPressed: () => _onViewResults(context, state),
+                ),
+              ] else if (state is SmsScannerScanning) ...[
+                _buildScanningIndicator(context, state),
+              ] else if (state is SmsScannerError) ...[
+                _buildError(context, state),
+              ] else ...[
+                _buildInitialState(context),
+              ],
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -246,17 +247,16 @@ class _SmsScanResultsPageState extends State<SmsScanResultsPage> {
     _scrollController.addListener(_onScroll);
   }
 
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
+  bool get _isBottom {
+    if (!_scrollController.hasClients) return false;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.offset;
+
+    return currentScroll >= (maxScroll * 0.9);
   }
 
   void _onScroll() {
-    if (!_scrollController.hasClients) return;
-    final maxScroll = _scrollController.position.maxScrollExtent;
-    final currentScroll = _scrollController.offset;
-    if (currentScroll >= (maxScroll * 0.9)) {
+    if (_isBottom) {
       final state = context.read<SmsScannerBloc>().state;
       if (state is SmsScannerScanComplete &&
           !state.hasReachedMax &&
@@ -266,6 +266,112 @@ class _SmsScanResultsPageState extends State<SmsScanResultsPage> {
         );
       }
     }
+  }
+
+  void _onSelectAll() {
+    context.read<SmsScannerBloc>().add(SelectAll());
+  }
+
+  void _onDeselectAll() {
+    context.read<SmsScannerBloc>().add(DeselectAll());
+  }
+
+  void _onToggleSelection(String transactionId) {
+    context.read<SmsScannerBloc>().add(
+      ToggleSelection(transactionId: transactionId),
+    );
+  }
+
+  void _onCreateSelected(SmsScannerScanComplete state) {
+    final selectedTransactions = state.results
+        .where((t) => state.selectedIds.contains(t.sourceId))
+        .toList();
+
+    context.read<SmsScannerBloc>().add(
+      CreateSelectedExpenses(transactions: selectedTransactions),
+    );
+    Navigator.of(context).pop();
+  }
+
+  Widget _buildActionButtons(SmsScannerScanComplete _) {
+    return Row(
+      children: [
+        TextButton(onPressed: _onSelectAll, child: const Text('Select All')),
+        TextButton(
+          onPressed: _onDeselectAll,
+          child: const Text('Deselect All'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEmptyResults() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(PiconsRegular.checkCircle, size: 64, color: Colors.green),
+          const SizedBox(height: 16),
+          const Text('No new records found', style: TextStyle(fontSize: 18)),
+          const SizedBox(height: 8),
+          const Text(
+            'Try scanning again or add more parsing rules',
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildResultCard(_, int index, SmsScannerScanComplete state) {
+    if (index >= state.results.length) {
+      return const TransactionCardSkeleton();
+    }
+
+    final transaction = state.results[index];
+
+    return ParsedTransactionCard(
+      transaction: transaction,
+      isSelected: state.selectedIds.contains(transaction.sourceId),
+      onSelectionChanged: (_) => _onToggleSelection(transaction.sourceId),
+    );
+  }
+
+  Widget _buildResultsList(SmsScannerScanComplete state) {
+    return ListView.builder(
+      controller: _scrollController,
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      itemCount: state.results.length + (state.isLoadingMore ? 10 : 0),
+      itemBuilder: (context, index) => _buildResultCard(context, index, state),
+    );
+  }
+
+  Widget _buildBody(SmsScannerScanComplete state) {
+    if (state.results.isEmpty) {
+      return _buildEmptyResults();
+    }
+
+    return _buildResultsList(state);
+  }
+
+  Widget _buildBottomBar(SmsScannerScanComplete state) {
+    if (state.selectedIds.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: ElevatedButton(
+        onPressed: () => _onCreateSelected(state),
+        child: Text('Create ${state.selectedIds.length} Selected'),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -278,23 +384,9 @@ class _SmsScanResultsPageState extends State<SmsScanResultsPage> {
             buildWhen: (previous, current) => current is SmsScannerScanComplete,
             builder: (context, state) {
               if (state is SmsScannerScanComplete) {
-                return Row(
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        context.read<SmsScannerBloc>().add(SelectAll());
-                      },
-                      child: const Text('Select All'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        context.read<SmsScannerBloc>().add(DeselectAll());
-                      },
-                      child: const Text('Deselect All'),
-                    ),
-                  ],
-                );
+                return _buildActionButtons(state);
               }
+
               return const SizedBox.shrink();
             },
           ),
@@ -307,52 +399,7 @@ class _SmsScanResultsPageState extends State<SmsScanResultsPage> {
             current is SmsScannerInitial,
         builder: (context, state) {
           if (state is SmsScannerScanComplete) {
-            if (state.results.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      PiconsRegular.checkCircle,
-                      size: 64,
-                      color: Colors.green,
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'No new records found',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Try scanning again or add more parsing rules',
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            return ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              itemCount: state.results.length + (state.isLoadingMore ? 10 : 0),
-              itemBuilder: (context, index) {
-                if (index >= state.results.length) {
-                  return const TransactionCardSkeleton();
-                }
-
-                final transaction = state.results[index];
-                return ParsedTransactionCard(
-                  transaction: transaction,
-                  isSelected: state.selectedIds.contains(transaction.sourceId),
-                  onSelectionChanged: (selected) {
-                    context.read<SmsScannerBloc>().add(
-                      ToggleSelection(transactionId: transaction.sourceId),
-                    );
-                  },
-                );
-              },
-            );
+            return _buildBody(state);
           }
 
           return const TransactionListSkeleton(itemCount: 10);
@@ -361,24 +408,10 @@ class _SmsScanResultsPageState extends State<SmsScanResultsPage> {
       bottomNavigationBar: BlocBuilder<SmsScannerBloc, SmsScannerState>(
         buildWhen: (previous, current) => current is SmsScannerScanComplete,
         builder: (context, state) {
-          if (state is SmsScannerScanComplete && state.selectedIds.isNotEmpty) {
-            return Container(
-              padding: const EdgeInsets.all(16),
-              child: ElevatedButton(
-                onPressed: () async {
-                  final selectedTransactions = state.results
-                      .where((t) => state.selectedIds.contains(t.sourceId))
-                      .toList();
-
-                  context.read<SmsScannerBloc>().add(
-                    CreateSelectedExpenses(transactions: selectedTransactions),
-                  );
-                  Navigator.of(context).pop();
-                },
-                child: Text('Create ${state.selectedIds.length} Selected'),
-              ),
-            );
+          if (state is SmsScannerScanComplete) {
+            return _buildBottomBar(state);
           }
+
           return const SizedBox.shrink();
         },
       ),

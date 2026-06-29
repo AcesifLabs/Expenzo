@@ -28,19 +28,23 @@ class ParsingRulesLocalDatasourceImpl implements ParsingRulesLocalDatasource {
   }) async {
     if (isEnabled == true) {
       final rules = await dao.getEnabledRules();
+
       return rules.map(_mapToEntity).toList();
     }
     if (sourceType != null) {
       final rules = await dao.getRulesBySourceType(sourceType.name);
+
       return rules.map(_mapToEntity).toList();
     }
     final rules = await dao.getAllRules();
+
     return rules.map(_mapToEntity).toList();
   }
 
   @override
   Future<domain.ParsingRule?> getRuleById(String id) async {
     final rule = await dao.getRuleById(id);
+
     return rule != null ? _mapToEntity(rule) : null;
   }
 
@@ -48,6 +52,7 @@ class ParsingRulesLocalDatasourceImpl implements ParsingRulesLocalDatasource {
   Future<domain.ParsingRule> createRule(domain.ParsingRule rule) async {
     final companion = _toCompanion(rule);
     await dao.insertRule(companion);
+
     return rule;
   }
 
@@ -55,6 +60,7 @@ class ParsingRulesLocalDatasourceImpl implements ParsingRulesLocalDatasource {
   Future<domain.ParsingRule> updateRule(domain.ParsingRule rule) async {
     final companion = _toCompanion(rule);
     await dao.updateRule(companion);
+
     return rule;
   }
 

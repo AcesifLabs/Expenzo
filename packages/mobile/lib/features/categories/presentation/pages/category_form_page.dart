@@ -18,12 +18,6 @@ class CategoryFormPage extends StatefulWidget {
 }
 
 class _CategoryFormPageState extends State<CategoryFormPage> {
-  final _formKey = GlobalKey<FormState>();
-  late TextEditingController _nameController;
-  String _selectedEmoji = 'package';
-  String _selectedColor = '#2196F3';
-  late RecordType _type;
-
   static const List<String> _iconNames = [
     'package',
     'shoppingCart',
@@ -39,17 +33,94 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
     'gift',
   ];
 
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  String _selectedEmoji = 'package';
+  String _selectedColor = '#2196F3';
+  RecordType _type = RecordType.expense;
+
   bool get _isEditing => widget.category != null;
 
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.category?.name ?? '');
-    _type = widget.category?.type ?? widget.initialType ?? RecordType.expense;
-    if (_isEditing) {
-      _selectedEmoji = widget.category!.emoji;
-      _selectedColor = widget.category!.color;
+    final category = widget.category;
+    _nameController.text = category?.name ?? '';
+    _type = category?.type ?? widget.initialType ?? RecordType.expense;
+    if (category != null) {
+      _selectedEmoji = category.emoji;
+      _selectedColor = category.color;
     }
+  }
+
+  String? _validateName(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter a name';
+    }
+
+    return null;
+  }
+
+  Widget _buildIconSelector(Color accentColor) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: _iconNames.map((name) {
+        return _buildIconItem(name, accentColor);
+      }).toList(),
+    );
+  }
+
+  Widget _buildIconItem(String name, Color accentColor) {
+    final isSelected = name == _selectedEmoji;
+
+    return GestureDetector(
+      onTap: () => setState(() => _selectedEmoji = name),
+      child: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: isSelected
+                ? accentColor
+                : Theme.of(context).colorScheme.outline.withAlpha(40),
+            width: isSelected ? 2 : 1,
+          ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Center(
+          child: Icon(
+            AppIcons.getCategoryIcon(name),
+            size: 24,
+            color: isSelected ? accentColor : Colors.grey,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _saveCategory() {
+    final currentState = _formKey.currentState;
+    if (currentState == null || !currentState.validate()) return;
+
+    final now = DateTime.now().toUtc();
+    final id = widget.category?.id ?? const Uuid().v4();
+    final category = Category(
+      id: id,
+      name: _nameController.text,
+      emoji: _selectedEmoji,
+      color: _selectedColor,
+      type: _type,
+      createdAt: widget.category?.createdAt ?? now,
+      updatedAt: now,
+    );
+
+    if (_isEditing) {
+      context.read<CategoryBloc>().add(UpdateCategoryEvent(category));
+    } else {
+      context.read<CategoryBloc>().add(CreateCategoryEvent(category));
+    }
+    Navigator.pop(context, category);
   }
 
   @override
@@ -81,49 +152,12 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
                 labelText: 'Category Name',
                 hintText: 'Enter category name',
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter a name';
-                }
-                return null;
-              },
+              validator: _validateName,
             ),
             const SizedBox(height: 24),
             const Text('Icon', style: TextStyle(fontSize: 16)),
             const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: _iconNames.map((name) {
-                final isSelected = name == _selectedEmoji;
-                return GestureDetector(
-                  onTap: () => setState(() => _selectedEmoji = name),
-                  child: Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: isSelected
-                            ? accentColor
-                            : Theme.of(
-                                context,
-                              ).colorScheme.outline.withAlpha(40),
-                        width: isSelected ? 2 : 1,
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Center(
-                      child: Icon(
-                        AppIcons.getCategoryIcon(name),
-                        size: 24,
-                        color: isSelected ? accentColor : Colors.grey,
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-
+            _buildIconSelector(accentColor),
             const SizedBox(height: 32),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -137,29 +171,5 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
         ),
       ),
     );
-  }
-
-  void _saveCategory() {
-    if (_formKey.currentState!.validate()) {
-      final now = DateTime.now().toUtc();
-
-      final id = widget.category?.id ?? const Uuid().v4();
-      final category = Category(
-        id: id,
-        name: _nameController.text,
-        emoji: _selectedEmoji,
-        color: _selectedColor,
-        type: _type,
-        createdAt: widget.category?.createdAt ?? now,
-        updatedAt: now,
-      );
-
-      if (_isEditing) {
-        context.read<CategoryBloc>().add(UpdateCategoryEvent(category));
-      } else {
-        context.read<CategoryBloc>().add(CreateCategoryEvent(category));
-      }
-      Navigator.pop(context, category);
-    }
   }
 }

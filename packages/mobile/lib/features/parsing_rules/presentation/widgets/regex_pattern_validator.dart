@@ -61,20 +61,13 @@ class _RegexValidatorIndicatorState extends State<RegexValidatorIndicator> {
     _validatePattern();
   }
 
-  @override
-  void didUpdateWidget(RegexValidatorIndicator oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.pattern != widget.pattern) {
-      _validatePattern();
-    }
-  }
-
   void _validatePattern() {
     if (widget.pattern.isEmpty) {
       setState(() {
         _isValid = true;
         _errorMessage = null;
       });
+
       return;
     }
 
@@ -90,6 +83,14 @@ class _RegexValidatorIndicatorState extends State<RegexValidatorIndicator> {
         _isValid = false;
         _errorMessage = 'Invalid regex: ${e.toString()}';
       });
+    }
+  }
+
+  @override
+  void didUpdateWidget(RegexValidatorIndicator oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.pattern != widget.pattern) {
+      _validatePattern();
     }
   }
 

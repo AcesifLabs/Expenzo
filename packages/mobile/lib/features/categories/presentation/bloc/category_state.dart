@@ -3,10 +3,10 @@ import 'package:expense_tracker/core/constants/record_type.dart';
 import '../../domain/entities/category.dart';
 
 abstract class CategoryState extends Equatable {
-  const CategoryState();
-
   @override
   List<Object?> get props => [];
+
+  const CategoryState();
 }
 
 class CategoryInitial extends CategoryState {
@@ -21,26 +21,26 @@ class CategoryLoaded extends CategoryState {
   final List<Category> categories;
   final RecordType? type;
 
-  const CategoryLoaded(this.categories, {this.type});
-
   @override
   List<Object?> get props => [categories, type];
+
+  const CategoryLoaded(this.categories, {this.type});
 }
 
 class CategoryError extends CategoryState {
   final String message;
 
-  const CategoryError(this.message);
-
   @override
   List<Object?> get props => [message];
+
+  const CategoryError(this.message);
 }
 
 class CategoryInUseError extends CategoryState {
   final String message;
 
-  const CategoryInUseError(this.message);
-
   @override
   List<Object?> get props => [message];
+
+  const CategoryInUseError(this.message);
 }

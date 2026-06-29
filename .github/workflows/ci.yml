@@ -41,5 +41,11 @@ jobs:
       - name: Analyze code
         run: flutter analyze --no-fatal-infos
 
+      - name: Run DCL metrics
+        run: dart run dart_code_linter:metrics analyze lib
+
+      - name: Check unused code
+        run: dart run dart_code_linter:metrics check-unused-code lib
+
       - name: Run tests
         run: flutter test

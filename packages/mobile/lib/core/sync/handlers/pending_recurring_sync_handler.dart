@@ -44,10 +44,11 @@ class PendingRecurringSyncHandler
   )..where((t) => t.id.equals(id))).go();
   @override
   Future<int> countRows(AppDatabase db) async {
-    final count = countAll();
-    final query = db.selectOnly(db.pendingRecurring)..addColumns([count]);
+    final c = countAll();
+    final query = db.selectOnly(db.pendingRecurring)..addColumns([c]);
     final result = await query.getSingle();
-    return result.read(count) ?? 0;
+
+    return result.read(c) ?? 0;
   }
 
   @override

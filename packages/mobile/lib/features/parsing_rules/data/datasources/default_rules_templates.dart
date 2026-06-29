@@ -1,42 +1,5 @@
 import '../../domain/entities/parsing_rule.dart';
 
-class DefaultRuleTemplate {
-  final String name;
-  final String description;
-  final List<String> triggerWords;
-  final String amountPattern;
-  final String? datePattern;
-  final SourceType sourceType;
-  final int priority;
-
-  const DefaultRuleTemplate({
-    required this.name,
-    required this.description,
-    required this.triggerWords,
-    required this.amountPattern,
-    this.datePattern,
-    required this.sourceType,
-    this.priority = 0,
-  });
-
-  ParsingRule toParsingRule() {
-    final now = DateTime.now();
-    return ParsingRule(
-      id: 'template_${now.millisecondsSinceEpoch}_$name',
-      name: name,
-      triggerWords: triggerWords,
-      amountPattern: amountPattern,
-      datePattern: datePattern,
-      categoryId: null,
-      sourceType: sourceType,
-      isEnabled: true,
-      priority: priority,
-      createdAt: now,
-      updatedAt: now,
-    );
-  }
-}
-
 class DefaultRulesTemplates {
   static const List<DefaultRuleTemplate> templates = [
     DefaultRuleTemplate(
@@ -126,4 +89,42 @@ class DefaultRulesTemplates {
       priority: 3,
     ),
   ];
+}
+
+class DefaultRuleTemplate {
+  final String name;
+  final String description;
+  final List<String> triggerWords;
+  final String amountPattern;
+  final String? datePattern;
+  final SourceType sourceType;
+  final int priority;
+
+  const DefaultRuleTemplate({
+    required this.name,
+    required this.description,
+    required this.triggerWords,
+    required this.amountPattern,
+    this.datePattern,
+    required this.sourceType,
+    this.priority = 0,
+  });
+
+  ParsingRule toParsingRule() {
+    final now = DateTime.now();
+
+    return ParsingRule(
+      id: 'template_${now.millisecondsSinceEpoch}_$name',
+      name: name,
+      triggerWords: triggerWords,
+      amountPattern: amountPattern,
+      datePattern: datePattern,
+      categoryId: null,
+      sourceType: sourceType,
+      isEnabled: true,
+      priority: priority,
+      createdAt: now,
+      updatedAt: now,
+    );
+  }
 }

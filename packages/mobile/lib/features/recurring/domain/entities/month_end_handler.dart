@@ -16,10 +16,11 @@ class MonthEndHandler {
     }
 
     final lastDayOfNextMonth = getLastDayOfMonth(nextYear, nextMonth);
-
-    final effectiveDay = dayOfMonth != null
-        ? (dayOfMonth > lastDayOfNextMonth ? lastDayOfNextMonth : dayOfMonth)
-        : current.day;
+    final effectiveDay = _resolveDayOfMonth(
+      dayOfMonth,
+      current.day,
+      lastDayOfNextMonth,
+    );
 
     return DateTime(nextYear, nextMonth, effectiveDay);
   }
@@ -42,6 +43,17 @@ class MonthEndHandler {
       case RecurringFrequencyType.yearly:
         return DateTime(current.year + 1, current.month, current.day);
     }
+  }
+
+  static int _resolveDayOfMonth(
+    int? dayOfMonth,
+    int currentDay,
+    int lastDayOfNextMonth,
+  ) {
+    if (dayOfMonth == null) return currentDay;
+    if (dayOfMonth > lastDayOfNextMonth) return lastDayOfNextMonth;
+
+    return dayOfMonth;
   }
 }
 

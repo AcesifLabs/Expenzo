@@ -13,7 +13,7 @@ class AppCriticalError extends StatefulWidget {
 }
 
 class _AppCriticalErrorState extends State<AppCriticalError> {
-  late final Timer _timer;
+  Timer? _timer;
 
   @override
   void initState() {
@@ -23,14 +23,17 @@ class _AppCriticalErrorState extends State<AppCriticalError> {
       'AppCriticalError: ${widget.details.exception}\n'
       '${widget.details.stack}',
     );
-    _timer = Timer(const Duration(seconds: 3), () {
-      if (mounted) SystemNavigator.pop();
-    });
+
+    _timer = Timer(const Duration(seconds: 3), _onTimerElapsed);
+  }
+
+  void _onTimerElapsed() {
+    if (mounted) SystemNavigator.pop();
   }
 
   @override
   void dispose() {
-    _timer.cancel();
+    _timer?.cancel();
     super.dispose();
   }
 

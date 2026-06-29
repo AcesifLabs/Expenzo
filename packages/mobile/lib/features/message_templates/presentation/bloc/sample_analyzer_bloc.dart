@@ -4,70 +4,6 @@ import 'package:equatable/equatable.dart';
 import '../../../sms_parser/data/datasources/sms_local_datasource.dart';
 import '../../../sms_parser/domain/entities/sms_message.dart';
 
-abstract class SampleAnalyzerEvent extends Equatable {
-  const SampleAnalyzerEvent();
-  @override
-  List<Object?> get props => [];
-}
-
-class LoadSamples extends SampleAnalyzerEvent {
-  final String contactId;
-  const LoadSamples({required this.contactId});
-  @override
-  List<Object?> get props => [contactId];
-}
-
-class LoadMoreSamples extends SampleAnalyzerEvent {
-  final String contactId;
-  const LoadMoreSamples({required this.contactId});
-  @override
-  List<Object?> get props => [contactId];
-}
-
-abstract class SampleAnalyzerState extends Equatable {
-  const SampleAnalyzerState();
-  @override
-  List<Object?> get props => [];
-}
-
-class SampleAnalyzerInitial extends SampleAnalyzerState {}
-
-class SampleAnalyzerLoading extends SampleAnalyzerState {}
-
-class SampleAnalyzerLoaded extends SampleAnalyzerState {
-  final List<SmsMessage> messages;
-  final bool hasReachedMax;
-  final bool isLoadingMore;
-
-  const SampleAnalyzerLoaded({
-    required this.messages,
-    this.hasReachedMax = false,
-    this.isLoadingMore = false,
-  });
-
-  SampleAnalyzerLoaded copyWith({
-    List<SmsMessage>? messages,
-    bool? hasReachedMax,
-    bool? isLoadingMore,
-  }) {
-    return SampleAnalyzerLoaded(
-      messages: messages ?? this.messages,
-      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
-      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
-    );
-  }
-
-  @override
-  List<Object?> get props => [messages, hasReachedMax, isLoadingMore];
-}
-
-class SampleAnalyzerError extends SampleAnalyzerState {
-  final String message;
-  const SampleAnalyzerError({required this.message});
-  @override
-  List<Object?> get props => [message];
-}
-
 class SampleAnalyzerBloc
     extends Bloc<SampleAnalyzerEvent, SampleAnalyzerState> {
   final SmsLocalDatasource smsDatasource;
@@ -132,6 +68,7 @@ class SampleAnalyzerBloc
 
       if (messages.isEmpty) {
         emit(currentState.copyWith(hasReachedMax: true, isLoadingMore: false));
+
         return;
       }
 
@@ -151,4 +88,76 @@ class SampleAnalyzerBloc
       emit(SampleAnalyzerError(message: e.toString()));
     }
   }
+}
+
+abstract class SampleAnalyzerEvent extends Equatable {
+  @override
+  List<Object?> get props => [];
+
+  const SampleAnalyzerEvent();
+}
+
+class LoadSamples extends SampleAnalyzerEvent {
+  final String contactId;
+
+  @override
+  List<Object?> get props => [contactId];
+
+  const LoadSamples({required this.contactId});
+}
+
+class LoadMoreSamples extends SampleAnalyzerEvent {
+  final String contactId;
+
+  @override
+  List<Object?> get props => [contactId];
+
+  const LoadMoreSamples({required this.contactId});
+}
+
+abstract class SampleAnalyzerState extends Equatable {
+  @override
+  List<Object?> get props => [];
+
+  const SampleAnalyzerState();
+}
+
+class SampleAnalyzerInitial extends SampleAnalyzerState {}
+
+class SampleAnalyzerLoading extends SampleAnalyzerState {}
+
+class SampleAnalyzerLoaded extends SampleAnalyzerState {
+  final List<SmsMessage> messages;
+  final bool hasReachedMax;
+  final bool isLoadingMore;
+
+  @override
+  List<Object?> get props => [messages, hasReachedMax, isLoadingMore];
+
+  const SampleAnalyzerLoaded({
+    required this.messages,
+    this.hasReachedMax = false,
+    this.isLoadingMore = false,
+  });
+
+  SampleAnalyzerLoaded copyWith({
+    List<SmsMessage>? messages,
+    bool? hasReachedMax,
+    bool? isLoadingMore,
+  }) {
+    return SampleAnalyzerLoaded(
+      messages: messages ?? this.messages,
+      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+    );
+  }
+}
+
+class SampleAnalyzerError extends SampleAnalyzerState {
+  final String message;
+
+  @override
+  List<Object?> get props => [message];
+
+  const SampleAnalyzerError({required this.message});
 }

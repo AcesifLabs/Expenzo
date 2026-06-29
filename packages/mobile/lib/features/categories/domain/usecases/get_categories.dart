@@ -22,8 +22,9 @@ class GetCategories extends UseCase<List<Category>, GetCategoriesParams> {
 class GetCategoriesParams extends Params {
   final RecordType? type;
   final bool sortByUsage;
-  const GetCategoriesParams({this.type, this.sortByUsage = false});
 
   @override
   List<Object?> get props => [type, sortByUsage];
+
+  const GetCategoriesParams({this.type, this.sortByUsage = false});
 }

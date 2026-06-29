@@ -5,15 +5,14 @@ import '../../features/records/domain/repositories/record_repository.dart';
 import '../../features/categories/domain/repositories/category_repository.dart';
 
 void initDashboardModule(GetIt getIt) {
-  getIt.registerLazySingleton<GetDashboardSummaryUseCase>(
-    () => GetDashboardSummaryUseCase(
+  getIt.registerLazySingleton<GetDashboardSummary>(
+    () => GetDashboardSummary(
       recordRepository: getIt<RecordRepository>(),
       categoryRepository: getIt<CategoryRepository>(),
     ),
   );
 
   getIt.registerFactory<DashboardBloc>(
-    () =>
-        DashboardBloc(getDashboardSummary: getIt<GetDashboardSummaryUseCase>()),
+    () => DashboardBloc(getDashboardSummary: getIt<GetDashboardSummary>()),
   );
 }

@@ -14,6 +14,7 @@ class RecurringRepositoryImpl implements RecurringRepository {
   Future<Either<Failure, List<RecurringTransaction>>> getRecurringList() async {
     try {
       final recurring = await localDatasource.getRecurringList();
+
       return Right(recurring);
     } on CacheException catch (e) {
       return Left(e.toFailure());
@@ -31,6 +32,7 @@ class RecurringRepositoryImpl implements RecurringRepository {
           CacheFailure(message: 'Recurring transaction not found'),
         );
       }
+
       return Right(recurring);
     } on CacheException catch (e) {
       return Left(e.toFailure());
@@ -43,6 +45,7 @@ class RecurringRepositoryImpl implements RecurringRepository {
   ) async {
     try {
       await localDatasource.createRecurring(recurring);
+
       return Right(recurring);
     } on CacheException catch (e) {
       return Left(e.toFailure());
@@ -55,6 +58,7 @@ class RecurringRepositoryImpl implements RecurringRepository {
   ) async {
     try {
       await localDatasource.updateRecurring(recurring);
+
       return Right(recurring);
     } on CacheException catch (e) {
       return Left(e.toFailure());
@@ -67,6 +71,7 @@ class RecurringRepositoryImpl implements RecurringRepository {
   ) async {
     try {
       await localDatasource.updateRecurringBatch(transactions);
+
       return const Right(null);
     } on CacheException catch (e) {
       return Left(e.toFailure());
@@ -77,6 +82,7 @@ class RecurringRepositoryImpl implements RecurringRepository {
   Future<Either<Failure, Unit>> deleteRecurring(String id) async {
     try {
       await localDatasource.deleteRecurring(id);
+
       return const Right(unit);
     } on CacheException catch (e) {
       return Left(e.toFailure());
@@ -92,6 +98,7 @@ class RecurringRepositoryImpl implements RecurringRepository {
   Future<Either<Failure, List<RecurringTransaction>>> getDueRecurring() async {
     try {
       final dueRecurring = await localDatasource.getDueRecurring();
+
       return Right(dueRecurring);
     } on CacheException catch (e) {
       return Left(e.toFailure());

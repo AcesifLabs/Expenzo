@@ -13,20 +13,20 @@ class RetroactiveScanDialog extends StatefulWidget {
     required this.template,
   });
 
-  static Future<void> show(
-    BuildContext context,
-    MessageSource source,
-    ExpenseTemplate template,
-  ) {
-    return showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => RetroactiveScanDialog(source: source, template: template),
-    );
-  }
-
   @override
   State<RetroactiveScanDialog> createState() => _RetroactiveScanDialogState();
+}
+
+Future<void> showRetroactiveScanDialog(
+  BuildContext context,
+  MessageSource source,
+  ExpenseTemplate template,
+) {
+  return showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => RetroactiveScanDialog(source: source, template: template),
+  );
 }
 
 class _RetroactiveScanDialogState extends State<RetroactiveScanDialog> {

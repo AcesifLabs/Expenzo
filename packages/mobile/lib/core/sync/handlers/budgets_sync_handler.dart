@@ -53,10 +53,11 @@ class BudgetsSyncHandler extends SyncTableHandler<$BudgetsTable, Budget> {
       await (db.delete(db.budgets)..where((t) => t.id.equals(id))).go();
   @override
   Future<int> countRows(AppDatabase db) async {
-    final count = countAll();
-    final query = db.selectOnly(db.budgets)..addColumns([count]);
+    final c = countAll();
+    final query = db.selectOnly(db.budgets)..addColumns([c]);
     final result = await query.getSingle();
-    return result.read(count) ?? 0;
+
+    return result.read(c) ?? 0;
   }
 
   @override

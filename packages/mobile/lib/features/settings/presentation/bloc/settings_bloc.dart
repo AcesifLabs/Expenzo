@@ -43,10 +43,10 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     );
   }
 
-  Future<void> _onUpdateCurrencySymbol(
+  void _onUpdateCurrencySymbol(
     UpdateCurrencySymbol event,
     Emitter<SettingsState> emit,
-  ) async {
+  ) {
     final currentState = state;
     if (currentState is SettingsLoaded) {
       final updated = currentState.settings.copyWith(
@@ -56,10 +56,10 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     }
   }
 
-  Future<void> _onUpdateEmailFetchLimit(
+  void _onUpdateEmailFetchLimit(
     UpdateEmailFetchLimit event,
     Emitter<SettingsState> emit,
-  ) async {
+  ) {
     final currentState = state;
     if (currentState is SettingsLoaded) {
       final updated = currentState.settings.copyWith(
@@ -69,10 +69,10 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     }
   }
 
-  Future<void> _onUpdateNotificationsEnabled(
+  void _onUpdateNotificationsEnabled(
     UpdateNotificationsEnabled event,
     Emitter<SettingsState> emit,
-  ) async {
+  ) {
     final currentState = state;
     if (currentState is SettingsLoaded) {
       final updated = currentState.settings.copyWith(
@@ -82,10 +82,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     }
   }
 
-  Future<void> _onUpdateTheme(
-    UpdateTheme event,
-    Emitter<SettingsState> emit,
-  ) async {
+  void _onUpdateTheme(UpdateTheme event, Emitter<SettingsState> emit) {
     final currentState = state;
     if (currentState is SettingsLoaded) {
       final updated = currentState.settings.copyWith(theme: event.theme);

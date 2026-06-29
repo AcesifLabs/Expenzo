@@ -10,80 +10,25 @@ import '../bloc/auth_state.dart';
 class SignUpPage extends StatelessWidget {
   const SignUpPage({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
-      body: BlocConsumer<AuthBloc, AuthState>(
-        listener: (context, state) {
-          if (state is AuthError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Error: ${state.message}'),
-                backgroundColor: AppColors.error,
-                duration: const Duration(seconds: 5),
-              ),
-            );
-          }
-          if (state is Authenticated) {
-            Navigator.of(context).popUntil((route) => route.isFirst);
-          }
-        },
-        builder: (context, state) {
-          return SafeArea(
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Spacer(),
-                    Icon(
-                      PiconsRegular.userPlus,
-                      size: 80,
-                      color: AppColors.primary,
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      'Create Account',
-                      style: AppTypography.headlineLarge.copyWith(
-                        color: AppColors.primary,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Start tracking your expenses today',
-                      style: AppTypography.bodyLarge.copyWith(
-                        color: AppColors.textSecondaryLight,
-                      ),
-                    ),
-                    const Spacer(),
-                    if (state is AuthLoading)
-                      const Column(
-                        children: [
-                          CircularProgressIndicator(),
-                          SizedBox(height: 16),
-                          Text('Creating account...'),
-                        ],
-                      )
-                    else
-                      _buildSignUpButton(context),
-                    const SizedBox(height: 48),
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
+  void _onAuthStateChanged(BuildContext context, AuthState state) {
+    if (state is AuthError) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${state.message}'),
+          backgroundColor: AppColors.error,
+          duration: const Duration(seconds: 5),
+        ),
+      );
+    }
+
+    if (state is Authenticated) {
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    }
   }
 
   Widget _buildSignUpButton(BuildContext context) {
     return ElevatedButton(
-      onPressed: () {
-        context.read<AuthBloc>().add(const SignInWithGoogleRequested());
-      },
+      onPressed: () => _onSignUpPressed(context),
       style: ElevatedButton.styleFrom(
         backgroundColor: const Color(0xFF4285F4),
         foregroundColor: Colors.white,
@@ -103,6 +48,64 @@ class SignUpPage extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _onSignUpPressed(BuildContext context) {
+    context.read<AuthBloc>().add(const SignInWithGoogleRequested());
+  }
+
+  Widget _buildBody(BuildContext context, AuthState state) {
+    return SafeArea(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Spacer(),
+              Icon(PiconsRegular.userPlus, size: 80, color: AppColors.primary),
+              const SizedBox(height: 24),
+              Text(
+                'Create Account',
+                style: AppTypography.headlineLarge.copyWith(
+                  color: AppColors.primary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Start tracking your expenses today',
+                style: AppTypography.bodyLarge.copyWith(
+                  color: AppColors.textSecondaryLight,
+                ),
+              ),
+              const Spacer(),
+              if (state is AuthLoading)
+                const Column(
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Creating account...'),
+                  ],
+                )
+              else
+                _buildSignUpButton(context),
+              const SizedBox(height: 48),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.backgroundLight,
+      body: BlocConsumer<AuthBloc, AuthState>(
+        listener: _onAuthStateChanged,
+        builder: _buildBody,
       ),
     );
   }

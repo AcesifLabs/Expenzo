@@ -10,7 +10,7 @@ class TokenStorage {
     await _storage.write(key: _tokenKey, value: token);
   }
 
-  static Future<String?> getToken() async {
+  static Future<String?> getToken() {
     return _storage.read(key: _tokenKey);
   }
 
@@ -20,6 +20,7 @@ class TokenStorage {
 
   static Future<bool> hasToken() async {
     final token = await getToken();
+
     return token != null && token.isNotEmpty;
   }
 
@@ -27,12 +28,13 @@ class TokenStorage {
     await _storage.write(key: _lastSyncKey, value: isoTime);
   }
 
-  static Future<String?> getLastSyncAt() async {
+  static Future<String?> getLastSyncAt() {
     return _storage.read(key: _lastSyncKey);
   }
 
   static Future<bool> isFirstSync() async {
     final value = await _storage.read(key: _isFirstSyncKey);
+
     return value == null || value == 'true';
   }
 

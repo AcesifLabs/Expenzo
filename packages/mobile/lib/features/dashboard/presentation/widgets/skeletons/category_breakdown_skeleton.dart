@@ -6,6 +6,13 @@ class CategoryBreakdownSkeleton extends StatelessWidget {
 
   const CategoryBreakdownSkeleton({super.key, this.rowCount = 4});
 
+  Widget _buildRow(int index) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: _CategoryRowSkeleton(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -16,13 +23,7 @@ class CategoryBreakdownSkeleton extends StatelessWidget {
           children: [
             ShimmerBox.textLine(width: 160, height: 18),
             const SizedBox(height: 16),
-
-            ...List.generate(rowCount, (index) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: _CategoryRowSkeleton(),
-              );
-            }),
+            ...List.generate(rowCount, _buildRow),
           ],
         ),
       ),
@@ -39,15 +40,12 @@ class _CategoryRowSkeleton extends StatelessWidget {
           children: [
             ShimmerBox.circle(size: 20),
             const SizedBox(width: 8),
-
             Expanded(child: ShimmerBox.textLine(height: 14)),
             const SizedBox(width: 8),
-
             ShimmerBox.textLine(width: 70, height: 14),
           ],
         ),
         const SizedBox(height: 4),
-
         Row(
           children: [
             Expanded(

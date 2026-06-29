@@ -25,7 +25,9 @@ class ParsingRulesRemoteDatasourceImpl implements ParsingRulesRemoteDatasource {
   }
 
   @override
-  Future<void> deleteRule(String id) async {}
+  Future<void> deleteRule(String id) async {
+    await Future.value();
+  }
 
   @override
   Stream<List<domain.ParsingRule>> watchRules() {

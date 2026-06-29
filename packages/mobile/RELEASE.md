@@ -108,3 +108,31 @@ cd packages/mobile/android
 bundle install
 bundle exec fastlane lanes
 ```
+
+## 7) Code Quality Gates
+
+The mobile package enforces quality checks on **every push** via `.githooks/pre-push` and on **every PR** via GitHub Actions CI.
+
+### Local checks (pre-push hook)
+
+```bash
+cd packages/mobile
+dart format --output=none --set-exit-if-changed .   # formatting
+flutter analyze --no-fatal-infos                      # Dart analysis
+dart run dart_code_linter:metrics analyze lib          # code metrics
+dart run dart_code_linter:metrics check-unused-code lib # unused code
+flutter test                                           # tests
+```
+
+The hook runs automatically on `git push`. Use `git push --no-verify` to bypass (not recommended).
+
+### CI checks (GitHub Actions)
+
+Push to `develop` or open a PR to `main`/`develop` triggers the CI workflow (`.github/workflows/ci.yml`), which runs the same gates centrally.
+
+### dart_code_linter rules
+
+Configured in `packages/mobile/analysis_options.yaml`:
+- **25+ rules** targeting code smells: avoid-dynamic, avoid-late-keyword, avoid-non-null-assertion, member-ordering, prefer-extracting-callbacks, etc.
+- **Metrics thresholds**: cyclomatic-complexity ≤10, nesting ≤4, params ≤4, SLOC ≤50
+- Generated files (`*.g.dart`, `*.freezed.dart`, `*.gr.dart`) are excluded

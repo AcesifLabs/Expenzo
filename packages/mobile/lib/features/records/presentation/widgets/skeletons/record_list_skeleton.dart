@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../../../shared/presentation/widgets/shimmer_box.dart';
 
-class ExpenseListSkeleton extends StatelessWidget {
+class RecordListSkeleton extends StatelessWidget {
   final int itemCount;
 
-  const ExpenseListSkeleton({super.key, this.itemCount = 6});
+  const RecordListSkeleton({super.key, this.itemCount = 6});
 
   @override
   Widget build(BuildContext context) {

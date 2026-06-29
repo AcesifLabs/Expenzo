@@ -20,14 +20,6 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
 
   StreamSubscription<List<Record>>? _recordsSubscription;
 
-  bool _hasActiveFilters(RecordLoaded state) {
-    return state.filterStartDate != null ||
-        state.filterEndDate != null ||
-        (state.filterCategoryIds != null &&
-            state.filterCategoryIds!.isNotEmpty) ||
-        state.filterRecordType != null;
-  }
-
   RecordBloc({
     required this.getRecords,
     required this.addRecord,
@@ -45,6 +37,22 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     on<ApplyFilters>(_onApplyFilters);
     on<ClearFilters>(_onClearFilters);
     on<_RecordsUpdated>(_onRecordsUpdated);
+  }
+
+  @override
+  Future<void> close() {
+    _recordsSubscription?.cancel();
+
+    return super.close();
+  }
+
+  bool _hasActiveFilters(RecordLoaded state) {
+    final catIds = state.filterCategoryIds;
+
+    return state.filterStartDate != null ||
+        state.filterEndDate != null ||
+        (catIds != null && catIds.isNotEmpty) ||
+        state.filterRecordType != null;
   }
 
   Future<void> _onLoadRecords(
@@ -75,10 +83,7 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     );
   }
 
-  Future<void> _onRecordsUpdated(
-    _RecordsUpdated event,
-    Emitter<RecordState> emit,
-  ) async {
+  void _onRecordsUpdated(_RecordsUpdated event, Emitter<RecordState> emit) {
     final records = event.records;
     final currentQuery = state is RecordLoaded
         ? (state as RecordLoaded).searchQuery
@@ -99,7 +104,7 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     Emitter<RecordState> emit,
   ) async {
     final currentState = state;
-    if (currentState is! RecordLoaded || currentState.hasMore == false) {
+    if (currentState is! RecordLoaded || !currentState.hasMore) {
       return;
     }
 
@@ -112,12 +117,14 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
 
     if (_hasActiveFilters(currentState)) {
       final result = await recordRepository.getFilteredRecords(
-        startDate: currentState.filterStartDate,
-        endDate: currentState.filterEndDate,
-        categoryIds: currentState.filterCategoryIds,
-        recordType: currentState.filterRecordType,
-        limit: _pageSize,
-        offset: currentState.records.length,
+        RecordFilter(
+          startDate: currentState.filterStartDate,
+          endDate: currentState.filterEndDate,
+          categoryIds: currentState.filterCategoryIds,
+          recordType: currentState.filterRecordType,
+          limit: _pageSize,
+          offset: currentState.records.length,
+        ),
       );
 
       result.fold((failure) => emit(RecordError(failure.message)), (
@@ -158,7 +165,10 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     Emitter<RecordState> emit,
   ) async {
     final result = await addRecord(event.record);
-    result.fold((failure) => emit(RecordError(failure.message)), (_) {});
+
+    if (result.isLeft()) {
+      result.fold((failure) => emit(RecordError(failure.message)), (_) => null);
+    }
   }
 
   Future<void> _onUpdateRecord(
@@ -166,7 +176,10 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     Emitter<RecordState> emit,
   ) async {
     final result = await updateRecord(event.record);
-    result.fold((failure) => emit(RecordError(failure.message)), (_) {});
+
+    if (result.isLeft()) {
+      result.fold((failure) => emit(RecordError(failure.message)), (_) => null);
+    }
   }
 
   Future<void> _onDeleteRecord(
@@ -174,13 +187,13 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     Emitter<RecordState> emit,
   ) async {
     final result = await deleteRecord(event.id);
-    result.fold((failure) => emit(RecordError(failure.message)), (_) {});
+
+    if (result.isLeft()) {
+      result.fold((failure) => emit(RecordError(failure.message)), (_) => null);
+    }
   }
 
-  Future<void> _onRefreshRecords(
-    RefreshRecords event,
-    Emitter<RecordState> emit,
-  ) async {
+  void _onRefreshRecords(RefreshRecords event, Emitter<RecordState> emit) {
     add(const LoadRecords());
   }
 
@@ -204,11 +217,13 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     _recordsSubscription = null;
 
     final result = await recordRepository.getFilteredRecords(
-      startDate: event.startDate,
-      endDate: event.endDate,
-      categoryIds: event.categoryIds,
-      recordType: event.recordType,
-      limit: _pageSize,
+      RecordFilter(
+        startDate: event.startDate,
+        endDate: event.endDate,
+        categoryIds: event.categoryIds,
+        recordType: event.recordType,
+        limit: _pageSize,
+      ),
     );
 
     result.fold(
@@ -228,24 +243,16 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     );
   }
 
-  Future<void> _onClearFilters(
-    ClearFilters event,
-    Emitter<RecordState> emit,
-  ) async {
+  void _onClearFilters(ClearFilters event, Emitter<RecordState> emit) {
     add(const LoadRecords());
-  }
-
-  @override
-  Future<void> close() {
-    _recordsSubscription?.cancel();
-    return super.close();
   }
 }
 
 class _RecordsUpdated extends RecordEvent {
   final List<Record> records;
-  const _RecordsUpdated(this.records);
 
   @override
   List<Object?> get props => [records];
+
+  const _RecordsUpdated(this.records);
 }

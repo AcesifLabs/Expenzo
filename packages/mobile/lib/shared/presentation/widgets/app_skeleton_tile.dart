@@ -15,15 +15,17 @@ class AppSkeletonTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localLine2Width = line2Width;
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: ListTile(
         leading: ShimmerBox.circle(size: circleSize),
         title: ShimmerBox.textLine(width: line1Width),
-        subtitle: line2Width != null
+        subtitle: localLine2Width != null
             ? Padding(
                 padding: const EdgeInsets.only(top: 4),
-                child: ShimmerBox.textLine(width: line2Width!),
+                child: ShimmerBox.textLine(width: localLine2Width),
               )
             : null,
       ),

@@ -9,7 +9,7 @@ class RecurringDao extends DatabaseAccessor<AppDatabase>
     with _$RecurringDaoMixin {
   RecurringDao(super.db);
 
-  Future<List<RecurringTransaction>> getAllRecurring() async {
+  Future<List<RecurringTransaction>> getAllRecurring() {
     return select(recurringTransactions).get();
   }
 
@@ -17,8 +17,9 @@ class RecurringDao extends DatabaseAccessor<AppDatabase>
     return select(recurringTransactions).watch();
   }
 
-  Future<RecurringTransaction?> getRecurringById(String id) async {
+  Future<RecurringTransaction?> getRecurringById(String id) {
     final query = select(recurringTransactions)..where((r) => r.id.equals(id));
+
     return query.getSingleOrNull();
   }
 
@@ -46,7 +47,7 @@ class RecurringDao extends DatabaseAccessor<AppDatabase>
     await (delete(recurringTransactions)..where((r) => r.id.equals(id))).go();
   }
 
-  Future<List<RecurringTransaction>> getDueRecurring() async {
+  Future<List<RecurringTransaction>> getDueRecurring() {
     final now = DateTime.now();
     final query = select(recurringTransactions)
       ..where(
@@ -54,6 +55,7 @@ class RecurringDao extends DatabaseAccessor<AppDatabase>
             r.isActive.equals(true) &
             r.nextOccurrence.isSmallerOrEqualValue(now),
       );
+
     return query.get();
   }
 }

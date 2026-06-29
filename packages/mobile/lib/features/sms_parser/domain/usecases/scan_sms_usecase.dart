@@ -4,7 +4,8 @@ import 'package:expense_tracker/core/error/usecase.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
 import '../../../parsing_rules/domain/entities/parsed_transaction.dart';
 import '../../../parsing_rules/domain/services/parsing_isolate_service.dart';
-import '../../../parsing_rules/domain/usecases/evaluate_rules.dart' as eval;
+import '../../../parsing_rules/domain/usecases/evaluate_rules_use_case.dart'
+    as eval;
 import '../../data/datasources/sms_local_datasource.dart';
 import '../entities/sms_message.dart';
 
@@ -34,9 +35,10 @@ class ScanSmsUseCase
       }
 
       List<SmsMessage> filteredMessages = messages;
-      if (params.since != null) {
+      final since = params.since;
+      if (since != null) {
         filteredMessages = messages
-            .where((m) => m.date.isAfter(params.since!))
+            .where((m) => m.date.isAfter(since))
             .toList();
       }
 
@@ -65,6 +67,7 @@ class ScanSmsUseCase
 
   String _generateSourceId(SmsMessage message) {
     final combined = '${message.address}_${message.date.toIso8601String()}';
+
     return combined.hashCode.abs().toString();
   }
 }

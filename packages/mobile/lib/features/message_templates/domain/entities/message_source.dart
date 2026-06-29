@@ -1,7 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-enum AutoCreateOption { autoCreate, promptUser, manualOnly }
-
 class MessageSource extends Equatable {
   final String id;
   final String contactId;
@@ -10,6 +8,17 @@ class MessageSource extends Equatable {
   final AutoCreateOption autoCreateOption;
   final DateTime createdAt;
   final DateTime updatedAt;
+
+  @override
+  List<Object?> get props => [
+    id,
+    contactId,
+    contactName,
+    isMonitored,
+    autoCreateOption,
+    createdAt,
+    updatedAt,
+  ];
 
   const MessageSource({
     required this.id,
@@ -40,15 +49,6 @@ class MessageSource extends Equatable {
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
-
-  @override
-  List<Object?> get props => [
-    id,
-    contactId,
-    contactName,
-    isMonitored,
-    autoCreateOption,
-    createdAt,
-    updatedAt,
-  ];
 }
+
+enum AutoCreateOption { autoCreate, promptUser, manualOnly }

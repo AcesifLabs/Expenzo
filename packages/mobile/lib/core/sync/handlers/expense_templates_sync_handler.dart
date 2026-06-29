@@ -29,42 +29,40 @@ class ExpenseTemplatesSyncHandler
     Map<String, dynamic> data,
   ) => ExpenseTemplatesCompanion.insert(
     id: id,
-    sourceId: data['sourceId'] ?? '',
-    sampleMessage: data['sampleMessage'] ?? '',
-    triggerWord: data['triggerWord'] ?? '',
-    amountPattern: data['amountPattern'] ?? '',
-    descriptionPattern: data['descriptionPattern'] != null
-        ? Value(data['descriptionPattern'])
-        : const Value.absent(),
-    datePattern: data['datePattern'] != null
-        ? Value(data['datePattern'])
-        : const Value.absent(),
-    categoryId: data['categoryId'] != null
-        ? Value(data['categoryId'])
-        : const Value.absent(),
-    selectedAmount: data['selectedAmount'] != null
-        ? Value(data['selectedAmount'])
-        : const Value.absent(),
-    createdAt: data['createdAt'] != null
-        ? DateTime.parse(data['createdAt']).toLocal()
-        : DateTime.now(),
-    updatedAt: data['updatedAt'] != null
-        ? DateTime.parse(data['updatedAt']).toLocal()
-        : DateTime.now(),
+    sourceId: _str(data, 'sourceId'),
+    sampleMessage: _str(data, 'sampleMessage'),
+    triggerWord: _str(data, 'triggerWord'),
+    amountPattern: _str(data, 'amountPattern'),
+    descriptionPattern: _optStr(data, 'descriptionPattern'),
+    datePattern: _optStr(data, 'datePattern'),
+    categoryId: _optStr(data, 'categoryId'),
+    selectedAmount: _optStr(data, 'selectedAmount'),
+    createdAt: _dt(data, 'createdAt'),
+    updatedAt: _dt(data, 'updatedAt'),
   );
   @override
   Future<void> deleteById(AppDatabase db, String id) async => await (db.delete(
     db.expenseTemplates,
   )..where((t) => t.id.equals(id))).go();
+
   @override
   Future<int> countRows(AppDatabase db) async {
-    final count = countAll();
-    final query = db.selectOnly(db.expenseTemplates)..addColumns([count]);
+    final c = countAll();
+    final query = db.selectOnly(db.expenseTemplates)..addColumns([c]);
     final result = await query.getSingle();
-    return result.read(count) ?? 0;
+
+    return result.read(c) ?? 0;
   }
 
   @override
   Future<List<ExpenseTemplate>> fetchAll(AppDatabase db) =>
       db.select(db.expenseTemplates).get();
+
+  static String _str(Map<String, dynamic> data, String key) => data[key] ?? '';
+  static Value<String> _optStr(Map<String, dynamic> data, String key) =>
+      data[key] != null ? Value(data[key] as String) : const Value.absent();
+  static DateTime _dt(Map<String, dynamic> data, String key) =>
+      data[key] != null
+      ? DateTime.parse(data[key] as String).toLocal()
+      : DateTime.now();
 }

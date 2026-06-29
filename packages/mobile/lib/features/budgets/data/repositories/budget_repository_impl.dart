@@ -17,26 +17,11 @@ class BudgetRepositoryImpl implements BudgetRepository {
     SyncQueueDao? syncQueueDao,
   }) : _syncQueueDao = syncQueueDao;
 
-  void _enqueueSync(
-    String action,
-    String recordId, [
-    Map<String, dynamic>? data,
-  ]) {
-    final syncQueueDao = _syncQueueDao;
-    if (syncQueueDao == null) return;
-    syncQueueDao.enqueue(
-      tableName: 'budgets',
-      recordId: recordId,
-      action: action,
-      payload: data != null ? jsonEncode(data) : '',
-    );
-    SyncEventBus().trigger();
-  }
-
   @override
   Future<Either<Failure, List<Budget>>> getBudgets() async {
     try {
       final budgets = await localDatasource.getBudgets();
+
       return Right(budgets);
     } on CacheException catch (e) {
       return Left(e.toFailure());
@@ -50,6 +35,7 @@ class BudgetRepositoryImpl implements BudgetRepository {
       if (budget == null) {
         return const Left(CacheFailure(message: 'Budget not found'));
       }
+
       return Right(budget);
     } on CacheException catch (e) {
       return Left(e.toFailure());
@@ -73,6 +59,7 @@ class BudgetRepositoryImpl implements BudgetRepository {
           'isEnabled': budget.isEnabled,
         },
       );
+
       return Right(budget);
     } on CacheException catch (e) {
       return Left(e.toFailure());
@@ -96,6 +83,7 @@ class BudgetRepositoryImpl implements BudgetRepository {
           'isEnabled': budget.isEnabled,
         },
       );
+
       return Right(budget);
     } on CacheException catch (e) {
       return Left(e.toFailure());
@@ -107,6 +95,7 @@ class BudgetRepositoryImpl implements BudgetRepository {
     try {
       await localDatasource.deleteBudget(id);
       _enqueueSync('delete', id);
+
       return const Right(unit);
     } on CacheException catch (e) {
       return Left(e.toFailure());
@@ -116,5 +105,21 @@ class BudgetRepositoryImpl implements BudgetRepository {
   @override
   Stream<List<Budget>> watchBudgets() {
     return localDatasource.watchBudgets();
+  }
+
+  void _enqueueSync(
+    String action,
+    String recordId, [
+    Map<String, dynamic>? data,
+  ]) {
+    final syncQueueDao = _syncQueueDao;
+    if (syncQueueDao == null) return;
+    syncQueueDao.enqueue(
+      tableName: 'budgets',
+      recordId: recordId,
+      action: action,
+      payload: data != null ? jsonEncode(data) : '',
+    );
+    SyncEventBus().trigger();
   }
 }

@@ -5,9 +5,9 @@ class AppScaffold extends StatelessWidget {
   final String? title;
   final String? subtitle;
   final List<Widget>? actions;
+  final RefreshCallback? onRefresh;
   final Widget? _body;
   final bool _isSlivers;
-  final RefreshCallback? onRefresh;
 
   const AppScaffold({
     super.key,
@@ -34,27 +34,32 @@ class AppScaffold extends StatelessWidget {
        ),
        _isSlivers = true;
 
+  Widget _buildContent() {
+    return _isSlivers
+        ? (_body ?? const SizedBox.shrink())
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AppPageHeader(
+                title: title ?? '',
+                subtitle: subtitle,
+                actions: actions,
+              ),
+              Expanded(child: _body ?? const SizedBox.shrink()),
+            ],
+          );
+  }
+
   @override
   Widget build(BuildContext context) {
-    Widget content;
-    if (_isSlivers) {
-      content = _body!;
-    } else {
-      content = Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AppPageHeader(
-            title: title ?? '',
-            subtitle: subtitle,
-            actions: actions,
-          ),
-          Expanded(child: _body ?? const SizedBox.shrink()),
-        ],
-      );
-    }
+    final localOnRefresh = onRefresh;
+    final content = _buildContent();
 
-    if (onRefresh != null) {
-      content = RefreshIndicator(onRefresh: onRefresh!, child: content);
+    if (localOnRefresh != null) {
+      return Material(
+        type: MaterialType.transparency,
+        child: RefreshIndicator(onRefresh: localOnRefresh, child: content),
+      );
     }
 
     return Material(type: MaterialType.transparency, child: content);

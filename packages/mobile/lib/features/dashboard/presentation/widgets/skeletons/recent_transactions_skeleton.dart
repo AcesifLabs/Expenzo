@@ -6,6 +6,10 @@ class RecentTransactionsSkeleton extends StatelessWidget {
 
   const RecentTransactionsSkeleton({super.key, this.itemCount = 5});
 
+  Widget _buildTile(int index) {
+    return const _TransactionTileSkeleton();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -16,10 +20,7 @@ class RecentTransactionsSkeleton extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: ShimmerBox.textLine(width: 180, height: 18),
           ),
-
-          ...List.generate(itemCount, (index) {
-            return const _TransactionTileSkeleton();
-          }),
+          ...List.generate(itemCount, _buildTile),
         ],
       ),
     );

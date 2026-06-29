@@ -13,39 +13,44 @@ class ProcessRecurring {
     try {
       final dueRecurringResult = await repository.getDueRecurring();
 
-      return dueRecurringResult.fold((failure) => Left(failure), (
-        dueRecurring,
-      ) async {
-        if (dueRecurring.isEmpty) {
-          return const Right([]);
-        }
-
-        final processed = <RecurringTransaction>[];
-        final updates = <RecurringTransaction>[];
-
-        for (final recurring in dueRecurring) {
-          if (recurring.autoCreateExpense) {
-            processed.add(recurring);
-          }
-
-          final nextDate = _calculateNextOccurrence(
-            recurring.nextOccurrence,
-            recurring.frequency,
-          );
-
-          updates.add(recurring.copyWith(nextOccurrence: nextDate));
-        }
-
-        final updateResult = await repository.updateRecurringBatch(updates);
-
-        return updateResult.fold(
-          (failure) => Left(failure),
-          (_) => Right(processed),
-        );
-      });
+      return dueRecurringResult.fold(
+        (failure) => Left(failure),
+        _processDueRecurring,
+      );
     } on CacheException catch (e) {
       return Left(e.toFailure());
     }
+  }
+
+  Future<Either<Failure, List<RecurringTransaction>>> _processDueRecurring(
+    List<RecurringTransaction> dueRecurring,
+  ) async {
+    if (dueRecurring.isEmpty) {
+      return const Right([]);
+    }
+
+    final processed = <RecurringTransaction>[];
+    final updates = <RecurringTransaction>[];
+
+    for (final recurring in dueRecurring) {
+      if (recurring.autoCreateExpense) {
+        processed.add(recurring);
+      }
+
+      final nextDate = _calculateNextOccurrence(
+        recurring.nextOccurrence,
+        recurring.frequency,
+      );
+
+      updates.add(recurring.copyWith(nextOccurrence: nextDate));
+    }
+
+    final updateResult = await repository.updateRecurringBatch(updates);
+
+    return updateResult.fold(
+      (failure) => Left(failure),
+      (_) => Right(processed),
+    );
   }
 
   DateTime _calculateNextOccurrence(

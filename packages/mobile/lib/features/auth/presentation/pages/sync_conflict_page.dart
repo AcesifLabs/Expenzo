@@ -21,38 +21,13 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
   String _status = '';
 
   @override
-  void dispose() {
-    try {
-      di.getIt<SyncEngine>().onProgress = null;
-    } catch (e) {
-      debugPrint('SyncConflictPage: Failed to clear onProgress callback: $e');
-    }
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      child: Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (_syncing) _buildProgressView() else _buildDecisionView(),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+  void initState() {
+    super.initState();
   }
 
   Widget _buildDecisionView() {
     final colors = Theme.of(context).colorScheme;
+
     return Column(
       children: [
         const SizedBox(height: 32),
@@ -75,21 +50,21 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
           'Merge My Data',
           'Keep all data from both sources',
           AppColors.primary,
-          () => _executeDecision(SyncMode.merge),
+          _onMergePressed,
         ),
         const SizedBox(height: 12),
         _decisionButton(
           'Replace with Cloud Data',
           'Delete local data, use cloud version',
           colors.error,
-          () => _showReplaceConfirm(),
+          _onReplacePressed,
         ),
         const SizedBox(height: 12),
         _decisionButton(
           'Overwrite Cloud with Local',
           'Replace cloud data with this device',
           Colors.orange,
-          () => _executeDecision(SyncMode.localWins),
+          _onOverwritePressed,
         ),
       ],
     );
@@ -176,26 +151,40 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
+      builder: (_) => AlertDialog(
         title: const Text('Replace Local Data?'),
         content: const Text(
           'This will permanently delete all data on this device and replace it with your cloud data.',
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: Navigator.of(context).pop,
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              _executeDecision(SyncMode.cloudWins);
-            },
+            onPressed: _onConfirmReplace,
             child: const Text('Replace', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
     );
+  }
+
+  void _onConfirmReplace() {
+    Navigator.pop(context);
+    _executeDecision(SyncMode.cloudWins);
+  }
+
+  void _onMergePressed() {
+    _executeDecision(SyncMode.merge);
+  }
+
+  void _onReplacePressed() {
+    _showReplaceConfirm();
+  }
+
+  void _onOverwritePressed() {
+    _executeDecision(SyncMode.localWins);
   }
 
   Future<void> _executeDecision(SyncMode mode) async {
@@ -207,31 +196,21 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
 
     try {
       final engine = di.getIt<SyncEngine>();
-      engine.onProgress = (p) {
-        if (mounted) {
-          setState(() {
-            _progress = p;
-            _status = 'Syncing...';
-          });
-        }
-      };
-
+      engine.onProgress = _onProgress;
       if (mode == SyncMode.cloudWins) {
         setState(() => _status = 'Resetting database...');
         await di.resetDatabaseInstance();
       }
-
       await engine.executeDecision(mode);
 
+      if (!mounted) return;
+      setState(() {
+        _progress = 1.0;
+        _status = 'Complete!';
+      });
+      await Future.delayed(const Duration(seconds: 1));
       if (mounted) {
-        setState(() {
-          _progress = 1.0;
-          _status = 'Complete!';
-        });
-        await Future.delayed(const Duration(seconds: 1));
-        if (mounted) {
-          context.read<AuthBloc>().add(const AuthCheckRequested());
-        }
+        context.read<AuthBloc>().add(const AuthCheckRequested());
       }
     } catch (e) {
       if (mounted) {
@@ -243,11 +222,52 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
       }
     }
   }
+
+  void _onProgress(double p) {
+    if (mounted) {
+      setState(() {
+        _progress = p;
+        _status = 'Syncing...';
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    try {
+      di.getIt<SyncEngine>().onProgress = null;
+    } catch (e) {
+      debugPrint('SyncConflictPage: Failed to clear onProgress callback: $e');
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (_syncing) _buildProgressView() else _buildDecisionView(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _PieChartPainter extends CustomPainter {
   final double progress;
   final Color primaryColor;
+
   _PieChartPainter(this.progress, this.primaryColor);
 
   @override

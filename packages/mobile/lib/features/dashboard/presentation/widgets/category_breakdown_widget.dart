@@ -69,6 +69,7 @@ class _CategoryRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final bodyMedium = theme.textTheme.bodyMedium;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -78,17 +79,10 @@ class _CategoryRow extends StatelessWidget {
             children: [
               Icon(AppIcons.getCategoryIcon(category.emoji), size: 20),
               const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  category.categoryName,
-                  style: theme.textTheme.bodyMedium,
-                ),
-              ),
+              Expanded(child: Text(category.categoryName, style: bodyMedium)),
               Text(
                 currencyFormat.format(category.amount),
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: bodyMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
             ],
           ),

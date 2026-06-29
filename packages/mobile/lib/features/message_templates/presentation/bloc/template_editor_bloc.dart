@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/usecases/save_template.dart';
 import '../../domain/repositories/message_template_repository.dart';
@@ -18,10 +20,13 @@ class TemplateEditorBloc
     on<DeleteTemplateEvent>(_onDeleteTemplate);
   }
 
+  // ignore: avoid-redundant-async
   Future<void> _onLoadTemplate(
     LoadTemplate event,
     Emitter<TemplateEditorState> emit,
-  ) async {}
+  ) async {
+    // TODO: implement template loading
+  }
 
   Future<void> _onSaveTemplate(
     SaveTemplateEvent event,
@@ -34,8 +39,9 @@ class TemplateEditorBloc
     if (sourceResult.isLeft()) {
       sourceResult.fold(
         (failure) => emit(TemplateEditorError(failure.message)),
-        (_) {},
+        (_) => unawaited(Future.value()),
       );
+
       return;
     }
 

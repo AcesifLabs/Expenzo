@@ -1,3 +1,5 @@
+// ignore_for_file: prefer-match-file-name
+
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
@@ -17,7 +19,18 @@ enum SyncConflictType { none, localOnly, cloudOnly, conflict }
 enum SyncMode { localWins, cloudWins, merge }
 
 class SyncEngine {
-  AppDatabase get _db => di.getIt<AppDatabase>();
+  void Function(double)? onProgress;
+
+  static const int chunkSize = 500;
+
+  static const List<Duration> _backoffDelays = [
+    Duration(seconds: 5),
+    Duration(seconds: 15),
+    Duration(seconds: 45),
+    Duration(minutes: 2),
+    Duration(minutes: 5),
+  ];
+
   final ApiClient _apiClient;
   final ConnectivityService _connectivity;
   final SyncQueueDao _syncQueueDao;
@@ -28,15 +41,8 @@ class SyncEngine {
   bool _initialized = false;
   int _retryCount = 0;
   Timer? _retryTimer;
-  void Function(double)? onProgress;
 
-  static const List<Duration> _backoffDelays = [
-    Duration(seconds: 5),
-    Duration(seconds: 15),
-    Duration(seconds: 45),
-    Duration(minutes: 2),
-    Duration(minutes: 5),
-  ];
+  AppDatabase get _db => di.getIt<AppDatabase>();
 
   SyncEngine({
     required SyncQueueDao syncQueueDao,
@@ -57,6 +63,7 @@ class SyncEngine {
       final hasToken = await TokenStorage.hasToken();
       if (!hasToken) {
         debugPrint('SyncEngine: No JWT');
+
         return;
       }
       await _safePullChanges();
@@ -65,11 +72,8 @@ class SyncEngine {
         await _migrateExistingData();
       }
       _connectivitySub = _connectivity.onlineStream.listen(
-        (online) async {
-          if (online) {
-            await _safePullChanges();
-            await _safePushChanges();
-          }
+        (online) {
+          unawaited(_onConnectivityChange(online));
         },
         onError: (e) {
           debugPrint('Connectivity stream error: $e');
@@ -77,12 +81,8 @@ class SyncEngine {
         },
       );
       _syncEventSub = SyncEventBus().events.listen(
-        (_) async {
-          final online = await _connectivity.checkNow();
-          if (online) {
-            await _safePullChanges();
-            await _safePushChanges();
-          }
+        (_) {
+          unawaited(_onSyncEvent());
         },
         onError: (e) {
           debugPrint('SyncEventBus listener error: $e');
@@ -107,7 +107,61 @@ class SyncEngine {
     _initialized = false;
   }
 
-  static const int chunkSize = 500;
+  Future<SyncConflictType> checkConflict() async {
+    int localCount = 0;
+    for (final handler in _registry.all) {
+      localCount += await handler.countRows(_db);
+    }
+
+    int cloudCount = 0;
+    try {
+      final response = await _apiClient.dio.get(ApiConstants.syncSummary);
+      cloudCount = response.data['totalCount'] ?? 0;
+    } catch (e) {
+      debugPrint('SyncEngine: Failed to fetch cloud summary: $e');
+      cloudCount = 0;
+    }
+
+    if (localCount > 0 && cloudCount > 0) return SyncConflictType.conflict;
+    if (localCount > 0) return SyncConflictType.localOnly;
+    if (cloudCount > 0) return SyncConflictType.cloudOnly;
+
+    return SyncConflictType.none;
+  }
+
+  Future<void> executeDecision(SyncMode mode) async {
+    switch (mode) {
+      case SyncMode.localWins:
+        await _apiClient.dio.delete(ApiConstants.syncClear);
+        await _migrateExistingData();
+        await _safePushChanges();
+        break;
+      case SyncMode.cloudWins:
+        await _safePullChanges();
+        break;
+      case SyncMode.merge:
+        await _migrateExistingData();
+        await _safePushChanges();
+        await _safePullChanges();
+        break;
+    }
+    await TokenStorage.markFirstSyncDone();
+  }
+
+  Future<void> _onConnectivityChange(bool online) async {
+    if (online) {
+      await _safePullChanges();
+      await _safePushChanges();
+    }
+  }
+
+  Future<void> _onSyncEvent() async {
+    final online = await _connectivity.checkNow();
+    if (online) {
+      await _safePullChanges();
+      await _safePushChanges();
+    }
+  }
 
   Future<void> _safePushChanges() async {
     if (_isSyncing) return;
@@ -115,63 +169,65 @@ class SyncEngine {
     try {
       if (!await _connectivity.checkNow()) {
         _isSyncing = false;
+
         return;
       }
       final queue = await _syncQueueDao.getUnsynced();
       if (queue.isEmpty) {
         _isSyncing = false;
+
         return;
       }
 
-      int processed = 0;
-      final total = queue.length;
-
-      while (processed < total) {
-        final end = processed + chunkSize > total
-            ? total
-            : processed + chunkSize;
-        final batch = queue.sublist(processed, end);
-        debugPrint(
-          'SyncEngine: Pushing chunk ${processed ~/ chunkSize + 1} (${batch.length} items)',
-        );
-
-        final changes = batch
-            .map(
-              (item) => {
-                'table': item.entityTable,
-                'action': item.action,
-                'id': item.recordId,
-                'data': item.payload.isNotEmpty
-                    ? jsonDecode(item.payload)
-                    : null,
-                'updatedAt': item.createdAt.toUtc().toIso8601String(),
-              },
-            )
-            .toList();
-
-        final response = await _apiClient.dio.post(
-          ApiConstants.syncPush,
-          data: {'changes': changes},
-        );
-        final results = response.data['results'] as List;
-        final syncedIds = <int>[];
-        for (int i = 0; i < results.length; i++) {
-          final status = SyncStatus.fromString(results[i]['status'] as String);
-          if (status == SyncStatus.success || status == SyncStatus.conflict) {
-            syncedIds.add(batch[i].id);
-          }
-        }
-        if (syncedIds.isNotEmpty) await _syncQueueDao.markSynced(syncedIds);
-
-        processed = end;
-        onProgress?.call(processed / total);
-      }
+      await _processPushQueue(queue);
       _retryCount = 0;
     } catch (e) {
       debugPrint('SyncEngine push failed: $e');
       _scheduleRetry();
     } finally {
       _isSyncing = false;
+    }
+  }
+
+  Future<void> _processPushQueue(List<SyncQueueData> queue) async {
+    int processed = 0;
+    final total = queue.length;
+
+    while (processed < total) {
+      final end = processed + chunkSize > total ? total : processed + chunkSize;
+      final batch = queue.sublist(processed, end);
+      debugPrint(
+        'SyncEngine: Pushing chunk ${processed ~/ chunkSize + 1} (${batch.length} items)',
+      );
+
+      final changes = batch
+          .map(
+            (item) => {
+              'table': item.entityTable,
+              'action': item.action,
+              'id': item.recordId,
+              'data': item.payload.isNotEmpty ? jsonDecode(item.payload) : null,
+              'updatedAt': item.createdAt.toUtc().toIso8601String(),
+            },
+          )
+          .toList();
+
+      final response = await _apiClient.dio.post(
+        ApiConstants.syncPush,
+        data: {'changes': changes},
+      );
+      final results = response.data['results'] as List;
+      final syncedIds = <int>[];
+      for (int i = 0; i < results.length; i++) {
+        final status = SyncStatus.fromString(results[i]['status'] as String);
+        if (status == SyncStatus.success || status == SyncStatus.conflict) {
+          syncedIds.add(batch[i].id);
+        }
+      }
+      if (syncedIds.isNotEmpty) await _syncQueueDao.markSynced(syncedIds);
+
+      processed = end;
+      onProgress?.call(processed / total);
     }
   }
 
@@ -220,6 +276,7 @@ class SyncEngine {
       if (changes.isEmpty) {
         debugPrint('SyncEngine: No data to migrate');
         await TokenStorage.markFirstSyncDone();
+
         return;
       }
 
@@ -245,6 +302,28 @@ class SyncEngine {
     }
   }
 
+  void _scheduleRetry() {
+    if (_retryCount >= _backoffDelays.length) {
+      _retryCount = 0;
+
+      return;
+    }
+    final delay = _backoffDelays[_retryCount];
+    debugPrint(
+      'SyncEngine: Retrying in ${delay.inSeconds}s (attempt ${_retryCount + 1})',
+    );
+    _retryTimer?.cancel();
+    _retryTimer = Timer(delay, () {
+      unawaited(_retrySync());
+    });
+  }
+
+  Future<void> _retrySync() async {
+    _retryCount++;
+    await _safePullChanges();
+    await _safePushChanges();
+  }
+
   Future<void> _applyRemoteChange(Map<String, dynamic> change) async {
     final tableName = change['table'] as String;
     final data = change['data'] as Map<String, dynamic>?;
@@ -253,6 +332,7 @@ class SyncEngine {
     final handler = _registry[tableName];
     if (handler == null) {
       debugPrint('SyncEngine: Unknown table in remote change: $tableName');
+
       return;
     }
 
@@ -262,6 +342,7 @@ class SyncEngine {
       } catch (e) {
         debugPrint('Error deleting remote change from $tableName: $e');
       }
+
       return;
     }
 
@@ -271,62 +352,5 @@ class SyncEngine {
     } catch (e) {
       debugPrint('Error applying remote change to $tableName: $e');
     }
-  }
-
-  void _scheduleRetry() {
-    if (_retryCount >= _backoffDelays.length) {
-      _retryCount = 0;
-      return;
-    }
-    final delay = _backoffDelays[_retryCount];
-    debugPrint(
-      'SyncEngine: Retrying in ${delay.inSeconds}s (attempt ${_retryCount + 1})',
-    );
-    _retryTimer?.cancel();
-    _retryTimer = Timer(delay, () async {
-      _retryCount++;
-      await _safePullChanges();
-      await _safePushChanges();
-    });
-  }
-
-  Future<SyncConflictType> checkConflict() async {
-    int localCount = 0;
-    for (final handler in _registry.all) {
-      localCount += await handler.countRows(_db);
-    }
-
-    int cloudCount = 0;
-    try {
-      final response = await _apiClient.dio.get(ApiConstants.syncSummary);
-      cloudCount = response.data['totalCount'] ?? 0;
-    } catch (e) {
-      debugPrint('SyncEngine: Failed to fetch cloud summary: $e');
-      cloudCount = 0;
-    }
-
-    if (localCount > 0 && cloudCount > 0) return SyncConflictType.conflict;
-    if (localCount > 0) return SyncConflictType.localOnly;
-    if (cloudCount > 0) return SyncConflictType.cloudOnly;
-    return SyncConflictType.none;
-  }
-
-  Future<void> executeDecision(SyncMode mode) async {
-    switch (mode) {
-      case SyncMode.localWins:
-        await _apiClient.dio.delete(ApiConstants.syncClear);
-        await _migrateExistingData();
-        await _safePushChanges();
-        break;
-      case SyncMode.cloudWins:
-        await _safePullChanges();
-        break;
-      case SyncMode.merge:
-        await _migrateExistingData();
-        await _safePushChanges();
-        await _safePullChanges();
-        break;
-    }
-    await TokenStorage.markFirstSyncDone();
   }
 }

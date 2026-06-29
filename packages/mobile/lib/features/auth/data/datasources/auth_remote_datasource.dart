@@ -72,42 +72,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
 
     final user = _mapFirebaseUserToEntity(firebaseUser);
     await _syncUserToLocalDb(firebaseUser);
-
-    try {
-      final firebaseToken = await firebaseUser.getIdToken(true);
-      final apiClient = di.getIt<ApiClient>();
-      final response = await apiClient.dio.post(
-        ApiConstants.login,
-        data: {'firebaseToken': firebaseToken},
-      );
-      await TokenStorage.saveToken(response.data['accessToken']);
-      debugPrint('AuthRemoteDatasource: Backend JWT obtained');
-    } catch (e) {
-      debugPrint('AuthRemoteDatasource: Backend JWT with Firebase failed: $e');
-
-      if (!isDevTokenFallbackAllowed(isDebugMode: kDebugMode)) {
-        rethrow;
-      }
-
-      try {
-        final payload = {
-          'uid': firebaseUser.uid,
-          'email': firebaseUser.email,
-          'name': firebaseUser.displayName,
-        };
-        final devToken =
-            'dev-${base64Encode(const Utf8Encoder().convert(jsonEncode(payload)))}';
-        final response = await di.getIt<ApiClient>().dio.post(
-          ApiConstants.login,
-          data: {'firebaseToken': devToken},
-        );
-        await TokenStorage.saveToken(response.data['accessToken']);
-        debugPrint('AuthRemoteDatasource: Dev JWT obtained');
-      } catch (e2) {
-        debugPrint('AuthRemoteDatasource: Dev JWT also failed: $e2');
-        rethrow;
-      }
-    }
+    await _obtainJwtToken(firebaseUser);
 
     return user;
   }
@@ -125,14 +90,17 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
     debugPrint('AuthRemoteDatasource: getCurrentUser called');
     final firebaseUser = firebaseAuth.currentUser;
     debugPrint('AuthRemoteDatasource: currentUser: $firebaseUser');
+
     if (firebaseUser == null) return null;
     await _syncUserToLocalDb(firebaseUser);
+
     return _mapFirebaseUserToEntity(firebaseUser);
   }
 
   @override
   Future<bool> isSignedIn() async {
     final currentUser = firebaseAuth.currentUser;
+
     return currentUser != null;
   }
 
@@ -180,6 +148,44 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
       );
     } catch (e) {
       debugPrint('AuthRemoteDatasource: Failed to sync user to local DB: $e');
+    }
+  }
+
+  Future<void> _obtainJwtToken(fb.User firebaseUser) async {
+    try {
+      final firebaseToken = await firebaseUser.getIdToken(true);
+      final apiClient = di.getIt<ApiClient>();
+      final response = await apiClient.dio.post(
+        ApiConstants.login,
+        data: {'firebaseToken': firebaseToken},
+      );
+      await TokenStorage.saveToken(response.data['accessToken']);
+      debugPrint('AuthRemoteDatasource: Backend JWT obtained');
+    } catch (e) {
+      debugPrint('AuthRemoteDatasource: Backend JWT with Firebase failed: $e');
+
+      if (!isDevTokenFallbackAllowed(isDebugMode: kDebugMode)) {
+        rethrow;
+      }
+
+      try {
+        final payload = {
+          'uid': firebaseUser.uid,
+          'email': firebaseUser.email,
+          'name': firebaseUser.displayName,
+        };
+        final devToken =
+            'dev-${base64Encode(const Utf8Encoder().convert(jsonEncode(payload)))}';
+        final response = await di.getIt<ApiClient>().dio.post(
+          ApiConstants.login,
+          data: {'firebaseToken': devToken},
+        );
+        await TokenStorage.saveToken(response.data['accessToken']);
+        debugPrint('AuthRemoteDatasource: Dev JWT obtained');
+      } catch (e2) {
+        debugPrint('AuthRemoteDatasource: Dev JWT also failed: $e2');
+        rethrow;
+      }
     }
   }
 }

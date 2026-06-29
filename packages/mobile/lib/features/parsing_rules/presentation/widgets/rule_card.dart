@@ -16,31 +16,85 @@ class RuleCard extends StatelessWidget {
   });
 
   IconData _getSourceIcon() {
-    switch (rule.sourceType) {
-      case SourceType.sms:
-        return Icons.sms;
-      case SourceType.email:
-        return Icons.email;
-      case SourceType.both:
-        return Icons.sync;
-    }
+    return switch (rule.sourceType) {
+      SourceType.sms => Icons.sms,
+      SourceType.email => Icons.email,
+      SourceType.both => Icons.sync,
+    };
   }
 
   String _getSourceLabel() {
-    switch (rule.sourceType) {
-      case SourceType.sms:
-        return 'SMS';
-      case SourceType.email:
-        return 'Email';
-      case SourceType.both:
-        return 'Both';
-    }
+    return switch (rule.sourceType) {
+      SourceType.sms => 'SMS',
+      SourceType.email => 'Email',
+      SourceType.both => 'Both',
+    };
   }
 
   String _getTriggerWordsPreview() {
     final words = rule.triggerWords.join(', ');
     if (words.length <= 30) return words;
+
     return '${words.substring(0, 30)}...';
+  }
+
+  Container _buildDismissBackground(ThemeData theme) {
+    return Container(
+      alignment: Alignment.centerRight,
+      padding: const EdgeInsets.only(right: 16),
+      color: theme.colorScheme.error,
+      child: Icon(Icons.delete, color: theme.colorScheme.onError),
+    );
+  }
+
+  AlertDialog _buildDeleteDialog(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Delete Rule'),
+      content: Text('Are you sure you want to delete "${rule.name}"?'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(true),
+          child: const Text('Delete'),
+        ),
+      ],
+    );
+  }
+
+  Card _buildCard(ThemeData theme) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: ListTile(
+        onTap: onTap,
+        leading: CircleAvatar(child: Icon(_getSourceIcon())),
+        title: Text(rule.name),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              _getTriggerWordsPreview(),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            Text(_getSourceLabel(), style: theme.textTheme.bodySmall),
+          ],
+        ),
+        trailing: Switch(value: rule.isEnabled, onChanged: onToggle),
+        isThreeLine: true,
+      ),
+    );
+  }
+
+  Future<bool> _confirmDismiss(BuildContext context) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (_) => _buildDeleteDialog(context),
+    );
+
+    return result ?? false;
   }
 
   @override
@@ -50,56 +104,10 @@ class RuleCard extends StatelessWidget {
     return Dismissible(
       key: Key(rule.id),
       direction: DismissDirection.endToStart,
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 16),
-        color: theme.colorScheme.error,
-        child: Icon(Icons.delete, color: theme.colorScheme.onError),
-      ),
-      confirmDismiss: (direction) async {
-        return await showDialog<bool>(
-              context: context,
-              builder: (context) => AlertDialog(
-                title: const Text('Delete Rule'),
-                content: Text(
-                  'Are you sure you want to delete "${rule.name}"?',
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(false),
-                    child: const Text('Cancel'),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(true),
-                    child: const Text('Delete'),
-                  ),
-                ],
-              ),
-            ) ??
-            false;
-      },
+      background: _buildDismissBackground(theme),
+      confirmDismiss: (_) => _confirmDismiss(context),
       onDismissed: (_) => onDelete(),
-      child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        child: ListTile(
-          onTap: onTap,
-          leading: CircleAvatar(child: Icon(_getSourceIcon())),
-          title: Text(rule.name),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                _getTriggerWordsPreview(),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              Text(_getSourceLabel(), style: theme.textTheme.bodySmall),
-            ],
-          ),
-          trailing: Switch(value: rule.isEnabled, onChanged: onToggle),
-          isThreeLine: true,
-        ),
-      ),
+      child: _buildCard(theme),
     );
   }
 }

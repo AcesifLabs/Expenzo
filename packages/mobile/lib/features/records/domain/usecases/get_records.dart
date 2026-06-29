@@ -26,13 +26,13 @@ class GetRecordsParams extends Params {
   final int? limit;
   final int? offset;
 
+  @override
+  List<Object?> get props => [dateRange, categoryId, limit, offset];
+
   const GetRecordsParams({
     this.dateRange,
     this.categoryId,
     this.limit,
     this.offset,
   });
-
-  @override
-  List<Object?> get props => [dateRange, categoryId, limit, offset];
 }

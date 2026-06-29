@@ -27,12 +27,14 @@ class MessageTemplateLocalDatasourceImpl
   @override
   Future<List<domain.MessageSource>> getMessageSources() async {
     final sources = await dao.getAllMessageSources();
+
     return sources.map(_mapSourceToDomain).toList();
   }
 
   @override
   Future<domain.MessageSource?> getMessageSourceById(String id) async {
     final source = await dao.getMessageSourceById(id);
+
     return source != null ? _mapSourceToDomain(source) : null;
   }
 
@@ -50,6 +52,7 @@ class MessageTemplateLocalDatasourceImpl
       updatedAt: Value(source.updatedAt),
     );
     await dao.insertMessageSource(companion);
+
     return source;
   }
 
@@ -70,12 +73,14 @@ class MessageTemplateLocalDatasourceImpl
     String sourceId,
   ) async {
     final templates = await dao.getTemplatesForSource(sourceId);
+
     return templates.map(_mapTemplateToDomain).toList();
   }
 
   @override
   Future<List<domain.ExpenseTemplate>> getAllTemplates() async {
     final templates = await dao.getAllTemplates();
+
     return templates.map(_mapTemplateToDomain).toList();
   }
 
@@ -97,6 +102,7 @@ class MessageTemplateLocalDatasourceImpl
       updatedAt: Value(template.updatedAt),
     );
     await dao.insertTemplate(companion);
+
     return template;
   }
 

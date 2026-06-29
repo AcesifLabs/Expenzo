@@ -38,6 +38,17 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
     }
   }
 
+  void _onClearPressed() {
+    widget.controller.clear();
+    widget.onClear();
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_onTextChanged);
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -64,10 +75,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
           if (_showClear)
             IconButton(
               icon: Icon(PiconsRegular.x, size: 20),
-              onPressed: () {
-                widget.controller.clear();
-                widget.onClear();
-              },
+              onPressed: _onClearPressed,
             ),
           IconButton(
             icon: Icon(PiconsRegular.slidersHorizontal, size: 20),
@@ -76,11 +84,5 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
         ],
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    widget.controller.removeListener(_onTextChanged);
-    super.dispose();
   }
 }

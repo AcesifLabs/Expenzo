@@ -6,6 +6,22 @@ import 'package:expense_tracker/core/theme/app_colors.dart';
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
+  void _handleCurrencyTap() {
+    // TODO: navigate to currency settings
+  }
+
+  void _handleNotificationsTap() {
+    // TODO: navigate to notification settings
+  }
+
+  void _handleAppearanceTap() {
+    // TODO: navigate to appearance settings
+  }
+
+  void _handleDeleteAccountTap() {
+    // TODO: show delete account dialog
+  }
+
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
@@ -17,24 +33,24 @@ class SettingsPage extends StatelessWidget {
             icon: PiconsLight.currencyDollar,
             title: 'Currency',
             subtitle: 'USD (\$)',
-            onTap: () {},
+            onTap: _handleCurrencyTap,
           ),
           _SettingTile(
             icon: PiconsLight.bell,
             title: 'Notifications',
-            onTap: () {},
+            onTap: _handleNotificationsTap,
           ),
           _SettingTile(
             icon: PiconsLight.sun,
             title: 'Appearance',
             subtitle: 'System',
-            onTap: () {},
+            onTap: _handleAppearanceTap,
           ),
           _SettingTile(
             icon: PiconsLight.trash,
             title: 'Delete Account',
             titleColor: AppColors.error,
-            onTap: () {},
+            onTap: _handleDeleteAccountTap,
           ),
         ],
       ),
@@ -60,6 +76,7 @@ class _SettingTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+
     return ListTile(
       onTap: onTap,
       leading: Icon(icon, color: titleColor ?? colors.onSurface),
@@ -70,7 +87,10 @@ class _SettingTile extends StatelessWidget {
           fontWeight: FontWeight.w600,
         ),
       ),
-      subtitle: subtitle != null ? Text(subtitle!) : null,
+      subtitle: switch (subtitle) {
+        final s? => Text(s),
+        _ => null,
+      },
       trailing: Icon(
         PiconsRegular.caretRight,
         size: 16,

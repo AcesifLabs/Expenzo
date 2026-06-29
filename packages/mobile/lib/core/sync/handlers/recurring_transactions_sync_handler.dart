@@ -67,10 +67,11 @@ class RecurringTransactionsSyncHandler
   )..where((t) => t.id.equals(id))).go();
   @override
   Future<int> countRows(AppDatabase db) async {
-    final count = countAll();
-    final query = db.selectOnly(db.recurringTransactions)..addColumns([count]);
+    final c = countAll();
+    final query = db.selectOnly(db.recurringTransactions)..addColumns([c]);
     final result = await query.getSingle();
-    return result.read(count) ?? 0;
+
+    return result.read(c) ?? 0;
   }
 
   @override

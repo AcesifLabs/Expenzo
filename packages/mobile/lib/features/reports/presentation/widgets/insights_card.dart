@@ -11,14 +11,17 @@ class InsightsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final highestDayDate = insights.highestDayDate;
+    final highestDay = highestDayDate != null
+        ? DateFormat('dd MMM yyyy').format(highestDayDate)
+        : 'N/A';
+
     return ListView(
       children: [
         AppStatTile(
           icon: PiconsRegular.trendUp,
           title: 'Highest Spending Day',
-          value: insights.highestDayDate != null
-              ? DateFormat('dd MMM yyyy').format(insights.highestDayDate!)
-              : 'N/A',
+          value: highestDay,
           subtitle: '\$${insights.highestDayAmount.toStringAsFixed(2)}',
           color: Colors.orange,
         ),

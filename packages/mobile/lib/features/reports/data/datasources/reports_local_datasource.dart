@@ -1,8 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 
-enum Granularity { daily, weekly, monthly }
-
 abstract class ReportsLocalDatasource {
   Future<Either<Failure, List<DateAmount>>> getSpendingTrend({
     required DateTime startDate,
@@ -59,3 +57,5 @@ class SpendingInsights {
     required this.totalSpent,
   });
 }
+
+enum Granularity { daily, weekly, monthly }

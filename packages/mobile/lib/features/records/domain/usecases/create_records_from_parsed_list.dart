@@ -46,29 +46,12 @@ class CreateRecordsFromParsedList
         );
       }
 
-      final now = DateTime.now();
-      final recordsToCreate = toCreate
-          .map(
-            (parsed) => Record(
-              amount: -(parsed.amount?.abs() ?? 0),
-              description: parsed.description ?? parsed.rawMessage,
-              date: parsed.date ?? now,
-              categoryId: parsed.categoryId,
-              source: parsed.sourceType == AppSourceType.sms
-                  ? ExpenseSource.sms
-                  : ExpenseSource.email,
-              sourceId: parsed.sourceId,
-              recordType: RecordType.expense,
-              createdAt: now,
-              updatedAt: now,
-            ),
-          )
-          .toList();
-
+      final recordsToCreate = _buildRecords(toCreate);
       final batchResult = await repository.addRecordsBatch(recordsToCreate);
 
       return batchResult.fold((failure) => Left(failure), (_) {
         createdCount = recordsToCreate.length;
+
         return Right(
           CreateRecordsResult(
             createdCount: createdCount,
@@ -79,6 +62,28 @@ class CreateRecordsFromParsedList
       });
     });
   }
+
+  List<Record> _buildRecords(List<ParsedTransaction> toCreate) {
+    final now = DateTime.now();
+
+    return toCreate
+        .map(
+          (parsed) => Record(
+            amount: -(parsed.amount?.abs() ?? 0),
+            description: parsed.description ?? parsed.rawMessage,
+            date: parsed.date ?? now,
+            categoryId: parsed.categoryId,
+            source: parsed.sourceType == AppSourceType.sms
+                ? ExpenseSource.sms
+                : ExpenseSource.email,
+            sourceId: parsed.sourceId,
+            recordType: RecordType.expense,
+            createdAt: now,
+            updatedAt: now,
+          ),
+        )
+        .toList();
+  }
 }
 
 class CreateRecordsResult {
@@ -86,11 +91,11 @@ class CreateRecordsResult {
   final int skippedDuplicates;
   final List<String> errors;
 
+  int get totalProcessed => createdCount + skippedDuplicates + errors.length;
+
   const CreateRecordsResult({
     required this.createdCount,
     required this.skippedDuplicates,
     required this.errors,
   });
-
-  int get totalProcessed => createdCount + skippedDuplicates + errors.length;
 }

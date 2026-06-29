@@ -4,6 +4,7 @@ import 'package:expense_tracker/features/records/data/datasources/record_local_d
 import 'package:expense_tracker/features/records/data/datasources/record_remote_datasource.dart';
 import 'package:expense_tracker/features/records/data/repositories/record_repository_impl.dart';
 import 'package:expense_tracker/features/records/domain/entities/record.dart';
+import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/sync/connectivity_service.dart';
@@ -16,6 +17,11 @@ class MockRemoteDatasource extends Mock implements RecordRemoteDatasource {}
 class MockConnectivityService extends Mock implements ConnectivityService {}
 
 void main() {
+  setUpAll(() {
+    registerFallbackValue(RecordFilter());
+    registerFallbackValue(RemoteRecordQuery());
+  });
+
   late MockLocalDatasource mockLocal;
   late MockRemoteDatasource mockRemote;
   late MockConnectivityService mockConnectivity;
@@ -44,6 +50,8 @@ void main() {
     );
   });
 
+  RecordFilter emptyFilter() => const RecordFilter();
+
   group('RecordRepositoryImpl.getFilteredRecords', () {
     group('when online', () {
       setUp(() {
@@ -52,16 +60,10 @@ void main() {
 
       test('calls remote datasource and returns records', () async {
         when(
-          () => mockRemote.getRecords(
-            limit: any(named: 'limit'),
-            startDate: any(named: 'startDate'),
-            endDate: any(named: 'endDate'),
-            categoryIds: any(named: 'categoryIds'),
-            recordType: any(named: 'recordType'),
-          ),
+          () => mockRemote.getRecords(any()),
         ).thenAnswer((_) async => RecordRemoteResponse(data: [testRecord]));
 
-        final result = await repository.getFilteredRecords();
+        final result = await repository.getFilteredRecords(emptyFilter());
         final records = result.getOrElse(
           () => throw 'Expected Right, got Left',
         );
@@ -73,50 +75,39 @@ void main() {
       test(
         'passes filter params to remote datasource with UTC conversion',
         () async {
-          when(
-            () => mockRemote.getRecords(
-              limit: 50,
-              startDate: '2024-01-01T00:00:00.000Z',
-              endDate: '2024-12-31T00:00:00.000Z',
-              categoryIds: ['cat-1', 'cat-2'],
-              recordType: 'OUT',
-            ),
-          ).thenAnswer((_) async => RecordRemoteResponse(data: [testRecord]));
+          final captured = <RemoteRecordQuery>[];
+          when(() => mockRemote.getRecords(any())).thenAnswer((invocation) {
+            captured.add(
+              invocation.positionalArguments[0] as RemoteRecordQuery,
+            );
+            return Future.value(RecordRemoteResponse(data: [testRecord]));
+          });
 
           await repository.getFilteredRecords(
-            limit: 50,
-            startDate: DateTime.utc(2024, 1, 1),
-            endDate: DateTime.utc(2024, 12, 31),
-            categoryIds: ['cat-1', 'cat-2'],
-            recordType: 'OUT',
-          );
-
-          verify(
-            () => mockRemote.getRecords(
+            RecordFilter(
               limit: 50,
-              startDate: '2024-01-01T00:00:00.000Z',
-              endDate: '2024-12-31T00:00:00.000Z',
+              startDate: DateTime.utc(2024, 1, 1),
+              endDate: DateTime.utc(2024, 12, 31),
               categoryIds: ['cat-1', 'cat-2'],
               recordType: 'OUT',
             ),
-          ).called(1);
+          );
+
+          expect(captured.length, 1);
+          expect(captured.first.limit, 50);
+          expect(captured.first.startDate, '2024-01-01T00:00:00.000Z');
+          expect(captured.first.endDate, '2024-12-31T00:00:00.000Z');
+          expect(captured.first.categoryIds, ['cat-1', 'cat-2']);
+          expect(captured.first.recordType, 'OUT');
         },
       );
 
       test('returns ServerFailure on ServerException', () async {
-        when(
-          () => mockRemote.getRecords(
-            limit: any(named: 'limit'),
-            startDate: any(named: 'startDate'),
-            endDate: any(named: 'endDate'),
-            categoryIds: any(named: 'categoryIds'),
-            recordType: any(named: 'recordType'),
-          ),
-        ).thenThrow(
+        when(() => mockRemote.getRecords(any())).thenThrow(
           const ServerException(message: 'API error', statusCode: 500),
         );
 
-        final result = await repository.getFilteredRecords();
+        final result = await repository.getFilteredRecords(emptyFilter());
 
         expect(result.isLeft(), true);
         result.fold((failure) {
@@ -133,17 +124,10 @@ void main() {
 
       test('calls local datasource and returns records', () async {
         when(
-          () => mockLocal.getFilteredRecords(
-            startDate: any(named: 'startDate'),
-            endDate: any(named: 'endDate'),
-            categoryIds: any(named: 'categoryIds'),
-            recordType: any(named: 'recordType'),
-            limit: any(named: 'limit'),
-            offset: any(named: 'offset'),
-          ),
+          () => mockLocal.getFilteredRecords(any()),
         ).thenAnswer((_) async => [testRecord]);
 
-        final result = await repository.getFilteredRecords();
+        final result = await repository.getFilteredRecords(emptyFilter());
         final records = result.getOrElse(
           () => throw 'Expected Right, got Left',
         );
@@ -152,30 +136,16 @@ void main() {
         expect(records.first.id, 'rec-1');
 
         verify(
-          () => mockLocal.getFilteredRecords(
-            startDate: null,
-            endDate: null,
-            categoryIds: null,
-            recordType: null,
-            limit: null,
-            offset: null,
-          ),
+          () => mockLocal.getFilteredRecords(const RecordFilter()),
         ).called(1);
       });
 
       test('returns CacheFailure on CacheException', () async {
         when(
-          () => mockLocal.getFilteredRecords(
-            startDate: any(named: 'startDate'),
-            endDate: any(named: 'endDate'),
-            categoryIds: any(named: 'categoryIds'),
-            recordType: any(named: 'recordType'),
-            limit: any(named: 'limit'),
-            offset: any(named: 'offset'),
-          ),
+          () => mockLocal.getFilteredRecords(any()),
         ).thenThrow(const CacheException(message: 'DB error'));
 
-        final result = await repository.getFilteredRecords();
+        final result = await repository.getFilteredRecords(emptyFilter());
 
         expect(result.isLeft(), true);
         result.fold((failure) {

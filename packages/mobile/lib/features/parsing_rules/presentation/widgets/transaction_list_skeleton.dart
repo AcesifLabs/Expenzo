@@ -1,6 +1,26 @@
 import 'package:flutter/material.dart';
 import '../../../../../shared/presentation/widgets/shimmer_box.dart';
 
+class TransactionListSkeleton extends StatelessWidget {
+  final int itemCount;
+
+  const TransactionListSkeleton({super.key, this.itemCount = 5});
+
+  @override
+  Widget build(BuildContext context) {
+    return ShimmerBox(
+      child: ListView.builder(
+        physics: const NeverScrollableScrollPhysics(),
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        itemCount: itemCount,
+        itemBuilder: (context, index) {
+          return const TransactionCardSkeleton();
+        },
+      ),
+    );
+  }
+}
+
 class TransactionCardSkeleton extends StatelessWidget {
   const TransactionCardSkeleton({super.key});
 
@@ -38,26 +58,6 @@ class TransactionCardSkeleton extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class TransactionListSkeleton extends StatelessWidget {
-  final int itemCount;
-
-  const TransactionListSkeleton({super.key, this.itemCount = 5});
-
-  @override
-  Widget build(BuildContext context) {
-    return ShimmerBox(
-      child: ListView.builder(
-        physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        itemCount: itemCount,
-        itemBuilder: (context, index) {
-          return const TransactionCardSkeleton();
-        },
       ),
     );
   }

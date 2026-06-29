@@ -5,8 +5,8 @@ class SearchResult extends Equatable {
   final Record record;
   final double? relevanceScore;
 
-  const SearchResult({required this.record, this.relevanceScore});
-
   @override
   List<Object?> get props => [record, relevanceScore];
+
+  const SearchResult({required this.record, this.relevanceScore});
 }

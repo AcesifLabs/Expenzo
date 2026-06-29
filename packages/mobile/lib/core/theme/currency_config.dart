@@ -1,3 +1,5 @@
+// ignore_for_file: prefer-match-file-name
+
 class CurrencySymbol {
   final String code;
   final String symbol;
@@ -35,6 +37,7 @@ class CurrencyConfig {
       if (rune < 0x20) return false;
       if (rune >= 0xD800 && rune <= 0xDFFF) return false;
     }
+
     return true;
   }
 }

@@ -8,6 +8,9 @@ class SmsMessage extends Equatable {
   final bool read;
   final SmsType type;
 
+  @override
+  List<Object?> get props => [id, address, body, date, read, type];
+
   const SmsMessage({
     required this.id,
     required this.address,
@@ -16,9 +19,6 @@ class SmsMessage extends Equatable {
     required this.read,
     required this.type,
   });
-
-  @override
-  List<Object?> get props => [id, address, body, date, read, type];
 }
 
 enum SmsType { received, sent, draft }

@@ -7,11 +7,8 @@ import '../api/api_client.dart';
 class ConnectivityService {
   final Connectivity _connectivity;
   final ApiClient _apiClient;
-
-  ConnectivityService({Connectivity? connectivity, ApiClient? apiClient})
-    : _connectivity = connectivity ?? Connectivity(),
-      _apiClient = apiClient ?? ApiClient();
   bool _isOnline = false;
+
   bool get isOnline => _isOnline;
 
   Stream<bool> get onlineStream => _connectivity.onConnectivityChanged
@@ -21,9 +18,26 @@ class ConnectivityService {
       })
       .asyncMap((results) => _checkConnectivity(results));
 
+  ConnectivityService({Connectivity? connectivity, ApiClient? apiClient})
+    : _connectivity = connectivity ?? Connectivity(),
+      _apiClient = apiClient ?? ApiClient();
+
+  Future<bool> checkNow() async {
+    try {
+      final results = await _connectivity.checkConnectivity();
+
+      return _checkConnectivity(results);
+    } catch (e) {
+      debugPrint('[ConnectivityService] checkNow error: $e');
+
+      return _isOnline;
+    }
+  }
+
   Future<bool> _checkConnectivity(List<ConnectivityResult> results) async {
     if (results.isEmpty || results.contains(ConnectivityResult.none)) {
       _isOnline = false;
+
       return false;
     }
     try {
@@ -31,20 +45,12 @@ class ConnectivityService {
           .get('/health', options: Options(validateStatus: (_) => true))
           .timeout(const Duration(seconds: 5));
       _isOnline = true;
+
       return true;
     } catch (_) {
       _isOnline = false;
-      return false;
-    }
-  }
 
-  Future<bool> checkNow() async {
-    try {
-      final results = await _connectivity.checkConnectivity();
-      return _checkConnectivity(results);
-    } catch (e) {
-      debugPrint('[ConnectivityService] checkNow error: $e');
-      return _isOnline;
+      return false;
     }
   }
 }
