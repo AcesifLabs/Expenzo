@@ -2,8 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
-import 'package:expense_tracker/features/search/domain/entities/search_result.dart';
 import 'package:expense_tracker/features/search/domain/entities/search_filters.dart';
+import 'package:expense_tracker/features/search/domain/entities/search_result.dart';
 import 'package:expense_tracker/features/search/domain/usecases/search_records.dart';
 import 'package:expense_tracker/features/search/presentation/bloc/search_bloc.dart';
 import 'package:expense_tracker/features/search/presentation/bloc/search_event.dart';
@@ -11,7 +11,12 @@ import 'package:expense_tracker/features/search/presentation/bloc/search_state.d
 
 class MockSearchRecords extends Mock implements SearchRecords {}
 
+class _SearchFiltersFake extends Fake implements SearchFilters {}
+
 void main() {
+  setUpAll(() {
+    registerFallbackValue(_SearchFiltersFake());
+  });
   late MockSearchRecords mockSearchRecords;
   late SearchBloc bloc;
 

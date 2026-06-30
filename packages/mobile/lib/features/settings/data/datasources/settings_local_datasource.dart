@@ -1,6 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:expense_tracker/core/error/exceptions.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../../domain/entities/user_settings.dart';
 
 abstract class SettingsLocalDatasource {
@@ -37,7 +38,7 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
 
       return _mapFromJson(json);
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Settings local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
   }
@@ -51,7 +52,7 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
 
       return settings;
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Settings local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
   }

@@ -31,10 +31,10 @@ void main() {
   group('ColorUtils.fromHexWithAlpha', () {
     test('returns color with 38 alpha (15% opacity)', () {
       final color = ColorUtils.fromHexWithAlpha('#FF0000');
-      expect(color.alpha, 38);
-      expect(color.red, 255);
-      expect(color.green, 0);
-      expect(color.blue, 0);
+      expect((color.a * 255.0).round().clamp(0, 255), 38);
+      expect((color.r * 255.0).round().clamp(0, 255), 255);
+      expect((color.g * 255.0).round().clamp(0, 255), 0);
+      expect((color.b * 255.0).round().clamp(0, 255), 0);
     });
   });
 }

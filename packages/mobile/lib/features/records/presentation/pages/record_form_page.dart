@@ -13,7 +13,6 @@ import '../../../categories/presentation/bloc/category_bloc.dart';
 import '../../../categories/presentation/bloc/category_event.dart';
 import '../../../categories/presentation/bloc/category_state.dart';
 import '../../../categories/domain/entities/category.dart';
-import '../../domain/entities/record.dart';
 import "package:expense_tracker/core/constants/source_types.dart";
 import '../bloc/record_bloc.dart';
 import '../bloc/record_event.dart';

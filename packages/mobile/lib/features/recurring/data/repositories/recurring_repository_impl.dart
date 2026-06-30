@@ -4,6 +4,7 @@ import 'package:expense_tracker/core/database/app_database.dart'
     show PendingRecurringData;
 import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/error/failures.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../../domain/entities/recurring_transaction.dart';
 import '../../domain/repositories/recurring_repository.dart';
 import '../datasources/recurring_local_datasource.dart';
@@ -27,7 +28,7 @@ class RecurringRepositoryImpl implements RecurringRepository {
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Recurring repository error', e, s);
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -49,7 +50,7 @@ class RecurringRepositoryImpl implements RecurringRepository {
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Recurring repository error', e, s);
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -66,7 +67,7 @@ class RecurringRepositoryImpl implements RecurringRepository {
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Recurring repository error', e, s);
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -83,7 +84,7 @@ class RecurringRepositoryImpl implements RecurringRepository {
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Recurring repository error', e, s);
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -100,7 +101,7 @@ class RecurringRepositoryImpl implements RecurringRepository {
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Recurring repository error', e, s);
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -115,7 +116,7 @@ class RecurringRepositoryImpl implements RecurringRepository {
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Recurring repository error', e, s);
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -135,7 +136,7 @@ class RecurringRepositoryImpl implements RecurringRepository {
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Recurring repository error', e, s);
       return Left(CacheFailure(message: e.toString()));
     }
   }

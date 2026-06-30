@@ -4,6 +4,7 @@ import 'package:expense_tracker/core/database/app_database.dart';
 import 'package:expense_tracker/core/database/daos/record_dao.dart';
 import 'package:expense_tracker/core/database/daos/category_dao.dart';
 import 'package:expense_tracker/core/error/failures.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../../domain/entities/date_amount.dart';
 import '../../domain/entities/category_amount.dart';
 import '../../domain/entities/spending_insights.dart';
@@ -49,7 +50,7 @@ class ReportsRepositoryImpl implements ReportsRepository {
 
       return Right(trend);
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Reports repository error', e, s);
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -80,7 +81,7 @@ class ReportsRepositoryImpl implements ReportsRepository {
 
       return Right(breakdown);
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Reports repository error', e, s);
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -127,7 +128,7 @@ class ReportsRepositoryImpl implements ReportsRepository {
         ),
       );
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Reports repository error', e, s);
       return Left(CacheFailure(message: e.toString()));
     }
   }

@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../../domain/repositories/budget_repository.dart';
 import '../../../../shared/services/notification_service.dart';
 
@@ -47,7 +48,7 @@ class CheckBudgetAlerts {
         return const Right(unit);
       });
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Error checking budget alerts', e, s);
       return Left(CacheFailure(message: e.toString()));
     }
   }

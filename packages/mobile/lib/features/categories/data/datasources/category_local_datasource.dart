@@ -4,6 +4,7 @@ import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/database/app_database.dart' as db;
 import 'package:expense_tracker/core/database/daos/category_dao.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../../domain/entities/category.dart';
 
 abstract class CategoryLocalDatasource {
@@ -46,7 +47,7 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
 
       return categories.map(_mapToEntity).toList();
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Error getting categories', e, s);
       throw CacheException(message: e.toString());
     }
   }
@@ -59,7 +60,7 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
 
       return category != null ? _mapToEntity(category) : null;
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Error getting category by id', e, s);
       throw CacheException(message: e.toString());
     }
   }
@@ -85,7 +86,7 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
 
       return category.copyWith(id: id, createdAt: now, updatedAt: now);
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Error creating category', e, s);
       throw CacheException(message: e.toString());
     }
   }
@@ -114,7 +115,7 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
 
       return category.copyWith(updatedAt: now);
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Error updating category', e, s);
       throw CacheException(message: e.toString());
     }
   }
@@ -125,7 +126,7 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
     try {
       await categoryDao.deleteCategory(id);
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Error deleting category', e, s);
       throw CacheException(message: e.toString());
     }
   }
@@ -146,7 +147,7 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
     try {
       await categoryDao.incrementUsageCount(id);
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Error incrementing usage count', e, s);
       throw CacheException(message: e.toString());
     }
   }

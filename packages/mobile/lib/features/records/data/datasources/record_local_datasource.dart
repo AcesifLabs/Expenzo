@@ -4,10 +4,10 @@ import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/database/app_database.dart' as db;
 import 'package:expense_tracker/core/database/daos/record_dao.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../../domain/entities/record.dart' as rec;
 import "package:expense_tracker/core/constants/source_types.dart";
 import '../../domain/repositories/record_repository.dart';
-import 'package:flutter/foundation.dart';
 
 abstract class RecordLocalDatasource {
   /// Throws: [CacheException] if a database error occurs.
@@ -87,7 +87,7 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
         return records.map<rec.Record>((e) => _mapToEntity(e)).toList();
       }
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Record local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
   }
@@ -100,7 +100,7 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
 
       return record != null ? _mapToEntity(record) : null;
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Record local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
   }
@@ -127,7 +127,7 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
 
       return record.copyWith(id: id, createdAt: now, updatedAt: now);
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Record local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
   }
@@ -157,7 +157,7 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
 
       return record.copyWith(updatedAt: now);
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Record local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
   }
@@ -168,7 +168,7 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
     try {
       await recordDao.deleteRecord(id);
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Record local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
   }
@@ -188,7 +188,7 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
     try {
       return await recordDao.existsBySourceId(sourceId);
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Record local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
   }
@@ -199,7 +199,7 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
     try {
       return await recordDao.getExistingSourceIds(sourceIds);
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Record local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
   }
@@ -220,7 +220,7 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
 
       return records.map<rec.Record>((e) => _mapToEntity(e)).toList();
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Record local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
   }
@@ -235,7 +235,7 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
     try {
       return await recordDao.getCategorySpending(categoryId, start, end);
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Record local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
   }
@@ -246,7 +246,7 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
     try {
       return await recordDao.getTotalSpending(start, end);
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Record local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
   }
@@ -262,7 +262,7 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
 
       return records.map<rec.Record>((e) => _mapToEntity(e)).toList();
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Record local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
   }
@@ -290,7 +290,7 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
       }).toList();
       await recordDao.insertRecordsBatch(companions);
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Record local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
   }
@@ -303,7 +303,7 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
 
       return records.map<rec.Record>((e) => _mapToEntity(e)).toList();
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Record local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
   }

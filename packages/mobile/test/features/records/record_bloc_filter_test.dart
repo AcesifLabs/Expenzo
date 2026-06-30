@@ -5,7 +5,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:expense_tracker/features/records/presentation/bloc/record_bloc.dart';
 import 'package:expense_tracker/features/records/presentation/bloc/record_event.dart';
 import 'package:expense_tracker/features/records/presentation/bloc/record_state.dart';
-import 'package:expense_tracker/features/records/domain/entities/record.dart';
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
 import 'package:expense_tracker/features/records/domain/usecases/add_record.dart';
 import 'package:expense_tracker/features/records/domain/usecases/delete_record.dart';

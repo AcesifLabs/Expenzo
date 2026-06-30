@@ -169,8 +169,6 @@ class _InteractiveTemplateBuilderState
   }
 
   Widget _buildStep2() {
-    final theme = Theme.of(context);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -254,8 +252,9 @@ class _InteractiveTemplateBuilderState
             BlocConsumer<TemplateEditorBloc, TemplateEditorState>(
               listener: _onTemplateSaveState,
               builder: (context, state) {
-                if (state is TemplateEditorSaving)
+                if (state is TemplateEditorSaving) {
                   return const CircularProgressIndicator();
+                }
 
                 return ElevatedButton(
                   onPressed: _onSaveTemplate,

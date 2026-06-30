@@ -13,6 +13,8 @@ import 'package:expense_tracker/features/parsing_rules/presentation/bloc/parsing
 
 class MockGetRules extends Mock implements GetRules {}
 
+class _GetRulesParamsFake extends Fake implements GetRulesParams {}
+
 class MockUpdateRule extends Mock implements UpdateRule {}
 
 class MockDeleteRule extends Mock implements DeleteRule {}
@@ -21,6 +23,10 @@ class MockParsingRulesRepository extends Mock
     implements ParsingRulesRepository {}
 
 void main() {
+  setUpAll(() {
+    registerFallbackValue(_GetRulesParamsFake());
+  });
+
   late MockGetRules mockGetRules;
   late MockUpdateRule mockUpdateRule;
   late MockDeleteRule mockDeleteRule;

@@ -31,6 +31,11 @@ void main() {
     updatedAt: DateTime.now(),
   );
 
+  setUpAll(() {
+    registerFallbackValue(_GetCategoriesParamsFake());
+    registerFallbackValue(_CategoryFake());
+  });
+
   setUp(() {
     mockGetCategories = MockGetCategories();
     mockCreateCategory = MockCreateCategory();
@@ -127,3 +132,7 @@ void main() {
 class MockUpdateCategory extends Mock implements UpdateCategory {}
 
 class MockDeleteCategory extends Mock implements DeleteCategory {}
+
+class _GetCategoriesParamsFake extends Fake implements GetCategoriesParams {}
+
+class _CategoryFake extends Fake implements Category {}

@@ -3,6 +3,7 @@ import 'package:expense_tracker/core/api/api_constants.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../../domain/entities/record.dart' as entity;
 
 abstract class RecordRemoteDatasource {
@@ -74,7 +75,7 @@ class RecordRemoteDatasourceImpl implements RecordRemoteDatasource {
         total: body['total'] as int? ?? records.length,
       );
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Record remote datasource error', e, s);
       throw ServerException(message: e.toString());
     }
   }

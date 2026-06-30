@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../../../parsing_rules/domain/entities/parsed_transaction.dart';
 import '../../../parsing_rules/domain/services/parsing_isolate_service.dart';
 import '../../../parsing_rules/domain/usecases/evaluate_rules_use_case.dart'
@@ -66,7 +67,7 @@ class ScanSmsUseCase
 
       return Right(results);
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Scan SMS error', e, s);
       return Left(SmsScanFailure(message: e.toString()));
     }
   }

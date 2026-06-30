@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/error/failures.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../../domain/entities/user_settings.dart';
 import '../../domain/repositories/settings_repository.dart';
 import '../datasources/settings_local_datasource.dart';
@@ -20,7 +21,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Settings repository error', e, s);
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -37,7 +38,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Settings repository error', e, s);
       return Left(CacheFailure(message: e.toString()));
     }
   }

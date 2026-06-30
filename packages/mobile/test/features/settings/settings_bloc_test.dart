@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
+import 'package:expense_tracker/core/error/usecase.dart';
 import 'package:expense_tracker/features/settings/domain/entities/user_settings.dart';
 import 'package:expense_tracker/features/settings/domain/usecases/get_settings.dart';
 import 'package:expense_tracker/features/settings/domain/usecases/update_settings.dart';
@@ -13,7 +14,15 @@ class MockGetSettings extends Mock implements GetSettings {}
 
 class MockUpdateSettings extends Mock implements UpdateSettings {}
 
+class _NoParamsFake extends Fake implements NoParams {}
+
+class _UserSettingsFake extends Fake implements UserSettings {}
+
 void main() {
+  setUpAll(() {
+    registerFallbackValue(_NoParamsFake());
+    registerFallbackValue(_UserSettingsFake());
+  });
   late MockGetSettings mockGetSettings;
   late MockUpdateSettings mockUpdateSettings;
   late SettingsBloc bloc;

@@ -1,9 +1,9 @@
 import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
 import 'package:expense_tracker/features/categories/domain/repositories/category_repository.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
-import '../../../records/domain/entities/record.dart';
 import '../../domain/entities/dashboard_summary.dart';
 import '../../domain/entities/date_range.dart';
 import '../../domain/repositories/dashboard_repository.dart';
@@ -58,7 +58,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
         ),
       );
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Error getting dashboard summary', e, s);
       return Left(ServerFailure(message: e.toString()));
     }
   }

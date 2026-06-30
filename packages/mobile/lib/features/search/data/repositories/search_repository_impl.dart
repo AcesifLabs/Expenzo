@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/error/failures.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../../domain/entities/search_filters.dart';
 import '../../domain/entities/search_result.dart';
 import '../../domain/repositories/search_repository.dart';
@@ -23,7 +24,7 @@ class SearchRepositoryImpl implements SearchRepository {
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Search repository error', e, s);
       return Left(CacheFailure(message: e.toString()));
     }
   }
