@@ -2,7 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
-import '../../../records/domain/entities/record.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../../../records/domain/repositories/record_repository.dart';
 import '../../../categories/domain/repositories/category_repository.dart';
 import '../../domain/entities/dashboard_summary.dart';
@@ -55,7 +55,7 @@ class GetDashboardSummary implements UseCase<DashboardSummary, DateRange> {
         ),
       );
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Error getting dashboard summary', e, s);
       return Left(ServerFailure(message: e.toString()));
     }
   }

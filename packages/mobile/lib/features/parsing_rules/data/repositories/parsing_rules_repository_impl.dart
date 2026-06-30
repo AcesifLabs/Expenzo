@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../../domain/entities/parsing_rule.dart';
 import '../../domain/repositories/parsing_rules_repository.dart';
 import '../datasources/parsing_rules_local_datasource.dart';
@@ -23,7 +24,7 @@ class ParsingRulesRepositoryImpl implements ParsingRulesRepository {
 
       return Right(rules);
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Error getting rules', e, s);
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -39,7 +40,7 @@ class ParsingRulesRepositoryImpl implements ParsingRulesRepository {
 
       return Right(rule);
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Error getting rule by id', e, s);
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -52,7 +53,7 @@ class ParsingRulesRepositoryImpl implements ParsingRulesRepository {
 
       return Right(createdRule);
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Error creating rule', e, s);
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -65,7 +66,7 @@ class ParsingRulesRepositoryImpl implements ParsingRulesRepository {
 
       return Right(updatedRule);
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Error updating rule', e, s);
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -78,7 +79,7 @@ class ParsingRulesRepositoryImpl implements ParsingRulesRepository {
 
       return const Right(unit);
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Error deleting rule', e, s);
       return Left(CacheFailure(message: e.toString()));
     }
   }

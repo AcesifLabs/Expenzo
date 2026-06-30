@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../entities/parsed_transaction.dart';
 import '../entities/evaluate_rules_params.dart';
 import '../entities/parsing_context.dart';
@@ -51,7 +52,7 @@ class EvaluateRulesUseCase
 
       return Right(result);
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Error evaluating rules use case', e, s);
       return Left(CacheFailure(message: e.toString()));
     }
   }

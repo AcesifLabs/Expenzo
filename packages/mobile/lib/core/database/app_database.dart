@@ -17,6 +17,9 @@ import 'tables/users_table.dart';
 import 'tables/sync_queue_table.dart';
 import 'tables/app_settings_table.dart';
 
+import '../constants/source_types.dart';
+import '../constants/record_type.dart';
+
 import 'daos/record_dao.dart';
 import 'daos/category_dao.dart';
 import 'daos/recurring_dao.dart';

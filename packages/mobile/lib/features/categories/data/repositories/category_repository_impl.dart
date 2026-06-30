@@ -5,6 +5,7 @@ import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/core/sync/sync_event.dart';
 import 'package:expense_tracker/core/database/daos/sync_queue_dao.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../../domain/entities/category.dart';
 import '../../domain/repositories/category_repository.dart';
 import '../datasources/category_local_datasource.dart';
@@ -34,7 +35,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Error getting categories', e, s);
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -52,7 +53,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Error getting category by id', e, s);
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -79,7 +80,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Error creating category', e, s);
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -106,7 +107,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Error updating category', e, s);
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -122,7 +123,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Error incrementing usage count', e, s);
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -138,7 +139,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Error deleting category', e, s);
       return Left(CacheFailure(message: e.toString()));
     }
   }

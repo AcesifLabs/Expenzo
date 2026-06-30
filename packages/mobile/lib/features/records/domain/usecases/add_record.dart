@@ -2,7 +2,6 @@ import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
 import 'package:expense_tracker/features/categories/domain/repositories/category_repository.dart';
-import '../entities/record.dart';
 import '../repositories/record_repository.dart';
 
 class AddRecord extends UseCase<Record, Record> {

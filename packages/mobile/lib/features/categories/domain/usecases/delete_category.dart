@@ -14,7 +14,7 @@ class DeleteCategory extends UseCase<Unit, String> {
   Future<Either<Failure, Unit>> call(String id) async {
     try {
       return await repository.deleteCategory(id);
-    } on CacheException catch (e, s) {
+    } on CacheException catch (e) {
       return Left(e.toFailure());
     }
   }

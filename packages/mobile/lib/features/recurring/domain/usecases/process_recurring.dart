@@ -19,7 +19,7 @@ class ProcessRecurring {
         (failure) => Left(failure),
         _processDueRecurring,
       );
-    } on CacheException catch (e, s) {
+    } on CacheException catch (e) {
       return Left(e.toFailure());
     }
   }

@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
+import 'package:expense_tracker/core/error/usecase.dart';
 import 'package:expense_tracker/features/recurring/domain/entities/recurring_transaction.dart';
 import 'package:expense_tracker/features/recurring/domain/usecases/get_recurring_list.dart';
 import 'package:expense_tracker/features/recurring/domain/usecases/create_recurring.dart'
@@ -26,7 +27,15 @@ class MockDeleteRecurring extends Mock implements uc.DeleteRecurring {}
 
 class MockProcessRecurring extends Mock implements uc.ProcessRecurring {}
 
+class _NoParamsFake extends Fake implements NoParams {}
+
+class _RecurringTransactionFake extends Fake implements RecurringTransaction {}
+
 void main() {
+  setUpAll(() {
+    registerFallbackValue(_NoParamsFake());
+    registerFallbackValue(_RecurringTransactionFake());
+  });
   late MockGetRecurringList mockGetRecurringList;
   late MockCreateRecurring mockCreateRecurring;
   late MockUpdateRecurring mockUpdateRecurring;

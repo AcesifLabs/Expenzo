@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:dartz/dartz.dart';
-import 'package:expense_tracker/features/records/domain/entities/record.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';

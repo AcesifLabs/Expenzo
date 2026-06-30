@@ -6,7 +6,6 @@ import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/sync/sync_event.dart';
 import 'package:expense_tracker/core/sync/connectivity_service.dart';
 import 'package:expense_tracker/core/database/daos/sync_queue_dao.dart';
-import '../../domain/entities/record.dart';
 import '../../domain/repositories/record_repository.dart';
 import '../datasources/record_local_datasource.dart';
 import '../datasources/record_remote_datasource.dart';

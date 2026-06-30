@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:expense_tracker/core/bloc/transformers.dart';
-import '../../domain/entities/record.dart';
 import '../../domain/repositories/record_repository.dart';
 import '../../domain/usecases/add_record.dart';
 import '../../domain/usecases/delete_record.dart';

@@ -47,8 +47,8 @@ class AppRouter {
         path: '/',
         builder: (context, state) => const _AppShellWithAuth(),
         routes: [
-          GoRoute(path: 'settings', builder: (_, __) => const SettingsPage()),
-          GoRoute(path: 'feedback', builder: (_, __) => const FeedbackPage()),
+          GoRoute(path: 'settings', builder: (_, _) => const SettingsPage()),
+          GoRoute(path: 'feedback', builder: (_, _) => const FeedbackPage()),
           GoRoute(
             path: 'records/new',
             builder: (context, state) {
@@ -175,10 +175,10 @@ class AppRouter {
               );
             },
           ),
-          GoRoute(path: 'login', builder: (_, __) => const LoginPage()),
+          GoRoute(path: 'login', builder: (_, _) => const LoginPage()),
           GoRoute(
             path: 'sync-conflict',
-            builder: (_, __) => const SyncConflictPage(),
+            builder: (_, _) => const SyncConflictPage(),
           ),
         ],
       ),

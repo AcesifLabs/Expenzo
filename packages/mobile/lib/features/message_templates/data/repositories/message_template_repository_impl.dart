@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../../domain/entities/expense_template.dart';
 import '../../domain/entities/message_source.dart';
 import '../../domain/repositories/message_template_repository.dart';
@@ -18,7 +19,7 @@ class MessageTemplateRepositoryImpl implements MessageTemplateRepository {
 
       return Right(sources);
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Error getting message sources', e, s);
       return Left(DatabaseFailure(message: e.toString()));
     }
   }
@@ -33,7 +34,7 @@ class MessageTemplateRepositoryImpl implements MessageTemplateRepository {
 
       return Right(saved);
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Error saving message source', e, s);
       return Left(DatabaseFailure(message: e.toString()));
     }
   }
@@ -46,7 +47,7 @@ class MessageTemplateRepositoryImpl implements MessageTemplateRepository {
 
       return const Right(unit);
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Error deleting message source', e, s);
       return Left(DatabaseFailure(message: e.toString()));
     }
   }
@@ -66,7 +67,7 @@ class MessageTemplateRepositoryImpl implements MessageTemplateRepository {
 
       return Right(templates);
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Error getting templates for source', e, s);
       return Left(DatabaseFailure(message: e.toString()));
     }
   }
@@ -79,7 +80,7 @@ class MessageTemplateRepositoryImpl implements MessageTemplateRepository {
 
       return Right(templates);
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Error getting all templates', e, s);
       return Left(DatabaseFailure(message: e.toString()));
     }
   }
@@ -94,7 +95,7 @@ class MessageTemplateRepositoryImpl implements MessageTemplateRepository {
 
       return Right(saved);
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Error saving template', e, s);
       return Left(DatabaseFailure(message: e.toString()));
     }
   }
@@ -107,7 +108,7 @@ class MessageTemplateRepositoryImpl implements MessageTemplateRepository {
 
       return const Right(unit);
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Error deleting template', e, s);
       return Left(DatabaseFailure(message: e.toString()));
     }
   }

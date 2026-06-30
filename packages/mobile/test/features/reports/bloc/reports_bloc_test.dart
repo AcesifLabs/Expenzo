@@ -2,15 +2,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
-import 'package:expense_tracker/features/reports/domain/entities/date_amount.dart';
-import 'package:expense_tracker/features/reports/domain/entities/category_amount.dart';
 import 'package:expense_tracker/features/reports/domain/entities/spending_insights.dart';
 import 'package:expense_tracker/features/reports/domain/entities/granularity.dart';
 import 'package:expense_tracker/features/reports/domain/usecases/get_spending_trend.dart';
 import 'package:expense_tracker/features/reports/domain/usecases/get_category_breakdown.dart';
 import 'package:expense_tracker/features/reports/domain/usecases/get_spending_insights.dart';
 import 'package:expense_tracker/features/reports/presentation/bloc/reports_bloc.dart';
-import 'package:expense_tracker/features/reports/presentation/bloc/reports_event.dart';
 import 'package:expense_tracker/features/reports/presentation/bloc/reports_state.dart';
 
 class MockGetSpendingTrend extends Mock implements GetSpendingTrend {}

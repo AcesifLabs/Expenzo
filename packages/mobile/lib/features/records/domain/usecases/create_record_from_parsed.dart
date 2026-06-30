@@ -2,7 +2,6 @@ import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
-import '../entities/record.dart';
 import "package:expense_tracker/core/constants/source_types.dart";
 import '../repositories/record_repository.dart';
 import '../../../parsing_rules/domain/entities/parsed_transaction.dart';

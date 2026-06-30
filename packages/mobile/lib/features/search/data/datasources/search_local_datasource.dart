@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/database/app_database.dart'
     hide Category, Record;
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../../domain/entities/search_filters.dart';
 import '../../domain/entities/search_result.dart';
 import '../../../records/domain/entities/record.dart';
@@ -52,7 +53,7 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
         );
       }).toList();
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Search local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
   }
@@ -66,7 +67,7 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
         [record.id, record.description],
       );
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Search local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
   }
@@ -79,7 +80,7 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
         recordId,
       ]);
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Search local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
   }
@@ -95,7 +96,7 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
         SELECT id, description FROM records
       ''');
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Search local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
   }

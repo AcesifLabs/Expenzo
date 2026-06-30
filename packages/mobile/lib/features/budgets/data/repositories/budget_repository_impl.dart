@@ -4,6 +4,7 @@ import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/sync/sync_event.dart';
 import 'package:expense_tracker/core/database/daos/sync_queue_dao.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../../domain/entities/budget.dart';
 import '../../domain/repositories/budget_repository.dart';
 import '../datasources/budget_local_datasource.dart';
@@ -27,7 +28,7 @@ class BudgetRepositoryImpl implements BudgetRepository {
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Error getting budgets', e, s);
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -45,7 +46,7 @@ class BudgetRepositoryImpl implements BudgetRepository {
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Error getting budget by id', e, s);
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -73,7 +74,7 @@ class BudgetRepositoryImpl implements BudgetRepository {
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Error creating budget', e, s);
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -101,7 +102,7 @@ class BudgetRepositoryImpl implements BudgetRepository {
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Error updating budget', e, s);
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -117,7 +118,7 @@ class BudgetRepositoryImpl implements BudgetRepository {
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('Error deleting budget', e, s);
       return Left(CacheFailure(message: e.toString()));
     }
   }

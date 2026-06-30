@@ -11,8 +11,14 @@ import 'package:expense_tracker/features/dashboard/presentation/bloc/dashboard_s
 
 class MockGetDashboardSummary extends Mock implements GetDashboardSummary {}
 
+class _DateRangeFake extends Fake implements DateRange {}
+
 void main() {
   late MockGetDashboardSummary mockGetDashboardSummary;
+
+  setUpAll(() {
+    registerFallbackValue(_DateRangeFake());
+  });
   late DashboardBloc bloc;
   late DateRange testDateRange;
 

@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
-import 'package:expense_tracker/core/constants/source_types.dart';
 import 'package:expense_tracker/features/message_templates/domain/entities/expense_template.dart';
 import 'package:expense_tracker/features/message_templates/domain/entities/message_source.dart';
 import 'package:expense_tracker/features/message_templates/domain/usecases/save_template.dart';
@@ -16,7 +15,15 @@ class MockSaveTemplate extends Mock implements SaveTemplate {}
 class MockMessageTemplateRepository extends Mock
     implements MessageTemplateRepository {}
 
+class _MessageSourceFake extends Fake implements MessageSource {}
+
+class _ExpenseTemplateFake extends Fake implements ExpenseTemplate {}
+
 void main() {
+  setUpAll(() {
+    registerFallbackValue(_MessageSourceFake());
+    registerFallbackValue(_ExpenseTemplateFake());
+  });
   late MockSaveTemplate mockSaveTemplate;
   late MockMessageTemplateRepository mockRepository;
   late TemplateEditorBloc bloc;

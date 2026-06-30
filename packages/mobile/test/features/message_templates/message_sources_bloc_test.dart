@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
+import 'package:expense_tracker/core/error/usecase.dart';
 import 'package:expense_tracker/features/message_templates/domain/entities/message_source.dart';
 import 'package:expense_tracker/features/message_templates/domain/usecases/get_message_sources.dart';
 import 'package:expense_tracker/features/message_templates/domain/usecases/save_message_source.dart';
@@ -13,7 +14,12 @@ class MockGetMessageSources extends Mock implements GetMessageSources {}
 
 class MockSaveMessageSource extends Mock implements SaveMessageSource {}
 
+class _NoParamsFake extends Fake implements NoParams {}
+
 void main() {
+  setUpAll(() {
+    registerFallbackValue(_NoParamsFake());
+  });
   late MockGetMessageSources mockGetMessageSources;
   late MockSaveMessageSource mockSaveMessageSource;
   late MessageSourcesBloc bloc;

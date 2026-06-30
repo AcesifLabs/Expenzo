@@ -1,4 +1,5 @@
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart' as fsms;
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../../domain/entities/sms_message.dart';
 
 abstract class SmsLocalDatasource {
@@ -27,7 +28,7 @@ class SmsLocalDatasourceImpl implements SmsLocalDatasource {
 
       return messages.map(_mapToEntity).toList();
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('SMS local datasource error', e, s);
       return [];
     }
   }
@@ -50,7 +51,7 @@ class SmsLocalDatasourceImpl implements SmsLocalDatasource {
           .map(_mapToEntity)
           .toList();
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('SMS local datasource error', e, s);
       return [];
     }
   }
@@ -63,7 +64,7 @@ class SmsLocalDatasourceImpl implements SmsLocalDatasource {
 
       return messages.map(_mapToEntity).toList();
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('SMS local datasource error', e, s);
       return [];
     }
   }
@@ -85,7 +86,7 @@ class SmsLocalDatasourceImpl implements SmsLocalDatasource {
 
       return messages.map(_mapToEntity).toList();
     } catch (e, s) {
-      print('Error: $e\n$s');
+      appLogger.error('SMS local datasource error', e, s);
       return [];
     }
   }
