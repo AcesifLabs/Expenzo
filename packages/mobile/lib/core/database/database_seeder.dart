@@ -42,12 +42,14 @@ class DatabaseSeeder {
         batch.insert(
           db.categories,
           _buildCategoryCompanion(cat, RecordType.expense.dbValue, now),
+          mode: InsertMode.insertOrReplace,
         );
       }
       for (final cat in _incomeCategories) {
         batch.insert(
           db.categories,
           _buildCategoryCompanion(cat, RecordType.income.dbValue, now),
+          mode: InsertMode.insertOrReplace,
         );
       }
     });
@@ -89,6 +91,7 @@ class DatabaseSeeder {
         batch.insert(
           db.categories,
           _buildCategoryCompanion(cat, RecordType.income.dbValue, now),
+          mode: InsertMode.insertOrReplace,
         );
       }
     });

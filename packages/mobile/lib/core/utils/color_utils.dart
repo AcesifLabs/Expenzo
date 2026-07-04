@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'dart:ui';
 
 class ColorUtils {
   ColorUtils._();
@@ -9,7 +9,6 @@ class ColorUtils {
 
       return Color(int.parse('0xFF$sanitized'));
     } catch (e) {
-      debugPrint('Color parse error: $e');
       return fallback;
     }
   }

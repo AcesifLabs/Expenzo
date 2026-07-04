@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/services/parsing_isolate_service.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/usecases/evaluate_rules_use_case.dart';
@@ -56,7 +55,6 @@ class RealtimeSmsProcessor {
         },
       );
     } catch (e) {
-      debugPrint('SMS processor error: $e');
       _isStarted = false;
       await _subscription?.cancel();
       _subscription = null;
@@ -145,12 +143,7 @@ class RealtimeSmsProcessor {
     }
   }
 
-  void _logError(String message, Object error, StackTrace? stackTrace) {
-    debugPrint('RealtimeSmsProcessor: $message: $error');
-    if (stackTrace != null) {
-      debugPrint('$stackTrace');
-    }
-  }
+  void _logError(String message, Object error, StackTrace? stackTrace) {}
 
   bool _isMonitoredSender(String sender, Iterable<MonitoredSource> sources) {
     final normalizedSender = SmsSenderNormalizer.normalize(sender);

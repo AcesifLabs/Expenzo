@@ -599,7 +599,7 @@ class _DashboardViewState extends State<DashboardView> {
       case 'language':
         context.push('/settings');
       case 'sign_in':
-        context.read<AuthBloc>().add(const SignInWithGoogleRequested());
+        context.push('/login');
       case 'theme':
         final isDark =
             Theme.of(context).colorScheme.brightness == Brightness.dark;

@@ -181,12 +181,24 @@ class _RecordFormPageState extends State<RecordFormPage> {
   }
 
   Widget _buildCategoryDropdown(List<Category> categories) {
+    // Deduplicate by id to prevent DropdownButton assertion crash
+    final seen = <String>{};
+    final unique = categories
+        .where((c) => c.id != null && seen.add(c.id!))
+        .toList();
+
+    // If _selectedCategoryId was a duplicate, reset to avoid mismatch
+    if (_selectedCategoryId != null &&
+        unique.every((c) => c.id != _selectedCategoryId)) {
+      _selectedCategoryId = null;
+    }
+
     return DropdownButtonFormField<String>(
       initialValue: _selectedCategoryId,
       decoration: const InputDecoration(labelText: 'Category'),
       items: [
         const DropdownMenuItem<String>(value: null, child: Text('No Category')),
-        ...categories.map(
+        ...unique.map(
           (cat) => DropdownMenuItem<String>(
             value: cat.id!,
             child: Row(

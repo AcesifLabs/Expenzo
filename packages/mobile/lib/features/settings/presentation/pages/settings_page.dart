@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
+import 'package:expense_tracker/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:expense_tracker/features/auth/presentation/bloc/auth_state.dart';
 import '../bloc/settings_bloc.dart';
 import '../bloc/settings_event.dart';
 import '../bloc/settings_state.dart';
@@ -96,12 +98,13 @@ class SettingsView extends StatelessWidget {
             subtitle: 'System',
             onTap: () => _handleAppearanceTap(context),
           ),
-          _SettingTile(
-            icon: PiconsLight.trash,
-            title: 'Delete Account',
-            titleColor: AppColors.error,
-            onTap: () => _handleDeleteAccountTap(context),
-          ),
+          if (context.read<AuthBloc>().state is Authenticated)
+            _SettingTile(
+              icon: PiconsLight.trash,
+              title: 'Delete Account',
+              titleColor: AppColors.error,
+              onTap: () => _handleDeleteAccountTap(context),
+            ),
         ],
       ),
     );
