@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:expense_tracker/core/constants/budget_period.dart';
 
 class Budget extends Equatable {
   final String? id;
@@ -55,5 +56,3 @@ class Budget extends Equatable {
     );
   }
 }
-
-enum BudgetPeriod { weekly, monthly, yearly }

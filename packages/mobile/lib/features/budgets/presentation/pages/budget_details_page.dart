@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:picons/picons.dart';
+import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
+import 'package:expense_tracker/features/budgets/domain/repositories/budget_repository.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budget_progress.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
@@ -13,30 +15,70 @@ import '../bloc/budget_event.dart';
 import '../bloc/budget_state.dart';
 
 class BudgetDetailsPage extends StatefulWidget {
-  final BudgetProgress progress;
+  final BudgetProgress? progress;
+  final String? budgetId;
 
-  const BudgetDetailsPage({super.key, required this.progress});
+  const BudgetDetailsPage({super.key, this.progress, this.budgetId});
 
   @override
   State<BudgetDetailsPage> createState() => _BudgetDetailsPageState();
 }
 
 class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
-  BudgetProgress get _progress => widget.progress;
+  BudgetProgress? _progress;
+  String? _categoryId;
+  var _isLoading = false;
 
   @override
   void initState() {
     super.initState();
+    final existingProgress = widget.progress;
+    if (existingProgress != null) {
+      _progress = existingProgress;
+      _categoryId = existingProgress.categoryId;
+      _dispatchLoadTransactions(existingProgress.budgetId);
+    } else if (widget.budgetId != null) {
+      _isLoading = true;
+      _loadBudgetData(widget.budgetId ?? '');
+    }
+  }
+
+  Future<void> _loadBudgetData(String budgetId) async {
+    try {
+      final repo = di.getIt<BudgetRepository>();
+      final budgetResult = await repo.getBudgetById(budgetId);
+      if (!mounted) return;
+      budgetResult.fold(
+        (failure) {
+          debugPrint(
+            'BudgetDetailsPage: Failed to load budget: ${failure.message}',
+          );
+          setState(() => _isLoading = false);
+        },
+        (budget) {
+          setState(() => _categoryId = budget.categoryId);
+          _dispatchLoadTransactions(budgetId);
+        },
+      );
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _dispatchLoadTransactions(String budgetId) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      context.read<BudgetBloc>().add(
-        LoadBudgetTransactions(_progress.budgetId),
-      );
+      context.read<BudgetBloc>().add(LoadBudgetTransactions(budgetId));
+      setState(() => _isLoading = false);
     });
   }
 
   Widget _buildProgressCard(NumberFormat fmt, ColorScheme colors) {
-    final percentage = _progress.percentage;
+    final progress = _progress;
+    if (progress == null) return const SizedBox.shrink();
+
+    final percentage = progress.percentage;
     final alpha120 = colors.onSurface.withAlpha(120);
 
     return AppCard(
@@ -44,7 +86,7 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
       child: Column(
         children: [
           Text(
-            '${fmt.format(_progress.spentAmount)} / ${fmt.format(_progress.budgetAmount)}',
+            '${fmt.format(progress.spentAmount)} / ${fmt.format(progress.budgetAmount)}',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w700,
@@ -53,7 +95,7 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
           ),
           const SizedBox(height: 8),
           Text(
-            '${_progress.period.name} budget',
+            '${progress.period.name} budget',
             style: TextStyle(fontSize: 14, color: alpha120),
           ),
           const SizedBox(height: 24),
@@ -66,7 +108,7 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
                 '${percentage.toStringAsFixed(0)}% used',
                 style: TextStyle(fontSize: 13, color: alpha120),
               ),
-              if (_progress.isOverBudget)
+              if (progress.isOverBudget)
                 Text(
                   'OVER BUDGET',
                   style: TextStyle(
@@ -82,12 +124,13 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
     );
   }
 
+  String get _budgetId => widget.progress?.budgetId ?? widget.budgetId ?? '';
+
   Widget _buildTransactionsSection() {
     return Expanded(
       child: BlocBuilder<BudgetBloc, BudgetState>(
         builder: (context, state) {
-          if (state is BudgetLoaded &&
-              state.selectedBudgetId == _progress.budgetId) {
+          if (state is BudgetLoaded && state.selectedBudgetId == _budgetId) {
             if (state.isLoadingTransactions) {
               return const Center(child: CircularProgressIndicator());
             }
@@ -129,7 +172,14 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
   Widget build(BuildContext context) {
     final fmt = CurrencyFormatter.getFormatter(decimalDigits: 0);
     final colors = Theme.of(context).colorScheme;
-    final title = _progress.categoryId ?? 'Budget Details';
+    final title = _categoryId ?? 'Budget Details';
+
+    if (_isLoading) {
+      return Scaffold(
+        appBar: AppBar(title: Text(title)),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
 
     return AppScaffold(
       title: title,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:picons/picons.dart';
 import '../bloc/sms_scanner_bloc.dart';
 import '../bloc/sms_scanner_event.dart';
@@ -68,7 +69,7 @@ class _SmsScanResultsPageState extends State<SmsScanResultsPage> {
     context.read<SmsScannerBloc>().add(
       CreateSelectedExpenses(transactions: selectedTransactions),
     );
-    Navigator.of(context).pop();
+    if (context.mounted) context.pop();
   }
 
   Widget _buildActionButtons(SmsScannerScanComplete _) {

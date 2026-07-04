@@ -33,6 +33,8 @@ class _RecordSearchPageState extends State<RecordSearchPage> {
   }
 
   Widget _buildInitialState() {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -40,17 +42,17 @@ class _RecordSearchPageState extends State<RecordSearchPage> {
           Icon(
             PiconsRegular.magnifyingGlass,
             size: 64,
-            color: Colors.grey[400],
+            color: colorScheme.onSurface.withAlpha(100),
           ),
           const SizedBox(height: 16),
           Text(
             'Search for records',
-            style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+            style: TextStyle(fontSize: 18, color: colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 8),
           Text(
             'Enter a query or apply filters',
-            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+            style: TextStyle(fontSize: 14, color: colorScheme.outline),
           ),
         ],
       ),
@@ -58,6 +60,8 @@ class _RecordSearchPageState extends State<RecordSearchPage> {
   }
 
   Widget _buildEmptyResults() {
+    final colors = Theme.of(context).colorScheme;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -65,17 +69,17 @@ class _RecordSearchPageState extends State<RecordSearchPage> {
           Icon(
             PiconsRegular.magnifyingGlass,
             size: 64,
-            color: Colors.grey[400],
+            color: colors.onSurface.withAlpha(100),
           ),
           const SizedBox(height: 16),
           Text(
             'No results found',
-            style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+            style: TextStyle(fontSize: 18, color: colors.onSurfaceVariant),
           ),
           const SizedBox(height: 8),
           Text(
             'Try a different search term or filters',
-            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+            style: TextStyle(fontSize: 14, color: colors.outline),
           ),
         ],
       ),
@@ -83,9 +87,9 @@ class _RecordSearchPageState extends State<RecordSearchPage> {
   }
 
   Widget _buildResultItem(SearchResult result) {
-    final record = result.record;
     final dateFormat = DateFormat('MMM dd, yyyy');
-    final isNegative = record.amount < 0;
+    final isNegative = result.amount < 0;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return AppCard(
       child: ListTile(
@@ -102,20 +106,20 @@ class _RecordSearchPageState extends State<RecordSearchPage> {
           ),
         ),
         title: Text(
-          record.description,
+          result.description,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         subtitle: Text(
-          dateFormat.format(record.date),
+          dateFormat.format(result.date),
           style: TextStyle(
             fontSize: 12,
-            color: Theme.of(context).colorScheme.onSurface.withAlpha(140),
+            color: colorScheme.onSurface.withAlpha(140),
           ),
         ),
         trailing: Text(
-          '${isNegative ? '-' : ''}৳${record.amount.abs().toStringAsFixed(2)}',
+          '${isNegative ? '-' : ''}৳${result.amount.abs().toStringAsFixed(2)}',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
@@ -138,20 +142,22 @@ class _RecordSearchPageState extends State<RecordSearchPage> {
   }
 
   Widget _buildErrorState(String message) {
+    final colors = Theme.of(context).colorScheme;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(PiconsRegular.warningCircle, size: 64, color: Colors.red[400]),
+          Icon(PiconsRegular.warningCircle, size: 64, color: colors.error),
           const SizedBox(height: 16),
           Text(
             'Error',
-            style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+            style: TextStyle(fontSize: 18, color: colors.onSurfaceVariant),
           ),
           const SizedBox(height: 8),
           Text(
             message,
-            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+            style: TextStyle(fontSize: 14, color: colors.outline),
             textAlign: TextAlign.center,
           ),
         ],
@@ -194,17 +200,14 @@ class _RecordSearchPageState extends State<RecordSearchPage> {
           Expanded(
             child: BlocBuilder<SearchBloc, SearchState>(
               builder: (context, state) {
-                if (state is SearchInitial) {
-                  return _buildInitialState();
-                } else if (state is SearchLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (state is SearchLoaded) {
-                  return _buildResultsList(state);
-                } else if (state is SearchError) {
-                  return _buildErrorState(state.message);
-                }
-
-                return const SizedBox.shrink();
+                return switch (state) {
+                  SearchInitial() => _buildInitialState(),
+                  SearchLoading() => const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                  SearchLoaded() => _buildResultsList(state),
+                  SearchError(:final message) => _buildErrorState(message),
+                };
               },
             ),
           ),

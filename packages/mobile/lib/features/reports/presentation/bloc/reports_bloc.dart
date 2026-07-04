@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/repositories/reports_repository.dart';
+import 'package:expense_tracker/core/bloc/transformers.dart';
+import '../../domain/entities/granularity.dart';
 import '../../domain/usecases/get_spending_trend.dart';
 import '../../domain/usecases/get_category_breakdown.dart';
 import '../../domain/usecases/get_spending_insights.dart';
@@ -26,9 +27,9 @@ class ReportsBloc extends Bloc<ReportsEvent, ReportsState> {
        _endDate = endDate,
        _granularity = granularity,
        super(ReportsInitial()) {
-    on<LoadReports>(_onLoadReports);
-    on<ChangeDateRange>(_onChangeDateRange);
-    on<ChangeGranularity>(_onChangeGranularity);
+    on<LoadReports>(_onLoadReports, transformer: concurrent());
+    on<ChangeDateRange>(_onChangeDateRange, transformer: concurrent());
+    on<ChangeGranularity>(_onChangeGranularity, transformer: concurrent());
 
     add(
       LoadReports(

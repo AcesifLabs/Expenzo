@@ -90,7 +90,8 @@ class SyncEngine {
         },
       );
       _initialized = true;
-    } catch (e) {
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
       debugPrint('SyncEngine start failed: $e');
       _initialized = false;
     }
@@ -117,7 +118,8 @@ class SyncEngine {
     try {
       final response = await _apiClient.dio.get(ApiConstants.syncSummary);
       cloudCount = response.data['totalCount'] ?? 0;
-    } catch (e) {
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
       debugPrint('SyncEngine: Failed to fetch cloud summary: $e');
       cloudCount = 0;
     }
@@ -181,7 +183,8 @@ class SyncEngine {
 
       await _processPushQueue(queue);
       _retryCount = 0;
-    } catch (e) {
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
       debugPrint('SyncEngine push failed: $e');
       _scheduleRetry();
     } finally {
@@ -248,7 +251,8 @@ class SyncEngine {
         }
       });
       await TokenStorage.saveLastSyncAt(serverTime);
-    } catch (e) {
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
       debugPrint('SyncEngine pull failed: $e');
     }
   }
@@ -339,7 +343,8 @@ class SyncEngine {
     if (data == null) {
       try {
         await handler.deleteById(_db, id);
-      } catch (e) {
+      } catch (e, s) {
+        debugPrint('Error: $e\n$s');
         debugPrint('Error deleting remote change from $tableName: $e');
       }
 
@@ -349,7 +354,8 @@ class SyncEngine {
     try {
       final companion = handler.fromSyncPayload(id, data);
       await _db.into(handler.tableRef(_db)).insertOnConflictUpdate(companion);
-    } catch (e) {
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
       debugPrint('Error applying remote change to $tableName: $e');
     }
   }

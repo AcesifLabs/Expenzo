@@ -9,6 +9,7 @@ class SaveTemplate implements UseCase<ExpenseTemplate, ExpenseTemplate> {
 
   SaveTemplate(this.repository);
 
+  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, ExpenseTemplate>> call(ExpenseTemplate template) {
     return repository.saveTemplate(template);

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
-import '../../../core/theme/app_colors.dart';
 
 class ShimmerBox extends StatelessWidget {
   static Widget circle({Key? key, required double size}) {
@@ -54,13 +53,9 @@ class ShimmerBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final baseColor = isDark
-        ? const Color(0xFF3A4A52)
-        : const Color(0xFFD4DDD0);
-    final highlightColor = isDark
-        ? AppColors.surfaceDark
-        : AppColors.backgroundLight;
+    final colors = Theme.of(context).colorScheme;
+    final baseColor = colors.surfaceContainerHighest;
+    final highlightColor = colors.onSurfaceVariant.withAlpha(50);
 
     return RepaintBoundary(
       child: Shimmer.fromColors(

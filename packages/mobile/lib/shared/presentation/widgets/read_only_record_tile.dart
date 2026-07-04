@@ -2,8 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
+import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:expense_tracker/features/records/domain/entities/record.dart';
 
+/// A read-only record tile for dashboard summary lists.
+///
+/// Unlike [RecordCard] which supports interactive actions (onTap, onDelete),
+/// this widget is a lightweight, presentational tile optimized for use in
+/// dashboard recent-activity sections and other read-only contexts.
 class ReadOnlyRecordTile extends StatelessWidget {
   final Record record;
   final NumberFormat? amountFormat;
@@ -94,9 +100,7 @@ class ReadOnlyRecordTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isExpense = record.recordType == RecordType.expense;
-    final amtColor = isExpense
-        ? const Color(0xFFFF3B30)
-        : const Color(0xFF34C759);
+    final amtColor = isExpense ? AppColors.expense : AppColors.success;
     final colors = Theme.of(context).colorScheme;
 
     return Padding(

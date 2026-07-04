@@ -8,6 +8,6 @@ class SyncQueue extends Table {
   TextColumn get recordId => text()();
   TextColumn get action => text()();
   TextColumn get payload => text()();
-  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get syncedAt => dateTime().nullable()();
 }

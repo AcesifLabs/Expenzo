@@ -129,7 +129,6 @@ class _InteractiveTemplateBuilderState
 
   Widget _buildStep1() {
     final theme = Theme.of(context);
-    final isLight = theme.brightness == Brightness.light;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -153,7 +152,7 @@ class _InteractiveTemplateBuilderState
             return ChoiceChip(
               label: Text(
                 cleanWord,
-                style: TextStyle(color: isLight ? Colors.black : null),
+                style: TextStyle(color: theme.colorScheme.onSurface),
               ),
               selected: _selectedTrigger == cleanWord,
               onSelected: (selected) => _onWordSelected(cleanWord, selected),
@@ -170,9 +169,6 @@ class _InteractiveTemplateBuilderState
   }
 
   Widget _buildStep2() {
-    final theme = Theme.of(context);
-    final isLight = theme.brightness == Brightness.light;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -184,12 +180,12 @@ class _InteractiveTemplateBuilderState
         const Text('Which of these numbers is the expense amount?'),
         const SizedBox(height: 24),
         if (_numbers.isEmpty)
-          const Text(
+          Text(
             'No numbers found in this message.',
-            style: TextStyle(color: Colors.red),
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
           )
         else
-          _buildNumberChips(isLight),
+          _buildNumberChips(),
         const Spacer(),
         Row(
           children: [
@@ -208,7 +204,9 @@ class _InteractiveTemplateBuilderState
     );
   }
 
-  Widget _buildNumberChips(bool isLight) {
+  Widget _buildNumberChips() {
+    final colors = Theme.of(context).colorScheme;
+
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -218,13 +216,10 @@ class _InteractiveTemplateBuilderState
         return ChoiceChip(
           label: Text(
             displayAmount,
-            style: TextStyle(
-              fontSize: 18,
-              color: isLight ? Colors.black : null,
-            ),
+            style: TextStyle(fontSize: 18, color: colors.onSurface),
           ),
           selected: _selectedAmount == number,
-          selectedColor: Colors.green.shade100,
+          selectedColor: Theme.of(context).colorScheme.secondaryContainer,
           onSelected: (selected) => _onNumberSelected(number, selected),
         );
       }).toList(),
@@ -275,28 +270,36 @@ class _InteractiveTemplateBuilderState
   }
 
   Widget _buildReviewCard() {
+    final colors = Theme.of(context).colorScheme;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Sender', style: TextStyle(color: Colors.grey)),
+            Text('Sender', style: TextStyle(color: colors.onSurfaceVariant)),
             Text(
               widget.source.contactName,
               style: const TextStyle(fontSize: 18),
             ),
             const SizedBox(height: 16),
-            const Text('Trigger Word', style: TextStyle(color: Colors.grey)),
+            Text(
+              'Trigger Word',
+              style: TextStyle(color: colors.onSurfaceVariant),
+            ),
             Text(
               _selectedTrigger ?? '',
-              style: const TextStyle(fontSize: 18, color: Colors.blue),
+              style: TextStyle(fontSize: 18, color: colors.tertiary),
             ),
             const SizedBox(height: 16),
-            const Text('Sample Amount', style: TextStyle(color: Colors.grey)),
+            Text(
+              'Sample Amount',
+              style: TextStyle(color: colors.onSurfaceVariant),
+            ),
             Text(
               _stripCurrencyPrefix(_selectedAmount ?? ''),
-              style: const TextStyle(fontSize: 18, color: Colors.green),
+              style: TextStyle(fontSize: 18, color: colors.secondary),
             ),
           ],
         ),
@@ -306,15 +309,18 @@ class _InteractiveTemplateBuilderState
 
   void _onTemplateSaveState(BuildContext context, TemplateEditorState state) {
     final saved = _savedTemplate;
-    if (state is TemplateEditorSaved && saved != null) {
-      unawaited(_handleSaveSuccess(context, saved));
-    } else if (state is TemplateEditorError) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error saving template: ${state.message}'),
-          backgroundColor: Colors.red,
-        ),
-      );
+    switch (state) {
+      case TemplateEditorSaved() when saved != null:
+        unawaited(_handleSaveSuccess(context, saved));
+      case TemplateEditorError(:final message):
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error saving template: $message'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      default:
+        break;
     }
   }
 

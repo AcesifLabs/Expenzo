@@ -2,7 +2,7 @@ import 'package:drift/drift.dart';
 import '../../constants/record_type.dart';
 import '../app_database.dart';
 import '../tables/records_table.dart';
-import '../../../features/records/domain/repositories/record_filter.dart';
+import '../../../features/records/domain/filters/record_filter.dart';
 
 part 'record_dao.g.dart';
 

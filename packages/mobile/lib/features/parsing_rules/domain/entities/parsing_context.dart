@@ -1,8 +1,9 @@
+import 'package:equatable/equatable.dart';
 import '../entities/parsing_rule.dart';
 import '../../../message_templates/domain/entities/expense_template.dart';
 import '../../../message_templates/domain/entities/message_source.dart';
 
-class ParsingContext {
+class ParsingContext extends Equatable {
   final List<ParsingRule> rules;
   final List<ExpenseTemplate> templates;
   final List<MessageSource> sources;
@@ -14,6 +15,10 @@ class ParsingContext {
     required this.sources,
     this.regexCache = const {},
   });
+
+  // ignore: member-ordering
+  @override
+  List<Object?> get props => [rules, templates, sources, regexCache];
 
   ParsingContext withPrecompiledRegex() {
     final cache = <String, RegExp>{};

@@ -1,5 +1,6 @@
 import 'package:intl/intl.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../entities/parsing_rule.dart';
 import '../entities/parsed_transaction.dart';
 import '../entities/evaluate_rules_params.dart';
@@ -109,7 +110,9 @@ class RuleEvaluator {
         parseFailed: false,
         parseError: null,
       );
-    } catch (e) {
+    } catch (e, s) {
+      appLogger.error('Error evaluating context', e, s);
+
       return null;
     }
   }
@@ -190,7 +193,9 @@ class RuleEvaluator {
         parseFailed: false,
         parseError: null,
       );
-    } catch (e) {
+    } catch (e, s) {
+      appLogger.error('Error evaluating with context', e, s);
+
       return ParsedTransaction(
         rawMessage: params.rawMessage,
         amount: null,
@@ -267,7 +272,9 @@ class RuleEvaluator {
     if (day < 1 || day > 31) return null;
     try {
       return DateTime(year, month, day);
-    } catch (_) {
+    } catch (e) {
+      appLogger.error('Rule evaluation error', e);
+
       return null;
     }
   }

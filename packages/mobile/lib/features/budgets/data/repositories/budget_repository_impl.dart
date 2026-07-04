@@ -4,6 +4,7 @@ import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/sync/sync_event.dart';
 import 'package:expense_tracker/core/database/daos/sync_queue_dao.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../../domain/entities/budget.dart';
 import '../../domain/repositories/budget_repository.dart';
 import '../datasources/budget_local_datasource.dart';
@@ -17,6 +18,7 @@ class BudgetRepositoryImpl implements BudgetRepository {
     SyncQueueDao? syncQueueDao,
   }) : _syncQueueDao = syncQueueDao;
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, List<Budget>>> getBudgets() async {
     try {
@@ -25,9 +27,14 @@ class BudgetRepositoryImpl implements BudgetRepository {
       return Right(budgets);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      appLogger.error('Error getting budgets', e, s);
+
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, Budget>> getBudgetById(String id) async {
     try {
@@ -39,9 +46,14 @@ class BudgetRepositoryImpl implements BudgetRepository {
       return Right(budget);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      appLogger.error('Error getting budget by id', e, s);
+
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, Budget>> createBudget(Budget budget) async {
     try {
@@ -63,9 +75,14 @@ class BudgetRepositoryImpl implements BudgetRepository {
       return Right(budget);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      appLogger.error('Error creating budget', e, s);
+
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, Budget>> updateBudget(Budget budget) async {
     try {
@@ -87,9 +104,14 @@ class BudgetRepositoryImpl implements BudgetRepository {
       return Right(budget);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      appLogger.error('Error updating budget', e, s);
+
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, Unit>> deleteBudget(String id) async {
     try {
@@ -99,6 +121,10 @@ class BudgetRepositoryImpl implements BudgetRepository {
       return const Right(unit);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      appLogger.error('Error deleting budget', e, s);
+
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 

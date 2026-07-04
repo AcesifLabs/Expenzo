@@ -2,9 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:picons/picons.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
-import 'package:expense_tracker/core/utils/navigation_utils.dart';
 import 'package:expense_tracker/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:expense_tracker/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:expense_tracker/features/records/presentation/bloc/record_bloc.dart';
@@ -13,7 +14,6 @@ import 'package:expense_tracker/features/records/presentation/widgets/new_transa
 import 'package:expense_tracker/features/budgets/presentation/pages/budget_list_page.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanner_event.dart';
-import 'package:expense_tracker/features/sms_parser/presentation/pages/sms_scan_results_page.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:expense_tracker/shared/presentation/widgets/sms_permission_gate.dart';
@@ -80,7 +80,7 @@ class _AppShellState extends State<AppShell> {
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withAlpha(20),
+                color: Theme.of(context).colorScheme.onSurface.withAlpha(20),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
@@ -93,7 +93,7 @@ class _AppShellState extends State<AppShell> {
               children: [
                 ...List.generate(leftCount, (i) => _navItem(i, colors)),
                 AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
+                  duration: AppSpacing.durationNormal,
                   curve: Curves.easeInOut,
                   width: showFab ? 48 : 0,
                 ),
@@ -123,7 +123,7 @@ class _AppShellState extends State<AppShell> {
             mainAxisSize: MainAxisSize.min,
             children: [
               AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
+                duration: AppSpacing.durationFast,
                 transitionBuilder: _navIconTransition,
                 child: Icon(
                   _navIcon(i, fill: sel),
@@ -134,7 +134,7 @@ class _AppShellState extends State<AppShell> {
               ),
               const SizedBox(height: 2),
               AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 200),
+                duration: AppSpacing.durationFast,
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: sel ? FontWeight.w600 : FontWeight.w400,
@@ -160,7 +160,7 @@ class _AppShellState extends State<AppShell> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: const Color(0x00000000),
       builder: (_) => MultiBlocProvider(
         providers: [
           BlocProvider.value(value: context.read<RecordBloc>()),
@@ -206,6 +206,8 @@ class _AppShellState extends State<AppShell> {
 }
 
 class _ScanPageWithFab extends StatefulWidget {
+  const _ScanPageWithFab();
+
   @override
   State<_ScanPageWithFab> createState() => _ScanPageWithFabState();
 }
@@ -257,14 +259,7 @@ class _ScanPageWithFabState extends State<_ScanPageWithFab> {
   void _startScan(BuildContext context, DateTime since) {
     final smsBloc = di.getIt<SmsScannerBloc>();
     smsBloc.add(StartScan(since: since, filterDuplicates: true));
-    Navigator.of(context).push(
-      SlidePageRoute(
-        builder: (_) => BlocProvider.value(
-          value: smsBloc,
-          child: const SmsScanResultsPage(),
-        ),
-      ),
-    );
+    context.push('/scan-results', extra: <String, dynamic>{'smsBloc': smsBloc});
   }
 
   @override

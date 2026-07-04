@@ -2,7 +2,6 @@ import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
-import '../entities/record.dart';
 import "package:expense_tracker/core/constants/source_types.dart";
 import '../repositories/record_repository.dart';
 import '../../../parsing_rules/domain/entities/parsed_transaction.dart';
@@ -12,6 +11,7 @@ class CreateRecordFromParsed extends UseCase<Record?, ParsedTransaction> {
 
   CreateRecordFromParsed(this.repository);
 
+  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, Record?>> call(ParsedTransaction parsed) async {
     final existsResult = await repository.recordExistsBySourceId(

@@ -3,7 +3,7 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/record.dart';
 
-abstract class RecordState extends Equatable {
+sealed class RecordState extends Equatable {
   @override
   List<Object?> get props => [];
 

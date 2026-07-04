@@ -10,6 +10,9 @@ abstract class Failure extends Equatable {
   List<Object> get props => [message, errorCode];
 
   const Failure({required this.message, required this.errorCode});
+
+  @override
+  String toString() => 'Failure($errorCode): $message';
 }
 
 class ServerFailure extends Failure {
@@ -23,6 +26,9 @@ class ServerFailure extends Failure {
     super.errorCode = 'SERVER_ERROR',
     this.statusCode,
   });
+
+  @override
+  String toString() => 'ServerFailure: $message (statusCode: $statusCode)';
 }
 
 class CacheFailure extends Failure {

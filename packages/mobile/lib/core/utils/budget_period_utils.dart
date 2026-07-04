@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:expense_tracker/features/budgets/domain/entities/budget.dart';
+import 'package:expense_tracker/core/constants/budget_period.dart';
 
 class BudgetPeriodUtils {
   BudgetPeriodUtils._();

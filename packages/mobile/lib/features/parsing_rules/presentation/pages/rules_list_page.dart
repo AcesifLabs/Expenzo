@@ -85,7 +85,11 @@ class RulesListPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.rule, size: 64, color: Colors.grey),
+            Icon(
+              Icons.rule,
+              size: 64,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
             const SizedBox(height: 16),
             const Text(
               'No rules yet',
@@ -231,17 +235,15 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
     final formState = _formKey.currentState;
     if (formState == null || !formState.validate()) return;
 
-    _buildRule();
+    final rule = _buildRule();
 
-    if (widget.rule == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Creating rule...')));
-    } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Updating rule...')));
-    }
+    context.read<ParsingRulesBloc>().add(CreateRuleEvent(rule));
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(widget.rule == null ? 'Rule created' : 'Rule updated'),
+      ),
+    );
 
     Navigator.of(context).pop();
   }
@@ -268,7 +270,9 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
     }
     try {
       RegExp(value);
-    } catch (e) {
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
+
       return 'Invalid regex pattern';
     }
 
@@ -505,7 +509,8 @@ class AddTemplatesPage extends StatelessWidget {
   }
 
   void _addTemplate(BuildContext context, DefaultRuleTemplate template) {
-    template.toParsingRule();
+    final rule = template.toParsingRule();
+    context.read<ParsingRulesBloc>().add(CreateRuleEvent(rule));
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text('Added "${template.name}"')));

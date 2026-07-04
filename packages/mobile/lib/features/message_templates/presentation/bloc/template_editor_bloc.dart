@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:expense_tracker/core/bloc/transformers.dart';
 import '../../domain/usecases/save_template.dart';
 import '../../domain/repositories/message_template_repository.dart';
 import 'template_editor_event.dart';
@@ -15,17 +16,8 @@ class TemplateEditorBloc
     required this.saveTemplateUseCase,
     required this.repository,
   }) : super(TemplateEditorInitial()) {
-    on<LoadTemplate>(_onLoadTemplate);
-    on<SaveTemplateEvent>(_onSaveTemplate);
-    on<DeleteTemplateEvent>(_onDeleteTemplate);
-  }
-
-  // ignore: avoid-redundant-async
-  Future<void> _onLoadTemplate(
-    LoadTemplate event,
-    Emitter<TemplateEditorState> emit,
-  ) async {
-    // TODO: implement template loading
+    on<SaveTemplateEvent>(_onSaveTemplate, transformer: concurrent());
+    on<DeleteTemplateEvent>(_onDeleteTemplate, transformer: concurrent());
   }
 
   Future<void> _onSaveTemplate(
@@ -36,11 +28,9 @@ class TemplateEditorBloc
 
     final sourceResult = await repository.saveMessageSource(event.source);
 
-    if (sourceResult.isLeft()) {
-      sourceResult.fold(
-        (failure) => emit(TemplateEditorError(failure.message)),
-        (_) => unawaited(Future.value()),
-      );
+    final sourceError = sourceResult.fold((failure) => failure, (_) => null);
+    if (sourceError != null) {
+      emit(TemplateEditorError(sourceError.message));
 
       return;
     }

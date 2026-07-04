@@ -1,16 +1,20 @@
 import 'package:equatable/equatable.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
 
-abstract class ContactSelectorState extends Equatable {
+sealed class ContactSelectorState extends Equatable {
   @override
   List<Object?> get props => [];
 
   const ContactSelectorState();
 }
 
-class ContactSelectorInitial extends ContactSelectorState {}
+class ContactSelectorInitial extends ContactSelectorState {
+  const ContactSelectorInitial();
+}
 
-class ContactSelectorLoading extends ContactSelectorState {}
+class ContactSelectorLoading extends ContactSelectorState {
+  const ContactSelectorLoading();
+}
 
 class ContactSelectorLoaded extends ContactSelectorState {
   final List<DeviceContact> contacts;

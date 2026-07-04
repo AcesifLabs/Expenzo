@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+// TODO: Migrate to blocTest<BudgetBloc, BudgetState>(...) when bloc_test dep
+// can be added (currently blocked by version conflicts). Example:
+//   blocTest<BudgetBloc, BudgetState>(
+//     'emits [BudgetLoading, BudgetLoaded]',
+//     build: () => bloc,
+//     act: (bloc) => bloc.add(LoadBudgets()),
+//     expect: () => [isA<BudgetLoading>(), isA<BudgetLoaded>()],
+//   );
+
 import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
+import 'package:expense_tracker/core/constants/budget_period.dart';
 import 'package:expense_tracker/features/budgets/domain/entities/budget.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/create_budget.dart';
@@ -172,7 +182,7 @@ void main() {
       );
 
       bloc.add(LoadBudgets());
-
+      // Let the first load complete
       await Future.delayed(Duration.zero);
       bloc.add(const LoadBudgetTransactions('budget-1'));
     });

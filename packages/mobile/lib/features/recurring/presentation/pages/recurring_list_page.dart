@@ -1,49 +1,62 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:picons/picons.dart';
-import 'package:expense_tracker/core/di/injection_container.dart' as di;
-import 'package:expense_tracker/core/utils/navigation_utils.dart';
+
 import '../../domain/entities/recurring_transaction.dart';
 import '../bloc/recurring_bloc.dart';
 import '../bloc/recurring_event.dart';
 import '../bloc/recurring_state.dart';
-import 'package:expense_tracker/features/recurring/presentation/pages/recurring_form_page.dart';
 
-class RecurringListPage extends StatefulWidget {
-  const RecurringListPage({super.key});
+class RecurringListPage extends StatelessWidget {
+  final RecurringBloc bloc;
+
+  const RecurringListPage({super.key, required this.bloc});
 
   @override
-  State<RecurringListPage> createState() => _RecurringListPageState();
+  Widget build(BuildContext context) {
+    return BlocProvider.value(value: bloc, child: const RecurringListView());
+  }
 }
 
-class _RecurringListPageState extends State<RecurringListPage> {
-  final _bloc = di.getIt<RecurringBloc>();
+class RecurringListView extends StatefulWidget {
+  const RecurringListView({super.key});
 
+  @override
+  State<RecurringListView> createState() => _RecurringListViewState();
+}
+
+class _RecurringListViewState extends State<RecurringListView> {
   @override
   void initState() {
     super.initState();
-    _bloc.add(LoadRecurring());
+    context.read<RecurringBloc>().add(LoadRecurring());
   }
 
   void _onListener(BuildContext context, RecurringState state) {
-    if (state is RecurringOperationSuccess) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(state.message)));
-    } else if (state is RecurringError) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(state.message)));
+    switch (state) {
+      case RecurringOperationSuccess():
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Operation successful')));
+      case RecurringError(:final message):
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(message)));
+      default:
+        break;
     }
   }
 
   void _onRefresh() {
-    _bloc.add(LoadRecurring());
+    context.read<RecurringBloc>().add(LoadRecurring());
   }
 
   void _onSwitchChanged(RecurringTransaction recurring, bool value) {
-    _bloc.add(UpdateRecurring(recurring.copyWith(isActive: value)));
+    context.read<RecurringBloc>().add(
+      UpdateRecurring(recurring.copyWith(isActive: value)),
+    );
   }
 
   void _onDeleteDialogConfirm(
@@ -52,8 +65,9 @@ class _RecurringListPageState extends State<RecurringListPage> {
   ) {
     final id = recurring.id;
     if (id == null) return;
+    if (!context.mounted) return;
     Navigator.pop(context);
-    _bloc.add(DeleteRecurring(id));
+    context.read<RecurringBloc>().add(DeleteRecurring(id));
   }
 
   String _frequencyLabel(RecurringFrequency frequency) {
@@ -70,6 +84,8 @@ class _RecurringListPageState extends State<RecurringListPage> {
   }
 
   Widget _buildEmptyState() {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -77,17 +93,17 @@ class _RecurringListPageState extends State<RecurringListPage> {
           Icon(
             PiconsRegular.arrowsCounterClockwise,
             size: 64,
-            color: Colors.grey[400],
+            color: colorScheme.onSurface.withAlpha(100),
           ),
           const SizedBox(height: 16),
           Text(
             'No recurring transactions',
-            style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+            style: TextStyle(fontSize: 18, color: colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 8),
           Text(
             'Tap + to create your first recurring expense',
-            style: TextStyle(color: Colors.grey[500]),
+            style: TextStyle(color: colorScheme.outline),
           ),
         ],
       ),
@@ -98,6 +114,7 @@ class _RecurringListPageState extends State<RecurringListPage> {
     RecurringTransaction recurring,
     DateFormat dateFormat,
   ) {
+    final colorScheme = Theme.of(context).colorScheme;
     final isDue = recurring.isDue();
 
     return Card(
@@ -105,11 +122,11 @@ class _RecurringListPageState extends State<RecurringListPage> {
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: isDue
-              ? Colors.orange.withAlpha(51)
-              : Colors.grey.withAlpha(26),
+              ? colorScheme.tertiary.withAlpha(51)
+              : colorScheme.onSurface.withAlpha(26),
           child: Icon(
             PiconsRegular.arrowsCounterClockwise,
-            color: isDue ? Colors.orange : Colors.grey,
+            color: isDue ? colorScheme.tertiary : colorScheme.onSurfaceVariant,
           ),
         ),
         title: Text(recurring.description),
@@ -122,7 +139,9 @@ class _RecurringListPageState extends State<RecurringListPage> {
             Text(
               'Next: ${dateFormat.format(recurring.nextOccurrence)}',
               style: TextStyle(
-                color: isDue ? Colors.orange : Colors.grey,
+                color: isDue
+                    ? colorScheme.tertiary
+                    : colorScheme.onSurfaceVariant,
                 fontSize: 12,
               ),
             ),
@@ -155,15 +174,12 @@ class _RecurringListPageState extends State<RecurringListPage> {
   }
 
   void _navigateToForm(BuildContext context, RecurringTransaction? recurring) {
-    Navigator.push(
-      context,
-      SlidePageRoute(
-        builder: (_) => BlocProvider.value(
-          value: _bloc,
-          child: RecurringFormPage(recurring: recurring),
-        ),
-      ),
-    );
+    final recurringId = recurring?.id;
+    if (recurringId != null) {
+      context.push('/recurring/$recurringId/edit');
+    } else {
+      context.push('/recurring/new');
+    }
   }
 
   void _showDeleteDialog(BuildContext context, RecurringTransaction recurring) {
@@ -181,7 +197,10 @@ class _RecurringListPageState extends State<RecurringListPage> {
           ),
           TextButton(
             onPressed: () => _onDeleteDialogConfirm(dialogContext, recurring),
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text(
+              'Delete',
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
           ),
         ],
       ),
@@ -189,16 +208,18 @@ class _RecurringListPageState extends State<RecurringListPage> {
   }
 
   Widget _buildErrorState(RecurringError state) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(PiconsRegular.warningCircle, size: 48, color: Colors.red),
+          Icon(PiconsRegular.warningCircle, size: 48, color: colorScheme.error),
           const SizedBox(height: 16),
           Text(state.message),
           const SizedBox(height: 16),
           ElevatedButton(
-            onPressed: () => _bloc.add(LoadRecurring()),
+            onPressed: () => context.read<RecurringBloc>().add(LoadRecurring()),
             child: const Text('Retry'),
           ),
         ],
@@ -207,46 +228,35 @@ class _RecurringListPageState extends State<RecurringListPage> {
   }
 
   Widget _buildBody(BuildContext _, RecurringState state) {
-    if (state is RecurringLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    if (state is RecurringError) return _buildErrorState(state);
-    if (state is RecurringLoaded) {
-      return _buildLoadedState(state, DateFormat('MMM dd, yyyy'));
-    }
-
-    return const SizedBox.shrink();
-  }
-
-  @override
-  void dispose() {
-    _bloc.close();
-    super.dispose();
+    return switch (state) {
+      RecurringLoading() => const Center(child: CircularProgressIndicator()),
+      RecurringError() => _buildErrorState(state),
+      RecurringLoaded() => _buildLoadedState(state, DateFormat('MMM dd, yyyy')),
+      _ => const SizedBox.shrink(),
+    };
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: _bloc,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Recurring Transactions'),
-          actions: [
-            IconButton(
-              icon: Icon(PiconsRegular.arrowsCounterClockwise),
-              onPressed: () => _bloc.add(const ProcessRecurring()),
-              tooltip: 'Process pending',
-            ),
-          ],
-        ),
-        body: BlocConsumer<RecurringBloc, RecurringState>(
-          listener: _onListener,
-          builder: _buildBody,
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () => _navigateToForm(context, null),
-          child: Icon(PiconsRegular.plus),
-        ),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Recurring Transactions'),
+        actions: [
+          IconButton(
+            icon: Icon(PiconsRegular.arrowsCounterClockwise),
+            onPressed: () =>
+                context.read<RecurringBloc>().add(const ProcessRecurring()),
+            tooltip: 'Process pending',
+          ),
+        ],
+      ),
+      body: BlocConsumer<RecurringBloc, RecurringState>(
+        listener: _onListener,
+        builder: _buildBody,
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _navigateToForm(context, null),
+        child: Icon(PiconsRegular.plus),
       ),
     );
   }

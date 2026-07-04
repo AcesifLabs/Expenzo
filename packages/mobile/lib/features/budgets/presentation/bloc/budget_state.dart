@@ -3,16 +3,20 @@ import '../../domain/entities/budget.dart';
 import '../../domain/usecases/get_budget_progress.dart';
 import '../../../records/domain/entities/record.dart';
 
-abstract class BudgetState extends Equatable {
+sealed class BudgetState extends Equatable {
   @override
   List<Object?> get props => [];
 
   const BudgetState();
 }
 
-class BudgetInitial extends BudgetState {}
+class BudgetInitial extends BudgetState {
+  const BudgetInitial();
+}
 
-class BudgetLoading extends BudgetState {}
+class BudgetLoading extends BudgetState {
+  const BudgetLoading();
+}
 
 class BudgetLoaded extends BudgetState {
   final List<Budget> budgets;
@@ -67,10 +71,8 @@ class BudgetError extends BudgetState {
 }
 
 class BudgetOperationSuccess extends BudgetState {
-  final String message;
-
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [];
 
-  const BudgetOperationSuccess(this.message);
+  const BudgetOperationSuccess();
 }

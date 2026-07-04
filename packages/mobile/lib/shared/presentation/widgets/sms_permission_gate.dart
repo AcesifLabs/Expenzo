@@ -73,7 +73,8 @@ class _SmsPermissionGateState extends State<SmsPermissionGate> {
   Future<void> _startRealtimeProcessor() async {
     try {
       await di.getIt<RealtimeSmsProcessor>().start();
-    } catch (e) {
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
       debugPrint('SmsPermissionGate start skipped: $e');
     }
   }
@@ -94,7 +95,11 @@ class _SmsPermissionGateState extends State<SmsPermissionGate> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(PiconsRegular.warningCircle, size: 80, color: Colors.grey),
+            Icon(
+              PiconsRegular.warningCircle,
+              size: 80,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
             const SizedBox(height: 24),
             const Text(
               'SMS Access Required',

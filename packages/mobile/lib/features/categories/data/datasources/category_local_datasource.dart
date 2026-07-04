@@ -4,14 +4,18 @@ import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/database/app_database.dart' as db;
 import 'package:expense_tracker/core/database/daos/category_dao.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../../domain/entities/category.dart';
 
 abstract class CategoryLocalDatasource {
+  /// Throws: [CacheException] if a database error occurs.
   Future<List<Category>> getCategories({
     RecordType? type,
     bool sortByUsage = false,
   });
   Future<Category?> getCategoryById(String id);
+
+  /// Throws: [CacheException] if a database error occurs.
   Future<Category> createCategory(Category category);
   Future<Category> updateCategory(Category category);
   Future<void> deleteCategory(String id);
@@ -19,6 +23,8 @@ abstract class CategoryLocalDatasource {
     RecordType? type,
     bool sortByUsage = false,
   });
+
+  /// Throws: [CacheException] if a database error occurs.
   Future<void> incrementUsageCount(String id);
 }
 
@@ -27,6 +33,7 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
 
   CategoryLocalDatasourceImpl({required this.categoryDao});
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<List<Category>> getCategories({
     RecordType? type,
@@ -39,22 +46,26 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
       );
 
       return categories.map(_mapToEntity).toList();
-    } catch (e) {
+    } catch (e, s) {
+      appLogger.error('Error getting categories', e, s);
       throw CacheException(message: e.toString());
     }
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<Category?> getCategoryById(String id) async {
     try {
       final category = await categoryDao.getCategoryById(id);
 
       return category != null ? _mapToEntity(category) : null;
-    } catch (e) {
+    } catch (e, s) {
+      appLogger.error('Error getting category by id', e, s);
       throw CacheException(message: e.toString());
     }
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<Category> createCategory(Category category) async {
     try {
@@ -74,11 +85,13 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
       await categoryDao.insertCategory(companion);
 
       return category.copyWith(id: id, createdAt: now, updatedAt: now);
-    } catch (e) {
+    } catch (e, s) {
+      appLogger.error('Error creating category', e, s);
       throw CacheException(message: e.toString());
     }
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<Category> updateCategory(Category category) async {
     try {
@@ -101,16 +114,19 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
       await categoryDao.updateCategory(companion);
 
       return category.copyWith(updatedAt: now);
-    } catch (e) {
+    } catch (e, s) {
+      appLogger.error('Error updating category', e, s);
       throw CacheException(message: e.toString());
     }
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<void> deleteCategory(String id) async {
     try {
       await categoryDao.deleteCategory(id);
-    } catch (e) {
+    } catch (e, s) {
+      appLogger.error('Error deleting category', e, s);
       throw CacheException(message: e.toString());
     }
   }
@@ -125,11 +141,13 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
         .map((categories) => categories.map(_mapToEntity).toList());
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<void> incrementUsageCount(String id) async {
     try {
       await categoryDao.incrementUsageCount(id);
-    } catch (e) {
+    } catch (e, s) {
+      appLogger.error('Error incrementing usage count', e, s);
       throw CacheException(message: e.toString());
     }
   }

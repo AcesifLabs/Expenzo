@@ -8,12 +8,11 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'core/di/injection_container.dart' as di;
+import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/lifecycle/bootstrap_service.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
-import 'features/auth/presentation/bloc/auth_state.dart';
-import 'features/auth/presentation/pages/sync_conflict_page.dart';
 import 'features/categories/presentation/bloc/category_bloc.dart';
 import 'features/categories/presentation/bloc/category_event.dart';
 import 'features/records/presentation/bloc/record_bloc.dart';
@@ -24,11 +23,8 @@ import 'features/settings/presentation/bloc/settings_event.dart';
 import 'features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
 import 'features/sms_parser/application/realtime_sms_processor.dart';
 import 'shared/presentation/pages/feedback_page.dart';
-import 'shared/presentation/widgets/app_shell.dart';
 import 'shared/presentation/widgets/app_critical_error.dart';
 import 'shared/presentation/widgets/app_error_fallback.dart';
-import 'core/database/database_seeder.dart';
-import 'core/database/app_database.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,7 +32,8 @@ void main() async {
   const isProd = bool.fromEnvironment('dart.vm.product');
   try {
     await dotenv.load(fileName: isProd ? '.env.prod' : '.env.dev');
-  } catch (e) {
+  } catch (e, s) {
+    debugPrint('Error: $e\n$s');
     debugPrint('Failed to load .env: $e');
   }
 
@@ -72,72 +69,10 @@ class ExpenzoApp extends StatefulWidget {
 }
 
 class _ExpenzoAppState extends State<ExpenzoApp> {
+  final _navigatorKey = GlobalKey<NavigatorState>();
   final _themeModeNotifier = ValueNotifier<ThemeMode>(ThemeMode.system);
-  StreamSubscription? _settingsSubscription;
+  AppRouter? _appRouter;
 
-  @override
-  void initState() {
-    super.initState();
-    _initSettingsWhenReady();
-  }
-
-  Future<void> _initSettingsWhenReady() async {
-    await di.criticalDependenciesReady;
-    if (!mounted) return;
-
-    final bloc = di.getIt<SettingsBloc>()..add(const LoadSettings());
-    _settingsSubscription = bloc.stream.listen((state) {
-      if (state is SettingsLoaded) {
-        _themeModeNotifier.value = _themeModeFromString(state.settings.theme);
-      } else if (state is SettingsUpdateSuccess) {
-        _themeModeNotifier.value = _themeModeFromString(state.settings.theme);
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _settingsSubscription?.cancel();
-    _themeModeNotifier.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<ThemeMode>(
-      valueListenable: _themeModeNotifier,
-      builder: (context, themeMode, _) {
-        return MaterialApp(
-          title: 'Expenzo',
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          themeMode: themeMode,
-          debugShowCheckedModeBanner: false,
-          home: AppLoader(feedbackBuilder: (_) => const FeedbackPage()),
-        );
-      },
-    );
-  }
-}
-
-ThemeMode _themeModeFromString(String theme) {
-  return switch (theme) {
-    'light' => ThemeMode.light,
-    'dark' => ThemeMode.dark,
-    _ => ThemeMode.system,
-  };
-}
-
-class AppLoader extends StatefulWidget {
-  const AppLoader({super.key, this.feedbackBuilder});
-
-  final WidgetBuilder? feedbackBuilder;
-
-  @override
-  State<AppLoader> createState() => _AppLoaderState();
-}
-
-class _AppLoaderState extends State<AppLoader> with WidgetsBindingObserver {
   bool _initialized = false;
   bool _error = false;
   String _errorRefId = '';
@@ -145,64 +80,24 @@ class _AppLoaderState extends State<AppLoader> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
+    _appRouter = AppRouter(navigatorKey: _navigatorKey);
     _startInitialization();
-  }
-
-  Widget _buildSplash(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      body: const Center(child: _SplashIcon()),
-    );
-  }
-
-  void _handleRetry() {
-    setState(() {
-      _error = false;
-      _initialized = false;
-    });
-    _startInitialization();
-  }
-
-  void _handleHardReset() {
-    unawaited(
-      di.getIt<BootstrapService>().hardReset().then((_) {
-        if (!mounted) return;
-
-        di.getIt<BootstrapService>().remountRoot();
-      }),
-    );
-  }
-
-  void _handleRestart() {
-    di.getIt<BootstrapService>().restart();
   }
 
   Future<void> _startInitialization() async {
     try {
-      await Firebase.initializeApp().timeout(
-        const Duration(seconds: 15),
-        onTimeout: () {
-          debugPrint('Firebase init timed out — proceeding offline');
-          throw TimeoutException('Firebase init timed out');
-        },
-      );
-    } catch (e) {
-      debugPrint('Firebase init failed (non-fatal): $e');
-    }
-
-    try {
+      await _initFirebase();
       await di.initCriticalDependencies();
+      if (!mounted) return;
 
-      final db = di.getIt<AppDatabase>();
-      try {
-        await DatabaseSeeder.seedInitialCategories(db);
-      } catch (e) {
-        debugPrint('DatabaseSeeder failed (non-fatal): $e');
-      }
+      await di.getIt<BootstrapService>().seedInitialData();
+      _initSettingsWhenReady();
 
       if (mounted) {
-        setState(() => _initialized = true);
+        setState(() {
+          _initialized = true;
+          _error = false;
+        });
       }
 
       unawaited(_tryStartRealtimeSmsProcessing());
@@ -216,7 +111,7 @@ class _AppLoaderState extends State<AppLoader> with WidgetsBindingObserver {
         );
       });
     } catch (e, stack) {
-      debugPrint('AppLoader: init failed: $e\n$stack');
+      debugPrint('App init failed: $e\n$stack');
       if (mounted) {
         setState(() {
           _error = true;
@@ -226,13 +121,161 @@ class _AppLoaderState extends State<AppLoader> with WidgetsBindingObserver {
     }
   }
 
+  Future<void> _initFirebase() async {
+    try {
+      await Firebase.initializeApp().timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          debugPrint('Firebase init timed out — proceeding offline');
+          throw TimeoutException('Firebase init timed out');
+        },
+      );
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
+      debugPrint('Firebase init failed (non-fatal): $e');
+    }
+  }
+
+  Future<void> _initSettingsWhenReady() async {
+    await di.criticalDependenciesReady;
+    if (!mounted) return;
+
+    final bloc = di.getIt<SettingsBloc>()..add(const LoadSettings());
+    bloc.stream.listen((state) {
+      if (state is SettingsLoaded) {
+        _themeModeNotifier.value = _themeModeFromString(state.settings.theme);
+      } else if (state is SettingsUpdateSuccess) {
+        _themeModeNotifier.value = _themeModeFromString(state.settings.theme);
+      }
+    });
+  }
+
   Future<void> _tryStartRealtimeSmsProcessing() async {
     try {
       final status = await Permission.sms.status;
       if (!status.isGranted) return;
       await di.getIt<RealtimeSmsProcessor>().start();
-    } catch (e) {
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
       debugPrint('Realtime SMS start skipped: $e');
+    }
+  }
+
+  void _initFeatureDependencies() {
+    di.initFeatureDependencies();
+  }
+
+  void _dispatchInitialLoads() {
+    try {
+      final navContext = _navigatorKey.currentContext;
+      if (navContext == null) return;
+      navContext.read<AuthBloc>().add(const AuthCheckRequested());
+      _dispatchDelayedCategoryLoad(navContext);
+      _dispatchDelayedRecordLoad(navContext);
+    } catch (e, s) {
+      debugPrint('Initial loads dispatch failed: $e\n$s');
+    }
+  }
+
+  void _dispatchDelayedCategoryLoad(BuildContext navContext) {
+    Future.delayed(
+      const Duration(milliseconds: 150),
+      () => _loadCategoriesIfMounted(navContext),
+    );
+  }
+
+  void _loadCategoriesIfMounted(BuildContext navContext) {
+    if (navContext.mounted) {
+      navContext.read<CategoryBloc>().add(const LoadCategories());
+    }
+  }
+
+  void _dispatchDelayedRecordLoad(BuildContext navContext) {
+    Future.delayed(
+      const Duration(milliseconds: 300),
+      () => _loadRecordsIfMounted(navContext),
+    );
+  }
+
+  void _loadRecordsIfMounted(BuildContext navContext) {
+    if (navContext.mounted) {
+      navContext.read<RecordBloc>().add(const LoadRecords());
+    }
+  }
+
+  @override
+  void dispose() {
+    _themeModeNotifier.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: _themeModeNotifier,
+      builder: (context, themeMode, _) {
+        return MaterialApp.router(
+          title: 'Expenzo',
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeMode,
+          routerConfig: _appRouter?.config,
+          debugShowCheckedModeBanner: false,
+          builder: (context, child) {
+            return MultiBlocProvider(
+              providers: [
+                BlocProvider<AuthBloc>(create: (_) => di.getIt<AuthBloc>()),
+                BlocProvider<CategoryBloc>(
+                  create: (_) => di.getIt<CategoryBloc>(),
+                ),
+                BlocProvider<RecordBloc>(create: (_) => di.getIt<RecordBloc>()),
+                BlocProvider<SmsScannerBloc>(
+                  create: (_) => di.getIt<SmsScannerBloc>(),
+                ),
+              ],
+              child: _AppContent(
+                initialized: _initialized,
+                error: _error,
+                errorRefId: _errorRefId,
+                onInitLoads: _dispatchInitialLoads,
+                child: child ?? const SizedBox.shrink(),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _AppContent extends StatefulWidget {
+  final Widget child;
+  final bool initialized;
+  final bool error;
+  final String errorRefId;
+  final VoidCallback onInitLoads;
+
+  const _AppContent({
+    required this.child,
+    required this.initialized,
+    required this.error,
+    required this.errorRefId,
+    required this.onInitLoads,
+  });
+
+  @override
+  State<_AppContent> createState() => _AppContentState();
+}
+
+class _AppContentState extends State<_AppContent> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    if (widget.initialized) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        widget.onInitLoads();
+      });
     }
   }
 
@@ -241,13 +284,45 @@ class _AppLoaderState extends State<AppLoader> with WidgetsBindingObserver {
       final status = await Permission.sms.status;
       if (!status.isGranted) return;
       await di.getIt<RealtimeSmsProcessor>().drainPendingMessages();
-    } catch (e) {
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
       debugPrint('Realtime SMS drain skipped: $e');
     }
   }
 
-  void _initFeatureDependencies() {
-    di.initFeatureDependencies();
+  // ignore: no-empty-block
+  void _handleRetry() {
+    /* handled by error fallback widget */
+  }
+
+  void _handleHardReset() {
+    unawaited(
+      di.getIt<BootstrapService>().hardReset().then((_) {
+        if (!mounted) return;
+        di.getIt<BootstrapService>().remountRoot();
+      }),
+    );
+  }
+
+  void _handleRestart() {
+    di.getIt<BootstrapService>().restart();
+  }
+
+  Widget _buildSplash(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      body: const Center(child: _SplashIcon()),
+    );
+  }
+
+  @override
+  void didUpdateWidget(_AppContent old) {
+    super.didUpdateWidget(old);
+    if (!old.initialized && widget.initialized) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        widget.onInitLoads();
+      });
+    }
   }
 
   @override
@@ -265,30 +340,22 @@ class _AppLoaderState extends State<AppLoader> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    if (_error) {
+    if (widget.error) {
       return AppErrorFallback(
         fallbackContext: AppFallbackContext.init,
-        referenceId: _errorRefId,
-        feedbackBuilder: widget.feedbackBuilder,
+        referenceId: widget.errorRefId,
+        feedbackBuilder: (_) => const FeedbackPage(),
         onRetry: _handleRetry,
         onHardReset: _handleHardReset,
         onRestart: _handleRestart,
       );
     }
 
-    if (!_initialized) {
+    if (!widget.initialized) {
       return _buildSplash(context);
     }
 
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider<AuthBloc>(create: (_) => di.getIt<AuthBloc>()),
-        BlocProvider<CategoryBloc>(create: (_) => di.getIt<CategoryBloc>()),
-        BlocProvider<RecordBloc>(create: (_) => di.getIt<RecordBloc>()),
-        BlocProvider<SmsScannerBloc>(create: (_) => di.getIt<SmsScannerBloc>()),
-      ],
-      child: const _InitialDataLoader(),
-    );
+    return widget.child;
   }
 }
 
@@ -353,65 +420,10 @@ class _SplashIconState extends State<_SplashIcon>
   }
 }
 
-class _InitialDataLoader extends StatefulWidget {
-  const _InitialDataLoader();
-
-  @override
-  State<_InitialDataLoader> createState() => _InitialDataLoaderState();
-}
-
-class _InitialDataLoaderState extends State<_InitialDataLoader> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback(_onPostFrameCallback);
-  }
-
-  void _onPostFrameCallback(_) {
-    if (!mounted) return;
-
-    context.read<AuthBloc>().add(const AuthCheckRequested());
-    Future.delayed(const Duration(milliseconds: 150), _loadCategories);
-    Future.delayed(const Duration(milliseconds: 300), _loadRecords);
-  }
-
-  void _loadCategories() {
-    if (mounted) {
-      context.read<CategoryBloc>().add(const LoadCategories());
-    }
-  }
-
-  void _loadRecords() {
-    if (mounted) {
-      context.read<RecordBloc>().add(const LoadRecords());
-    }
-  }
-
-  void _onAuthStateChanged(BuildContext context, AuthState state) {
-    if (state is AuthError) {
-      if (state.isUserInitiated) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Sign-in failed: ${state.message}'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 5),
-          ),
-        );
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocConsumer<AuthBloc, AuthState>(
-      listener: _onAuthStateChanged,
-      builder: (context, state) {
-        if (state is AuthSyncConflictPending) {
-          return const SyncConflictPage();
-        }
-
-        return const AppShell();
-      },
-    );
-  }
+ThemeMode _themeModeFromString(String theme) {
+  return switch (theme) {
+    'light' => ThemeMode.light,
+    'dark' => ThemeMode.dark,
+    _ => ThemeMode.system,
+  };
 }

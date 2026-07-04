@@ -9,6 +9,7 @@ class GetSettings extends UseCase<UserSettings, NoParams> {
 
   GetSettings(this.repository);
 
+  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, UserSettings>> call(NoParams params) {
     return repository.getSettings();

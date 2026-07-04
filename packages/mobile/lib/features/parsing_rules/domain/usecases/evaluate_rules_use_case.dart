@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../entities/parsed_transaction.dart';
 import '../entities/evaluate_rules_params.dart';
 import '../entities/parsing_context.dart';
@@ -40,6 +41,7 @@ class EvaluateRulesUseCase
     return RuleEvaluator.evaluateWithContext(context, params);
   }
 
+  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, ParsedTransaction?>> call(
     EvaluateRulesParams params,
@@ -49,7 +51,9 @@ class EvaluateRulesUseCase
       final result = evaluateWithPreloadedContext(context, params);
 
       return Right(result);
-    } catch (e) {
+    } catch (e, s) {
+      appLogger.error('Error evaluating rules use case', e, s);
+
       return Left(CacheFailure(message: e.toString()));
     }
   }

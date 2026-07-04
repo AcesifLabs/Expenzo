@@ -1,7 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
-import '../entities/record.dart';
 import '../repositories/record_repository.dart';
 
 class GetRecords extends UseCase<List<Record>, GetRecordsParams> {
@@ -9,6 +8,7 @@ class GetRecords extends UseCase<List<Record>, GetRecordsParams> {
 
   GetRecords(this.repository);
 
+  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, List<Record>>> call(GetRecordsParams params) {
     return repository.getRecords(

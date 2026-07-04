@@ -6,7 +6,6 @@ import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/sync/sync_event.dart';
 import 'package:expense_tracker/core/sync/connectivity_service.dart';
 import 'package:expense_tracker/core/database/daos/sync_queue_dao.dart';
-import '../../domain/entities/record.dart';
 import '../../domain/repositories/record_repository.dart';
 import '../datasources/record_local_datasource.dart';
 import '../datasources/record_remote_datasource.dart';
@@ -24,6 +23,7 @@ class RecordRepositoryImpl implements RecordRepository {
     SyncQueueDao? syncQueueDao,
   }) : _syncQueueDao = syncQueueDao;
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, List<Record>>> getRecords({
     DateTimeRange? dateRange,
@@ -42,9 +42,14 @@ class RecordRepositoryImpl implements RecordRepository {
       return Right(records);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
+
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, List<Record>>> getFilteredRecords(
     RecordFilter filter,
@@ -72,9 +77,14 @@ class RecordRepositoryImpl implements RecordRepository {
       return Left(e.toFailure());
     } on ServerException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
+
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, Record>> getRecordById(String id) async {
     try {
@@ -86,9 +96,14 @@ class RecordRepositoryImpl implements RecordRepository {
       return Right(record);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
+
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, Record>> addRecord(Record record) async {
     try {
@@ -108,9 +123,14 @@ class RecordRepositoryImpl implements RecordRepository {
       return Right(added);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
+
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, Record>> updateRecord(Record record) async {
     try {
@@ -130,9 +150,14 @@ class RecordRepositoryImpl implements RecordRepository {
       return Right(updated);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
+
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, Unit>> deleteRecord(String id) async {
     try {
@@ -142,6 +167,10 @@ class RecordRepositoryImpl implements RecordRepository {
       return const Right(unit);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
+
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
@@ -150,6 +179,7 @@ class RecordRepositoryImpl implements RecordRepository {
     return localDatasource.watchRecords(limit: limit, offset: offset);
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, bool>> recordExistsBySourceId(
     String sourceId,
@@ -160,9 +190,14 @@ class RecordRepositoryImpl implements RecordRepository {
       return Right(exists);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
+
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, Set<String>>> getExistingSourceIds(
     List<String> sourceIds,
@@ -173,9 +208,14 @@ class RecordRepositoryImpl implements RecordRepository {
       return Right(existing);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
+
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, List<Record>>> getRecordsByCategoryAndDateRange(
     String categoryId,
@@ -192,9 +232,14 @@ class RecordRepositoryImpl implements RecordRepository {
       return Right(records);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
+
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, double>> getCategorySpending(
     String categoryId,
@@ -211,9 +256,14 @@ class RecordRepositoryImpl implements RecordRepository {
       return Right(spending);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
+
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, double>> getTotalSpending(
     DateTime start,
@@ -225,9 +275,14 @@ class RecordRepositoryImpl implements RecordRepository {
       return Right(spending);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
+
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, List<Record>>> getRecordsByDateRangeOnly(
     DateTime start,
@@ -242,11 +297,16 @@ class RecordRepositoryImpl implements RecordRepository {
       return Right(records);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
+
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
-  Future<Either<CacheFailure, void>> addRecordsBatch(
+  Future<Either<CacheFailure, Unit>> addRecordsBatch(
     List<Record> records,
   ) async {
     try {
@@ -265,9 +325,13 @@ class RecordRepositoryImpl implements RecordRepository {
         }
       }
 
-      return const Right(null);
+      return const Right(unit);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
+
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
@@ -277,7 +341,8 @@ class RecordRepositoryImpl implements RecordRepository {
         const Duration(seconds: 3),
         onTimeout: () => false,
       );
-    } catch (e) {
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
       debugPrint('Connectivity check failed, assuming offline: $e');
 
       return false;

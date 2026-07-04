@@ -8,7 +8,6 @@ import '../../../categories/presentation/bloc/category_event.dart';
 import '../../../categories/presentation/bloc/category_state.dart';
 import '../../../categories/domain/entities/category.dart';
 import '../../../../core/constants/record_type.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/presentation/widgets/app_icons.dart';
 import '../bloc/record_bloc.dart';
 
@@ -110,9 +109,7 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
   Color _chipLabelColor(ThemeData theme, bool selected) {
     if (!selected) return theme.colorScheme.onSurface;
 
-    if (theme.brightness == Brightness.dark) return Colors.black;
-
-    return AppColors.onPrimary;
+    return theme.colorScheme.onPrimary;
   }
 
   String _categoryLabel(int selectedCount, int totalCount) {
@@ -139,38 +136,6 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
     });
   }
 
-  Widget _buildBackdrop() {
-    return Positioned.fill(
-      child: GestureDetector(
-        onTap: () => Navigator.of(context).pop(),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Container(color: Colors.black.withAlpha(60)),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader(ThemeData theme) {
-    final onSurface120 = theme.colorScheme.onSurface.withAlpha(120);
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(
-          child: Text('Filter Records', style: theme.textTheme.titleLarge),
-        ),
-        IconButton(
-          icon: Icon(PiconsRegular.x, color: onSurface120),
-          onPressed: () => Navigator.of(context).pop(),
-          visualDensity: VisualDensity.compact,
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-        ),
-      ],
-    );
-  }
-
   Widget _buildDateRangeSection(ThemeData theme) {
     final sd = _startDate;
     final ed = _endDate;
@@ -180,46 +145,14 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
       children: [
         Text('Date Range', style: theme.textTheme.titleSmall),
         const SizedBox(height: 8),
-        _buildDateRangeBox(theme, sd, ed),
+        _DateRangeBox(
+          startDate: sd,
+          endDate: ed,
+          theme: theme,
+          formatDate: _formatDate,
+          onTap: _pickDateRange,
+        ),
       ],
-    );
-  }
-
-  Widget _buildDateRangeBox(ThemeData theme, DateTime? sd, DateTime? ed) {
-    final colorScheme = theme.colorScheme;
-    final onSurface = colorScheme.onSurface;
-    final onSurface120 = onSurface.withAlpha(120);
-    final onSurface160 = onSurface.withAlpha(160);
-    final outline60 = colorScheme.outline.withAlpha(60);
-
-    return InkWell(
-      onTap: _pickDateRange,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: colorScheme.surface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: outline60),
-        ),
-        child: Row(
-          children: [
-            Icon(PiconsRegular.calendar, size: 20, color: onSurface160),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                sd != null && ed != null
-                    ? '${_formatDate(sd)} - ${_formatDate(ed)}'
-                    : 'Select date range',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: sd != null ? colorScheme.onSurface : onSurface120,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -422,7 +355,7 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
 
     return Stack(
       children: [
-        _buildBackdrop(),
+        _FilterBackdrop(),
         Center(
           child: ConstrainedBox(
             constraints: BoxConstraints(
@@ -441,7 +374,7 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildHeader(theme),
+                      _FilterHeader(),
                       const SizedBox(height: 24),
                       _buildDateRangeSection(theme),
                       const SizedBox(height: 24),
@@ -458,6 +391,106 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _FilterBackdrop extends StatelessWidget {
+  const _FilterBackdrop();
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      child: GestureDetector(
+        onTap: () => Navigator.of(context).pop(),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(color: Colors.black.withAlpha(60)),
+        ),
+      ),
+    );
+  }
+}
+
+class _FilterHeader extends StatelessWidget {
+  const _FilterHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final onSurface120 = theme.colorScheme.onSurface.withAlpha(120);
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Text('Filter Records', style: theme.textTheme.titleLarge),
+        ),
+        IconButton(
+          icon: Icon(PiconsRegular.x, color: onSurface120),
+          onPressed: () => Navigator.of(context).pop(),
+          visualDensity: VisualDensity.compact,
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+        ),
+      ],
+    );
+  }
+}
+
+class _DateRangeBox extends StatelessWidget {
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final ThemeData theme;
+  final String Function(DateTime) formatDate;
+  final VoidCallback onTap;
+
+  const _DateRangeBox({
+    required this.startDate,
+    required this.endDate,
+    required this.theme,
+    required this.formatDate,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final sd = startDate;
+    final ed = endDate;
+    final colorScheme = theme.colorScheme;
+    final onSurface = colorScheme.onSurface;
+    final onSurface120 = onSurface.withAlpha(120);
+    final onSurface160 = onSurface.withAlpha(160);
+    final outline60 = colorScheme.outline.withAlpha(60);
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: outline60),
+        ),
+        child: Row(
+          children: [
+            Icon(PiconsRegular.calendar, size: 20, color: onSurface160),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                sd != null && ed != null
+                    ? '${formatDate(sd)} - ${formatDate(ed)}'
+                    : 'Select date range',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: sd != null ? colorScheme.onSurface : onSurface120,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

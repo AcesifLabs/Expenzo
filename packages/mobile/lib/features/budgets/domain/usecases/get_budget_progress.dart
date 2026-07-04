@@ -1,13 +1,15 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/core/error/failures.dart';
-import '../entities/budget.dart';
+import 'package:expense_tracker/core/constants/budget_period.dart';
 import '../repositories/budget_repository.dart';
 
 class GetBudgetProgress {
   final BudgetRepository repository;
 
   GetBudgetProgress({required this.repository});
+
+  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
 
   Future<Either<Failure, BudgetProgress>> call({
     required String budgetId,

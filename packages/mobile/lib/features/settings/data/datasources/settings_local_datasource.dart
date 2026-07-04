@@ -1,9 +1,11 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:expense_tracker/core/error/exceptions.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../../domain/entities/user_settings.dart';
 
 abstract class SettingsLocalDatasource {
+  /// Throws: [CacheException] if a database error occurs.
   Future<UserSettings> getSettings();
   Future<UserSettings> updateSettings(UserSettings settings);
 }
@@ -14,6 +16,7 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
 
   SettingsLocalDatasourceImpl({required this.sharedPreferences});
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<UserSettings> getSettings() async {
     try {
@@ -34,11 +37,13 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
       final json = jsonDecode(jsonString) as Map<String, dynamic>;
 
       return _mapFromJson(json);
-    } catch (e) {
+    } catch (e, s) {
+      appLogger.error('Settings local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<UserSettings> updateSettings(UserSettings settings) async {
     try {
@@ -46,7 +51,8 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
       await sharedPreferences.setString(_settingsKey, jsonEncode(json));
 
       return settings;
-    } catch (e) {
+    } catch (e, s) {
+      appLogger.error('Settings local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
   }

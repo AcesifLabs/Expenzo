@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:expense_tracker/core/utils/navigation_utils.dart';
 import '../bloc/sample_analyzer_bloc.dart';
+import '../bloc/sample_analyzer_event.dart';
+import '../bloc/sample_analyzer_state.dart';
 import '../../domain/entities/message_source.dart';
 import 'template_editor_page.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
@@ -139,7 +141,7 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
         borderRadius: BorderRadius.circular(16),
       ),
       child: Material(
-        color: Colors.transparent,
+        color: const Color(0x00000000),
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: () => _onMessageTap(msg),
@@ -254,11 +256,12 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
   Widget _buildContent() {
     return BlocBuilder<SampleAnalyzerBloc, SampleAnalyzerState>(
       builder: (context, state) {
-        if (state is SampleAnalyzerLoading) return _buildLoading();
-        if (state is SampleAnalyzerError) return _buildError(state.message);
-        if (state is SampleAnalyzerLoaded) return _buildLoaded(state);
-
-        return const SizedBox.shrink();
+        return switch (state) {
+          SampleAnalyzerLoading() => _buildLoading(),
+          SampleAnalyzerError(:final message) => _buildError(message),
+          SampleAnalyzerLoaded() => _buildLoaded(state),
+          _ => const SizedBox.shrink(),
+        };
       },
     );
   }

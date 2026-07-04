@@ -9,6 +9,7 @@ class DeleteCategory extends UseCase<Unit, String> {
 
   DeleteCategory(this.repository);
 
+  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, Unit>> call(String id) async {
     try {

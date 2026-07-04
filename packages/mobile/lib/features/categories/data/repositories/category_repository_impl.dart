@@ -5,6 +5,7 @@ import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/core/sync/sync_event.dart';
 import 'package:expense_tracker/core/database/daos/sync_queue_dao.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../../domain/entities/category.dart';
 import '../../domain/repositories/category_repository.dart';
 import '../datasources/category_local_datasource.dart';
@@ -18,6 +19,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
     SyncQueueDao? syncQueueDao,
   }) : _syncQueueDao = syncQueueDao;
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, List<Category>>> getCategories({
     RecordType? type,
@@ -32,9 +34,14 @@ class CategoryRepositoryImpl implements CategoryRepository {
       return Right(categories);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      appLogger.error('Error getting categories', e, s);
+
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, Category>> getCategoryById(String id) async {
     try {
@@ -46,9 +53,14 @@ class CategoryRepositoryImpl implements CategoryRepository {
       return Right(category);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      appLogger.error('Error getting category by id', e, s);
+
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, Category>> createCategory(
     Category category,
@@ -69,9 +81,14 @@ class CategoryRepositoryImpl implements CategoryRepository {
       return Right(created);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      appLogger.error('Error creating category', e, s);
+
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, Category>> updateCategory(
     Category category,
@@ -92,20 +109,31 @@ class CategoryRepositoryImpl implements CategoryRepository {
       return Right(updated);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      appLogger.error('Error updating category', e, s);
+
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
-  Future<Either<CacheFailure, void>> incrementUsageCount(String id) async {
+  Future<Either<CacheFailure, Unit>> incrementUsageCount(String id) async {
     try {
       await localDatasource.incrementUsageCount(id);
+      _enqueueSync('update', id);
 
-      return const Right(null);
+      return const Right(unit);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      appLogger.error('Error incrementing usage count', e, s);
+
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, Unit>> deleteCategory(String id) async {
     try {
@@ -115,6 +143,10 @@ class CategoryRepositoryImpl implements CategoryRepository {
       return const Right(unit);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      appLogger.error('Error deleting category', e, s);
+
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 

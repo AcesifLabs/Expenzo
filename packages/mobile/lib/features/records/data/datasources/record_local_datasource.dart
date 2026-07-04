@@ -4,22 +4,28 @@ import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/database/app_database.dart' as db;
 import 'package:expense_tracker/core/database/daos/record_dao.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../../domain/entities/record.dart' as rec;
 import "package:expense_tracker/core/constants/source_types.dart";
 import '../../domain/repositories/record_repository.dart';
 
 abstract class RecordLocalDatasource {
+  /// Throws: [CacheException] if a database error occurs.
   Future<List<rec.Record>> getRecords({
     DateTimeRange? dateRange,
     String? categoryId,
     int? limit,
     int? offset,
   });
+
+  /// Throws: [CacheException] if a database error occurs.
   Future<rec.Record?> getRecordById(String id);
   Future<rec.Record> addRecord(rec.Record record);
   Future<rec.Record> updateRecord(rec.Record record);
   Future<void> deleteRecord(String id);
   Stream<List<rec.Record>> watchRecords({int? limit, int? offset});
+
+  /// Throws: [CacheException] if a database error occurs.
   Future<bool> recordExistsBySourceId(String sourceId);
   Future<Set<String>> getExistingSourceIds(List<String> sourceIds);
   Future<void> addRecordsBatch(List<rec.Record> records);
@@ -28,16 +34,22 @@ abstract class RecordLocalDatasource {
     DateTime start,
     DateTime end,
   );
+
+  /// Throws: [CacheException] if a database error occurs.
   Future<double> getCategorySpending(
     String categoryId,
     DateTime start,
     DateTime end,
   );
+
+  /// Throws: [CacheException] if a database error occurs.
   Future<double> getTotalSpending(DateTime start, DateTime end);
   Future<List<rec.Record>> getRecordsByDateRangeOnly(
     DateTime start,
     DateTime end,
   );
+
+  /// Throws: [CacheException] if a database error occurs.
   Future<List<rec.Record>> getFilteredRecords(RecordFilter filter);
 }
 
@@ -46,6 +58,7 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
 
   RecordLocalDatasourceImpl({required this.recordDao});
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<List<rec.Record>> getRecords({
     DateTimeRange? dateRange,
@@ -73,22 +86,26 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
 
         return records.map<rec.Record>((e) => _mapToEntity(e)).toList();
       }
-    } catch (e) {
+    } catch (e, s) {
+      appLogger.error('Record local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<rec.Record?> getRecordById(String id) async {
     try {
       final record = await recordDao.getRecordById(id);
 
       return record != null ? _mapToEntity(record) : null;
-    } catch (e) {
+    } catch (e, s) {
+      appLogger.error('Record local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<rec.Record> addRecord(rec.Record record) async {
     try {
@@ -109,11 +126,13 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
       await recordDao.insertRecord(companion);
 
       return record.copyWith(id: id, createdAt: now, updatedAt: now);
-    } catch (e) {
+    } catch (e, s) {
+      appLogger.error('Record local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<rec.Record> updateRecord(rec.Record record) async {
     try {
@@ -137,16 +156,19 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
       await recordDao.updateRecord(companion);
 
       return record.copyWith(updatedAt: now);
-    } catch (e) {
+    } catch (e, s) {
+      appLogger.error('Record local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<void> deleteRecord(String id) async {
     try {
       await recordDao.deleteRecord(id);
-    } catch (e) {
+    } catch (e, s) {
+      appLogger.error('Record local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
   }
@@ -160,24 +182,29 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
         );
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<bool> recordExistsBySourceId(String sourceId) async {
     try {
       return await recordDao.existsBySourceId(sourceId);
-    } catch (e) {
+    } catch (e, s) {
+      appLogger.error('Record local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<Set<String>> getExistingSourceIds(List<String> sourceIds) async {
     try {
       return await recordDao.getExistingSourceIds(sourceIds);
-    } catch (e) {
+    } catch (e, s) {
+      appLogger.error('Record local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<List<rec.Record>> getRecordsByCategoryAndDateRange(
     String categoryId,
@@ -192,11 +219,13 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
       );
 
       return records.map<rec.Record>((e) => _mapToEntity(e)).toList();
-    } catch (e) {
+    } catch (e, s) {
+      appLogger.error('Record local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<double> getCategorySpending(
     String categoryId,
@@ -205,20 +234,24 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
   ) async {
     try {
       return await recordDao.getCategorySpending(categoryId, start, end);
-    } catch (e) {
+    } catch (e, s) {
+      appLogger.error('Record local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<double> getTotalSpending(DateTime start, DateTime end) async {
     try {
       return await recordDao.getTotalSpending(start, end);
-    } catch (e) {
+    } catch (e, s) {
+      appLogger.error('Record local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<List<rec.Record>> getRecordsByDateRangeOnly(
     DateTime start,
@@ -228,11 +261,13 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
       final records = await recordDao.getRecordsByDateRangeOnly(start, end);
 
       return records.map<rec.Record>((e) => _mapToEntity(e)).toList();
-    } catch (e) {
+    } catch (e, s) {
+      appLogger.error('Record local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<void> addRecordsBatch(List<rec.Record> records) async {
     try {
@@ -254,18 +289,21 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
         );
       }).toList();
       await recordDao.insertRecordsBatch(companions);
-    } catch (e) {
+    } catch (e, s) {
+      appLogger.error('Record local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<List<rec.Record>> getFilteredRecords(RecordFilter filter) async {
     try {
       final records = await recordDao.getFilteredRecords(filter);
 
       return records.map<rec.Record>((e) => _mapToEntity(e)).toList();
-    } catch (e) {
+    } catch (e, s) {
+      appLogger.error('Record local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
   }

@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:expense_tracker/core/bloc/transformers.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
 import '../../domain/usecases/get_recurring_list.dart';
 import '../../domain/usecases/create_recurring.dart' as usecase;
@@ -22,11 +23,11 @@ class RecurringBloc extends Bloc<RecurringEvent, RecurringState> {
     required this.deleteRecurring,
     required this.processRecurring,
   }) : super(RecurringInitial()) {
-    on<LoadRecurring>(_onLoadRecurring);
-    on<CreateRecurring>(_onCreateRecurring);
-    on<UpdateRecurring>(_onUpdateRecurring);
-    on<DeleteRecurring>(_onDeleteRecurring);
-    on<ProcessRecurring>(_onProcessRecurring);
+    on<LoadRecurring>(_onLoadRecurring, transformer: concurrent());
+    on<CreateRecurring>(_onCreateRecurring, transformer: sequential());
+    on<UpdateRecurring>(_onUpdateRecurring, transformer: sequential());
+    on<DeleteRecurring>(_onDeleteRecurring, transformer: sequential());
+    on<ProcessRecurring>(_onProcessRecurring, transformer: droppable());
   }
 
   Future<void> _onLoadRecurring(
@@ -54,7 +55,7 @@ class RecurringBloc extends Bloc<RecurringEvent, RecurringState> {
     result.fold((failure) => emit(RecurringError(failure.message)), (
       recurring,
     ) {
-      emit(const RecurringOperationSuccess('Recurring transaction created'));
+      emit(const RecurringOperationSuccess());
       add(LoadRecurring());
     });
   }
@@ -70,7 +71,7 @@ class RecurringBloc extends Bloc<RecurringEvent, RecurringState> {
     result.fold((failure) => emit(RecurringError(failure.message)), (
       recurring,
     ) {
-      emit(const RecurringOperationSuccess('Recurring transaction updated'));
+      emit(const RecurringOperationSuccess());
       add(LoadRecurring());
     });
   }
@@ -84,7 +85,7 @@ class RecurringBloc extends Bloc<RecurringEvent, RecurringState> {
     final result = await deleteRecurring(event.id);
 
     result.fold((failure) => emit(RecurringError(failure.message)), (_) {
-      emit(const RecurringOperationSuccess('Recurring transaction deleted'));
+      emit(const RecurringOperationSuccess());
       add(LoadRecurring());
     });
   }
@@ -100,11 +101,7 @@ class RecurringBloc extends Bloc<RecurringEvent, RecurringState> {
     result.fold((failure) => emit(RecurringError(failure.message)), (
       processed,
     ) {
-      emit(
-        RecurringOperationSuccess(
-          'Processed $processed recurring transactions',
-        ),
-      );
+      emit(const RecurringOperationSuccess());
       add(LoadRecurring());
     });
   }

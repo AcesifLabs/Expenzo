@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../../domain/repositories/budget_repository.dart';
 import '../../../../shared/services/notification_service.dart';
 
@@ -12,7 +13,9 @@ class CheckBudgetAlerts {
     required this.notificationService,
   });
 
-  Future<Either<Failure, void>> call({
+  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
+
+  Future<Either<Failure, Unit>> call({
     required String budgetId,
     required double spentAmount,
   }) async {
@@ -42,9 +45,11 @@ class CheckBudgetAlerts {
           );
         }
 
-        return const Right(null);
+        return const Right(unit);
       });
-    } catch (e) {
+    } catch (e, s) {
+      appLogger.error('Error checking budget alerts', e, s);
+
       return Left(CacheFailure(message: e.toString()));
     }
   }

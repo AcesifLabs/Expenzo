@@ -173,7 +173,8 @@ class NotificationService {
       final data = jsonDecode(payload) as Map<String, dynamic>;
 
       return data['deepLink'] as String?;
-    } catch (e) {
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
       if (kDebugMode) {
         debugPrint('Failed to parse notification payload: $e');
       }

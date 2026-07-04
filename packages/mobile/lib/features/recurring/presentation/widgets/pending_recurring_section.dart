@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
-import 'package:expense_tracker/core/database/daos/pending_recurring_dao.dart';
-import 'package:expense_tracker/core/database/app_database.dart';
+import 'package:expense_tracker/core/database/app_database.dart'
+    show PendingRecurringData;
+import '../../domain/repositories/recurring_repository.dart';
 import '../bloc/recurring_bloc.dart';
 import '../bloc/recurring_event.dart';
 
@@ -18,7 +19,7 @@ class PendingRecurringSection extends StatefulWidget {
 }
 
 class _PendingRecurringSectionState extends State<PendingRecurringSection> {
-  final PendingRecurringDao _pendingDao = di.getIt<PendingRecurringDao>();
+  final RecurringRepository _repository = di.getIt<RecurringRepository>();
 
   void _processAll() {
     final recurringBloc = di.getIt<RecurringBloc>();
@@ -43,11 +44,13 @@ class _PendingRecurringSectionState extends State<PendingRecurringSection> {
   }
 
   Widget _buildHeader() {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          Icon(PiconsRegular.clock, color: Colors.orange),
+          Icon(PiconsRegular.clock, color: colorScheme.tertiary),
           const SizedBox(width: 8),
           const Text(
             'Pending Recurring',
@@ -75,10 +78,12 @@ class _PendingRecurringSectionState extends State<PendingRecurringSection> {
   }
 
   Widget _buildPendingItem(PendingRecurringData item, DateFormat dateFormat) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return ListTile(
       leading: CircleAvatar(
-        backgroundColor: Colors.orange.withAlpha(51),
-        child: Icon(PiconsRegular.calendar, color: Colors.orange),
+        backgroundColor: colorScheme.tertiary.withAlpha(51),
+        child: Icon(PiconsRegular.calendar, color: colorScheme.tertiary),
       ),
       title: Text(item.description),
       subtitle: Text(
@@ -86,14 +91,14 @@ class _PendingRecurringSectionState extends State<PendingRecurringSection> {
       ),
       trailing: IconButton(
         icon: Icon(PiconsRegular.checkCircle),
-        color: Colors.green,
+        color: colorScheme.secondary,
         onPressed: () => unawaited(_removePending(item.id)),
       ),
     );
   }
 
   Future<void> _removePending(String id) async {
-    await _pendingDao.removePending(id);
+    await _repository.removePendingRecurring(id);
   }
 
   @override
@@ -101,7 +106,7 @@ class _PendingRecurringSectionState extends State<PendingRecurringSection> {
     final dateFormat = DateFormat('MMM dd, yyyy');
 
     return StreamBuilder(
-      stream: _pendingDao.watchPending(),
+      stream: _repository.watchPendingRecurring(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const SizedBox.shrink();

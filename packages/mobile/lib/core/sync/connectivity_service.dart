@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import '../api/api_client.dart';
@@ -13,7 +12,6 @@ class ConnectivityService {
 
   Stream<bool> get onlineStream => _connectivity.onConnectivityChanged
       .handleError((Object error, StackTrace stack) {
-        debugPrint('[ConnectivityService] stream error: $error');
         _isOnline = false;
       })
       .asyncMap((results) => _checkConnectivity(results));
@@ -28,8 +26,6 @@ class ConnectivityService {
 
       return _checkConnectivity(results);
     } catch (e) {
-      debugPrint('[ConnectivityService] checkNow error: $e');
-
       return _isOnline;
     }
   }
@@ -47,7 +43,7 @@ class ConnectivityService {
       _isOnline = true;
 
       return true;
-    } catch (_) {
+    } catch (e) {
       _isOnline = false;
 
       return false;

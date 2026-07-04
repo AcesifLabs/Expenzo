@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../../../parsing_rules/domain/entities/parsed_transaction.dart';
 import '../../../parsing_rules/domain/services/parsing_isolate_service.dart';
 import '../../../parsing_rules/domain/usecases/evaluate_rules_use_case.dart'
@@ -13,10 +14,15 @@ class ScanSmsUseCase
     implements UseCase<List<ParsedTransaction>, ScanSmsParams> {
   final SmsLocalDatasource smsDatasource;
   final eval.EvaluateRulesUseCase evaluateRules;
-  final ParsingIsolateService _isolateService = ParsingIsolateService();
+  final ParsingIsolateService _isolateService;
 
-  ScanSmsUseCase({required this.smsDatasource, required this.evaluateRules});
+  ScanSmsUseCase({
+    required this.smsDatasource,
+    required this.evaluateRules,
+    required ParsingIsolateService parsingIsolateService,
+  }) : _isolateService = parsingIsolateService;
 
+  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, List<ParsedTransaction>>> call(
     ScanSmsParams params,
@@ -60,7 +66,9 @@ class ScanSmsUseCase
       );
 
       return Right(results);
-    } catch (e) {
+    } catch (e, s) {
+      appLogger.error('Scan SMS error', e, s);
+
       return Left(SmsScanFailure(message: e.toString()));
     }
   }

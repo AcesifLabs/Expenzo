@@ -9,6 +9,7 @@ class GetMessageSources implements UseCase<List<MessageSource>, NoParams> {
 
   GetMessageSources(this.repository);
 
+  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, List<MessageSource>>> call(NoParams params) {
     return repository.getMessageSources();

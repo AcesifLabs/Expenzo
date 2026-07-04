@@ -27,8 +27,7 @@ class SourceBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isLight = Theme.of(context).brightness == Brightness.light;
-    final contentColor = isLight ? Colors.black : Colors.white;
+    final contentColor = Theme.of(context).colorScheme.onSurface;
 
     final isManualOverride =
         source == ExpenseSource.manual && categoryName != null;

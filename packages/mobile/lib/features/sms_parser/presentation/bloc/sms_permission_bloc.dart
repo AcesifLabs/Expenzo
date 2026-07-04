@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:expense_tracker/core/bloc/transformers.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'sms_permission_event.dart';
@@ -13,9 +14,9 @@ class SmsPermissionBloc extends Bloc<SmsPermissionEvent, SmsPermissionState> {
   static const Duration _timeoutDuration = Duration(seconds: 5);
 
   SmsPermissionBloc() : super(const SmsPermissionInitial()) {
-    on<CheckSmsPermission>(_onCheckPermission);
-    on<RequestSmsPermission>(_onRequestPermission);
-    on<OpenAppSettings>(_onOpenSettings);
+    on<CheckSmsPermission>(_onCheckPermission, transformer: concurrent());
+    on<RequestSmsPermission>(_onRequestPermission, transformer: concurrent());
+    on<OpenAppSettings>(_onOpenSettings, transformer: concurrent());
   }
 
   @override
@@ -58,7 +59,8 @@ class SmsPermissionBloc extends Bloc<SmsPermissionEvent, SmsPermissionState> {
 
       await _savePermissionStatus(status);
       emit(_mapStatusToState(status));
-    } catch (e) {
+    } catch (e, s) {
+      addError(e, s);
       _timeoutTimer?.cancel();
       emit(const SmsPermissionDenied());
     }

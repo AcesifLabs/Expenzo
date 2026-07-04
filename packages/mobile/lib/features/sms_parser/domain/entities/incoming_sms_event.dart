@@ -1,6 +1,7 @@
+import 'package:equatable/equatable.dart';
 import '../services/sms_sender_normalizer.dart';
 
-class IncomingSmsEvent {
+class IncomingSmsEvent extends Equatable {
   final String address;
   final String body;
   final DateTime receivedAt;
@@ -12,6 +13,9 @@ class IncomingSmsEvent {
 
     return '$normalizedAddress:$timestamp:$bodyHash';
   }
+
+  @override
+  List<Object?> get props => [address, body, receivedAt];
 
   const IncomingSmsEvent({
     required this.address,

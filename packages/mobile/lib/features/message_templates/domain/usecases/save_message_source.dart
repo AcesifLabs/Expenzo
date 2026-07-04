@@ -9,6 +9,7 @@ class SaveMessageSource implements UseCase<MessageSource, MessageSource> {
 
   SaveMessageSource(this.repository);
 
+  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, MessageSource>> call(MessageSource source) {
     return repository.saveMessageSource(source);

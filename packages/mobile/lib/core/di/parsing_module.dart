@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:flutter_sms_inbox/flutter_sms_inbox.dart' as fsms;
 import 'package:expense_tracker/core/database/app_database.dart';
 import 'package:expense_tracker/core/database/daos/parsing_rule_dao.dart';
 import 'package:expense_tracker/core/database/daos/message_template_dao.dart';
@@ -25,6 +26,7 @@ import 'package:expense_tracker/features/sms_parser/domain/usecases/scan_sms_use
 import 'package:expense_tracker/features/sms_parser/application/realtime_sms_processor.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
+import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets_with_progress.dart';
 import 'package:expense_tracker/features/records/domain/usecases/create_records_from_parsed_list.dart';
 
 void initParsingModule(GetIt getIt) {
@@ -99,12 +101,13 @@ void _initSmsParsing(GetIt getIt) {
   );
 
   getIt.registerLazySingleton<SmsLocalDatasource>(
-    () => SmsLocalDatasourceImpl(),
+    () => SmsLocalDatasourceImpl(smsQuery: fsms.SmsQuery()),
   );
   getIt.registerLazySingleton(
     () => ScanSmsUseCase(
       smsDatasource: getIt<SmsLocalDatasource>(),
       evaluateRules: getIt<EvaluateRulesUseCase>(),
+      parsingIsolateService: getIt<ParsingIsolateService>(),
     ),
   );
   getIt.registerFactory<SmsScannerBloc>(
@@ -112,6 +115,7 @@ void _initSmsParsing(GetIt getIt) {
       scanSmsUseCase: getIt<ScanSmsUseCase>(),
       recordRepository: getIt<RecordRepository>(),
       createRecordsFromParsedList: getIt<CreateRecordsFromParsedList>(),
+      getBudgetsWithProgress: getIt<GetBudgetsWithProgress>(),
     ),
   );
 

@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import '../../domain/repositories/reports_repository.dart';
+import '../../domain/entities/granularity.dart';
 
 abstract class ReportsEvent extends Equatable {
   @override

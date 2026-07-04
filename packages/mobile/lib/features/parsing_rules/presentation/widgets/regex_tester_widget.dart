@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:picons/picons.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:expense_tracker/core/utils/regex_utils.dart';
 
 class RegexTesterWidget extends StatefulWidget {
@@ -55,7 +56,8 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
     final stopwatch = Stopwatch()..start();
     try {
       _runPatternTest(sample, stopwatch);
-    } catch (e) {
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
       _handlePatternError(sample, stopwatch, e);
     }
   }
@@ -154,7 +156,8 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
           if (month == null || day == null || year == null) continue;
 
           return DateTime(year, month, day);
-        } catch (e) {
+        } catch (e, s) {
+          debugPrint('Error: $e\n$s');
           debugPrint('RegexTesterWidget: Failed to parse date components: $e');
         }
       }
@@ -187,18 +190,20 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
   }
 
   Card _buildTimeoutCard() {
+    final colors = Theme.of(context).colorScheme;
+
     return Card(
-      color: Colors.orange.shade50,
-      child: const Padding(
-        padding: EdgeInsets.all(16),
+      color: colors.tertiaryContainer,
+      child: Padding(
+        padding: AppSpacing.paddingMd,
         child: Row(
           children: [
-            Icon(PiconsRegular.warning, color: Colors.orange),
-            SizedBox(width: 8),
+            Icon(PiconsRegular.warning, color: colors.tertiary),
+            const SizedBox(width: 8),
             Expanded(
               child: Text(
                 '⏱️ Timeout - Pattern took more than 2 seconds',
-                style: TextStyle(color: Colors.orange),
+                style: TextStyle(color: colors.tertiary),
               ),
             ),
           ],
@@ -208,21 +213,23 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
   }
 
   Card _buildErrorCard(String error) {
+    final colors = Theme.of(context).colorScheme;
+
     return Card(
-      color: Colors.red.shade50,
+      color: colors.errorContainer,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: AppSpacing.paddingMd,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(PiconsRegular.warningCircle, color: Colors.red),
-                SizedBox(width: 8),
-                const Text(
+                Icon(PiconsRegular.warningCircle, color: colors.error),
+                const SizedBox(width: 8),
+                Text(
                   'Error',
                   style: TextStyle(
-                    color: Colors.red,
+                    color: colors.error,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -239,7 +246,7 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
   Card _buildSuccessCard(ParsedTestResult result) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: AppSpacing.paddingMd,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -256,25 +263,31 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
   }
 
   Row _buildHeaderRow(ParsedTestResult result) {
+    final colors = Theme.of(context).colorScheme;
+
     return Row(
       children: [
         Icon(
           result.matchFound ? PiconsFill.checkCircle : PiconsFill.xCircle,
-          color: result.matchFound ? Colors.green : Colors.grey,
+          color: result.matchFound ? colors.secondary : colors.onSurfaceVariant,
         ),
         const SizedBox(width: 8),
         Text(
           result.matchFound ? 'Match found' : 'No match',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: result.matchFound ? Colors.green : Colors.grey,
+            color: result.matchFound
+                ? colors.secondary
+                : colors.onSurfaceVariant,
           ),
         ),
         const Spacer(),
         Text(
           '⏱️ ${result.elapsedMs}ms',
           style: TextStyle(
-            color: result.elapsedMs > 1000 ? Colors.orange : Colors.grey,
+            color: result.elapsedMs > 1000
+                ? colors.tertiary
+                : colors.onSurfaceVariant,
             fontSize: 12,
           ),
         ),
@@ -295,15 +308,20 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
   }
 
   Widget _buildFieldResult(String label, String? value) {
+    final colors = Theme.of(context).colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+        Text(
+          label,
+          style: TextStyle(fontSize: 10, color: colors.onSurfaceVariant),
+        ),
         Text(
           value ?? '-',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: value != null ? Colors.green : Colors.grey,
+            color: value != null ? colors.secondary : colors.onSurfaceVariant,
           ),
         ),
       ],
@@ -336,12 +354,14 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
         if (_result != null) ...[
           _buildResultCard(),
         ] else ...[
-          const Card(
+          Card(
             child: Padding(
-              padding: EdgeInsets.all(16),
+              padding: AppSpacing.paddingMd,
               child: Text(
                 'Enter a sample message above to test the pattern',
-                style: TextStyle(color: Colors.grey),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
           ),

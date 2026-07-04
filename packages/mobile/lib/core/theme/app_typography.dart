@@ -1,11 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
-class AppTypography {
-  static final _latoLight = GoogleFonts.lato(fontWeight: FontWeight.w300);
-  static final _latoMedium = GoogleFonts.lato(fontWeight: FontWeight.w500);
-  static final _latoBold = GoogleFonts.lato(fontWeight: FontWeight.w700);
+abstract final class AppTypography {
+  static const _latoLight = TextStyle(
+    fontFamily: 'Lato',
+    fontWeight: FontWeight.w300,
+  );
+  static const _latoMedium = TextStyle(
+    fontFamily: 'Lato',
+    fontWeight: FontWeight.w500,
+  );
+  static const _latoBold = TextStyle(
+    fontFamily: 'Lato',
+    fontWeight: FontWeight.w700,
+  );
 
+  static TextStyle get displayLarge =>
+      _latoBold.copyWith(fontSize: 57, height: 1.12);
+  static TextStyle get displayMedium =>
+      _latoBold.copyWith(fontSize: 45, height: 1.15);
+  static TextStyle get displaySmall =>
+      _latoBold.copyWith(fontSize: 36, height: 1.2);
   static TextStyle get headlineLarge =>
       _latoBold.copyWith(fontSize: 32, height: 1.2);
   static TextStyle get headlineMedium =>
@@ -31,6 +45,4 @@ class AppTypography {
     fontSize: 18,
     fontFeatures: const [FontFeature.tabularFigures()],
   );
-
-  AppTypography._();
 }

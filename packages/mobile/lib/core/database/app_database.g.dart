@@ -1,5 +1,8 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
 part of 'app_database.dart';
 
+// ignore_for_file: type=lint
 class $RecordsTable extends Records with TableInfo<$RecordsTable, Record> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -62,7 +65,7 @@ class $RecordsTable extends Records with TableInfo<$RecordsTable, Record> {
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
-    defaultValue: const Constant('manual'),
+    defaultValue: Constant(ExpenseSource.manual.name),
   );
   static const VerificationMeta _sourceIdMeta = const VerificationMeta(
     'sourceId',
@@ -722,7 +725,7 @@ class $CategoriesTable extends Categories
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
-    defaultValue: const Constant('OUT'),
+    defaultValue: Constant(RecordType.expense.dbValue),
   );
   static const VerificationMeta _usageCountMeta = const VerificationMeta(
     'usageCount',
@@ -1839,7 +1842,8 @@ class $ParsingRulesTable extends ParsingRules
     aliasedName,
     false,
     type: DriftSqlType.dateTime,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
   );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
@@ -1850,7 +1854,8 @@ class $ParsingRulesTable extends ParsingRules
     aliasedName,
     false,
     type: DriftSqlType.dateTime,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
   );
   @override
   List<GeneratedColumn> get $columns => [
@@ -1953,16 +1958,12 @@ class $ParsingRulesTable extends ParsingRules
         _createdAtMeta,
         createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
       );
-    } else if (isInserting) {
-      context.missing(_createdAtMeta);
     }
     if (data.containsKey('updated_at')) {
       context.handle(
         _updatedAtMeta,
         updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
       );
-    } else if (isInserting) {
-      context.missing(_updatedAtMeta);
     }
     return context;
   }
@@ -2266,16 +2267,14 @@ class ParsingRulesCompanion extends UpdateCompanion<ParsingRule> {
     required String sourceType,
     this.isEnabled = const Value.absent(),
     this.priority = const Value.absent(),
-    required DateTime createdAt,
-    required DateTime updatedAt,
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        name = Value(name),
        triggerWords = Value(triggerWords),
        amountPattern = Value(amountPattern),
-       sourceType = Value(sourceType),
-       createdAt = Value(createdAt),
-       updatedAt = Value(updatedAt);
+       sourceType = Value(sourceType);
   static Insertable<ParsingRule> custom({
     Expression<String>? id,
     Expression<String>? name,
@@ -2471,7 +2470,8 @@ class $MessageSourcesTable extends MessageSources
     aliasedName,
     false,
     type: DriftSqlType.dateTime,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
   );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
@@ -2482,7 +2482,8 @@ class $MessageSourcesTable extends MessageSources
     aliasedName,
     false,
     type: DriftSqlType.dateTime,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
   );
   @override
   List<GeneratedColumn> get $columns => [
@@ -2553,16 +2554,12 @@ class $MessageSourcesTable extends MessageSources
         _createdAtMeta,
         createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
       );
-    } else if (isInserting) {
-      context.missing(_createdAtMeta);
     }
     if (data.containsKey('updated_at')) {
       context.handle(
         _updatedAtMeta,
         updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
       );
-    } else if (isInserting) {
-      context.missing(_updatedAtMeta);
     }
     return context;
   }
@@ -2778,14 +2775,12 @@ class MessageSourcesCompanion extends UpdateCompanion<MessageSource> {
     required String contactName,
     this.isMonitored = const Value.absent(),
     this.autoCreateOption = const Value.absent(),
-    required DateTime createdAt,
-    required DateTime updatedAt,
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        contactId = Value(contactId),
-       contactName = Value(contactName),
-       createdAt = Value(createdAt),
-       updatedAt = Value(updatedAt);
+       contactName = Value(contactName);
   static Insertable<MessageSource> custom({
     Expression<String>? id,
     Expression<String>? contactId,
@@ -2991,7 +2986,8 @@ class $ExpenseTemplatesTable extends ExpenseTemplates
     aliasedName,
     false,
     type: DriftSqlType.dateTime,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
   );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
@@ -3002,7 +2998,8 @@ class $ExpenseTemplatesTable extends ExpenseTemplates
     aliasedName,
     false,
     type: DriftSqlType.dateTime,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
   );
   @override
   List<GeneratedColumn> get $columns => [
@@ -3114,16 +3111,12 @@ class $ExpenseTemplatesTable extends ExpenseTemplates
         _createdAtMeta,
         createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
       );
-    } else if (isInserting) {
-      context.missing(_createdAtMeta);
     }
     if (data.containsKey('updated_at')) {
       context.handle(
         _updatedAtMeta,
         updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
       );
-    } else if (isInserting) {
-      context.missing(_updatedAtMeta);
     }
     return context;
   }
@@ -3445,16 +3438,14 @@ class ExpenseTemplatesCompanion extends UpdateCompanion<ExpenseTemplate> {
     this.datePattern = const Value.absent(),
     this.categoryId = const Value.absent(),
     this.selectedAmount = const Value.absent(),
-    required DateTime createdAt,
-    required DateTime updatedAt,
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        sourceId = Value(sourceId),
        sampleMessage = Value(sampleMessage),
        triggerWord = Value(triggerWord),
-       amountPattern = Value(amountPattern),
-       createdAt = Value(createdAt),
-       updatedAt = Value(updatedAt);
+       amountPattern = Value(amountPattern);
   static Insertable<ExpenseTemplate> custom({
     Expression<String>? id,
     Expression<String>? sourceId,
@@ -5079,7 +5070,8 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     aliasedName,
     false,
     type: DriftSqlType.dateTime,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
   );
   static const VerificationMeta _lastLoginAtMeta = const VerificationMeta(
     'lastLoginAt',
@@ -5090,7 +5082,8 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     aliasedName,
     false,
     type: DriftSqlType.dateTime,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
   );
   @override
   List<GeneratedColumn> get $columns => [
@@ -5153,8 +5146,6 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
         _createdAtMeta,
         createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
       );
-    } else if (isInserting) {
-      context.missing(_createdAtMeta);
     }
     if (data.containsKey('last_login_at')) {
       context.handle(
@@ -5164,8 +5155,6 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
           _lastLoginAtMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_lastLoginAtMeta);
     }
     return context;
   }
@@ -5385,12 +5374,10 @@ class UsersCompanion extends UpdateCompanion<User> {
     required String email,
     this.displayName = const Value.absent(),
     this.photoUrl = const Value.absent(),
-    required DateTime createdAt,
-    required DateTime lastLoginAt,
+    this.createdAt = const Value.absent(),
+    this.lastLoginAt = const Value.absent(),
   }) : uid = Value(uid),
-       email = Value(email),
-       createdAt = Value(createdAt),
-       lastLoginAt = Value(lastLoginAt);
+       email = Value(email);
   static Insertable<User> custom({
     Expression<int>? id,
     Expression<String>? uid,
@@ -5543,7 +5530,8 @@ class $SyncQueueTable extends SyncQueue
     aliasedName,
     false,
     type: DriftSqlType.dateTime,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
   );
   static const VerificationMeta _syncedAtMeta = const VerificationMeta(
     'syncedAt',
@@ -5621,8 +5609,6 @@ class $SyncQueueTable extends SyncQueue
         _createdAtMeta,
         createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
       );
-    } else if (isInserting) {
-      context.missing(_createdAtMeta);
     }
     if (data.containsKey('synced_at')) {
       context.handle(
@@ -5842,13 +5828,12 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
     required String recordId,
     required String action,
     required String payload,
-    required DateTime createdAt,
+    this.createdAt = const Value.absent(),
     this.syncedAt = const Value.absent(),
   }) : entityTable = Value(entityTable),
        recordId = Value(recordId),
        action = Value(action),
-       payload = Value(payload),
-       createdAt = Value(createdAt);
+       payload = Value(payload);
   static Insertable<SyncQueueData> custom({
     Expression<int>? id,
     Expression<String>? entityTable,
@@ -6926,8 +6911,8 @@ typedef $$ParsingRulesTableCreateCompanionBuilder =
       required String sourceType,
       Value<bool> isEnabled,
       Value<int> priority,
-      required DateTime createdAt,
-      required DateTime updatedAt,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
       Value<int> rowid,
     });
 typedef $$ParsingRulesTableUpdateCompanionBuilder =
@@ -7007,8 +6992,8 @@ class $$ParsingRulesTableTableManager
                 required String sourceType,
                 Value<bool> isEnabled = const Value.absent(),
                 Value<int> priority = const Value.absent(),
-                required DateTime createdAt,
-                required DateTime updatedAt,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ParsingRulesCompanion.insert(
                 id: id,
@@ -7175,8 +7160,8 @@ typedef $$MessageSourcesTableCreateCompanionBuilder =
       required String contactName,
       Value<bool> isMonitored,
       Value<int> autoCreateOption,
-      required DateTime createdAt,
-      required DateTime updatedAt,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
       Value<int> rowid,
     });
 typedef $$MessageSourcesTableUpdateCompanionBuilder =
@@ -7242,8 +7227,8 @@ class $$MessageSourcesTableTableManager
                 required String contactName,
                 Value<bool> isMonitored = const Value.absent(),
                 Value<int> autoCreateOption = const Value.absent(),
-                required DateTime createdAt,
-                required DateTime updatedAt,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => MessageSourcesCompanion.insert(
                 id: id,
@@ -7384,8 +7369,8 @@ typedef $$ExpenseTemplatesTableCreateCompanionBuilder =
       Value<String?> datePattern,
       Value<String?> categoryId,
       Value<String?> selectedAmount,
-      required DateTime createdAt,
-      required DateTime updatedAt,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
       Value<int> rowid,
     });
 typedef $$ExpenseTemplatesTableUpdateCompanionBuilder =
@@ -7467,8 +7452,8 @@ class $$ExpenseTemplatesTableTableManager
                 Value<String?> datePattern = const Value.absent(),
                 Value<String?> categoryId = const Value.absent(),
                 Value<String?> selectedAmount = const Value.absent(),
-                required DateTime createdAt,
-                required DateTime updatedAt,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ExpenseTemplatesCompanion.insert(
                 id: id,
@@ -8206,8 +8191,8 @@ typedef $$UsersTableCreateCompanionBuilder =
       required String email,
       Value<String?> displayName,
       Value<String?> photoUrl,
-      required DateTime createdAt,
-      required DateTime lastLoginAt,
+      Value<DateTime> createdAt,
+      Value<DateTime> lastLoginAt,
     });
 typedef $$UsersTableUpdateCompanionBuilder =
     UsersCompanion Function({
@@ -8267,8 +8252,8 @@ class $$UsersTableTableManager
                 required String email,
                 Value<String?> displayName = const Value.absent(),
                 Value<String?> photoUrl = const Value.absent(),
-                required DateTime createdAt,
-                required DateTime lastLoginAt,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> lastLoginAt = const Value.absent(),
               }) => UsersCompanion.insert(
                 id: id,
                 uid: uid,
@@ -8381,7 +8366,7 @@ typedef $$SyncQueueTableCreateCompanionBuilder =
       required String recordId,
       required String action,
       required String payload,
-      required DateTime createdAt,
+      Value<DateTime> createdAt,
       Value<DateTime?> syncedAt,
     });
 typedef $$SyncQueueTableUpdateCompanionBuilder =
@@ -8442,7 +8427,7 @@ class $$SyncQueueTableTableManager
                 required String recordId,
                 required String action,
                 required String payload,
-                required DateTime createdAt,
+                Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime?> syncedAt = const Value.absent(),
               }) => SyncQueueCompanion.insert(
                 id: id,

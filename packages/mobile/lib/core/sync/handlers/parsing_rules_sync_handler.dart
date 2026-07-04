@@ -38,8 +38,8 @@ class ParsingRulesSyncHandler
     sourceType: data['sourceType'] ?? ExpenseSource.sms.name,
     isEnabled: _optBool(data, 'isEnabled'),
     priority: _optInt(data, 'priority'),
-    createdAt: _dt(data, 'createdAt'),
-    updatedAt: _dt(data, 'updatedAt'),
+    createdAt: Value(_dt(data, 'createdAt')),
+    updatedAt: Value(_dt(data, 'updatedAt')),
   );
   @override
   Future<void> deleteById(AppDatabase db, String id) async =>

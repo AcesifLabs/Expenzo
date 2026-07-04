@@ -1,13 +1,12 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
-import 'package:expense_tracker/features/message_templates/domain/entities/message_source.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/services/parsing_isolate_service.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/usecases/evaluate_rules_use_case.dart';
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
 import 'package:expense_tracker/features/records/domain/usecases/create_records_from_parsed_list.dart';
 import 'package:expense_tracker/features/sms_parser/domain/entities/incoming_sms_event.dart';
+import 'package:expense_tracker/features/sms_parser/domain/entities/monitored_source.dart';
 import 'package:expense_tracker/features/sms_parser/domain/services/realtime_sms_listener.dart';
 import 'package:expense_tracker/features/sms_parser/domain/services/sms_sender_normalizer.dart';
 
@@ -55,7 +54,7 @@ class RealtimeSmsProcessor {
           _logError('stream error', error, stackTrace);
         },
       );
-    } catch (_) {
+    } catch (e) {
       _isStarted = false;
       await _subscription?.cancel();
       _subscription = null;
@@ -89,7 +88,9 @@ class RealtimeSmsProcessor {
   Future<void> _processEvent(IncomingSmsEvent event) async {
     try {
       final context = await _evaluateRules.loadContext();
-      final monitoredSources = context.sources.where((s) => s.isMonitored);
+      final monitoredSources = context.sources
+          .where((s) => s.isMonitored)
+          .map((s) => MonitoredSource(contactId: s.contactId));
 
       if (!_isMonitoredSender(event.address, monitoredSources)) {
         return;
@@ -142,14 +143,11 @@ class RealtimeSmsProcessor {
     }
   }
 
-  void _logError(String message, Object error, StackTrace? stackTrace) {
-    debugPrint('RealtimeSmsProcessor: $message: $error');
-    if (stackTrace != null) {
-      debugPrint('$stackTrace');
-    }
-  }
+  // TODO: re-enable logging when appLogger is wired up
+  // ignore: avoid-unused-parameters, no-empty-block
+  void _logError(String message, Object error, StackTrace? stackTrace) {}
 
-  bool _isMonitoredSender(String sender, Iterable<MessageSource> sources) {
+  bool _isMonitoredSender(String sender, Iterable<MonitoredSource> sources) {
     final normalizedSender = SmsSenderNormalizer.normalize(sender);
 
     for (final source in sources) {

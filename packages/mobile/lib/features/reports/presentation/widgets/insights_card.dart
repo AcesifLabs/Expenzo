@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:picons/picons.dart';
+import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_stat_tile.dart';
 import '../../domain/entities/spending_insights.dart';
 
@@ -8,6 +9,12 @@ class InsightsCard extends StatelessWidget {
   final SpendingInsights insights;
 
   const InsightsCard({super.key, required this.insights});
+
+  String _formatAmount(double amount) {
+    final fmt = CurrencyFormatter.getFormatter(decimalDigits: 2);
+
+    return fmt.format(amount);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,13 +29,13 @@ class InsightsCard extends StatelessWidget {
           icon: PiconsRegular.trendUp,
           title: 'Highest Spending Day',
           value: highestDay,
-          subtitle: '\$${insights.highestDayAmount.toStringAsFixed(2)}',
+          subtitle: _formatAmount(insights.highestDayAmount),
           color: Colors.orange,
         ),
         AppStatTile(
           icon: PiconsRegular.chartLineUp,
           title: 'Average Daily Spending',
-          value: '\$${insights.avgDailySpending.toStringAsFixed(2)}',
+          value: _formatAmount(insights.avgDailySpending),
           subtitle: 'Per day in selected period',
           color: Colors.blue,
         ),
@@ -42,7 +49,7 @@ class InsightsCard extends StatelessWidget {
         AppStatTile(
           icon: PiconsRegular.wallet,
           title: 'Total Spent',
-          value: '\$${insights.totalSpent.toStringAsFixed(2)}',
+          value: _formatAmount(insights.totalSpent),
           subtitle: 'In selected period',
           color: Colors.purple,
         ),

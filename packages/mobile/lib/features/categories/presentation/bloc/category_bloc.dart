@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:expense_tracker/core/bloc/transformers.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import '../../domain/usecases/create_category.dart';
 import '../../domain/usecases/delete_category.dart';
@@ -20,10 +21,10 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     required this.updateCategory,
     required this.deleteCategory,
   }) : super(const CategoryInitial()) {
-    on<LoadCategories>(_onLoadCategories);
-    on<CreateCategoryEvent>(_onCreateCategory);
-    on<UpdateCategoryEvent>(_onUpdateCategory);
-    on<DeleteCategoryEvent>(_onDeleteCategory);
+    on<LoadCategories>(_onLoadCategories, transformer: concurrent());
+    on<CreateCategoryEvent>(_onCreateCategory, transformer: sequential());
+    on<UpdateCategoryEvent>(_onUpdateCategory, transformer: sequential());
+    on<DeleteCategoryEvent>(_onDeleteCategory, transformer: sequential());
   }
 
   Future<void> _onLoadCategories(

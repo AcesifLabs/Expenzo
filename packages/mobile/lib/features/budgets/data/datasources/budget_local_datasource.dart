@@ -1,9 +1,11 @@
 import 'package:drift/drift.dart';
+import 'package:expense_tracker/core/constants/budget_period.dart';
 import 'package:expense_tracker/core/database/app_database.dart';
 import 'package:expense_tracker/core/database/daos/budget_dao.dart';
 import '../../domain/entities/budget.dart' as domain;
 
 abstract class BudgetLocalDatasource {
+  /// Throws: [CacheException] if a database error occurs.
   Future<List<domain.Budget>> getBudgets();
   Future<domain.Budget?> getBudgetById(String id);
   Future<void> createBudget(domain.Budget budget);
@@ -17,6 +19,7 @@ class BudgetLocalDatasourceImpl implements BudgetLocalDatasource {
 
   BudgetLocalDatasourceImpl({required this.budgetDao});
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<List<domain.Budget>> getBudgets() async {
     final budgets = await budgetDao.getAllBudgets();
@@ -24,6 +27,7 @@ class BudgetLocalDatasourceImpl implements BudgetLocalDatasource {
     return budgets.map(_mapToEntity).toList();
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<domain.Budget?> getBudgetById(String id) async {
     final budget = await budgetDao.getBudgetById(id);
@@ -31,6 +35,7 @@ class BudgetLocalDatasourceImpl implements BudgetLocalDatasource {
     return budget != null ? _mapToEntity(budget) : null;
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<void> createBudget(domain.Budget budget) async {
     final now = DateTime.now().toUtc();
@@ -52,6 +57,7 @@ class BudgetLocalDatasourceImpl implements BudgetLocalDatasource {
     );
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<void> updateBudget(domain.Budget budget) async {
     final now = DateTime.now().toUtc();
@@ -73,6 +79,7 @@ class BudgetLocalDatasourceImpl implements BudgetLocalDatasource {
     );
   }
 
+  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<void> deleteBudget(String id) async {
     await budgetDao.deleteBudget(id);
@@ -98,11 +105,11 @@ class BudgetLocalDatasourceImpl implements BudgetLocalDatasource {
     );
   }
 
-  domain.BudgetPeriod _parsePeriod(String period) {
-    for (final p in domain.BudgetPeriod.values) {
+  BudgetPeriod _parsePeriod(String period) {
+    for (final p in BudgetPeriod.values) {
       if (p.name == period) return p;
     }
 
-    return domain.BudgetPeriod.monthly;
+    return BudgetPeriod.monthly;
   }
 }

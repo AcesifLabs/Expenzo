@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:expense_tracker/core/bloc/transformers.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/entities/parsed_transaction.dart';
@@ -8,8 +10,7 @@ import 'package:expense_tracker/features/parsing_rules/domain/entities/parsing_c
 import 'package:expense_tracker/features/parsing_rules/domain/usecases/evaluate_rules_use_case.dart';
 import 'package:expense_tracker/features/sms_parser/data/datasources/sms_local_datasource.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
-import 'package:expense_tracker/features/budgets/presentation/bloc/budget_bloc.dart';
-import 'package:expense_tracker/features/budgets/presentation/bloc/budget_event.dart';
+import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets_with_progress.dart';
 import '../../domain/usecases/scan_sms_usecase.dart';
 import 'package:expense_tracker/features/records/domain/usecases/create_records_from_parsed_list.dart';
 import 'sms_scanner_event.dart';
@@ -21,19 +22,24 @@ class SmsScannerBloc extends Bloc<SmsScannerEvent, SmsScannerState> {
   final ScanSmsUseCase scanSmsUseCase;
   final RecordRepository recordRepository;
   final CreateRecordsFromParsedList createRecordsFromParsedList;
+  final GetBudgetsWithProgress getBudgetsWithProgress;
 
   SmsScannerBloc({
     required this.scanSmsUseCase,
     required this.recordRepository,
     required this.createRecordsFromParsedList,
+    required this.getBudgetsWithProgress,
   }) : super(SmsScannerInitial()) {
-    on<StartScan>(_onStartScan);
-    on<LoadMoreScanResults>(_onLoadMore);
-    on<ToggleSelection>(_onToggleSelection);
-    on<SelectAll>(_onSelectAll);
-    on<DeselectAll>(_onDeselectAll);
-    on<ClearResults>(_onClearResults);
-    on<CreateSelectedExpenses>(_onCreateSelectedExpenses);
+    on<StartScan>(_onStartScan, transformer: droppable());
+    on<LoadMoreScanResults>(_onLoadMore, transformer: concurrent());
+    on<ToggleSelection>(_onToggleSelection, transformer: concurrent());
+    on<SelectAll>(_onSelectAll, transformer: concurrent());
+    on<DeselectAll>(_onDeselectAll, transformer: concurrent());
+    on<ClearResults>(_onClearResults, transformer: concurrent());
+    on<CreateSelectedExpenses>(
+      _onCreateSelectedExpenses,
+      transformer: concurrent(),
+    );
   }
 
   Future<void> _onStartScan(
@@ -167,16 +173,24 @@ class SmsScannerBloc extends Bloc<SmsScannerEvent, SmsScannerState> {
   ) async {
     final result = await createRecordsFromParsedList(event.transactions);
 
-    result.fold((failure) => emit(SmsScannerError(message: failure.message)), (
-      creationResult,
-    ) {
-      try {
-        di.getIt<BudgetBloc>().add(LoadBudgets());
-      } catch (e) {
-        debugPrint('SmsScannerBloc: Failed to reload budgets: $e');
-      }
-      add(ClearResults());
-    });
+    result.fold(
+      (failure) {
+        emit(SmsScannerError(message: failure.message));
+      },
+      (creationResult) {
+        unawaited(_reloadBudgets());
+        add(ClearResults());
+      },
+    );
+  }
+
+  Future<void> _reloadBudgets() async {
+    try {
+      await getBudgetsWithProgress();
+    } catch (e, s) {
+      addError(e, s);
+      debugPrint('SmsScannerBloc: Failed to reload budgets: $e');
+    }
   }
 
   void _emitEmptyResults(Emitter<SmsScannerState> emit, StartScan event) {

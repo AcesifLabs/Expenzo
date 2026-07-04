@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/error/failures.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../../domain/entities/user_settings.dart';
 import '../../domain/repositories/settings_repository.dart';
 import '../datasources/settings_local_datasource.dart';
@@ -10,6 +11,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
   SettingsRepositoryImpl({required this.localDatasource});
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, UserSettings>> getSettings() async {
     try {
@@ -18,9 +20,14 @@ class SettingsRepositoryImpl implements SettingsRepository {
       return Right(settings);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      appLogger.error('Settings repository error', e, s);
+
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, UserSettings>> updateSettings(
     UserSettings settings,
@@ -31,6 +38,10 @@ class SettingsRepositoryImpl implements SettingsRepository {
       return Right(updated);
     } on CacheException catch (e) {
       return Left(e.toFailure());
+    } catch (e, s) {
+      appLogger.error('Settings repository error', e, s);
+
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 }

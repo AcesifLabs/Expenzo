@@ -11,6 +11,8 @@ import 'package:expense_tracker/core/error/failures.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_datasource.dart';
+import 'package:expense_tracker/core/sync/sync_engine.dart';
+import 'package:expense_tracker/core/di/injection_container.dart' as di;
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDatasource remoteDatasource;
@@ -43,30 +45,24 @@ class AuthRepositoryImpl implements AuthRepository {
       return 'The request timed out. Please check your connection and try again.';
     }
 
-    debugPrint('AuthRepositoryImpl: Unmapped exception type: ${e.runtimeType}');
-
     return 'Something went wrong. Please try again.';
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<AuthFailure, User>> signInWithGoogle() async {
     try {
-      debugPrint('AuthRepositoryImpl: signInWithGoogle called');
       final user = await remoteDatasource.signInWithGoogle();
-      debugPrint('AuthRepositoryImpl: signInWithGoogle success, user: $user');
 
       return Right(user);
     } on AuthException catch (e) {
-      debugPrint('AuthRepositoryImpl: AuthException: ${e.message}');
-
       return Left(e.toFailure());
-    } catch (e, stackTrace) {
-      debugPrint('AuthRepositoryImpl: Exception: $e\n$stackTrace');
-
+    } catch (e) {
       return Left(AuthFailure(message: mapExceptionToMessage(e)));
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<AuthFailure, Unit>> signOut() async {
     try {
@@ -80,6 +76,7 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<AuthFailure, User?>> getCurrentUser() async {
     try {
@@ -93,6 +90,7 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<AuthFailure, bool>> isSignedIn() async {
     try {
@@ -104,6 +102,7 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<AuthFailure, Unit>> deleteAccount() async {
     try {
@@ -117,6 +116,7 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  /// Returns Left(Failure) on error.
   @override
   Future<Either<AuthFailure, bool>> hasGmailScope() async {
     try {
@@ -126,6 +126,25 @@ class AuthRepositoryImpl implements AuthRepository {
     } catch (e) {
       return Left(AuthFailure(message: mapExceptionToMessage(e)));
     }
+  }
+
+  @override
+  Future<SyncConflictType> checkConflict() async {
+    return di.getIt<SyncEngine>().checkConflict();
+  }
+
+  @override
+  Future<void> stopSyncEngine() async {
+    try {
+      await di.getIt<SyncEngine>().stop();
+    } catch (_) {}
+  }
+
+  @override
+  Future<void> startSyncEngine() async {
+    try {
+      await di.getIt<SyncEngine>().start();
+    } catch (_) {}
   }
 
   static String _mapFirebaseAuthException(fb.FirebaseAuthException e) {
@@ -150,10 +169,6 @@ class AuthRepositoryImpl implements AuthRepository {
     if (e.code == 'sign_in_canceled' || e.code == 'sign_in_failed') {
       return 'Sign-in was cancelled.';
     }
-
-    debugPrint(
-      'AuthRepositoryImpl: Unhandled PlatformException code: ${e.code}',
-    );
 
     return 'Authentication failed. Please try again.';
   }

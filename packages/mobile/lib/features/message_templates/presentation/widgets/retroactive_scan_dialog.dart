@@ -64,7 +64,11 @@ class _RetroactiveScanDialogState extends State<RetroactiveScanDialog> {
           : Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(PiconsFill.checkCircle, color: Colors.green, size: 48),
+                Icon(
+                  PiconsFill.checkCircle,
+                  color: Theme.of(context).colorScheme.secondary,
+                  size: 48,
+                ),
                 SizedBox(height: 16),
                 Text(
                   'Template active! Future messages will be parsed automatically.',

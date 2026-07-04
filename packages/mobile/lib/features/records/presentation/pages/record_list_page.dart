@@ -1,10 +1,13 @@
 import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/constants/app_constants.dart';
-import 'package:expense_tracker/core/utils/navigation_utils.dart';
+import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
+import 'package:expense_tracker/features/categories/presentation/bloc/category_event.dart';
+import 'package:expense_tracker/features/categories/presentation/bloc/category_state.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_search_bar.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_empty_state.dart';
@@ -15,16 +18,34 @@ import '../bloc/record_event.dart';
 import '../bloc/record_state.dart';
 import '../widgets/record_card.dart';
 import '../widgets/record_filter_modal.dart';
-import 'record_form_page.dart';
 
-class RecordListPage extends StatefulWidget {
+class RecordListPage extends StatelessWidget {
   const RecordListPage({super.key});
 
   @override
-  State<RecordListPage> createState() => _RecordListPageState();
+  Widget build(BuildContext context) {
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => di.getIt<RecordBloc>()..add(const LoadRecords()),
+        ),
+        BlocProvider(
+          create: (_) => di.getIt<CategoryBloc>()..add(const LoadCategories()),
+        ),
+      ],
+      child: const RecordListView(),
+    );
+  }
 }
 
-class _RecordListPageState extends State<RecordListPage> {
+class RecordListView extends StatefulWidget {
+  const RecordListView({super.key});
+
+  @override
+  State<RecordListView> createState() => _RecordListViewState();
+}
+
+class _RecordListViewState extends State<RecordListView> {
   final _scrollController = ScrollController();
   final _searchCtrl = TextEditingController();
 
@@ -52,6 +73,18 @@ class _RecordListPageState extends State<RecordListPage> {
     context.read<RecordBloc>().add(const RefreshRecords());
   }
 
+  CategoryInfo _resolveCategory(Record record, CategoryState catState) {
+    if (catState is! CategoryLoaded) return const CategoryInfo();
+    final matched = catState.categories.where((c) => c.id == record.categoryId);
+    if (matched.isEmpty) return const CategoryInfo();
+
+    return CategoryInfo(
+      name: matched.first.name,
+      emoji: matched.first.emoji,
+      color: matched.first.color,
+    );
+  }
+
   Widget _buildRecordsList() {
     return BlocBuilder<RecordBloc, RecordState>(
       buildWhen: (previous, current) =>
@@ -60,13 +93,8 @@ class _RecordListPageState extends State<RecordListPage> {
           current is RecordLoading ||
           current is RecordLoadingMore,
       builder: (context, state) {
-        if (state is RecordLoading) {
-          return _buildShimmerList();
-        }
-
-        if (state is RecordError) {
-          return Center(child: Text(state.message));
-        }
+        if (state is RecordLoading) return _buildShimmerList();
+        if (state is RecordError) return Center(child: Text(state.message));
 
         final listState = _extractListState(state);
         final records = listState.$1;
@@ -79,6 +107,8 @@ class _RecordListPageState extends State<RecordListPage> {
             message: 'No transactions found',
           );
         }
+
+        final catState = context.watch<CategoryBloc>().state;
 
         return RefreshIndicator(
           onRefresh: () async => _onRefresh(),
@@ -97,6 +127,7 @@ class _RecordListPageState extends State<RecordListPage> {
                 record: record,
                 onTap: () => _navigateToForm(context, record),
                 onDelete: () => _handleDelete(context, record),
+                categoryInfo: _resolveCategory(record, catState),
               );
             },
           ),
@@ -120,15 +151,15 @@ class _RecordListPageState extends State<RecordListPage> {
   }
 
   (List<Record>, bool, bool) _extractListState(RecordState state) {
-    if (state is RecordLoaded) {
-      return (state.filteredRecords, state.hasMore, false);
-    }
-
-    if (state is RecordLoadingMore) {
-      return (state.currentRecords, true, true);
-    }
-
-    return (<Record>[], false, false);
+    return switch (state) {
+      RecordLoaded(:final filteredRecords, :final hasMore) => (
+        filteredRecords,
+        hasMore,
+        false,
+      ),
+      RecordLoadingMore(:final currentRecords) => (currentRecords, true, true),
+      _ => (<Record>[], false, false),
+    };
   }
 
   Widget _buildLoadMore(bool isLoadingMore) {
@@ -147,20 +178,16 @@ class _RecordListPageState extends State<RecordListPage> {
   }
 
   void _navigateToForm(BuildContext context, Record? record) {
-    final recordBloc = context.read<RecordBloc>();
-    final categoryBloc = context.read<CategoryBloc>();
-    Navigator.push(
-      context,
-      SlidePageRoute(
-        builder: (_) => MultiBlocProvider(
-          providers: [
-            BlocProvider.value(value: recordBloc),
-            BlocProvider.value(value: categoryBloc),
-          ],
-          child: RecordFormPage(record: record),
-        ),
-      ),
-    );
+    final extra = <String, dynamic>{
+      'recordBloc': context.read<RecordBloc>(),
+      'categoryBloc': context.read<CategoryBloc>(),
+    };
+    final recordId = record?.id;
+    if (recordId != null) {
+      context.push('/records/$recordId/edit', extra: extra);
+    } else {
+      context.push('/records/new', extra: extra);
+    }
   }
 
   void _onUndoDelete(Record record) {
@@ -218,11 +245,16 @@ class _RecordListPageState extends State<RecordListPage> {
     List<String>? categoryIds;
     String? recordType;
 
-    if (state is RecordLoaded) {
-      startDate = state.filterStartDate;
-      endDate = state.filterEndDate;
-      categoryIds = state.filterCategoryIds;
-      recordType = state.filterRecordType;
+    if (state case RecordLoaded(
+      :final filterStartDate,
+      :final filterEndDate,
+      :final filterCategoryIds,
+      :final filterRecordType,
+    )) {
+      startDate = filterStartDate;
+      endDate = filterEndDate;
+      categoryIds = filterCategoryIds;
+      recordType = filterRecordType;
     }
 
     showRecordFilterModal(

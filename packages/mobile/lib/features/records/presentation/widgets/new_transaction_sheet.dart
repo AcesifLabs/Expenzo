@@ -2,16 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
-import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/core/theme/app_colors.dart';
-import 'package:expense_tracker/core/utils/navigation_utils.dart';
 import 'package:expense_tracker/features/categories/domain/entities/category.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_state.dart';
-import 'package:expense_tracker/features/categories/presentation/pages/category_form_page.dart';
 import '../../../categories/presentation/bloc/category_event.dart';
 import '../../domain/entities/record.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
@@ -26,7 +24,9 @@ import 'new_transaction/type_toggle.dart';
 import 'new_transaction/typewriter_animation_mixin.dart';
 
 class NewTransactionSheet extends StatefulWidget {
-  const NewTransactionSheet({super.key});
+  final RecurringRepository? recurringRepository;
+
+  const NewTransactionSheet({super.key, this.recurringRepository});
 
   @override
   State<NewTransactionSheet> createState() => _NewTransactionSheetState();
@@ -134,7 +134,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: const Color(0x00000000),
       builder: (ctx) => AllCategoriesPicker(
         categories: allCategories,
         selectedId: _selectedCategoryId,
@@ -169,14 +169,9 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     RecordType type,
     CategoryBloc categoryBloc,
   ) async {
-    final created = await Navigator.push<Category>(
-      context,
-      SlidePageRoute(
-        builder: (_) => BlocProvider.value(
-          value: categoryBloc,
-          child: CategoryFormPage(initialType: type),
-        ),
-      ),
+    final created = await context.push<Category>(
+      '/categories/new',
+      extra: {'initialType': type, 'categoryBloc': categoryBloc},
     );
     if (created != null && context.mounted) {
       setState(() {
@@ -349,8 +344,8 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
 
   Future<bool> _createRecurringTransaction(double finalAmount) async {
     try {
-      await di.featureDependenciesReady;
-      if (!di.getIt.isRegistered<RecurringRepository>()) {
+      final repo = widget.recurringRepository;
+      if (repo == null) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -362,7 +357,6 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
         return false;
       }
 
-      final repo = di.getIt<RecurringRepository>();
       await repo.createRecurring(
         RecurringTransaction(
           description: _noteCtrl.text.trim(),
@@ -379,7 +373,8 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       );
 
       return true;
-    } catch (e) {
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
       debugPrint(
         'NewTransactionSheet: Failed to create recurring transaction: $e',
       );
@@ -410,17 +405,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   }
 
   Widget _buildDragHandle(ColorScheme colors) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 12, bottom: 4),
-      child: Container(
-        width: 40,
-        height: 4,
-        decoration: BoxDecoration(
-          color: colors.onSurface.withAlpha(50),
-          borderRadius: BorderRadius.circular(2),
-        ),
-      ),
-    );
+    return _DragHandle(colors: colors);
   }
 
   Widget _buildTypeToggle() {
@@ -437,8 +422,8 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
         final displayVal = val.isEmpty ? '0' : val;
         final sign = _type == RecordType.expense ? '-' : '+';
         final signColor = _type == RecordType.expense
-            ? const Color(0xFFFF3B30)
-            : const Color(0xFF34C759);
+            ? AppColors.expense
+            : AppColors.success;
 
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
@@ -507,10 +492,10 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     );
   }
 
-  Widget _buildDatePicker(ColorScheme colors, DateFormat dateFmt, bool isDark) {
+  Widget _buildDatePicker(ColorScheme colors, DateFormat dateFmt) {
     return Expanded(
       child: InkWell(
-        onTap: () => _pickDate(context, isDark),
+        onTap: () => _pickDate(context),
         borderRadius: BorderRadius.circular(12),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -548,63 +533,29 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     );
   }
 
-  Widget _buildRecurringCheckbox(ColorScheme colors, Color mutedIconColor) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(
-          width: 24,
-          height: 24,
-          child: Checkbox(
-            value: _isRecurring,
-            onChanged: (v) => setState(() => _isRecurring = v ?? false),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(4),
-            ),
-            activeColor: _type == RecordType.expense
-                ? colors.error
-                : colors.primary,
-            side: BorderSide(color: mutedIconColor, width: 1.5),
-          ),
-        ),
-        const SizedBox(width: 6),
-        Text(
-          'Recurring?',
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-            color: colors.onSurface.withAlpha(200),
-          ),
-        ),
-        const SizedBox(width: 4),
-        Tooltip(
-          message: 'Check this if your expense or income repeats every month',
-          preferBelow: false,
-          triggerMode: TooltipTriggerMode.tap,
-          child: Icon(PiconsLight.info, size: 14, color: mutedIconColor),
-        ),
-      ],
-    );
-  }
-
   Widget _buildDateAndRecurringRow(ColorScheme colors) {
     final dateFmt = DateFormat('MMM dd, yyyy');
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final mutedIconColor = colors.onSurface.withAlpha(120);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 12, 24, 4),
       child: Row(
         children: [
-          _buildDatePicker(colors, dateFmt, isDark),
+          _buildDatePicker(colors, dateFmt),
           const SizedBox(width: 12),
-          _buildRecurringCheckbox(colors, mutedIconColor),
+          _RecurringCheckbox(
+            isRecurring: _isRecurring,
+            type: _type,
+            colors: colors,
+            mutedIconColor: mutedIconColor,
+            onChanged: (v) => setState(() => _isRecurring = v),
+          ),
         ],
       ),
     );
   }
 
-  Future<void> _pickDate(BuildContext context, bool isDark) async {
+  Future<void> _pickDate(BuildContext context) async {
     final typePrimary = _type == RecordType.expense
         ? AppColors.expense
         : AppColors.secondary;
@@ -613,40 +564,36 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       initialDate: _selectedDate,
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
-      builder: (ctx, child) => Theme(
-        data: Theme.of(ctx).copyWith(
-          colorScheme: isDark
-              ? ColorScheme.dark(
-                  primary: typePrimary,
-                  onPrimary: Colors.black,
-                  surface: AppColors.surfaceDark,
-                  onSurface: Colors.white,
-                  onSurfaceVariant: Colors.white70,
-                )
-              : null,
-        ),
-        child: child ?? const SizedBox.shrink(),
-      ),
+      builder: (ctx, child) {
+        final ctxColorScheme = Theme.of(ctx).colorScheme;
+        final ctxOnSurface = ctxColorScheme.onSurface;
+        final isDark =
+            Theme.of(context).colorScheme.brightness == Brightness.dark;
+
+        return Theme(
+          data: Theme.of(ctx).copyWith(
+            colorScheme: isDark
+                ? ColorScheme.dark(
+                    primary: typePrimary,
+                    onPrimary: ctxOnSurface,
+                    surface: AppColors.surfaceDark,
+                    onSurface: ctxOnSurface,
+                    onSurfaceVariant: ctxOnSurface.withAlpha(180),
+                  )
+                : null,
+          ),
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
     );
     if (picked != null) setState(() => _selectedDate = picked);
   }
 
   Widget _buildAllCategoriesButton(List<Category> allCats, ColorScheme colors) {
-    return GestureDetector(
+    return _AllCategoriesButton(
+      allCats: allCats,
+      colors: colors,
       onTap: () => _showAllCategories(context, allCats, _type),
-      child: Container(
-        width: 50,
-        margin: const EdgeInsets.only(left: 4),
-        decoration: BoxDecoration(
-          color: colors.onSurface.withAlpha(10),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(
-          PiconsBold.gridFour,
-          size: 20,
-          color: colors.onSurface.withAlpha(150),
-        ),
-      ),
     );
   }
 
@@ -678,6 +625,10 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   }
 
   Widget _buildCategoryChip(Category cat, ColorScheme colors) {
+    final chipSelectedColor = _type == RecordType.expense
+        ? colors.error
+        : colors.primary;
+
     return CategoryPickerItem(
       category: cat,
       isSelected: cat.id == _selectedCategoryId,
@@ -686,9 +637,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
         colors,
         fallback: Colors.transparent,
       ),
-      selectedColor: _type == RecordType.expense
-          ? colors.error
-          : colors.primary,
+      selectedColor: chipSelectedColor,
       onTap: () => _onCategoryChipTap(cat),
     );
   }
@@ -758,28 +707,11 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   }
 
   Widget _buildSubmitButton(ColorScheme colors) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-      child: SizedBox(
-        width: double.infinity,
-        height: 52,
-        child: FilledButton(
-          onPressed: _isSubmitting ? null : () => unawaited(_submit()),
-          style: FilledButton.styleFrom(
-            backgroundColor: _type == RecordType.expense
-                ? colors.error
-                : colors.primary,
-            foregroundColor: colors.onPrimary,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
-            ),
-          ),
-          child: Text(
-            'Add ${_type.displayName}',
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-          ),
-        ),
-      ),
+    return _SubmitButton(
+      isSubmitting: _isSubmitting,
+      type: _type,
+      colors: colors,
+      onSubmit: _submit,
     );
   }
 
@@ -829,6 +761,156 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
           ),
         ),
       ),
+    );
+  }
+}
+
+class _DragHandle extends StatelessWidget {
+  final ColorScheme colors;
+
+  const _DragHandle({required this.colors});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12, bottom: 4),
+      child: Container(
+        width: 40,
+        height: 4,
+        decoration: BoxDecoration(
+          color: colors.onSurface.withAlpha(50),
+          borderRadius: BorderRadius.circular(2),
+        ),
+      ),
+    );
+  }
+}
+
+class _SubmitButton extends StatelessWidget {
+  final bool isSubmitting;
+  final RecordType type;
+  final ColorScheme colors;
+  final Future<void> Function() onSubmit;
+
+  const _SubmitButton({
+    required this.isSubmitting,
+    required this.type,
+    required this.colors,
+    required this.onSubmit,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+      child: SizedBox(
+        width: double.infinity,
+        height: 52,
+        child: FilledButton(
+          onPressed: isSubmitting ? null : () => unawaited(onSubmit()),
+          style: FilledButton.styleFrom(
+            backgroundColor: type == RecordType.expense
+                ? colors.error
+                : colors.primary,
+            foregroundColor: colors.onPrimary,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+          ),
+          child: Text(
+            'Add ${type.displayName}',
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AllCategoriesButton extends StatelessWidget {
+  final List<Category> allCats;
+  final ColorScheme colors;
+  final VoidCallback onTap;
+
+  const _AllCategoriesButton({
+    required this.allCats,
+    required this.colors,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 50,
+        margin: const EdgeInsets.only(left: 4),
+        decoration: BoxDecoration(
+          color: colors.onSurface.withAlpha(10),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          PiconsBold.gridFour,
+          size: 20,
+          color: colors.onSurface.withAlpha(150),
+        ),
+      ),
+    );
+  }
+}
+
+class _RecurringCheckbox extends StatelessWidget {
+  final bool isRecurring;
+  final RecordType type;
+  final ColorScheme colors;
+  final Color mutedIconColor;
+  final ValueChanged<bool> onChanged;
+
+  const _RecurringCheckbox({
+    required this.isRecurring,
+    required this.type,
+    required this.colors,
+    required this.mutedIconColor,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          width: 24,
+          height: 24,
+          child: Checkbox(
+            value: isRecurring,
+            onChanged: (v) => onChanged(v ?? false),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
+            activeColor: type == RecordType.expense
+                ? colors.error
+                : colors.primary,
+            side: BorderSide(color: mutedIconColor, width: 1.5),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          'Recurring?',
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: colors.onSurface.withAlpha(200),
+          ),
+        ),
+        const SizedBox(width: 4),
+        Tooltip(
+          message: 'Check this if your expense or income repeats every month',
+          preferBelow: false,
+          triggerMode: TooltipTriggerMode.tap,
+          child: Icon(PiconsLight.info, size: 14, color: mutedIconColor),
+        ),
+      ],
     );
   }
 }

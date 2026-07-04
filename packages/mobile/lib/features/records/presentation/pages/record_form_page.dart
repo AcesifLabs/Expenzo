@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_icons.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
+import 'package:expense_tracker/core/di/injection_container.dart' as di;
+import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
 import '../../../../shared/presentation/widgets/shimmer_box.dart';
 import '../../../categories/presentation/bloc/category_bloc.dart';
 import '../../../categories/presentation/bloc/category_event.dart';
 import '../../../categories/presentation/bloc/category_state.dart';
-import '../../domain/entities/record.dart';
+import '../../../categories/domain/entities/category.dart';
 import "package:expense_tracker/core/constants/source_types.dart";
 import '../bloc/record_bloc.dart';
 import '../bloc/record_event.dart';
@@ -17,8 +20,14 @@ import '../bloc/record_event.dart';
 class RecordFormPage extends StatefulWidget {
   final Record? record;
   final RecordType? initialType;
+  final String? recordId;
 
-  const RecordFormPage({super.key, this.record, this.initialType});
+  const RecordFormPage({
+    super.key,
+    this.record,
+    this.initialType,
+    this.recordId,
+  });
 
   @override
   State<RecordFormPage> createState() => _RecordFormPageState();
@@ -26,18 +35,47 @@ class RecordFormPage extends StatefulWidget {
 
 class _RecordFormPageState extends State<RecordFormPage> {
   static final _dateFormat = DateFormat('MMM dd, yyyy');
-  bool get _isEditing => widget.record != null;
+  bool get _isEditing => widget.record != null || widget.recordId != null;
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
   final _descriptionController = TextEditingController();
   var _selectedDate = DateTime.now();
   String? _selectedCategoryId;
   var _recordType = RecordType.expense;
+  var _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    final record = widget.record;
+    final recordId = widget.recordId;
+    if (recordId != null) {
+      _isLoading = true;
+      _loadRecord(recordId);
+    } else {
+      _initFromRecord(widget.record);
+    }
+    context.read<CategoryBloc>().add(LoadCategories(type: _recordType));
+  }
+
+  Future<void> _loadRecord(String id) async {
+    final repo = di.getIt<RecordRepository>();
+    final result = await repo.getRecordById(id);
+    if (!mounted) return;
+    result.fold(
+      (failure) => debugPrint(
+        'RecordFormPage: Failed to load record: ${failure.message}',
+      ),
+      (record) {
+        if (!mounted) return;
+        setState(() {
+          _initFromRecord(record);
+          _isLoading = false;
+        });
+      },
+    );
+  }
+
+  void _initFromRecord(Record? record) {
     _amountController.text = record != null
         ? record.amount.abs().toString()
         : '';
@@ -46,7 +84,6 @@ class _RecordFormPageState extends State<RecordFormPage> {
     _selectedCategoryId = record?.categoryId;
     _recordType =
         record?.recordType ?? widget.initialType ?? RecordType.expense;
-    context.read<CategoryBloc>().add(LoadCategories(type: _recordType));
   }
 
   String? _validateAmount(String? value) {
@@ -90,7 +127,7 @@ class _RecordFormPageState extends State<RecordFormPage> {
         : rawAmount;
 
     final record = Record(
-      id: widget.record?.id,
+      id: widget.record?.id ?? widget.recordId,
       amount: finalAmount,
       description: _descriptionController.text,
       date: _selectedDate,
@@ -106,55 +143,25 @@ class _RecordFormPageState extends State<RecordFormPage> {
     } else {
       context.read<RecordBloc>().add(AddRecordEvent(record));
     }
-    if (mounted) Navigator.pop(context);
+    if (mounted) context.pop();
   }
 
   Widget _buildCategoryField(BuildContext _, CategoryState state) {
-    if (state is CategoryLoading || state is CategoryInitial) {
-      return ShimmerBox.rectangle(
+    return switch (state) {
+      CategoryInitial() || CategoryLoading() => ShimmerBox.rectangle(
         width: double.infinity,
         height: 56,
         borderRadius: 12,
-      );
-    }
-
-    if (state is CategoryError) return Text('Error: ${state.message}');
-
-    if (state is CategoryLoaded) {
-      if (state.categories.isEmpty) {
-        return const Padding(
-          padding: EdgeInsets.symmetric(vertical: 16),
-          child: Text('No categories available. Create one first.'),
-        );
-      }
-
-      return DropdownButtonFormField<String>(
-        initialValue: _selectedCategoryId,
-        decoration: const InputDecoration(labelText: 'Category'),
-        items: [
-          const DropdownMenuItem<String>(
-            value: null,
-            child: Text('No Category'),
-          ),
-          ...state.categories.map(
-            (cat) => DropdownMenuItem<String>(
-              value: cat.id,
-              child: Row(
-                children: [
-                  Icon(AppIcons.getCategoryIcon(cat.emoji), size: 18),
-                  const SizedBox(width: 8),
-                  Text(cat.name),
-                ],
-              ),
-            ),
-          ),
-        ],
-        onChanged: _onCategoryChanged,
-        key: ValueKey('category_dropdown_$_recordType'),
-      );
-    }
-
-    return const SizedBox.shrink();
+      ),
+      CategoryError(:final message) => Text('Error: $message'),
+      CategoryLoaded(:final categories) =>
+        categories.isEmpty
+            ? const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Text('No categories available. Create one first.'),
+              )
+            : _buildCategoryDropdown(categories),
+    };
   }
 
   Widget _buildAmountField() {
@@ -170,6 +177,42 @@ class _RecordFormPageState extends State<RecordFormPage> {
         FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
       ],
       validator: _validateAmount,
+    );
+  }
+
+  Widget _buildCategoryDropdown(List<Category> categories) {
+    // Deduplicate by id to prevent DropdownButton assertion crash
+    final seen = <String>{};
+    final unique = categories
+        .where((c) => c.id != null && seen.add(c.id ?? ''))
+        .toList();
+
+    // If _selectedCategoryId was a duplicate, reset to avoid mismatch
+    if (_selectedCategoryId != null &&
+        unique.every((c) => c.id != _selectedCategoryId)) {
+      _selectedCategoryId = null;
+    }
+
+    return DropdownButtonFormField<String>(
+      initialValue: _selectedCategoryId,
+      decoration: const InputDecoration(labelText: 'Category'),
+      items: [
+        const DropdownMenuItem<String>(value: null, child: Text('No Category')),
+        ...unique.map(
+          (cat) => DropdownMenuItem<String>(
+            value: cat.id ?? '',
+            child: Row(
+              children: [
+                Icon(AppIcons.getCategoryIcon(cat.emoji), size: 18),
+                const SizedBox(width: 8),
+                Text(cat.name),
+              ],
+            ),
+          ),
+        ),
+      ],
+      onChanged: _onCategoryChanged,
+      key: ValueKey('category_dropdown_$_recordType'),
     );
   }
 
@@ -214,6 +257,13 @@ class _RecordFormPageState extends State<RecordFormPage> {
     final title = _isEditing
         ? 'Edit ${_recordType.displayName}'
         : 'New ${_recordType.displayName}';
+
+    if (_isLoading) {
+      return Scaffold(
+        appBar: AppBar(title: Text(title)),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(title: Text(title)),

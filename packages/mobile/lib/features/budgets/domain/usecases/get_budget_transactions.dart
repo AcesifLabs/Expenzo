@@ -2,7 +2,6 @@ import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/utils/budget_period_utils.dart';
-import 'package:expense_tracker/features/records/domain/entities/record.dart';
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
 import '../repositories/budget_repository.dart';
 
@@ -14,6 +13,8 @@ class GetBudgetTransactions {
     required this.budgetRepository,
     required this.recordRepository,
   });
+
+  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
 
   Future<Either<Failure, List<Record>>> call(String budgetId) async {
     final budgetResult = await budgetRepository.getBudgetById(budgetId);

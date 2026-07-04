@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:equatable/equatable.dart';
+import 'package:expense_tracker/core/bloc/transformers.dart';
 import '../../../sms_parser/data/datasources/sms_local_datasource.dart';
 import '../../../sms_parser/domain/entities/sms_message.dart';
+import 'sample_analyzer_event.dart';
+import 'sample_analyzer_state.dart';
 
 class SampleAnalyzerBloc
     extends Bloc<SampleAnalyzerEvent, SampleAnalyzerState> {
@@ -14,8 +16,8 @@ class SampleAnalyzerBloc
 
   SampleAnalyzerBloc({required this.smsDatasource})
     : super(SampleAnalyzerInitial()) {
-    on<LoadSamples>(_onLoadSamples);
-    on<LoadMoreSamples>(_onLoadMoreSamples);
+    on<LoadSamples>(_onLoadSamples, transformer: concurrent());
+    on<LoadMoreSamples>(_onLoadMoreSamples, transformer: concurrent());
   }
 
   Future<void> _onLoadSamples(
@@ -44,7 +46,8 @@ class SampleAnalyzerBloc
       );
 
       _currentOffset += messages.length;
-    } catch (e) {
+    } catch (e, s) {
+      addError(e, s);
       emit(SampleAnalyzerError(message: e.toString()));
     }
   }
@@ -84,80 +87,9 @@ class SampleAnalyzerBloc
       );
 
       _currentOffset += messages.length;
-    } catch (e) {
+    } catch (e, s) {
+      addError(e, s);
       emit(SampleAnalyzerError(message: e.toString()));
     }
   }
-}
-
-abstract class SampleAnalyzerEvent extends Equatable {
-  @override
-  List<Object?> get props => [];
-
-  const SampleAnalyzerEvent();
-}
-
-class LoadSamples extends SampleAnalyzerEvent {
-  final String contactId;
-
-  @override
-  List<Object?> get props => [contactId];
-
-  const LoadSamples({required this.contactId});
-}
-
-class LoadMoreSamples extends SampleAnalyzerEvent {
-  final String contactId;
-
-  @override
-  List<Object?> get props => [contactId];
-
-  const LoadMoreSamples({required this.contactId});
-}
-
-abstract class SampleAnalyzerState extends Equatable {
-  @override
-  List<Object?> get props => [];
-
-  const SampleAnalyzerState();
-}
-
-class SampleAnalyzerInitial extends SampleAnalyzerState {}
-
-class SampleAnalyzerLoading extends SampleAnalyzerState {}
-
-class SampleAnalyzerLoaded extends SampleAnalyzerState {
-  final List<SmsMessage> messages;
-  final bool hasReachedMax;
-  final bool isLoadingMore;
-
-  @override
-  List<Object?> get props => [messages, hasReachedMax, isLoadingMore];
-
-  const SampleAnalyzerLoaded({
-    required this.messages,
-    this.hasReachedMax = false,
-    this.isLoadingMore = false,
-  });
-
-  SampleAnalyzerLoaded copyWith({
-    List<SmsMessage>? messages,
-    bool? hasReachedMax,
-    bool? isLoadingMore,
-  }) {
-    return SampleAnalyzerLoaded(
-      messages: messages ?? this.messages,
-      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
-      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
-    );
-  }
-}
-
-class SampleAnalyzerError extends SampleAnalyzerState {
-  final String message;
-
-  @override
-  List<Object?> get props => [message];
-
-  const SampleAnalyzerError({required this.message});
 }

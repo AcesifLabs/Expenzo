@@ -3,7 +3,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:expense_tracker/features/records/data/datasources/record_local_datasource.dart';
 import 'package:expense_tracker/features/records/data/datasources/record_remote_datasource.dart';
 import 'package:expense_tracker/features/records/data/repositories/record_repository_impl.dart';
-import 'package:expense_tracker/features/records/domain/entities/record.dart';
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/error/failures.dart';

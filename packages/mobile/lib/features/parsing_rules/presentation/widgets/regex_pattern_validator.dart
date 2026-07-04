@@ -18,21 +18,23 @@ class RegexPatternValidator extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.orange.shade50,
+        color: colorScheme.tertiaryContainer,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.orange),
+        border: Border.all(color: colorScheme.tertiary),
       ),
       child: Row(
         children: [
-          const Icon(Icons.warning, color: Colors.orange, size: 20),
+          Icon(Icons.warning, color: colorScheme.tertiary, size: 20),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               validation,
-              style: const TextStyle(color: Colors.orange, fontSize: 12),
+              style: TextStyle(color: colorScheme.tertiary, fontSize: 12),
             ),
           ),
         ],
@@ -78,7 +80,8 @@ class _RegexValidatorIndicatorState extends State<RegexValidatorIndicator> {
         _isValid = warning == null;
         _errorMessage = warning;
       });
-    } catch (e) {
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
       setState(() {
         _isValid = false;
         _errorMessage = 'Invalid regex: ${e.toString()}';
@@ -100,6 +103,8 @@ class _RegexValidatorIndicatorState extends State<RegexValidatorIndicator> {
       return const SizedBox.shrink();
     }
 
+    final colorScheme = Theme.of(context).colorScheme;
+
     if (!_isValid || _errorMessage != null) {
       return Padding(
         padding: const EdgeInsets.only(top: 4),
@@ -107,7 +112,7 @@ class _RegexValidatorIndicatorState extends State<RegexValidatorIndicator> {
           children: [
             Icon(
               _isValid ? Icons.warning : Icons.error,
-              color: _isValid ? Colors.orange : Colors.red,
+              color: _isValid ? colorScheme.tertiary : colorScheme.error,
               size: 16,
             ),
             const SizedBox(width: 4),
@@ -115,7 +120,7 @@ class _RegexValidatorIndicatorState extends State<RegexValidatorIndicator> {
               child: Text(
                 _errorMessage ?? '',
                 style: TextStyle(
-                  color: _isValid ? Colors.orange : Colors.red,
+                  color: _isValid ? colorScheme.tertiary : colorScheme.error,
                   fontSize: 12,
                 ),
               ),
@@ -125,13 +130,13 @@ class _RegexValidatorIndicatorState extends State<RegexValidatorIndicator> {
       );
     }
 
-    return const Row(
+    return Row(
       children: [
-        Icon(Icons.check_circle, color: Colors.green, size: 16),
-        SizedBox(width: 4),
+        Icon(Icons.check_circle, color: colorScheme.secondary, size: 16),
+        const SizedBox(width: 4),
         Text(
           'Valid pattern',
-          style: TextStyle(color: Colors.green, fontSize: 12),
+          style: TextStyle(color: colorScheme.secondary, fontSize: 12),
         ),
       ],
     );

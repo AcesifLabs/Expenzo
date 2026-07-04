@@ -37,8 +37,8 @@ class ExpenseTemplatesSyncHandler
     datePattern: _optStr(data, 'datePattern'),
     categoryId: _optStr(data, 'categoryId'),
     selectedAmount: _optStr(data, 'selectedAmount'),
-    createdAt: _dt(data, 'createdAt'),
-    updatedAt: _dt(data, 'updatedAt'),
+    createdAt: Value(_dt(data, 'createdAt')),
+    updatedAt: Value(_dt(data, 'updatedAt')),
   );
   @override
   Future<void> deleteById(AppDatabase db, String id) async => await (db.delete(

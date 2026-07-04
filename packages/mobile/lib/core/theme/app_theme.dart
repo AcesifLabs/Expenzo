@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
+import 'app_spacing.dart';
 import 'app_typography.dart';
 
 class _ThemeColors {
@@ -74,6 +75,9 @@ class AppTheme {
   );
 
   static final TextTheme _textTheme = TextTheme(
+    displayLarge: AppTypography.displayLarge,
+    displayMedium: AppTypography.displayMedium,
+    displaySmall: AppTypography.displaySmall,
     headlineLarge: AppTypography.headlineLarge,
     headlineMedium: AppTypography.headlineMedium,
     headlineSmall: AppTypography.headlineSmall,
@@ -98,6 +102,18 @@ class AppTheme {
         surface: AppColors.surfaceLight,
         onPrimary: AppColors.onPrimary,
         onSecondary: AppColors.onSecondary,
+        onSurface: AppColors.textPrimaryLight,
+        onError: Colors.white,
+        surfaceTint: AppColors.primary,
+        errorContainer: Color(0xFFFFDAD6),
+        onErrorContainer: Color(0xFF410002),
+        primaryContainer: Color(0xFFEDE1FF),
+        onPrimaryContainer: Color(0xFF342C49),
+        secondaryContainer: Color(0xFFA2D3A4),
+        onSecondaryContainer: Color(0xFF0A3817),
+        tertiary: Color(0xFFB3C9FF),
+        outline: Color(0xFF948F97),
+        outlineVariant: Color(0xFF49454D),
       ),
       scaffoldBg: AppColors.backgroundLight,
       appBarBg: AppColors.surfaceLight,
@@ -137,6 +153,18 @@ class AppTheme {
         surface: AppColors.surfaceDark,
         onPrimary: AppColors.backgroundDark,
         onSecondary: AppColors.backgroundDark,
+        onSurface: AppColors.textPrimaryDark,
+        onError: Colors.white,
+        surfaceTint: AppColors.secondary,
+        errorContainer: Color(0xFF93000A),
+        onErrorContainer: Color(0xFFFFDAD6),
+        primaryContainer: Color(0xFF4B4363),
+        onPrimaryContainer: Color(0xFFEDE1FF),
+        secondaryContainer: Color(0xFF1E5730),
+        onSecondaryContainer: Color(0xFFA2D3A4),
+        tertiary: Color(0xFF6D8ECF),
+        outline: Color(0xFF948F97),
+        outlineVariant: Color(0xFF49454D),
       ),
       scaffoldBg: AppColors.backgroundDark,
       appBarBg: AppColors.surfaceDark,
@@ -169,6 +197,8 @@ class AppTheme {
   AppTheme._();
 
   static ThemeData _buildTheme(_ThemeColors c) {
+    final primaryWithAlpha40 = c.colorScheme.primary.withAlpha(40);
+
     return ThemeData(
       useMaterial3: true,
       brightness: c.brightness,
@@ -188,6 +218,24 @@ class AppTheme {
       dialogTheme: _dialogTheme(c),
       snackBarTheme: _snackBarTheme(c),
       chipTheme: _chipTheme(c),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected))
+            return c.colorScheme.primary;
+
+          return null;
+        }),
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: c.colorScheme.primary,
+        linearTrackColor: primaryWithAlpha40,
+      ),
+      popupMenuTheme: PopupMenuThemeData(
+        color: c.colorScheme.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        ),
+      ),
       datePickerTheme: _datePickerTheme(c),
       bottomNavigationBarTheme: _bottomNavTheme(c),
       navigationBarTheme: _navBarTheme(c),
