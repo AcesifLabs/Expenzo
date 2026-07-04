@@ -26,13 +26,6 @@ class SmsPermissionBloc extends Bloc<SmsPermissionEvent, SmsPermissionState> {
     return super.close();
   }
 
-  @override
-  Future<void> close() {
-    _timeoutTimer?.cancel();
-
-    return super.close();
-  }
-
   Future<void> _onCheckPermission(
     CheckSmsPermission event,
     Emitter<SmsPermissionState> emit,
