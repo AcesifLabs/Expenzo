@@ -60,7 +60,7 @@ part 'app_database.g.dart';
 )
 class AppDatabase extends _$AppDatabase {
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 14;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -104,6 +104,7 @@ class AppDatabase extends _$AppDatabase {
       _MigrationStep(11, () => _migrateToV11(m)),
       _MigrationStep(12, _migrateV12),
       _MigrationStep(13, _migrateV13),
+      _MigrationStep(14, _migrateV14),
     ];
 
     for (final step in steps) {
@@ -262,6 +263,16 @@ class AppDatabase extends _$AppDatabase {
       SELECT id, description FROM records
     ''');
     await _createFtsTriggers(customStatement);
+  }
+
+  Future<void> _migrateV14() async {
+    // Remove duplicate category rows, keeping the most recently updated one
+    await customStatement('''
+      DELETE FROM categories
+      WHERE rowid NOT IN (
+        SELECT MAX(rowid) FROM categories GROUP BY id
+      )
+    ''');
   }
 
   Future<void> _createFtsTable(Future<void> Function(String) executor) async {

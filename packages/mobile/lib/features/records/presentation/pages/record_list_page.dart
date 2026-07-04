@@ -6,6 +6,7 @@ import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/constants/app_constants.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
+import 'package:expense_tracker/features/categories/presentation/bloc/category_event.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_state.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_search_bar.dart';
@@ -28,7 +29,9 @@ class RecordListPage extends StatelessWidget {
         BlocProvider(
           create: (_) => di.getIt<RecordBloc>()..add(const LoadRecords()),
         ),
-        BlocProvider(create: (_) => di.getIt<CategoryBloc>()),
+        BlocProvider(
+          create: (_) => di.getIt<CategoryBloc>()..add(const LoadCategories()),
+        ),
       ],
       child: const RecordListView(),
     );

@@ -90,7 +90,7 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
       await di.initCriticalDependencies();
       if (!mounted) return;
 
-      di.getIt<BootstrapService>().seedInitialData();
+      await di.getIt<BootstrapService>().seedInitialData();
       _initSettingsWhenReady();
 
       if (mounted) {

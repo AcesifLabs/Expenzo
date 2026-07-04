@@ -28,17 +28,6 @@ class AppRouter {
 
   final GlobalKey<NavigatorState> _navigatorKey;
 
-  static bool _isProtectedRoute(String location) {
-    return location == '/' ||
-        location.startsWith('/settings') ||
-        location.startsWith('/feedback') ||
-        location.startsWith('/records') ||
-        location.startsWith('/budgets') ||
-        location.startsWith('/recurring') ||
-        location.startsWith('/categories') ||
-        location.startsWith('/scan-results');
-  }
-
   late final GoRouter config = GoRouter(
     navigatorKey: _navigatorKey,
     initialLocation: '/',
@@ -194,15 +183,8 @@ class AppRouter {
       final isAuth = authState is Authenticated;
       final isLoginRoute = location == '/login';
       final isConflictRoute = location == '/sync-conflict';
-      final isProtected = _isProtectedRoute(location);
 
-      if (!isAuth && isProtected && !isLoginRoute && !isConflictRoute) {
-        return '/login';
-      }
-
-      if (authState is AuthSyncConflictPending &&
-          isProtected &&
-          !isConflictRoute) {
+      if (authState is AuthSyncConflictPending && !isConflictRoute) {
         return '/sync-conflict';
       }
 

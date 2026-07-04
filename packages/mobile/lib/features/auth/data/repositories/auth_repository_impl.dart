@@ -45,8 +45,6 @@ class AuthRepositoryImpl implements AuthRepository {
       return 'The request timed out. Please check your connection and try again.';
     }
 
-    debugPrint('AuthRepositoryImpl: Unmapped exception type: ${e.runtimeType}');
-
     return 'Something went wrong. Please try again.';
   }
 
@@ -54,18 +52,12 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<AuthFailure, User>> signInWithGoogle() async {
     try {
-      debugPrint('AuthRepositoryImpl: signInWithGoogle called');
       final user = await remoteDatasource.signInWithGoogle();
-      debugPrint('AuthRepositoryImpl: signInWithGoogle success, user: $user');
 
       return Right(user);
     } on AuthException catch (e) {
-      debugPrint('AuthRepositoryImpl: AuthException: ${e.message}');
-
       return Left(e.toFailure());
-    } catch (e, stackTrace) {
-      debugPrint('AuthRepositoryImpl: Exception: $e\n$stackTrace');
-
+    } catch (e) {
       return Left(AuthFailure(message: mapExceptionToMessage(e)));
     }
   }
@@ -79,8 +71,7 @@ class AuthRepositoryImpl implements AuthRepository {
       return const Right(unit);
     } on AuthException catch (e) {
       return Left(e.toFailure());
-    } catch (e, s) {
-      debugPrint('Error: $e\n$s');
+    } catch (e) {
       return Left(AuthFailure(message: mapExceptionToMessage(e)));
     }
   }
@@ -94,8 +85,7 @@ class AuthRepositoryImpl implements AuthRepository {
       return Right(user);
     } on AuthException catch (e) {
       return Left(e.toFailure());
-    } catch (e, s) {
-      debugPrint('Error: $e\n$s');
+    } catch (e) {
       return Left(AuthFailure(message: mapExceptionToMessage(e)));
     }
   }
@@ -107,8 +97,7 @@ class AuthRepositoryImpl implements AuthRepository {
       final isSignedIn = await remoteDatasource.isSignedIn();
 
       return Right(isSignedIn);
-    } catch (e, s) {
-      debugPrint('Error: $e\n$s');
+    } catch (e) {
       return Left(AuthFailure(message: mapExceptionToMessage(e)));
     }
   }
@@ -122,8 +111,7 @@ class AuthRepositoryImpl implements AuthRepository {
       return const Right(unit);
     } on AuthException catch (e) {
       return Left(e.toFailure());
-    } catch (e, s) {
-      debugPrint('Error: $e\n$s');
+    } catch (e) {
       return Left(AuthFailure(message: mapExceptionToMessage(e)));
     }
   }
@@ -135,8 +123,7 @@ class AuthRepositoryImpl implements AuthRepository {
       final hasScope = await remoteDatasource.hasGmailScope();
 
       return Right(hasScope);
-    } catch (e, s) {
-      debugPrint('Error: $e\n$s');
+    } catch (e) {
       return Left(AuthFailure(message: mapExceptionToMessage(e)));
     }
   }
@@ -150,20 +137,14 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> stopSyncEngine() async {
     try {
       await di.getIt<SyncEngine>().stop();
-    } catch (e, s) {
-      debugPrint('Error: $e\n$s');
-      debugPrint('AuthRepositoryImpl: Failed to stop sync engine: $e');
-    }
+    } catch (_) {}
   }
 
   @override
   Future<void> startSyncEngine() async {
     try {
       await di.getIt<SyncEngine>().start();
-    } catch (e, s) {
-      debugPrint('Error: $e\n$s');
-      debugPrint('AuthRepositoryImpl: Failed to start sync engine: $e');
-    }
+    } catch (_) {}
   }
 
   static String _mapFirebaseAuthException(fb.FirebaseAuthException e) {
@@ -188,10 +169,6 @@ class AuthRepositoryImpl implements AuthRepository {
     if (e.code == 'sign_in_canceled' || e.code == 'sign_in_failed') {
       return 'Sign-in was cancelled.';
     }
-
-    debugPrint(
-      'AuthRepositoryImpl: Unhandled PlatformException code: ${e.code}',
-    );
 
     return 'Authentication failed. Please try again.';
   }
