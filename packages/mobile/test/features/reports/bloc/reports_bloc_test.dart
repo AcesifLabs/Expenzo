@@ -26,6 +26,10 @@ void main() {
   final startDate = DateTime(now.year, now.month, 1);
   final endDate = DateTime(now.year, now.month + 1, 0);
 
+  setUpAll(() {
+    registerFallbackValue(Granularity.monthly);
+  });
+
   setUp(() {
     mockGetSpendingTrend = MockGetSpendingTrend();
     mockGetCategoryBreakdown = MockGetCategoryBreakdown();

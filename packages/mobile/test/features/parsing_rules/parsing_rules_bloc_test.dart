@@ -112,9 +112,14 @@ void main() {
 
   group('ToggleRule', () {
     test('does nothing when state is not ParsingRulesLoaded', () async {
-      expectLater(bloc.stream, neverEmits(isA<ParsingRulesError>()));
+      final expectation = expectLater(
+        bloc.stream,
+        neverEmits(isA<ParsingRulesError>()),
+      );
       bloc.add(ToggleRule(ruleId: 'rule-1', isEnabled: false));
       await Future.delayed(Duration.zero);
+      await bloc.close();
+      await expectation;
     });
   });
 }

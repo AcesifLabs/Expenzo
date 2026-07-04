@@ -54,7 +54,7 @@ void main() {
   group('LoadCategories', () {
     test('emits [CategoryLoading, CategoryLoaded] on success', () async {
       when(
-        () => mockGetCategories(any(named: 'params')),
+        () => mockGetCategories(any()),
       ).thenAnswer((_) async => Right([testCategory]));
 
       final expected = [
@@ -72,7 +72,7 @@ void main() {
 
     test('emits [CategoryLoading, CategoryError] on failure', () async {
       when(
-        () => mockGetCategories(any(named: 'params')),
+        () => mockGetCategories(any()),
       ).thenAnswer((_) async => Left(ServerFailure(message: 'Failed to load')));
 
       final expected = [
@@ -95,7 +95,7 @@ void main() {
         () => mockCreateCategory(any()),
       ).thenAnswer((_) async => Right(testCategory));
       when(
-        () => mockGetCategories(any(named: 'params')),
+        () => mockGetCategories(any()),
       ).thenAnswer((_) async => Right([testCategory]));
 
       final expected = [
