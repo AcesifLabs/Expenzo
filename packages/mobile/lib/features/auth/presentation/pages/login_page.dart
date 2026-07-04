@@ -40,7 +40,23 @@ class LoginView extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildHeader(),
+                const Spacer(),
+                Icon(PiconsRegular.wallet, size: 80, color: AppColors.primary),
+                const SizedBox(height: 24),
+                Text(
+                  'Expenzo',
+                  style: AppTypography.headlineLarge.copyWith(
+                    color: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Track your expenses effortlessly',
+                  style: AppTypography.bodyLarge.copyWith(
+                    color: AppColors.textSecondaryLight,
+                  ),
+                ),
+                const Spacer(),
                 if (state is AuthLoading)
                   const Column(
                     children: [
@@ -57,28 +73,6 @@ class LoginView extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Column(
-      children: [
-        const Spacer(),
-        Icon(PiconsRegular.wallet, size: 80, color: AppColors.primary),
-        const SizedBox(height: 24),
-        Text(
-          'Expenzo',
-          style: AppTypography.headlineLarge.copyWith(color: AppColors.primary),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Track your expenses effortlessly',
-          style: AppTypography.bodyLarge.copyWith(
-            color: AppColors.textSecondaryLight,
-          ),
-        ),
-        const Spacer(),
-      ],
     );
   }
 

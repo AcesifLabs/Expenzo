@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_state.dart';
 import 'package:expense_tracker/features/auth/presentation/pages/login_page.dart';
@@ -17,15 +17,15 @@ void main() {
     when(
       () => mockAuthBloc.stream,
     ).thenAnswer((_) => Stream<AuthState>.value(const AuthInitial()));
+    when(() => mockAuthBloc.close()).thenAnswer((_) async {});
+
+    di.getIt.registerFactory<AuthBloc>(() => mockAuthBloc);
   });
 
+  tearDown(() => di.getIt.reset());
+
   Widget createTestWidget() {
-    return MaterialApp(
-      home: BlocProvider<AuthBloc>.value(
-        value: mockAuthBloc,
-        child: const LoginPage(),
-      ),
-    );
+    return const MaterialApp(home: LoginPage());
   }
 
   testWidgets('renders Expenzo title and sign-in button', (tester) async {

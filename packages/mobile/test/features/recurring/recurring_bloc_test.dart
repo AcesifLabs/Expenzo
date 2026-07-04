@@ -124,6 +124,7 @@ void main() {
       final expected = [
         isA<RecurringLoading>(),
         isA<RecurringOperationSuccess>(),
+        isA<RecurringLoading>(),
         isA<RecurringLoaded>(),
       ];
 

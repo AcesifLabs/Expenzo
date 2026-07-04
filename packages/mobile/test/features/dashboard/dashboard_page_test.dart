@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_state.dart';
 import 'package:expense_tracker/features/dashboard/presentation/bloc/dashboard_bloc.dart';
@@ -24,22 +24,21 @@ void main() {
     when(
       () => mockAuthBloc.stream,
     ).thenAnswer((_) => Stream<AuthState>.value(const AuthInitial()));
+    when(() => mockAuthBloc.close()).thenAnswer((_) async {});
     when(() => mockDashboardBloc.state).thenReturn(DashboardInitial());
     when(
       () => mockDashboardBloc.stream,
     ).thenAnswer((_) => Stream<DashboardState>.value(DashboardInitial()));
+    when(() => mockDashboardBloc.close()).thenAnswer((_) async {});
+
+    di.getIt.registerFactory<AuthBloc>(() => mockAuthBloc);
+    di.getIt.registerFactory<DashboardBloc>(() => mockDashboardBloc);
   });
 
+  tearDown(() => di.getIt.reset());
+
   Widget createTestWidget() {
-    return MaterialApp(
-      home: MultiBlocProvider(
-        providers: [
-          BlocProvider<AuthBloc>.value(value: mockAuthBloc),
-          BlocProvider<DashboardBloc>.value(value: mockDashboardBloc),
-        ],
-        child: const DashboardPage(),
-      ),
-    );
+    return const MaterialApp(home: DashboardPage());
   }
 
   testWidgets('dashboard page renders without error', (tester) async {

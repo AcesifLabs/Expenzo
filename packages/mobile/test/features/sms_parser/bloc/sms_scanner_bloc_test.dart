@@ -36,9 +36,14 @@ void main() {
 
   group('ToggleSelection', () {
     test('does nothing when state is not SmsScannerScanComplete', () async {
-      expectLater(bloc.stream, neverEmits(isA<SmsScannerScanComplete>()));
+      final expectation = expectLater(
+        bloc.stream,
+        neverEmits(isA<SmsScannerScanComplete>()),
+      );
       bloc.add(const ToggleSelection(transactionId: 'tx-1'));
       await Future.delayed(Duration.zero);
+      await bloc.close();
+      await expectation;
     });
   });
 
@@ -53,9 +58,14 @@ void main() {
 
   group('DeselectAll', () {
     test('does nothing when state is not SmsScannerScanComplete', () async {
-      expectLater(bloc.stream, neverEmits(isA<SmsScannerScanComplete>()));
+      final expectation = expectLater(
+        bloc.stream,
+        neverEmits(isA<SmsScannerScanComplete>()),
+      );
       bloc.add(DeselectAll());
       await Future.delayed(Duration.zero);
+      await bloc.close();
+      await expectation;
     });
   });
 }

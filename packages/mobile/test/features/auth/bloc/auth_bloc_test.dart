@@ -1,6 +1,8 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:dartz/dartz.dart';
+import 'package:expense_tracker/core/error/usecase.dart';
 import 'package:expense_tracker/core/sync/sync_engine.dart';
 import 'package:expense_tracker/features/auth/domain/entities/user.dart';
 import 'package:expense_tracker/features/auth/domain/repositories/auth_repository.dart';
@@ -20,6 +22,8 @@ class MockSignOut extends Mock implements SignOut {}
 class MockAuthRepository extends Mock implements AuthRepository {}
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   late MockGetCurrentUser mockGetCurrentUser;
   late MockSignInWithGoogle mockSignInWithGoogle;
   late MockSignOut mockSignOut;
@@ -31,6 +35,17 @@ void main() {
     email: 'test@example.com',
     displayName: 'Test User',
   );
+
+  setUpAll(() {
+    registerFallbackValue(NoParams());
+    // FlutterSecureStorage (used by TokenStorage in the auth-success path)
+    // talks over a platform channel that hangs in tests; stub reads to null.
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'),
+          (call) async => null,
+        );
+  });
 
   setUp(() {
     mockGetCurrentUser = MockGetCurrentUser();
@@ -57,6 +72,7 @@ void main() {
       when(
         () => mockAuthRepository.checkConflict(),
       ).thenAnswer((_) async => SyncConflictType.none);
+      when(() => mockAuthRepository.startSyncEngine()).thenAnswer((_) async {});
 
       final expected = [
         isA<AuthLoading>(),
