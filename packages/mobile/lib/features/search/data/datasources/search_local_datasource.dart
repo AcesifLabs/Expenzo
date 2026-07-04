@@ -44,6 +44,7 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
 
       return result.map((row) {
         final data = row.data;
+
         return SearchResult(
           recordId: data['id'] as String,
           amount: _toDouble(data['amount']),

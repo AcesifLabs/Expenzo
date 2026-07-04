@@ -14,6 +14,9 @@ class IncomingSmsEvent extends Equatable {
     return '$normalizedAddress:$timestamp:$bodyHash';
   }
 
+  @override
+  List<Object?> get props => [address, body, receivedAt];
+
   const IncomingSmsEvent({
     required this.address,
     required this.body,
@@ -33,7 +36,4 @@ class IncomingSmsEvent extends Equatable {
 
     return hash.toRadixString(16).padLeft(8, '0');
   }
-
-  @override
-  List<Object?> get props => [address, body, receivedAt];
 }

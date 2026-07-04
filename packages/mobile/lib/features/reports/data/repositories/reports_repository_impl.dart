@@ -51,6 +51,7 @@ class ReportsRepositoryImpl implements ReportsRepository {
       return Right(trend);
     } catch (e, s) {
       appLogger.error('Reports repository error', e, s);
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -82,6 +83,7 @@ class ReportsRepositoryImpl implements ReportsRepository {
       return Right(breakdown);
     } catch (e, s) {
       appLogger.error('Reports repository error', e, s);
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -129,6 +131,7 @@ class ReportsRepositoryImpl implements ReportsRepository {
       );
     } catch (e, s) {
       appLogger.error('Reports repository error', e, s);
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -207,6 +210,7 @@ class ReportsRepositoryImpl implements ReportsRepository {
         return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
       case Granularity.weekly:
         final startOfWeek = date.subtract(Duration(days: date.weekday - 1));
+
         return '${startOfWeek.year}-${startOfWeek.month.toString().padLeft(2, '0')}-${startOfWeek.day.toString().padLeft(2, '0')}';
       case Granularity.monthly:
         return '${date.year}-${date.month.toString().padLeft(2, '0')}';

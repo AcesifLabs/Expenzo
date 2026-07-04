@@ -36,14 +36,16 @@ class SettingsView extends StatelessWidget {
           title: const Text('Select Currency'),
           content: CurrencySelector(
             currentSymbol: state.settings.currencySymbol,
-            onSymbolSelected: (symbol) {
-              context.read<SettingsBloc>().add(UpdateCurrencySymbol(symbol));
-              Navigator.of(context).pop();
-            },
+            onSymbolSelected: (symbol) => _onCurrencySelected(context, symbol),
           ),
         ),
       );
     }
+  }
+
+  void _onCurrencySelected(BuildContext context, String symbol) {
+    context.read<SettingsBloc>().add(UpdateCurrencySymbol(symbol));
+    Navigator.of(context).pop();
   }
 
   void _handleNotificationsTap(BuildContext context) {
@@ -67,11 +69,13 @@ class SettingsView extends StatelessWidget {
     showDialog(
       context: context,
       builder: (_) => DeleteAccountDialog(
-        onConfirm: () {
-          context.read<SettingsBloc>().add(const DeleteAccountEvent());
-        },
+        onConfirm: () => _onDeleteAccountConfirmed(context),
       ),
     );
+  }
+
+  void _onDeleteAccountConfirmed(BuildContext context) {
+    context.read<SettingsBloc>().add(const DeleteAccountEvent());
   }
 
   @override

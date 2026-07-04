@@ -44,6 +44,7 @@ class RecordRepositoryImpl implements RecordRepository {
       return Left(e.toFailure());
     } catch (e, s) {
       debugPrint('Error: $e\n$s');
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -78,6 +79,7 @@ class RecordRepositoryImpl implements RecordRepository {
       return Left(e.toFailure());
     } catch (e, s) {
       debugPrint('Error: $e\n$s');
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -96,6 +98,7 @@ class RecordRepositoryImpl implements RecordRepository {
       return Left(e.toFailure());
     } catch (e, s) {
       debugPrint('Error: $e\n$s');
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -122,6 +125,7 @@ class RecordRepositoryImpl implements RecordRepository {
       return Left(e.toFailure());
     } catch (e, s) {
       debugPrint('Error: $e\n$s');
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -148,6 +152,7 @@ class RecordRepositoryImpl implements RecordRepository {
       return Left(e.toFailure());
     } catch (e, s) {
       debugPrint('Error: $e\n$s');
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -164,6 +169,7 @@ class RecordRepositoryImpl implements RecordRepository {
       return Left(e.toFailure());
     } catch (e, s) {
       debugPrint('Error: $e\n$s');
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -186,6 +192,7 @@ class RecordRepositoryImpl implements RecordRepository {
       return Left(e.toFailure());
     } catch (e, s) {
       debugPrint('Error: $e\n$s');
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -203,6 +210,7 @@ class RecordRepositoryImpl implements RecordRepository {
       return Left(e.toFailure());
     } catch (e, s) {
       debugPrint('Error: $e\n$s');
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -226,6 +234,7 @@ class RecordRepositoryImpl implements RecordRepository {
       return Left(e.toFailure());
     } catch (e, s) {
       debugPrint('Error: $e\n$s');
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -249,6 +258,7 @@ class RecordRepositoryImpl implements RecordRepository {
       return Left(e.toFailure());
     } catch (e, s) {
       debugPrint('Error: $e\n$s');
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -267,6 +277,7 @@ class RecordRepositoryImpl implements RecordRepository {
       return Left(e.toFailure());
     } catch (e, s) {
       debugPrint('Error: $e\n$s');
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -288,6 +299,7 @@ class RecordRepositoryImpl implements RecordRepository {
       return Left(e.toFailure());
     } catch (e, s) {
       debugPrint('Error: $e\n$s');
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -318,6 +330,7 @@ class RecordRepositoryImpl implements RecordRepository {
       return Left(e.toFailure());
     } catch (e, s) {
       debugPrint('Error: $e\n$s');
+
       return Left(CacheFailure(message: e.toString()));
     }
   }

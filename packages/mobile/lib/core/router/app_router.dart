@@ -12,6 +12,7 @@ import 'package:expense_tracker/features/budgets/presentation/pages/budget_detai
 import 'package:expense_tracker/features/budgets/presentation/pages/budget_form_page.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:expense_tracker/features/categories/presentation/pages/category_form_page.dart';
+import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/features/records/presentation/bloc/record_bloc.dart';
 import 'package:expense_tracker/features/records/presentation/pages/record_form_page.dart';
 import 'package:expense_tracker/features/recurring/presentation/bloc/recurring_bloc.dart';
@@ -23,11 +24,9 @@ import 'package:expense_tracker/shared/presentation/pages/feedback_page.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_shell.dart';
 
 class AppRouter {
-  AppRouter({required GlobalKey<NavigatorState> navigatorKey})
-    : _navigatorKey = navigatorKey;
-
   final GlobalKey<NavigatorState> _navigatorKey;
 
+  // ignore: avoid-late-keyword, member-ordering
   late final GoRouter config = GoRouter(
     navigatorKey: _navigatorKey,
     initialLocation: '/',
@@ -42,18 +41,17 @@ class AppRouter {
             path: 'records/new',
             builder: (context, state) {
               final extra = state.extra as Map<String, dynamic>?;
+              final recordBloc = extra?['recordBloc'] as RecordBloc?;
+              final categoryBloc = extra?['categoryBloc'] as CategoryBloc?;
+
               return MultiBlocProvider(
                 providers: [
-                  if (extra?['recordBloc'] != null)
-                    BlocProvider.value(
-                      value: extra!['recordBloc'] as RecordBloc,
-                    )
+                  if (recordBloc != null)
+                    BlocProvider.value(value: recordBloc)
                   else
                     BlocProvider(create: (_) => di.getIt<RecordBloc>()),
-                  if (extra?['categoryBloc'] != null)
-                    BlocProvider.value(
-                      value: extra!['categoryBloc'] as CategoryBloc,
-                    )
+                  if (categoryBloc != null)
+                    BlocProvider.value(value: categoryBloc)
                   else
                     BlocProvider(create: (_) => di.getIt<CategoryBloc>()),
                 ],
@@ -64,20 +62,19 @@ class AppRouter {
           GoRoute(
             path: 'records/:id/edit',
             builder: (context, state) {
-              final id = state.pathParameters['id']!;
+              final id = state.pathParameters['id'] ?? '';
               final extra = state.extra as Map<String, dynamic>?;
+              final recordBloc = extra?['recordBloc'] as RecordBloc?;
+              final categoryBloc = extra?['categoryBloc'] as CategoryBloc?;
+
               return MultiBlocProvider(
                 providers: [
-                  if (extra?['recordBloc'] != null)
-                    BlocProvider.value(
-                      value: extra!['recordBloc'] as RecordBloc,
-                    )
+                  if (recordBloc != null)
+                    BlocProvider.value(value: recordBloc)
                   else
                     BlocProvider(create: (_) => di.getIt<RecordBloc>()),
-                  if (extra?['categoryBloc'] != null)
-                    BlocProvider.value(
-                      value: extra!['categoryBloc'] as CategoryBloc,
-                    )
+                  if (categoryBloc != null)
+                    BlocProvider.value(value: categoryBloc)
                   else
                     BlocProvider(create: (_) => di.getIt<CategoryBloc>()),
                 ],
@@ -95,7 +92,8 @@ class AppRouter {
           GoRoute(
             path: 'budgets/:id',
             builder: (context, state) {
-              final id = state.pathParameters['id']!;
+              final id = state.pathParameters['id'] ?? '';
+
               return BlocProvider(
                 create: (_) => di.getIt<BudgetBloc>(),
                 child: BudgetDetailsPage(budgetId: id),
@@ -105,7 +103,8 @@ class AppRouter {
           GoRoute(
             path: 'budgets/:id/edit',
             builder: (context, state) {
-              final id = state.pathParameters['id']!;
+              final id = state.pathParameters['id'] ?? '';
+
               return BlocProvider(
                 create: (_) => di.getIt<BudgetBloc>(),
                 child: BudgetFormPage(budgetId: id),
@@ -122,7 +121,8 @@ class AppRouter {
           GoRoute(
             path: 'recurring/:id/edit',
             builder: (context, state) {
-              final id = state.pathParameters['id']!;
+              final id = state.pathParameters['id'] ?? '';
+
               return BlocProvider(
                 create: (_) => di.getIt<RecurringBloc>(),
                 child: RecurringFormPage(recurringId: id),
@@ -133,7 +133,8 @@ class AppRouter {
             path: 'categories/new',
             builder: (context, state) {
               final extra = state.extra as Map<String, dynamic>?;
-              final type = extra?['initialType'] as dynamic;
+              final type = extra?['initialType'] as RecordType?;
+
               return BlocProvider.value(
                 value: context.read<CategoryBloc>(),
                 child: CategoryFormPage(initialType: type),
@@ -158,6 +159,7 @@ class AppRouter {
                   child: const SmsScanResultsPage(),
                 );
               }
+
               return BlocProvider(
                 create: (_) => di.getIt<SmsScannerBloc>(),
                 child: const SmsScanResultsPage(),
@@ -195,6 +197,9 @@ class AppRouter {
       return null;
     },
   );
+
+  AppRouter({required GlobalKey<NavigatorState> navigatorKey})
+    : _navigatorKey = navigatorKey;
 }
 
 class _AppShellWithAuth extends StatelessWidget {
@@ -203,6 +208,7 @@ class _AppShellWithAuth extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authState = context.watch<AuthBloc>().state;
+
     return switch (authState) {
       AuthSyncConflictPending() => const SyncConflictPage(),
       _ => const AppShell(),

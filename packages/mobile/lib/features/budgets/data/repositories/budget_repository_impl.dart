@@ -29,6 +29,7 @@ class BudgetRepositoryImpl implements BudgetRepository {
       return Left(e.toFailure());
     } catch (e, s) {
       appLogger.error('Error getting budgets', e, s);
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -47,6 +48,7 @@ class BudgetRepositoryImpl implements BudgetRepository {
       return Left(e.toFailure());
     } catch (e, s) {
       appLogger.error('Error getting budget by id', e, s);
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -75,6 +77,7 @@ class BudgetRepositoryImpl implements BudgetRepository {
       return Left(e.toFailure());
     } catch (e, s) {
       appLogger.error('Error creating budget', e, s);
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -103,6 +106,7 @@ class BudgetRepositoryImpl implements BudgetRepository {
       return Left(e.toFailure());
     } catch (e, s) {
       appLogger.error('Error updating budget', e, s);
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -119,6 +123,7 @@ class BudgetRepositoryImpl implements BudgetRepository {
       return Left(e.toFailure());
     } catch (e, s) {
       appLogger.error('Error deleting budget', e, s);
+
       return Left(CacheFailure(message: e.toString()));
     }
   }

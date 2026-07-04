@@ -25,6 +25,7 @@ class ParsingRulesRepositoryImpl implements ParsingRulesRepository {
       return Right(rules);
     } catch (e, s) {
       appLogger.error('Error getting rules', e, s);
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -41,6 +42,7 @@ class ParsingRulesRepositoryImpl implements ParsingRulesRepository {
       return Right(rule);
     } catch (e, s) {
       appLogger.error('Error getting rule by id', e, s);
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -54,6 +56,7 @@ class ParsingRulesRepositoryImpl implements ParsingRulesRepository {
       return Right(createdRule);
     } catch (e, s) {
       appLogger.error('Error creating rule', e, s);
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -67,6 +70,7 @@ class ParsingRulesRepositoryImpl implements ParsingRulesRepository {
       return Right(updatedRule);
     } catch (e, s) {
       appLogger.error('Error updating rule', e, s);
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -80,6 +84,7 @@ class ParsingRulesRepositoryImpl implements ParsingRulesRepository {
       return const Right(unit);
     } catch (e, s) {
       appLogger.error('Error deleting rule', e, s);
+
       return Left(CacheFailure(message: e.toString()));
     }
   }

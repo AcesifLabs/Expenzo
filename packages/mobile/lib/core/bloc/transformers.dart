@@ -7,6 +7,7 @@ EventTransformer<T> sequential<T>() {
 
 EventTransformer<T> restartable<T>() {
   StreamSubscription? subscription;
+
   return (events, mapper) {
     return events.transform(
       StreamTransformer.fromHandlers(
@@ -31,6 +32,7 @@ EventTransformer<T> restartable<T>() {
 EventTransformer<T> droppable<T>() {
   return (events, mapper) {
     bool running = false;
+
     return events.transform(
       StreamTransformer.fromHandlers(
         handleData: (event, sink) {
@@ -61,8 +63,11 @@ EventTransformer<T> concurrent<T>() {
         );
       },
       onError: controller.addError,
-      onDone: controller.close,
+      onDone: () {
+        controller.close();
+      },
     );
+
     return controller.stream;
   };
 }

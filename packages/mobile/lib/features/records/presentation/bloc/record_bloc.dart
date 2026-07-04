@@ -180,7 +180,10 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
   ) async {
     final result = await addRecord(event.record);
 
-    result.fold((failure) => emit(RecordError(failure.message)), (_) {});
+    // ignore: no-empty-block
+    result.fold((failure) => emit(RecordError(failure.message)), (_) {
+      /* updated via stream */
+    });
   }
 
   Future<void> _onUpdateRecord(
@@ -189,7 +192,10 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
   ) async {
     final result = await updateRecord(event.record);
 
-    result.fold((failure) => emit(RecordError(failure.message)), (_) {});
+    // ignore: no-empty-block
+    result.fold((failure) => emit(RecordError(failure.message)), (_) {
+      /* updated via stream */
+    });
   }
 
   Future<void> _onDeleteRecord(
@@ -198,7 +204,10 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
   ) async {
     final result = await deleteRecord(event.id);
 
-    result.fold((failure) => emit(RecordError(failure.message)), (_) {});
+    // ignore: no-empty-block
+    result.fold((failure) => emit(RecordError(failure.message)), (_) {
+      /* updated via stream */
+    });
   }
 
   void _onRefreshRecords(RefreshRecords event, Emitter<RecordState> emit) {

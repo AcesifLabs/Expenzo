@@ -206,6 +206,7 @@ class _InteractiveTemplateBuilderState
 
   Widget _buildNumberChips() {
     final colors = Theme.of(context).colorScheme;
+
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -270,6 +271,7 @@ class _InteractiveTemplateBuilderState
 
   Widget _buildReviewCard() {
     final colors = Theme.of(context).colorScheme;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),

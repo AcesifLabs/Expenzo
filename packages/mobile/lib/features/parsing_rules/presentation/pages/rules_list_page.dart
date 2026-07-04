@@ -272,6 +272,7 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
       RegExp(value);
     } catch (e, s) {
       debugPrint('Error: $e\n$s');
+
       return 'Invalid regex pattern';
     }
 

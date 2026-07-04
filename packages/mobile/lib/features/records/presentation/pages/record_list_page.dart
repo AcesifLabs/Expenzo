@@ -77,6 +77,7 @@ class _RecordListViewState extends State<RecordListView> {
     if (catState is! CategoryLoaded) return const CategoryInfo();
     final matched = catState.categories.where((c) => c.id == record.categoryId);
     if (matched.isEmpty) return const CategoryInfo();
+
     return CategoryInfo(
       name: matched.first.name,
       emoji: matched.first.emoji,
@@ -181,8 +182,9 @@ class _RecordListViewState extends State<RecordListView> {
       'recordBloc': context.read<RecordBloc>(),
       'categoryBloc': context.read<CategoryBloc>(),
     };
-    if (record?.id != null) {
-      context.push('/records/${record!.id}/edit', extra: extra);
+    final recordId = record?.id;
+    if (recordId != null) {
+      context.push('/records/$recordId/edit', extra: extra);
     } else {
       context.push('/records/new', extra: extra);
     }

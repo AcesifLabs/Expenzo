@@ -7,14 +7,6 @@ class CategoryAmount extends Equatable {
   final double amount;
   final double percentage;
 
-  const CategoryAmount({
-    required this.categoryId,
-    required this.categoryName,
-    required this.emoji,
-    required this.amount,
-    required this.percentage,
-  });
-
   @override
   List<Object?> get props => [
     categoryId,
@@ -23,4 +15,12 @@ class CategoryAmount extends Equatable {
     amount,
     percentage,
   ];
+
+  const CategoryAmount({
+    required this.categoryId,
+    required this.categoryName,
+    required this.emoji,
+    required this.amount,
+    required this.percentage,
+  });
 }

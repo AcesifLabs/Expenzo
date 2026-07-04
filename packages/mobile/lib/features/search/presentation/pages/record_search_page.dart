@@ -33,6 +33,8 @@ class _RecordSearchPageState extends State<RecordSearchPage> {
   }
 
   Widget _buildInitialState() {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -40,23 +42,17 @@ class _RecordSearchPageState extends State<RecordSearchPage> {
           Icon(
             PiconsRegular.magnifyingGlass,
             size: 64,
-            color: Theme.of(context).colorScheme.onSurface.withAlpha(100),
+            color: colorScheme.onSurface.withAlpha(100),
           ),
           const SizedBox(height: 16),
           Text(
             'Search for records',
-            style: TextStyle(
-              fontSize: 18,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+            style: TextStyle(fontSize: 18, color: colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 8),
           Text(
             'Enter a query or apply filters',
-            style: TextStyle(
-              fontSize: 14,
-              color: Theme.of(context).colorScheme.outline,
-            ),
+            style: TextStyle(fontSize: 14, color: colorScheme.outline),
           ),
         ],
       ),
@@ -65,6 +61,7 @@ class _RecordSearchPageState extends State<RecordSearchPage> {
 
   Widget _buildEmptyResults() {
     final colors = Theme.of(context).colorScheme;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -92,6 +89,7 @@ class _RecordSearchPageState extends State<RecordSearchPage> {
   Widget _buildResultItem(SearchResult result) {
     final dateFormat = DateFormat('MMM dd, yyyy');
     final isNegative = result.amount < 0;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return AppCard(
       child: ListTile(
@@ -117,7 +115,7 @@ class _RecordSearchPageState extends State<RecordSearchPage> {
           dateFormat.format(result.date),
           style: TextStyle(
             fontSize: 12,
-            color: Theme.of(context).colorScheme.onSurface.withAlpha(140),
+            color: colorScheme.onSurface.withAlpha(140),
           ),
         ),
         trailing: Text(
@@ -145,6 +143,7 @@ class _RecordSearchPageState extends State<RecordSearchPage> {
 
   Widget _buildErrorState(String message) {
     final colors = Theme.of(context).colorScheme;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

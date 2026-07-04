@@ -20,6 +20,7 @@ class MessageTemplateRepositoryImpl implements MessageTemplateRepository {
       return Right(sources);
     } catch (e, s) {
       appLogger.error('Error getting message sources', e, s);
+
       return Left(DatabaseFailure(message: e.toString()));
     }
   }
@@ -35,6 +36,7 @@ class MessageTemplateRepositoryImpl implements MessageTemplateRepository {
       return Right(saved);
     } catch (e, s) {
       appLogger.error('Error saving message source', e, s);
+
       return Left(DatabaseFailure(message: e.toString()));
     }
   }
@@ -48,6 +50,7 @@ class MessageTemplateRepositoryImpl implements MessageTemplateRepository {
       return const Right(unit);
     } catch (e, s) {
       appLogger.error('Error deleting message source', e, s);
+
       return Left(DatabaseFailure(message: e.toString()));
     }
   }
@@ -68,6 +71,7 @@ class MessageTemplateRepositoryImpl implements MessageTemplateRepository {
       return Right(templates);
     } catch (e, s) {
       appLogger.error('Error getting templates for source', e, s);
+
       return Left(DatabaseFailure(message: e.toString()));
     }
   }
@@ -81,6 +85,7 @@ class MessageTemplateRepositoryImpl implements MessageTemplateRepository {
       return Right(templates);
     } catch (e, s) {
       appLogger.error('Error getting all templates', e, s);
+
       return Left(DatabaseFailure(message: e.toString()));
     }
   }
@@ -96,6 +101,7 @@ class MessageTemplateRepositoryImpl implements MessageTemplateRepository {
       return Right(saved);
     } catch (e, s) {
       appLogger.error('Error saving template', e, s);
+
       return Left(DatabaseFailure(message: e.toString()));
     }
   }
@@ -109,6 +115,7 @@ class MessageTemplateRepositoryImpl implements MessageTemplateRepository {
       return const Right(unit);
     } catch (e, s) {
       appLogger.error('Error deleting template', e, s);
+
       return Left(DatabaseFailure(message: e.toString()));
     }
   }

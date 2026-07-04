@@ -101,10 +101,10 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     }
   }
 
-  Future<void> _onDeleteAccountEvent(
+  void _onDeleteAccountEvent(
     DeleteAccountEvent event,
     Emitter<SettingsState> emit,
-  ) async {
+  ) {
     emit(const SettingsLoading());
     // Account deletion would call a remote API here
     // For now, emit an informative state

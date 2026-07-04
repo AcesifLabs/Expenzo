@@ -25,6 +25,7 @@ class SearchRepositoryImpl implements SearchRepository {
       return Left(CacheFailure(message: e.message));
     } catch (e, s) {
       appLogger.error('Search repository error', e, s);
+
       return Left(CacheFailure(message: e.toString()));
     }
   }

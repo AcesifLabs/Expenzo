@@ -197,6 +197,8 @@ class AppTheme {
   AppTheme._();
 
   static ThemeData _buildTheme(_ThemeColors c) {
+    final primaryWithAlpha40 = c.colorScheme.primary.withAlpha(40);
+
     return ThemeData(
       useMaterial3: true,
       brightness: c.brightness,
@@ -218,15 +220,15 @@ class AppTheme {
       chipTheme: _chipTheme(c),
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) {
+          if (states.contains(WidgetState.selected))
             return c.colorScheme.primary;
-          }
+
           return null;
         }),
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: c.colorScheme.primary,
-        linearTrackColor: c.colorScheme.primary.withAlpha(40),
+        linearTrackColor: primaryWithAlpha40,
       ),
       popupMenuTheme: PopupMenuThemeData(
         color: c.colorScheme.surface,

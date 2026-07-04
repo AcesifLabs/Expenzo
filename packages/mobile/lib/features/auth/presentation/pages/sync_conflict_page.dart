@@ -27,7 +27,8 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
   }
 
   Widget _buildDecisionView() {
-    final colors = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
 
     return Column(
       children: [
@@ -64,7 +65,7 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
         _decisionButton(
           'Overwrite Cloud with Local',
           'Replace cloud data with this device',
-          Theme.of(context).colorScheme.tertiary,
+          colors.tertiary,
           _onOverwritePressed,
         ),
       ],

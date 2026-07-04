@@ -71,7 +71,7 @@ class ExpenzoApp extends StatefulWidget {
 class _ExpenzoAppState extends State<ExpenzoApp> {
   final _navigatorKey = GlobalKey<NavigatorState>();
   final _themeModeNotifier = ValueNotifier<ThemeMode>(ThemeMode.system);
-  late final AppRouter _appRouter;
+  AppRouter? _appRouter;
 
   bool _initialized = false;
   bool _error = false;
@@ -170,18 +170,36 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
       final navContext = _navigatorKey.currentContext;
       if (navContext == null) return;
       navContext.read<AuthBloc>().add(const AuthCheckRequested());
-      Future.delayed(const Duration(milliseconds: 150), () {
-        if (navContext.mounted) {
-          navContext.read<CategoryBloc>().add(const LoadCategories());
-        }
-      });
-      Future.delayed(const Duration(milliseconds: 300), () {
-        if (navContext.mounted) {
-          navContext.read<RecordBloc>().add(const LoadRecords());
-        }
-      });
+      _dispatchDelayedCategoryLoad(navContext);
+      _dispatchDelayedRecordLoad(navContext);
     } catch (e, s) {
       debugPrint('Initial loads dispatch failed: $e\n$s');
+    }
+  }
+
+  void _dispatchDelayedCategoryLoad(BuildContext navContext) {
+    Future.delayed(
+      const Duration(milliseconds: 150),
+      () => _loadCategoriesIfMounted(navContext),
+    );
+  }
+
+  void _loadCategoriesIfMounted(BuildContext navContext) {
+    if (navContext.mounted) {
+      navContext.read<CategoryBloc>().add(const LoadCategories());
+    }
+  }
+
+  void _dispatchDelayedRecordLoad(BuildContext navContext) {
+    Future.delayed(
+      const Duration(milliseconds: 300),
+      () => _loadRecordsIfMounted(navContext),
+    );
+  }
+
+  void _loadRecordsIfMounted(BuildContext navContext) {
+    if (navContext.mounted) {
+      navContext.read<RecordBloc>().add(const LoadRecords());
     }
   }
 
@@ -201,7 +219,7 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: themeMode,
-          routerConfig: _appRouter.config,
+          routerConfig: _appRouter?.config,
           debugShowCheckedModeBanner: false,
           builder: (context, child) {
             return MultiBlocProvider(
@@ -220,7 +238,7 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
                 error: _error,
                 errorRefId: _errorRefId,
                 onInitLoads: _dispatchInitialLoads,
-                child: child!,
+                child: child ?? const SizedBox.shrink(),
               ),
             );
           },
@@ -261,6 +279,42 @@ class _AppContentState extends State<_AppContent> with WidgetsBindingObserver {
     }
   }
 
+  Future<void> _tryDrainRealtimeSms() async {
+    try {
+      final status = await Permission.sms.status;
+      if (!status.isGranted) return;
+      await di.getIt<RealtimeSmsProcessor>().drainPendingMessages();
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
+      debugPrint('Realtime SMS drain skipped: $e');
+    }
+  }
+
+  // ignore: no-empty-block
+  void _handleRetry() {
+    /* handled by error fallback widget */
+  }
+
+  void _handleHardReset() {
+    unawaited(
+      di.getIt<BootstrapService>().hardReset().then((_) {
+        if (!mounted) return;
+        di.getIt<BootstrapService>().remountRoot();
+      }),
+    );
+  }
+
+  void _handleRestart() {
+    di.getIt<BootstrapService>().restart();
+  }
+
+  Widget _buildSplash(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      body: const Center(child: _SplashIcon()),
+    );
+  }
+
   @override
   void didUpdateWidget(_AppContent old) {
     super.didUpdateWidget(old);
@@ -284,17 +338,6 @@ class _AppContentState extends State<_AppContent> with WidgetsBindingObserver {
     }
   }
 
-  Future<void> _tryDrainRealtimeSms() async {
-    try {
-      final status = await Permission.sms.status;
-      if (!status.isGranted) return;
-      await di.getIt<RealtimeSmsProcessor>().drainPendingMessages();
-    } catch (e, s) {
-      debugPrint('Error: $e\n$s');
-      debugPrint('Realtime SMS drain skipped: $e');
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     if (widget.error) {
@@ -313,28 +356,6 @@ class _AppContentState extends State<_AppContent> with WidgetsBindingObserver {
     }
 
     return widget.child;
-  }
-
-  Widget _buildSplash(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      body: const Center(child: _SplashIcon()),
-    );
-  }
-
-  void _handleRetry() {}
-
-  void _handleHardReset() {
-    unawaited(
-      di.getIt<BootstrapService>().hardReset().then((_) {
-        if (!mounted) return;
-        di.getIt<BootstrapService>().remountRoot();
-      }),
-    );
-  }
-
-  void _handleRestart() {
-    di.getIt<BootstrapService>().restart();
   }
 }
 

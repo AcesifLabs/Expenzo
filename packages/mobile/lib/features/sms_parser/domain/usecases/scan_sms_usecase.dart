@@ -68,6 +68,7 @@ class ScanSmsUseCase
       return Right(results);
     } catch (e, s) {
       appLogger.error('Scan SMS error', e, s);
+
       return Left(SmsScanFailure(message: e.toString()));
     }
   }

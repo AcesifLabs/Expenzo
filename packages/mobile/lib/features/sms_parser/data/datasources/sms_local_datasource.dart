@@ -29,6 +29,7 @@ class SmsLocalDatasourceImpl implements SmsLocalDatasource {
       return messages.map(_mapToEntity).toList();
     } catch (e, s) {
       appLogger.error('SMS local datasource error', e, s);
+
       return [];
     }
   }
@@ -52,6 +53,7 @@ class SmsLocalDatasourceImpl implements SmsLocalDatasource {
           .toList();
     } catch (e, s) {
       appLogger.error('SMS local datasource error', e, s);
+
       return [];
     }
   }
@@ -65,6 +67,7 @@ class SmsLocalDatasourceImpl implements SmsLocalDatasource {
       return messages.map(_mapToEntity).toList();
     } catch (e, s) {
       appLogger.error('SMS local datasource error', e, s);
+
       return [];
     }
   }
@@ -87,6 +90,7 @@ class SmsLocalDatasourceImpl implements SmsLocalDatasource {
       return messages.map(_mapToEntity).toList();
     } catch (e, s) {
       appLogger.error('SMS local datasource error', e, s);
+
       return [];
     }
   }

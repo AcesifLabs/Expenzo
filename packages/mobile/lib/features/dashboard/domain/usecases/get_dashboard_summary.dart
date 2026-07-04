@@ -56,6 +56,7 @@ class GetDashboardSummary implements UseCase<DashboardSummary, DateRange> {
       );
     } catch (e, s) {
       appLogger.error('Error getting dashboard summary', e, s);
+
       return Left(ServerFailure(message: e.toString()));
     }
   }

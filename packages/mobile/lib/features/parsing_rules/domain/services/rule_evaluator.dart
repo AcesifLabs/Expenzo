@@ -112,6 +112,7 @@ class RuleEvaluator {
       );
     } catch (e, s) {
       appLogger.error('Error evaluating context', e, s);
+
       return null;
     }
   }
@@ -194,6 +195,7 @@ class RuleEvaluator {
       );
     } catch (e, s) {
       appLogger.error('Error evaluating with context', e, s);
+
       return ParsedTransaction(
         rawMessage: params.rawMessage,
         amount: null,
@@ -272,6 +274,7 @@ class RuleEvaluator {
       return DateTime(year, month, day);
     } catch (e) {
       appLogger.error('Rule evaluation error', e);
+
       return null;
     }
   }

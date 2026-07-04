@@ -143,6 +143,8 @@ class RealtimeSmsProcessor {
     }
   }
 
+  // TODO: re-enable logging when appLogger is wired up
+  // ignore: avoid-unused-parameters, no-empty-block
   void _logError(String message, Object error, StackTrace? stackTrace) {}
 
   bool _isMonitoredSender(String sender, Iterable<MonitoredSource> sources) {

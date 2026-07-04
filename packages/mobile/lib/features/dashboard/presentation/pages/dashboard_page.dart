@@ -540,6 +540,7 @@ class _DashboardViewState extends State<DashboardView> {
       return di.getIt<GetBudgetsWithProgress>();
     } catch (e, s) {
       debugPrint('Dashboard error: $e\n$s');
+
       return null;
     }
   }

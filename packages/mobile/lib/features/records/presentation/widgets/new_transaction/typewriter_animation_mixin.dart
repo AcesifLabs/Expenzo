@@ -64,13 +64,15 @@ mixin TypewriterAnimationMixin<T extends StatefulWidget>
   void _tickTyping(String currentPhrase) {
     if (_twCharIndex < currentPhrase.length) {
       _twCharIndex++;
-      _twDisplayText = currentPhrase.substring(0, _twCharIndex);
-      setState(() {});
+      setState(() {
+        _twDisplayText = currentPhrase.substring(0, _twCharIndex);
+      });
       _typewriterTimer = Timer(
         const Duration(milliseconds: 80),
         _tickTypewriter,
       );
     } else {
+      // Pause at end of phrase before erasing
       _typewriterTimer = Timer(const Duration(seconds: 2), () {
         if (!_twIsPaused && mounted) {
           _twIsErasing = true;
@@ -83,18 +85,21 @@ mixin TypewriterAnimationMixin<T extends StatefulWidget>
   void _tickErasing(String currentPhrase) {
     if (_twCharIndex > 0) {
       _twCharIndex--;
-      _twDisplayText = currentPhrase.substring(0, _twCharIndex);
-      setState(() {});
+      setState(() {
+        _twDisplayText = currentPhrase.substring(0, _twCharIndex);
+      });
       _typewriterTimer = Timer(
         const Duration(milliseconds: 40),
         _tickTypewriter,
       );
     } else {
-      _twIsErasing = false;
-      _twPhraseIndex = (_twPhraseIndex + 1) % _twPhrases.length;
-      _twCharIndex = 0;
-      _twDisplayText = '';
-      setState(() {});
+      // Move to next phrase after brief pause
+      setState(() {
+        _twIsErasing = false;
+        _twPhraseIndex = (_twPhraseIndex + 1) % _twPhrases.length;
+        _twCharIndex = 0;
+        _twDisplayText = '';
+      });
       _typewriterTimer = Timer(const Duration(milliseconds: 300), () {
         if (!_twIsPaused && mounted) {
           _tickTypewriter();

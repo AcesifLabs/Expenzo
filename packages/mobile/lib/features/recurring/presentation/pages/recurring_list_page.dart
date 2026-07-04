@@ -84,6 +84,8 @@ class _RecurringListViewState extends State<RecurringListView> {
   }
 
   Widget _buildEmptyState() {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -91,20 +93,17 @@ class _RecurringListViewState extends State<RecurringListView> {
           Icon(
             PiconsRegular.arrowsCounterClockwise,
             size: 64,
-            color: Theme.of(context).colorScheme.onSurface.withAlpha(100),
+            color: colorScheme.onSurface.withAlpha(100),
           ),
           const SizedBox(height: 16),
           Text(
             'No recurring transactions',
-            style: TextStyle(
-              fontSize: 18,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+            style: TextStyle(fontSize: 18, color: colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 8),
           Text(
             'Tap + to create your first recurring expense',
-            style: TextStyle(color: Theme.of(context).colorScheme.outline),
+            style: TextStyle(color: colorScheme.outline),
           ),
         ],
       ),
@@ -115,6 +114,7 @@ class _RecurringListViewState extends State<RecurringListView> {
     RecurringTransaction recurring,
     DateFormat dateFormat,
   ) {
+    final colorScheme = Theme.of(context).colorScheme;
     final isDue = recurring.isDue();
 
     return Card(
@@ -122,13 +122,11 @@ class _RecurringListViewState extends State<RecurringListView> {
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: isDue
-              ? Theme.of(context).colorScheme.tertiary.withAlpha(51)
-              : Theme.of(context).colorScheme.onSurface.withAlpha(26),
+              ? colorScheme.tertiary.withAlpha(51)
+              : colorScheme.onSurface.withAlpha(26),
           child: Icon(
             PiconsRegular.arrowsCounterClockwise,
-            color: isDue
-                ? Theme.of(context).colorScheme.tertiary
-                : Theme.of(context).colorScheme.onSurfaceVariant,
+            color: isDue ? colorScheme.tertiary : colorScheme.onSurfaceVariant,
           ),
         ),
         title: Text(recurring.description),
@@ -142,8 +140,8 @@ class _RecurringListViewState extends State<RecurringListView> {
               'Next: ${dateFormat.format(recurring.nextOccurrence)}',
               style: TextStyle(
                 color: isDue
-                    ? Theme.of(context).colorScheme.tertiary
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
+                    ? colorScheme.tertiary
+                    : colorScheme.onSurfaceVariant,
                 fontSize: 12,
               ),
             ),
@@ -176,8 +174,9 @@ class _RecurringListViewState extends State<RecurringListView> {
   }
 
   void _navigateToForm(BuildContext context, RecurringTransaction? recurring) {
-    if (recurring?.id != null) {
-      context.push('/recurring/${recurring!.id}/edit');
+    final recurringId = recurring?.id;
+    if (recurringId != null) {
+      context.push('/recurring/$recurringId/edit');
     } else {
       context.push('/recurring/new');
     }
@@ -209,15 +208,13 @@ class _RecurringListViewState extends State<RecurringListView> {
   }
 
   Widget _buildErrorState(RecurringError state) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            PiconsRegular.warningCircle,
-            size: 48,
-            color: Theme.of(context).colorScheme.error,
-          ),
+          Icon(PiconsRegular.warningCircle, size: 48, color: colorScheme.error),
           const SizedBox(height: 16),
           Text(state.message),
           const SizedBox(height: 16),

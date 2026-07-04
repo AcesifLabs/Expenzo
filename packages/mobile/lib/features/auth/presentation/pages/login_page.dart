@@ -27,9 +27,38 @@ class LoginView extends StatelessWidget {
     context.read<AuthBloc>().add(const SignInWithGoogleRequested());
   }
 
+  Widget _buildSignInButton(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return ElevatedButton(
+      onPressed: () => _onSignInPressed(context),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFFDB4437),
+        foregroundColor: colorScheme.onPrimary,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.g_mobiledata, size: 24),
+          const SizedBox(width: 12),
+          Text(
+            'Sign in with Google',
+            style: AppTypography.labelLarge.copyWith(
+              fontWeight: FontWeight.bold,
+              color: colorScheme.onPrimary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AuthBloc>().state;
+    final primaryColor = AppColors.primary;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
@@ -41,12 +70,12 @@ class LoginView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Spacer(),
-                Icon(PiconsRegular.wallet, size: 80, color: AppColors.primary),
+                Icon(PiconsRegular.wallet, size: 80, color: primaryColor),
                 const SizedBox(height: 24),
                 Text(
                   'Expenzo',
                   style: AppTypography.headlineLarge.copyWith(
-                    color: AppColors.primary,
+                    color: primaryColor,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -72,32 +101,6 @@ class LoginView extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildSignInButton(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () => _onSignInPressed(context),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFFDB4437),
-        foregroundColor: Theme.of(context).colorScheme.onPrimary,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.g_mobiledata, size: 24),
-          const SizedBox(width: 12),
-          Text(
-            'Sign in with Google',
-            style: AppTypography.labelLarge.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.onPrimary,
-            ),
-          ),
-        ],
       ),
     );
   }

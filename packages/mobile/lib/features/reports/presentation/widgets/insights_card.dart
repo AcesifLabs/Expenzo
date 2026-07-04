@@ -12,6 +12,7 @@ class InsightsCard extends StatelessWidget {
 
   String _formatAmount(double amount) {
     final fmt = CurrencyFormatter.getFormatter(decimalDigits: 2);
+
     return fmt.format(amount);
   }
 

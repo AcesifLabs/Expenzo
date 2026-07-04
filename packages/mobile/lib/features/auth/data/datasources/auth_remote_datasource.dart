@@ -131,6 +131,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
       ]);
     } catch (e, s) {
       debugPrint('Error: $e\n$s');
+
       return false;
     }
   }

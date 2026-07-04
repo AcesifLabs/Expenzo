@@ -53,6 +53,7 @@ class EvaluateRulesUseCase
       return Right(result);
     } catch (e, s) {
       appLogger.error('Error evaluating rules use case', e, s);
+
       return Left(CacheFailure(message: e.toString()));
     }
   }

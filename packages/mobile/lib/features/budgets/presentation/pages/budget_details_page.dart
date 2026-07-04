@@ -39,7 +39,7 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
       _dispatchLoadTransactions(existingProgress.budgetId);
     } else if (widget.budgetId != null) {
       _isLoading = true;
-      _loadBudgetData(widget.budgetId!);
+      _loadBudgetData(widget.budgetId ?? '');
     }
   }
 

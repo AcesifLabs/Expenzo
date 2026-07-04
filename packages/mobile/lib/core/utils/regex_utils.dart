@@ -71,6 +71,7 @@ class TimedRegex {
       return null;
     } catch (e, s) {
       debugPrint('Error: $e\n$s');
+
       return 'Invalid regex pattern: $e';
     }
   }

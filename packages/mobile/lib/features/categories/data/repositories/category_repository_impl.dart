@@ -36,6 +36,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
       return Left(e.toFailure());
     } catch (e, s) {
       appLogger.error('Error getting categories', e, s);
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -54,6 +55,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
       return Left(e.toFailure());
     } catch (e, s) {
       appLogger.error('Error getting category by id', e, s);
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -81,6 +83,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
       return Left(e.toFailure());
     } catch (e, s) {
       appLogger.error('Error creating category', e, s);
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -108,6 +111,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
       return Left(e.toFailure());
     } catch (e, s) {
       appLogger.error('Error updating category', e, s);
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -124,6 +128,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
       return Left(e.toFailure());
     } catch (e, s) {
       appLogger.error('Error incrementing usage count', e, s);
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -140,6 +145,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
       return Left(e.toFailure());
     } catch (e, s) {
       appLogger.error('Error deleting category', e, s);
+
       return Left(CacheFailure(message: e.toString()));
     }
   }

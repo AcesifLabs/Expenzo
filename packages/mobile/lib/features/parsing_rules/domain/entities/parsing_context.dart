@@ -16,6 +16,10 @@ class ParsingContext extends Equatable {
     this.regexCache = const {},
   });
 
+  // ignore: member-ordering
+  @override
+  List<Object?> get props => [rules, templates, sources, regexCache];
+
   ParsingContext withPrecompiledRegex() {
     final cache = <String, RegExp>{};
     for (final rule in rules) {
@@ -40,7 +44,4 @@ class ParsingContext extends Equatable {
       regexCache: cache,
     );
   }
-
-  @override
-  List<Object?> get props => [rules, templates, sources, regexCache];
 }

@@ -29,6 +29,7 @@ class RecurringRepositoryImpl implements RecurringRepository {
       return Left(e.toFailure());
     } catch (e, s) {
       appLogger.error('Recurring repository error', e, s);
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -51,6 +52,7 @@ class RecurringRepositoryImpl implements RecurringRepository {
       return Left(e.toFailure());
     } catch (e, s) {
       appLogger.error('Recurring repository error', e, s);
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -68,6 +70,7 @@ class RecurringRepositoryImpl implements RecurringRepository {
       return Left(e.toFailure());
     } catch (e, s) {
       appLogger.error('Recurring repository error', e, s);
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -85,6 +88,7 @@ class RecurringRepositoryImpl implements RecurringRepository {
       return Left(e.toFailure());
     } catch (e, s) {
       appLogger.error('Recurring repository error', e, s);
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -102,6 +106,7 @@ class RecurringRepositoryImpl implements RecurringRepository {
       return Left(e.toFailure());
     } catch (e, s) {
       appLogger.error('Recurring repository error', e, s);
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -117,6 +122,7 @@ class RecurringRepositoryImpl implements RecurringRepository {
       return Left(e.toFailure());
     } catch (e, s) {
       appLogger.error('Recurring repository error', e, s);
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -137,6 +143,7 @@ class RecurringRepositoryImpl implements RecurringRepository {
       return Left(e.toFailure());
     } catch (e, s) {
       appLogger.error('Recurring repository error', e, s);
+
       return Left(CacheFailure(message: e.toString()));
     }
   }

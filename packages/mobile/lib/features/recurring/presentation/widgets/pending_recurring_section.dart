@@ -44,14 +44,13 @@ class _PendingRecurringSectionState extends State<PendingRecurringSection> {
   }
 
   Widget _buildHeader() {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          Icon(
-            PiconsRegular.clock,
-            color: Theme.of(context).colorScheme.tertiary,
-          ),
+          Icon(PiconsRegular.clock, color: colorScheme.tertiary),
           const SizedBox(width: 8),
           const Text(
             'Pending Recurring',
@@ -79,13 +78,12 @@ class _PendingRecurringSectionState extends State<PendingRecurringSection> {
   }
 
   Widget _buildPendingItem(PendingRecurringData item, DateFormat dateFormat) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return ListTile(
       leading: CircleAvatar(
-        backgroundColor: Theme.of(context).colorScheme.tertiary.withAlpha(51),
-        child: Icon(
-          PiconsRegular.calendar,
-          color: Theme.of(context).colorScheme.tertiary,
-        ),
+        backgroundColor: colorScheme.tertiary.withAlpha(51),
+        child: Icon(PiconsRegular.calendar, color: colorScheme.tertiary),
       ),
       title: Text(item.description),
       subtitle: Text(
@@ -93,7 +91,7 @@ class _PendingRecurringSectionState extends State<PendingRecurringSection> {
       ),
       trailing: IconButton(
         icon: Icon(PiconsRegular.checkCircle),
-        color: Theme.of(context).colorScheme.secondary,
+        color: colorScheme.secondary,
         onPressed: () => unawaited(_removePending(item.id)),
       ),
     );

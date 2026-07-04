@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:expense_tracker/core/bloc/transformers.dart';
@@ -172,20 +173,24 @@ class SmsScannerBloc extends Bloc<SmsScannerEvent, SmsScannerState> {
   ) async {
     final result = await createRecordsFromParsedList(event.transactions);
 
-    await result.fold(
-      (failure) async {
+    result.fold(
+      (failure) {
         emit(SmsScannerError(message: failure.message));
       },
-      (creationResult) async {
-        try {
-          await getBudgetsWithProgress();
-        } catch (e, s) {
-          addError(e, s);
-          debugPrint('SmsScannerBloc: Failed to reload budgets: $e');
-        }
+      (creationResult) {
+        unawaited(_reloadBudgets());
         add(ClearResults());
       },
     );
+  }
+
+  Future<void> _reloadBudgets() async {
+    try {
+      await getBudgetsWithProgress();
+    } catch (e, s) {
+      addError(e, s);
+      debugPrint('SmsScannerBloc: Failed to reload budgets: $e');
+    }
   }
 
   void _emitEmptyResults(Emitter<SmsScannerState> emit, StartScan event) {

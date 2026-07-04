@@ -49,6 +49,7 @@ class CheckBudgetAlerts {
       });
     } catch (e, s) {
       appLogger.error('Error checking budget alerts', e, s);
+
       return Left(CacheFailure(message: e.toString()));
     }
   }

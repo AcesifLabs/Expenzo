@@ -184,7 +184,7 @@ class _RecordFormPageState extends State<RecordFormPage> {
     // Deduplicate by id to prevent DropdownButton assertion crash
     final seen = <String>{};
     final unique = categories
-        .where((c) => c.id != null && seen.add(c.id!))
+        .where((c) => c.id != null && seen.add(c.id ?? ''))
         .toList();
 
     // If _selectedCategoryId was a duplicate, reset to avoid mismatch
@@ -200,7 +200,7 @@ class _RecordFormPageState extends State<RecordFormPage> {
         const DropdownMenuItem<String>(value: null, child: Text('No Category')),
         ...unique.map(
           (cat) => DropdownMenuItem<String>(
-            value: cat.id!,
+            value: cat.id ?? '',
             child: Row(
               children: [
                 Icon(AppIcons.getCategoryIcon(cat.emoji), size: 18),

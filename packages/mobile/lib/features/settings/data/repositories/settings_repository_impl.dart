@@ -22,6 +22,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
       return Left(e.toFailure());
     } catch (e, s) {
       appLogger.error('Settings repository error', e, s);
+
       return Left(CacheFailure(message: e.toString()));
     }
   }
@@ -39,6 +40,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
       return Left(e.toFailure());
     } catch (e, s) {
       appLogger.error('Settings repository error', e, s);
+
       return Left(CacheFailure(message: e.toString()));
     }
   }

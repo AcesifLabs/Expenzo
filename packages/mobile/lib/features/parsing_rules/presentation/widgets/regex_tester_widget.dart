@@ -191,6 +191,7 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
 
   Card _buildTimeoutCard() {
     final colors = Theme.of(context).colorScheme;
+
     return Card(
       color: colors.tertiaryContainer,
       child: Padding(
@@ -213,6 +214,7 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
 
   Card _buildErrorCard(String error) {
     final colors = Theme.of(context).colorScheme;
+
     return Card(
       color: colors.errorContainer,
       child: Padding(
@@ -262,6 +264,7 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
 
   Row _buildHeaderRow(ParsedTestResult result) {
     final colors = Theme.of(context).colorScheme;
+
     return Row(
       children: [
         Icon(
@@ -306,6 +309,7 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
 
   Widget _buildFieldResult(String label, String? value) {
     final colors = Theme.of(context).colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

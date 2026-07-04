@@ -7,14 +7,6 @@ class SpendingInsights extends Equatable {
   final int totalTransactionCount;
   final double totalSpent;
 
-  const SpendingInsights({
-    this.highestDayDate,
-    required this.highestDayAmount,
-    required this.avgDailySpending,
-    required this.totalTransactionCount,
-    required this.totalSpent,
-  });
-
   @override
   List<Object?> get props => [
     highestDayDate,
@@ -23,4 +15,12 @@ class SpendingInsights extends Equatable {
     totalTransactionCount,
     totalSpent,
   ];
+
+  const SpendingInsights({
+    this.highestDayDate,
+    required this.highestDayAmount,
+    required this.avgDailySpending,
+    required this.totalTransactionCount,
+    required this.totalSpent,
+  });
 }

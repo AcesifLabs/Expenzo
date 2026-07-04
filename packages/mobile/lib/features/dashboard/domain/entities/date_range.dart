@@ -67,6 +67,15 @@ class DateRange extends Equatable {
 
   const DateRange({required this.preset, this.customStart, this.customEnd});
 
+  factory DateRange.thisMonth() =>
+      const DateRange(preset: DateRangePreset.thisMonth);
+
+  factory DateRange.lastMonth() =>
+      const DateRange(preset: DateRangePreset.lastMonth);
+
+  factory DateRange.thisYear() =>
+      const DateRange(preset: DateRangePreset.thisYear);
+
   DateRange copyWith({
     DateRangePreset? preset,
     DateTime? customStart,
@@ -78,15 +87,6 @@ class DateRange extends Equatable {
       customEnd: customEnd ?? this.customEnd,
     );
   }
-
-  factory DateRange.thisMonth() =>
-      const DateRange(preset: DateRangePreset.thisMonth);
-
-  factory DateRange.lastMonth() =>
-      const DateRange(preset: DateRangePreset.lastMonth);
-
-  factory DateRange.thisYear() =>
-      const DateRange(preset: DateRangePreset.thisYear);
 
   bool isInRange(DateTime date) {
     return date.isAfter(startDate.subtract(const Duration(days: 1))) &&

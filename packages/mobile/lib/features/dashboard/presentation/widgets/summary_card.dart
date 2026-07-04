@@ -22,6 +22,9 @@ class SummaryCard extends StatelessWidget {
 
   Widget _buildPercentChangeRow(ThemeData theme, double change) {
     final isPositive = change >= 0;
+    final changeColor = isPositive
+        ? theme.colorScheme.error
+        : theme.colorScheme.secondary;
 
     return Padding(
       padding: const EdgeInsets.only(top: 4),
@@ -30,18 +33,12 @@ class SummaryCard extends StatelessWidget {
           Icon(
             isPositive ? PiconsRegular.trendUp : PiconsRegular.trendDown,
             size: 16,
-            color: isPositive
-                ? theme.colorScheme.error
-                : theme.colorScheme.secondary,
+            color: changeColor,
           ),
           const SizedBox(width: 4),
           Text(
             '${change.abs().toStringAsFixed(1)}% vs last period',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: isPositive
-                  ? theme.colorScheme.error
-                  : theme.colorScheme.secondary,
-            ),
+            style: theme.textTheme.bodySmall?.copyWith(color: changeColor),
           ),
         ],
       ),

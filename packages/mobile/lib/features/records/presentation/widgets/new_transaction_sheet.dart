@@ -564,23 +564,27 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       initialDate: _selectedDate,
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
-      builder: (ctx, child) => Theme(
-        data: Theme.of(ctx).copyWith(
-          colorScheme:
-              Theme.of(context).colorScheme.brightness == Brightness.dark
-              ? ColorScheme.dark(
-                  primary: typePrimary,
-                  onPrimary: Theme.of(ctx).colorScheme.onSurface,
-                  surface: AppColors.surfaceDark,
-                  onSurface: Theme.of(ctx).colorScheme.onSurface,
-                  onSurfaceVariant: Theme.of(
-                    ctx,
-                  ).colorScheme.onSurface.withAlpha(180),
-                )
-              : null,
-        ),
-        child: child ?? const SizedBox.shrink(),
-      ),
+      builder: (ctx, child) {
+        final ctxColorScheme = Theme.of(ctx).colorScheme;
+        final ctxOnSurface = ctxColorScheme.onSurface;
+        final isDark =
+            Theme.of(context).colorScheme.brightness == Brightness.dark;
+
+        return Theme(
+          data: Theme.of(ctx).copyWith(
+            colorScheme: isDark
+                ? ColorScheme.dark(
+                    primary: typePrimary,
+                    onPrimary: ctxOnSurface,
+                    surface: AppColors.surfaceDark,
+                    onSurface: ctxOnSurface,
+                    onSurfaceVariant: ctxOnSurface.withAlpha(180),
+                  )
+                : null,
+          ),
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
     );
     if (picked != null) setState(() => _selectedDate = picked);
   }
@@ -621,6 +625,10 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   }
 
   Widget _buildCategoryChip(Category cat, ColorScheme colors) {
+    final chipSelectedColor = _type == RecordType.expense
+        ? colors.error
+        : colors.primary;
+
     return CategoryPickerItem(
       category: cat,
       isSelected: cat.id == _selectedCategoryId,
@@ -629,9 +637,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
         colors,
         fallback: Colors.transparent,
       ),
-      selectedColor: _type == RecordType.expense
-          ? colors.error
-          : colors.primary,
+      selectedColor: chipSelectedColor,
       onTap: () => _onCategoryChipTap(cat),
     );
   }

@@ -61,7 +61,7 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
     } else {
       _initFromCategory(widget.category);
       if (widget.category == null && widget.initialType != null) {
-        _type = widget.initialType!;
+        _type = widget.initialType ?? RecordType.expense;
       }
     }
   }
@@ -115,6 +115,7 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
 
   Widget _buildIconItem(String name, Color accentColor) {
     final isSelected = name == _selectedEmoji;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return GestureDetector(
       onTap: () => setState(() => _selectedEmoji = name),
@@ -123,9 +124,7 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
         height: 48,
         decoration: BoxDecoration(
           border: Border.all(
-            color: isSelected
-                ? accentColor
-                : Theme.of(context).colorScheme.outline.withAlpha(40),
+            color: isSelected ? accentColor : colorScheme.outline.withAlpha(40),
             width: isSelected ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(12),
@@ -134,9 +133,7 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
           child: Icon(
             AppIcons.getCategoryIcon(name),
             size: 24,
-            color: isSelected
-                ? accentColor
-                : Theme.of(context).colorScheme.onSurfaceVariant,
+            color: isSelected ? accentColor : colorScheme.onSurfaceVariant,
           ),
         ),
       ),

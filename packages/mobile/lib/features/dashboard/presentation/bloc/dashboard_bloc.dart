@@ -40,8 +40,11 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     Emitter<DashboardState> emit,
   ) {
     final currentState = state;
-    if (currentState is DashboardLoaded && currentState.dateRange != null) {
-      add(LoadDashboard(dateRange: currentState.dateRange!));
+    final dateRange = currentState is DashboardLoaded
+        ? currentState.dateRange
+        : null;
+    if (dateRange != null) {
+      add(LoadDashboard(dateRange: dateRange));
     } else {
       add(LoadDashboard(dateRange: DateRange.thisMonth()));
     }

@@ -41,9 +41,10 @@ class CategoryListPage extends StatelessWidget {
   }
 
   void _navigateToForm(BuildContext context, Category? category) {
-    if (category?.id != null) {
+    final categoryId = category?.id;
+    if (categoryId != null) {
       context.push(
-        '/categories/${category!.id}/edit',
+        '/categories/$categoryId/edit',
         extra: {'category': category},
       );
     } else {

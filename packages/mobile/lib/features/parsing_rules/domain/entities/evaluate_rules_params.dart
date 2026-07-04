@@ -7,14 +7,6 @@ class EvaluateRulesParams extends Equatable {
   final String? address;
   final DateTime? messageDate;
 
-  const EvaluateRulesParams({
-    required this.rawMessage,
-    required this.sourceType,
-    required this.sourceId,
-    this.address,
-    this.messageDate,
-  });
-
   @override
   List<Object?> get props => [
     rawMessage,
@@ -23,4 +15,12 @@ class EvaluateRulesParams extends Equatable {
     address,
     messageDate,
   ];
+
+  const EvaluateRulesParams({
+    required this.rawMessage,
+    required this.sourceType,
+    required this.sourceId,
+    this.address,
+    this.messageDate,
+  });
 }
