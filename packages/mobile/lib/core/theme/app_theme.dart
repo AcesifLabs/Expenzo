@@ -220,8 +220,9 @@ class AppTheme {
       chipTheme: _chipTheme(c),
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected))
+          if (states.contains(WidgetState.selected)) {
             return c.colorScheme.primary;
+          }
 
           return null;
         }),
