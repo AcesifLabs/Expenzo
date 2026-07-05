@@ -139,7 +139,6 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
   Future<void> _initSettingsWhenReady() async {
     await di.criticalDependenciesReady;
     if (!mounted) return;
-
     final bloc = di.getIt<SettingsBloc>()..add(const LoadSettings());
     bloc.stream.listen((state) {
       if (state is SettingsLoaded) {
@@ -170,37 +169,31 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
       final navContext = _navigatorKey.currentContext;
       if (navContext == null) return;
       navContext.read<AuthBloc>().add(const AuthCheckRequested());
-      _dispatchDelayedCategoryLoad(navContext);
-      _dispatchDelayedRecordLoad(navContext);
+      _dispatchDelayedCategoryLoad();
+      _dispatchDelayedRecordLoad();
     } catch (e, s) {
       debugPrint('Initial loads dispatch failed: $e\n$s');
     }
   }
 
-  void _dispatchDelayedCategoryLoad(BuildContext navContext) {
-    Future.delayed(
-      const Duration(milliseconds: 150),
-      () => _loadCategoriesIfMounted(navContext),
-    );
+  void _dispatchDelayedCategoryLoad() {
+    Future.delayed(const Duration(milliseconds: 150), () {
+      if (!mounted) return;
+      final ctx = _navigatorKey.currentContext;
+      if (ctx != null && ctx.mounted) {
+        ctx.read<CategoryBloc>().add(const LoadCategories());
+      }
+    });
   }
 
-  void _loadCategoriesIfMounted(BuildContext navContext) {
-    if (navContext.mounted) {
-      navContext.read<CategoryBloc>().add(const LoadCategories());
-    }
-  }
-
-  void _dispatchDelayedRecordLoad(BuildContext navContext) {
-    Future.delayed(
-      const Duration(milliseconds: 300),
-      () => _loadRecordsIfMounted(navContext),
-    );
-  }
-
-  void _loadRecordsIfMounted(BuildContext navContext) {
-    if (navContext.mounted) {
-      navContext.read<RecordBloc>().add(const LoadRecords());
-    }
+  void _dispatchDelayedRecordLoad() {
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (!mounted) return;
+      final ctx = _navigatorKey.currentContext;
+      if (ctx != null && ctx.mounted) {
+        ctx.read<RecordBloc>().add(const LoadRecords());
+      }
+    });
   }
 
   @override
