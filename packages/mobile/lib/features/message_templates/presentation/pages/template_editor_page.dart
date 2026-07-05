@@ -68,10 +68,15 @@ class _InteractiveTemplateBuilderState
   ExpenseTemplate? _savedTemplate;
 
   static String _stripCurrencyPrefix(String amount) {
-    return amount.replaceAll(
-      RegExp(r'^(?:Rs\.?|INR|BDT|৳)\s*', caseSensitive: false),
-      '',
-    );
+    return amount
+        .replaceAll(
+          RegExp(
+            r'^(?:Tk|Rs\.?|RM|INR|BDT|PKR|LKR|NPR|USD|GBP|EUR|[$€£৳₹])\s*',
+            caseSensitive: false,
+          ),
+          '',
+        )
+        .trim();
   }
 
   @override
@@ -79,8 +84,10 @@ class _InteractiveTemplateBuilderState
     super.initState();
     _words = widget.sampleMessage.body.split(RegExp(r'\s+'));
 
+    // Matches optional currency prefix (Tk, Rs, USD, etc.) followed by a
+    // number with optional thousands-separator commas and decimal part.
     final numRegex = RegExp(
-      r'(?:Rs\.?|INR|BDT|৳)?\s*[\d,]+(?:\.\d+)?',
+      r'(?:[A-Z]{2,4}[\s.]*|[$€£৳₹]\s*)?([\d][\d,]*\.\d+|[\d]+)',
       caseSensitive: false,
     );
     _numbers = numRegex
@@ -110,7 +117,10 @@ class _InteractiveTemplateBuilderState
     final amount = _selectedAmount;
     if (trigger == null || amount == null) return;
 
-    final amountPattern = r'(Rs\.?|INR|BDT|৳)\s*([\d,]+(?:\.\d+)?)';
+    // Currency prefix is optional so patterns like "Tk 1,000.00" or bare
+    // "1,000.00" both match.  Group 1 = amount, group 2 = decimal variant.
+    final amountPattern =
+        r'(?:[A-Z]{2,4}[\s.]*|[$€£৳₹]\s*)?([\d][\d,]*\.\d+|[\d]+)';
 
     _savedTemplate = ExpenseTemplate(
       id: 'tmpl_${DateTime.now().millisecondsSinceEpoch}',

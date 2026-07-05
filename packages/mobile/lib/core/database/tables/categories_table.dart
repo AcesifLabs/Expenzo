@@ -18,4 +18,8 @@ class Categories extends Table {
 
   @override
   Set<Column> get primaryKey => {id};
+
+  Set<TableIndex> get indexes => {
+    const TableIndex(name: 'idx_categories_user_id', columns: {#userId}),
+  };
 }

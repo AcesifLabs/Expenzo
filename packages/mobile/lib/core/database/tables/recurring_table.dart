@@ -20,4 +20,11 @@ class RecurringTransactions extends Table {
 
   @override
   Set<Column> get primaryKey => {id};
+
+  Set<TableIndex> get indexes => {
+    const TableIndex(
+      name: 'idx_recurring_transactions_cat_id',
+      columns: {#categoryId},
+    ),
+  };
 }

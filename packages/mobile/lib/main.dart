@@ -1,16 +1,19 @@
-// ignore_for_file: prefer-match-file-name
-
 import 'dart:async';
-import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'dart:io';
+
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:saropa_drift_advisor/saropa_drift_advisor.dart';
+
+import 'core/database/app_database.dart';
 import 'core/di/injection_container.dart' as di;
+import 'core/lifecycle/bootstrap_service.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
-import 'core/lifecycle/bootstrap_service.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
 import 'features/categories/presentation/bloc/category_bloc.dart';
@@ -18,10 +21,10 @@ import 'features/categories/presentation/bloc/category_event.dart';
 import 'features/records/presentation/bloc/record_bloc.dart';
 import 'features/records/presentation/bloc/record_event.dart';
 import 'features/settings/presentation/bloc/settings_bloc.dart';
-import 'features/settings/presentation/bloc/settings_state.dart';
 import 'features/settings/presentation/bloc/settings_event.dart';
-import 'features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
+import 'features/settings/presentation/bloc/settings_state.dart';
 import 'features/sms_parser/application/realtime_sms_processor.dart';
+import 'features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
 import 'shared/presentation/pages/feedback_page.dart';
 import 'shared/presentation/widgets/app_critical_error.dart';
 import 'shared/presentation/widgets/app_error_fallback.dart';
@@ -90,6 +93,10 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
       await di.initCriticalDependencies();
       if (!mounted) return;
 
+      if (kDebugMode) {
+        await _startDriftDebugServer();
+      }
+
       await di.getIt<BootstrapService>().seedInitialData();
       _initSettingsWhenReady();
 
@@ -102,14 +109,9 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
 
       unawaited(_tryStartRealtimeSmsProcessing());
 
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        unawaited(
-          Future.delayed(
-            const Duration(milliseconds: 500),
-            _initFeatureDependencies,
-          ),
-        );
-      });
+      // Feature deps no longer need the 500ms delay — the
+      // `featureDependenciesReady` getter is self-healing.
+      await di.initFeatureDependencies();
     } catch (e, stack) {
       debugPrint('App init failed: $e\n$stack');
       if (mounted) {
@@ -119,6 +121,25 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
         });
       }
     }
+  }
+
+  Future<void> _startDriftDebugServer() async {
+    final db = di.getIt<AppDatabase>();
+    try {
+      await db.startDriftViewer(
+        enabled: kDebugMode,
+        getDatabaseBytes: _readDbBytes,
+        writeQuery: (sql) => db.customStatement(sql),
+      );
+      debugPrint('Drift debug server ready on http://127.0.0.1:8642/');
+    } catch (e, s) {
+      debugPrint('Drift debug server failed to start: $e\n$s');
+    }
+  }
+
+  Future<List<int>> _readDbBytes() async {
+    final db = di.getIt<AppDatabase>();
+    return File(await db.dbPath).readAsBytes();
   }
 
   Future<void> _initFirebase() async {
@@ -158,10 +179,6 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
       debugPrint('Error: $e\n$s');
       debugPrint('Realtime SMS start skipped: $e');
     }
-  }
-
-  void _initFeatureDependencies() {
-    di.initFeatureDependencies();
   }
 
   void _dispatchInitialLoads() {

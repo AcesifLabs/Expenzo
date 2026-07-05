@@ -24,5 +24,6 @@ class Records extends Table {
     const TableIndex(name: 'idx_records_date', columns: {#date}),
     const TableIndex(name: 'idx_records_category', columns: {#categoryId}),
     const TableIndex(name: 'idx_records_source_id', columns: {#sourceId}),
+    const TableIndex(name: 'idx_records_user_id', columns: {#userId}),
   };
 }

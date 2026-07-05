@@ -1,0 +1,678 @@
+{
+  "schemaVersion": 1,
+  "producer": {
+    "name": "saropa_drift_advisor",
+    "version": "4.1.19"
+  },
+  "generatedAt": "2026-07-05T17:51:40.835985Z",
+  "diagnostics": [
+    {
+      "source": "advisor",
+      "severity": "warning",
+      "table": "expense_templates",
+      "message": "expense_templates.source_id: Foreign key without index (references message_sources.id)",
+      "suggestedSql": "CREATE INDEX idx_expense_templates_source_id ON \"expense_templates\"(\"source_id\");",
+      "priority": "high",
+      "column": "source_id",
+      "category": "performance",
+      "title": "expense_templates.source_id: Foreign key without index (references message_sources.id)",
+      "id": "saropa_drift_advisor:index-suggestion:expense_templates:source_id",
+      "fix": {
+        "kind": "command",
+        "command": "driftViewer.goToDefinitionForTable",
+        "args": [
+          {
+            "table": "expense_templates"
+          }
+        ],
+        "title": "Go to table definition"
+      },
+      "ruleId": "index-suggestion"
+    },
+    {
+      "source": "advisor",
+      "severity": "info",
+      "table": "budgets",
+      "message": "budgets.category_id: Column ending in _id — likely used in JOINs/WHERE",
+      "suggestedSql": "CREATE INDEX idx_budgets_category_id ON \"budgets\"(\"category_id\");",
+      "priority": "medium",
+      "column": "category_id",
+      "category": "performance",
+      "title": "budgets.category_id: Column ending in _id — likely used in JOINs/WHERE",
+      "id": "saropa_drift_advisor:index-suggestion:budgets:category_id",
+      "fix": {
+        "kind": "command",
+        "command": "driftViewer.goToDefinitionForTable",
+        "args": [
+          {
+            "table": "budgets"
+          }
+        ],
+        "title": "Go to table definition"
+      },
+      "ruleId": "index-suggestion"
+    },
+    {
+      "source": "advisor",
+      "severity": "info",
+      "table": "budgets",
+      "message": "budgets.user_id: Column ending in _id — likely used in JOINs/WHERE",
+      "suggestedSql": "CREATE INDEX idx_budgets_user_id ON \"budgets\"(\"user_id\");",
+      "priority": "medium",
+      "column": "user_id",
+      "category": "performance",
+      "title": "budgets.user_id: Column ending in _id — likely used in JOINs/WHERE",
+      "id": "saropa_drift_advisor:index-suggestion:budgets:user_id",
+      "fix": {
+        "kind": "command",
+        "command": "driftViewer.goToDefinitionForTable",
+        "args": [
+          {
+            "table": "budgets"
+          }
+        ],
+        "title": "Go to table definition"
+      },
+      "ruleId": "index-suggestion"
+    },
+    {
+      "source": "advisor",
+      "severity": "info",
+      "table": "categories",
+      "message": "categories.user_id: Column ending in _id — likely used in JOINs/WHERE",
+      "suggestedSql": "CREATE INDEX idx_categories_user_id ON \"categories\"(\"user_id\");",
+      "priority": "medium",
+      "column": "user_id",
+      "category": "performance",
+      "title": "categories.user_id: Column ending in _id — likely used in JOINs/WHERE",
+      "id": "saropa_drift_advisor:index-suggestion:categories:user_id",
+      "fix": {
+        "kind": "command",
+        "command": "driftViewer.goToDefinitionForTable",
+        "args": [
+          {
+            "table": "categories"
+          }
+        ],
+        "title": "Go to table definition"
+      },
+      "ruleId": "index-suggestion"
+    },
+    {
+      "source": "advisor",
+      "severity": "info",
+      "table": "expense_templates",
+      "message": "expense_templates.category_id: Column ending in _id — likely used in JOINs/WHERE",
+      "suggestedSql": "CREATE INDEX idx_expense_templates_category_id ON \"expense_templates\"(\"category_id\");",
+      "priority": "medium",
+      "column": "category_id",
+      "category": "performance",
+      "title": "expense_templates.category_id: Column ending in _id — likely used in JOINs/WHERE",
+      "id": "saropa_drift_advisor:index-suggestion:expense_templates:category_id",
+      "fix": {
+        "kind": "command",
+        "command": "driftViewer.goToDefinitionForTable",
+        "args": [
+          {
+            "table": "expense_templates"
+          }
+        ],
+        "title": "Go to table definition"
+      },
+      "ruleId": "index-suggestion"
+    },
+    {
+      "source": "advisor",
+      "severity": "info",
+      "table": "parsing_rules",
+      "message": "parsing_rules.category_id: Column ending in _id — likely used in JOINs/WHERE",
+      "suggestedSql": "CREATE INDEX idx_parsing_rules_category_id ON \"parsing_rules\"(\"category_id\");",
+      "priority": "medium",
+      "column": "category_id",
+      "category": "performance",
+      "title": "parsing_rules.category_id: Column ending in _id — likely used in JOINs/WHERE",
+      "id": "saropa_drift_advisor:index-suggestion:parsing_rules:category_id",
+      "fix": {
+        "kind": "command",
+        "command": "driftViewer.goToDefinitionForTable",
+        "args": [
+          {
+            "table": "parsing_rules"
+          }
+        ],
+        "title": "Go to table definition"
+      },
+      "ruleId": "index-suggestion"
+    },
+    {
+      "source": "advisor",
+      "severity": "info",
+      "table": "pending_recurring",
+      "message": "pending_recurring.category_id: Column ending in _id — likely used in JOINs/WHERE",
+      "suggestedSql": "CREATE INDEX idx_pending_recurring_category_id ON \"pending_recurring\"(\"category_id\");",
+      "priority": "medium",
+      "column": "category_id",
+      "category": "performance",
+      "title": "pending_recurring.category_id: Column ending in _id — likely used in JOINs/WHERE",
+      "id": "saropa_drift_advisor:index-suggestion:pending_recurring:category_id",
+      "fix": {
+        "kind": "command",
+        "command": "driftViewer.goToDefinitionForTable",
+        "args": [
+          {
+            "table": "pending_recurring"
+          }
+        ],
+        "title": "Go to table definition"
+      },
+      "ruleId": "index-suggestion"
+    },
+    {
+      "source": "advisor",
+      "severity": "info",
+      "table": "records",
+      "message": "records.category_id: Column ending in _id — likely used in JOINs/WHERE",
+      "suggestedSql": "CREATE INDEX idx_records_category_id ON \"records\"(\"category_id\");",
+      "priority": "medium",
+      "column": "category_id",
+      "category": "performance",
+      "title": "records.category_id: Column ending in _id — likely used in JOINs/WHERE",
+      "id": "saropa_drift_advisor:index-suggestion:records:category_id",
+      "fix": {
+        "kind": "command",
+        "command": "driftViewer.goToDefinitionForTable",
+        "args": [
+          {
+            "table": "records"
+          }
+        ],
+        "title": "Go to table definition"
+      },
+      "ruleId": "index-suggestion"
+    },
+    {
+      "source": "advisor",
+      "severity": "info",
+      "table": "records",
+      "message": "records.user_id: Column ending in _id — likely used in JOINs/WHERE",
+      "suggestedSql": "CREATE INDEX idx_records_user_id ON \"records\"(\"user_id\");",
+      "priority": "medium",
+      "column": "user_id",
+      "category": "performance",
+      "title": "records.user_id: Column ending in _id — likely used in JOINs/WHERE",
+      "id": "saropa_drift_advisor:index-suggestion:records:user_id",
+      "fix": {
+        "kind": "command",
+        "command": "driftViewer.goToDefinitionForTable",
+        "args": [
+          {
+            "table": "records"
+          }
+        ],
+        "title": "Go to table definition"
+      },
+      "ruleId": "index-suggestion"
+    },
+    {
+      "source": "advisor",
+      "severity": "info",
+      "table": "recurring_transactions",
+      "message": "recurring_transactions.category_id: Column ending in _id — likely used in JOINs/WHERE",
+      "suggestedSql": "CREATE INDEX idx_recurring_transactions_category_id ON \"recurring_transactions\"(\"category_id\");",
+      "priority": "medium",
+      "column": "category_id",
+      "category": "performance",
+      "title": "recurring_transactions.category_id: Column ending in _id — likely used in JOINs/WHERE",
+      "id": "saropa_drift_advisor:index-suggestion:recurring_transactions:category_id",
+      "fix": {
+        "kind": "command",
+        "command": "driftViewer.goToDefinitionForTable",
+        "args": [
+          {
+            "table": "recurring_transactions"
+          }
+        ],
+        "title": "Go to table definition"
+      },
+      "ruleId": "index-suggestion"
+    },
+    {
+      "source": "advisor",
+      "severity": "info",
+      "table": "sync_queue",
+      "message": "sync_queue.record_id: Column ending in _id — likely used in JOINs/WHERE",
+      "suggestedSql": "CREATE INDEX idx_sync_queue_record_id ON \"sync_queue\"(\"record_id\");",
+      "priority": "medium",
+      "column": "record_id",
+      "category": "performance",
+      "title": "sync_queue.record_id: Column ending in _id — likely used in JOINs/WHERE",
+      "id": "saropa_drift_advisor:index-suggestion:sync_queue:record_id",
+      "fix": {
+        "kind": "command",
+        "command": "driftViewer.goToDefinitionForTable",
+        "args": [
+          {
+            "table": "sync_queue"
+          }
+        ],
+        "title": "Go to table definition"
+      },
+      "ruleId": "index-suggestion"
+    },
+    {
+      "source": "advisor",
+      "severity": "warning",
+      "table": "sync_queue",
+      "message": "3 empty string(s) in sync_queue.payload",
+      "column": "payload",
+      "type": "empty_strings",
+      "count": 3,
+      "category": "data",
+      "title": "3 empty string(s) in sync_queue.payload",
+      "id": "saropa_drift_advisor:anomaly:sync_queue:payload:empty_strings",
+      "fix": {
+        "kind": "command",
+        "command": "driftViewer.goToDefinitionForTable",
+        "args": [
+          {
+            "table": "sync_queue"
+          }
+        ],
+        "title": "Go to table definition"
+      },
+      "ruleId": "anomaly"
+    },
+    {
+      "source": "advisor",
+      "severity": "warning",
+      "table": "expense_fts",
+      "message": "Orphan physical table 'expense_fts' — present in the database but not declared in the Drift schema. Left by a prior migration? Drop it or restore its definition.",
+      "type": "orphan_table",
+      "suggestedSql": "DROP TABLE \"expense_fts\";",
+      "category": "schema",
+      "title": "Orphan physical table 'expense_fts' — present in the database but not declared in the Drift schema. Left by a prior migration? Drop it or restore its definition.",
+      "id": "saropa_drift_advisor:orphan-table:expense_fts:orphan_table",
+      "fix": {
+        "kind": "command",
+        "command": "driftViewer.goToDefinitionForTable",
+        "args": [
+          {
+            "table": "expense_fts"
+          }
+        ],
+        "title": "Go to table definition"
+      },
+      "ruleId": "orphan-table"
+    },
+    {
+      "source": "advisor",
+      "severity": "warning",
+      "table": "expense_fts_config",
+      "message": "Orphan physical table 'expense_fts_config' — present in the database but not declared in the Drift schema. Left by a prior migration? Drop it or restore its definition.",
+      "type": "orphan_table",
+      "suggestedSql": "DROP TABLE \"expense_fts_config\";",
+      "category": "schema",
+      "title": "Orphan physical table 'expense_fts_config' — present in the database but not declared in the Drift schema. Left by a prior migration? Drop it or restore its definition.",
+      "id": "saropa_drift_advisor:orphan-table:expense_fts_config:orphan_table",
+      "fix": {
+        "kind": "command",
+        "command": "driftViewer.goToDefinitionForTable",
+        "args": [
+          {
+            "table": "expense_fts_config"
+          }
+        ],
+        "title": "Go to table definition"
+      },
+      "ruleId": "orphan-table"
+    },
+    {
+      "source": "advisor",
+      "severity": "warning",
+      "table": "expense_fts_content",
+      "message": "Orphan physical table 'expense_fts_content' — present in the database but not declared in the Drift schema. Left by a prior migration? Drop it or restore its definition.",
+      "type": "orphan_table",
+      "suggestedSql": "DROP TABLE \"expense_fts_content\";",
+      "category": "schema",
+      "title": "Orphan physical table 'expense_fts_content' — present in the database but not declared in the Drift schema. Left by a prior migration? Drop it or restore its definition.",
+      "id": "saropa_drift_advisor:orphan-table:expense_fts_content:orphan_table",
+      "fix": {
+        "kind": "command",
+        "command": "driftViewer.goToDefinitionForTable",
+        "args": [
+          {
+            "table": "expense_fts_content"
+          }
+        ],
+        "title": "Go to table definition"
+      },
+      "ruleId": "orphan-table"
+    },
+    {
+      "source": "advisor",
+      "severity": "warning",
+      "table": "expense_fts_data",
+      "message": "Orphan physical table 'expense_fts_data' — present in the database but not declared in the Drift schema. Left by a prior migration? Drop it or restore its definition.",
+      "type": "orphan_table",
+      "suggestedSql": "DROP TABLE \"expense_fts_data\";",
+      "category": "schema",
+      "title": "Orphan physical table 'expense_fts_data' — present in the database but not declared in the Drift schema. Left by a prior migration? Drop it or restore its definition.",
+      "id": "saropa_drift_advisor:orphan-table:expense_fts_data:orphan_table",
+      "fix": {
+        "kind": "command",
+        "command": "driftViewer.goToDefinitionForTable",
+        "args": [
+          {
+            "table": "expense_fts_data"
+          }
+        ],
+        "title": "Go to table definition"
+      },
+      "ruleId": "orphan-table"
+    },
+    {
+      "source": "advisor",
+      "severity": "warning",
+      "table": "expense_fts_docsize",
+      "message": "Orphan physical table 'expense_fts_docsize' — present in the database but not declared in the Drift schema. Left by a prior migration? Drop it or restore its definition.",
+      "type": "orphan_table",
+      "suggestedSql": "DROP TABLE \"expense_fts_docsize\";",
+      "category": "schema",
+      "title": "Orphan physical table 'expense_fts_docsize' — present in the database but not declared in the Drift schema. Left by a prior migration? Drop it or restore its definition.",
+      "id": "saropa_drift_advisor:orphan-table:expense_fts_docsize:orphan_table",
+      "fix": {
+        "kind": "command",
+        "command": "driftViewer.goToDefinitionForTable",
+        "args": [
+          {
+            "table": "expense_fts_docsize"
+          }
+        ],
+        "title": "Go to table definition"
+      },
+      "ruleId": "orphan-table"
+    },
+    {
+      "source": "advisor",
+      "severity": "warning",
+      "table": "expense_fts_idx",
+      "message": "Orphan physical table 'expense_fts_idx' — present in the database but not declared in the Drift schema. Left by a prior migration? Drop it or restore its definition.",
+      "type": "orphan_table",
+      "suggestedSql": "DROP TABLE \"expense_fts_idx\";",
+      "category": "schema",
+      "title": "Orphan physical table 'expense_fts_idx' — present in the database but not declared in the Drift schema. Left by a prior migration? Drop it or restore its definition.",
+      "id": "saropa_drift_advisor:orphan-table:expense_fts_idx:orphan_table",
+      "fix": {
+        "kind": "command",
+        "command": "driftViewer.goToDefinitionForTable",
+        "args": [
+          {
+            "table": "expense_fts_idx"
+          }
+        ],
+        "title": "Go to table definition"
+      },
+      "ruleId": "orphan-table"
+    },
+    {
+      "source": "advisor",
+      "severity": "info",
+      "table": "budgets",
+      "message": "budgets.category_id looks like a link to categories (category_id reference convention), but no foreign key or relationship is declared. Tooling (ER diagram, joins, NL queries, orphan checks) cannot see it. Declare it via a relationship manifest to make it visible — no schema change or PRAGMA needed.",
+      "type": "soft_relationship",
+      "fromTable": "budgets",
+      "fromColumn": "category_id",
+      "toTable": "categories",
+      "toColumn": "id",
+      "rule": "noun_id",
+      "category": "schema",
+      "title": "budgets.category_id looks like a link to categories (category_id reference convention), but no foreign key or relationship is declared. Tooling (ER diagram, joins, NL queries, orphan checks) cannot see it. Declare it via a relationship manifest to make it visible — no schema change or PRAGMA needed.",
+      "id": "saropa_drift_advisor:soft-relationship:budgets:category_id:soft_relationship:categories:id",
+      "fix": {
+        "kind": "command",
+        "command": "driftViewer.goToDefinitionForTable",
+        "args": [
+          {
+            "table": "budgets"
+          }
+        ],
+        "title": "Go to table definition"
+      },
+      "ruleId": "soft-relationship"
+    },
+    {
+      "source": "advisor",
+      "severity": "info",
+      "table": "budgets",
+      "message": "budgets.user_id looks like a link to users (user_id reference convention), but no foreign key or relationship is declared. Tooling (ER diagram, joins, NL queries, orphan checks) cannot see it. Declare it via a relationship manifest to make it visible — no schema change or PRAGMA needed.",
+      "type": "soft_relationship",
+      "fromTable": "budgets",
+      "fromColumn": "user_id",
+      "toTable": "users",
+      "toColumn": "id",
+      "rule": "noun_id",
+      "category": "schema",
+      "title": "budgets.user_id looks like a link to users (user_id reference convention), but no foreign key or relationship is declared. Tooling (ER diagram, joins, NL queries, orphan checks) cannot see it. Declare it via a relationship manifest to make it visible — no schema change or PRAGMA needed.",
+      "id": "saropa_drift_advisor:soft-relationship:budgets:user_id:soft_relationship:users:id",
+      "fix": {
+        "kind": "command",
+        "command": "driftViewer.goToDefinitionForTable",
+        "args": [
+          {
+            "table": "budgets"
+          }
+        ],
+        "title": "Go to table definition"
+      },
+      "ruleId": "soft-relationship"
+    },
+    {
+      "source": "advisor",
+      "severity": "info",
+      "table": "categories",
+      "message": "categories.user_id looks like a link to users (user_id reference convention), but no foreign key or relationship is declared. Tooling (ER diagram, joins, NL queries, orphan checks) cannot see it. Declare it via a relationship manifest to make it visible — no schema change or PRAGMA needed.",
+      "type": "soft_relationship",
+      "fromTable": "categories",
+      "fromColumn": "user_id",
+      "toTable": "users",
+      "toColumn": "id",
+      "rule": "noun_id",
+      "category": "schema",
+      "title": "categories.user_id looks like a link to users (user_id reference convention), but no foreign key or relationship is declared. Tooling (ER diagram, joins, NL queries, orphan checks) cannot see it. Declare it via a relationship manifest to make it visible — no schema change or PRAGMA needed.",
+      "id": "saropa_drift_advisor:soft-relationship:categories:user_id:soft_relationship:users:id",
+      "fix": {
+        "kind": "command",
+        "command": "driftViewer.goToDefinitionForTable",
+        "args": [
+          {
+            "table": "categories"
+          }
+        ],
+        "title": "Go to table definition"
+      },
+      "ruleId": "soft-relationship"
+    },
+    {
+      "source": "advisor",
+      "severity": "info",
+      "table": "expense_templates",
+      "message": "expense_templates.category_id looks like a link to categories (category_id reference convention), but no foreign key or relationship is declared. Tooling (ER diagram, joins, NL queries, orphan checks) cannot see it. Declare it via a relationship manifest to make it visible — no schema change or PRAGMA needed.",
+      "type": "soft_relationship",
+      "fromTable": "expense_templates",
+      "fromColumn": "category_id",
+      "toTable": "categories",
+      "toColumn": "id",
+      "rule": "noun_id",
+      "category": "schema",
+      "title": "expense_templates.category_id looks like a link to categories (category_id reference convention), but no foreign key or relationship is declared. Tooling (ER diagram, joins, NL queries, orphan checks) cannot see it. Declare it via a relationship manifest to make it visible — no schema change or PRAGMA needed.",
+      "id": "saropa_drift_advisor:soft-relationship:expense_templates:category_id:soft_relationship:categories:id",
+      "fix": {
+        "kind": "command",
+        "command": "driftViewer.goToDefinitionForTable",
+        "args": [
+          {
+            "table": "expense_templates"
+          }
+        ],
+        "title": "Go to table definition"
+      },
+      "ruleId": "soft-relationship"
+    },
+    {
+      "source": "advisor",
+      "severity": "info",
+      "table": "parsing_rules",
+      "message": "parsing_rules.category_id looks like a link to categories (category_id reference convention), but no foreign key or relationship is declared. Tooling (ER diagram, joins, NL queries, orphan checks) cannot see it. Declare it via a relationship manifest to make it visible — no schema change or PRAGMA needed.",
+      "type": "soft_relationship",
+      "fromTable": "parsing_rules",
+      "fromColumn": "category_id",
+      "toTable": "categories",
+      "toColumn": "id",
+      "rule": "noun_id",
+      "category": "schema",
+      "title": "parsing_rules.category_id looks like a link to categories (category_id reference convention), but no foreign key or relationship is declared. Tooling (ER diagram, joins, NL queries, orphan checks) cannot see it. Declare it via a relationship manifest to make it visible — no schema change or PRAGMA needed.",
+      "id": "saropa_drift_advisor:soft-relationship:parsing_rules:category_id:soft_relationship:categories:id",
+      "fix": {
+        "kind": "command",
+        "command": "driftViewer.goToDefinitionForTable",
+        "args": [
+          {
+            "table": "parsing_rules"
+          }
+        ],
+        "title": "Go to table definition"
+      },
+      "ruleId": "soft-relationship"
+    },
+    {
+      "source": "advisor",
+      "severity": "info",
+      "table": "pending_recurring",
+      "message": "pending_recurring.category_id looks like a link to categories (category_id reference convention), but no foreign key or relationship is declared. Tooling (ER diagram, joins, NL queries, orphan checks) cannot see it. Declare it via a relationship manifest to make it visible — no schema change or PRAGMA needed.",
+      "type": "soft_relationship",
+      "fromTable": "pending_recurring",
+      "fromColumn": "category_id",
+      "toTable": "categories",
+      "toColumn": "id",
+      "rule": "noun_id",
+      "category": "schema",
+      "title": "pending_recurring.category_id looks like a link to categories (category_id reference convention), but no foreign key or relationship is declared. Tooling (ER diagram, joins, NL queries, orphan checks) cannot see it. Declare it via a relationship manifest to make it visible — no schema change or PRAGMA needed.",
+      "id": "saropa_drift_advisor:soft-relationship:pending_recurring:category_id:soft_relationship:categories:id",
+      "fix": {
+        "kind": "command",
+        "command": "driftViewer.goToDefinitionForTable",
+        "args": [
+          {
+            "table": "pending_recurring"
+          }
+        ],
+        "title": "Go to table definition"
+      },
+      "ruleId": "soft-relationship"
+    },
+    {
+      "source": "advisor",
+      "severity": "info",
+      "table": "records",
+      "message": "records.category_id looks like a link to categories (category_id reference convention), but no foreign key or relationship is declared. Tooling (ER diagram, joins, NL queries, orphan checks) cannot see it. Declare it via a relationship manifest to make it visible — no schema change or PRAGMA needed.",
+      "type": "soft_relationship",
+      "fromTable": "records",
+      "fromColumn": "category_id",
+      "toTable": "categories",
+      "toColumn": "id",
+      "rule": "noun_id",
+      "category": "schema",
+      "title": "records.category_id looks like a link to categories (category_id reference convention), but no foreign key or relationship is declared. Tooling (ER diagram, joins, NL queries, orphan checks) cannot see it. Declare it via a relationship manifest to make it visible — no schema change or PRAGMA needed.",
+      "id": "saropa_drift_advisor:soft-relationship:records:category_id:soft_relationship:categories:id",
+      "fix": {
+        "kind": "command",
+        "command": "driftViewer.goToDefinitionForTable",
+        "args": [
+          {
+            "table": "records"
+          }
+        ],
+        "title": "Go to table definition"
+      },
+      "ruleId": "soft-relationship"
+    },
+    {
+      "source": "advisor",
+      "severity": "info",
+      "table": "records",
+      "message": "records.user_id looks like a link to users (user_id reference convention), but no foreign key or relationship is declared. Tooling (ER diagram, joins, NL queries, orphan checks) cannot see it. Declare it via a relationship manifest to make it visible — no schema change or PRAGMA needed.",
+      "type": "soft_relationship",
+      "fromTable": "records",
+      "fromColumn": "user_id",
+      "toTable": "users",
+      "toColumn": "id",
+      "rule": "noun_id",
+      "category": "schema",
+      "title": "records.user_id looks like a link to users (user_id reference convention), but no foreign key or relationship is declared. Tooling (ER diagram, joins, NL queries, orphan checks) cannot see it. Declare it via a relationship manifest to make it visible — no schema change or PRAGMA needed.",
+      "id": "saropa_drift_advisor:soft-relationship:records:user_id:soft_relationship:users:id",
+      "fix": {
+        "kind": "command",
+        "command": "driftViewer.goToDefinitionForTable",
+        "args": [
+          {
+            "table": "records"
+          }
+        ],
+        "title": "Go to table definition"
+      },
+      "ruleId": "soft-relationship"
+    },
+    {
+      "source": "advisor",
+      "severity": "info",
+      "table": "recurring_transactions",
+      "message": "recurring_transactions.category_id looks like a link to categories (category_id reference convention), but no foreign key or relationship is declared. Tooling (ER diagram, joins, NL queries, orphan checks) cannot see it. Declare it via a relationship manifest to make it visible — no schema change or PRAGMA needed.",
+      "type": "soft_relationship",
+      "fromTable": "recurring_transactions",
+      "fromColumn": "category_id",
+      "toTable": "categories",
+      "toColumn": "id",
+      "rule": "noun_id",
+      "category": "schema",
+      "title": "recurring_transactions.category_id looks like a link to categories (category_id reference convention), but no foreign key or relationship is declared. Tooling (ER diagram, joins, NL queries, orphan checks) cannot see it. Declare it via a relationship manifest to make it visible — no schema change or PRAGMA needed.",
+      "id": "saropa_drift_advisor:soft-relationship:recurring_transactions:category_id:soft_relationship:categories:id",
+      "fix": {
+        "kind": "command",
+        "command": "driftViewer.goToDefinitionForTable",
+        "args": [
+          {
+            "table": "recurring_transactions"
+          }
+        ],
+        "title": "Go to table definition"
+      },
+      "ruleId": "soft-relationship"
+    },
+    {
+      "source": "advisor",
+      "severity": "info",
+      "table": "sync_queue",
+      "message": "sync_queue.record_id looks like a link to records (record_id reference convention), but no foreign key or relationship is declared. Tooling (ER diagram, joins, NL queries, orphan checks) cannot see it. Declare it via a relationship manifest to make it visible — no schema change or PRAGMA needed.",
+      "type": "soft_relationship",
+      "fromTable": "sync_queue",
+      "fromColumn": "record_id",
+      "toTable": "records",
+      "toColumn": "id",
+      "rule": "noun_id",
+      "category": "schema",
+      "title": "sync_queue.record_id looks like a link to records (record_id reference convention), but no foreign key or relationship is declared. Tooling (ER diagram, joins, NL queries, orphan checks) cannot see it. Declare it via a relationship manifest to make it visible — no schema change or PRAGMA needed.",
+      "id": "saropa_drift_advisor:soft-relationship:sync_queue:record_id:soft_relationship:records:id",
+      "fix": {
+        "kind": "command",
+        "command": "driftViewer.goToDefinitionForTable",
+        "args": [
+          {
+            "table": "sync_queue"
+          }
+        ],
+        "title": "Go to table definition"
+      },
+      "ruleId": "soft-relationship"
+    }
+  ]
+}

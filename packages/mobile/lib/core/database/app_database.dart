@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 
@@ -60,7 +61,7 @@ part 'app_database.g.dart';
 )
 class AppDatabase extends _$AppDatabase {
   @override
-  int get schemaVersion => 14;
+  int get schemaVersion => 15;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -76,6 +77,15 @@ class AppDatabase extends _$AppDatabase {
 
   AppDatabase() : super(_openConnection());
   AppDatabase.forTesting(super.e);
+
+  Future<String>? _dbPathFuture;
+
+  Future<String> get dbPath => _dbPathFuture ??= _resolveDbPath();
+
+  Future<String> _resolveDbPath() async {
+    final dir = await getApplicationDocumentsDirectory();
+    return p.join(dir.path, 'expenzo_db.sqlite');
+  }
 
   Future<void> clearAllTables() async {
     await customStatement('PRAGMA foreign_keys = OFF');
@@ -105,6 +115,7 @@ class AppDatabase extends _$AppDatabase {
       _MigrationStep(12, _migrateV12),
       _MigrationStep(13, _migrateV13),
       _MigrationStep(14, _migrateV14),
+      _MigrationStep(15, _migrateV15),
     ];
 
     for (final step in steps) {
@@ -275,6 +286,25 @@ class AppDatabase extends _$AppDatabase {
     ''');
   }
 
+  Future<void> _migrateV15() async {
+    final queries = [
+      'CREATE INDEX IF NOT EXISTS idx_records_user_id ON records (user_id)',
+      'CREATE INDEX IF NOT EXISTS idx_categories_user_id ON categories (user_id)',
+      'CREATE INDEX IF NOT EXISTS idx_budgets_category_id ON budgets (category_id)',
+      'CREATE INDEX IF NOT EXISTS idx_budgets_user_id ON budgets (user_id)',
+      'CREATE INDEX IF NOT EXISTS idx_pending_recurring_req_id ON pending_recurring (recurring_id)',
+      'CREATE INDEX IF NOT EXISTS idx_pending_recurring_cat_id ON pending_recurring (category_id)',
+      'CREATE INDEX IF NOT EXISTS idx_recurring_transactions_cat_id ON recurring_transactions (category_id)',
+      'CREATE INDEX IF NOT EXISTS idx_expense_templates_source_id ON expense_templates (source_id)',
+      'CREATE INDEX IF NOT EXISTS idx_expense_templates_cat_id ON expense_templates (category_id)',
+      'CREATE INDEX IF NOT EXISTS idx_parsing_rules_cat_id ON parsing_rules (category_id)',
+    ];
+
+    for (final query in queries) {
+      await customStatement(query);
+    }
+  }
+
   Future<void> _createFtsTable(Future<void> Function(String) executor) async {
     await executor('''
       CREATE VIRTUAL TABLE IF NOT EXISTS expense_fts USING fts5(
@@ -321,6 +351,6 @@ LazyDatabase _openConnection() {
     final dbFolder = await getApplicationDocumentsDirectory();
     final file = File(p.join(dbFolder.path, 'expenzo_db.sqlite'));
 
-    return NativeDatabase.createInBackground(file);
+    return NativeDatabase.createInBackground(file, logStatements: kDebugMode);
   });
 }
