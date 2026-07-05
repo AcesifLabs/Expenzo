@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/features/message_templates/domain/entities/message_source.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/entities/parsed_transaction.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/entities/parsing_context.dart';
@@ -14,6 +15,7 @@ import 'package:expense_tracker/features/sms_parser/domain/entities/incoming_sms
 import 'package:expense_tracker/features/sms_parser/domain/services/realtime_sms_listener.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:talker/talker.dart';
 
 class MockRealtimeSmsListener extends Mock implements RealtimeSmsListener {}
 
@@ -31,6 +33,8 @@ void main() {
     registerFallbackValue(
       const ParsingContext(rules: [], templates: [], sources: []),
     );
+
+    appLogger.configure(settings: TalkerSettings(useConsoleLogs: false));
   });
 
   late MockRealtimeSmsListener listener;

@@ -1,5 +1,3 @@
-// ignore_for_file: prefer-match-file-name
-
 import 'package:drift/drift.dart';
 import '../../constants/record_type.dart';
 
@@ -18,4 +16,8 @@ class Categories extends Table {
 
   @override
   Set<Column> get primaryKey => {id};
+
+  Set<TableIndex> get indexes => {
+    const TableIndex(name: 'idx_categories_user_id', columns: {#userId}),
+  };
 }

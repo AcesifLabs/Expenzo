@@ -1,16 +1,22 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:picons/picons.dart';
-import 'package:expense_tracker/core/theme/app_colors.dart';
+
+import 'package:expense_tracker/core/database/app_database.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
+import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_state.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
+
 import '../bloc/settings_bloc.dart';
 import '../bloc/settings_event.dart';
 import '../bloc/settings_state.dart';
-import 'delete_account_dialog.dart';
 import '../widgets/currency_selector.dart';
+import 'debug_db_inspector_page.dart';
+import 'delete_account_dialog.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -78,6 +84,17 @@ class SettingsView extends StatelessWidget {
     context.read<SettingsBloc>().add(const DeleteAccountEvent());
   }
 
+  void _openDbInspector(BuildContext context) {
+    assert(kDebugMode, 'Database Inspector must only be opened in debug mode');
+    if (!kDebugMode) return;
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        fullscreenDialog: true,
+        builder: (_) => DebugDbInspectorPage(database: di.getIt<AppDatabase>()),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
@@ -108,6 +125,13 @@ class SettingsView extends StatelessWidget {
               title: 'Delete Account',
               titleColor: AppColors.error,
               onTap: () => _handleDeleteAccountTap(context),
+            ),
+          if (kDebugMode)
+            _SettingTile(
+              icon: Icons.storage,
+              title: 'Database Inspector',
+              subtitle: 'Debug builds only',
+              onTap: () => _openDbInspector(context),
             ),
         ],
       ),

@@ -1,5 +1,3 @@
-// ignore_for_file: prefer-match-file-name
-
 class CurrencySymbol {
   final String code;
   final String symbol;

@@ -313,6 +313,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.10.1"
+  db_viewer:
+    dependency: transitive
+    description:
+      name: db_viewer
+      sha256: "5f7e3cfcde9663321797d8f6f0c876f7c13f0825a2e77ec1ef065656797144d9"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
   dbus:
     dependency: transitive
     description:
@@ -345,6 +353,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.19.1+1"
+  drift_db_viewer:
+    dependency: "direct dev"
+    description:
+      name: drift_db_viewer
+      sha256: "5ea77858c52b55460a1e8f34ab5f88324621d486717d876fd745765fbc227f3f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
   drift_dev:
     dependency: "direct dev"
     description:
@@ -848,7 +864,7 @@ packages:
     source: hosted
     version: "0.13.0"
   meta:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: meta
       sha256: "1741988757a65eb6b36abe716829688cf01910bbf91c34354ff7ec1c3de2b349"
@@ -1127,6 +1143,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.0"
+  saropa_drift_advisor:
+    dependency: "direct main"
+    description:
+      name: saropa_drift_advisor
+      sha256: "2bfd7c8c875138de0cda325d56cf9163957777dbdf669d235dab2dc8a1b30af9"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.1.19"
   shared_preferences:
     dependency: "direct main"
     description:

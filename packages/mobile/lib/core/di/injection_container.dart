@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:meta/meta.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -32,11 +33,29 @@ import 'dashboard_module.dart';
 
 final getIt = GetIt.instance;
 
-Future<void> get criticalDependenciesReady =>
-    getIt.get<Future<void>>(instanceName: 'criticalReady');
+/// Returns the future registered for [name], running [init] first if the
+/// future has not yet been registered. This makes the dependent getter
+/// safe to `await` from any caller regardless of whether the init has
+/// been scheduled yet — the underlying init function is idempotent and
+/// will only run once.
+Future<void> _ensureReady(String name, Future<void> Function() init) async {
+  await init();
 
+  return getIt.get<Future<void>>(instanceName: name);
+}
+
+/// Safe to `await` from anywhere. If [initCriticalDependencies] has not
+/// been run yet, this getter runs it (and awaits the result) before
+/// returning the future.
+Future<void> get criticalDependenciesReady =>
+    _ensureReady('criticalReady', initCriticalDependencies);
+
+/// Safe to `await` from any widget, regardless of when
+/// [initFeatureDependencies] was scheduled. The underlying
+/// [initFeatureDependencies] is idempotent and will be run on the first
+/// call if it has not been run yet.
 Future<void> get featureDependenciesReady =>
-    getIt.get<Future<void>>(instanceName: 'featureReady');
+    _ensureReady('featureReady', initFeatureDependencies);
 
 void _registerDaoFactories() {
   getIt.registerFactory<RecordDao>(() => RecordDao(getIt<AppDatabase>()));
@@ -54,6 +73,8 @@ void _registerDaoFactories() {
 
 Future<void> initCriticalDependencies() async {
   if (getIt.isRegistered<Future<void>>(instanceName: 'criticalReady')) return;
+
+  criticalInitRunCount++;
 
   final completer = Completer<void>();
   getIt.registerSingleton<Future<void>>(
@@ -114,8 +135,27 @@ Future<void> resetDatabaseInstance() async {
   await TokenStorage.clearSyncState();
 }
 
+/// Counts the number of times [initCriticalDependencies] has actually
+/// run (i.e. the `isRegistered` guard did not short-circuit). Tests
+/// reset this in `setUp` and assert it bumps after `GetIt.I.reset()`,
+/// which pins the "run-once per GetIt registration" contract the
+/// dartdoc on [criticalDependenciesReady] promises — the guard
+/// short-circuits as long as the completer stays registered.
+@visibleForTesting
+int criticalInitRunCount = 0;
+
+/// Counts the number of times [initFeatureDependencies] has actually
+/// run the module inits (i.e. the `isRegistered` guard did not
+/// short-circuit). Tests reset this in `setUp` and assert it stays at
+/// 1 after multiple getter calls, which pins the run-once contract the
+/// dartdoc on [featureDependenciesReady] promises.
+@visibleForTesting
+int featureInitRunCount = 0;
+
 Future<void> initFeatureDependencies() async {
   if (getIt.isRegistered<Future<void>>(instanceName: 'featureReady')) return;
+
+  featureInitRunCount++;
 
   final completer = Completer<void>();
   getIt.registerSingleton<Future<void>>(

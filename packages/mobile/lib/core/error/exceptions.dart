@@ -1,5 +1,3 @@
-// ignore_for_file: prefer-match-file-name
-
 import 'failures.dart';
 
 class ServerException implements Exception {

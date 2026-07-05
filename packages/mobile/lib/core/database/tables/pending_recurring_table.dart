@@ -1,5 +1,3 @@
-// ignore_for_file: prefer-match-file-name
-
 import 'package:drift/drift.dart';
 
 class PendingRecurring extends Table {
@@ -13,4 +11,15 @@ class PendingRecurring extends Table {
 
   @override
   Set<Column> get primaryKey => {id};
+
+  Set<TableIndex> get indexes => {
+    const TableIndex(
+      name: 'idx_pending_recurring_req_id',
+      columns: {#recurringId},
+    ),
+    const TableIndex(
+      name: 'idx_pending_recurring_cat_id',
+      columns: {#categoryId},
+    ),
+  };
 }

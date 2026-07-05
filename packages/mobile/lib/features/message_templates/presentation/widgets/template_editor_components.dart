@@ -4,8 +4,6 @@ import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:expense_tracker/core/theme/app_typography.dart';
 
-// ignore_for_file: prefer-match-file-name
-
 /// Step state for the progress indicator.
 enum _StepDotState { completed, active, inactive }
 

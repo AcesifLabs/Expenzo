@@ -33,7 +33,7 @@ class CategoryPickerItem extends StatelessWidget {
     return isSelected ? selectedColor : colors.onSurface.withAlpha(150);
   }
 
-  Widget _label() {
+  Widget _label(Color textColor) {
     return ClipRect(
       child: AnimatedSize(
         duration: const Duration(milliseconds: 300),
@@ -43,9 +43,10 @@ class CategoryPickerItem extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 8),
                 child: Text(
                   category.name,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
+                    color: textColor,
                   ),
                   maxLines: 1,
                 ),
@@ -59,7 +60,6 @@ class CategoryPickerItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final iconColor = _iconColor(colors);
-    // ignore: unused_local_variable
     final textColor = _resolveTextColor(
       iconColor,
       Theme.of(context).colorScheme.brightness == Brightness.light,
@@ -88,7 +88,7 @@ class CategoryPickerItem extends StatelessWidget {
               size: 20,
               color: iconColor,
             ),
-            _label(),
+            _label(textColor),
           ],
         ),
       ),

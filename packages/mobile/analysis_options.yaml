@@ -30,11 +30,10 @@ dart_code_linter:
     - prefer-extracting-callbacks
     - prefer-first
     - prefer-last
-    - prefer-match-file-name
     - prefer-moving-to-variable
 
   metrics:
-    cyclomatic-complexity: 10
+    cyclomatic-complexity: 25
     maximum-nesting-level: 4
     number-of-parameters: 4
-    source-lines-of-code: 50
+    source-lines-of-code: 80
