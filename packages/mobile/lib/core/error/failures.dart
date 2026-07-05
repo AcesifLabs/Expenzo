@@ -1,5 +1,3 @@
-// ignore_for_file: prefer-match-file-name
-
 import 'package:equatable/equatable.dart';
 
 abstract class Failure extends Equatable {

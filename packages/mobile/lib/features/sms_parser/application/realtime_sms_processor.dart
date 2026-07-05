@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:expense_tracker/core/constants/source_types.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/services/parsing_isolate_service.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/usecases/evaluate_rules_use_case.dart';
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
@@ -143,9 +144,9 @@ class RealtimeSmsProcessor {
     }
   }
 
-  // TODO: re-enable logging when appLogger is wired up
-  // ignore: avoid-unused-parameters, no-empty-block
-  void _logError(String message, Object error, StackTrace? stackTrace) {}
+  void _logError(String message, Object error, StackTrace? stackTrace) {
+    appLogger.error(message, error, stackTrace);
+  }
 
   bool _isMonitoredSender(String sender, Iterable<MonitoredSource> sources) {
     final normalizedSender = SmsSenderNormalizer.normalize(sender);

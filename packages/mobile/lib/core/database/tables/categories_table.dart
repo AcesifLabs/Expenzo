@@ -1,5 +1,3 @@
-// ignore_for_file: prefer-match-file-name
-
 import 'package:drift/drift.dart';
 import '../../constants/record_type.dart';
 

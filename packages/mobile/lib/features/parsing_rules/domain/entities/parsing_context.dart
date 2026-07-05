@@ -9,16 +9,15 @@ class ParsingContext extends Equatable {
   final List<MessageSource> sources;
   final Map<String, RegExp> regexCache;
 
+  @override
+  List<Object?> get props => [rules, templates, sources, regexCache];
+
   const ParsingContext({
     required this.rules,
     required this.templates,
     required this.sources,
     this.regexCache = const {},
   });
-
-  // ignore: member-ordering
-  @override
-  List<Object?> get props => [rules, templates, sources, regexCache];
 
   ParsingContext withPrecompiledRegex() {
     final cache = <String, RegExp>{};

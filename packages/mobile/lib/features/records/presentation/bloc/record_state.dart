@@ -1,5 +1,3 @@
-// ignore_for_file: cyclomatic-complexity
-
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/record.dart';
 

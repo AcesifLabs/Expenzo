@@ -60,6 +60,8 @@ part 'app_database.g.dart';
   ],
 )
 class AppDatabase extends _$AppDatabase {
+  Future<String>? _dbPathFuture;
+
   @override
   int get schemaVersion => 15;
 
@@ -75,17 +77,10 @@ class AppDatabase extends _$AppDatabase {
     },
   );
 
-  AppDatabase() : super(_openConnection());
-  AppDatabase.forTesting(super.e);
-
-  Future<String>? _dbPathFuture;
-
   Future<String> get dbPath => _dbPathFuture ??= _resolveDbPath();
 
-  Future<String> _resolveDbPath() async {
-    final dir = await getApplicationDocumentsDirectory();
-    return p.join(dir.path, 'expenzo_db.sqlite');
-  }
+  AppDatabase() : super(_openConnection());
+  AppDatabase.forTesting(super.e);
 
   Future<void> clearAllTables() async {
     await customStatement('PRAGMA foreign_keys = OFF');
@@ -99,6 +94,12 @@ class AppDatabase extends _$AppDatabase {
     } finally {
       await customStatement('PRAGMA foreign_keys = ON');
     }
+  }
+
+  Future<String> _resolveDbPath() async {
+    final dir = await getApplicationDocumentsDirectory();
+
+    return p.join(dir.path, 'expenzo_db.sqlite');
   }
 
   Future<void> _runMigrations(Migrator m, int from) async {

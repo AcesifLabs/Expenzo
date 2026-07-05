@@ -52,10 +52,11 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     'Investment dividend',
   ];
 
-  // ignore: avoid-late-keyword
-  late final AnimationController _glowController;
-  // ignore: avoid-late-keyword
-  late final CurvedAnimation _glowCurve;
+  AnimationController? _glowController;
+  CurvedAnimation? _glowCurve;
+
+  Listenable get _glowListenable =>
+      _glowCurve ?? const AlwaysStoppedAnimation<double>(0);
 
   RecordType _type = RecordType.expense;
   final _amountText = ValueNotifier<String>('');
@@ -77,16 +78,17 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     _loadCategories();
     initTypewriter(_expensePlaceholders);
 
-    _glowController = AnimationController(
+    final glow = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
     );
+    _glowController = glow;
     _glowCurve = CurvedAnimation(
-      parent: _glowController,
+      parent: glow,
       curve: Curves.easeIn,
       reverseCurve: Curves.easeOut,
     );
-    _glowController.addStatusListener(_onGlowStatus);
+    glow.addStatusListener(_onGlowStatus);
     _noteCtrl.addListener(_onNoteChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) startTypewriter();
@@ -95,7 +97,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
 
   void _onGlowStatus(AnimationStatus status) {
     if (status == AnimationStatus.completed) {
-      _glowController.reverse();
+      _glowController?.reverse();
     } else if (status == AnimationStatus.dismissed) {
       setState(() {
         _labelError = false;
@@ -207,7 +209,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   }
 
   void _switchType(RecordType t) {
-    _glowController.reset();
+    _glowController?.reset();
     stopTypewriter();
     setState(() {
       _type = t;
@@ -265,11 +267,15 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   }) {
     if (!hasError) return fallback ?? Colors.transparent;
 
-    if (_glowController.isAnimating) {
+    final glowController = _glowController;
+    final glowCurve = _glowCurve;
+    if (glowController != null &&
+        glowController.isAnimating &&
+        glowCurve != null) {
       final lerped = Color.lerp(
         colors.error.withAlpha(80),
         colors.error,
-        _glowCurve.value,
+        glowCurve.value,
       );
 
       return lerped ?? colors.error;
@@ -279,7 +285,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   }
 
   void _triggerValidationGlow() {
-    _glowController.forward(from: 0.0);
+    _glowController?.forward(from: 0.0);
   }
 
   bool _validateInput(double amount, String description) {
@@ -447,7 +453,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
         : colors.primary;
 
     return AnimatedBuilder(
-      animation: _glowCurve,
+      animation: _glowListenable,
       builder: (context, _) {
         final borderColor = _resolveGlowBorderColor(
           _labelError,
@@ -688,7 +694,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
         final displayCats = _buildDisplayCategories(allCats);
 
         return AnimatedBuilder(
-          animation: _glowCurve,
+          animation: _glowListenable,
           builder: (context, _) => Container(
             height: 50,
             margin: const EdgeInsets.symmetric(vertical: 8),
@@ -718,7 +724,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   @override
   void dispose() {
     _noteCtrl.removeListener(_onNoteChanged);
-    _glowController.dispose();
+    _glowController?.dispose();
     _amountText.dispose();
     _noteCtrl.dispose();
     super.dispose();
