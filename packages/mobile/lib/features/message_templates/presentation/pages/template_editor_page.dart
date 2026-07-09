@@ -21,10 +21,18 @@ class TemplateEditorPage extends StatelessWidget {
   final MessageSource source;
   final SmsMessage sampleMessage;
 
+  /// When provided, the page enters edit-mode: trigger word and amount
+  /// are pre-filled from this template, the AppBar title says
+  /// "Edit Template", the row id is preserved so save upserts the
+  /// existing row, and the post-save retroactive-scan dialog is
+  /// skipped. When null, the page is in create-mode.
+  final ExpenseTemplate? existingTemplate;
+
   const TemplateEditorPage({
     super.key,
     required this.source,
     required this.sampleMessage,
+    this.existingTemplate,
   });
 
   @override
@@ -37,6 +45,7 @@ class TemplateEditorPage extends StatelessWidget {
       child: InteractiveTemplateBuilder(
         source: source,
         sampleMessage: sampleMessage,
+        existingTemplate: existingTemplate,
       ),
     );
   }
@@ -45,11 +54,13 @@ class TemplateEditorPage extends StatelessWidget {
 class InteractiveTemplateBuilder extends StatefulWidget {
   final MessageSource source;
   final SmsMessage sampleMessage;
+  final ExpenseTemplate? existingTemplate;
 
   const InteractiveTemplateBuilder({
     super.key,
     required this.source,
     required this.sampleMessage,
+    this.existingTemplate,
   });
 
   @override
@@ -94,6 +105,35 @@ class _InteractiveTemplateBuilderState
         .allMatches(widget.sampleMessage.body)
         .map((m) => m.group(0) ?? '')
         .toList();
+
+    _applyExistingTemplatePrefill();
+  }
+
+  /// In edit-mode, pre-select the previously chosen trigger word and
+  /// amount so the user can either accept or revise.
+  void _applyExistingTemplatePrefill() {
+    final existing = widget.existingTemplate;
+    if (existing == null) return;
+
+    _selectedTrigger = existing.triggerWord;
+
+    final savedStripped = existing.selectedAmount;
+    if (savedStripped != null) {
+      for (final raw in _numbers) {
+        if (_stripCurrencyPrefix(raw) == savedStripped) {
+          _selectedAmount = raw;
+
+          break;
+        }
+      }
+      // If the previous amount isn't in this message body (rare), leave
+      // _selectedAmount null so the user re-picks on Step 2.
+    }
+
+    // Open at Step 3 (Review) in edit-mode so the user sees the live
+    // values they just loaded and can either accept or step back to
+    // adjust. Create-mode still opens at Step 1.
+    _step = 3;
   }
 
   void _onWordSelected(String? cleanWord, bool selected) {
@@ -122,16 +162,23 @@ class _InteractiveTemplateBuilderState
     final amountPattern =
         r'(?:[A-Z]{2,4}[\s.]*|[$€£৳₹]\s*)?([\d][\d,]*\.\d+|[\d]+)';
 
+    final existing = widget.existingTemplate;
+    final now = DateTime.now();
+
     _savedTemplate = ExpenseTemplate(
-      id: 'tmpl_${DateTime.now().millisecondsSinceEpoch}',
+      // Preserve id in edit-mode so save upserts the same row.
+      id: existing?.id ?? 'tmpl_${now.millisecondsSinceEpoch}',
       sourceId: widget.source.id,
       sampleMessage: widget.sampleMessage.body,
       triggerWord: trigger,
       amountPattern: amountPattern,
       selectedAmount: _stripCurrencyPrefix(amount),
-      descriptionPattern: widget.source.contactName,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
+      descriptionPattern:
+          existing?.descriptionPattern ?? widget.source.contactName,
+      datePattern: existing?.datePattern,
+      categoryId: existing?.categoryId,
+      createdAt: existing?.createdAt ?? now,
+      updatedAt: now,
     );
 
     final saved = _savedTemplate;
@@ -457,14 +504,24 @@ class _InteractiveTemplateBuilderState
     BuildContext context,
     ExpenseTemplate saved,
   ) async {
-    await showRetroactiveScanDialog(context, widget.source, saved);
+    final isEdit = widget.existingTemplate != null;
 
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Template saved successfully!')),
-      );
-      Navigator.of(context).pop();
+    // Edit-mode skips the retroactive scan: editing doesn't generate
+    // new candidate messages. Create-mode keeps the existing flow.
+    if (!isEdit) {
+      await showRetroactiveScanDialog(context, widget.source, saved);
     }
+
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          isEdit ? 'Template updated' : 'Template saved successfully!',
+        ),
+      ),
+    );
+    Navigator.of(context).pop();
   }
 
   Widget _buildCurrentStep() {
@@ -495,7 +552,7 @@ class _InteractiveTemplateBuilderState
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          'Create Template',
+          widget.existingTemplate != null ? 'Edit Template' : 'Create Template',
           style: AppTypography.titleMedium.copyWith(
             color: AppColors.textPrimaryDark,
             fontWeight: FontWeight.w600,

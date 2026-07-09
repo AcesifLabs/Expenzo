@@ -82,7 +82,10 @@ void _initMessageTemplates(GetIt getIt) {
     () => ContactSelectorBloc(smsDatasource: getIt<SmsLocalDatasource>()),
   );
   getIt.registerFactory<SampleAnalyzerBloc>(
-    () => SampleAnalyzerBloc(smsDatasource: getIt<SmsLocalDatasource>()),
+    () => SampleAnalyzerBloc(
+      smsDatasource: getIt<SmsLocalDatasource>(),
+      templateRepository: getIt<MessageTemplateRepository>(),
+    ),
   );
   getIt.registerFactory<TemplateEditorBloc>(
     () => TemplateEditorBloc(

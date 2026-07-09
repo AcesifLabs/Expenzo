@@ -15,6 +15,14 @@ import 'sample_analyzer_page.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import '../../../parsing_rules/presentation/widgets/transaction_list_skeleton.dart';
 
+/// Returns true only when the keyboard transitioned from open to closed,
+/// i.e. the previous bottom view inset was positive and the current one is
+/// zero. Used to unfocus the search field once the keyboard collapses.
+bool keyboardJustCollapsed({
+  required double previousBottomInset,
+  required double currentBottomInset,
+}) => previousBottomInset > 0 && currentBottomInset == 0;
+
 class ContactSelectorPage extends StatelessWidget {
   const ContactSelectorPage({super.key});
 
@@ -42,20 +50,18 @@ class ContactSelectorView extends StatefulWidget {
   State<ContactSelectorView> createState() => _ContactSelectorViewState();
 }
 
-class _ContactSelectorViewState extends State<ContactSelectorView> {
+class _ContactSelectorViewState extends State<ContactSelectorView>
+    with WidgetsBindingObserver {
   String _searchQuery = '';
   final ScrollController _scrollController = ScrollController();
+  final FocusNode _searchFocusNode = FocusNode();
+  double _lastBottomInset = 0;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-  }
-
-  void _onScroll() {
-    if (_isBottom) {
-      context.read<ContactSelectorBloc>().add(LoadMoreContacts());
-    }
+    WidgetsBinding.instance.addObserver(this);
   }
 
   bool get _isBottom {
@@ -64,6 +70,12 @@ class _ContactSelectorViewState extends State<ContactSelectorView> {
     final currentScroll = _scrollController.offset;
 
     return currentScroll >= (maxScroll * 0.9);
+  }
+
+  void _onScroll() {
+    if (_isBottom) {
+      context.read<ContactSelectorBloc>().add(LoadMoreContacts());
+    }
   }
 
   void _onSearchChanged(String value) {
@@ -136,6 +148,7 @@ class _ContactSelectorViewState extends State<ContactSelectorView> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
       child: TextField(
+        focusNode: _searchFocusNode,
         decoration: InputDecoration(
           hintText: 'Search contacts...',
           hintStyle: TextStyle(color: surfaceDimAlpha),
@@ -326,7 +339,31 @@ class _ContactSelectorViewState extends State<ContactSelectorView> {
   }
 
   @override
+  void didChangeMetrics() {
+    super.didChangeMetrics();
+
+    final currentBottomInset = WidgetsBinding
+        .instance
+        .platformDispatcher
+        .views
+        .first
+        .viewInsets
+        .bottom;
+
+    if (keyboardJustCollapsed(
+      previousBottomInset: _lastBottomInset,
+      currentBottomInset: currentBottomInset,
+    )) {
+      _searchFocusNode.unfocus();
+    }
+
+    _lastBottomInset = currentBottomInset;
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _searchFocusNode.dispose();
     _scrollController.dispose();
     super.dispose();
   }
