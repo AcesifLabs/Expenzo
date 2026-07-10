@@ -6,6 +6,7 @@ import 'package:expense_tracker/features/settings/domain/repositories/settings_r
 import 'package:expense_tracker/features/settings/domain/usecases/get_settings.dart';
 import 'package:expense_tracker/features/settings/domain/usecases/update_settings.dart';
 import 'package:expense_tracker/features/settings/presentation/bloc/settings_bloc.dart';
+import 'package:expense_tracker/features/auth/domain/usecases/delete_account.dart';
 
 void initSettingsModule(GetIt getIt) {
   getIt.registerLazySingleton<SettingsLocalDatasource>(
@@ -29,6 +30,7 @@ void initSettingsModule(GetIt getIt) {
     () => SettingsBloc(
       getSettings: getIt<GetSettings>(),
       updateSettings: getIt<UpdateSettings>(),
+      deleteAccount: getIt<DeleteAccount>(),
     ),
   );
 }

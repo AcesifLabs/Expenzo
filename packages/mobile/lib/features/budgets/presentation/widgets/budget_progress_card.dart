@@ -53,13 +53,13 @@ class BudgetProgressCard extends StatelessWidget {
       children: [
         Text(
           '${fmt.format(progress.spentAmount)} spent / ${fmt.format(progress.budgetAmount)} budget',
-          style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+          style: TextStyle(fontSize: 14, color: AppColors.textSecondaryLight),
         ),
         if (progress.rolloverAmount > 0) ...[
           const SizedBox(height: 4),
           Text(
             'Includes ${fmt.format(progress.rolloverAmount)} rollover',
-            style: TextStyle(fontSize: 12, color: Colors.green[700]),
+            style: TextStyle(fontSize: 12, color: AppColors.success),
           ),
         ],
         const SizedBox(height: 12),
@@ -70,7 +70,10 @@ class BudgetProgressCard extends StatelessWidget {
           children: [
             Text(
               '${progress.percentage.toStringAsFixed(0)}% used',
-              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              style: TextStyle(
+                fontSize: 12,
+                color: AppColors.textSecondaryLight,
+              ),
             ),
             if (progress.isOverBudget)
               Text(

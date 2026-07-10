@@ -36,7 +36,9 @@ class GetBudgetTransactions {
 
         return result.fold(
           (failure) => Left<Failure, List<Record>>(failure),
-          (records) => Right<Failure, List<Record>>(records),
+          (records) => Right<Failure, List<Record>>(
+            records.where((r) => r.recordType == RecordType.expense).toList(),
+          ),
         );
       }
 

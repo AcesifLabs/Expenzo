@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/theme/currency_config.dart';
 
 class CurrencySelector extends StatefulWidget {
   final String currentSymbol;
@@ -61,7 +62,7 @@ class _CurrencySelectorState extends State<CurrencySelector> {
     if (_isCustom) {
       widget.onSymbolSelected(_customController.text);
     } else {
-      widget.onSymbolSelected('\$_');
+      widget.onSymbolSelected(CurrencyConfig.defaultSymbol);
     }
   }
 

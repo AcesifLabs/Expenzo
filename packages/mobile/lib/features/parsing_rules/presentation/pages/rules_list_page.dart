@@ -280,13 +280,11 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
   }
 
   void _onAmountPatternChanged(String _) {
-    setState(
-      () => _amountPatternController.text = _amountPatternController.text,
-    );
+    // Controller text is already updated by the TextFormField
   }
 
   void _onDatePatternChanged(String _) {
-    setState(() => _datePatternController.text = _datePatternController.text);
+    // Controller text is already updated by the TextFormField
   }
 
   void _onSourceTypeChanged(Set<SourceType> selection) {
@@ -302,7 +300,7 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
   }
 
   void _onRegexTestResult(ParsedTestResult _) {
-    setState(() => _isEnabled = _isEnabled);
+    // Result is displayed by the regex tester widget
   }
 
   TextFormField _buildNameField() {

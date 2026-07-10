@@ -31,13 +31,7 @@ class CheckBudgetAlerts {
             ? (spentAmount / effectiveBudget) * 100
             : 0.0;
 
-        if (percentage >= 100) {
-          await notificationService.showBudgetAlert(
-            budgetId: budgetId,
-            budgetName: budget.categoryId ?? 'Overall Budget',
-            percentage: percentage,
-          );
-        } else if (percentage >= 80) {
+        if (percentage >= 80) {
           await notificationService.showBudgetAlert(
             budgetId: budgetId,
             budgetName: budget.categoryId ?? 'Overall Budget',

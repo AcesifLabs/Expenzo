@@ -89,10 +89,13 @@ class ParsingRulesBloc extends Bloc<ParsingRulesEvent, ParsingRulesState> {
   ) async {
     final currentState = state;
     if (currentState is ParsingRulesLoaded) {
-      final rule = currentState.rules.firstWhere(
-        (r) => r.id == event.ruleId,
-        orElse: () => throw ArgumentError('Rule not found: ${event.ruleId}'),
-      );
+      final matching = currentState.rules.where((r) => r.id == event.ruleId);
+      if (matching.isEmpty) {
+        emit(const ParsingRulesError(message: 'Rule not found'));
+
+        return;
+      }
+      final rule = matching.first;
 
       final updatedRule = rule.copyWith(
         isEnabled: event.isEnabled,

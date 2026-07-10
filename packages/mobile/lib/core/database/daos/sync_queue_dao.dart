@@ -34,12 +34,11 @@ class SyncQueueDao extends DatabaseAccessor<AppDatabase>
   }
 
   Future<void> markSynced(List<int> ids) async {
+    if (ids.isEmpty) return;
     final now = DateTime.now().toUtc();
-    for (final id in ids) {
-      await (update(syncQueue)..where((t) => t.id.equals(id))).write(
-        SyncQueueCompanion(syncedAt: Value(now)),
-      );
-    }
+    await (update(syncQueue)..where((t) => t.id.isIn(ids))).write(
+      SyncQueueCompanion(syncedAt: Value(now)),
+    );
   }
 
   Future<int> getUnsyncedCount() async {

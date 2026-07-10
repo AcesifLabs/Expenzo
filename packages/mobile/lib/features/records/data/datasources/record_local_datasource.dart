@@ -68,9 +68,20 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
   }) async {
     try {
       if (dateRange != null) {
+        // Normalize end to end-of-day for inclusive queries
+        final end = dateRange.end;
+        final inclusiveEnd = DateTime(
+          end.year,
+          end.month,
+          end.day,
+          23,
+          59,
+          59,
+          999,
+        );
         final records = await recordDao.getRecordsByDateRange(
           dateRange.start,
-          dateRange.end,
+          inclusiveEnd,
         );
 
         return records.map<rec.Record>((e) => _mapToEntity(e)).toList();
@@ -258,7 +269,20 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
     DateTime end,
   ) async {
     try {
-      final records = await recordDao.getRecordsByDateRangeOnly(start, end);
+      // Normalize end to end-of-day for inclusive queries
+      final inclusiveEnd = DateTime(
+        end.year,
+        end.month,
+        end.day,
+        23,
+        59,
+        59,
+        999,
+      );
+      final records = await recordDao.getRecordsByDateRangeOnly(
+        start,
+        inclusiveEnd,
+      );
 
       return records.map<rec.Record>((e) => _mapToEntity(e)).toList();
     } catch (e, s) {

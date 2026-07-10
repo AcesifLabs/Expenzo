@@ -2,6 +2,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter/foundation.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
 import 'package:expense_tracker/core/logger/app_logger.dart';
+import 'package:expense_tracker/core/utils/regex_utils.dart';
 import '../entities/parsing_rule.dart';
 import '../entities/parsed_transaction.dart';
 import '../entities/evaluate_rules_params.dart';
@@ -106,7 +107,7 @@ class RuleEvaluator {
     try {
       final regex =
           regexCache[template.amountPattern] ?? RegExp(template.amountPattern);
-      final allMatches = regex.allMatches(params.rawMessage).toList();
+      final allMatches = matchAllWithBudget(regex, params.rawMessage);
       final selectedAmount = template.selectedAmount;
 
       final amountMatch = resolveAmountMatch(
@@ -164,7 +165,7 @@ class RuleEvaluator {
     try {
       final regex =
           regexCache[rule.amountPattern] ?? RegExp(rule.amountPattern);
-      final amountMatch = regex.firstMatch(params.rawMessage);
+      final amountMatch = matchFirstWithBudget(regex, params.rawMessage);
 
       if (amountMatch == null) return null;
 
@@ -223,7 +224,7 @@ class RuleEvaluator {
     Map<String, RegExp> regexCache,
   ) {
     final dateRegex = regexCache[datePattern] ?? RegExp(datePattern);
-    final dateMatch = dateRegex.firstMatch(params.rawMessage);
+    final dateMatch = matchFirstWithBudget(dateRegex, params.rawMessage);
     if (dateMatch == null) return null;
 
     return _parseDate(dateMatch.group(0) ?? '');

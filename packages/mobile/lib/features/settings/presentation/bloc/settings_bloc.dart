@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:expense_tracker/core/bloc/transformers.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
+import 'package:expense_tracker/features/auth/domain/usecases/delete_account.dart';
 import '../../domain/usecases/get_settings.dart';
 import '../../domain/usecases/update_settings.dart';
 import 'settings_event.dart';
@@ -9,9 +10,13 @@ import 'settings_state.dart';
 class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   final GetSettings getSettings;
   final UpdateSettings updateSettings;
+  final DeleteAccount deleteAccount;
 
-  SettingsBloc({required this.getSettings, required this.updateSettings})
-    : super(const SettingsInitial()) {
+  SettingsBloc({
+    required this.getSettings,
+    required this.updateSettings,
+    required this.deleteAccount,
+  }) : super(const SettingsInitial()) {
     on<LoadSettings>(_onLoadSettings, transformer: concurrent());
     on<UpdateSettingsEvent>(_onUpdateSettings, transformer: concurrent());
     on<UpdateCurrencySymbol>(
@@ -101,13 +106,15 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     }
   }
 
-  void _onDeleteAccountEvent(
+  Future<void> _onDeleteAccountEvent(
     DeleteAccountEvent event,
     Emitter<SettingsState> emit,
-  ) {
+  ) async {
     emit(const SettingsLoading());
-    // Account deletion would call a remote API here
-    // For now, emit an informative state
-    emit(const SettingsError('Account deletion not yet implemented'));
+    final result = await deleteAccount(NoParams());
+    result.fold(
+      (failure) => emit(SettingsError(failure.message)),
+      (_) => emit(const AccountDeleted()),
+    );
   }
 }

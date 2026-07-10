@@ -21,7 +21,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     required this.updateCategory,
     required this.deleteCategory,
   }) : super(const CategoryInitial()) {
-    on<LoadCategories>(_onLoadCategories, transformer: concurrent());
+    on<LoadCategories>(_onLoadCategories, transformer: restartable());
     on<CreateCategoryEvent>(_onCreateCategory, transformer: sequential());
     on<UpdateCategoryEvent>(_onUpdateCategory, transformer: sequential());
     on<DeleteCategoryEvent>(_onDeleteCategory, transformer: sequential());

@@ -27,9 +27,9 @@ class ReportsBloc extends Bloc<ReportsEvent, ReportsState> {
        _endDate = endDate,
        _granularity = granularity,
        super(ReportsInitial()) {
-    on<LoadReports>(_onLoadReports, transformer: concurrent());
-    on<ChangeDateRange>(_onChangeDateRange, transformer: concurrent());
-    on<ChangeGranularity>(_onChangeGranularity, transformer: concurrent());
+    on<LoadReports>(_onLoadReports, transformer: restartable());
+    on<ChangeDateRange>(_onChangeDateRange, transformer: restartable());
+    on<ChangeGranularity>(_onChangeGranularity, transformer: restartable());
 
     add(
       LoadReports(

@@ -9,12 +9,11 @@ import '../database/daos/sync_queue_dao.dart';
 import '../di/injection_container.dart' as di;
 import 'connectivity_service.dart';
 import 'sync_event.dart';
+import 'sync_mode.dart';
 import 'sync_status.dart';
 import 'sync_table_registry.dart';
 
-enum SyncConflictType { none, localOnly, cloudOnly, conflict }
-
-enum SyncMode { localWins, cloudWins, merge }
+export 'sync_mode.dart';
 
 class SyncEngine {
   void Function(double)? onProgress;
@@ -35,10 +34,15 @@ class SyncEngine {
   final SyncTableRegistry _registry;
   StreamSubscription? _connectivitySub;
   StreamSubscription? _syncEventSub;
-  bool _isSyncing = false;
   bool _initialized = false;
   int _retryCount = 0;
   Timer? _retryTimer;
+
+  /// Single-flight lock for sync operations.
+  /// When non-null, a sync cycle is in progress. Concurrent triggers
+  /// are coalesced: exactly one more cycle will run after the current completes.
+  Completer<void>? _syncLock;
+  bool _hasPendingTrigger = false;
 
   AppDatabase get _db => di.getIt<AppDatabase>();
 
@@ -64,8 +68,7 @@ class SyncEngine {
 
         return;
       }
-      await _safePullChanges();
-      await _safePushChanges();
+      await _runSyncCycle();
       if (await TokenStorage.isFirstSync()) {
         await _migrateExistingData();
       }
@@ -75,7 +78,6 @@ class SyncEngine {
         },
         onError: (e) {
           debugPrint('Connectivity stream error: $e');
-          _isSyncing = false;
         },
       );
       _syncEventSub = SyncEventBus().events.listen(
@@ -84,7 +86,6 @@ class SyncEngine {
         },
         onError: (e) {
           debugPrint('SyncEventBus listener error: $e');
-          _isSyncing = false;
         },
       );
       _initialized = true;
@@ -150,43 +151,56 @@ class SyncEngine {
 
   Future<void> _onConnectivityChange(bool online) async {
     if (online) {
-      await _safePullChanges();
-      await _safePushChanges();
+      await _runSyncCycle();
     }
   }
 
   Future<void> _onSyncEvent() async {
     final online = await _connectivity.checkNow();
     if (online) {
-      await _safePullChanges();
-      await _safePushChanges();
+      await _runSyncCycle();
+    }
+  }
+
+  /// Runs a full sync cycle (pull then push) with single-flight protection.
+  /// Concurrent triggers are coalesced: if a cycle is already running,
+  /// exactly one more cycle will run after it completes.
+  Future<void> _runSyncCycle() async {
+    // If a cycle is already in progress, mark a pending trigger and return
+    if (_syncLock != null) {
+      _hasPendingTrigger = true;
+
+      return;
+    }
+
+    // Acquire the lock
+    _syncLock = Completer<void>();
+
+    try {
+      // Run cycles until no more pending triggers
+      do {
+        _hasPendingTrigger = false;
+        await _safePullChanges();
+        await _safePushChanges();
+      } while (_hasPendingTrigger);
+    } finally {
+      // Release the lock
+      _syncLock!.complete();
+      _syncLock = null;
     }
   }
 
   Future<void> _safePushChanges() async {
-    if (_isSyncing) return;
-    _isSyncing = true;
     try {
-      if (!await _connectivity.checkNow()) {
-        _isSyncing = false;
-
-        return;
-      }
+      if (!await _connectivity.checkNow()) return;
       final queue = await _syncQueueDao.getUnsynced();
-      if (queue.isEmpty) {
-        _isSyncing = false;
-
-        return;
-      }
+      if (queue.isEmpty) return;
 
       await _processPushQueue(queue);
       _retryCount = 0;
-    } catch (e, s) {
-      debugPrint('Error: $e\n$s');
-      debugPrint('SyncEngine push failed: $e');
+    } catch (e) {
+      debugPrint('SyncEngine push failed: ${e.runtimeType}');
       _scheduleRetry();
-    } finally {
-      _isSyncing = false;
     }
   }
 
@@ -219,10 +233,26 @@ class SyncEngine {
       );
       final results = response.data['results'] as List;
       final syncedIds = <int>[];
+
+      // Build a lookup map for id-based correlation if server echoes identifiers
+      final batchByRecordId = <String, int>{};
+      for (int i = 0; i < batch.length; i++) {
+        batchByRecordId[batch[i].recordId] = batch[i].id;
+      }
+
       for (int i = 0; i < results.length; i++) {
-        final status = SyncStatus.fromString(results[i]['status'] as String);
+        final result = results[i] as Map<String, dynamic>;
+        final status = SyncStatus.fromString(result['status'] as String);
         if (status == SyncStatus.success || status == SyncStatus.conflict) {
-          syncedIds.add(batch[i].id);
+          // Try id-based correlation first, fall back to positional
+          final resultId = result['id']?.toString();
+          final queueId = resultId != null
+              ? batchByRecordId[resultId]
+              : (i < batch.length ? batch[i].id : null);
+
+          if (queueId != null) {
+            syncedIds.add(queueId);
+          }
         }
       }
       if (syncedIds.isNotEmpty) await _syncQueueDao.markSynced(syncedIds);
@@ -282,6 +312,7 @@ class SyncEngine {
         return;
       }
 
+      var allSucceeded = true;
       for (var i = 0; i < changes.length; i += chunkSize) {
         final end = i + chunkSize > changes.length
             ? changes.length
@@ -290,15 +321,38 @@ class SyncEngine {
         debugPrint(
           'SyncEngine: Migrating chunk ${i ~/ chunkSize + 1} (${batch.length} items)',
         );
-        await _apiClient.dio.post(
-          ApiConstants.syncPush,
-          data: {'changes': batch},
-        );
+
+        try {
+          final response = await _apiClient.dio.post(
+            ApiConstants.syncPush,
+            data: {'changes': batch},
+          );
+
+          // Validate response: check for errors in results
+          final results = response.data['results'] as List?;
+          if (results != null) {
+            for (final result in results) {
+              final status = result['status']?.toString();
+              if (status != 'success' && status != 'conflict') {
+                debugPrint('SyncEngine: Migration item failed: $status');
+                allSucceeded = false;
+              }
+            }
+          }
+        } catch (e) {
+          debugPrint('SyncEngine: Migration chunk failed: ${e.runtimeType}');
+          allSucceeded = false;
+        }
+
         onProgress?.call(end / changes.length);
       }
 
-      debugPrint('SyncEngine: Migration complete');
-      await TokenStorage.markFirstSyncDone();
+      if (allSucceeded) {
+        debugPrint('SyncEngine: Migration complete');
+        await TokenStorage.markFirstSyncDone();
+      } else {
+        debugPrint('SyncEngine: Migration partially failed, will retry');
+      }
     } catch (e, stackTrace) {
       debugPrint('SyncEngine: Migration failed: $e\n$stackTrace');
     }
@@ -322,14 +376,21 @@ class SyncEngine {
 
   Future<void> _retrySync() async {
     _retryCount++;
-    await _safePullChanges();
-    await _safePushChanges();
+    await _runSyncCycle();
   }
 
   Future<void> _applyRemoteChange(Map<String, dynamic> change) async {
-    final tableName = change['table'] as String;
-    final data = change['data'] as Map<String, dynamic>?;
-    final id = change['id'] as String;
+    final tableName = change['table']?.toString();
+    final id = change['id']?.toString();
+    final rawData = change['data'];
+
+    if (tableName == null || id == null) {
+      debugPrint('SyncEngine: Malformed remote change (missing table or id)');
+
+      return;
+    }
+
+    final data = rawData is Map<String, dynamic> ? rawData : null;
 
     final handler = _registry[tableName];
     if (handler == null) {
@@ -341,9 +402,10 @@ class SyncEngine {
     if (data == null) {
       try {
         await handler.deleteById(_db, id);
-      } catch (e, s) {
-        debugPrint('Error: $e\n$s');
-        debugPrint('Error deleting remote change from $tableName: $e');
+      } catch (e) {
+        debugPrint(
+          'SyncEngine: Error deleting from $tableName: ${e.runtimeType}',
+        );
       }
 
       return;
@@ -352,9 +414,10 @@ class SyncEngine {
     try {
       final companion = handler.fromSyncPayload(id, data);
       await _db.into(handler.tableRef(_db)).insertOnConflictUpdate(companion);
-    } catch (e, s) {
-      debugPrint('Error: $e\n$s');
-      debugPrint('Error applying remote change to $tableName: $e');
+    } catch (e) {
+      debugPrint(
+        'SyncEngine: Error applying change to $tableName: ${e.runtimeType}',
+      );
     }
   }
 }

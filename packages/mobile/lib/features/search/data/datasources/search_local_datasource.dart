@@ -5,6 +5,7 @@ import 'package:expense_tracker/core/database/app_database.dart'
 import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../../domain/entities/search_filters.dart';
 import '../../domain/entities/search_result.dart';
+import '../../domain/helpers/fts_query_helper.dart';
 import '../../../records/domain/entities/record.dart';
 
 abstract class SearchLocalDatasource {
@@ -126,7 +127,7 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
     final query = filters.query;
     if (query != null && query.isNotEmpty) {
       conditions.add('expense_fts.description MATCH ?');
-      args.add('"$query"*');
+      args.add(buildFtsMatchQuery(query));
     }
   }
 

@@ -95,7 +95,20 @@ class ReportsRepositoryImpl implements ReportsRepository {
     required DateTime endDate,
   }) async {
     try {
-      final records = await recordDao.getRecordsByDateRange(startDate, endDate);
+      // Normalize end to end-of-day for inclusive queries
+      final inclusiveEnd = DateTime(
+        endDate.year,
+        endDate.month,
+        endDate.day,
+        23,
+        59,
+        59,
+        999,
+      );
+      final records = await recordDao.getRecordsByDateRange(
+        startDate,
+        inclusiveEnd,
+      );
 
       if (records.isEmpty) {
         return const Right(

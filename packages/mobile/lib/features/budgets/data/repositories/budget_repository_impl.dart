@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:dartz/dartz.dart';
+import 'package:uuid/uuid.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/sync/sync_event.dart';
@@ -57,22 +58,22 @@ class BudgetRepositoryImpl implements BudgetRepository {
   @override
   Future<Either<Failure, Budget>> createBudget(Budget budget) async {
     try {
-      await localDatasource.createBudget(budget);
-      _enqueueSync(
-        'insert',
-        budget.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
-        {
-          'categoryId': budget.categoryId,
-          'amount': budget.amount,
-          'period': budget.period.name,
-          'startDate': budget.startDate.toUtc().toIso8601String(),
-          'rolloverEnabled': budget.rolloverEnabled,
-          'rolloverAmount': budget.rolloverAmount,
-          'isEnabled': budget.isEnabled,
-        },
-      );
+      // Generate id once if not provided, so datasource and sync use the same id
+      final id = budget.id ?? const Uuid().v4();
+      final budgetWithId = budget.id != null ? budget : budget.copyWith(id: id);
 
-      return Right(budget);
+      await localDatasource.createBudget(budgetWithId);
+      _enqueueSync('insert', id, {
+        'categoryId': budget.categoryId,
+        'amount': budget.amount,
+        'period': budget.period.name,
+        'startDate': budget.startDate.toUtc().toIso8601String(),
+        'rolloverEnabled': budget.rolloverEnabled,
+        'rolloverAmount': budget.rolloverAmount,
+        'isEnabled': budget.isEnabled,
+      });
+
+      return Right(budgetWithId);
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
@@ -87,19 +88,20 @@ class BudgetRepositoryImpl implements BudgetRepository {
   Future<Either<Failure, Budget>> updateBudget(Budget budget) async {
     try {
       await localDatasource.updateBudget(budget);
-      _enqueueSync(
-        'update',
-        budget.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
-        {
-          'categoryId': budget.categoryId,
-          'amount': budget.amount,
-          'period': budget.period.name,
-          'startDate': budget.startDate.toUtc().toIso8601String(),
-          'rolloverEnabled': budget.rolloverEnabled,
-          'rolloverAmount': budget.rolloverAmount,
-          'isEnabled': budget.isEnabled,
-        },
-      );
+      // Update requires an existing budget with id
+      final id = budget.id;
+      if (id == null) {
+        return Left(CacheFailure(message: 'Cannot update budget without id'));
+      }
+      _enqueueSync('update', id, {
+        'categoryId': budget.categoryId,
+        'amount': budget.amount,
+        'period': budget.period.name,
+        'startDate': budget.startDate.toUtc().toIso8601String(),
+        'rolloverEnabled': budget.rolloverEnabled,
+        'rolloverAmount': budget.rolloverAmount,
+        'isEnabled': budget.isEnabled,
+      });
 
       return Right(budget);
     } on CacheException catch (e) {
