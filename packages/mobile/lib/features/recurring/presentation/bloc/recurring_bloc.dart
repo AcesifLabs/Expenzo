@@ -112,6 +112,7 @@ class RecurringBloc extends Bloc<RecurringEvent, RecurringState> {
         var failedCount = 0;
 
         for (final recurring in processed) {
+          final now = DateTime.now().toUtc();
           final record = Record(
             amount: recurring.amount,
             description: recurring.description,
@@ -119,8 +120,8 @@ class RecurringBloc extends Bloc<RecurringEvent, RecurringState> {
             categoryId: recurring.categoryId,
             source: ExpenseSource.recurring,
             recordType: RecordType.expense,
-            createdAt: DateTime.now().toUtc(),
-            updatedAt: DateTime.now().toUtc(),
+            createdAt: now,
+            updatedAt: now,
           );
 
           final addResult = await addRecord(record);

@@ -670,55 +670,55 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
 
   Widget _buildCategoryChips(ColorScheme colors) {
     return BlocBuilder<CategoryBloc, CategoryState>(
-      builder: (ctx, state) {
-        final categories = state is CategoryLoaded
-            ? state.categories
-            : _categories;
-        if (state is CategoryLoaded) {
-          if (state.type != null && state.type != _type) {
-            return _buildCategoryLoadingSpinner(colors);
-          }
-          // Schedule default category selection after the build
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              _selectDefaultCategory(state.categories);
-            }
-          });
+      builder: (ctx, state) => _buildCategoryChipsContent(state, colors),
+    );
+  }
+
+  Widget _buildCategoryChipsContent(CategoryState state, ColorScheme colors) {
+    final categories = state is CategoryLoaded ? state.categories : _categories;
+    if (state is CategoryLoaded) {
+      if (state.type != null && state.type != _type) {
+        return _buildCategoryLoadingSpinner(colors);
+      }
+      // Schedule default category selection after the build
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _selectDefaultCategory(state.categories);
         }
+      });
+    }
 
-        final allCats = categories;
-        if (state is CategoryLoading || allCats.isEmpty) {
-          if (state is CategoryLoading) {
-            return _buildCategoryLoadingSpinner(colors);
-          }
+    final allCats = categories;
+    if (state is CategoryLoading || allCats.isEmpty) {
+      if (state is CategoryLoading) {
+        return _buildCategoryLoadingSpinner(colors);
+      }
 
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Text(
-              'No categories available',
-              style: TextStyle(color: colors.onSurface.withAlpha(80)),
-            ),
-          );
-        }
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Text(
+          'No categories available',
+          style: TextStyle(color: colors.onSurface.withAlpha(80)),
+        ),
+      );
+    }
 
-        final displayCats = _buildDisplayCategories(allCats);
+    final displayCats = _buildDisplayCategories(allCats);
 
-        return AnimatedBuilder(
-          animation: _glowListenable,
-          builder: (context, _) => Container(
-            height: 50,
-            margin: const EdgeInsets.symmetric(vertical: 8),
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              children: [
-                ...displayCats.map((cat) => _buildCategoryChip(cat, colors)),
-                _buildAllCategoriesButton(allCats, colors),
-              ],
-            ),
-          ),
-        );
-      },
+    return AnimatedBuilder(
+      animation: _glowListenable,
+      builder: (context, _) => Container(
+        height: 50,
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          children: [
+            ...displayCats.map((cat) => _buildCategoryChip(cat, colors)),
+            _buildAllCategoriesButton(allCats, colors),
+          ],
+        ),
+      ),
     );
   }
 

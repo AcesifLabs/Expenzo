@@ -185,7 +185,10 @@ class SyncEngine {
       } while (_hasPendingTrigger);
     } finally {
       // Release the lock
-      _syncLock!.complete();
+      final lock = _syncLock;
+      if (lock != null) {
+        lock.complete();
+      }
       _syncLock = null;
     }
   }
@@ -215,51 +218,58 @@ class SyncEngine {
         'SyncEngine: Pushing chunk ${processed ~/ chunkSize + 1} (${batch.length} items)',
       );
 
-      final changes = batch
-          .map(
-            (item) => {
-              'table': item.entityTable,
-              'action': item.action,
-              'id': item.recordId,
-              'data': item.payload.isNotEmpty ? jsonDecode(item.payload) : null,
-              'updatedAt': item.createdAt.toUtc().toIso8601String(),
-            },
-          )
-          .toList();
-
-      final response = await _apiClient.dio.post(
-        ApiConstants.syncPush,
-        data: {'changes': changes},
-      );
-      final results = response.data['results'] as List;
-      final syncedIds = <int>[];
-
-      // Build a lookup map for id-based correlation if server echoes identifiers
-      final batchByRecordId = <String, int>{};
-      for (int i = 0; i < batch.length; i++) {
-        batchByRecordId[batch[i].recordId] = batch[i].id;
-      }
-
-      for (int i = 0; i < results.length; i++) {
-        final result = results[i] as Map<String, dynamic>;
-        final status = SyncStatus.fromString(result['status'] as String);
-        if (status == SyncStatus.success || status == SyncStatus.conflict) {
-          // Try id-based correlation first, fall back to positional
-          final resultId = result['id']?.toString();
-          final queueId = resultId != null
-              ? batchByRecordId[resultId]
-              : (i < batch.length ? batch[i].id : null);
-
-          if (queueId != null) {
-            syncedIds.add(queueId);
-          }
-        }
-      }
-      if (syncedIds.isNotEmpty) await _syncQueueDao.markSynced(syncedIds);
+      await _pushBatch(batch);
 
       processed = end;
       onProgress?.call(processed / total);
     }
+  }
+
+  Future<void> _pushBatch(List<SyncQueueData> batch) async {
+    final changes = batch
+        .map(
+          (item) => {
+            'table': item.entityTable,
+            'action': item.action,
+            'id': item.recordId,
+            'data': item.payload.isNotEmpty ? jsonDecode(item.payload) : null,
+            'updatedAt': item.createdAt.toUtc().toIso8601String(),
+          },
+        )
+        .toList();
+
+    final response = await _apiClient.dio.post(
+      ApiConstants.syncPush,
+      data: {'changes': changes},
+    );
+    final results = response.data['results'] as List;
+    final syncedIds = <int>[];
+
+    // Build a lookup map for id-based correlation if server echoes identifiers
+    final batchByRecordId = <String, int>{};
+    for (int i = 0; i < batch.length; i++) {
+      batchByRecordId[batch[i].recordId] = batch[i].id;
+    }
+
+    for (int i = 0; i < results.length; i++) {
+      final result = results[i] as Map<String, dynamic>;
+      final status = SyncStatus.fromString(result['status'] as String);
+      if (status == SyncStatus.success || status == SyncStatus.conflict) {
+        // Try id-based correlation first, fall back to positional
+        final resultId = result['id']?.toString();
+        int? queueId;
+        if (resultId != null) {
+          queueId = batchByRecordId[resultId];
+        } else if (i < batch.length) {
+          queueId = batch[i].id;
+        }
+
+        if (queueId != null) {
+          syncedIds.add(queueId);
+        }
+      }
+    }
+    if (syncedIds.isNotEmpty) await _syncQueueDao.markSynced(syncedIds);
   }
 
   Future<void> _safePullChanges() async {
@@ -288,22 +298,7 @@ class SyncEngine {
   Future<void> _migrateExistingData() async {
     debugPrint('SyncEngine: Starting one-time data migration');
     try {
-      final changes = <Map<String, dynamic>>[];
-
-      for (final handler in _registry.all) {
-        final rows = await handler.fetchAll(_db);
-        for (final row in rows) {
-          final payload = handler.toSyncPayload(row);
-          final id = payload['id']?.toString() ?? '';
-          changes.add({
-            'table': handler.tableName,
-            'action': 'insert',
-            'id': id,
-            'data': payload,
-            'updatedAt': payload['updatedAt'],
-          });
-        }
-      }
+      final changes = await _collectAllChanges();
 
       if (changes.isEmpty) {
         debugPrint('SyncEngine: No data to migrate');
@@ -312,40 +307,7 @@ class SyncEngine {
         return;
       }
 
-      var allSucceeded = true;
-      for (var i = 0; i < changes.length; i += chunkSize) {
-        final end = i + chunkSize > changes.length
-            ? changes.length
-            : i + chunkSize;
-        final batch = changes.sublist(i, end);
-        debugPrint(
-          'SyncEngine: Migrating chunk ${i ~/ chunkSize + 1} (${batch.length} items)',
-        );
-
-        try {
-          final response = await _apiClient.dio.post(
-            ApiConstants.syncPush,
-            data: {'changes': batch},
-          );
-
-          // Validate response: check for errors in results
-          final results = response.data['results'] as List?;
-          if (results != null) {
-            for (final result in results) {
-              final status = result['status']?.toString();
-              if (status != 'success' && status != 'conflict') {
-                debugPrint('SyncEngine: Migration item failed: $status');
-                allSucceeded = false;
-              }
-            }
-          }
-        } catch (e) {
-          debugPrint('SyncEngine: Migration chunk failed: ${e.runtimeType}');
-          allSucceeded = false;
-        }
-
-        onProgress?.call(end / changes.length);
-      }
+      final allSucceeded = await _pushMigrationChunks(changes);
 
       if (allSucceeded) {
         debugPrint('SyncEngine: Migration complete');
@@ -356,6 +318,79 @@ class SyncEngine {
     } catch (e, stackTrace) {
       debugPrint('SyncEngine: Migration failed: $e\n$stackTrace');
     }
+  }
+
+  Future<List<Map<String, dynamic>>> _collectAllChanges() async {
+    final changes = <Map<String, dynamic>>[];
+
+    for (final handler in _registry.all) {
+      final rows = await handler.fetchAll(_db);
+      for (final row in rows) {
+        final payload = handler.toSyncPayload(row);
+        final id = payload['id']?.toString() ?? '';
+        changes.add({
+          'table': handler.tableName,
+          'action': 'insert',
+          'id': id,
+          'data': payload,
+          'updatedAt': payload['updatedAt'],
+        });
+      }
+    }
+
+    return changes;
+  }
+
+  Future<bool> _pushMigrationChunks(List<Map<String, dynamic>> changes) async {
+    var allSucceeded = true;
+    for (var i = 0; i < changes.length; i += chunkSize) {
+      final end = i + chunkSize > changes.length
+          ? changes.length
+          : i + chunkSize;
+      final batch = changes.sublist(i, end);
+      debugPrint(
+        'SyncEngine: Migrating chunk ${i ~/ chunkSize + 1} (${batch.length} items)',
+      );
+
+      final chunkOk = await _pushSingleMigrationChunk(batch);
+      if (!chunkOk) allSucceeded = false;
+
+      onProgress?.call(end / changes.length);
+    }
+
+    return allSucceeded;
+  }
+
+  Future<bool> _pushSingleMigrationChunk(
+    List<Map<String, dynamic>> batch,
+  ) async {
+    try {
+      final response = await _apiClient.dio.post(
+        ApiConstants.syncPush,
+        data: {'changes': batch},
+      );
+
+      return _validateMigrationResults(response.data['results'] as List?);
+    } catch (e) {
+      debugPrint('SyncEngine: Migration chunk failed: ${e.runtimeType}');
+
+      return false;
+    }
+  }
+
+  bool _validateMigrationResults(List? results) {
+    if (results == null) return true;
+
+    var allOk = true;
+    for (final result in results) {
+      final status = result['status']?.toString();
+      if (status != 'success' && status != 'conflict') {
+        debugPrint('SyncEngine: Migration item failed: $status');
+        allOk = false;
+      }
+    }
+
+    return allOk;
   }
 
   void _scheduleRetry() {

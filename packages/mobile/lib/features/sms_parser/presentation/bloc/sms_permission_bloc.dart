@@ -47,7 +47,12 @@ class SmsPermissionBloc extends Bloc<SmsPermissionEvent, SmsPermissionState> {
         return;
       }
 
-      final status = result.status!;
+      final status = result.status;
+      if (status == null) {
+        emit(const SmsPermissionDenied());
+
+        return;
+      }
       await _savePermissionStatus(status);
       emit(_mapStatusToState(status));
     } catch (e, s) {

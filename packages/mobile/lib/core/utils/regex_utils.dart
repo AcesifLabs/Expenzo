@@ -90,6 +90,7 @@ Match? matchFirstWithBudget(
       'RegexUtils: firstMatch exceeded budget '
       '(${sw.elapsedMilliseconds}ms > ${budget.inMilliseconds}ms)',
     );
+
     return null;
   }
 
@@ -113,6 +114,7 @@ List<Match> matchAllWithBudget(
       'RegexUtils: allMatches exceeded budget '
       '(${sw.elapsedMilliseconds}ms > ${budget.inMilliseconds}ms)',
     );
+
     return [];
   }
 

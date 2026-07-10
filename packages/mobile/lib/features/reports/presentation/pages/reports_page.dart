@@ -45,7 +45,11 @@ class _ReportsPageContentState extends State<_ReportsPageContent>
   void _onTabChanged() {
     // Only rebuild when the index actually changes, not on animation ticks
     if (_tabController?.indexIsChanging != true) return;
-    setState(() {});
+    // Trigger rebuild to update tab content
+    setState(() {
+      // Intentional empty setState to trigger rebuild on tab change
+      return;
+    });
   }
 
   void _handleDateRangeSelected(String value) {
