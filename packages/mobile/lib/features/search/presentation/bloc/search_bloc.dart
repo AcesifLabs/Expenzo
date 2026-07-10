@@ -10,7 +10,10 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   SearchFilters _currentFilters = const SearchFilters();
 
   SearchBloc({required this.searchRecords}) : super(const SearchInitial()) {
-    on<SearchQueryChanged>(_onSearchQueryChanged, transformer: restartable());
+    on<SearchQueryChanged>(
+      _onSearchQueryChanged,
+      transformer: debounceRestartable(const Duration(milliseconds: 300)),
+    );
     on<SearchFiltersChanged>(
       _onSearchFiltersChanged,
       transformer: restartable(),

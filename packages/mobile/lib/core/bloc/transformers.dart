@@ -71,3 +71,37 @@ EventTransformer<T> concurrent<T>() {
     return controller.stream;
   };
 }
+
+/// Debounces events by [delay], then applies restartable semantics.
+/// Only the latest event within the debounce window is processed.
+/// Previous in-flight operations are cancelled when a new event arrives.
+EventTransformer<T> debounceRestartable<T>([
+  Duration delay = const Duration(milliseconds: 300),
+]) {
+  StreamSubscription? subscription;
+  Timer? timer;
+
+  return (events, mapper) {
+    return events.transform(
+      StreamTransformer.fromHandlers(
+        handleData: (event, sink) {
+          timer?.cancel();
+          timer = Timer(delay, () {
+            subscription?.cancel();
+            subscription = mapper(event).listen(
+              (data) => sink.add(data),
+              onError: (e, st) => sink.addError(e, st),
+              onDone: () => subscription = null,
+              cancelOnError: false,
+            );
+          });
+        },
+        handleDone: (sink) {
+          timer?.cancel();
+          subscription?.cancel();
+          sink.close();
+        },
+      ),
+    );
+  };
+}

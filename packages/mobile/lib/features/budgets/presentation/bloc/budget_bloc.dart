@@ -119,13 +119,26 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
     );
 
     final result = await getBudgetTransactions(event.budgetId);
+    // Read the latest state to avoid clobbering with stale data
+    final latest = state;
+    if (latest is! BudgetLoaded) return;
+
     result.fold(
-      (failure) => emit(BudgetError(failure.message)),
+      (failure) {
+        // Emit a scoped error without wiping the loaded budgets/progress
+        emit(
+          latest.copyWith(
+            isLoadingTransactions: false,
+            transactionsError: failure.message,
+          ),
+        );
+      },
       (records) => emit(
-        current.copyWith(
+        latest.copyWith(
           selectedBudgetId: event.budgetId,
           selectedBudgetTransactions: records,
           isLoadingTransactions: false,
+          clearTransactionsError: true,
         ),
       ),
     );

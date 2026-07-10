@@ -1,5 +1,7 @@
-import 'dart:async';
 import 'package:flutter/foundation.dart';
+
+/// Default per-match budget for user-supplied regex patterns.
+const Duration kRegexMatchBudget = Duration(milliseconds: 250);
 
 class TimedRegex {
   final String pattern;
@@ -17,14 +19,14 @@ class TimedRegex {
     final regex = _compiled;
     if (regex == null) return null;
 
-    return _matchWithTimeout(input, regex, timeout);
+    return matchFirstWithBudget(regex, input, timeout);
   }
 
   Iterable<Match> allMatches(String input) {
     final regex = _compiled;
     if (regex == null) return [];
 
-    return _matchAllWithTimeout(input, regex, timeout);
+    return matchAllWithBudget(regex, input, timeout);
   }
 
   static bool isDangerousPattern(String pattern) {
@@ -39,19 +41,7 @@ class TimedRegex {
     ];
 
     for (final dangerous in dangerousPatterns) {
-      try {
-        if (RegExp(dangerous).hasMatch(pattern)) {
-          return true;
-        }
-      } catch (e, s) {
-        debugPrint('Error: $e\n$s');
-        debugPrint('RegexUtils: Failed to test dangerous pattern: $e');
-      }
-    }
-
-    if (pattern.contains('({')) {
-      final nestedQuantifiers = RegExp(r'\(\?|\(\*|\(\+');
-      if (nestedQuantifiers.hasMatch(pattern)) {
+      if (pattern.contains(dangerous)) {
         return true;
       }
     }
@@ -67,9 +57,7 @@ class TimedRegex {
       }
 
       return null;
-    } catch (e, s) {
-      debugPrint('Error: $e\n$s');
-
+    } catch (e) {
       return 'Invalid regex pattern: $e';
     }
   }
@@ -77,58 +65,56 @@ class TimedRegex {
   void _compile() {
     try {
       _compiled = RegExp(pattern);
-    } catch (e, s) {
-      debugPrint('Error: $e\n$s');
+    } catch (e) {
       debugPrint('TimedRegex: Failed to compile pattern: $e');
     }
   }
+}
 
-  static Match? _matchWithTimeout(
-    String input,
-    RegExp regex,
-    Duration timeout,
-  ) {
-    Match? result;
-    bool isTimedOut = false;
+/// Runs [regex.firstMatch] on [input] and returns null if it exceeds [budget].
+///
+/// This is a post-hoc guard: the regex still runs to completion, but if it
+/// takes longer than [budget] the result is discarded and a warning is logged.
+/// For true interrupt-based protection, use a separate isolate.
+Match? matchFirstWithBudget(
+  RegExp regex,
+  String input, [
+  Duration budget = kRegexMatchBudget,
+]) {
+  final sw = Stopwatch()..start();
+  final result = regex.firstMatch(input);
+  sw.stop();
 
-    final timer = Timer(timeout, () {
-      isTimedOut = true;
-    });
-
-    try {
-      for (final match in regex.allMatches(input)) {
-        if (isTimedOut) break;
-        result = match;
-        break;
-      }
-    } finally {
-      timer.cancel();
-    }
-
-    return result;
+  if (sw.elapsed > budget) {
+    debugPrint(
+      'RegexUtils: firstMatch exceeded budget '
+      '(${sw.elapsedMilliseconds}ms > ${budget.inMilliseconds}ms)',
+    );
+    return null;
   }
 
-  static Iterable<Match> _matchAllWithTimeout(
-    String input,
-    RegExp regex,
-    Duration timeout,
-  ) {
-    final matches = <Match>[];
-    bool isTimedOut = false;
+  return result;
+}
 
-    final timer = Timer(timeout, () {
-      isTimedOut = true;
-    });
+/// Runs [regex.allMatches] on [input] and returns empty if it exceeds [budget].
+///
+/// Same post-hoc guard as [matchFirstWithBudget].
+List<Match> matchAllWithBudget(
+  RegExp regex,
+  String input, [
+  Duration budget = kRegexMatchBudget,
+]) {
+  final sw = Stopwatch()..start();
+  final result = regex.allMatches(input).toList();
+  sw.stop();
 
-    try {
-      for (final match in regex.allMatches(input)) {
-        if (isTimedOut) break;
-        matches.add(match);
-      }
-    } finally {
-      timer.cancel();
-    }
-
-    return matches;
+  if (sw.elapsed > budget) {
+    debugPrint(
+      'RegexUtils: allMatches exceeded budget '
+      '(${sw.elapsedMilliseconds}ms > ${budget.inMilliseconds}ms)',
+    );
+    return [];
   }
+
+  return result;
 }

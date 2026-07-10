@@ -24,6 +24,7 @@ class BudgetLoaded extends BudgetState {
   final String? selectedBudgetId;
   final List<Record> selectedBudgetTransactions;
   final bool isLoadingTransactions;
+  final String? transactionsError;
 
   @override
   List<Object?> get props => [
@@ -32,6 +33,7 @@ class BudgetLoaded extends BudgetState {
     selectedBudgetId,
     selectedBudgetTransactions,
     isLoadingTransactions,
+    transactionsError,
   ];
 
   const BudgetLoaded(
@@ -40,6 +42,7 @@ class BudgetLoaded extends BudgetState {
     this.selectedBudgetId,
     this.selectedBudgetTransactions = const [],
     this.isLoadingTransactions = false,
+    this.transactionsError,
   });
 
   BudgetLoaded copyWith({
@@ -48,6 +51,8 @@ class BudgetLoaded extends BudgetState {
     String? selectedBudgetId,
     List<Record>? selectedBudgetTransactions,
     bool? isLoadingTransactions,
+    String? transactionsError,
+    bool clearTransactionsError = false,
   }) {
     return BudgetLoaded(
       budgets ?? this.budgets,
@@ -57,6 +62,9 @@ class BudgetLoaded extends BudgetState {
           selectedBudgetTransactions ?? this.selectedBudgetTransactions,
       isLoadingTransactions:
           isLoadingTransactions ?? this.isLoadingTransactions,
+      transactionsError: clearTransactionsError
+          ? null
+          : (transactionsError ?? this.transactionsError),
     );
   }
 }

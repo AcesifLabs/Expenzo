@@ -13,6 +13,7 @@ import 'package:expense_tracker/features/recurring/domain/usecases/delete_recurr
     as delete_uc;
 import 'package:expense_tracker/features/recurring/domain/usecases/process_recurring.dart'
     as process_uc;
+import 'package:expense_tracker/features/records/domain/usecases/add_record.dart';
 import 'package:expense_tracker/features/recurring/presentation/bloc/recurring_bloc.dart';
 
 void initRecurringModule(GetIt getIt) {
@@ -49,6 +50,7 @@ void initRecurringModule(GetIt getIt) {
       updateRecurring: getIt<update_uc.UpdateRecurring>(),
       deleteRecurring: getIt<delete_uc.DeleteRecurring>(),
       processRecurring: getIt<process_uc.ProcessRecurring>(),
+      addRecord: getIt<AddRecord>(),
     ),
   );
 }

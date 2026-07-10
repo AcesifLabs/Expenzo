@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
+import 'package:expense_tracker/core/constants/app_constants.dart';
 import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:expense_tracker/features/categories/domain/entities/category.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
@@ -202,7 +203,9 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
 
   String? _findDefaultCategoryId(List<Category> categories) {
     for (final c in categories) {
-      if (c.name == 'General' && c.isDefault) return c.id;
+      if (c.name == AppConstants.defaultCategoryName && c.isDefault) {
+        return c.id;
+      }
     }
 
     return categories.first.id;
@@ -668,15 +671,22 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   Widget _buildCategoryChips(ColorScheme colors) {
     return BlocBuilder<CategoryBloc, CategoryState>(
       builder: (ctx, state) {
+        final categories = state is CategoryLoaded
+            ? state.categories
+            : _categories;
         if (state is CategoryLoaded) {
           if (state.type != null && state.type != _type) {
             return _buildCategoryLoadingSpinner(colors);
           }
-          _categories = state.categories;
-          _selectDefaultCategory(state.categories);
+          // Schedule default category selection after the build
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              _selectDefaultCategory(state.categories);
+            }
+          });
         }
 
-        final allCats = _categories;
+        final allCats = categories;
         if (state is CategoryLoading || allCats.isEmpty) {
           if (state is CategoryLoading) {
             return _buildCategoryLoadingSpinner(colors);

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -22,7 +23,6 @@ class ApiClient {
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
-            'bypass-tunnel-reminder': 'true',
           },
         ),
       ) {
@@ -41,6 +41,11 @@ class ApiClient {
 class _AuthInterceptor extends Interceptor {
   final Dio _dio;
 
+  /// Single-flight guard for token refresh.
+  /// When non-null, concurrent 401s await this future instead of each
+  /// independently triggering a refresh.
+  Completer<String?>? _refreshCompleter;
+
   _AuthInterceptor(this._dio);
 
   @override
@@ -53,9 +58,8 @@ class _AuthInterceptor extends Interceptor {
       if (token != null && token.isNotEmpty) {
         options.headers['Authorization'] = 'Bearer $token';
       }
-    } catch (e, s) {
-      debugPrint('Error: $e\n$s');
-      debugPrint('AuthInterceptor.onRequest error: $e');
+    } catch (e) {
+      debugPrint('AuthInterceptor.onRequest error: ${e.runtimeType}');
     } finally {
       handler.next(options);
     }
@@ -67,21 +71,15 @@ class _AuthInterceptor extends Interceptor {
       try {
         final connectivity = di.getIt<ConnectivityService>();
         if (!await connectivity.checkNow()) {
-          debugPrint('AuthInterceptor: Offline, skipping token refresh');
           handler.next(err);
 
           return;
         }
-        final firebaseUser = FirebaseAuth.instance.currentUser;
-        if (firebaseUser != null) {
-          final firebaseToken = await firebaseUser.getIdToken(true);
-          final authDio = Dio(BaseOptions(baseUrl: ApiConstants.baseUrl));
-          final response = await authDio.post(
-            ApiConstants.login,
-            data: {'firebaseToken': firebaseToken},
-          );
-          final newJwt = response.data['accessToken'];
-          await TokenStorage.saveToken(newJwt);
+
+        // Single-flight: if a refresh is already in progress, await it
+        final newJwt = await _refreshToken();
+
+        if (newJwt != null) {
           final opts = err.requestOptions;
           opts.headers['Authorization'] = 'Bearer $newJwt';
           final retryResponse = await _dio.fetch(opts);
@@ -89,13 +87,56 @@ class _AuthInterceptor extends Interceptor {
 
           return;
         }
-      } catch (e, s) {
-        debugPrint('Error: $e\n$s');
-        debugPrint('Token refresh failed: $e');
+      } catch (e) {
+        debugPrint('Token refresh failed: ${e.runtimeType}');
         await TokenStorage.clearAll();
       }
     }
     handler.next(err);
+  }
+
+  /// Performs a single-flight token refresh.
+  /// Returns the new JWT string, or null if refresh fails.
+  Future<String?> _refreshToken() {
+    // If a refresh is already in flight, await it
+    if (_refreshCompleter != null) {
+      return _refreshCompleter!.future;
+    }
+
+    // Start a new refresh
+    _refreshCompleter = Completer<String?>();
+
+    _doRefresh()
+        .then((token) {
+          _refreshCompleter!.complete(token);
+          _refreshCompleter = null;
+        })
+        .catchError((Object e) {
+          debugPrint('Token refresh error: ${e.runtimeType}');
+          _refreshCompleter!.complete(null);
+          _refreshCompleter = null;
+        });
+
+    return _refreshCompleter!.future;
+  }
+
+  Future<String?> _doRefresh() async {
+    final firebaseUser = FirebaseAuth.instance.currentUser;
+    if (firebaseUser == null) return null;
+
+    final firebaseToken = await firebaseUser.getIdToken(true);
+    final authDio = Dio(BaseOptions(baseUrl: ApiConstants.baseUrl));
+    final response = await authDio.post(
+      ApiConstants.login,
+      data: {'firebaseToken': firebaseToken},
+    );
+    final newJwt = response.data['accessToken'];
+    if (newJwt is! String || newJwt.isEmpty) {
+      return null;
+    }
+    await TokenStorage.saveToken(newJwt);
+
+    return newJwt;
   }
 }
 

@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import '../entities/recurring_transaction.dart';
+import '../helpers/next_occurrence.dart';
 import '../repositories/recurring_repository.dart';
 
 class ProcessRecurring {
@@ -9,8 +10,12 @@ class ProcessRecurring {
 
   ProcessRecurring(this.repository);
 
-  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
-
+  /// Returns [Right(list)] on success, [Left(Failure)] on failure.
+  ///
+  /// For each due recurring, advances occurrences until the next one is in the
+  /// future (catch-up). Respects [RecurringTransaction.endDate]. Each elapsed
+  /// occurrence produces one entry in the returned list if
+  /// [RecurringTransaction.autoCreateExpense] is true.
   Future<Either<Failure, List<RecurringTransaction>>> call() async {
     try {
       final dueRecurringResult = await repository.getDueRecurring();
@@ -33,18 +38,12 @@ class ProcessRecurring {
 
     final processed = <RecurringTransaction>[];
     final updates = <RecurringTransaction>[];
+    final now = DateTime.now();
 
     for (final recurring in dueRecurring) {
-      if (recurring.autoCreateExpense) {
-        processed.add(recurring);
-      }
-
-      final nextDate = _calculateNextOccurrence(
-        recurring.nextOccurrence,
-        recurring.frequency,
-      );
-
-      updates.add(recurring.copyWith(nextOccurrence: nextDate));
+      final result = _catchUpRecurring(recurring, now);
+      processed.addAll(result.processed);
+      updates.add(result.updated);
     }
 
     final updateResult = await repository.updateRecurringBatch(updates);
@@ -55,19 +54,59 @@ class ProcessRecurring {
     );
   }
 
-  DateTime _calculateNextOccurrence(
-    DateTime current,
-    RecurringFrequency frequency,
+  /// Advances [recurring] from its current [nextOccurrence] until the next
+  /// occurrence is in the future or exceeds [endDate].
+  _CatchUpResult _catchUpRecurring(
+    RecurringTransaction recurring,
+    DateTime now,
   ) {
-    switch (frequency) {
-      case RecurringFrequency.daily:
-        return current.add(const Duration(days: 1));
-      case RecurringFrequency.weekly:
-        return current.add(const Duration(days: 7));
-      case RecurringFrequency.monthly:
-        return DateTime(current.year, current.month + 1, current.day);
-      case RecurringFrequency.yearly:
-        return DateTime(current.year + 1, current.month, current.day);
+    var current = recurring.nextOccurrence;
+    final processed = <RecurringTransaction>[];
+    var count = 0;
+
+    // Catch up: advance until current is in the future
+    while (!current.isAfter(now) && count < kMaxCatchUpOccurrences) {
+      // Check endDate before processing this occurrence
+      if (recurring.endDate != null && current.isAfter(recurring.endDate!)) {
+        // This occurrence and all future ones are past endDate
+        return _CatchUpResult(
+          processed: processed,
+          updated: recurring.copyWith(nextOccurrence: current, isActive: false),
+        );
+      }
+
+      // This occurrence is due — record it if autoCreateExpense
+      if (recurring.autoCreateExpense) {
+        processed.add(recurring.copyWith(nextOccurrence: current));
+      }
+
+      // Advance to next occurrence
+      current = calculateNextOccurrence(
+        current,
+        recurring.frequency,
+        dayOfMonth: recurring.dayOfMonth,
+      );
+      count++;
     }
+
+    // Check if the final nextOccurrence exceeds endDate
+    final isPastEnd =
+        recurring.endDate != null && current.isAfter(recurring.endDate!);
+
+    return _CatchUpResult(
+      processed: processed,
+      updated: recurring.copyWith(
+        nextOccurrence: current,
+        isActive: !isPastEnd,
+      ),
+    );
   }
+}
+
+/// Result of catch-up processing for a single recurring transaction.
+class _CatchUpResult {
+  final List<RecurringTransaction> processed;
+  final RecurringTransaction updated;
+
+  const _CatchUpResult({required this.processed, required this.updated});
 }

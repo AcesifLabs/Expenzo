@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import '../../database/app_database.dart';
 import '../sync_table_registry.dart';
+import 'sync_parse_helpers.dart';
 
 class CategoriesSyncHandler
     extends SyncTableHandler<$CategoriesTable, Category> {
@@ -22,30 +23,32 @@ class CategoriesSyncHandler
     'updatedAt': row.updatedAt.toUtc().toIso8601String(),
   };
   @override
-  Insertable<Category> fromSyncPayload(
-    String id,
-    Map<String, dynamic> data,
-  ) => CategoriesCompanion.insert(
-    id: id,
-    name: data['name'] ?? 'Category',
-    emoji: data['emoji'] != null ? Value(data['emoji']) : const Value.absent(),
-    color: data['color'] != null ? Value(data['color']) : const Value.absent(),
-    isDefault: data['isDefault'] != null
-        ? Value(data['isDefault'])
-        : const Value.absent(),
-    categoryType: data['categoryType'] != null
-        ? Value(data['categoryType'])
-        : const Value.absent(),
-    usageCount: data['usageCount'] != null
-        ? Value(int.parse(data['usageCount'].toString()))
-        : const Value.absent(),
-    createdAt: data['createdAt'] != null
-        ? Value(DateTime.parse(data['createdAt']).toLocal())
-        : const Value.absent(),
-    updatedAt: data['updatedAt'] != null
-        ? Value(DateTime.parse(data['updatedAt']).toLocal())
-        : const Value.absent(),
-  );
+  Insertable<Category> fromSyncPayload(String id, Map<String, dynamic> data) =>
+      CategoriesCompanion.insert(
+        id: id,
+        name: parseSyncString(data['name'], 'Category'),
+        emoji: data['emoji'] != null
+            ? Value(parseSyncString(data['emoji']))
+            : const Value.absent(),
+        color: data['color'] != null
+            ? Value(parseSyncString(data['color']))
+            : const Value.absent(),
+        isDefault: data['isDefault'] != null
+            ? Value(data['isDefault'] == true)
+            : const Value.absent(),
+        categoryType: data['categoryType'] != null
+            ? Value(parseSyncString(data['categoryType']))
+            : const Value.absent(),
+        usageCount: data['usageCount'] != null
+            ? Value(int.tryParse(data['usageCount'].toString()) ?? 0)
+            : const Value.absent(),
+        createdAt: data['createdAt'] != null
+            ? Value(parseSyncDate(data['createdAt']))
+            : const Value.absent(),
+        updatedAt: data['updatedAt'] != null
+            ? Value(parseSyncDate(data['updatedAt']))
+            : const Value.absent(),
+      );
   @override
   Future<void> deleteById(AppDatabase db, String id) async =>
       await (db.delete(db.categories)..where((t) => t.id.equals(id))).go();

@@ -1,6 +1,15 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/record.dart';
 
+/// Sentinel value used to distinguish "not provided" from "set to null"
+/// in [RecordLoaded.copyWith]. Do not compare to this directly; use
+/// [RecordLoaded._isSentinel] instead.
+class _Sentinel {
+  const _Sentinel();
+}
+
+const _sentinel = _Sentinel();
+
 sealed class RecordState extends Equatable {
   @override
   List<Object?> get props => [];
@@ -69,25 +78,40 @@ class RecordLoaded extends RecordState {
     this.filterRecordType,
   });
 
+  /// Creates a copy with updated fields.
+  ///
+  /// Nullable filter fields ([filterStartDate], [filterEndDate],
+  /// [filterCategoryIds], [filterRecordType]) use a sentinel pattern:
+  /// - Omitted or `const _sentinel()` → field is preserved unchanged.
+  /// - Explicitly passed `null` → field is cleared to `null`.
+  /// - Any other value → field is set to that value.
   RecordLoaded copyWith({
     List<Record>? records,
     int? total,
     bool? hasMore,
     String? searchQuery,
-    DateTime? filterStartDate,
-    DateTime? filterEndDate,
-    List<String>? filterCategoryIds,
-    String? filterRecordType,
+    Object? filterStartDate = _sentinel,
+    Object? filterEndDate = _sentinel,
+    Object? filterCategoryIds = _sentinel,
+    Object? filterRecordType = _sentinel,
   }) {
     return RecordLoaded(
       records: records ?? this.records,
       total: total ?? this.total,
       hasMore: hasMore ?? this.hasMore,
       searchQuery: searchQuery ?? this.searchQuery,
-      filterStartDate: filterStartDate ?? this.filterStartDate,
-      filterEndDate: filterEndDate ?? this.filterEndDate,
-      filterCategoryIds: filterCategoryIds ?? this.filterCategoryIds,
-      filterRecordType: filterRecordType ?? this.filterRecordType,
+      filterStartDate: filterStartDate == _sentinel
+          ? this.filterStartDate
+          : filterStartDate as DateTime?,
+      filterEndDate: filterEndDate == _sentinel
+          ? this.filterEndDate
+          : filterEndDate as DateTime?,
+      filterCategoryIds: filterCategoryIds == _sentinel
+          ? this.filterCategoryIds
+          : filterCategoryIds as List<String>?,
+      filterRecordType: filterRecordType == _sentinel
+          ? this.filterRecordType
+          : filterRecordType as String?,
     );
   }
 }

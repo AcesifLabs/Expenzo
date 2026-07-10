@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:expense_tracker/core/constants/budget_period.dart';
 import '../../database/app_database.dart';
 import '../sync_table_registry.dart';
+import 'sync_parse_helpers.dart';
 
 class BudgetsSyncHandler extends SyncTableHandler<$BudgetsTable, Budget> {
   @override
@@ -26,25 +27,25 @@ class BudgetsSyncHandler extends SyncTableHandler<$BudgetsTable, Budget> {
       BudgetsCompanion.insert(
         id: id,
         categoryId: data['categoryId'] != null
-            ? Value(data['categoryId'])
+            ? Value(data['categoryId'].toString())
             : const Value.absent(),
-        amount: double.parse(data['amount'].toString()),
-        period: data['period'] ?? BudgetPeriod.monthly.name,
-        startDate: DateTime.parse(data['startDate']).toLocal(),
+        amount: parseSyncAmount(data['amount']),
+        period: parseSyncString(data['period'], BudgetPeriod.monthly.name),
+        startDate: parseSyncDate(data['startDate']),
         rolloverEnabled: data['rolloverEnabled'] != null
-            ? Value(data['rolloverEnabled'])
+            ? Value(data['rolloverEnabled'] == true)
             : const Value.absent(),
         rolloverAmount: data['rolloverAmount'] != null
-            ? Value(double.parse(data['rolloverAmount'].toString()))
+            ? Value(parseSyncAmount(data['rolloverAmount']))
             : const Value.absent(),
         isEnabled: data['isEnabled'] != null
-            ? Value(data['isEnabled'])
+            ? Value(data['isEnabled'] == true)
             : const Value.absent(),
         createdAt: data['createdAt'] != null
-            ? Value(DateTime.parse(data['createdAt']).toLocal())
+            ? Value(parseSyncDate(data['createdAt']))
             : const Value.absent(),
         updatedAt: data['updatedAt'] != null
-            ? Value(DateTime.parse(data['updatedAt']).toLocal())
+            ? Value(parseSyncDate(data['updatedAt']))
             : const Value.absent(),
       );
   @override

@@ -10,20 +10,12 @@ class SmsPermissionBloc extends Bloc<SmsPermissionEvent, SmsPermissionState> {
   static const String _smsPermissionAskedKey = 'sms_permission_asked';
   static const String _smsPermissionStatusKey = 'sms_permission_status';
 
-  Timer? _timeoutTimer;
   static const Duration _timeoutDuration = Duration(seconds: 5);
 
   SmsPermissionBloc() : super(const SmsPermissionInitial()) {
     on<CheckSmsPermission>(_onCheckPermission, transformer: concurrent());
     on<RequestSmsPermission>(_onRequestPermission, transformer: concurrent());
     on<OpenAppSettings>(_onOpenSettings, transformer: concurrent());
-  }
-
-  @override
-  Future<void> close() {
-    _timeoutTimer?.cancel();
-
-    return super.close();
   }
 
   Future<void> _onCheckPermission(
@@ -42,26 +34,24 @@ class SmsPermissionBloc extends Bloc<SmsPermissionEvent, SmsPermissionState> {
   ) async {
     emit(const SmsPermissionLoading());
 
-    final timeoutCompleter = Completer<SmsPermissionState>();
-    _timeoutTimer = Timer(_timeoutDuration, () {
-      if (!timeoutCompleter.isCompleted) {
-        timeoutCompleter.complete(const SmsPermissionTimeout());
-      }
-    });
-
     try {
-      final status = await Permission.sms.request();
-      _timeoutTimer?.cancel();
+      // Race the permission request against a timeout
+      final result = await Future.any([
+        Permission.sms.request().then((status) => _PermissionResult(status)),
+        Future.delayed(_timeoutDuration, () => _PermissionResult.timedOut()),
+      ]);
 
-      if (!timeoutCompleter.isCompleted) {
-        timeoutCompleter.complete(_mapStatusToState(status));
+      if (result.isTimeout) {
+        emit(const SmsPermissionTimeout());
+
+        return;
       }
 
+      final status = result.status!;
       await _savePermissionStatus(status);
       emit(_mapStatusToState(status));
     } catch (e, s) {
       addError(e, s);
-      _timeoutTimer?.cancel();
       emit(const SmsPermissionDenied());
     }
   }
@@ -114,4 +104,13 @@ class SmsPermissionBloc extends Bloc<SmsPermissionEvent, SmsPermissionState> {
 
     await prefs.setString(_smsPermissionStatusKey, statusString);
   }
+}
+
+/// Helper to distinguish between a permission result and a timeout.
+class _PermissionResult {
+  final PermissionStatus? status;
+  final bool isTimeout;
+
+  _PermissionResult(this.status) : isTimeout = false;
+  _PermissionResult.timedOut() : status = null, isTimeout = true;
 }

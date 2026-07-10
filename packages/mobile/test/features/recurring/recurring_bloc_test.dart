@@ -4,6 +4,8 @@ import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
 import 'package:expense_tracker/features/recurring/domain/entities/recurring_transaction.dart';
+import 'package:expense_tracker/features/records/domain/entities/record.dart';
+import 'package:expense_tracker/features/records/domain/usecases/add_record.dart';
 import 'package:expense_tracker/features/recurring/domain/usecases/get_recurring_list.dart';
 import 'package:expense_tracker/features/recurring/domain/usecases/create_recurring.dart'
     as create_uc;
@@ -27,20 +29,26 @@ class MockDeleteRecurring extends Mock implements uc.DeleteRecurring {}
 
 class MockProcessRecurring extends Mock implements uc.ProcessRecurring {}
 
+class MockAddRecord extends Mock implements AddRecord {}
+
 class _NoParamsFake extends Fake implements NoParams {}
 
 class _RecurringTransactionFake extends Fake implements RecurringTransaction {}
+
+class _RecordFake extends Fake implements Record {}
 
 void main() {
   setUpAll(() {
     registerFallbackValue(_NoParamsFake());
     registerFallbackValue(_RecurringTransactionFake());
+    registerFallbackValue(_RecordFake());
   });
   late MockGetRecurringList mockGetRecurringList;
   late MockCreateRecurring mockCreateRecurring;
   late MockUpdateRecurring mockUpdateRecurring;
   late MockDeleteRecurring mockDeleteRecurring;
   late MockProcessRecurring mockProcessRecurring;
+  late MockAddRecord mockAddRecord;
   late RecurringBloc bloc;
 
   final testRecurring = RecurringTransaction(
@@ -61,12 +69,14 @@ void main() {
     mockUpdateRecurring = MockUpdateRecurring();
     mockDeleteRecurring = MockDeleteRecurring();
     mockProcessRecurring = MockProcessRecurring();
+    mockAddRecord = MockAddRecord();
     bloc = RecurringBloc(
       getRecurringList: mockGetRecurringList,
       createRecurring: mockCreateRecurring,
       updateRecurring: mockUpdateRecurring,
       deleteRecurring: mockDeleteRecurring,
       processRecurring: mockProcessRecurring,
+      addRecord: mockAddRecord,
     );
   });
 

@@ -1,4 +1,7 @@
 import 'package:equatable/equatable.dart';
+import 'sms_type.dart';
+
+export 'sms_type.dart';
 
 class SmsMessage extends Equatable {
   final String id;
@@ -38,5 +41,3 @@ class SmsMessage extends Equatable {
     );
   }
 }
-
-enum SmsType { received, sent, draft }

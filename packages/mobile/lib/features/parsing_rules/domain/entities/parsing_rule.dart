@@ -1,4 +1,7 @@
 import 'package:equatable/equatable.dart';
+import 'source_type.dart';
+
+export 'source_type.dart';
 
 class ParsingRule extends Equatable {
   final String id;
@@ -78,5 +81,3 @@ class ParsingRule extends Equatable {
 
   static T _v<T>(T? value, T defaultValue) => value ?? defaultValue;
 }
-
-enum SourceType { sms, email, both }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:picons/picons.dart';
+import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_stat_tile.dart';
 import '../../domain/entities/spending_insights.dart';
@@ -30,28 +31,28 @@ class InsightsCard extends StatelessWidget {
           title: 'Highest Spending Day',
           value: highestDay,
           subtitle: _formatAmount(insights.highestDayAmount),
-          color: Colors.orange,
+          color: AppColors.warning,
         ),
         AppStatTile(
           icon: PiconsRegular.chartLineUp,
           title: 'Average Daily Spending',
           value: _formatAmount(insights.avgDailySpending),
           subtitle: 'Per day in selected period',
-          color: Colors.blue,
+          color: AppColors.primary,
         ),
         AppStatTile(
           icon: PiconsRegular.invoice,
           title: 'Total Transactions',
           value: insights.totalTransactionCount.toString(),
           subtitle: 'In selected period',
-          color: Colors.green,
+          color: AppColors.success,
         ),
         AppStatTile(
           icon: PiconsRegular.wallet,
           title: 'Total Spent',
           value: _formatAmount(insights.totalSpent),
           subtitle: 'In selected period',
-          color: Colors.purple,
+          color: AppColors.expense,
         ),
       ],
     );

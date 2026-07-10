@@ -17,6 +17,7 @@ class AppConstants {
   static const int maxPaginationLimit = 100;
   static const String defaultEmoji = '📦';
   static const String defaultColor = '#2196F3';
+  static const String defaultCategoryName = 'General';
   static const Duration tokenRefreshThreshold = Duration(minutes: 5);
   static const List<String> googleSignInScopes = ['email', 'profile'];
 
