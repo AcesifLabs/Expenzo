@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:picons/picons.dart';
+import 'package:expense_tracker/core/theme/app_colors.dart';
 
 class SearchBarWidget extends StatefulWidget {
   final TextEditingController controller;
@@ -59,7 +60,10 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
       ),
       child: Row(
         children: [
-          Icon(PiconsRegular.magnifyingGlass, color: Colors.grey),
+          Icon(
+            PiconsRegular.magnifyingGlass,
+            color: AppColors.textSecondaryLight,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: TextField(

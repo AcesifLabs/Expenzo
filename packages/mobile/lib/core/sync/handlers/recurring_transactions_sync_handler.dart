@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import '../../constants/transaction_frequency.dart';
 import '../../database/app_database.dart';
 import '../sync_table_registry.dart';
+import 'sync_parse_helpers.dart';
 
 class RecurringTransactionsSyncHandler
     extends
@@ -34,31 +35,34 @@ class RecurringTransactionsSyncHandler
     Map<String, dynamic> data,
   ) => RecurringTransactionsCompanion.insert(
     id: id,
-    description: data['description'] ?? '',
-    amount: double.parse(data['amount'].toString()),
+    description: parseSyncString(data['description']),
+    amount: parseSyncAmount(data['amount']),
     categoryId: data['categoryId'] != null
-        ? Value(data['categoryId'])
+        ? Value(data['categoryId'].toString())
         : const Value.absent(),
-    frequency: data['frequency'] ?? TransactionFrequency.monthly.name,
-    startDate: DateTime.parse(data['startDate']).toLocal(),
+    frequency: parseSyncString(
+      data['frequency'],
+      TransactionFrequency.monthly.name,
+    ),
+    startDate: parseSyncDate(data['startDate']),
     endDate: data['endDate'] != null
-        ? Value(DateTime.parse(data['endDate']).toLocal())
+        ? Value(parseSyncDate(data['endDate']))
         : const Value.absent(),
-    nextOccurrence: DateTime.parse(data['nextOccurrence']).toLocal(),
+    nextOccurrence: parseSyncDate(data['nextOccurrence']),
     isActive: data['isActive'] != null
-        ? Value(data['isActive'])
+        ? Value(data['isActive'] == true)
         : const Value.absent(),
     autoCreateExpense: data['autoCreateExpense'] != null
-        ? Value(data['autoCreateExpense'])
+        ? Value(data['autoCreateExpense'] == true)
         : const Value.absent(),
     dayOfMonth: data['dayOfMonth'] != null
-        ? Value(int.parse(data['dayOfMonth'].toString()))
+        ? Value(int.tryParse(data['dayOfMonth'].toString()) ?? 0)
         : const Value.absent(),
     createdAt: data['createdAt'] != null
-        ? Value(DateTime.parse(data['createdAt']).toLocal())
+        ? Value(parseSyncDate(data['createdAt']))
         : const Value.absent(),
     updatedAt: data['updatedAt'] != null
-        ? Value(DateTime.parse(data['updatedAt']).toLocal())
+        ? Value(parseSyncDate(data['updatedAt']))
         : const Value.absent(),
   );
   @override

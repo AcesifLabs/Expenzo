@@ -99,41 +99,53 @@ class SettingsView extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppScaffold(
       title: 'Settings',
-      child: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        children: [
-          _SettingTile(
-            icon: PiconsLight.currencyDollar,
-            title: 'Currency',
-            subtitle: 'USD (\$)',
-            onTap: () => _handleCurrencyTap(context),
-          ),
-          _SettingTile(
-            icon: PiconsLight.bell,
-            title: 'Notifications',
-            onTap: () => _handleNotificationsTap(context),
-          ),
-          _SettingTile(
-            icon: PiconsLight.sun,
-            title: 'Appearance',
-            subtitle: 'System',
-            onTap: () => _handleAppearanceTap(context),
-          ),
-          if (context.read<AuthBloc>().state is Authenticated)
-            _SettingTile(
-              icon: PiconsLight.trash,
-              title: 'Delete Account',
-              titleColor: AppColors.error,
-              onTap: () => _handleDeleteAccountTap(context),
-            ),
-          if (kDebugMode)
-            _SettingTile(
-              icon: Icons.storage,
-              title: 'Database Inspector',
-              subtitle: 'Debug builds only',
-              onTap: () => _openDbInspector(context),
-            ),
-        ],
+      child: BlocBuilder<SettingsBloc, SettingsState>(
+        builder: (context, settingsState) {
+          final currencySymbol = settingsState is SettingsLoaded
+              ? settingsState.settings.currencySymbol
+              : '\$';
+          final theme = settingsState is SettingsLoaded
+              ? settingsState.settings.theme
+              : 'system';
+          final themeLabel = theme[0].toUpperCase() + theme.substring(1);
+
+          return ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            children: [
+              _SettingTile(
+                icon: PiconsLight.currencyDollar,
+                title: 'Currency',
+                subtitle: currencySymbol,
+                onTap: () => _handleCurrencyTap(context),
+              ),
+              _SettingTile(
+                icon: PiconsLight.bell,
+                title: 'Notifications',
+                onTap: () => _handleNotificationsTap(context),
+              ),
+              _SettingTile(
+                icon: PiconsLight.sun,
+                title: 'Appearance',
+                subtitle: themeLabel,
+                onTap: () => _handleAppearanceTap(context),
+              ),
+              if (context.read<AuthBloc>().state is Authenticated)
+                _SettingTile(
+                  icon: PiconsLight.trash,
+                  title: 'Delete Account',
+                  titleColor: AppColors.error,
+                  onTap: () => _handleDeleteAccountTap(context),
+                ),
+              if (kDebugMode)
+                _SettingTile(
+                  icon: Icons.storage,
+                  title: 'Database Inspector',
+                  subtitle: 'Debug builds only',
+                  onTap: () => _openDbInspector(context),
+                ),
+            ],
+          );
+        },
       ),
     );
   }

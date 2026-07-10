@@ -77,7 +77,7 @@ List<ParsedTransaction> _parseInIsolate(_IsolatePayload payload) {
     processedIds.add(message.sourceId);
 
     _isolateLog(
-      'Evaluating message from ${message.address}: "${message.body}"',
+      'Evaluating message ${message.sourceId} (length: ${message.body.length})',
     );
 
     final parsed = RuleEvaluator.evaluateWithContext(
@@ -92,9 +92,7 @@ List<ParsedTransaction> _parseInIsolate(_IsolatePayload payload) {
     );
 
     if (parsed != null && !parsed.parseFailed && parsed.amount != null) {
-      _isolateLog(
-        'Message matched! Amount: ${parsed.amount}, Category: ${parsed.categoryId}',
-      );
+      _isolateLog('Message matched: ${message.sourceId}');
       results.add(parsed);
     }
   }

@@ -26,8 +26,12 @@ class GetDashboardSummary implements UseCase<DashboardSummary, DateRange> {
 
       final totalIncome = _calculateByType(currentRecords, RecordType.income);
       final totalExpense = _calculateByType(currentRecords, RecordType.expense);
-      final totalSpent = totalIncome + totalExpense;
-      final previousPeriodTotal = _calculateTotal(previousRecords);
+      // "Spent" is expense-only — income is tracked separately
+      final totalSpent = totalExpense;
+      final previousPeriodTotal = _calculateByType(
+        previousRecords,
+        RecordType.expense,
+      );
 
       double percentChange = 0;
       if (previousPeriodTotal > 0) {
@@ -85,12 +89,16 @@ class GetDashboardSummary implements UseCase<DashboardSummary, DateRange> {
   Future<List<CategoryAmount>> _calculateCategoryBreakdown(
     List<Record> records,
   ) async {
-    final totalSpent = _calculateTotal(records);
+    // Only include expenses in the category breakdown
+    final expenseRecords = records
+        .where((r) => r.recordType == RecordType.expense)
+        .toList();
+    final totalExpense = _calculateTotal(expenseRecords);
 
-    if (totalSpent == 0) return [];
+    if (totalExpense == 0) return [];
 
     final categoryMap = <String, double>{};
-    for (final record in records) {
+    for (final record in expenseRecords) {
       final catId = record.categoryId;
       if (catId != null) {
         categoryMap[catId] = (categoryMap[catId] ?? 0) + record.amount.abs();
@@ -102,10 +110,22 @@ class GetDashboardSummary implements UseCase<DashboardSummary, DateRange> {
     return categoryResult.fold((failure) => [], (categories) {
       final breakdown = <CategoryAmount>[];
       for (final entry in categoryMap.entries) {
-        final category = categories.firstWhere(
-          (c) => c.id == entry.key,
-          orElse: () => throw ArgumentError('Category not found: ${entry.key}'),
-        );
+        // Skip orphaned categories instead of throwing
+        final matching = categories.where((c) => c.id == entry.key);
+        if (matching.isEmpty) {
+          // Bucket as "Uncategorized"
+          breakdown.add(
+            CategoryAmount(
+              categoryId: entry.key,
+              emoji: '❓',
+              categoryName: 'Uncategorized',
+              amount: entry.value,
+              percentage: (entry.value / totalExpense) * 100,
+            ),
+          );
+          continue;
+        }
+        final category = matching.first;
         final amount = entry.value;
         breakdown.add(
           CategoryAmount(
@@ -113,7 +133,7 @@ class GetDashboardSummary implements UseCase<DashboardSummary, DateRange> {
             emoji: category.emoji,
             categoryName: category.name,
             amount: amount,
-            percentage: (amount / totalSpent) * 100,
+            percentage: (amount / totalExpense) * 100,
           ),
         );
       }

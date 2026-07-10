@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:flutter/foundation.dart';
@@ -35,41 +34,23 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
     required this.userDao,
   });
 
-  @visibleForTesting
-  static bool isDevTokenFallbackAllowed({required bool isDebugMode}) {
-    return isDebugMode;
-  }
-
   /// Throws: [ServerException] if the API request fails.
   @override
   Future<User> signInWithGoogle() async {
-    debugPrint('AuthRemoteDatasource: signInWithGoogle started');
-
-    final googleAccount = await googleSignIn.signInSilently();
-    debugPrint('AuthRemoteDatasource: signInSilently result: $googleAccount');
-
     final googleUser = await googleSignIn.signIn();
-    debugPrint('AuthRemoteDatasource: signIn result: $googleUser');
 
     if (googleUser == null) {
-      debugPrint('AuthRemoteDatasource: Google sign in was cancelled by user');
       throw AuthException(message: 'Google sign in was cancelled');
     }
 
     final googleAuth = await googleUser.authentication;
-    debugPrint('AuthRemoteDatasource: Got google auth tokens');
-
     final credential = fb.GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
 
-    debugPrint('AuthRemoteDatasource: Calling Firebase signInWithCredential');
     final userCredential = await firebaseAuth.signInWithCredential(credential);
-    debugPrint('AuthRemoteDatasource: Firebase signInWithCredential succeeded');
-
     final firebaseUser = userCredential.user;
-    debugPrint('AuthRemoteDatasource: Firebase user: $firebaseUser');
 
     if (firebaseUser == null) {
       throw AuthException(message: 'Firebase sign in failed');
@@ -94,9 +75,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
   /// Throws: [ServerException] if the API request fails.
   @override
   Future<User?> getCurrentUser() async {
-    debugPrint('AuthRemoteDatasource: getCurrentUser called');
     final firebaseUser = firebaseAuth.currentUser;
-    debugPrint('AuthRemoteDatasource: currentUser: $firebaseUser');
 
     if (firebaseUser == null) return null;
     await _syncUserToLocalDb(firebaseUser);
@@ -113,13 +92,41 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
   }
 
   /// Throws: [ServerException] if the API request fails.
+  /// Handles the common `requires-recent-login` exception by re-authenticating
+  /// via Google Sign-In before retrying the delete.
   @override
   Future<void> deleteAccount() async {
     final user = firebaseAuth.currentUser;
-    if (user != null) {
+    if (user == null) return;
+
+    try {
       await user.delete();
-      await userDao.clearUser();
+    } on fb.FirebaseAuthException catch (e) {
+      if (e.code == 'requires-recent-login') {
+        // Re-authenticate via Google credential and retry
+        final googleAccount = await googleSignIn.signInSilently();
+        if (googleAccount == null) {
+          throw ServerException(
+            message:
+                'Re-authentication required. Please sign in again before deleting your account.',
+          );
+        }
+        final googleAuth = await googleAccount.authentication;
+        final credential = fb.GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+        await user.reauthenticateWithCredential(credential);
+        await user.delete();
+      } else {
+        rethrow;
+      }
     }
+
+    // Cleanup: sign out of Google, clear tokens, clear local user
+    await googleSignIn.signOut();
+    await TokenStorage.clearAll();
+    await userDao.clearUser();
   }
 
   /// Throws: [ServerException] if the API request fails.
@@ -129,8 +136,10 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
       return await googleSignIn.canAccessScopes([
         'https://www.googleapis.com/auth/gmail.readonly',
       ]);
-    } catch (e, s) {
-      debugPrint('Error: $e\n$s');
+    } catch (e) {
+      debugPrint(
+        'AuthRemoteDatasource: Failed to check Gmail scope: ${e.runtimeType}',
+      );
 
       return false;
     }
@@ -159,49 +168,27 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
           lastLoginAt: Value(now),
         ),
       );
-    } catch (e, s) {
-      debugPrint('Error: $e\n$s');
-      debugPrint('AuthRemoteDatasource: Failed to sync user to local DB: $e');
+    } catch (e) {
+      debugPrint(
+        'AuthRemoteDatasource: Failed to sync user to local DB: ${e.runtimeType}',
+      );
     }
   }
 
   /// Throws: [ServerException] if the API request fails.
   Future<void> _obtainJwtToken(fb.User firebaseUser) async {
-    try {
-      final firebaseToken = await firebaseUser.getIdToken(true);
-      final apiClient = di.getIt<ApiClient>();
-      final response = await apiClient.dio.post(
-        ApiConstants.login,
-        data: {'firebaseToken': firebaseToken},
+    final firebaseToken = await firebaseUser.getIdToken(true);
+    final apiClient = di.getIt<ApiClient>();
+    final response = await apiClient.dio.post(
+      ApiConstants.login,
+      data: {'firebaseToken': firebaseToken},
+    );
+    final accessToken = response.data['accessToken'];
+    if (accessToken is! String || accessToken.isEmpty) {
+      throw ServerException(
+        message: 'Invalid access token received from server.',
       );
-      await TokenStorage.saveToken(response.data['accessToken']);
-      debugPrint('AuthRemoteDatasource: Backend JWT obtained');
-    } catch (e, s) {
-      debugPrint('Error: $e\n$s');
-      debugPrint('AuthRemoteDatasource: Backend JWT with Firebase failed: $e');
-
-      if (!isDevTokenFallbackAllowed(isDebugMode: kDebugMode)) {
-        rethrow;
-      }
-
-      try {
-        final payload = {
-          'uid': firebaseUser.uid,
-          'email': firebaseUser.email,
-          'name': firebaseUser.displayName,
-        };
-        final devToken =
-            'dev-${base64Encode(const Utf8Encoder().convert(jsonEncode(payload)))}';
-        final response = await di.getIt<ApiClient>().dio.post(
-          ApiConstants.login,
-          data: {'firebaseToken': devToken},
-        );
-        await TokenStorage.saveToken(response.data['accessToken']);
-        debugPrint('AuthRemoteDatasource: Dev JWT obtained');
-      } catch (e2) {
-        debugPrint('AuthRemoteDatasource: Dev JWT also failed: $e2');
-        rethrow;
-      }
     }
+    await TokenStorage.saveToken(accessToken);
   }
 }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiConstants {
@@ -15,11 +16,30 @@ class ApiConstants {
   static const String syncPull = '/sync/pull';
   static const String syncSummary = '/sync/summary';
   static const String syncClear = '/sync/clear';
+  static const String health = '/health';
 
+  /// Returns the configured backend base URL.
+  ///
+  /// In debug mode, falls back to localhost if BACKEND_URL is missing.
+  /// In release/profile builds, throws a [StateError] if BACKEND_URL is
+  /// missing or not HTTPS, to prevent silent misconfiguration.
   static String get baseUrl {
     final value = dotenv.env['BACKEND_URL'];
     if (value == null || value.isEmpty || value == 'TBD') {
-      return 'http://localhost:3000/api';
+      if (kDebugMode) {
+        return 'http://localhost:3000/api';
+      }
+      throw StateError(
+        'BACKEND_URL is not configured. '
+        'Set it in .env.prod for release builds.',
+      );
+    }
+
+    if (!kDebugMode && !value.startsWith('https://')) {
+      throw StateError(
+        'BACKEND_URL must use HTTPS in release builds. '
+        'Got: ${value.split('://').first}://',
+      );
     }
 
     return value;

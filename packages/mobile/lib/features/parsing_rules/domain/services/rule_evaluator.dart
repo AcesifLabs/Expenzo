@@ -2,28 +2,18 @@ import 'package:intl/intl.dart';
 import 'package:flutter/foundation.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
 import 'package:expense_tracker/core/logger/app_logger.dart';
+import 'package:expense_tracker/core/utils/regex_utils.dart';
 import '../entities/parsing_rule.dart';
 import '../entities/parsed_transaction.dart';
 import '../entities/evaluate_rules_params.dart';
 import '../entities/parsing_context.dart';
+import 'amount_match_resolver.dart' as amount_match_resolver;
 import '../../../message_templates/domain/entities/expense_template.dart';
 import '../../../message_templates/domain/entities/message_source.dart';
 
 class RuleEvaluator {
-  // Pre-compiled scorer regexes. Hoisted out of the loop so each call to
-  // [resolveAmountMatch] doesn't re-allocate them once per candidate.
-  static final _maskSuffixRegex = RegExp(r'(\*+|[xX]+)$');
-  static final _balanceKeywordRegex = RegExp(
-    r'(avl|bal|balance)\b',
-    caseSensitive: false,
-  );
-  static final _amountKeywordRegex = RegExp(
-    r'(bdt|rs|inr|tk|৳|debited|spent|paid)\s*:?\s*$',
-    caseSensitive: false,
-  );
-
   static String normalizeAmount(String amount) =>
-      amount.replaceAll(RegExp(r'[^\d.]'), '');
+      amount_match_resolver.normalizeResolvedAmount(amount);
 
   static ParsedTransaction? evaluateWithContext(
     ParsingContext context,
@@ -51,30 +41,11 @@ class RuleEvaluator {
     List<Match> allMatches,
     String? selectedAmount,
     String rawMessage,
-  ) {
-    if (allMatches.isEmpty) return null;
-
-    if (selectedAmount != null) {
-      final exact = _findExactMatch(
-        allMatches,
-        normalizeAmount(selectedAmount),
-      );
-      if (exact != null) return exact;
-    }
-
-    Match? bestMatch;
-    int bestScore = -1 << 30;
-
-    for (final match in allMatches) {
-      final score = _scoreAmountCandidate(match, rawMessage);
-      if (score > bestScore) {
-        bestScore = score;
-        bestMatch = match;
-      }
-    }
-
-    return bestMatch;
-  }
+  ) => amount_match_resolver.resolveAmountMatch(
+    allMatches,
+    selectedAmount,
+    rawMessage,
+  );
 
   static ParsedTransaction? _evaluateTemplates(
     ParsingContext context,
@@ -136,7 +107,7 @@ class RuleEvaluator {
     try {
       final regex =
           regexCache[template.amountPattern] ?? RegExp(template.amountPattern);
-      final allMatches = regex.allMatches(params.rawMessage).toList();
+      final allMatches = matchAllWithBudget(regex, params.rawMessage);
       final selectedAmount = template.selectedAmount;
 
       final amountMatch = resolveAmountMatch(
@@ -175,43 +146,6 @@ class RuleEvaluator {
     }
   }
 
-  static int _scoreAmountCandidate(Match match, String rawMessage) {
-    final matchText = match.group(0) ?? '';
-    final beforeContext = rawMessage.substring(0, match.start);
-    var score = 0;
-
-    // Penalize masked account digits like "***6538"
-    if (_maskSuffixRegex.hasMatch(beforeContext.trim())) score -= 50;
-    // Penalize balance/availability indicators preceding the number
-    if (_balanceKeywordRegex.hasMatch(beforeContext)) score -= 20;
-    // Reward decimals (real amounts almost always have them)
-    if (matchText.contains('.')) score += 3;
-    // Reward proximity to currency or action keywords immediately before
-    if (_amountKeywordRegex.hasMatch(beforeContext)) score += 10;
-
-    return score;
-  }
-
-  static Match? _findExactMatch(List<Match> matches, String targetNormalized) {
-    for (final m in matches) {
-      // group(1) holds the numeric portion (with optional commas) for the
-      // typical pattern. Fall back to group(0) for patterns without a
-      // capture group — Dart throws RangeError on out-of-range group access.
-      final fullMatch = m.group(0) ?? '';
-      final numericPortion = m.groupCount >= 1
-          ? (m.group(1) ?? fullMatch)
-          : fullMatch;
-      if (normalizeAmount(numericPortion) == targetNormalized) {
-        return m;
-      }
-    }
-
-    // No match found: returning null lets the caller (resolveAmountMatch)
-    // fall through to the scorer rather than silently picking the leftmost
-    // candidate, which is almost always wrong.
-    return null;
-  }
-
   static double? _extractAmount(Match amountMatch) {
     // group(1) holds the numeric portion for both legacy and new patterns;
     // fall back to group(0) for patterns without a capture group.
@@ -231,7 +165,7 @@ class RuleEvaluator {
     try {
       final regex =
           regexCache[rule.amountPattern] ?? RegExp(rule.amountPattern);
-      final amountMatch = regex.firstMatch(params.rawMessage);
+      final amountMatch = matchFirstWithBudget(regex, params.rawMessage);
 
       if (amountMatch == null) return null;
 
@@ -290,7 +224,7 @@ class RuleEvaluator {
     Map<String, RegExp> regexCache,
   ) {
     final dateRegex = regexCache[datePattern] ?? RegExp(datePattern);
-    final dateMatch = dateRegex.firstMatch(params.rawMessage);
+    final dateMatch = matchFirstWithBudget(dateRegex, params.rawMessage);
     if (dateMatch == null) return null;
 
     return _parseDate(dateMatch.group(0) ?? '');

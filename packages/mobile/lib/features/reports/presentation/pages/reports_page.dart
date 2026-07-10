@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
 import 'package:expense_tracker/core/di/injection_container.dart';
 import '../bloc/reports_bloc.dart';
+import '../bloc/reports_event.dart';
 import '../bloc/reports_state.dart';
 import '../widgets/spending_trend_chart.dart';
 import '../widgets/category_pie_chart.dart';
@@ -42,11 +43,28 @@ class _ReportsPageContentState extends State<_ReportsPageContent>
   }
 
   void _onTabChanged() {
-    setState(() => _tabController);
+    // Only rebuild when the index actually changes, not on animation ticks
+    if (_tabController?.indexIsChanging != true) return;
+    setState(() {});
   }
 
-  void _handleDateRangeSelected(String _) {
-    // TODO: handle date range selection
+  void _handleDateRangeSelected(String value) {
+    final now = DateTime.now();
+    DateTime startDate;
+    DateTime endDate = now;
+
+    switch (value) {
+      case 'week':
+        startDate = now.subtract(const Duration(days: 7));
+      case 'month':
+        startDate = now.subtract(const Duration(days: 30));
+      default:
+        return;
+    }
+
+    context.read<ReportsBloc>().add(
+      ChangeDateRange(startDate: startDate, endDate: endDate),
+    );
   }
 
   Widget _buildDateRangeSelector(BuildContext _) {

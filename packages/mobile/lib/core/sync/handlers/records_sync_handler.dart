@@ -3,6 +3,7 @@ import '../../constants/record_type.dart';
 import '../../constants/source_types.dart';
 import '../../database/app_database.dart';
 import '../sync_table_registry.dart';
+import 'sync_parse_helpers.dart';
 
 class RecordsSyncHandler extends SyncTableHandler<$RecordsTable, Record> {
   @override
@@ -22,27 +23,29 @@ class RecordsSyncHandler extends SyncTableHandler<$RecordsTable, Record> {
     'updatedAt': row.updatedAt.toUtc().toIso8601String(),
   };
   @override
-  Insertable<Record> fromSyncPayload(String id, Map<String, dynamic> data) =>
-      RecordsCompanion.insert(
-        id: id,
-        amount: double.parse(data['amount'].toString()),
-        description: data['description'] ?? '',
-        date: DateTime.parse(data['date']).toLocal(),
-        categoryId: data['categoryId'] != null
-            ? Value(data['categoryId'])
-            : const Value.absent(),
-        source: Value(data['source'] ?? ExpenseSource.manual.name),
-        sourceId: data['sourceId'] != null
-            ? Value(data['sourceId'])
-            : const Value.absent(),
-        recordType: data['recordType'] ?? RecordType.expense.dbValue,
-        createdAt: data['createdAt'] != null
-            ? Value(DateTime.parse(data['createdAt']).toLocal())
-            : const Value.absent(),
-        updatedAt: data['updatedAt'] != null
-            ? Value(DateTime.parse(data['updatedAt']).toLocal())
-            : const Value.absent(),
-      );
+  Insertable<Record> fromSyncPayload(
+    String id,
+    Map<String, dynamic> data,
+  ) => RecordsCompanion.insert(
+    id: id,
+    amount: parseSyncAmount(data['amount']),
+    description: parseSyncString(data['description']),
+    date: parseSyncDate(data['date']),
+    categoryId: data['categoryId'] != null
+        ? Value(data['categoryId'].toString())
+        : const Value.absent(),
+    source: Value(parseSyncString(data['source'], ExpenseSource.manual.name)),
+    sourceId: data['sourceId'] != null
+        ? Value(data['sourceId'].toString())
+        : const Value.absent(),
+    recordType: parseSyncString(data['recordType'], RecordType.expense.dbValue),
+    createdAt: data['createdAt'] != null
+        ? Value(parseSyncDate(data['createdAt']))
+        : const Value.absent(),
+    updatedAt: data['updatedAt'] != null
+        ? Value(parseSyncDate(data['updatedAt']))
+        : const Value.absent(),
+  );
   @override
   Future<void> deleteById(AppDatabase db, String id) async =>
       await (db.delete(db.records)..where((t) => t.id.equals(id))).go();

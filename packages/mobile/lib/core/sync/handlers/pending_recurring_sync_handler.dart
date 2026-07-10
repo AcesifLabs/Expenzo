@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import '../../database/app_database.dart';
 import '../sync_table_registry.dart';
+import 'sync_parse_helpers.dart';
 
 class PendingRecurringSyncHandler
     extends SyncTableHandler<$PendingRecurringTable, PendingRecurringData> {
@@ -27,15 +28,15 @@ class PendingRecurringSyncHandler
     Map<String, dynamic> data,
   ) => PendingRecurringCompanion.insert(
     id: id,
-    recurringId: data['recurringId'] ?? '',
-    dueDate: DateTime.parse(data['dueDate']).toLocal(),
-    amount: double.parse(data['amount'].toString()),
-    description: data['description'] ?? '',
+    recurringId: parseSyncString(data['recurringId']),
+    dueDate: parseSyncDate(data['dueDate']),
+    amount: parseSyncAmount(data['amount']),
+    description: parseSyncString(data['description']),
     categoryId: data['categoryId'] != null
-        ? Value(data['categoryId'])
+        ? Value(data['categoryId'].toString())
         : const Value.absent(),
     createdAt: data['createdAt'] != null
-        ? Value(DateTime.parse(data['createdAt']).toLocal())
+        ? Value(parseSyncDate(data['createdAt']))
         : const Value.absent(),
   );
   @override

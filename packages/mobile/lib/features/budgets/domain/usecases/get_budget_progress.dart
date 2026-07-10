@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/constants/budget_period.dart';
+import 'package:expense_tracker/core/utils/budget_period_utils.dart';
 import '../repositories/budget_repository.dart';
 
 class GetBudgetProgress {
@@ -23,10 +24,9 @@ class GetBudgetProgress {
       final percentage = effectiveBudget > 0
           ? (spentAmount / effectiveBudget) * 100
           : 0.0;
-      final now = DateTime.now();
-      final periodRange = DateTimeRange(
-        start: now,
-        end: now.add(const Duration(days: 30)),
+      final periodRange = BudgetPeriodUtils.calculateCurrentPeriod(
+        budget.startDate,
+        budget.period,
       );
 
       return Right(

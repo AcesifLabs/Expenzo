@@ -212,12 +212,15 @@ class _ScanPageWithFab extends StatefulWidget {
   State<_ScanPageWithFab> createState() => _ScanPageWithFabState();
 }
 
-class _ScanPageWithFabState extends State<_ScanPageWithFab> {
+class _ScanPageWithFabState extends State<_ScanPageWithFab>
+    with WidgetsBindingObserver {
   bool _hasSmsPermission = false;
+  bool _keyboardOpen = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     unawaited(_loadInitialPermission());
   }
 
@@ -263,13 +266,48 @@ class _ScanPageWithFabState extends State<_ScanPageWithFab> {
   }
 
   @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeMetrics() {
+    super.didChangeMetrics();
+
+    // The outer AppShell Scaffold consumes viewInsets for its body, so reading
+    // MediaQuery here would always report 0. Read the true keyboard inset from
+    // the platform view instead.
+    final bottomInset = WidgetsBinding
+        .instance
+        .platformDispatcher
+        .views
+        .first
+        .viewInsets
+        .bottom;
+    final keyboardOpen = bottomInset > 0;
+
+    if (!mounted || _keyboardOpen == keyboardOpen) {
+      return;
+    }
+
+    setState(() {
+      _keyboardOpen = keyboardOpen;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SmsPermissionGate(
         onPermissionChanged: _onPermissionChanged,
         child: const ContactSelectorPage(),
       ),
-      floatingActionButton: _hasSmsPermission
+      floatingActionButton:
+          shouldShowScanFab(
+            hasSmsPermission: _hasSmsPermission,
+            keyboardOpen: _keyboardOpen,
+          )
           ? Padding(
               padding: const EdgeInsets.only(bottom: 80),
               child: FloatingActionButton(
@@ -278,10 +316,15 @@ class _ScanPageWithFabState extends State<_ScanPageWithFab> {
                 child: Icon(PiconsBold.scan),
               ),
             )
-          : const SizedBox.shrink(),
+          : null,
     );
   }
 }
+
+bool shouldShowScanFab({
+  required bool hasSmsPermission,
+  required bool keyboardOpen,
+}) => hasSmsPermission && !keyboardOpen;
 
 class _ScanOptionsSheet extends StatelessWidget {
   final BuildContext parentContext;

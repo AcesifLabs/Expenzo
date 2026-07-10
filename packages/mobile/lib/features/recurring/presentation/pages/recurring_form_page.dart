@@ -36,6 +36,7 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
   int? _dayOfMonth;
   var _isActive = true;
   var _isLoading = false;
+  String? _categoryId;
 
   bool get _isEditing => widget.recurring != null || widget.recurringId != null;
 
@@ -101,6 +102,7 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
     _autoCreateExpense = recurring.autoCreateExpense;
     _dayOfMonth = recurring.dayOfMonth;
     _isActive = recurring.isActive;
+    _categoryId = recurring.categoryId;
   }
 
   void _onRecurringListener(BuildContext context, RecurringState state) {
@@ -140,7 +142,7 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
       id: widget.recurring?.id ?? widget.recurringId,
       description: _descriptionController.text,
       amount: double.parse(_amountController.text),
-      categoryId: widget.recurring?.categoryId,
+      categoryId: _categoryId,
       frequency: _frequency,
       startDate: _startDate,
       endDate: _endDate,

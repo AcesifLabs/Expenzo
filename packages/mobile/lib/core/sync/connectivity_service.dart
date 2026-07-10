@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import '../api/api_client.dart';
+import '../api/api_constants.dart';
 
 class ConnectivityService {
   final Connectivity _connectivity;
@@ -38,7 +39,10 @@ class ConnectivityService {
     }
     try {
       await _apiClient.dio
-          .get('/health', options: Options(validateStatus: (_) => true))
+          .get(
+            ApiConstants.health,
+            options: Options(validateStatus: (_) => true),
+          )
           .timeout(const Duration(seconds: 5));
       _isOnline = true;
 

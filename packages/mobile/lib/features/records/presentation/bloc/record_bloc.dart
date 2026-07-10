@@ -85,16 +85,15 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
 
   void _onRecordsUpdated(_RecordsUpdated event, Emitter<RecordState> emit) {
     final records = event.records;
-    final currentQuery = state is RecordLoaded
-        ? (state as RecordLoaded).searchQuery
-        : '';
+    final currentState = state;
+    if (currentState is! RecordLoaded) return;
 
+    // Preserve all active filter fields from the current state
     emit(
-      RecordLoaded(
+      currentState.copyWith(
         records: records,
         total: records.length,
         hasMore: records.length >= _pageSize,
-        searchQuery: currentQuery,
       ),
     );
   }
@@ -164,11 +163,10 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
       final allRecords = [...currentState.records, ...newRecords];
 
       emit(
-        RecordLoaded(
+        currentState.copyWith(
           records: allRecords,
           total: allRecords.length,
           hasMore: newRecords.length >= _pageSize,
-          searchQuery: currentState.searchQuery,
         ),
       );
     });
@@ -222,7 +220,6 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     emit(const RecordLoading());
 
     await _recordsSubscription?.cancel();
-    _recordsSubscription = null;
 
     final result = await recordRepository.getFilteredRecords(
       RecordFilter(
@@ -234,9 +231,8 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
       ),
     );
 
-    result.fold(
-      (failure) => emit(RecordError(failure.message)),
-      (records) => emit(
+    result.fold((failure) => emit(RecordError(failure.message)), (records) {
+      emit(
         RecordLoaded(
           records: records,
           total: records.length,
@@ -247,8 +243,17 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
           filterCategoryIds: event.categoryIds,
           filterRecordType: event.recordType,
         ),
-      ),
-    );
+      );
+
+      // Re-subscribe to live updates with the current filter context
+      _recordsSubscription = recordRepository
+          .watchRecords(limit: _pageSize)
+          .listen((updatedRecords) {
+            if (!isClosed) {
+              add(_RecordsUpdated(updatedRecords));
+            }
+          });
+    });
   }
 
   void _onClearFilters(ClearFilters event, Emitter<RecordState> emit) {

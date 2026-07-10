@@ -41,6 +41,6 @@ class BootstrapService {
   Future<void> hardReset() async {
     await GetIt.I.reset().catchError((Object _) => null);
     await di.initCriticalDependencies();
-    di.initFeatureDependencies();
+    await di.initFeatureDependencies();
   }
 }

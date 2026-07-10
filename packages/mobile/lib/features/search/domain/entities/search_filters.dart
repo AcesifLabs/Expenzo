@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 class SearchFilters extends Equatable {
   final String? query;
-  final int? categoryId;
+  final String? categoryId;
   final DateRange? dateRange;
   final double? minAmount;
   final double? maxAmount;
@@ -33,7 +33,7 @@ class SearchFilters extends Equatable {
 
   SearchFilters copyWith({
     String? query,
-    int? categoryId,
+    String? categoryId,
     DateRange? dateRange,
     double? minAmount,
     double? maxAmount,
