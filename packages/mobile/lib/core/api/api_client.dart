@@ -99,25 +99,27 @@ class _AuthInterceptor extends Interceptor {
   /// Returns the new JWT string, or null if refresh fails.
   Future<String?> _refreshToken() {
     // If a refresh is already in flight, await it
-    if (_refreshCompleter != null) {
-      return _refreshCompleter!.future;
+    final existingCompleter = _refreshCompleter;
+    if (existingCompleter != null) {
+      return existingCompleter.future;
     }
 
     // Start a new refresh
-    _refreshCompleter = Completer<String?>();
+    final completer = Completer<String?>();
+    _refreshCompleter = completer;
 
     _doRefresh()
         .then((token) {
-          _refreshCompleter!.complete(token);
+          completer.complete(token);
           _refreshCompleter = null;
         })
         .catchError((Object e) {
           debugPrint('Token refresh error: ${e.runtimeType}');
-          _refreshCompleter!.complete(null);
+          completer.complete(null);
           _refreshCompleter = null;
         });
 
-    return _refreshCompleter!.future;
+    return completer.future;
   }
 
   Future<String?> _doRefresh() async {

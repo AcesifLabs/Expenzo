@@ -7,13 +7,13 @@ import 'package:expense_tracker/core/utils/regex_utils.dart';
 class RegexTesterWidget extends StatefulWidget {
   final String pattern;
   final String? datePattern;
-  final Function(ParsedTestResult) onResult;
+  final Function(ParsedTestResult)? onResult;
 
   const RegexTesterWidget({
     super.key,
     required this.pattern,
     this.datePattern,
-    required this.onResult,
+    this.onResult,
   });
 
   @override
@@ -88,7 +88,7 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
     setState(() {
       _result = result;
     });
-    widget.onResult(result);
+    widget.onResult?.call(result);
   }
 
   double? _extractAmount(Match? match) {
@@ -138,7 +138,7 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
     setState(() {
       _result = result;
     });
-    widget.onResult(result);
+    widget.onResult?.call(result);
   }
 
   DateTime? _parseDate(String dateStr) {

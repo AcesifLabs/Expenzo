@@ -279,14 +279,6 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
     return null;
   }
 
-  void _onAmountPatternChanged(String _) {
-    // Controller text is already updated by the TextFormField
-  }
-
-  void _onDatePatternChanged(String _) {
-    // Controller text is already updated by the TextFormField
-  }
-
   void _onSourceTypeChanged(Set<SourceType> selection) {
     setState(() {
       _sourceType = selection.first;
@@ -297,10 +289,6 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
     setState(() {
       _isEnabled = value;
     });
-  }
-
-  void _onRegexTestResult(ParsedTestResult _) {
-    // Result is displayed by the regex tester widget
   }
 
   TextFormField _buildNameField() {
@@ -348,14 +336,12 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
             helperText:
                 r'Use capture group () for amount value. Example: Rs\.?\s*([\d,]+\.?\d*)',
           ),
-          onChanged: _onAmountPatternChanged,
           validator: _validateAmountPattern,
         ),
         const SizedBox(height: 8),
         RegexTesterWidget(
           pattern: _amountPatternController.text,
           datePattern: _datePatternController.text,
-          onResult: _onRegexTestResult,
         ),
       ],
     );
@@ -378,7 +364,6 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
             border: OutlineInputBorder(),
             helperText: 'Leave empty if date is not needed',
           ),
-          onChanged: _onDatePatternChanged,
         ),
       ],
     );

@@ -11,5 +11,6 @@ String buildFtsMatchQuery(String raw) {
   // Trim whitespace to avoid empty quoted phrases
   final trimmed = escaped.trim();
   if (trimmed.isEmpty) return '';
+
   return '"$trimmed"*';
 }

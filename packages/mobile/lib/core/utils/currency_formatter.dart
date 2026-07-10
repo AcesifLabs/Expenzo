@@ -22,6 +22,7 @@ class CurrencyFormatter {
       decimalDigits: decimalDigits,
     );
     if (amount >= 0) return '+$formatted';
+
     return '-$formatted';
   }
 

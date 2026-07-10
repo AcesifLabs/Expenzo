@@ -67,7 +67,8 @@ class ProcessRecurring {
     // Catch up: advance until current is in the future
     while (!current.isAfter(now) && count < kMaxCatchUpOccurrences) {
       // Check endDate before processing this occurrence
-      if (recurring.endDate != null && current.isAfter(recurring.endDate!)) {
+      final endDate = recurring.endDate;
+      if (endDate != null && current.isAfter(endDate)) {
         // This occurrence and all future ones are past endDate
         return _CatchUpResult(
           processed: processed,
@@ -90,8 +91,8 @@ class ProcessRecurring {
     }
 
     // Check if the final nextOccurrence exceeds endDate
-    final isPastEnd =
-        recurring.endDate != null && current.isAfter(recurring.endDate!);
+    final endDate = recurring.endDate;
+    final isPastEnd = endDate != null && current.isAfter(endDate);
 
     return _CatchUpResult(
       processed: processed,
