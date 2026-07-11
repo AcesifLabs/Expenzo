@@ -30,6 +30,7 @@ import 'budget_module.dart';
 import 'recurring_module.dart';
 import 'settings_module.dart';
 import 'dashboard_module.dart';
+import 'ai_assistant_module.dart';
 
 final getIt = GetIt.instance;
 
@@ -121,6 +122,7 @@ Future<void> initCriticalDependencies() async {
   initDashboardModule(getIt);
   initParsingModule(getIt);
   initReportModule(getIt);
+  initAiAssistantModule(getIt);
 
   completer.complete();
 }

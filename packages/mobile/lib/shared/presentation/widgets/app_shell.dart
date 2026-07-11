@@ -196,7 +196,7 @@ class _AppShellState extends State<AppShell> {
       ),
       floatingActionButton: showFab
           ? FloatingActionButton(
-              heroTag: 'shell_fab',
+              heroTag: null,
               onPressed: () => _onFabPressed(context),
               shape: const CircleBorder(),
               child: Icon(PiconsBold.plus),

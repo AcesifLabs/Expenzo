@@ -11,6 +11,8 @@ packages/mobile/.flutter-plugins-dependencies
 packages/mobile/.pub-cache/
 packages/mobile/.pub/
 packages/mobile/build/
+packages/mobile/.env.dev
+packages/mobile/.env.prod
 packages/mobile/**/build/
 
 # Android keys (not committed)
@@ -37,7 +39,7 @@ app.*.symbols
 app.*.map.json
 /coverage/
 **/.env**
-!packages/mobile/.env.dev
-!packages/mobile/.env.prod
+!packages/mobile/.env.dev.example
+!packages/mobile/.env.prod.example
 **/build/**
 **/task**

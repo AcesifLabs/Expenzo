@@ -7,6 +7,7 @@ import 'package:expense_tracker/features/reports/domain/repositories/reports_rep
 import 'package:expense_tracker/features/reports/domain/usecases/get_spending_trend.dart';
 import 'package:expense_tracker/features/reports/domain/usecases/get_category_breakdown.dart';
 import 'package:expense_tracker/features/reports/domain/usecases/get_spending_insights.dart';
+import 'package:expense_tracker/features/reports/domain/usecases/get_insights.dart';
 import 'package:expense_tracker/features/reports/presentation/bloc/reports_bloc.dart';
 
 void initReportModule(GetIt getIt) {
@@ -25,6 +26,7 @@ void initReportModule(GetIt getIt) {
   getIt.registerLazySingleton(
     () => GetSpendingInsights(repository: getIt<ReportsRepository>()),
   );
+  getIt.registerLazySingleton(() => const GetInsights());
   getIt.registerFactory<ReportsBloc>(
     () => ReportsBloc(
       getSpendingTrend: getIt<GetSpendingTrend>(),
