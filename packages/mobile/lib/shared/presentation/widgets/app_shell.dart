@@ -14,6 +14,8 @@ import 'package:expense_tracker/features/records/presentation/widgets/new_transa
 import 'package:expense_tracker/features/budgets/presentation/pages/budget_list_page.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanner_event.dart';
+import 'package:expense_tracker/features/sms_parser/presentation/models/sms_scan_range_selection.dart';
+import 'package:expense_tracker/features/sms_parser/presentation/widgets/sms_scan_options_sheet.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:expense_tracker/shared/presentation/widgets/sms_permission_gate.dart';
@@ -242,26 +244,28 @@ class _ScanPageWithFabState extends State<_ScanPageWithFab>
     });
   }
 
-  void _showScanOptions(BuildContext context) {
-    showModalBottomSheet(
+  Future<void> _showScanOptions(BuildContext context) async {
+    final selection = await showModalBottomSheet<SmsScanRangeSelection>(
       context: context,
-      builder: (ctx) =>
-          _ScanOptionsSheet(parentContext: context, onTap: _onScanOptionTap),
+      backgroundColor: const Color(0x00000000),
+      builder: (_) => SmsScanOptionsSheet(now: DateTime.now()),
     );
+    if (!context.mounted || selection == null) {
+      return;
+    }
+
+    _startScan(context, selection);
   }
 
-  void _onScanOptionTap(
-    BuildContext bottomSheetContext,
-    BuildContext context,
-    DateTime since,
-  ) {
-    Navigator.pop(bottomSheetContext);
-    _startScan(context, since);
-  }
-
-  void _startScan(BuildContext context, DateTime since) {
+  void _startScan(BuildContext context, SmsScanRangeSelection selection) {
     final smsBloc = di.getIt<SmsScannerBloc>();
-    smsBloc.add(StartScan(since: since, filterDuplicates: true));
+    smsBloc.add(
+      StartScan(
+        startDate: selection.startDate,
+        endDate: selection.endDate,
+        filterDuplicates: true,
+      ),
+    );
     context.push('/scan-results', extra: <String, dynamic>{'smsBloc': smsBloc});
   }
 
@@ -325,65 +329,3 @@ bool shouldShowScanFab({
   required bool hasSmsPermission,
   required bool keyboardOpen,
 }) => hasSmsPermission && !keyboardOpen;
-
-class _ScanOptionsSheet extends StatelessWidget {
-  final BuildContext parentContext;
-  final void Function(BuildContext, BuildContext, DateTime) onTap;
-
-  const _ScanOptionsSheet({required this.parentContext, required this.onTap});
-
-  Widget _scanOptionTile(
-    BuildContext context,
-    String label,
-    IconData icon,
-    DateTime since,
-  ) {
-    return ListTile(
-      leading: Icon(icon),
-      title: Text(label),
-      onTap: () => onTap(context, parentContext, since),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text(
-              'Scan past SMS for records',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ),
-          _scanOptionTile(
-            context,
-            'Last 7 Days',
-            PiconsRegular.clockCounterClockwise,
-            DateTime.now().subtract(const Duration(days: 7)),
-          ),
-          _scanOptionTile(
-            context,
-            'Last 30 Days',
-            PiconsRegular.calendar,
-            DateTime.now().subtract(const Duration(days: 30)),
-          ),
-          _scanOptionTile(
-            context,
-            'Last 3 Months',
-            PiconsRegular.calendarDots,
-            DateTime.now().subtract(const Duration(days: 90)),
-          ),
-          _scanOptionTile(
-            context,
-            'All Time',
-            PiconsRegular.infinity,
-            DateTime(2000),
-          ),
-        ],
-      ),
-    );
-  }
-}
