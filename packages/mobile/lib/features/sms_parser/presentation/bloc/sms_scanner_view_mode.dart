@@ -1,0 +1,1 @@
+enum SmsScannerViewMode { groupedBySender, flatList }

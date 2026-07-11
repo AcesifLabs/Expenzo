@@ -21,14 +21,19 @@ class ParsedTransactionCard extends StatelessWidget {
   Widget _buildAmountRow(ThemeData theme, NumberFormat currencyFormat) {
     final amount = transaction.amount;
     final hasAmount = amount != null;
+    final colors = theme.colorScheme;
+    final amountColor = isSelected ? colors.primary : colors.onSurface;
+    final badgeColor = isSelected
+        ? colors.primary
+        : colors.onSurface.withAlpha(180);
 
     return Row(
       children: [
         Text(
           hasAmount ? currencyFormat.format(amount) : 'N/A',
           style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: hasAmount ? theme.colorScheme.primary : Colors.grey,
+            fontWeight: FontWeight.w700,
+            color: hasAmount ? amountColor : Colors.grey,
           ),
         ),
         const SizedBox(width: 8),
@@ -36,24 +41,32 @@ class ParsedTransactionCard extends StatelessWidget {
           label: 'SMS',
           icon: PiconsRegular.chat,
           size: AppBadgeSize.small,
+          color: badgeColor,
         ),
       ],
     );
   }
 
-  Widget _buildBadgesRow() {
+  Widget _buildBadgesRow(ThemeData theme) {
+    final colors = theme.colorScheme;
+    final badgeColor = isSelected
+        ? colors.primary
+        : colors.onSurface.withAlpha(180);
+
     return Row(
       children: [
         if (transaction.matchedRuleId != null) ...[
           AppBadge(
             label: 'Rule: ${transaction.matchedRuleId}',
             size: AppBadgeSize.small,
+            color: colors.primary,
           ),
           const SizedBox(width: 8),
         ],
         AppBadge(
           label: '${(transaction.confidenceScore * 100).toInt()}%',
           size: AppBadgeSize.small,
+          color: badgeColor,
         ),
       ],
     );
@@ -63,11 +76,20 @@ class ParsedTransactionCard extends StatelessWidget {
     final body = transaction.rawMessage;
 
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Checkbox(
-          value: isSelected,
-          onChanged: (value) => onSelectionChanged(value ?? false),
+        Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: SizedBox(
+            width: 20,
+            height: 20,
+            child: Checkbox(
+              value: isSelected,
+              onChanged: (value) => onSelectionChanged(value ?? false),
+            ),
+          ),
         ),
+        const SizedBox(width: 10),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,8 +102,8 @@ class ParsedTransactionCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.bodyMedium,
               ),
-              const SizedBox(height: 4),
-              _buildBadgesRow(),
+              const SizedBox(height: 6),
+              _buildBadgesRow(theme),
             ],
           ),
         ),
@@ -93,11 +115,17 @@ class ParsedTransactionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final currencyFormat = CurrencyFormatter.getFormatter();
+    final colors = theme.colorScheme;
 
     return AppCard(
       onTap: () => onSelectionChanged(!isSelected),
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       padding: const EdgeInsets.all(12),
+      backgroundColor: isSelected
+          ? colors.primary.withAlpha(30)
+          : colors.surface,
+      borderColor: isSelected ? colors.primary : null,
+      borderRadius: 16,
       child: _buildCardContent(theme, currencyFormat),
     );
   }

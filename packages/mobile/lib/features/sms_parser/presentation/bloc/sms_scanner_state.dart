@@ -1,5 +1,11 @@
 import 'package:equatable/equatable.dart';
-import '../../../parsing_rules/domain/entities/parsed_transaction.dart';
+import '../../domain/entities/sms_scan_result_item.dart';
+
+import '../helpers/scan_range_label_formatter.dart';
+import '../helpers/sms_scan_result_presenter.dart';
+import '../models/sender_result_section.dart';
+import 'sms_scanner_submission_status.dart';
+import 'sms_scanner_view_mode.dart';
 
 sealed class SmsScannerState extends Equatable {
   @override
@@ -31,16 +37,37 @@ class SmsScannerScanning extends SmsScannerState {
 }
 
 class SmsScannerScanComplete extends SmsScannerState {
-  final List<ParsedTransaction> results;
+  final List<SmsScanResultItem> results;
   final DateTime lastScanTimestamp;
   final Set<String> selectedIds;
   final int currentOffset;
   final bool hasReachedMax;
   final bool isLoadingMore;
-  final DateTime? since;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final SmsScannerViewMode viewMode;
+  final SmsScannerSubmissionStatus submissionStatus;
+  final String? submissionErrorMessage;
 
-  List<ParsedTransaction> get selectedTransactions =>
+  List<SmsScanResultItem> get selectedTransactions =>
       results.where((r) => selectedIds.contains(r.sourceId)).toList();
+
+  Map<String, List<SmsScanResultItem>> get resultsBySender {
+    final grouped = <String, List<SmsScanResultItem>>{};
+
+    for (final result in results) {
+      grouped.putIfAbsent(result.senderKey, () => []).add(result);
+    }
+
+    return grouped;
+  }
+
+  String get activeRangeLabel =>
+      formatScanRangeLabel(startDate: startDate, endDate: endDate);
+
+  List<SmsScanResultItem> get flatResults => sortResultsNewestFirst(results);
+
+  List<SenderResultSection> get senderSections => buildSenderSections(results);
 
   @override
   List<Object?> get props => [
@@ -50,7 +77,11 @@ class SmsScannerScanComplete extends SmsScannerState {
     currentOffset,
     hasReachedMax,
     isLoadingMore,
-    since,
+    startDate,
+    endDate,
+    viewMode,
+    submissionStatus,
+    submissionErrorMessage,
   ];
 
   const SmsScannerScanComplete({
@@ -60,17 +91,38 @@ class SmsScannerScanComplete extends SmsScannerState {
     this.currentOffset = 0,
     this.hasReachedMax = false,
     this.isLoadingMore = false,
-    this.since,
+    this.startDate,
+    this.endDate,
+    this.viewMode = SmsScannerViewMode.groupedBySender,
+    this.submissionStatus = SmsScannerSubmissionStatus.idle,
+    this.submissionErrorMessage,
   });
 
+  int selectedCountForSender(String senderKey) {
+    return resultsBySender[senderKey]
+            ?.where((item) => selectedIds.contains(item.sourceId))
+            .length ??
+        0;
+  }
+
+  Set<String> sourceIdsForSender(String senderKey) {
+    return resultsBySender[senderKey]?.map((item) => item.sourceId).toSet() ??
+        <String>{};
+  }
+
   SmsScannerScanComplete copyWith({
-    List<ParsedTransaction>? results,
+    List<SmsScanResultItem>? results,
     DateTime? lastScanTimestamp,
     Set<String>? selectedIds,
     int? currentOffset,
     bool? hasReachedMax,
     bool? isLoadingMore,
-    DateTime? since,
+    DateTime? startDate,
+    DateTime? endDate,
+    SmsScannerViewMode? viewMode,
+    SmsScannerSubmissionStatus? submissionStatus,
+    String? submissionErrorMessage,
+    bool clearSubmissionErrorMessage = false,
   }) {
     return SmsScannerScanComplete(
       results: results ?? this.results,
@@ -79,7 +131,13 @@ class SmsScannerScanComplete extends SmsScannerState {
       currentOffset: currentOffset ?? this.currentOffset,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
-      since: since ?? this.since,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      viewMode: viewMode ?? this.viewMode,
+      submissionStatus: submissionStatus ?? this.submissionStatus,
+      submissionErrorMessage: clearSubmissionErrorMessage
+          ? null
+          : submissionErrorMessage ?? this.submissionErrorMessage,
     );
   }
 }
