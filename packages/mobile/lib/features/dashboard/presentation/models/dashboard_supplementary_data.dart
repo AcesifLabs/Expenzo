@@ -6,11 +6,6 @@ class DashboardSupplementaryData extends Equatable {
   final List<DashboardBudgetPreview> budgetPreviews;
   final Map<String, Category> categoriesById;
 
-  const DashboardSupplementaryData({
-    required this.budgetPreviews,
-    required this.categoriesById,
-  });
-
   static const empty = DashboardSupplementaryData(
     budgetPreviews: [],
     categoriesById: {},
@@ -18,4 +13,9 @@ class DashboardSupplementaryData extends Equatable {
 
   @override
   List<Object?> get props => [budgetPreviews, categoriesById];
+
+  const DashboardSupplementaryData({
+    required this.budgetPreviews,
+    required this.categoriesById,
+  });
 }

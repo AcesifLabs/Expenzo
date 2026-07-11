@@ -6,12 +6,12 @@ class DashboardBudgetPreview extends Equatable {
   final String title;
   final String? emoji;
 
+  @override
+  List<Object?> get props => [progress, title, emoji];
+
   const DashboardBudgetPreview({
     required this.progress,
     required this.title,
     this.emoji,
   });
-
-  @override
-  List<Object?> get props => [progress, title, emoji];
 }

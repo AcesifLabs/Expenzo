@@ -109,8 +109,7 @@ class _DashboardViewState extends State<DashboardView> {
       (value) => value,
     );
     final categoriesById = {
-      for (final category in categories)
-        if (category.id != null) category.id!: category,
+      for (final category in categories) ?category.id: category,
     };
     final budgets = budgetResult.fold((failure) {
       debugPrint('DashboardPage: Failed to load budgets: ${failure.message}');
@@ -198,7 +197,7 @@ class _DashboardViewState extends State<DashboardView> {
     String name,
     String? photoUrl,
   ) {
-    final primaryColor = Theme.of(context).colorScheme.primary;
+    final colors = Theme.of(context).colorScheme;
     final Widget? avatarChild;
 
     if (photoUrl != null) {
@@ -209,15 +208,11 @@ class _DashboardViewState extends State<DashboardView> {
         style: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w600,
-          color: Theme.of(context).colorScheme.onPrimary,
+          color: colors.onPrimary,
         ),
       );
     } else {
-      avatarChild = Icon(
-        PiconsRegular.user,
-        color: Theme.of(context).colorScheme.onPrimary,
-        size: 20,
-      );
+      avatarChild = Icon(PiconsRegular.user, color: colors.onPrimary, size: 20);
     }
 
     return SizedBox(
@@ -228,7 +223,7 @@ class _DashboardViewState extends State<DashboardView> {
         children: [
           CircleAvatar(
             radius: 20,
-            backgroundColor: primaryColor,
+            backgroundColor: colors.primary,
             backgroundImage: photoUrl != null ? NetworkImage(photoUrl) : null,
             child: avatarChild,
           ),
@@ -238,7 +233,7 @@ class _DashboardViewState extends State<DashboardView> {
               height: 44,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: primaryColor,
+                color: colors.primary,
               ),
             ),
         ],
@@ -434,8 +429,6 @@ class _DashboardViewState extends State<DashboardView> {
     BuildContext context,
     DashboardLoaded state,
   ) {
-    final currencyFmt = CurrencyFormatter.getFormatter(decimalDigits: 2);
-
     return [
       SliverToBoxAdapter(child: _buildBalanceCard(context, state)),
       const SliverToBoxAdapter(child: SizedBox(height: 20)),
@@ -448,7 +441,7 @@ class _DashboardViewState extends State<DashboardView> {
           ),
         ),
       ),
-      _buildBudgetsSection(context),
+      _buildBudgetsSection(),
       const SliverToBoxAdapter(child: SizedBox(height: 20)),
       SliverPadding(
         padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
@@ -459,10 +452,7 @@ class _DashboardViewState extends State<DashboardView> {
           ),
         ),
       ),
-      _buildRecentTransactionsSection(
-        state.summary.recentTransactions,
-        currencyFmt,
-      ),
+      _buildRecentTransactionsSection(state.summary.recentTransactions),
       const SliverToBoxAdapter(child: SizedBox(height: 20)),
       SliverPadding(
         padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
@@ -474,7 +464,7 @@ class _DashboardViewState extends State<DashboardView> {
     ];
   }
 
-  Widget _buildBudgetsSection(BuildContext context) {
+  Widget _buildBudgetsSection() {
     final currencyFmt = CurrencyFormatter.getFormatter(decimalDigits: 0);
     _ensureSupplementaryFuture();
 
@@ -534,10 +524,8 @@ class _DashboardViewState extends State<DashboardView> {
     );
   }
 
-  Widget _buildRecentTransactionsSection(
-    List<Record> transactions,
-    NumberFormat currencyFmt,
-  ) {
+  Widget _buildRecentTransactionsSection(List<Record> transactions) {
+    final currencyFmt = CurrencyFormatter.getFormatter(decimalDigits: 2);
     _ensureSupplementaryFuture();
 
     return SliverToBoxAdapter(
@@ -563,31 +551,35 @@ class _DashboardViewState extends State<DashboardView> {
             );
           }
 
+          final recentTwo = transactions.take(2).toList();
+          final dividerColor = Theme.of(
+            context,
+          ).colorScheme.onSurface.withAlpha(16);
+
+          final children = <Widget>[];
+          for (var i = 0; i < recentTwo.length; i++) {
+            final record = recentTwo[i];
+            final categoryName = record.categoryId == null
+                ? record.recordType.displayName
+                : categoriesById[record.categoryId]?.name;
+            children.add(
+              _RecentTile(
+                record: record,
+                fmt: currencyFmt,
+                categoryName: categoryName,
+              ),
+            );
+            if (i < recentTwo.length - 1) {
+              children.add(Divider(height: 1, color: dividerColor));
+            }
+          }
+
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
             child: AppCard(
               borderRadius: 16,
               clipBehavior: Clip.antiAlias,
-              child: Column(
-                children: [
-                  for (var i = 0; i < transactions.take(2).length; i++) ...[
-                    _RecentTile(
-                      record: transactions[i],
-                      fmt: currencyFmt,
-                      categoryName: transactions[i].categoryId == null
-                          ? transactions[i].recordType.displayName
-                          : categoriesById[transactions[i].categoryId!]?.name,
-                    ),
-                    if (i != transactions.take(2).length - 1)
-                      Divider(
-                        height: 1,
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withAlpha(16),
-                      ),
-                  ],
-                ],
-              ),
+              child: Column(children: children),
             ),
           );
         },
@@ -636,37 +628,37 @@ class _DashboardViewState extends State<DashboardView> {
         child: ShimmerBox(
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: Column(
-              children: List.generate(2, (index) {
-                return Padding(
-                  padding: EdgeInsets.only(bottom: index == 1 ? 0 : 20),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          ShimmerBox.circle(size: 20),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: ShimmerBox.textLine(width: 120, height: 14),
-                          ),
-                          const SizedBox(width: 8),
-                          ShimmerBox.textLine(width: 90, height: 12),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      ShimmerBox.rectangle(width: double.infinity, height: 12),
-                    ],
-                  ),
-                );
-              }),
-            ),
+            child: Column(children: List.generate(2, _buildSkeletonBudgetRow)),
           ),
         ),
       ),
     );
   }
 
+  Widget _buildSkeletonBudgetRow(int index) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: index == 1 ? 0 : 20),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              ShimmerBox.circle(size: 20),
+              const SizedBox(width: 8),
+              Expanded(child: ShimmerBox.textLine(width: 120, height: 14)),
+              const SizedBox(width: 8),
+              ShimmerBox.textLine(width: 90, height: 12),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ShimmerBox.rectangle(width: double.infinity, height: 12),
+        ],
+      ),
+    );
+  }
+
   Widget _buildBalanceSkeleton(BuildContext context) {
+    final shimmerTextLine = ShimmerBox.textLine(width: 120, height: 36);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
       child: Container(
@@ -686,13 +678,9 @@ class _DashboardViewState extends State<DashboardView> {
                 const SizedBox(height: 20),
                 Row(
                   children: [
-                    Expanded(
-                      child: ShimmerBox.textLine(width: 120, height: 36),
-                    ),
+                    Expanded(child: shimmerTextLine),
                     const SizedBox(width: 24),
-                    Expanded(
-                      child: ShimmerBox.textLine(width: 120, height: 36),
-                    ),
+                    Expanded(child: shimmerTextLine),
                   ],
                 ),
               ],
@@ -750,17 +738,7 @@ class _DashboardViewState extends State<DashboardView> {
                   height: 48,
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
-                    children: List.generate(14, (index) {
-                      return Expanded(
-                        child: Padding(
-                          padding: EdgeInsets.only(right: index == 13 ? 0 : 3),
-                          child: ShimmerBox.rectangle(
-                            width: double.infinity,
-                            height: 12 + (index % 5) * 6,
-                          ),
-                        ),
-                      );
-                    }),
+                    children: List.generate(14, _buildSkeletonTrendBar),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -782,6 +760,18 @@ class _DashboardViewState extends State<DashboardView> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (_) => _buildBudgetTransactionSheet(bp),
+    );
+  }
+
+  Widget _buildSkeletonTrendBar(int index) {
+    return Expanded(
+      child: Padding(
+        padding: EdgeInsets.only(right: index == 13 ? 0 : 3),
+        child: ShimmerBox.rectangle(
+          width: double.infinity,
+          height: 12 + (index % 5) * 6,
+        ),
+      ),
     );
   }
 
@@ -1043,7 +1033,10 @@ class _BudgetPreviewTile extends StatelessWidget {
             Row(
               children: [
                 if (preview.emoji != null) ...[
-                  Text(preview.emoji!, style: const TextStyle(fontSize: 16)),
+                  Text(
+                    preview.emoji ?? '',
+                    style: const TextStyle(fontSize: 16),
+                  ),
                   const SizedBox(width: 8),
                 ],
                 Expanded(
@@ -1112,6 +1105,8 @@ class _RecentTile extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
     final isExpense = record.recordType == RecordType.expense;
     final amountColor = isExpense ? colors.error : colors.secondary;
+    final mutedColor = colors.onSurface.withAlpha(140);
+    final displayName = record.recordType.displayName;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -1136,9 +1131,7 @@ class _RecentTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  record.description.isEmpty
-                      ? record.recordType.displayName
-                      : record.description,
+                  record.description.isEmpty ? displayName : record.description,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -1149,13 +1142,10 @@ class _RecentTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  categoryName ?? record.recordType.displayName,
+                  categoryName ?? displayName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: colors.onSurface.withAlpha(140),
-                  ),
+                  style: TextStyle(fontSize: 13, color: mutedColor),
                 ),
               ],
             ),
@@ -1175,10 +1165,7 @@ class _RecentTile extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 _timeLabel(),
-                style: TextStyle(
-                  fontSize: 12,
-                  color: colors.onSurface.withAlpha(140),
-                ),
+                style: TextStyle(fontSize: 12, color: mutedColor),
               ),
             ],
           ),
