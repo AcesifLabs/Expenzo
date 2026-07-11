@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
-import 'package:expense_tracker/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:expense_tracker/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:expense_tracker/features/records/presentation/bloc/record_bloc.dart';
 import 'package:expense_tracker/features/records/presentation/pages/record_list_page.dart';
@@ -151,6 +150,11 @@ class _AppShellState extends State<AppShell> {
     );
   }
 
+  void _switchToTab(int index) {
+    if (!mounted || _currentIndex == index) return;
+    setState(() => _currentIndex = index);
+  }
+
   void _onFabPressed(BuildContext context) {
     final now = DateTime.now();
     final lastPress = _lastFabPress;
@@ -184,10 +188,7 @@ class _AppShellState extends State<AppShell> {
       body: LazyIndexedStack(
         index: _currentIndex,
         children: [
-          BlocProvider(
-            create: (_) => di.getIt<DashboardBloc>(),
-            child: const DashboardPage(),
-          ),
+          DashboardPage(onNavigateToTab: _switchToTab),
           const RecordListPage(),
           _ScanPageWithFab(),
           const BudgetListPage(),
