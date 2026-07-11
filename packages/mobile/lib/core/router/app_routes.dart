@@ -16,6 +16,8 @@ import 'package:expense_tracker/features/records/presentation/bloc/record_bloc.d
 import 'package:expense_tracker/features/records/presentation/pages/record_form_page.dart';
 import 'package:expense_tracker/features/recurring/presentation/bloc/recurring_bloc.dart';
 import 'package:expense_tracker/features/recurring/presentation/pages/recurring_form_page.dart';
+import 'package:expense_tracker/features/reports/presentation/pages/reports_screen.dart';
+import 'package:expense_tracker/features/ai_assistant/presentation/pages/ai_assistant_page.dart';
 import 'package:expense_tracker/features/settings/presentation/pages/settings_page.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/pages/sms_scan_results_page.dart';
@@ -101,6 +103,11 @@ List<RouteBase> buildAppRoutes() {
         GoRoute(
           path: 'sync-conflict',
           builder: (_, _) => const SyncConflictPage(),
+        ),
+        GoRoute(path: 'reports', builder: (_, _) => const ReportsScreen()),
+        GoRoute(
+          path: 'ai-assistant',
+          builder: (_, _) => const AiAssistantPage(),
         ),
       ],
     ),

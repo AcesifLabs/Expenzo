@@ -1,8 +1,19 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // Kotlin is provided by Flutter's Built-in Kotlin support — do NOT apply kotlin-android here.
     id("dev.flutter.flutter-gradle-plugin")
     id("com.google.gms.google-services")
+}
+
+// Local signing credentials (git-ignored). CI injects these via environment
+// variables instead, which take precedence over the file.
+val keystoreProperties = Properties().apply {
+    val keystorePropertiesFile = rootProject.file("key.properties")
+    if (keystorePropertiesFile.exists()) {
+        keystorePropertiesFile.inputStream().use { load(it) }
+    }
 }
 
 android {
@@ -26,10 +37,16 @@ android {
 
     signingConfigs {
         create("release") {
-            keyAlias = System.getenv("KEY_ALIAS") ?: "upload"
-            keyPassword = System.getenv("KEY_PASSWORD") ?: ""
+            keyAlias = System.getenv("KEY_ALIAS")
+                ?: keystoreProperties.getProperty("keyAlias")
+                ?: "upload"
+            keyPassword = System.getenv("KEY_PASSWORD")
+                ?: keystoreProperties.getProperty("keyPassword")
+                ?: ""
             storeFile = file("release.jks")
-            storePassword = System.getenv("KEY_STORE_PASSWORD") ?: ""
+            storePassword = System.getenv("KEY_STORE_PASSWORD")
+                ?: keystoreProperties.getProperty("storePassword")
+                ?: ""
         }
     }
 

@@ -383,7 +383,10 @@ class _DashboardViewState extends State<DashboardView> {
       SliverPadding(
         padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
         sliver: SliverToBoxAdapter(
-          child: const DashboardSectionHeader(title: 'Spending Patterns'),
+          child: DashboardSectionHeader(
+            title: 'Spending Patterns',
+            onTrailingTap: () => context.push('/reports'),
+          ),
         ),
       ),
       SliverToBoxAdapter(child: _buildTrendSkeleton(context)),
@@ -457,7 +460,10 @@ class _DashboardViewState extends State<DashboardView> {
       SliverPadding(
         padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
         sliver: SliverToBoxAdapter(
-          child: const DashboardSectionHeader(title: 'Spending Patterns'),
+          child: DashboardSectionHeader(
+            title: 'Spending Patterns',
+            onTrailingTap: () => context.push('/reports'),
+          ),
         ),
       ),
       _buildTrendSection(context, state),

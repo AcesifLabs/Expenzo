@@ -2,15 +2,8 @@ name: Deploy Android
 
 on:
   push:
-<<<<<<< Updated upstream
     tags:
       - 'mobile-v*'
-=======
-    branches: [mobile-staging]
-    paths:
-      - 'packages/mobile/**'
-      - '.github/workflows/deploy-android.yml'
->>>>>>> Stashed changes
   workflow_dispatch:
 
 jobs:
@@ -67,6 +60,11 @@ jobs:
           ruby-version: '3.4'
           bundler-cache: true
           working-directory: packages/mobile/android
+
+      - name: Prepare CI env files
+        run: |
+          cp .env.dev.example .env.dev
+          cp .env.prod.example .env.prod
 
       - name: Install Flutter dependencies
         run: flutter pub get
