@@ -112,10 +112,11 @@ class _RecordListViewState extends State<RecordListView> {
 
         return RefreshIndicator(
           onRefresh: () async => _onRefresh(),
-          child: ListView.builder(
+          child: ListView.separated(
             controller: _scrollController,
-            padding: const EdgeInsets.fromLTRB(0, 4, 0, 100),
+            padding: const EdgeInsets.fromLTRB(24, 4, 24, 100),
             itemCount: records.length + (hasMore ? 1 : 0),
+            separatorBuilder: (_, _) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
               if (index >= records.length) {
                 return _buildLoadMore(isLoadingMore);
@@ -283,6 +284,7 @@ class _RecordListViewState extends State<RecordListView> {
   Widget build(BuildContext context) {
     return AppScaffold(
       title: 'Activity',
+      subtitle: 'Transaction history',
       actions: [
         IconButton(
           icon: Icon(PiconsLight.funnel),
@@ -292,10 +294,14 @@ class _RecordListViewState extends State<RecordListView> {
       ],
       child: Column(
         children: [
-          AppSearchBar(
-            controller: _searchCtrl,
-            hintText: 'Search transactions...',
-            onChanged: (v) => context.read<RecordBloc>().add(SearchRecords(v)),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            child: AppSearchBar(
+              controller: _searchCtrl,
+              hintText: 'Search transactions...',
+              onChanged: (v) =>
+                  context.read<RecordBloc>().add(SearchRecords(v)),
+            ),
           ),
           Expanded(
             child: GestureDetector(

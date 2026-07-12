@@ -43,8 +43,8 @@ class AppPageHeader extends StatelessWidget {
                 Text(
                   title,
                   style: TextStyle(
-                    fontSize: hasSubtitle ? 22 : 28,
-                    fontWeight: FontWeight.w700,
+                    fontSize: hasSubtitle ? 22 : 24,
+                    fontWeight: FontWeight.w600,
                     color: colors.onSurface,
                   ),
                 ),

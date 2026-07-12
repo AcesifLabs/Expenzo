@@ -62,7 +62,7 @@ class _AppSearchBarState extends State<AppSearchBar> {
     final mutedColor = colors.onSurface.withAlpha(80);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      padding: EdgeInsets.zero,
       child: TextField(
         controller: widget.controller,
         focusNode: widget.focusNode,
@@ -84,12 +84,12 @@ class _AppSearchBarState extends State<AppSearchBar> {
           filled: true,
           fillColor: colors.onSurface.withAlpha(10),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide.none,
           ),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
-            vertical: 12,
+            vertical: 10,
           ),
         ),
         style: TextStyle(fontSize: 15, color: colors.onSurface),
