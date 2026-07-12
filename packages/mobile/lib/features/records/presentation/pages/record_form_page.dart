@@ -17,6 +17,22 @@ import "package:expense_tracker/core/constants/source_types.dart";
 import '../bloc/record_bloc.dart';
 import '../bloc/record_event.dart';
 
+// -- Design tokens from expenzo.pen --
+const _bg = Color(0xFF141315);
+const _inputFill = Color(0xFF201F21);
+const _inputStroke = Color(0x208E8E93); // #8E8E93 at 12% opacity
+const _primary = Color(0xFFD1C4E9);
+const _textPrimary = Color(0xFFF5F7FA);
+const _textSecondary = Color(0xFF8E8E93);
+const _onPrimary = Color(0xFF141315);
+const _errorColor = Color(0xFFF48FB1);
+
+const _inputRadius = BorderRadius.all(Radius.circular(12));
+const _buttonRadius = BorderRadius.all(Radius.circular(14));
+const _cellShape = RoundedRectangleBorder(
+  borderRadius: BorderRadius.all(Radius.circular(8)),
+);
+
 class RecordFormPage extends StatefulWidget {
   final Record? record;
   final RecordType? initialType;
@@ -39,14 +55,22 @@ class _RecordFormPageState extends State<RecordFormPage> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
   final _descriptionController = TextEditingController();
+  final _amountFocus = FocusNode();
+  final _descriptionFocus = FocusNode();
   var _selectedDate = DateTime.now();
   String? _selectedCategoryId;
   var _recordType = RecordType.expense;
   var _isLoading = false;
+  String? _amountError;
+  String? _descriptionError;
+  var _amountFocused = false;
+  var _descriptionFocused = false;
 
   @override
   void initState() {
     super.initState();
+    _amountFocus.addListener(_onAmountFocusChange);
+    _descriptionFocus.addListener(_onDescriptionFocusChange);
     final recordId = widget.recordId;
     if (recordId != null) {
       _isLoading = true;
@@ -55,6 +79,14 @@ class _RecordFormPageState extends State<RecordFormPage> {
       _initFromRecord(widget.record);
     }
     context.read<CategoryBloc>().add(LoadCategories(type: _recordType));
+  }
+
+  void _onAmountFocusChange() {
+    setState(() => _amountFocused = _amountFocus.hasFocus);
+  }
+
+  void _onDescriptionFocusChange() {
+    setState(() => _descriptionFocused = _descriptionFocus.hasFocus);
   }
 
   Future<void> _loadRecord(String id) async {
@@ -86,21 +118,52 @@ class _RecordFormPageState extends State<RecordFormPage> {
         record?.recordType ?? widget.initialType ?? RecordType.expense;
   }
 
-  String? _validateAmount(String? value) {
-    if (value == null || value.isEmpty) return 'Please enter an amount';
-    if (double.tryParse(value) == null) return 'Please enter a valid number';
+  bool _validate() {
+    var valid = true;
+    String? newAmountError;
+    String? newDescriptionError;
 
-    return null;
-  }
+    final amount = _amountController.text;
+    if (amount.isEmpty) {
+      newAmountError = 'Please enter an amount';
+      valid = false;
+    } else if (double.tryParse(amount) == null) {
+      newAmountError = 'Please enter a valid number';
+      valid = false;
+    }
 
-  String? _validateDescription(String? value) {
-    if (value == null || value.isEmpty) return 'Please enter a description';
+    final desc = _descriptionController.text;
+    if (desc.isEmpty) {
+      newDescriptionError = 'Please enter a description';
+      valid = false;
+    }
 
-    return null;
+    setState(() {
+      _amountError = newAmountError;
+      _descriptionError = newDescriptionError;
+    });
+
+    return valid;
   }
 
   void _onCategoryChanged(String? value) {
     setState(() => _selectedCategoryId = value);
+  }
+
+  void _onAmountChanged(String _) {
+    if (_amountError != null) {
+      setState(() => _amountError = null);
+    }
+  }
+
+  void _onDescriptionChanged(String _) {
+    if (_descriptionError != null) {
+      setState(() => _descriptionError = null);
+    }
+  }
+
+  void _handleSelectDate() {
+    _selectDate();
   }
 
   Future<void> _selectDate() async {
@@ -109,6 +172,7 @@ class _RecordFormPageState extends State<RecordFormPage> {
       initialDate: _selectedDate,
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
+      builder: _buildDatePickerTheme,
     );
     if (!mounted) return;
     if (picked != null && picked != _selectedDate) {
@@ -116,9 +180,137 @@ class _RecordFormPageState extends State<RecordFormPage> {
     }
   }
 
+  Widget _buildDatePickerTheme(BuildContext context, Widget? child) {
+    final isSelected = WidgetStateProperty.resolveWith<Color?>((states) {
+      if (states.contains(WidgetState.selected)) {
+        return _onPrimary;
+      }
+      if (states.contains(WidgetState.disabled)) {
+        return _textSecondary.withAlpha(80);
+      }
+
+      return _textPrimary;
+    });
+
+    final selectedBg = WidgetStateProperty.resolveWith<Color?>((states) {
+      if (states.contains(WidgetState.selected)) {
+        return _primary;
+      }
+
+      return Colors.transparent;
+    });
+
+    final cellShape = WidgetStateProperty.all<OutlinedBorder>(_cellShape);
+
+    return Theme(
+      data: Theme.of(context).copyWith(
+        colorScheme: const ColorScheme.dark(
+          surface: _bg,
+          onSurface: _textPrimary,
+          primary: _primary,
+          onPrimary: _onPrimary,
+          secondary: _primary,
+          onSecondary: _onPrimary,
+          outline: _textSecondary,
+          surfaceContainerHighest: _inputFill,
+          surfaceContainerHigh: _inputFill,
+          surfaceContainerLow: _inputFill,
+        ),
+        dialogTheme: const DialogThemeData(backgroundColor: _bg),
+        datePickerTheme: _buildDatePickerData(
+          isSelected,
+          selectedBg,
+          cellShape,
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(foregroundColor: _primary),
+        ),
+        inputDecorationTheme: _buildInputDecorationTheme(),
+        textSelectionTheme: const TextSelectionThemeData(
+          cursorColor: _primary,
+          selectionColor: _inputFill,
+          selectionHandleColor: _primary,
+        ),
+      ),
+      child: child ?? const SizedBox.shrink(),
+    );
+  }
+
+  DatePickerThemeData _buildDatePickerData(
+    WidgetStateProperty<Color?> isSelected,
+    WidgetStateProperty<Color?> selectedBg,
+    WidgetStateProperty<OutlinedBorder> cellShape,
+  ) {
+    return DatePickerThemeData(
+      backgroundColor: _bg,
+      surfaceTintColor: Colors.transparent,
+      headerBackgroundColor: _inputFill,
+      headerForegroundColor: _textPrimary,
+      dayForegroundColor: isSelected,
+      dayBackgroundColor: selectedBg,
+      todayForegroundColor: isSelected,
+      todayBackgroundColor: selectedBg,
+      todayBorder: const BorderSide(color: _primary, width: 1),
+      yearForegroundColor: isSelected,
+      yearBackgroundColor: selectedBg,
+      weekdayStyle: const TextStyle(
+        fontFamily: 'Work Sans',
+        color: _textSecondary,
+        fontSize: 12,
+        fontWeight: FontWeight.w500,
+      ),
+      dayStyle: const TextStyle(
+        fontFamily: 'Work Sans',
+        color: _textPrimary,
+        fontSize: 14,
+      ),
+      yearStyle: const TextStyle(
+        fontFamily: 'Work Sans',
+        color: _textPrimary,
+        fontSize: 14,
+      ),
+      headerHeadlineStyle: const TextStyle(
+        fontFamily: 'Work Sans',
+        color: _textPrimary,
+        fontSize: 24,
+        fontWeight: FontWeight.w600,
+      ),
+      headerHelpStyle: const TextStyle(
+        fontFamily: 'Work Sans',
+        color: _textSecondary,
+        fontSize: 12,
+      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      dayShape: cellShape,
+      yearShape: cellShape,
+    );
+  }
+
+  InputDecorationTheme _buildInputDecorationTheme() {
+    return const InputDecorationTheme(
+      filled: true,
+      fillColor: _inputFill,
+      hintStyle: TextStyle(color: _textSecondary),
+      labelStyle: TextStyle(color: _textSecondary),
+      prefixStyle: TextStyle(color: _textPrimary),
+      suffixStyle: TextStyle(color: _textPrimary),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: _inputRadius,
+        borderSide: BorderSide(color: _inputStroke, width: 1),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: _inputRadius,
+        borderSide: BorderSide(color: _primary, width: 1.5),
+      ),
+      border: OutlineInputBorder(
+        borderRadius: _inputRadius,
+        borderSide: BorderSide(color: _inputStroke, width: 1),
+      ),
+    );
+  }
+
   void _saveRecord() {
-    final formState = _formKey.currentState;
-    if (formState == null || !formState.validate()) return;
+    if (!_validate()) return;
 
     final now = DateTime.now().toUtc();
     final rawAmount = double.parse(_amountController.text).abs();
@@ -146,41 +338,236 @@ class _RecordFormPageState extends State<RecordFormPage> {
     if (mounted) context.pop();
   }
 
-  Widget _buildCategoryField(BuildContext _, CategoryState state) {
-    return switch (state) {
-      CategoryInitial() || CategoryLoading() => ShimmerBox.rectangle(
-        width: double.infinity,
-        height: 56,
-        borderRadius: 12,
-      ),
-      CategoryError(:final message) => Text('Error: $message'),
-      CategoryLoaded(:final categories) =>
-        categories.isEmpty
-            ? const Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: Text('No categories available. Create one first.'),
-              )
-            : _buildCategoryDropdown(categories),
-    };
+  // -- Helpers --
+
+  Color _amountBorderColor() {
+    if (_amountError != null) return _errorColor;
+    if (_amountFocused) return _primary;
+
+    return _inputStroke;
   }
 
-  Widget _buildAmountField() {
-    return TextFormField(
-      controller: _amountController,
-      decoration: const InputDecoration(
-        labelText: 'Amount',
-        prefixText: '৳ ',
-        hintText: '0.00',
+  Color _descriptionBorderColor() {
+    if (_descriptionError != null) return _errorColor;
+    if (_descriptionFocused) return _primary;
+
+    return _inputStroke;
+  }
+
+  double _focusedWidth(bool focused) => focused ? 1.5 : 1;
+
+  // -- TopBar --
+  Widget _buildTopBar(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => context.pop(),
+            child: const Icon(
+              PiconsRegular.caretLeft,
+              size: 24,
+              color: _textPrimary,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            title,
+            style: const TextStyle(
+              fontFamily: 'Work Sans',
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: _textPrimary,
+            ),
+          ),
+        ],
       ),
-      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      inputFormatters: [
-        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
-      ],
-      validator: _validateAmount,
     );
   }
 
-  Widget _buildCategoryDropdown(List<Category> categories) {
+  // -- Field label --
+  Widget _buildLabel(String text) {
+    return Text(
+      text,
+      style: const TextStyle(
+        fontFamily: 'Work Sans',
+        fontSize: 12,
+        fontWeight: FontWeight.w500,
+        color: _textSecondary,
+      ),
+    );
+  }
+
+  // -- Error text --
+  Widget _buildErrorText(String error) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: Text(
+        error,
+        style: const TextStyle(
+          fontFamily: 'Work Sans',
+          fontSize: 12,
+          color: _errorColor,
+        ),
+      ),
+    );
+  }
+
+  // -- Amount Field --
+  Widget _buildAmountField() {
+    final borderColor = _amountBorderColor();
+    final borderWidth = _focusedWidth(_amountFocused);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildLabel('Amount'),
+          const SizedBox(height: 6),
+          Container(
+            height: 48,
+            decoration: BoxDecoration(
+              color: _inputFill,
+              borderRadius: _inputRadius,
+              border: Border.all(color: borderColor, width: borderWidth),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            alignment: Alignment.centerLeft,
+            child: Row(
+              children: [
+                const Text(
+                  '\$',
+                  style: TextStyle(
+                    fontFamily: 'Work Sans',
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: _textSecondary,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: TextField(
+                    controller: _amountController,
+                    focusNode: _amountFocus,
+                    cursorColor: _primary,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                        RegExp(r'^\d*\.?\d{0,2}'),
+                      ),
+                    ],
+                    style: const TextStyle(
+                      fontFamily: 'Work Sans',
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: _textPrimary,
+                    ),
+                    decoration: const InputDecoration(
+                      hintText: '0.00',
+                      hintStyle: TextStyle(color: _textSecondary),
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      filled: false,
+                      contentPadding: EdgeInsets.zero,
+                      isDense: true,
+                    ),
+                    onChanged: _onAmountChanged,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (_amountError case final error?) _buildErrorText(error),
+        ],
+      ),
+    );
+  }
+
+  // -- Description Field --
+  Widget _buildDescriptionField() {
+    final borderColor = _descriptionBorderColor();
+    final borderWidth = _focusedWidth(_descriptionFocused);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildLabel('Description'),
+          const SizedBox(height: 6),
+          Container(
+            height: 80,
+            decoration: BoxDecoration(
+              color: _inputFill,
+              borderRadius: _inputRadius,
+              border: Border.all(color: borderColor, width: borderWidth),
+            ),
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+            child: TextField(
+              controller: _descriptionController,
+              focusNode: _descriptionFocus,
+              cursorColor: _primary,
+              maxLines: 3,
+              style: const TextStyle(
+                fontFamily: 'Work Sans',
+                fontSize: 15,
+                fontWeight: FontWeight.normal,
+                color: _textPrimary,
+              ),
+              decoration: InputDecoration(
+                hintText:
+                    'What was this ${_recordType.displayName.toLowerCase()} for?',
+                hintStyle: const TextStyle(color: _textSecondary),
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                filled: false,
+                contentPadding: EdgeInsets.zero,
+                isDense: true,
+              ),
+              onChanged: _onDescriptionChanged,
+            ),
+          ),
+          if (_descriptionError case final error?) _buildErrorText(error),
+        ],
+      ),
+    );
+  }
+
+  // -- Category Field --
+  Widget _buildCategoryField(BuildContext _, CategoryState state) {
+    return switch (state) {
+      CategoryInitial() || CategoryLoading() => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildLabel('Category'),
+            const SizedBox(height: 6),
+            ShimmerBox.rectangle(
+              width: double.infinity,
+              height: 48,
+              borderRadius: 12,
+            ),
+          ],
+        ),
+      ),
+      CategoryError(:final message) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Text(
+          'Error: $message',
+          style: const TextStyle(color: _errorColor),
+        ),
+      ),
+      CategoryLoaded(:final categories) => _buildCategorySelect(categories),
+    };
+  }
+
+  Widget _buildCategorySelect(List<Category> categories) {
     // Deduplicate by id to prevent DropdownButton assertion crash
     final seen = <String>{};
     final unique = categories
@@ -193,55 +580,270 @@ class _RecordFormPageState extends State<RecordFormPage> {
       _selectedCategoryId = null;
     }
 
-    return DropdownButtonFormField<String>(
-      initialValue: _selectedCategoryId,
-      decoration: const InputDecoration(labelText: 'Category'),
-      items: [
-        const DropdownMenuItem<String>(value: null, child: Text('No Category')),
-        ...unique.map(
-          (cat) => DropdownMenuItem<String>(
-            value: cat.id ?? '',
-            child: Row(
-              children: [
-                Icon(AppIcons.getCategoryIcon(cat.emoji), size: 18),
-                const SizedBox(width: 8),
-                Text(cat.name),
-              ],
+    // Find selected category for display
+    final selected = _selectedCategoryId != null
+        ? unique.where((c) => c.id == _selectedCategoryId).firstOrNull
+        : null;
+    final selectedIcon = selected != null
+        ? AppIcons.getCategoryIcon(selected.emoji)
+        : PiconsRegular.coffee;
+    final selectedName = selected?.name ?? 'Select category';
+    final selectedColor = selected != null ? _textPrimary : _textSecondary;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildLabel('Category'),
+          const SizedBox(height: 6),
+          GestureDetector(
+            onTap: () => _showCategoryPicker(unique),
+            child: Container(
+              height: 48,
+              decoration: BoxDecoration(
+                color: _inputFill,
+                borderRadius: _inputRadius,
+                border: Border.all(color: _inputStroke, width: 1),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  Icon(selectedIcon, size: 18, color: _primary),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      selectedName,
+                      style: TextStyle(
+                        fontFamily: 'Work Sans',
+                        fontSize: 15,
+                        fontWeight: FontWeight.normal,
+                        color: selectedColor,
+                      ),
+                    ),
+                  ),
+                  const Icon(
+                    PiconsRegular.caretDown,
+                    size: 16,
+                    color: _textSecondary,
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-      ],
-      onChanged: _onCategoryChanged,
-      key: ValueKey('category_dropdown_$_recordType'),
-    );
-  }
-
-  Widget _buildDescriptionField() {
-    return TextFormField(
-      controller: _descriptionController,
-      decoration: InputDecoration(
-        labelText: 'Description',
-        hintText: 'What was this ${_recordType.displayName.toLowerCase()} for?',
+        ],
       ),
-      maxLines: 3,
-      validator: _validateDescription,
     );
   }
 
+  void _showCategoryPicker(List<Category> categories) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: _bg,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Handle bar
+              Container(
+                margin: const EdgeInsets.only(top: 12, bottom: 16),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: _textSecondary.withAlpha(80),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.only(bottom: 12),
+                child: Text(
+                  'Select Category',
+                  style: TextStyle(
+                    fontFamily: 'Work Sans',
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: _textPrimary,
+                  ),
+                ),
+              ),
+              // Scrollable category list
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ...categories.map(
+                        (cat) => _buildCategoryPickerItem(
+                          icon: AppIcons.getCategoryIcon(cat.emoji),
+                          name: cat.name,
+                          isSelected: cat.id == _selectedCategoryId,
+                          onTap: () {
+                            _onCategoryChanged(cat.id);
+                            Navigator.pop(ctx);
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildCategoryPickerItem({
+    required IconData icon,
+    required String name,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        child: Row(
+          children: [
+            Icon(icon, size: 18, color: _primary),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                name,
+                style: TextStyle(
+                  fontFamily: 'Work Sans',
+                  fontSize: 15,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  color: _textPrimary,
+                ),
+              ),
+            ),
+            if (isSelected)
+              const Icon(PiconsRegular.check, size: 18, color: _primary),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // -- Date Field --
   Widget _buildDatePicker() {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      title: const Text('Date'),
-      subtitle: Text(_dateFormat.format(_selectedDate)),
-      trailing: Icon(PiconsRegular.calendar),
-      onTap: () => _selectDate(),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildLabel('Date'),
+          const SizedBox(height: 6),
+          GestureDetector(
+            onTap: _handleSelectDate,
+            child: Container(
+              height: 48,
+              decoration: BoxDecoration(
+                color: _inputFill,
+                borderRadius: _inputRadius,
+                border: Border.all(color: _inputStroke, width: 1),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  const Icon(PiconsRegular.calendar, size: 18, color: _primary),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _dateFormat.format(_selectedDate),
+                      style: const TextStyle(
+                        fontFamily: 'Work Sans',
+                        fontSize: 15,
+                        fontWeight: FontWeight.normal,
+                        color: _textPrimary,
+                      ),
+                    ),
+                  ),
+                  const Icon(
+                    PiconsRegular.caretDown,
+                    size: 16,
+                    color: _textSecondary,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
+  // -- Save Button --
   Widget _buildSubmitButton() {
-    return ElevatedButton(
-      onPressed: _saveRecord,
-      child: Text(_isEditing ? 'Update' : 'Create'),
+    final label = _isEditing
+        ? 'Update ${_recordType.displayName}'
+        : 'Create ${_recordType.displayName}';
+
+    return GestureDetector(
+      onTap: _saveRecord,
+      child: Container(
+        width: double.infinity,
+        height: 52,
+        decoration: BoxDecoration(color: _primary, borderRadius: _buttonRadius),
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        alignment: Alignment.center,
+        child: Text(
+          label,
+          style: const TextStyle(
+            fontFamily: 'Work Sans',
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: _onPrimary,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // -- Loading state --
+  Widget _buildLoadingState(String title) {
+    return Scaffold(
+      backgroundColor: _bg,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildTopBar(title),
+              _buildFieldShimmer('Amount', 48),
+              _buildFieldShimmer('Description', 80),
+              _buildFieldShimmer('Category', 48),
+              _buildFieldShimmer('Date', 48),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFieldShimmer(String label, double height) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildLabel(label),
+          const SizedBox(height: 6),
+          ShimmerBox.rectangle(
+            width: double.infinity,
+            height: height,
+            borderRadius: 12,
+          ),
+        ],
+      ),
     );
   }
 
@@ -249,6 +851,8 @@ class _RecordFormPageState extends State<RecordFormPage> {
   void dispose() {
     _amountController.dispose();
     _descriptionController.dispose();
+    _amountFocus.dispose();
+    _descriptionFocus.dispose();
     super.dispose();
   }
 
@@ -259,32 +863,40 @@ class _RecordFormPageState extends State<RecordFormPage> {
         : 'New ${_recordType.displayName}';
 
     if (_isLoading) {
-      return Scaffold(
-        appBar: AppBar(title: Text(title)),
-        body: const Center(child: CircularProgressIndicator()),
-      );
+      return _buildLoadingState(title);
     }
 
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(24),
-          children: [
-            _buildAmountField(),
-            const SizedBox(height: 16),
-            _buildDescriptionField(),
-            const SizedBox(height: 16),
-            BlocBuilder<CategoryBloc, CategoryState>(
-              builder: _buildCategoryField,
+    return Theme(
+      data: Theme.of(context).copyWith(
+        textSelectionTheme: const TextSelectionThemeData(
+          cursorColor: _primary,
+          selectionColor: _inputFill,
+          selectionHandleColor: _primary,
+        ),
+      ),
+      child: Scaffold(
+        backgroundColor: _bg,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildTopBar(title),
+                  _buildAmountField(),
+                  _buildDescriptionField(),
+                  BlocBuilder<CategoryBloc, CategoryState>(
+                    builder: _buildCategoryField,
+                  ),
+                  _buildDatePicker(),
+                  const SizedBox(height: 24),
+                  _buildSubmitButton(),
+                ],
+              ),
             ),
-            const SizedBox(height: 16),
-            _buildDatePicker(),
-            const Divider(),
-            const SizedBox(height: 16),
-            _buildSubmitButton(),
-          ],
+          ),
         ),
       ),
     );
