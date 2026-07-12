@@ -20,6 +20,13 @@ class AppIcons {
     'laptop': PiconsRegular.laptop,
     'chartLineUp': PiconsRegular.chartLineUp,
     'arrowULeftDown': PiconsRegular.arrowULeftDown,
+    'bag': PiconsRegular.bag,
+    'heart': PiconsRegular.heart,
+    'bookOpen': PiconsRegular.bookOpen,
+    'filmStrip': PiconsRegular.filmStrip,
+    'lightning': PiconsRegular.lightning,
+    'coffee': PiconsRegular.coffee,
+    'dog': PiconsRegular.dog,
   };
 
   static const Map<String, IconData> _iconNameLookup = {
@@ -162,6 +169,13 @@ class AppIcons {
   static IconData get gameController => PiconsRegular.gameController;
   static IconData get deviceMobile => PiconsRegular.deviceMobile;
   static IconData get graduationCap => PiconsRegular.graduationCap;
+  static IconData get bag => PiconsRegular.bag;
+  static IconData get heartPure => PiconsRegular.heart;
+  static IconData get bookOpen => PiconsRegular.bookOpen;
+  static IconData get filmStrip => PiconsRegular.filmStrip;
+  static IconData get lightning => PiconsRegular.lightning;
+  static IconData get coffeeIcon => PiconsRegular.coffee;
+  static IconData get dog => PiconsRegular.dog;
 
   static IconData get sms => PiconsRegular.chatDots;
   static IconData get email => PiconsRegular.envelope;

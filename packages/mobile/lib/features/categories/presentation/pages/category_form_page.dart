@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:picons/picons.dart';
 import 'package:uuid/uuid.dart';
-import 'package:expense_tracker/shared/presentation/widgets/app_icons.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import '../../domain/entities/category.dart';
 import '../../domain/repositories/category_repository.dart';
 import '../bloc/category_bloc.dart';
 import '../bloc/category_event.dart';
+import '../widgets/category_type_toggle.dart';
+import '../widgets/icon_grid_picker.dart';
+import '../widgets/color_picker_row.dart';
 
 class CategoryFormPage extends StatefulWidget {
   final Category? category;
@@ -27,25 +30,9 @@ class CategoryFormPage extends StatefulWidget {
 }
 
 class _CategoryFormPageState extends State<CategoryFormPage> {
-  static const List<String> _iconNames = [
-    'package',
-    'shoppingCart',
-    'forkKnife',
-    'car',
-    'house',
-    'heartbeat',
-    'gameController',
-    'deviceMobile',
-    'airplane',
-    'graduationCap',
-    'currencyDollar',
-    'gift',
-  ];
-
-  final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  String _selectedEmoji = 'package';
-  String _selectedColor = '#2196F3';
+  String _selectedIcon = 'shoppingCart';
+  String _selectedColor = '#D1C4E9';
   RecordType _type = RecordType.expense;
   var _isLoading = false;
 
@@ -61,7 +48,7 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
     } else {
       _initFromCategory(widget.category);
       if (widget.category == null && widget.initialType != null) {
-        _type = widget.initialType ?? RecordType.expense;
+        _type = widget.initialType!;
       }
     }
   }
@@ -90,66 +77,26 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
   void _initFromCategory(Category? category) {
     if (category == null) return;
     _nameController.text = category.name;
-    _selectedEmoji = category.emoji;
+    _selectedIcon = category.emoji;
     _selectedColor = category.color;
     _type = category.type;
   }
 
-  String? _validateName(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter a name';
-    }
-
-    return null;
-  }
-
-  Widget _buildIconSelector(Color accentColor) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: _iconNames.map((name) {
-        return _buildIconItem(name, accentColor);
-      }).toList(),
-    );
-  }
-
-  Widget _buildIconItem(String name, Color accentColor) {
-    final isSelected = name == _selectedEmoji;
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return GestureDetector(
-      onTap: () => setState(() => _selectedEmoji = name),
-      child: Container(
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: isSelected ? accentColor : colorScheme.outline.withAlpha(40),
-            width: isSelected ? 2 : 1,
-          ),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Center(
-          child: Icon(
-            AppIcons.getCategoryIcon(name),
-            size: 24,
-            color: isSelected ? accentColor : colorScheme.onSurfaceVariant,
-          ),
-        ),
-      ),
-    );
-  }
-
   void _saveCategory() {
-    final currentState = _formKey.currentState;
-    if (currentState == null || !currentState.validate()) return;
+    final name = _nameController.text.trim();
+    if (name.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please enter a name')));
+      return;
+    }
 
     final now = DateTime.now().toUtc();
     final id = widget.category?.id ?? widget.categoryId ?? const Uuid().v4();
     final category = Category(
       id: id,
-      name: _nameController.text,
-      emoji: _selectedEmoji,
+      name: name,
+      emoji: _selectedIcon,
       color: _selectedColor,
       type: _type,
       createdAt: widget.category?.createdAt ?? now,
@@ -172,56 +119,162 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    final isExpense = _type == RecordType.expense;
-    final accentColor = isExpense ? colors.error : colors.primary;
-
     if (_isLoading) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text(
-            _isEditing ? 'Edit Category' : 'New ${_type.displayName} Category',
-          ),
+      return const Scaffold(
+        backgroundColor: _DesignTokens.background,
+        body: Center(
+          child: CircularProgressIndicator(color: _DesignTokens.primary),
         ),
-        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          _isEditing ? 'Edit Category' : 'New ${_type.displayName} Category',
-        ),
-      ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(24),
+      backgroundColor: _DesignTokens.background,
+      body: SafeArea(
+        child: Column(
           children: [
-            TextFormField(
-              controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Category Name',
-                hintText: 'Enter category name',
+            _buildTopBar(),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CategoryTypeToggle(
+                      type: _type,
+                      onSwitch: (t) => setState(() => _type = t),
+                    ),
+                    _buildNameField(),
+                    IconGridPicker(
+                      selectedIcon: _selectedIcon,
+                      onIconSelected: (icon) =>
+                          setState(() => _selectedIcon = icon),
+                    ),
+                    ColorPickerRow(
+                      selectedColor: _selectedColor,
+                      onColorSelected: (color) =>
+                          setState(() => _selectedColor = color),
+                    ),
+                  ],
+                ),
               ),
-              validator: _validateName,
             ),
-            const SizedBox(height: 24),
-            const Text('Icon', style: TextStyle(fontSize: 16)),
-            const SizedBox(height: 8),
-            _buildIconSelector(accentColor),
-            const SizedBox(height: 32),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: accentColor,
-                foregroundColor: colors.onError,
-              ),
-              onPressed: _saveCategory,
-              child: Text(_isEditing ? 'Update' : 'Create'),
-            ),
+            _buildSaveButton(),
           ],
         ),
       ),
     );
   }
+
+  Widget _buildTopBar() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => context.pop(),
+            child: const Icon(
+              PiconsRegular.x,
+              size: 24,
+              color: _DesignTokens.textPrimary,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            _isEditing ? 'Edit Category' : 'Add New Category',
+            style: const TextStyle(
+              fontFamily: 'Work Sans',
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: _DesignTokens.textPrimary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNameField() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Name',
+            style: TextStyle(
+              fontFamily: 'Work Sans',
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: _DesignTokens.mutedColor,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Container(
+            height: 48,
+            decoration: BoxDecoration(
+              color: _DesignTokens.inputFill,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: _DesignTokens.inputBorder, width: 1),
+            ),
+            child: TextField(
+              controller: _nameController,
+              style: const TextStyle(
+                fontFamily: 'Work Sans',
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: _DesignTokens.textPrimary,
+              ),
+              decoration: const InputDecoration(
+                hintText: 'Groceries',
+                hintStyle: TextStyle(color: _DesignTokens.mutedColor),
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(horizontal: 16),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSaveButton() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+      child: SizedBox(
+        width: double.infinity,
+        height: 52,
+        child: ElevatedButton(
+          onPressed: _saveCategory,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: _DesignTokens.primary,
+            foregroundColor: _DesignTokens.background,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+            elevation: 0,
+          ),
+          child: const Text(
+            'Save Category',
+            style: TextStyle(
+              fontFamily: 'Work Sans',
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DesignTokens {
+  _DesignTokens._();
+
+  static const Color background = Color(0xFF141315);
+  static const Color primary = Color(0xFFD1C4E9);
+  static const Color textPrimary = Color(0xFFF5F7FA);
+  static const Color mutedColor = Color(0xFF8E8E93);
+  static const Color inputFill = Color(0xFF201F21);
+  static const Color inputBorder = Color(0x208E8E93);
 }
