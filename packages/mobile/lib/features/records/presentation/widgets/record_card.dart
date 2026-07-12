@@ -13,6 +13,24 @@ import '../../domain/entities/record.dart';
 /// Supports dismiss-to-delete and tap-to-edit.
 /// Requires [categoryInfo] to be resolved by the parent widget.
 class RecordCard extends StatelessWidget {
+  /// Formats a date as relative time: "Today, 4:15 PM", "Yesterday", etc.
+  static String _formatRelativeTime(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final dateOnly = DateTime(date.year, date.month, date.day);
+    final difference = today.difference(dateOnly).inDays;
+
+    final timeStr = DateFormat('h:mm a').format(date);
+
+    if (difference == 0) return 'Today, $timeStr';
+
+    if (difference == 1) return 'Yesterday';
+
+    if (difference < 7) return DateFormat('EEEE').format(date);
+
+    return DateFormat('MMM d').format(date);
+  }
+
   final Record record;
   final VoidCallback onTap;
   final VoidCallback onDelete;
@@ -25,21 +43,6 @@ class RecordCard extends StatelessWidget {
     required this.onDelete,
     this.categoryInfo,
   });
-
-  /// Formats a date as relative time: "Today, 4:15 PM", "Yesterday", etc.
-  static String _formatRelativeTime(DateTime date) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final dateOnly = DateTime(date.year, date.month, date.day);
-    final difference = today.difference(dateOnly).inDays;
-
-    final timeStr = DateFormat('h:mm a').format(date);
-
-    if (difference == 0) return 'Today, $timeStr';
-    if (difference == 1) return 'Yesterday';
-    if (difference < 7) return DateFormat('EEEE').format(date);
-    return DateFormat('MMM d').format(date);
-  }
 
   Widget _buildLeading() {
     final iconName = categoryInfo?.emoji;
