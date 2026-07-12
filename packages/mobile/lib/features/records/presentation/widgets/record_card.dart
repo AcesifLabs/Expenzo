@@ -4,22 +4,37 @@ import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:expense_tracker/core/utils/color_utils.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_icons.dart';
 import '../../domain/entities/record.dart';
-import 'source_badge.dart';
 
-/// Interactive record card with tap/delete actions for the records list.
+/// Interactive record card matching the .pen ActivityScreen design.
 ///
-/// Unlike [ReadOnlyRecordTile] which is a lightweight read-only tile for
-/// dashboard summaries, this widget supports dismiss-to-delete, tap-to-edit,
-/// and category icon display. Requires [categoryInfo] to be resolved by
-/// the parent widget to avoid per-card BlocBuilder rebuilds.
+/// Shows: icon (40×40) | title + category name | amount + relative time.
+/// Supports dismiss-to-delete and tap-to-edit.
+/// Requires [categoryInfo] to be resolved by the parent widget.
 class RecordCard extends StatelessWidget {
+  /// Formats a date as relative time: "Today, 4:15 PM", "Yesterday", etc.
+  static String _formatRelativeTime(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final dateOnly = DateTime(date.year, date.month, date.day);
+    final difference = today.difference(dateOnly).inDays;
+
+    final timeStr = DateFormat('h:mm a').format(date);
+
+    if (difference == 0) return 'Today, $timeStr';
+
+    if (difference == 1) return 'Yesterday';
+
+    if (difference < 7) return DateFormat('EEEE').format(date);
+
+    return DateFormat('MMM d').format(date);
+  }
+
   final Record record;
   final VoidCallback onTap;
   final VoidCallback onDelete;
   final CategoryInfo? categoryInfo;
-
-  static final _dateFormat = DateFormat('MMM dd, yyyy');
 
   const RecordCard({
     super.key,
@@ -29,42 +44,61 @@ class RecordCard extends StatelessWidget {
     this.categoryInfo,
   });
 
-  Widget _buildLeading(Color leadingBg, Color catColor) {
+  Widget _buildLeading() {
+    final iconName = categoryInfo?.emoji;
+    final catColorHex = categoryInfo?.color;
+    final iconColor = catColorHex != null && catColorHex.isNotEmpty
+        ? ColorUtils.fromHex(catColorHex)
+        : AppColors.primary;
+
     return Container(
-      width: 48,
-      height: 48,
+      width: 40,
+      height: 40,
       decoration: BoxDecoration(
-        color: leadingBg,
+        color: AppColors.surfaceDark,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Center(
-        child: Icon(PiconsLight.receipt, size: 22, color: catColor),
+        child: Icon(
+          iconName != null && iconName.isNotEmpty
+              ? AppIcons.getCategoryIcon(iconName)
+              : PiconsLight.receipt,
+          size: 20,
+          color: iconColor,
+        ),
       ),
     );
   }
 
-  Widget _buildInfo(ColorScheme colors) {
+  Widget _buildInfo() {
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             record.description,
-            style: const TextStyle(fontWeight: FontWeight.w500),
-            maxLines: 2,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textPrimaryDark,
+            ),
+            maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 4),
           Text(
-            _dateFormat.format(record.date),
-            style: TextStyle(fontSize: 12, color: colors.onSurfaceVariant),
+            categoryInfo?.name ?? 'Uncategorized',
+            style: const TextStyle(
+              fontSize: 13,
+              color: AppColors.textSecondaryDark,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildAmount(bool isNegative, CategoryInfo catInfo, Object? _) {
+  Widget _buildAmount(bool isNegative) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisSize: MainAxisSize.min,
@@ -73,16 +107,17 @@ class RecordCard extends StatelessWidget {
           '${isNegative ? '-' : ''}\$${record.amount.abs().toStringAsFixed(2)}',
           style: TextStyle(
             fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: isNegative ? AppColors.expense : AppColors.success,
+            fontWeight: FontWeight.w600,
+            color: isNegative ? AppColors.expenseDark : AppColors.successDark,
           ),
         ),
         const SizedBox(height: 4),
-        SourceBadge(
-          source: record.source,
-          categoryName: catInfo.name,
-          categoryIconName: catInfo.emoji,
-          categoryColor: catInfo.color,
+        Text(
+          _formatRelativeTime(record.date),
+          style: const TextStyle(
+            fontSize: 12,
+            color: AppColors.textSecondaryDark,
+          ),
         ),
       ],
     );
@@ -90,32 +125,21 @@ class RecordCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final catInfo = categoryInfo ?? const CategoryInfo();
     final isNegative = record.amount < 0;
-    final catColorHex = catInfo.color;
-    final colors = Theme.of(context).colorScheme;
-
-    final catColor = catColorHex != null
-        ? ColorUtils.fromHex(catColorHex)
-        : colors.primary;
-
-    final leadingBg = catColorHex != null
-        ? ColorUtils.fromHexWithAlpha(catColorHex)
-        : catColor.withAlpha(25);
 
     return AppCard(
       onTap: onTap,
       dismissibleKey: Key('record_${record.id}'),
       onDismissed: onDelete,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      padding: const EdgeInsets.all(12),
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       child: Row(
         children: [
-          _buildLeading(leadingBg, catColor),
+          _buildLeading(),
           const SizedBox(width: 12),
-          _buildInfo(colors),
+          _buildInfo(),
           const SizedBox(width: 12),
-          _buildAmount(isNegative, catInfo, catColor),
+          _buildAmount(isNegative),
         ],
       ),
     );

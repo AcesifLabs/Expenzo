@@ -56,6 +56,18 @@ Secure sign-in via Google or Email. Your data is yours—Expenzo provides easy t
 
 ---
 
+## 🧑‍💻 Developer Setup
+
+After cloning, run:
+
+```bash
+./scripts/setup-hooks.sh
+```
+
+This configures Git to use the repo-local hooks in `.githooks/`.
+
+---
+
 ## 🛠 Built With
 
 | Category | Technology |
