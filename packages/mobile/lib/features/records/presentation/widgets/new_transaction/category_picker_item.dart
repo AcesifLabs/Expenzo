@@ -5,7 +5,6 @@ import 'package:expense_tracker/features/categories/domain/entities/category.dar
 class CategoryPickerItem extends StatelessWidget {
   final Category category;
   final bool isSelected;
-  final Color errorBorderColor;
   final Color selectedColor;
   final VoidCallback onTap;
 
@@ -13,83 +12,73 @@ class CategoryPickerItem extends StatelessWidget {
     super.key,
     required this.category,
     required this.isSelected,
-    required this.errorBorderColor,
     this.selectedColor = const Color(0xFFD1C4E9),
     required this.onTap,
   });
 
-  Color _resolveTextColor(Color iconColor, bool isLight) {
-    return (isSelected && isLight) ? Colors.black : iconColor;
-  }
-
-  Color _resolveBorderColor(ColorScheme colors) {
-    if (isSelected) return selectedColor.withAlpha(50);
-    if (errorBorderColor != Colors.transparent) return errorBorderColor;
-
-    return colors.onSurface.withAlpha(40);
-  }
-
   Color _iconColor(ColorScheme colors) {
     return isSelected ? selectedColor : colors.onSurface.withAlpha(150);
-  }
-
-  Widget _label(Color textColor) {
-    return ClipRect(
-      child: AnimatedSize(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOutCubic,
-        child: isSelected
-            ? Padding(
-                padding: const EdgeInsets.only(left: 8),
-                child: Text(
-                  category.name,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: textColor,
-                  ),
-                  maxLines: 1,
-                ),
-              )
-            : const SizedBox.shrink(),
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final iconColor = _iconColor(colors);
-    final textColor = _resolveTextColor(
-      iconColor,
-      Theme.of(context).colorScheme.brightness == Brightness.light,
-    );
-    final borderColor = _resolveBorderColor(colors);
+    final textColor = isSelected
+        ? selectedColor
+        : colors.onSurface.withAlpha(150);
 
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOutCubic,
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? selectedColor.withAlpha(25)
-              : colors.onSurface.withAlpha(10),
-          borderRadius: BorderRadius.circular(25),
-          border: Border.all(color: borderColor, width: 1),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              AppIcons.getCategoryIcon(category.emoji),
-              size: 20,
-              color: iconColor,
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: Semantics(
+        button: true,
+        selected: isSelected,
+        label: category.name,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(20),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              curve: Curves.easeOut,
+              constraints: const BoxConstraints(minHeight: 48),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? selectedColor.withAlpha(25)
+                    : colors.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isSelected
+                      ? selectedColor
+                      : colors.outlineVariant.withAlpha(32),
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    AppIcons.getCategoryIcon(category.emoji),
+                    size: 16,
+                    color: iconColor,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    category.name,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.w400,
+                      color: textColor,
+                    ),
+                    maxLines: 1,
+                  ),
+                ],
+              ),
             ),
-            _label(textColor),
-          ],
+          ),
         ),
       ),
     );

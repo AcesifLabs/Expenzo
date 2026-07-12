@@ -4,6 +4,9 @@ class KeypadButton extends StatelessWidget {
   final Color color;
   final Widget child;
   final VoidCallback onTap;
+  final String? semanticLabel;
+  final double height;
+  final double radius;
   final void Function(LongPressStartDetails)? onLongPressStart;
   final void Function(LongPressEndDetails)? onLongPressEnd;
   final VoidCallback? onLongPressCancel;
@@ -13,6 +16,9 @@ class KeypadButton extends StatelessWidget {
     required this.color,
     required this.child,
     required this.onTap,
+    this.semanticLabel,
+    this.height = 48,
+    this.radius = 8,
     this.onLongPressStart,
     this.onLongPressEnd,
     this.onLongPressCancel,
@@ -22,18 +28,24 @@ class KeypadButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: GestureDetector(
-        onTap: onTap,
         onLongPressStart: onLongPressStart,
         onLongPressEnd: onLongPressEnd,
         onLongPressCancel: onLongPressCancel,
-        child: Container(
-          height: 52,
-          margin: const EdgeInsets.all(4),
-          decoration: BoxDecoration(
+        child: Semantics(
+          button: true,
+          label: semanticLabel,
+          child: Material(
             color: color,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(radius),
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(radius),
+              child: SizedBox(
+                height: height,
+                child: Center(child: child),
+              ),
+            ),
           ),
-          child: Center(child: child),
         ),
       ),
     );

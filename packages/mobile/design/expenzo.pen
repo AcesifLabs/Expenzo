@@ -30985,16 +30985,6 @@
               "fontFamily": "Work Sans",
               "fontSize": 20,
               "fontWeight": "600"
-            },
-            {
-              "type": "text",
-              "id": "vU97D",
-              "name": "Status",
-              "fill": "#A2D3A4",
-              "content": "● Online",
-              "fontFamily": "Work Sans",
-              "fontSize": 12,
-              "fontWeight": "normal"
             }
           ]
         },
@@ -31010,90 +31000,6 @@
             0
           ],
           "children": [
-            {
-              "type": "frame",
-              "id": "M338Xx",
-              "name": "InsightCard1",
-              "width": "fill_container",
-              "fill": "#D1C4E910",
-              "cornerRadius": 16,
-              "stroke": "#D1C4E930",
-              "strokeWidth": 1,
-              "layout": "vertical",
-              "gap": 8,
-              "padding": 14,
-              "children": [
-                {
-                  "type": "icon",
-                  "id": "YGO8d",
-                  "name": "Icon",
-                  "width": 18,
-                  "height": 18,
-                  "icon": "lightbulb",
-                  "library": "phosphor",
-                  "fill": "#FFD700"
-                },
-                {
-                  "type": "text",
-                  "id": "Ut1lq",
-                  "name": "Text",
-                  "fill": "#F5F7FA",
-                  "textGrowth": "fixed-width",
-                  "width": "fill_container",
-                  "content": "You've spent $4,200 on dining this month — 35% more than last month.",
-                  "fontFamily": "Work Sans",
-                  "fontSize": 13,
-                  "fontWeight": "normal"
-                },
-                {
-                  "type": "text",
-                  "id": "hiUSH",
-                  "name": "Action",
-                  "fill": "#D1C4E9",
-                  "content": "Adjust budget →",
-                  "fontFamily": "Work Sans",
-                  "fontSize": 12,
-                  "fontWeight": "600"
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "zDC83",
-              "name": "InsightCard2",
-              "width": "fill_container",
-              "fill": "#A2D3A410",
-              "cornerRadius": 16,
-              "stroke": "#A2D3A430",
-              "strokeWidth": 1,
-              "layout": "vertical",
-              "gap": 8,
-              "padding": 14,
-              "children": [
-                {
-                  "type": "icon",
-                  "id": "BWT0t",
-                  "name": "Icon",
-                  "width": 18,
-                  "height": 18,
-                  "icon": "target",
-                  "library": "phosphor",
-                  "fill": "#A2D3A4"
-                },
-                {
-                  "type": "text",
-                  "id": "u52DS",
-                  "name": "Text",
-                  "fill": "#F5F7FA",
-                  "textGrowth": "fixed-width",
-                  "width": "fill_container",
-                  "content": "You're on track to meet your laptop goal in 3 months. Great job!",
-                  "fontFamily": "Work Sans",
-                  "fontSize": 13,
-                  "fontWeight": "normal"
-                }
-              ]
-            },
             {
               "type": "frame",
               "id": "OIDnR",
@@ -31202,53 +31108,6 @@
                       "fontWeight": "normal"
                     }
                   ]
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "ptPIh",
-              "name": "FbRow",
-              "width": "fill_container",
-              "gap": 12,
-              "padding": [
-                0,
-                0,
-                0,
-                36
-              ],
-              "justifyContent": "end",
-              "alignItems": "center",
-              "children": [
-                {
-                  "type": "text",
-                  "id": "D7obbw",
-                  "name": "FbLabel",
-                  "fill": "#8E8E93",
-                  "content": "Was this helpful?",
-                  "fontFamily": "Work Sans",
-                  "fontSize": 11,
-                  "fontWeight": "normal"
-                },
-                {
-                  "type": "icon",
-                  "id": "auZkA",
-                  "name": "ThumbsUp",
-                  "width": 16,
-                  "height": 16,
-                  "icon": "thumbs-up",
-                  "library": "phosphor",
-                  "fill": "#8E8E93"
-                },
-                {
-                  "type": "icon",
-                  "id": "S1Xpv",
-                  "name": "ThumbsDown",
-                  "width": 16,
-                  "height": 16,
-                  "icon": "thumbs-down",
-                  "library": "phosphor",
-                  "fill": "#8E8E93"
                 }
               ]
             }
