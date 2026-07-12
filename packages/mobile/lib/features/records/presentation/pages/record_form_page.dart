@@ -25,9 +25,13 @@ const _primary = Color(0xFFD1C4E9);
 const _textPrimary = Color(0xFFF5F7FA);
 const _textSecondary = Color(0xFF8E8E93);
 const _onPrimary = Color(0xFF141315);
+const _errorColor = Color(0xFFF48FB1);
 
 const _inputRadius = BorderRadius.all(Radius.circular(12));
 const _buttonRadius = BorderRadius.all(Radius.circular(14));
+const _cellShape = RoundedRectangleBorder(
+  borderRadius: BorderRadius.all(Radius.circular(8)),
+);
 
 class RecordFormPage extends StatefulWidget {
   final Record? record;
@@ -116,31 +120,50 @@ class _RecordFormPageState extends State<RecordFormPage> {
 
   bool _validate() {
     var valid = true;
+    String? newAmountError;
+    String? newDescriptionError;
+
     final amount = _amountController.text;
     if (amount.isEmpty) {
-      _amountError = 'Please enter an amount';
+      newAmountError = 'Please enter an amount';
       valid = false;
     } else if (double.tryParse(amount) == null) {
-      _amountError = 'Please enter a valid number';
+      newAmountError = 'Please enter a valid number';
       valid = false;
-    } else {
-      _amountError = null;
     }
 
     final desc = _descriptionController.text;
     if (desc.isEmpty) {
-      _descriptionError = 'Please enter a description';
+      newDescriptionError = 'Please enter a description';
       valid = false;
-    } else {
-      _descriptionError = null;
     }
 
-    setState(() {});
+    setState(() {
+      _amountError = newAmountError;
+      _descriptionError = newDescriptionError;
+    });
+
     return valid;
   }
 
   void _onCategoryChanged(String? value) {
     setState(() => _selectedCategoryId = value);
+  }
+
+  void _onAmountChanged(String _) {
+    if (_amountError != null) {
+      setState(() => _amountError = null);
+    }
+  }
+
+  void _onDescriptionChanged(String _) {
+    if (_descriptionError != null) {
+      setState(() => _descriptionError = null);
+    }
+  }
+
+  void _handleSelectDate() {
+    _selectDate();
   }
 
   Future<void> _selectDate() async {
@@ -149,136 +172,141 @@ class _RecordFormPageState extends State<RecordFormPage> {
       initialDate: _selectedDate,
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
-              surface: _bg,
-              onSurface: _textPrimary,
-              primary: _primary,
-              onPrimary: _onPrimary,
-              secondary: _primary,
-              onSecondary: _onPrimary,
-              outline: _textSecondary,
-              surfaceContainerHighest: _inputFill,
-              surfaceContainerHigh: _inputFill,
-              surfaceContainerLow: _inputFill,
-            ),
-            dialogTheme: const DialogThemeData(backgroundColor: _bg),
-            datePickerTheme: DatePickerThemeData(
-              backgroundColor: _bg,
-              surfaceTintColor: Colors.transparent,
-              headerBackgroundColor: _inputFill,
-              headerForegroundColor: _textPrimary,
-              dayForegroundColor: WidgetStateProperty.resolveWith((states) {
-                if (states.contains(WidgetState.selected)) {
-                  return _onPrimary;
-                }
-                if (states.contains(WidgetState.disabled)) {
-                  return _textSecondary.withAlpha(80);
-                }
-                return _textPrimary;
-              }),
-              dayBackgroundColor: WidgetStateProperty.resolveWith((states) {
-                if (states.contains(WidgetState.selected)) return _primary;
-                return Colors.transparent;
-              }),
-              todayForegroundColor: WidgetStateProperty.resolveWith((states) {
-                if (states.contains(WidgetState.selected)) return _onPrimary;
-                return _primary;
-              }),
-              todayBackgroundColor: WidgetStateProperty.resolveWith((states) {
-                if (states.contains(WidgetState.selected)) return _primary;
-                return Colors.transparent;
-              }),
-              todayBorder: const BorderSide(color: _primary, width: 1),
-              yearForegroundColor: WidgetStateProperty.resolveWith((states) {
-                if (states.contains(WidgetState.selected)) {
-                  return _onPrimary;
-                }
-                if (states.contains(WidgetState.disabled)) {
-                  return _textSecondary.withAlpha(80);
-                }
-                return _textPrimary;
-              }),
-              yearBackgroundColor: WidgetStateProperty.resolveWith((states) {
-                if (states.contains(WidgetState.selected)) return _primary;
-                return Colors.transparent;
-              }),
-              weekdayStyle: const TextStyle(
-                fontFamily: 'Work Sans',
-                color: _textSecondary,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
-              dayStyle: const TextStyle(
-                fontFamily: 'Work Sans',
-                color: _textPrimary,
-                fontSize: 14,
-              ),
-              yearStyle: const TextStyle(
-                fontFamily: 'Work Sans',
-                color: _textPrimary,
-                fontSize: 14,
-              ),
-              headerHeadlineStyle: const TextStyle(
-                fontFamily: 'Work Sans',
-                color: _textPrimary,
-                fontSize: 24,
-                fontWeight: FontWeight.w600,
-              ),
-              headerHelpStyle: const TextStyle(
-                fontFamily: 'Work Sans',
-                color: _textSecondary,
-                fontSize: 12,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              dayShape: WidgetStateProperty.all(
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              ),
-              yearShape: WidgetStateProperty.all(
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              ),
-            ),
-            textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(foregroundColor: _primary),
-            ),
-            inputDecorationTheme: const InputDecorationTheme(
-              filled: true,
-              fillColor: _inputFill,
-              hintStyle: TextStyle(color: _textSecondary),
-              labelStyle: TextStyle(color: _textSecondary),
-              prefixStyle: TextStyle(color: _textPrimary),
-              suffixStyle: TextStyle(color: _textPrimary),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: _inputRadius,
-                borderSide: BorderSide(color: _inputStroke, width: 1),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: _inputRadius,
-                borderSide: BorderSide(color: _primary, width: 1.5),
-              ),
-              border: OutlineInputBorder(
-                borderRadius: _inputRadius,
-                borderSide: BorderSide(color: _inputStroke, width: 1),
-              ),
-            ),
-            textSelectionTheme: const TextSelectionThemeData(
-              cursorColor: _primary,
-              selectionColor: _inputFill,
-              selectionHandleColor: _primary,
-            ),
-          ),
-          child: child!,
-        );
-      },
+      builder: _buildDatePickerTheme,
     );
     if (!mounted) return;
     if (picked != null && picked != _selectedDate) {
       setState(() => _selectedDate = picked);
     }
+  }
+
+  Widget _buildDatePickerTheme(BuildContext context, Widget? child) {
+    final isSelected = WidgetStateProperty.resolveWith<Color?>((states) {
+      if (states.contains(WidgetState.selected)) {
+        return _onPrimary;
+      }
+      if (states.contains(WidgetState.disabled)) {
+        return _textSecondary.withAlpha(80);
+      }
+
+      return _textPrimary;
+    });
+
+    final selectedBg = WidgetStateProperty.resolveWith<Color?>((states) {
+      if (states.contains(WidgetState.selected)) {
+        return _primary;
+      }
+
+      return Colors.transparent;
+    });
+
+    final cellShape = WidgetStateProperty.all<OutlinedBorder>(_cellShape);
+
+    return Theme(
+      data: Theme.of(context).copyWith(
+        colorScheme: const ColorScheme.dark(
+          surface: _bg,
+          onSurface: _textPrimary,
+          primary: _primary,
+          onPrimary: _onPrimary,
+          secondary: _primary,
+          onSecondary: _onPrimary,
+          outline: _textSecondary,
+          surfaceContainerHighest: _inputFill,
+          surfaceContainerHigh: _inputFill,
+          surfaceContainerLow: _inputFill,
+        ),
+        dialogTheme: const DialogThemeData(backgroundColor: _bg),
+        datePickerTheme: _buildDatePickerData(
+          isSelected,
+          selectedBg,
+          cellShape,
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(foregroundColor: _primary),
+        ),
+        inputDecorationTheme: _buildInputDecorationTheme(),
+        textSelectionTheme: const TextSelectionThemeData(
+          cursorColor: _primary,
+          selectionColor: _inputFill,
+          selectionHandleColor: _primary,
+        ),
+      ),
+      child: child ?? const SizedBox.shrink(),
+    );
+  }
+
+  DatePickerThemeData _buildDatePickerData(
+    WidgetStateProperty<Color?> isSelected,
+    WidgetStateProperty<Color?> selectedBg,
+    WidgetStateProperty<OutlinedBorder> cellShape,
+  ) {
+    return DatePickerThemeData(
+      backgroundColor: _bg,
+      surfaceTintColor: Colors.transparent,
+      headerBackgroundColor: _inputFill,
+      headerForegroundColor: _textPrimary,
+      dayForegroundColor: isSelected,
+      dayBackgroundColor: selectedBg,
+      todayForegroundColor: isSelected,
+      todayBackgroundColor: selectedBg,
+      todayBorder: const BorderSide(color: _primary, width: 1),
+      yearForegroundColor: isSelected,
+      yearBackgroundColor: selectedBg,
+      weekdayStyle: const TextStyle(
+        fontFamily: 'Work Sans',
+        color: _textSecondary,
+        fontSize: 12,
+        fontWeight: FontWeight.w500,
+      ),
+      dayStyle: const TextStyle(
+        fontFamily: 'Work Sans',
+        color: _textPrimary,
+        fontSize: 14,
+      ),
+      yearStyle: const TextStyle(
+        fontFamily: 'Work Sans',
+        color: _textPrimary,
+        fontSize: 14,
+      ),
+      headerHeadlineStyle: const TextStyle(
+        fontFamily: 'Work Sans',
+        color: _textPrimary,
+        fontSize: 24,
+        fontWeight: FontWeight.w600,
+      ),
+      headerHelpStyle: const TextStyle(
+        fontFamily: 'Work Sans',
+        color: _textSecondary,
+        fontSize: 12,
+      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      dayShape: cellShape,
+      yearShape: cellShape,
+    );
+  }
+
+  InputDecorationTheme _buildInputDecorationTheme() {
+    return const InputDecorationTheme(
+      filled: true,
+      fillColor: _inputFill,
+      hintStyle: TextStyle(color: _textSecondary),
+      labelStyle: TextStyle(color: _textSecondary),
+      prefixStyle: TextStyle(color: _textPrimary),
+      suffixStyle: TextStyle(color: _textPrimary),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: _inputRadius,
+        borderSide: BorderSide(color: _inputStroke, width: 1),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: _inputRadius,
+        borderSide: BorderSide(color: _primary, width: 1.5),
+      ),
+      border: OutlineInputBorder(
+        borderRadius: _inputRadius,
+        borderSide: BorderSide(color: _inputStroke, width: 1),
+      ),
+    );
   }
 
   void _saveRecord() {
@@ -310,6 +338,24 @@ class _RecordFormPageState extends State<RecordFormPage> {
     if (mounted) context.pop();
   }
 
+  // -- Helpers --
+
+  Color _amountBorderColor() {
+    if (_amountError != null) return _errorColor;
+    if (_amountFocused) return _primary;
+
+    return _inputStroke;
+  }
+
+  Color _descriptionBorderColor() {
+    if (_descriptionError != null) return _errorColor;
+    if (_descriptionFocused) return _primary;
+
+    return _inputStroke;
+  }
+
+  double _focusedWidth(bool focused) => focused ? 1.5 : 1;
+
   // -- TopBar --
   Widget _buildTopBar(String title) {
     return Padding(
@@ -339,36 +385,52 @@ class _RecordFormPageState extends State<RecordFormPage> {
     );
   }
 
+  // -- Field label --
+  Widget _buildLabel(String text) {
+    return Text(
+      text,
+      style: const TextStyle(
+        fontFamily: 'Work Sans',
+        fontSize: 12,
+        fontWeight: FontWeight.w500,
+        color: _textSecondary,
+      ),
+    );
+  }
+
+  // -- Error text --
+  Widget _buildErrorText(String error) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: Text(
+        error,
+        style: const TextStyle(
+          fontFamily: 'Work Sans',
+          fontSize: 12,
+          color: _errorColor,
+        ),
+      ),
+    );
+  }
+
   // -- Amount Field --
   Widget _buildAmountField() {
+    final borderColor = _amountBorderColor();
+    final borderWidth = _focusedWidth(_amountFocused);
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Amount',
-            style: TextStyle(
-              fontFamily: 'Work Sans',
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: _textSecondary,
-            ),
-          ),
+          _buildLabel('Amount'),
           const SizedBox(height: 6),
           Container(
             height: 48,
             decoration: BoxDecoration(
               color: _inputFill,
               borderRadius: _inputRadius,
-              border: Border.all(
-                color: _amountError != null
-                    ? const Color(0xFFF48FB1)
-                    : _amountFocused
-                    ? _primary
-                    : _inputStroke,
-                width: _amountFocused ? 1.5 : 1,
-              ),
+              border: Border.all(color: borderColor, width: borderWidth),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 16),
             alignment: Alignment.centerLeft,
@@ -413,27 +475,13 @@ class _RecordFormPageState extends State<RecordFormPage> {
                       contentPadding: EdgeInsets.zero,
                       isDense: true,
                     ),
-                    onChanged: (_) {
-                      if (_amountError != null) {
-                        setState(() => _amountError = null);
-                      }
-                    },
+                    onChanged: _onAmountChanged,
                   ),
                 ),
               ],
             ),
           ),
-          if (_amountError != null) ...[
-            const SizedBox(height: 6),
-            Text(
-              _amountError!,
-              style: const TextStyle(
-                fontFamily: 'Work Sans',
-                fontSize: 12,
-                color: Color(0xFFF48FB1),
-              ),
-            ),
-          ],
+          if (_amountError case final error?) _buildErrorText(error),
         ],
       ),
     );
@@ -441,34 +489,22 @@ class _RecordFormPageState extends State<RecordFormPage> {
 
   // -- Description Field --
   Widget _buildDescriptionField() {
+    final borderColor = _descriptionBorderColor();
+    final borderWidth = _focusedWidth(_descriptionFocused);
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Description',
-            style: TextStyle(
-              fontFamily: 'Work Sans',
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: _textSecondary,
-            ),
-          ),
+          _buildLabel('Description'),
           const SizedBox(height: 6),
           Container(
             height: 80,
             decoration: BoxDecoration(
               color: _inputFill,
               borderRadius: _inputRadius,
-              border: Border.all(
-                color: _descriptionError != null
-                    ? const Color(0xFFF48FB1)
-                    : _descriptionFocused
-                    ? _primary
-                    : _inputStroke,
-                width: _descriptionFocused ? 1.5 : 1,
-              ),
+              border: Border.all(color: borderColor, width: borderWidth),
             ),
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
             child: TextField(
@@ -493,24 +529,10 @@ class _RecordFormPageState extends State<RecordFormPage> {
                 contentPadding: EdgeInsets.zero,
                 isDense: true,
               ),
-              onChanged: (_) {
-                if (_descriptionError != null) {
-                  setState(() => _descriptionError = null);
-                }
-              },
+              onChanged: _onDescriptionChanged,
             ),
           ),
-          if (_descriptionError != null) ...[
-            const SizedBox(height: 6),
-            Text(
-              _descriptionError!,
-              style: const TextStyle(
-                fontFamily: 'Work Sans',
-                fontSize: 12,
-                color: Color(0xFFF48FB1),
-              ),
-            ),
-          ],
+          if (_descriptionError case final error?) _buildErrorText(error),
         ],
       ),
     );
@@ -524,15 +546,7 @@ class _RecordFormPageState extends State<RecordFormPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Category',
-              style: TextStyle(
-                fontFamily: 'Work Sans',
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: _textSecondary,
-              ),
-            ),
+            _buildLabel('Category'),
             const SizedBox(height: 6),
             ShimmerBox.rectangle(
               width: double.infinity,
@@ -546,7 +560,7 @@ class _RecordFormPageState extends State<RecordFormPage> {
         padding: const EdgeInsets.symmetric(vertical: 12),
         child: Text(
           'Error: $message',
-          style: const TextStyle(color: Color(0xFFF48FB1)),
+          style: const TextStyle(color: _errorColor),
         ),
       ),
       CategoryLoaded(:final categories) => _buildCategorySelect(categories),
@@ -570,21 +584,18 @@ class _RecordFormPageState extends State<RecordFormPage> {
     final selected = _selectedCategoryId != null
         ? unique.where((c) => c.id == _selectedCategoryId).firstOrNull
         : null;
+    final selectedIcon = selected != null
+        ? AppIcons.getCategoryIcon(selected.emoji)
+        : PiconsRegular.coffee;
+    final selectedName = selected?.name ?? 'Select category';
+    final selectedColor = selected != null ? _textPrimary : _textSecondary;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Category',
-            style: TextStyle(
-              fontFamily: 'Work Sans',
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: _textSecondary,
-            ),
-          ),
+          _buildLabel('Category'),
           const SizedBox(height: 6),
           GestureDetector(
             onTap: () => _showCategoryPicker(unique),
@@ -598,22 +609,16 @@ class _RecordFormPageState extends State<RecordFormPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
-                  Icon(
-                    selected != null
-                        ? AppIcons.getCategoryIcon(selected.emoji)
-                        : PiconsRegular.coffee,
-                    size: 18,
-                    color: _primary,
-                  ),
+                  Icon(selectedIcon, size: 18, color: _primary),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      selected?.name ?? 'Select category',
+                      selectedName,
                       style: TextStyle(
                         fontFamily: 'Work Sans',
                         fontSize: 15,
                         fontWeight: FontWeight.normal,
-                        color: selected != null ? _textPrimary : _textSecondary,
+                        color: selectedColor,
                       ),
                     ),
                   ),
@@ -671,7 +676,6 @@ class _RecordFormPageState extends State<RecordFormPage> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Category list
                       ...categories.map(
                         (cat) => _buildCategoryPickerItem(
                           icon: AppIcons.getCategoryIcon(cat.emoji),
@@ -735,18 +739,10 @@ class _RecordFormPageState extends State<RecordFormPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Date',
-            style: TextStyle(
-              fontFamily: 'Work Sans',
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: _textSecondary,
-            ),
-          ),
+          _buildLabel('Date'),
           const SizedBox(height: 6),
           GestureDetector(
-            onTap: _selectDate,
+            onTap: _handleSelectDate,
             child: Container(
               height: 48,
               decoration: BoxDecoration(
@@ -789,6 +785,7 @@ class _RecordFormPageState extends State<RecordFormPage> {
     final label = _isEditing
         ? 'Update ${_recordType.displayName}'
         : 'Create ${_recordType.displayName}';
+
     return GestureDetector(
       onTap: _saveRecord,
       child: Container(
@@ -821,13 +818,9 @@ class _RecordFormPageState extends State<RecordFormPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildTopBar(title),
-              // Amount shimmer
               _buildFieldShimmer('Amount', 48),
-              // Description shimmer
               _buildFieldShimmer('Description', 80),
-              // Category shimmer
               _buildFieldShimmer('Category', 48),
-              // Date shimmer
               _buildFieldShimmer('Date', 48),
             ],
           ),
@@ -842,15 +835,7 @@ class _RecordFormPageState extends State<RecordFormPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: const TextStyle(
-              fontFamily: 'Work Sans',
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: _textSecondary,
-            ),
-          ),
+          _buildLabel(label),
           const SizedBox(height: 6),
           ShimmerBox.rectangle(
             width: double.infinity,
@@ -883,9 +868,9 @@ class _RecordFormPageState extends State<RecordFormPage> {
 
     return Theme(
       data: Theme.of(context).copyWith(
-        textSelectionTheme: TextSelectionThemeData(
+        textSelectionTheme: const TextSelectionThemeData(
           cursorColor: _primary,
-          selectionColor: _primary.withAlpha(80),
+          selectionColor: _inputFill,
           selectionHandleColor: _primary,
         ),
       ),
