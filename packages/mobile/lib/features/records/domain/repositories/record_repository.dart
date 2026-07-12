@@ -96,4 +96,9 @@ abstract class RecordRepository {
     DateTime start,
     DateTime end,
   );
+
+  /// Returns the number of records that reference [categoryId].
+  ///
+  /// Returns [Right(int)] on success, [Left(CacheFailure)] on failure.
+  Future<Either<CacheFailure, int>> getRecordCountByCategory(String categoryId);
 }

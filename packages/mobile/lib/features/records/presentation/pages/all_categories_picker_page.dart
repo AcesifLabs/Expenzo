@@ -5,11 +5,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
+import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/shared/presentation/widgets/app_icons.dart';
 import 'package:expense_tracker/features/categories/domain/entities/category.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_event.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_state.dart';
+import 'package:expense_tracker/features/categories/presentation/widgets/delete_category_dialog.dart';
+import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
 
 /// Full-screen category picker matching the .pen design.
 ///
@@ -66,6 +69,36 @@ class _AllCategoriesPickerPageState extends State<AllCategoriesPickerPage> {
 
   void _onCategoryTap(Category category) {
     Navigator.pop(context, category);
+  }
+
+  Future<void> _onLongPressDelete(Category category) async {
+    if (category.isDefault) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Default categories cannot be deleted')),
+      );
+
+      return;
+    }
+
+    final id = category.id;
+    if (id == null) return;
+
+    int transactionCount = 0;
+    final repo = di.getIt<RecordRepository>();
+    final result = await repo.getRecordCountByCategory(id);
+    result.fold((_) {}, (count) => transactionCount = count);
+
+    if (!context.mounted) return;
+
+    final confirmed = await DeleteCategoryDialog.show(
+      context: context,
+      categoryName: category.name,
+      transactionCount: transactionCount,
+    );
+
+    if (confirmed == true && context.mounted) {
+      context.read<CategoryBloc>().add(DeleteCategoryEvent(id));
+    }
   }
 
   void _onAddNew() {
@@ -261,6 +294,7 @@ class _AllCategoriesPickerPageState extends State<AllCategoriesPickerPage> {
 
     return GestureDetector(
       onTap: () => _onCategoryTap(category),
+      onLongPress: () => _onLongPressDelete(category),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         color: const Color(0xFF1C1B1D),
