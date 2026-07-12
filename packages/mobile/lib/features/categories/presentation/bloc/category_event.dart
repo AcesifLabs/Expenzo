@@ -45,3 +45,13 @@ class DeleteCategoryEvent extends CategoryEvent {
 
   const DeleteCategoryEvent(this.id);
 }
+
+class SearchCategoriesEvent extends CategoryEvent {
+  final String query;
+  final RecordType? type;
+
+  @override
+  List<Object?> get props => [query, type];
+
+  const SearchCategoriesEvent({required this.query, this.type});
+}

@@ -161,6 +161,28 @@ class CategoryRepositoryImpl implements CategoryRepository {
     );
   }
 
+  /// Returns Left(Failure) on error.
+  @override
+  Future<Either<CacheFailure, List<Category>>> searchCategories({
+    required String query,
+    RecordType? type,
+  }) async {
+    try {
+      final categories = await localDatasource.searchCategories(
+        query: query,
+        type: type,
+      );
+
+      return Right(categories);
+    } on CacheException catch (e) {
+      return Left(e.toFailure());
+    } catch (e, s) {
+      appLogger.error('Error searching categories', e, s);
+
+      return Left(CacheFailure(message: e.toString()));
+    }
+  }
+
   void _enqueueSync(
     String action,
     String recordId, [

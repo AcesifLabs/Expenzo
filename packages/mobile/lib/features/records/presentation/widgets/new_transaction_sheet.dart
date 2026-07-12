@@ -18,7 +18,6 @@ import 'package:expense_tracker/features/recurring/domain/entities/recurring_tra
 import 'package:expense_tracker/features/recurring/domain/repositories/recurring_repository.dart';
 import '../bloc/record_bloc.dart';
 import '../bloc/record_event.dart';
-import 'new_transaction/all_categories_picker.dart';
 import 'new_transaction/category_picker_item.dart';
 import 'new_transaction/numeric_keypad.dart';
 import 'new_transaction/type_toggle.dart';
@@ -103,59 +102,22 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     BuildContext context,
     List<Category> allCategories,
     RecordType type,
-  ) {
-    final colors = Theme.of(context).colorScheme;
-    final accentColor = type == RecordType.expense
-        ? colors.error
-        : colors.primary;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: const Color(0x00000000),
-      builder: (ctx) => AllCategoriesPicker(
-        categories: allCategories,
-        selectedId: _selectedCategoryId,
-        type: type,
-        accentColor: accentColor,
-        onAddNew: _onAddNew(ctx, type),
-        onSelect: _onCategorySelect(ctx),
-      ),
+  ) async {
+    final result = await context.push<Category>(
+      '/categories/picker',
+      extra: {'type': type, 'selectedId': _selectedCategoryId},
     );
-  }
 
-  VoidCallback _onAddNew(BuildContext ctx, RecordType type) {
-    return () {
-      final categoryBloc = context.read<CategoryBloc>();
-      Navigator.pop(ctx);
-      _addNewCategory(context, type, categoryBloc);
-    };
-  }
-
-  void Function(String) _onCategorySelect(BuildContext ctx) {
-    return (id) {
+    if (result != null && mounted) {
       setState(() {
-        _selectedCategoryId = id;
+        _selectedCategoryId = result.id;
         _categoryError = false;
       });
-      Navigator.pop(ctx);
-    };
-  }
+    }
 
-  Future<void> _addNewCategory(
-    BuildContext context,
-    RecordType type,
-    CategoryBloc categoryBloc,
-  ) async {
-    final created = await context.push<Category>(
-      '/categories/new',
-      extra: {'initialType': type, 'categoryBloc': categoryBloc},
-    );
-    if (created != null && context.mounted) {
-      setState(() {
-        _selectedCategoryId = created.id;
-        _categories = [created, ..._categories];
-      });
+    // Reload categories to restore bloc state after picker changed it
+    if (mounted) {
+      _loadCategories();
     }
   }
 

@@ -13,6 +13,7 @@ import 'package:expense_tracker/features/budgets/presentation/pages/budget_form_
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:expense_tracker/features/categories/presentation/pages/category_form_page.dart';
 import 'package:expense_tracker/features/records/presentation/bloc/record_bloc.dart';
+import 'package:expense_tracker/features/records/presentation/pages/all_categories_picker_page.dart';
 import 'package:expense_tracker/features/records/presentation/pages/record_form_page.dart';
 import 'package:expense_tracker/features/recurring/presentation/bloc/recurring_bloc.dart';
 import 'package:expense_tracker/features/recurring/presentation/pages/recurring_form_page.dart';
@@ -97,6 +98,22 @@ List<RouteBase> buildAppRoutes() {
             value: context.read<CategoryBloc>(),
             child: CategoryFormPage(categoryId: state.pathParameters['id']),
           ),
+        ),
+        GoRoute(
+          path: 'categories/picker',
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>?;
+            final type = extra?['type'] as RecordType? ?? RecordType.expense;
+            final selectedId = extra?['selectedId'] as String?;
+
+            return BlocProvider.value(
+              value: context.read<CategoryBloc>(),
+              child: AllCategoriesPickerPage(
+                type: type,
+                selectedId: selectedId,
+              ),
+            );
+          },
         ),
         GoRoute(path: 'scan-results', builder: _buildScanResultsRoute),
         GoRoute(path: 'login', builder: (_, _) => const LoginPage()),

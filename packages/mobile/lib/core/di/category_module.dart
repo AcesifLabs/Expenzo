@@ -7,6 +7,7 @@ import 'package:expense_tracker/features/categories/domain/repositories/category
 import 'package:expense_tracker/features/categories/domain/usecases/create_category.dart';
 import 'package:expense_tracker/features/categories/domain/usecases/delete_category.dart';
 import 'package:expense_tracker/features/categories/domain/usecases/get_categories.dart';
+import 'package:expense_tracker/features/categories/domain/usecases/search_categories.dart';
 import 'package:expense_tracker/features/categories/domain/usecases/update_category.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
 
@@ -30,12 +31,16 @@ void initCategoryModule(GetIt getIt) {
   getIt.registerLazySingleton(
     () => DeleteCategory(getIt<CategoryRepository>()),
   );
+  getIt.registerLazySingleton(
+    () => SearchCategories(getIt<CategoryRepository>()),
+  );
   getIt.registerFactory<CategoryBloc>(
     () => CategoryBloc(
       getCategories: getIt<GetCategories>(),
       createCategory: getIt<CreateCategory>(),
       updateCategory: getIt<UpdateCategory>(),
       deleteCategory: getIt<DeleteCategory>(),
+      searchCategories: getIt<SearchCategories>(),
     ),
   );
 }

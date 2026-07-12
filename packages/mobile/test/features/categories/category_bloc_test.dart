@@ -8,6 +8,7 @@ import 'package:expense_tracker/features/categories/domain/usecases/get_categori
 import 'package:expense_tracker/features/categories/domain/usecases/create_category.dart';
 import 'package:expense_tracker/features/categories/domain/usecases/update_category.dart';
 import 'package:expense_tracker/features/categories/domain/usecases/delete_category.dart';
+import 'package:expense_tracker/features/categories/domain/usecases/search_categories.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_event.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_state.dart';
@@ -15,6 +16,8 @@ import 'package:expense_tracker/features/categories/presentation/bloc/category_s
 class MockGetCategories extends Mock implements GetCategories {}
 
 class MockCreateCategory extends Mock implements CreateCategory {}
+
+class MockSearchCategories extends Mock implements SearchCategories {}
 
 void main() {
   late MockGetCategories mockGetCategories;
@@ -44,6 +47,7 @@ void main() {
       createCategory: mockCreateCategory,
       updateCategory: MockUpdateCategory(),
       deleteCategory: MockDeleteCategory(),
+      searchCategories: MockSearchCategories(),
     );
   });
 

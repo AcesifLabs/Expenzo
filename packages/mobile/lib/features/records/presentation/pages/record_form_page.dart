@@ -78,7 +78,7 @@ class _RecordFormPageState extends State<RecordFormPage> {
     } else {
       _initFromRecord(widget.record);
     }
-    context.read<CategoryBloc>().add(LoadCategories(type: _recordType));
+    context.read<CategoryBloc>().add(const LoadCategories());
   }
 
   void _onAmountFocusChange() {
@@ -564,6 +564,7 @@ class _RecordFormPageState extends State<RecordFormPage> {
         ),
       ),
       CategoryLoaded(:final categories) => _buildCategorySelect(categories),
+      CategorySearchResults(:final results) => _buildCategorySelect(results),
     };
   }
 
@@ -636,100 +637,20 @@ class _RecordFormPageState extends State<RecordFormPage> {
     );
   }
 
-  void _showCategoryPicker(List<Category> categories) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: _bg,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Handle bar
-              Container(
-                margin: const EdgeInsets.only(top: 12, bottom: 16),
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: _textSecondary.withAlpha(80),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.only(bottom: 12),
-                child: Text(
-                  'Select Category',
-                  style: TextStyle(
-                    fontFamily: 'Work Sans',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: _textPrimary,
-                  ),
-                ),
-              ),
-              // Scrollable category list
-              Flexible(
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ...categories.map(
-                        (cat) => _buildCategoryPickerItem(
-                          icon: AppIcons.getCategoryIcon(cat.emoji),
-                          name: cat.name,
-                          isSelected: cat.id == _selectedCategoryId,
-                          onTap: () {
-                            _onCategoryChanged(cat.id);
-                            Navigator.pop(ctx);
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+  void _showCategoryPicker(List<Category> categories) async {
+    final result = await context.push<Category>(
+      '/categories/picker',
+      extra: {'type': _recordType, 'selectedId': _selectedCategoryId},
     );
-  }
 
-  Widget _buildCategoryPickerItem({
-    required IconData icon,
-    required String name,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        child: Row(
-          children: [
-            Icon(icon, size: 18, color: _primary),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                name,
-                style: TextStyle(
-                  fontFamily: 'Work Sans',
-                  fontSize: 15,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                  color: _textPrimary,
-                ),
-              ),
-            ),
-            if (isSelected)
-              const Icon(PiconsRegular.check, size: 18, color: _primary),
-          ],
-        ),
-      ),
-    );
+    if (result != null && mounted) {
+      _onCategoryChanged(result.id);
+    }
+
+    // Reload all categories to restore bloc state after picker changed it
+    if (mounted) {
+      context.read<CategoryBloc>().add(const LoadCategories());
+    }
   }
 
   // -- Date Field --
