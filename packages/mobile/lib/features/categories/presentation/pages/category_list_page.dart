@@ -3,13 +3,15 @@ import 'package:expense_tracker/features/categories/domain/entities/category.dar
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:expense_tracker/core/theme/app_colors.dart';
+import 'package:expense_tracker/core/di/injection_container.dart' as di;
+import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_empty_state.dart';
 import '../bloc/category_bloc.dart';
 import '../bloc/category_event.dart';
 import '../bloc/category_state.dart';
 import '../widgets/category_card.dart';
+import '../widgets/delete_category_dialog.dart';
 
 class CategoryListPage extends StatelessWidget {
   const CategoryListPage({super.key});
@@ -52,35 +54,38 @@ class CategoryListPage extends StatelessWidget {
     }
   }
 
-  void _showDeleteDialog(BuildContext context, Category category) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete Category'),
-        content: Text('Are you sure you want to delete "${category.name}"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => _onDeleteConfirm(dialogContext, context, category),
-            style: TextButton.styleFrom(foregroundColor: AppColors.error),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _onDeleteConfirm(
-    BuildContext dialogContext,
+  Future<void> _showDeleteDialog(
     BuildContext context,
     Category category,
-  ) {
-    Navigator.pop(dialogContext);
+  ) async {
+    if (category.isDefault) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Default categories cannot be deleted')),
+      );
+
+      return;
+    }
+
     final id = category.id;
-    if (id != null) {
+    if (id == null) return;
+
+    int transactionCount = 0;
+    final repo = di.getIt<RecordRepository>();
+    final result = await repo.getRecordCountByCategory(id);
+    result.fold(
+      (_) => transactionCount = 0,
+      (count) => transactionCount = count,
+    );
+
+    if (!context.mounted) return;
+
+    final confirmed = await DeleteCategoryDialog.show(
+      context: context,
+      categoryName: category.name,
+      transactionCount: transactionCount,
+    );
+
+    if (confirmed == true && context.mounted) {
       context.read<CategoryBloc>().add(DeleteCategoryEvent(id));
     }
   }

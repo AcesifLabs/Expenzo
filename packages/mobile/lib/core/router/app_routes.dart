@@ -8,11 +8,11 @@ import 'package:expense_tracker/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:expense_tracker/features/auth/presentation/pages/login_page.dart';
 import 'package:expense_tracker/features/auth/presentation/pages/sync_conflict_page.dart';
 import 'package:expense_tracker/features/budgets/presentation/bloc/budget_bloc.dart';
-import 'package:expense_tracker/features/budgets/presentation/pages/budget_details_page.dart';
 import 'package:expense_tracker/features/budgets/presentation/pages/budget_form_page.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:expense_tracker/features/categories/presentation/pages/category_form_page.dart';
 import 'package:expense_tracker/features/records/presentation/bloc/record_bloc.dart';
+import 'package:expense_tracker/features/records/presentation/pages/all_categories_picker_page.dart';
 import 'package:expense_tracker/features/records/presentation/pages/record_form_page.dart';
 import 'package:expense_tracker/features/recurring/presentation/bloc/recurring_bloc.dart';
 import 'package:expense_tracker/features/recurring/presentation/pages/recurring_form_page.dart';
@@ -35,81 +35,85 @@ List<RouteBase> buildAppRoutes() {
     GoRoute(
       path: '/',
       builder: (context, state) => const AuthAwareAppShell(),
-      routes: [
-        GoRoute(path: 'settings', builder: (_, _) => const SettingsPage()),
-        GoRoute(path: 'feedback', builder: (_, _) => const FeedbackPage()),
-        GoRoute(path: 'records/new', builder: _buildNewRecordRoute),
-        GoRoute(path: 'records/:id/edit', builder: _buildEditRecordRoute),
-        GoRoute(
-          path: 'budgets/new',
-          builder: (_, _) => BlocProvider(
-            create: (_) => di.getIt<BudgetBloc>(),
-            child: const BudgetFormPage(),
-          ),
-        ),
-        GoRoute(
-          path: 'budgets/:id',
-          builder: (context, state) => BlocProvider(
-            create: (_) => di.getIt<BudgetBloc>(),
-            child: BudgetDetailsPage(
-              budgetId: state.pathParameters['id'] ?? '',
-            ),
-          ),
-        ),
-        GoRoute(
-          path: 'budgets/:id/edit',
-          builder: (context, state) => BlocProvider(
-            create: (_) => di.getIt<BudgetBloc>(),
-            child: BudgetFormPage(budgetId: state.pathParameters['id'] ?? ''),
-          ),
-        ),
-        GoRoute(
-          path: 'recurring/new',
-          builder: (_, _) => BlocProvider(
-            create: (_) => di.getIt<RecurringBloc>(),
-            child: const RecurringFormPage(),
-          ),
-        ),
-        GoRoute(
-          path: 'recurring/:id/edit',
-          builder: (context, state) => BlocProvider(
-            create: (_) => di.getIt<RecurringBloc>(),
-            child: RecurringFormPage(
-              recurringId: state.pathParameters['id'] ?? '',
-            ),
-          ),
-        ),
-        GoRoute(
-          path: 'categories/new',
-          builder: (context, state) {
-            final extra = state.extra as Map<String, dynamic>?;
-            final type = extra?['initialType'] as RecordType?;
+      routes: _buildNestedRoutes(),
+    ),
+  ];
+}
 
-            return BlocProvider.value(
-              value: context.read<CategoryBloc>(),
-              child: CategoryFormPage(initialType: type),
-            );
-          },
-        ),
-        GoRoute(
-          path: 'categories/:id/edit',
-          builder: (context, state) => BlocProvider.value(
-            value: context.read<CategoryBloc>(),
-            child: CategoryFormPage(categoryId: state.pathParameters['id']),
-          ),
-        ),
-        GoRoute(path: 'scan-results', builder: _buildScanResultsRoute),
-        GoRoute(path: 'login', builder: (_, _) => const LoginPage()),
-        GoRoute(
-          path: 'sync-conflict',
-          builder: (_, _) => const SyncConflictPage(),
-        ),
-        GoRoute(path: 'reports', builder: (_, _) => const ReportsScreen()),
-        GoRoute(
-          path: 'ai-assistant',
-          builder: (_, _) => const AiAssistantPage(),
-        ),
-      ],
+List<RouteBase> _buildNestedRoutes() {
+  return [
+    GoRoute(path: 'settings', builder: (_, _) => const SettingsPage()),
+    GoRoute(path: 'feedback', builder: (_, _) => const FeedbackPage()),
+    GoRoute(path: 'records/new', builder: _buildNewRecordRoute),
+    GoRoute(path: 'records/:id/edit', builder: _buildEditRecordRoute),
+    ..._buildBudgetRoutes(),
+    ..._buildRecurringRoutes(),
+    ..._buildCategoryRoutes(),
+    GoRoute(path: 'scan-results', builder: _buildScanResultsRoute),
+    GoRoute(path: 'login', builder: (_, _) => const LoginPage()),
+    GoRoute(path: 'sync-conflict', builder: (_, _) => const SyncConflictPage()),
+    GoRoute(path: 'reports', builder: (_, _) => const ReportsScreen()),
+    GoRoute(path: 'ai-assistant', builder: (_, _) => const AiAssistantPage()),
+  ];
+}
+
+List<RouteBase> _buildBudgetRoutes() {
+  return [
+    GoRoute(
+      path: 'budgets/new',
+      builder: (_, _) => BlocProvider(
+        create: (_) => di.getIt<BudgetBloc>(),
+        child: const BudgetFormPage(),
+      ),
+    ),
+  ];
+}
+
+List<RouteBase> _buildRecurringRoutes() {
+  return [
+    GoRoute(
+      path: 'recurring/new',
+      builder: (_, _) => BlocProvider(
+        create: (_) => di.getIt<RecurringBloc>(),
+        child: const RecurringFormPage(),
+      ),
+    ),
+  ];
+}
+
+List<RouteBase> _buildCategoryRoutes() {
+  return [
+    GoRoute(
+      path: 'categories/new',
+      builder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>?;
+        final type = extra?['initialType'] as RecordType?;
+
+        return BlocProvider.value(
+          value: context.read<CategoryBloc>(),
+          child: CategoryFormPage(initialType: type),
+        );
+      },
+    ),
+    GoRoute(
+      path: 'categories/:id/edit',
+      builder: (context, state) => BlocProvider.value(
+        value: context.read<CategoryBloc>(),
+        child: CategoryFormPage(categoryId: state.pathParameters['id']),
+      ),
+    ),
+    GoRoute(
+      path: 'categories/picker',
+      builder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>?;
+        final type = extra?['type'] as RecordType? ?? RecordType.expense;
+        final selectedId = extra?['selectedId'] as String?;
+
+        return BlocProvider.value(
+          value: context.read<CategoryBloc>(),
+          child: AllCategoriesPickerPage(type: type, selectedId: selectedId),
+        );
+      },
     ),
   ];
 }

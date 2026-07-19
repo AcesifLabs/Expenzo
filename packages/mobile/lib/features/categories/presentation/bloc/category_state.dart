@@ -35,3 +35,12 @@ class CategoryError extends CategoryState {
 
   const CategoryError(this.message);
 }
+
+class CategorySearchResults extends CategoryState {
+  final List<Category> results;
+
+  @override
+  List<Object?> get props => [results];
+
+  const CategorySearchResults(this.results);
+}

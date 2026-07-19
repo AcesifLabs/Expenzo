@@ -26,6 +26,13 @@ abstract class CategoryLocalDatasource {
 
   /// Throws: [CacheException] if a database error occurs.
   Future<void> incrementUsageCount(String id);
+
+  /// Searches categories by name.
+  /// Throws: [CacheException] if a database error occurs.
+  Future<List<Category>> searchCategories({
+    required String query,
+    RecordType? type,
+  });
 }
 
 class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
@@ -148,6 +155,25 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
       await categoryDao.incrementUsageCount(id);
     } catch (e, s) {
       appLogger.error('Error incrementing usage count', e, s);
+      throw CacheException(message: e.toString());
+    }
+  }
+
+  /// Throws: [CacheException] if a database error occurs.
+  @override
+  Future<List<Category>> searchCategories({
+    required String query,
+    RecordType? type,
+  }) async {
+    try {
+      final categories = await categoryDao.searchCategories(
+        query: query,
+        type: type?.dbValue,
+      );
+
+      return categories.map(_mapToEntity).toList();
+    } catch (e, s) {
+      appLogger.error('Error searching categories', e, s);
       throw CacheException(message: e.toString());
     }
   }

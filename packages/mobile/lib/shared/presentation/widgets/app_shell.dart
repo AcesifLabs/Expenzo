@@ -17,6 +17,7 @@ import 'package:expense_tracker/features/sms_parser/presentation/models/sms_scan
 import 'package:expense_tracker/features/sms_parser/presentation/widgets/sms_scan_options_sheet.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
+import 'package:expense_tracker/features/categories/presentation/bloc/category_event.dart';
 import 'package:expense_tracker/shared/presentation/widgets/sms_permission_gate.dart';
 import 'package:expense_tracker/features/message_templates/presentation/pages/contact_selector_page.dart';
 import 'lazy_indexed_stack.dart';
@@ -155,7 +156,7 @@ class _AppShellState extends State<AppShell> {
     setState(() => _currentIndex = index);
   }
 
-  void _onFabPressed(BuildContext context) {
+  void _onFabPressed(BuildContext context) async {
     final now = DateTime.now();
     final lastPress = _lastFabPress;
     if (lastPress != null &&
@@ -163,7 +164,7 @@ class _AppShellState extends State<AppShell> {
       return;
     }
     _lastFabPress = now;
-    showModalBottomSheet(
+    await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: const Color(0x00000000),
@@ -175,6 +176,10 @@ class _AppShellState extends State<AppShell> {
         child: const NewTransactionSheet(),
       ),
     );
+    // Reload all categories after sheet closes to restore full list
+    if (context.mounted) {
+      context.read<CategoryBloc>().add(const LoadCategories());
+    }
   }
 
   @override

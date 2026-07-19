@@ -4,27 +4,27 @@ import 'app_database.dart';
 
 class DatabaseSeeder {
   static const _incomeCategories = [
-    ('default_in_salary', 'Salary', 'briefcase', '#43A047'),
-    ('default_in_freelance', 'Freelance', 'laptop', '#00ACC1'),
-    ('default_in_investment', 'Investment', 'chartLineUp', '#7CB342'),
+    ('default_in_salary', 'Salary', 'currencyDollar', '#A2D3A4'),
+    ('default_in_freelance', 'Freelance', 'briefcase', '#D1C4E9'),
+    ('default_in_investment', 'Investment', 'trendUp', '#90CAF9'),
     ('default_in_refund', 'Refund', 'arrowULeftDown', '#FF9800'),
     ('default_in_gift', 'Gift', 'gift', '#FFB300'),
-    ('default_in_general', 'General', 'package', '#1E88E5'),
+    ('default_in_general', 'General', 'tag', '#8E8E93'),
   ];
 
   static const _expenseCategories = [
-    ('default_out_food', 'Food', 'forkKnife', '#FF9800'),
-    ('default_out_shopping', 'Shopping', 'shoppingCart', '#D81B60'),
-    ('default_out_transport', 'Transport', 'car', '#00ACC1'),
+    ('default_out_food', 'Food & Dining', 'forkKnife', '#F48FB1'),
+    ('default_out_shopping', 'Shopping', 'bag', '#D1C4E9'),
+    ('default_out_transport', 'Transport', 'car', '#90CAF9'),
     ('default_out_home', 'Home', 'house', '#5E35B1'),
-    ('default_out_health', 'Health', 'heartbeat', '#E53935'),
-    ('default_out_entertainment', 'Entertainment', 'gameController', '#43A047'),
-    ('default_out_bills', 'Bills', 'deviceMobile', '#FDD835'),
+    ('default_out_health', 'Health', 'heartbeat', '#F48FB1'),
+    ('default_out_entertainment', 'Entertainment', 'ticket', '#A2D3A4'),
+    ('default_out_bills', 'Bills & Utilities', 'lightning', '#FFD700'),
     ('default_out_travel', 'Travel', 'airplane', '#3949AB'),
-    ('default_out_education', 'Education', 'graduationCap', '#00897B'),
-    ('default_out_investment', 'Investment', 'currencyDollar', '#7CB342'),
+    ('default_out_education', 'Education', 'bookOpen', '#90CAF9'),
+    ('default_out_investment', 'Investment', 'currencyDollar', '#90CAF9'),
     ('default_out_gifts', 'Gifts', 'gift', '#FFB300'),
-    ('default_out_general', 'General', 'package', '#1E88E5'),
+    ('default_out_general', 'General', 'tag', '#8E8E93'),
   ];
 
   static Future<void> seedInitialCategories(AppDatabase db) async {

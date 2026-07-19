@@ -81,4 +81,19 @@ class CategoryDao extends DatabaseAccessor<AppDatabase>
   Future<int> deleteCategory(String id) {
     return (delete(categories)..where((t) => t.id.equals(id))).go();
   }
+
+  Future<List<Category>> searchCategories({
+    required String query,
+    String? type,
+  }) {
+    var q = select(categories)
+      ..where((t) => t.name.like('%$query%'))
+      ..orderBy([(t) => OrderingTerm.asc(t.name)]);
+
+    if (type != null) {
+      q.where((t) => t.categoryType.equals(type));
+    }
+
+    return q.get();
+  }
 }
