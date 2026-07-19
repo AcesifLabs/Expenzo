@@ -26741,12 +26741,12 @@
     {
       "type": "frame",
       "id": "p62Bd",
-      "x": 3752,
-      "y": 3559,
+      "x": 3726,
+      "y": 3550,
       "name": "DeleteCategoryDialog",
       "clip": true,
       "width": 360,
-      "height": 800,
+      "height": 809,
       "fill": "#141315",
       "layout": "vertical",
       "padding": [
@@ -26754,14 +26754,6 @@
         24
       ],
       "children": [
-        {
-          "type": "rectangle",
-          "id": "iDoMW",
-          "name": "DimBg",
-          "fill": "#00000080",
-          "width": "fill_container",
-          "height": "fill_container"
-        },
         {
           "type": "frame",
           "id": "UDaNX",

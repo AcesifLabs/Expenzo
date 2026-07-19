@@ -2,15 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:picons/picons.dart';
 
 class ColorPickerRow extends StatelessWidget {
-  final String selectedColor;
-  final ValueChanged<String> onColorSelected;
-
-  const ColorPickerRow({
-    super.key,
-    required this.selectedColor,
-    required this.onColorSelected,
-  });
-
   static const List<String> colorOptions = [
     '#D1C4E9',
     '#F48FB1',
@@ -20,8 +11,18 @@ class ColorPickerRow extends StatelessWidget {
     '#FF8A65',
   ];
 
+  final String selectedColor;
+  final ValueChanged<String> onColorSelected;
+
+  const ColorPickerRow({
+    super.key,
+    required this.selectedColor,
+    required this.onColorSelected,
+  });
+
   Color _parseColor(String hex) {
     final sanitized = hex.replaceFirst('#', '');
+
     return Color(int.parse('0xFF$sanitized'));
   }
 
@@ -47,6 +48,7 @@ class ColorPickerRow extends StatelessWidget {
           child: Row(
             children: colorOptions.map((hex) {
               final isSelected = hex == selectedColor;
+
               return Padding(
                 padding: const EdgeInsets.only(right: 10),
                 child: _ColorSwatch(
@@ -106,9 +108,9 @@ class _ColorSwatch extends StatelessWidget {
 }
 
 class _DesignTokens {
-  _DesignTokens._();
-
   static const Color selectedBorder = Color(0xFFF5F7FA);
   static const Color checkColor = Color(0xFF141315);
   static const Color mutedColor = Color(0xFF8E8E93);
+
+  _DesignTokens._();
 }

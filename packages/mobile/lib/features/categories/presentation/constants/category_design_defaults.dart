@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 
 /// Default icon colors for built-in categories, matching the .pen design.
 class CategoryDesignDefaults {
-  CategoryDesignDefaults._();
-
   // ── Design System Colors ──────────────────────────────────────────────
 
   /// Primary lavender color.
@@ -17,6 +15,9 @@ class CategoryDesignDefaults {
 
   /// Muted text color.
   static const Color mutedColor = Color(0xFF8E8E93);
+
+  /// Default color for categories without a specific design color.
+  static const Color defaultColor = Color(0xFF8E8E93);
 
   // ── Color Picker Options ──────────────────────────────────────────────
 
@@ -80,8 +81,7 @@ class CategoryDesignDefaults {
     'Investment': 'trendUp',
   };
 
-  /// Default color for categories without a specific design color.
-  static const Color defaultColor = Color(0xFF8E8E93);
+  CategoryDesignDefaults._();
 
   /// Gets the icon color for a category by name.
   static Color getColor(String categoryName) {

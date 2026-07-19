@@ -6,9 +6,9 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
-import 'package:expense_tracker/core/constants/app_constants.dart';
 import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:expense_tracker/features/categories/domain/entities/category.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_icons.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_state.dart';
 import '../../../categories/presentation/bloc/category_event.dart';
@@ -18,7 +18,6 @@ import 'package:expense_tracker/features/recurring/domain/entities/recurring_tra
 import 'package:expense_tracker/features/recurring/domain/repositories/recurring_repository.dart';
 import '../bloc/record_bloc.dart';
 import '../bloc/record_event.dart';
-import 'new_transaction/category_picker_item.dart';
 import 'new_transaction/numeric_keypad.dart';
 import 'new_transaction/type_toggle.dart';
 import 'new_transaction/typewriter_animation_mixin.dart';
@@ -56,8 +55,6 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   final _amountText = ValueNotifier<String>('');
   final _noteCtrl = TextEditingController();
   String? _selectedCategoryId;
-  List<Category> _categories = [];
-  var _hasManuallyDeselected = false;
   var _labelError = false;
   var _categoryError = false;
   var _isSubmitting = false;
@@ -98,11 +95,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     );
   }
 
-  void _showAllCategories(
-    BuildContext context,
-    List<Category> allCategories,
-    RecordType type,
-  ) async {
+  void _showAllCategories(BuildContext context, RecordType type) async {
     final result = await context.push<Category>(
       '/categories/picker',
       extra: {'type': type, 'selectedId': _selectedCategoryId},
@@ -121,40 +114,11 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     }
   }
 
-  void _selectDefaultCategory(List<Category> categories) {
-    if (_selectedCategoryId != null ||
-        _hasManuallyDeselected ||
-        categories.isEmpty) {
-      return;
-    }
-
-    final targetId = _findDefaultCategoryId(categories);
-    if (targetId != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && _selectedCategoryId == null) {
-          setState(() => _selectedCategoryId = targetId);
-        }
-      });
-    }
-  }
-
-  String? _findDefaultCategoryId(List<Category> categories) {
-    for (final c in categories) {
-      if (c.name == AppConstants.defaultCategoryName && c.isDefault) {
-        return c.id;
-      }
-    }
-
-    return categories.first.id;
-  }
-
   void _switchType(RecordType t) {
     stopTypewriter();
     setState(() {
       _type = t;
       _selectedCategoryId = null;
-      _categories = [];
-      _hasManuallyDeselected = false;
       _labelError = false;
       _categoryError = false;
     });
@@ -521,66 +485,166 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     if (picked != null) setState(() => _selectedDate = picked);
   }
 
-  Widget _buildAllCategoriesButton(List<Category> allCats, ColorScheme colors) {
+  Widget _buildAllCategoriesButton(ColorScheme colors) {
     return _AllCategoriesButton(
       colors: colors,
-      onTap: () => _showAllCategories(context, allCats, _type),
+      onTap: () => _showAllCategories(context, _type),
     );
   }
 
-  List<Category> _buildDisplayCategories(List<Category> allCats) {
-    final displayCats = allCats.take(2).toList();
-
-    // Pin "General" first so it's always visible in the chip row.
-    final generalIndex = displayCats.indexWhere(
-      (c) => c.name == AppConstants.defaultCategoryName,
+  Widget _buildCategorySelector(ColorScheme colors) {
+    return BlocBuilder<CategoryBloc, CategoryState>(
+      builder: (ctx, state) => _buildCategorySelectorContent(state, colors),
     );
-    if (generalIndex > 0) {
-      final general = displayCats.removeAt(generalIndex);
-      displayCats.insert(0, general);
-    }
-
-    if (_selectedCategoryId != null &&
-        !displayCats.any((c) => c.id == _selectedCategoryId)) {
-      Category? selected;
-      for (final c in allCats) {
-        if (c.id == _selectedCategoryId) {
-          selected = c;
-          break;
-        }
-      }
-      if (selected != null) {
-        if (displayCats.isNotEmpty) {
-          displayCats.removeLast();
-        }
-        displayCats.insert(0, selected);
-      }
-    }
-
-    return displayCats;
   }
 
-  void _onCategoryChipTap(Category cat) {
-    setState(() {
-      _selectedCategoryId = cat.id;
-      _categoryError = false;
-    });
+  Widget _buildCategorySelectorContent(
+    CategoryState state,
+    ColorScheme colors,
+  ) {
+    final categories = state is CategoryLoaded
+        ? state.categories
+        : <Category>[];
+
+    if (state is CategoryLoaded && state.type != null && state.type != _type) {
+      return _buildCategorySelectorLoading(colors);
+    }
+
+    if (state is CategoryLoading || categories.isEmpty) {
+      if (state is CategoryLoading) {
+        return _buildCategorySelectorLoading(colors);
+      }
+
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
+        child: Text(
+          'No categories available',
+          style: TextStyle(color: colors.onSurface.withAlpha(80)),
+        ),
+      );
+    }
+
+    Category? selectedCategory;
+    if (_selectedCategoryId != null) {
+      selectedCategory = categories.cast<Category?>().firstWhere(
+        (c) => c?.id == _selectedCategoryId,
+        orElse: () => null,
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 12, 24, 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: InputDecorator(
+              decoration: _buildCategoryFieldDecoration(colors),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<Category>(
+                  value: selectedCategory,
+                  hint: _buildCategoryHint(colors),
+                  isExpanded: true,
+                  icon: Icon(
+                    PiconsRegular.caretDown,
+                    color: colors.onSurface.withAlpha(120),
+                  ),
+                  dropdownColor: colors.surfaceContainerLow,
+                  isDense: true,
+                  items: categories.map(_buildCategoryDropdownItem).toList(),
+                  onChanged: _onCategorySelected,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          _buildAllCategoriesButton(colors),
+        ],
+      ),
+    );
   }
 
-  Widget _buildCategoryChip(Category cat, ColorScheme colors) {
-    final chipSelectedColor = _type == RecordType.expense
+  InputDecoration _buildCategoryFieldDecoration(ColorScheme colors) {
+    final idleBorderColor = _categoryError
         ? colors.error
-        : colors.primary;
+        : colors.onSurface.withAlpha(12);
+    final idleBorder = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(color: idleBorderColor),
+    );
 
-    return CategoryPickerItem(
-      category: cat,
-      isSelected: cat.id == _selectedCategoryId,
-      selectedColor: chipSelectedColor,
-      onTap: () => _onCategoryChipTap(cat),
+    return InputDecoration(
+      filled: true,
+      fillColor: colors.surfaceContainerLow,
+      border: idleBorder,
+      enabledBorder: idleBorder,
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(
+          color: _categoryError ? colors.error : colors.primary,
+          width: 2,
+        ),
+      ),
+      errorText: _categoryError ? 'Select a category' : null,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
     );
   }
 
-  Widget _buildCategoryLoadingSpinner(ColorScheme colors) {
+  DropdownMenuItem<Category> _buildCategoryDropdownItem(Category cat) {
+    return DropdownMenuItem<Category>(
+      value: cat,
+      child: _buildCategoryDropdownRow(cat),
+    );
+  }
+
+  void _onCategorySelected(Category? cat) {
+    if (cat != null) {
+      setState(() {
+        _selectedCategoryId = cat.id;
+        _categoryError = false;
+      });
+    }
+  }
+
+  Widget _buildCategoryHint(ColorScheme colors) {
+    final hintColor = colors.onSurface.withAlpha(120);
+
+    return Row(
+      children: [
+        Icon(PiconsRegular.tag, size: 20, color: hintColor),
+        const SizedBox(width: 12),
+        Text('Select a category', style: TextStyle(color: hintColor)),
+      ],
+    );
+  }
+
+  Widget _buildCategoryDropdownRow(Category category) {
+    final color = _parseCategoryColor(category.color);
+
+    return Row(
+      children: [
+        Icon(AppIcons.getCategoryIcon(category.emoji), size: 20, color: color),
+        const SizedBox(width: 12),
+        Expanded(child: Text(category.name, overflow: TextOverflow.ellipsis)),
+      ],
+    );
+  }
+
+  Color _parseCategoryColor(String colorHex) {
+    if (colorHex.isNotEmpty) {
+      try {
+        final hex = colorHex.replaceFirst('#', '');
+
+        return Color(int.parse('0xFF$hex'));
+      } catch (_) {
+        // Fallback to default color
+      }
+    }
+
+    return const Color(0xFF8E8E93);
+  }
+
+  Widget _buildCategorySelectorLoading(ColorScheme colors) {
     return Container(
       height: 50,
       margin: const EdgeInsets.symmetric(vertical: 4),
@@ -594,95 +658,6 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
           color: colors.onSurface.withAlpha(80),
         ),
       ),
-    );
-  }
-
-  Widget _buildCategoryChips(ColorScheme colors) {
-    return BlocBuilder<CategoryBloc, CategoryState>(
-      builder: (ctx, state) => _buildCategoryChipsContent(state, colors),
-    );
-  }
-
-  Widget _buildCategoryChipsContent(CategoryState state, ColorScheme colors) {
-    final categories = state is CategoryLoaded ? state.categories : _categories;
-    if (state is CategoryLoaded) {
-      if (state.type != null && state.type != _type) {
-        return _buildCategoryLoadingSpinner(colors);
-      }
-      // Schedule default category selection after the build
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          _selectDefaultCategory(state.categories);
-        }
-      });
-    }
-
-    final allCats = categories;
-    if (state is CategoryLoading || allCats.isEmpty) {
-      if (state is CategoryLoading) {
-        return _buildCategoryLoadingSpinner(colors);
-      }
-
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
-        child: Text(
-          'No categories available',
-          style: TextStyle(color: colors.onSurface.withAlpha(80)),
-        ),
-      );
-    }
-
-    final displayCats = _buildDisplayCategories(allCats);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Semantics(
-          container: true,
-          liveRegion: _categoryError,
-          label: _categoryError
-              ? 'Category selector. Error: Select a category'
-              : 'Category selector',
-          child: Container(
-            margin: const EdgeInsets.fromLTRB(20, 8, 20, 4),
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: _categoryError ? colors.error : Colors.transparent,
-              ),
-            ),
-            child: SizedBox(
-              height: 48,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: displayCats
-                            .map((cat) => _buildCategoryChip(cat, colors))
-                            .toList(),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  _buildAllCategoriesButton(allCats, colors),
-                ],
-              ),
-            ),
-          ),
-        ),
-        if (_categoryError) ...[
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
-            child: Text(
-              'Select a category',
-              style: TextStyle(fontSize: 12, color: colors.error),
-            ),
-          ),
-        ],
-      ],
     );
   }
 
@@ -732,7 +707,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                   color: colors,
                 ),
                 _buildNoteField(colors),
-                _buildCategoryChips(colors),
+                _buildCategorySelector(colors),
                 _buildDateAndRecurringRow(colors),
                 _buildSubmitButton(colors),
               ],
@@ -831,28 +806,20 @@ class _AllCategoriesButton extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: onTap,
-            borderRadius: BorderRadius.circular(24),
-            child: SizedBox(
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
               width: 48,
               height: 48,
-              child: Center(
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: colors.onSurface.withAlpha(8),
-                    shape: BoxShape.circle,
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    '...',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: colors.onSurface.withAlpha(150),
-                    ),
-                  ),
-                ),
+              decoration: BoxDecoration(
+                color: colors.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: colors.onSurface.withAlpha(12)),
+              ),
+              alignment: Alignment.center,
+              child: Icon(
+                PiconsRegular.dotsThreeVertical,
+                size: 22,
+                color: colors.onSurface.withAlpha(150),
               ),
             ),
           ),

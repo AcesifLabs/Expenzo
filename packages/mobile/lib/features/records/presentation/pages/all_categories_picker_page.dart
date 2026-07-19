@@ -36,6 +36,7 @@ class AllCategoriesPickerPage extends StatefulWidget {
 class _AllCategoriesPickerPageState extends State<AllCategoriesPickerPage> {
   final _searchController = TextEditingController();
   Timer? _debounce;
+  String _pendingQuery = '';
 
   @override
   void initState() {
@@ -45,26 +46,26 @@ class _AllCategoriesPickerPageState extends State<AllCategoriesPickerPage> {
     );
   }
 
-  @override
-  void dispose() {
-    _searchController.dispose();
-    _debounce?.cancel();
-    super.dispose();
+  void _performSearch(String query) {
+    if (query.isEmpty) {
+      context.read<CategoryBloc>().add(
+        LoadCategories(type: widget.type, sortByUsage: true),
+      );
+    } else {
+      context.read<CategoryBloc>().add(
+        SearchCategoriesEvent(query: query, type: widget.type),
+      );
+    }
   }
 
-  void _onSearchChanged(String query) {
+  void _debounceAndSearch(String query) {
     _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 300), () {
-      if (query.isEmpty) {
-        context.read<CategoryBloc>().add(
-          LoadCategories(type: widget.type, sortByUsage: true),
-        );
-      } else {
-        context.read<CategoryBloc>().add(
-          SearchCategoriesEvent(query: query, type: widget.type),
-        );
-      }
-    });
+    _pendingQuery = query;
+    _debounce = Timer(const Duration(milliseconds: 300), _runPendingSearch);
+  }
+
+  void _runPendingSearch() {
+    _performSearch(_pendingQuery);
   }
 
   void _onCategoryTap(Category category) {
@@ -86,9 +87,12 @@ class _AllCategoriesPickerPageState extends State<AllCategoriesPickerPage> {
     int transactionCount = 0;
     final repo = di.getIt<RecordRepository>();
     final result = await repo.getRecordCountByCategory(id);
-    result.fold((_) {}, (count) => transactionCount = count);
+    result.fold(
+      (_) => transactionCount = 0,
+      (count) => transactionCount = count,
+    );
 
-    if (!context.mounted) return;
+    if (!mounted) return;
 
     final confirmed = await DeleteCategoryDialog.show(
       context: context,
@@ -96,32 +100,13 @@ class _AllCategoriesPickerPageState extends State<AllCategoriesPickerPage> {
       transactionCount: transactionCount,
     );
 
-    if (confirmed == true && context.mounted) {
+    if (confirmed == true && mounted) {
       context.read<CategoryBloc>().add(DeleteCategoryEvent(id));
     }
   }
 
   void _onAddNew() {
     context.push('/categories/new', extra: {'initialType': widget.type});
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    const backgroundColor = Color(0xFF141315);
-
-    return Scaffold(
-      backgroundColor: backgroundColor,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildTopBar(),
-            _buildSearchBar(),
-            Expanded(child: _buildCategoryList()),
-            _buildAddCategoryButton(),
-          ],
-        ),
-      ),
-    );
   }
 
   Widget _buildTopBar() {
@@ -172,7 +157,7 @@ class _AllCategoriesPickerPageState extends State<AllCategoriesPickerPage> {
             Expanded(
               child: TextField(
                 controller: _searchController,
-                onChanged: _onSearchChanged,
+                onChanged: _debounceAndSearch,
                 style: const TextStyle(
                   fontFamily: 'Work Sans',
                   fontSize: 14,
@@ -247,7 +232,6 @@ class _AllCategoriesPickerPageState extends State<AllCategoriesPickerPage> {
           );
         }
 
-        // Group categories by type
         final expenseCategories = categories
             .where((c) => c.type == RecordType.expense)
             .toList();
@@ -329,16 +313,17 @@ class _AllCategoriesPickerPageState extends State<AllCategoriesPickerPage> {
   }
 
   Color _getCategoryColor(Category category) {
-    // Parse the color hex string from the category
     final colorHex = category.color;
     if (colorHex.isNotEmpty) {
       try {
         final hex = colorHex.replaceFirst('#', '');
+
         return Color(int.parse('0xFF$hex'));
       } catch (_) {
         // Fallback to default color
       }
     }
+
     return const Color(0xFF8E8E93);
   }
 
@@ -374,6 +359,32 @@ class _AllCategoriesPickerPageState extends State<AllCategoriesPickerPage> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _debounce?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const backgroundColor = Color(0xFF141315);
+
+    return Scaffold(
+      backgroundColor: backgroundColor,
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildTopBar(),
+            _buildSearchBar(),
+            Expanded(child: _buildCategoryList()),
+            _buildAddCategoryButton(),
+          ],
         ),
       ),
     );

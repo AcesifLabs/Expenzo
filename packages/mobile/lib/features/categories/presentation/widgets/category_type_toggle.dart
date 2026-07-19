@@ -93,11 +93,11 @@ class _TabButton extends StatelessWidget {
 }
 
 class _DesignTokens {
-  _DesignTokens._();
-
   static const Color expenseColor = Color(0xFFF48FB1);
   static const Color expenseFill = Color(0x20F48FB1);
   static const Color incomeColor = Color(0xFFA2D3A4);
   static const Color incomeFill = Color(0x20A2D3A4);
   static const Color mutedColor = Color(0xFF8E8E93);
+
+  _DesignTokens._();
 }

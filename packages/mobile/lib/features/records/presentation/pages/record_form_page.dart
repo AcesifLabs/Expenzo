@@ -599,7 +599,7 @@ class _RecordFormPageState extends State<RecordFormPage> {
           _buildLabel('Category'),
           const SizedBox(height: 6),
           GestureDetector(
-            onTap: () => _showCategoryPicker(unique),
+            onTap: () => _showCategoryPicker(),
             child: Container(
               height: 48,
               decoration: BoxDecoration(
@@ -637,7 +637,7 @@ class _RecordFormPageState extends State<RecordFormPage> {
     );
   }
 
-  void _showCategoryPicker(List<Category> categories) async {
+  void _showCategoryPicker() async {
     final result = await context.push<Category>(
       '/categories/picker',
       extra: {'type': _recordType, 'selectedId': _selectedCategoryId},

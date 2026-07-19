@@ -73,7 +73,7 @@ class CategoryListPage extends StatelessWidget {
     final repo = di.getIt<RecordRepository>();
     final result = await repo.getRecordCountByCategory(id);
     result.fold(
-      (_) {}, // ignore errors — show dialog with count 0
+      (_) => transactionCount = 0,
       (count) => transactionCount = count,
     );
 

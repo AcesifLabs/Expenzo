@@ -88,6 +88,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   ) async {
     if (event.query.isEmpty) {
       emit(const CategorySearchResults([]));
+
       return;
     }
 

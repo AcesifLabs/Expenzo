@@ -47,8 +47,9 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
       _loadCategory(categoryId);
     } else {
       _initFromCategory(widget.category);
-      if (widget.category == null && widget.initialType != null) {
-        _type = widget.initialType!;
+      final initialType = widget.initialType;
+      if (widget.category == null && initialType != null) {
+        _type = initialType;
       }
     }
   }
@@ -88,6 +89,7 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Please enter a name')));
+
       return;
     }
 
@@ -109,61 +111,6 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
       context.read<CategoryBloc>().add(CreateCategoryEvent(category));
     }
     context.pop(category);
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Scaffold(
-        backgroundColor: _DesignTokens.background,
-        body: Center(
-          child: CircularProgressIndicator(color: _DesignTokens.primary),
-        ),
-      );
-    }
-
-    return Scaffold(
-      backgroundColor: _DesignTokens.background,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildTopBar(),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CategoryTypeToggle(
-                      type: _type,
-                      onSwitch: (t) => setState(() => _type = t),
-                    ),
-                    _buildNameField(),
-                    IconGridPicker(
-                      selectedIcon: _selectedIcon,
-                      onIconSelected: (icon) =>
-                          setState(() => _selectedIcon = icon),
-                    ),
-                    ColorPickerRow(
-                      selectedColor: _selectedColor,
-                      onColorSelected: (color) =>
-                          setState(() => _selectedColor = color),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            _buildSaveButton(),
-          ],
-        ),
-      ),
-    );
   }
 
   Widget _buildTopBar() {
@@ -266,15 +213,70 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
       ),
     );
   }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        backgroundColor: _DesignTokens.background,
+        body: Center(
+          child: CircularProgressIndicator(color: _DesignTokens.primary),
+        ),
+      );
+    }
+
+    return Scaffold(
+      backgroundColor: _DesignTokens.background,
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildTopBar(),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CategoryTypeToggle(
+                      type: _type,
+                      onSwitch: (t) => setState(() => _type = t),
+                    ),
+                    _buildNameField(),
+                    IconGridPicker(
+                      selectedIcon: _selectedIcon,
+                      onIconSelected: (icon) =>
+                          setState(() => _selectedIcon = icon),
+                    ),
+                    ColorPickerRow(
+                      selectedColor: _selectedColor,
+                      onColorSelected: (color) =>
+                          setState(() => _selectedColor = color),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            _buildSaveButton(),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _DesignTokens {
-  _DesignTokens._();
-
   static const Color background = Color(0xFF141315);
   static const Color primary = Color(0xFFD1C4E9);
   static const Color textPrimary = Color(0xFFF5F7FA);
   static const Color mutedColor = Color(0xFF8E8E93);
   static const Color inputFill = Color(0xFF201F21);
   static const Color inputBorder = Color(0x208E8E93);
+
+  _DesignTokens._();
 }

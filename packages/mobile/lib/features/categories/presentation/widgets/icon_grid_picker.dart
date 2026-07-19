@@ -2,15 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_icons.dart';
 
 class IconGridPicker extends StatelessWidget {
-  final String selectedIcon;
-  final ValueChanged<String> onIconSelected;
-
-  const IconGridPicker({
-    super.key,
-    required this.selectedIcon,
-    required this.onIconSelected,
-  });
-
   static const List<String> iconNames = [
     'shoppingCart',
     'forkKnife',
@@ -25,6 +16,15 @@ class IconGridPicker extends StatelessWidget {
     'dog',
     'airplane',
   ];
+
+  final String selectedIcon;
+  final ValueChanged<String> onIconSelected;
+
+  const IconGridPicker({
+    super.key,
+    required this.selectedIcon,
+    required this.onIconSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -107,12 +107,12 @@ class _IconCell extends StatelessWidget {
 }
 
 class _DesignTokens {
-  _DesignTokens._();
-
   static const Color selectedFill = Color(0x20D1C4E9);
   static const Color selectedStroke = Color(0xFFD1C4E9);
   static const Color unselectedFill = Color(0xFF2B292C);
   static const Color selectedIconColor = Color(0xFFD1C4E9);
   static const Color unselectedIconColor = Color(0xFF8E8E93);
   static const Color mutedColor = Color(0xFF8E8E93);
+
+  _DesignTokens._();
 }
