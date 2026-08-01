@@ -609,49 +609,72 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   }
 
   Widget _buildBudgetSelector(ColorScheme colors) {
-    final mutedColor = colors.onSurface.withAlpha(150);
     final noneOrEmpty = _budgetsLoading || _budgets.isEmpty;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 4, 24, 8),
-      child: DropdownButtonFormField<String?>(
-        initialValue: _selectedBudgetId,
-        isExpanded: true,
-        dropdownColor: colors.surface,
-        icon: Icon(Icons.keyboard_arrow_down, color: mutedColor, size: 18),
-        decoration: InputDecoration(
-          labelText: 'Budget (optional)',
-          labelStyle: TextStyle(color: mutedColor),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 8,
-          ),
-        ),
-        hint: Text(
-          _budgetsLoading ? 'Loading budgets…' : 'No budgets yet',
-          style: TextStyle(color: mutedColor),
-        ),
-        items: [
-          DropdownMenuItem<String?>(
-            value: null,
-            child: Text('No budget', style: TextStyle(color: mutedColor)),
-          ),
-          for (final budget in _budgets)
-            DropdownMenuItem<String?>(
-              value: budget.id,
-              child: Text(
-                '${budget.name} · ${budget.period.displayName}',
-                style: TextStyle(color: colors.onSurface),
-                overflow: TextOverflow.ellipsis,
-              ),
+      padding: const EdgeInsets.fromLTRB(24, 12, 24, 8),
+      child: InputDecorator(
+        decoration: _buildBudgetFieldDecoration(colors),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<String?>(
+            value: _selectedBudgetId,
+            hint: _buildBudgetHint(colors),
+            isExpanded: true,
+            icon: Icon(
+              PiconsRegular.caretDown,
+              color: colors.onSurface.withAlpha(120),
             ),
-        ],
-        onChanged: noneOrEmpty
-            ? null
-            : (value) => setState(() => _selectedBudgetId = value),
+            dropdownColor: colors.surfaceContainerLow,
+            isDense: true,
+            items: [
+              const DropdownMenuItem<String?>(
+                value: null,
+                child: Text('No budget', overflow: TextOverflow.ellipsis),
+              ),
+              for (final budget in _budgets)
+                DropdownMenuItem<String?>(
+                  value: budget.id,
+                  child: Text(
+                    '${budget.name} · ${budget.period.displayName}',
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+            ],
+            onChanged: noneOrEmpty ? null : _onBudgetSelected,
+          ),
+        ),
       ),
     );
+  }
+
+  InputDecoration _buildBudgetFieldDecoration(ColorScheme colors) {
+    final idleBorder = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(color: colors.onSurface.withAlpha(12)),
+    );
+
+    return InputDecoration(
+      filled: true,
+      fillColor: colors.surfaceContainerLow,
+      border: idleBorder,
+      enabledBorder: idleBorder,
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: colors.primary, width: 2),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    );
+  }
+
+  void _onBudgetSelected(String? budgetId) {
+    setState(() => _selectedBudgetId = budgetId);
+  }
+
+  Widget _buildBudgetHint(ColorScheme colors) {
+    final hintColor = colors.onSurface.withAlpha(120);
+    final text = _budgetsLoading ? 'Loading budgets…' : 'No budget';
+
+    return Text(text, style: TextStyle(color: hintColor));
   }
 
   Widget _buildCategorySelectorContent(
