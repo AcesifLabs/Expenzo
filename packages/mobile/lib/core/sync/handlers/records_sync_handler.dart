@@ -17,6 +17,7 @@ class RecordsSyncHandler extends SyncTableHandler<$RecordsTable, Record> {
     'description': row.description,
     'date': row.date.toUtc().toIso8601String(),
     'categoryId': row.categoryId,
+    'budgetId': row.budgetId,
     'source': row.source,
     'recordType': row.recordType,
     'createdAt': row.createdAt.toUtc().toIso8601String(),
@@ -33,6 +34,9 @@ class RecordsSyncHandler extends SyncTableHandler<$RecordsTable, Record> {
     date: parseSyncDate(data['date']),
     categoryId: data['categoryId'] != null
         ? Value(data['categoryId'].toString())
+        : const Value.absent(),
+    budgetId: data['budgetId'] != null
+        ? Value(data['budgetId'].toString())
         : const Value.absent(),
     source: Value(parseSyncString(data['source'], ExpenseSource.manual.name)),
     sourceId: data['sourceId'] != null

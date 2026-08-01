@@ -115,6 +115,7 @@ class RecordRepositoryImpl implements RecordRepository {
           'description': added.description,
           'date': added.date.toUtc().toIso8601String(),
           'categoryId': added.categoryId,
+          'budgetId': added.budgetId,
           'source': added.source.name,
           'recordType': added.recordType.dbValue,
         });
@@ -142,6 +143,7 @@ class RecordRepositoryImpl implements RecordRepository {
           'description': updated.description,
           'date': updated.date.toUtc().toIso8601String(),
           'categoryId': updated.categoryId,
+          'budgetId': updated.budgetId,
           'source': updated.source.name,
           'recordType': updated.recordType.dbValue,
         });
@@ -284,6 +286,30 @@ class RecordRepositoryImpl implements RecordRepository {
 
   /// Returns Left(Failure) on error.
   @override
+  Future<Either<CacheFailure, double>> getBudgetSpending(
+    String budgetId,
+    DateTime start,
+    DateTime end,
+  ) async {
+    try {
+      final spending = await localDatasource.getBudgetSpending(
+        budgetId,
+        start,
+        end,
+      );
+
+      return Right(spending);
+    } on CacheException catch (e) {
+      return Left(e.toFailure());
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
+
+      return Left(CacheFailure(message: e.toString()));
+    }
+  }
+
+  /// Returns Left(Failure) on error.
+  @override
   Future<Either<CacheFailure, List<Record>>> getRecordsByDateRangeOnly(
     DateTime start,
     DateTime end,
@@ -319,6 +345,7 @@ class RecordRepositoryImpl implements RecordRepository {
             'description': r.description,
             'date': r.date.toUtc().toIso8601String(),
             'categoryId': r.categoryId,
+            'budgetId': r.budgetId,
             'source': r.source.name,
             'recordType': r.recordType.dbValue,
           });
@@ -344,6 +371,25 @@ class RecordRepositoryImpl implements RecordRepository {
       final count = await localDatasource.getRecordCountByCategory(categoryId);
 
       return Right(count);
+    } on CacheException catch (e) {
+      return Left(e.toFailure());
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
+
+      return Left(CacheFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<CacheFailure, List<Record>>> getRecentRecordsByCreatedAt({
+    int limit = 5,
+  }) async {
+    try {
+      final records = await localDatasource.getRecentRecordsByCreatedAt(
+        limit: limit,
+      );
+
+      return Right(records);
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {

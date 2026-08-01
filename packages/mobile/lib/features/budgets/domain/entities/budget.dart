@@ -3,7 +3,7 @@ import 'package:expense_tracker/core/constants/budget_period.dart';
 
 class Budget extends Equatable {
   final String? id;
-  final String? categoryId;
+  final String name;
   final double amount;
   final BudgetPeriod period;
   final DateTime startDate;
@@ -14,7 +14,7 @@ class Budget extends Equatable {
   @override
   List<Object?> get props => [
     id,
-    categoryId,
+    name,
     amount,
     period,
     startDate,
@@ -25,7 +25,7 @@ class Budget extends Equatable {
 
   const Budget({
     this.id,
-    this.categoryId,
+    required this.name,
     required this.amount,
     required this.period,
     required this.startDate,
@@ -36,7 +36,7 @@ class Budget extends Equatable {
 
   Budget copyWith({
     String? id,
-    String? categoryId,
+    String? name,
     double? amount,
     BudgetPeriod? period,
     DateTime? startDate,
@@ -46,7 +46,7 @@ class Budget extends Equatable {
   }) {
     return Budget(
       id: id ?? this.id,
-      categoryId: categoryId ?? this.categoryId,
+      name: name ?? this.name,
       amount: amount ?? this.amount,
       period: period ?? this.period,
       startDate: startDate ?? this.startDate,

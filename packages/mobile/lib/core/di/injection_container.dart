@@ -31,6 +31,7 @@ import 'recurring_module.dart';
 import 'settings_module.dart';
 import 'dashboard_module.dart';
 import 'ai_assistant_module.dart';
+import 'receipt_scan_module.dart';
 
 final getIt = GetIt.instance;
 
@@ -123,6 +124,7 @@ Future<void> initCriticalDependencies() async {
   initParsingModule(getIt);
   initReportModule(getIt);
   initAiAssistantModule(getIt);
+  initReceiptScanModule(getIt);
 
   completer.complete();
 }

@@ -30,10 +30,11 @@ class AppShell extends StatefulWidget {
 }
 
 class _AppShellState extends State<AppShell> {
+  static const _labels = ['Home', 'Activity', 'Scan', 'Budgets'];
+
   int _currentIndex = 0;
   DateTime? _lastFabPress;
-
-  static const _labels = ['Home', 'Activity', 'Scan', 'Budgets'];
+  final ValueNotifier<int> _homeRefreshTick = ValueNotifier(0);
 
   IconData _navIcon(int i, {bool fill = false}) {
     if (fill) {
@@ -164,7 +165,7 @@ class _AppShellState extends State<AppShell> {
       return;
     }
     _lastFabPress = now;
-    await showModalBottomSheet(
+    final saved = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: const Color(0x00000000),
@@ -179,7 +180,16 @@ class _AppShellState extends State<AppShell> {
     // Reload all categories after sheet closes to restore full list
     if (context.mounted) {
       context.read<CategoryBloc>().add(const LoadCategories());
+      if (saved == true) {
+        _homeRefreshTick.value++;
+      }
     }
+  }
+
+  @override
+  void dispose() {
+    _homeRefreshTick.dispose();
+    super.dispose();
   }
 
   @override
@@ -193,7 +203,10 @@ class _AppShellState extends State<AppShell> {
       body: LazyIndexedStack(
         index: _currentIndex,
         children: [
-          DashboardPage(onNavigateToTab: _switchToTab),
+          DashboardPage(
+            onNavigateToTab: _switchToTab,
+            refreshTick: _homeRefreshTick,
+          ),
           const RecordListPage(),
           _ScanPageWithFab(),
           const BudgetListPage(),

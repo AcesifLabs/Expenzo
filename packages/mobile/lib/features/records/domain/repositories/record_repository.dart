@@ -89,6 +89,16 @@ abstract class RecordRepository {
     DateTime end,
   );
 
+  /// Total expense spend linked to [budgetId] within the half-open range
+  /// [start, end).
+  ///
+  /// Returns [Right(double)] on success, [Left(CacheFailure)] on failure.
+  Future<Either<CacheFailure, double>> getBudgetSpending(
+    String budgetId,
+    DateTime start,
+    DateTime end,
+  );
+
   /// Retrieves records by [start] and [end] date range only.
   ///
   /// Returns [Right(List<Record>)] on success, [Left(CacheFailure)] on failure.
@@ -101,4 +111,11 @@ abstract class RecordRepository {
   ///
   /// Returns [Right(int)] on success, [Left(CacheFailure)] on failure.
   Future<Either<CacheFailure, int>> getRecordCountByCategory(String categoryId);
+
+  /// Newest saves first, regardless of transaction [Record.date].
+  ///
+  /// Returns [Right(List<Record>)] on success, [Left(CacheFailure)] on failure.
+  Future<Either<CacheFailure, List<Record>>> getRecentRecordsByCreatedAt({
+    int limit = 5,
+  });
 }

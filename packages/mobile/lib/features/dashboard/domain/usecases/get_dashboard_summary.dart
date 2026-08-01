@@ -43,9 +43,9 @@ class GetDashboardSummary implements UseCase<DashboardSummary, DateRange> {
         currentRecords,
       );
 
-      final sortedRecords = List<Record>.from(currentRecords)
-        ..sort((a, b) => b.date.compareTo(a.date));
-      final recentTransactions = sortedRecords.take(5).toList();
+      // Recent Activity = newest saves, not "in this month by transaction date".
+      // Receipt-prefilled dates often fall outside the dashboard range.
+      final recentTransactions = await _fetchRecentByCreatedAt();
 
       return Right(
         DashboardSummary(
@@ -72,6 +72,12 @@ class GetDashboardSummary implements UseCase<DashboardSummary, DateRange> {
         end: dateRange.endDate,
       ),
     );
+
+    return result.fold((failure) => [], (records) => records);
+  }
+
+  Future<List<Record>> _fetchRecentByCreatedAt() async {
+    final result = await recordRepository.getRecentRecordsByCreatedAt(limit: 5);
 
     return result.fold((failure) => [], (records) => records);
   }

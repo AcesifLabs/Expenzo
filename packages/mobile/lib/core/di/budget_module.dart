@@ -11,7 +11,6 @@ import 'package:expense_tracker/features/budgets/domain/usecases/delete_budget.d
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets_with_progress.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budget_transactions.dart';
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
-import 'package:expense_tracker/features/categories/domain/repositories/category_repository.dart';
 import 'package:expense_tracker/features/budgets/presentation/bloc/budget_bloc.dart';
 
 void initBudgetModule(GetIt getIt) {
@@ -40,7 +39,6 @@ void initBudgetModule(GetIt getIt) {
     () => GetBudgetsWithProgress(
       budgetRepository: getIt<BudgetRepository>(),
       recordRepository: getIt<RecordRepository>(),
-      categoryRepository: getIt<CategoryRepository>(),
     ),
   );
   getIt.registerLazySingleton(

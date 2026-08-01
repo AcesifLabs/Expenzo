@@ -6,18 +6,25 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
+import 'package:expense_tracker/core/di/injection_container.dart' as di;
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:expense_tracker/features/categories/domain/entities/category.dart';
+import 'package:expense_tracker/features/categories/domain/usecases/get_categories.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_icons.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_state.dart';
 import '../../../categories/presentation/bloc/category_event.dart';
 import '../../domain/entities/record.dart';
+import '../../domain/usecases/add_record.dart';
+import 'package:expense_tracker/features/budgets/domain/entities/budget.dart';
+import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
 import 'package:expense_tracker/features/recurring/domain/entities/recurring_transaction.dart';
 import 'package:expense_tracker/features/recurring/domain/repositories/recurring_repository.dart';
-import '../bloc/record_bloc.dart';
-import '../bloc/record_event.dart';
+import 'package:expense_tracker/features/receipt_scan/domain/entities/receipt_extraction.dart';
+import 'package:expense_tracker/features/receipt_scan/presentation/helpers/category_name_matcher.dart';
+import 'package:expense_tracker/features/receipt_scan/presentation/pages/receipt_scan_camera_page.dart';
 import 'new_transaction/numeric_keypad.dart';
 import 'new_transaction/type_toggle.dart';
 import 'new_transaction/typewriter_animation_mixin.dart';
@@ -55,6 +62,9 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   final _amountText = ValueNotifier<String>('');
   final _noteCtrl = TextEditingController();
   String? _selectedCategoryId;
+  String? _selectedBudgetId;
+  List<Budget> _budgets = const [];
+  var _budgetsLoading = true;
   var _labelError = false;
   var _categoryError = false;
   var _isSubmitting = false;
@@ -71,6 +81,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   void initState() {
     super.initState();
     _loadCategories();
+    _loadBudgets();
     initTypewriter(_expensePlaceholders);
     _noteCtrl.addListener(_onNoteChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -93,6 +104,18 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     context.read<CategoryBloc>().add(
       LoadCategories(type: _type, sortByUsage: true),
     );
+  }
+
+  Future<void> _loadBudgets() async {
+    final result = await di.getIt<GetBudgets>()();
+    if (!mounted) return;
+    setState(() {
+      _budgets = result
+          .getOrElse(() => const <Budget>[])
+          .where((b) => b.isEnabled)
+          .toList();
+      _budgetsLoading = false;
+    });
   }
 
   void _showAllCategories(BuildContext context, RecordType type) async {
@@ -119,6 +142,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     setState(() {
       _type = t;
       _selectedCategoryId = null;
+      _selectedBudgetId = null;
       _labelError = false;
       _categoryError = false;
     });
@@ -202,13 +226,29 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       description: description,
       date: _selectedDate,
       categoryId: _selectedCategoryId,
+      budgetId: _type == RecordType.expense ? _selectedBudgetId : null,
       source: ExpenseSource.manual,
       recordType: _type,
       createdAt: now,
       updatedAt: now,
     );
 
-    context.read<RecordBloc>().add(AddRecordEvent(record));
+    // Await insert so Home can refresh against committed data after pop(true).
+    final result = await di.getIt<AddRecord>()(record);
+    if (!mounted) return;
+
+    final failed = result.fold((failure) {
+      appLogger.error(
+        'NewTransactionSheet: Failed to save record: ${failure.message}',
+      );
+      setState(() => _isSubmitting = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(failure.message)));
+
+      return true;
+    }, (_) => false);
+    if (failed) return;
 
     if (_isRecurring) {
       final created = await _createRecurringTransaction(finalAmount);
@@ -219,7 +259,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       }
     }
 
-    if (mounted) Navigator.pop(context);
+    if (mounted) Navigator.pop(context, true);
   }
 
   Future<bool> _createRecurringTransaction(double finalAmount) async {
@@ -282,6 +322,71 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     }
 
     return _type == RecordType.expense ? 'Name of expense' : 'Name of income';
+  }
+
+  String _formatAmount(double amount) {
+    if (amount == amount.roundToDouble()) {
+      return amount.round().toString();
+    }
+
+    return amount
+        .toStringAsFixed(2)
+        .replaceFirst(RegExp(r'0+$'), '')
+        .replaceFirst(RegExp(r'\.$'), '');
+  }
+
+  Future<List<Category>> _loadExpenseCategoriesForScan() async {
+    final result = await di.getIt<GetCategories>()(
+      const GetCategoriesParams(type: RecordType.expense, sortByUsage: true),
+    );
+
+    return result.fold(
+      (_) => const <Category>[],
+      (categories) =>
+          categories.where((c) => c.type == RecordType.expense).toList(),
+    );
+  }
+
+  Future<void> _openReceiptScan() async {
+    final expenseCategories = await _loadExpenseCategoriesForScan();
+    if (!mounted) return;
+
+    final extraction = await Navigator.of(context, rootNavigator: true)
+        .push<ReceiptExtraction>(
+          MaterialPageRoute(
+            fullscreenDialog: true,
+            builder: (_) => ReceiptScanCameraPage(
+              expenseCategoryNames: expenseCategories
+                  .map((c) => c.name)
+                  .toList(),
+            ),
+          ),
+        );
+    if (extraction == null || !mounted) return;
+
+    final matched = matchCategoryByName(
+      extraction.categoryName,
+      expenseCategories,
+    );
+
+    final extractedDate = extraction.date;
+    final matchedCategoryId = matched?.id;
+
+    pauseTypewriter();
+    setState(() {
+      _type = RecordType.expense;
+      _labelError = false;
+      _categoryError = false;
+      _amountText.value = _formatAmount(extraction.amount);
+      _noteCtrl.text = extraction.description;
+      if (extractedDate != null) {
+        _selectedDate = extractedDate;
+      }
+      if (matchedCategoryId != null) {
+        _selectedCategoryId = matchedCategoryId;
+      }
+    });
+    _loadCategories();
   }
 
   Widget _buildDragHandle(ColorScheme colors) {
@@ -373,19 +478,24 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                 ),
               ),
               const SizedBox(width: 8),
-              IgnorePointer(
-                child: Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: colors.secondary.withAlpha(32),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  alignment: Alignment.center,
-                  child: Icon(
-                    PiconsRegular.receipt,
-                    size: 22,
-                    color: colors.secondary,
+              Material(
+                color: colors.secondary.withAlpha(32),
+                borderRadius: BorderRadius.circular(12),
+                child: InkWell(
+                  onTap: _isSubmitting
+                      ? null
+                      : () {
+                          unawaited(_openReceiptScan());
+                        },
+                  borderRadius: BorderRadius.circular(12),
+                  child: SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: Icon(
+                      PiconsRegular.receipt,
+                      size: 22,
+                      color: colors.secondary,
+                    ),
                   ),
                 ),
               ),
@@ -495,6 +605,52 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   Widget _buildCategorySelector(ColorScheme colors) {
     return BlocBuilder<CategoryBloc, CategoryState>(
       builder: (ctx, state) => _buildCategorySelectorContent(state, colors),
+    );
+  }
+
+  Widget _buildBudgetSelector(ColorScheme colors) {
+    final mutedColor = colors.onSurface.withAlpha(150);
+    final noneOrEmpty = _budgetsLoading || _budgets.isEmpty;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 4, 24, 8),
+      child: DropdownButtonFormField<String?>(
+        initialValue: _selectedBudgetId,
+        isExpanded: true,
+        dropdownColor: colors.surface,
+        icon: Icon(Icons.keyboard_arrow_down, color: mutedColor, size: 18),
+        decoration: InputDecoration(
+          labelText: 'Budget (optional)',
+          labelStyle: TextStyle(color: mutedColor),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 8,
+          ),
+        ),
+        hint: Text(
+          _budgetsLoading ? 'Loading budgets…' : 'No budgets yet',
+          style: TextStyle(color: mutedColor),
+        ),
+        items: [
+          DropdownMenuItem<String?>(
+            value: null,
+            child: Text('No budget', style: TextStyle(color: mutedColor)),
+          ),
+          for (final budget in _budgets)
+            DropdownMenuItem<String?>(
+              value: budget.id,
+              child: Text(
+                '${budget.name} · ${budget.period.displayName}',
+                style: TextStyle(color: colors.onSurface),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+        ],
+        onChanged: noneOrEmpty
+            ? null
+            : (value) => setState(() => _selectedBudgetId = value),
+      ),
     );
   }
 
@@ -708,6 +864,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                 ),
                 _buildNoteField(colors),
                 _buildCategorySelector(colors),
+                if (_type == RecordType.expense) _buildBudgetSelector(colors),
                 _buildDateAndRecurringRow(colors),
                 _buildSubmitButton(colors),
               ],

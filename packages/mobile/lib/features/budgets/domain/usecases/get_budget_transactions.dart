@@ -5,6 +5,7 @@ import 'package:expense_tracker/core/utils/budget_period_utils.dart';
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
 import '../repositories/budget_repository.dart';
 
+/// Loads expense records in the current period for a named budget.
 class GetBudgetTransactions {
   final BudgetRepository budgetRepository;
   final RecordRepository recordRepository;
@@ -13,8 +14,6 @@ class GetBudgetTransactions {
     required this.budgetRepository,
     required this.recordRepository,
   });
-
-  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
 
   Future<Either<Failure, List<Record>>> call(String budgetId) async {
     final budgetResult = await budgetRepository.getBudgetById(budgetId);
@@ -25,32 +24,21 @@ class GetBudgetTransactions {
         budget.period,
       );
 
-      final catId = budget.categoryId;
-
-      if (catId != null) {
-        final result = await recordRepository.getRecordsByCategoryAndDateRange(
-          catId,
-          periodRange.start,
-          periodRange.end,
-        );
-
-        return result.fold(
-          (failure) => Left<Failure, List<Record>>(failure),
-          (records) => Right<Failure, List<Record>>(
-            records.where((r) => r.recordType == RecordType.expense).toList(),
-          ),
-        );
-      }
-
       final result = await recordRepository.getRecordsByDateRangeOnly(
         periodRange.start,
         periodRange.end,
       );
 
       return result.fold(
-        (failure) => Left<Failure, List<Record>>(failure),
-        (records) => Right<Failure, List<Record>>(
-          records.where((r) => r.recordType == RecordType.expense).toList(),
+        (failure) => Left(failure),
+        (records) => Right(
+          records
+              .where(
+                (r) =>
+                    r.recordType == RecordType.expense &&
+                    r.budgetId == budgetId,
+              )
+              .toList(),
         ),
       );
     });

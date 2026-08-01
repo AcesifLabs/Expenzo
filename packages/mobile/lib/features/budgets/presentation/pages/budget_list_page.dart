@@ -1,19 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
-import 'package:expense_tracker/core/theme/app_colors.dart';
-import 'package:expense_tracker/core/utils/currency_formatter.dart';
-import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
-import 'package:expense_tracker/shared/presentation/widgets/app_summary_card.dart';
-import 'package:expense_tracker/shared/presentation/widgets/app_empty_state.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budget_progress.dart';
-import '../../domain/entities/budget.dart';
+import 'package:expense_tracker/features/budgets/domain/entities/budget.dart';
 import '../bloc/budget_bloc.dart';
 import '../bloc/budget_event.dart';
 import '../bloc/budget_state.dart';
+import '../constants/budget_ui_tokens.dart';
 import '../widgets/budget_progress_card.dart';
 import '../widgets/skeletons/budget_list_skeleton.dart';
 
@@ -52,6 +47,47 @@ class _BudgetListViewState extends State<BudgetListView> {
     }
   }
 
+  Widget _buildHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: const [
+              Text(
+                'Budgets',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                  color: BudgetUiTokens.textPrimary,
+                ),
+              ),
+              SizedBox(height: 4),
+              Text(
+                'Track your monthly limits',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: BudgetUiTokens.textTertiary,
+                ),
+              ),
+            ],
+          ),
+          IconButton(
+            icon: const Icon(
+              PiconsLight.plus,
+              color: BudgetUiTokens.textPrimary,
+            ),
+            tooltip: 'Add Budget',
+            onPressed: () => _navigateToCreate(context),
+          ),
+        ],
+      ),
+    );
+  }
+
   BudgetProgress? _findProgress(BudgetLoaded state, Budget budget) {
     final id = budget.id;
     if (id == null) return null;
@@ -59,53 +95,47 @@ class _BudgetListViewState extends State<BudgetListView> {
     return state.progressByBudgetId[id];
   }
 
-  Color _getIndicatorColor(double percentage) {
-    if (percentage > 100) {
-      return AppColors.expense;
-    }
-    if (percentage >= 80) {
-      return AppColors.warning;
-    }
+  Future<void> _onRefresh() {
+    context.read<BudgetBloc>().add(LoadBudgets());
 
-    return AppColors.success;
+    return Future<void>.value();
   }
 
-  Widget _buildLoadedState(
-    BuildContext context,
-    BudgetLoaded state,
-    NumberFormat fmt,
-  ) {
-    return AppScaffold.slivers(
-      title: 'Budgets',
-      actions: [
-        IconButton(
-          icon: const Icon(PiconsLight.plus),
-          color: Theme.of(context).colorScheme.onSurface.withAlpha(160),
-          onPressed: () => _navigateToCreate(context),
+  Widget _buildLoadedState(BuildContext context, BudgetLoaded state) {
+    return Scaffold(
+      backgroundColor: BudgetUiTokens.bg,
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: _onRefresh,
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              SliverToBoxAdapter(child: _buildHeader(context)),
+              if (state.budgets.isEmpty)
+                const SliverFillRemaining(
+                  child: Center(
+                    child: Text(
+                      'No Budgets Present',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: BudgetUiTokens.textSecondary,
+                      ),
+                    ),
+                  ),
+                )
+              else
+                _buildBudgetList(state),
+            ],
+          ),
         ),
-      ],
-      slivers: [
-        SliverToBoxAdapter(child: _buildSummaryCard(context, state, fmt)),
-
-        if (state.budgets.isEmpty)
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(40),
-              child: AppEmptyState(
-                icon: PiconsRegular.tray,
-                message: 'No budgets yet. Tap + to create one.',
-              ),
-            ),
-          )
-        else
-          _buildBudgetList(state),
-      ],
+      ),
     );
   }
 
   Widget _buildBudgetList(BudgetLoaded state) {
     return SliverPadding(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       sliver: SliverList(
         delegate: SliverChildBuilderDelegate((context, index) {
           final budget = state.budgets[index];
@@ -123,7 +153,7 @@ class _BudgetListViewState extends State<BudgetListView> {
                 rolloverAmount: budget.rolloverAmount,
                 percentage: 0,
                 isOverBudget: false,
-                categoryId: budget.categoryId,
+                name: budget.name,
                 periodRange: DateTimeRange(
                   start: budget.startDate,
                   end: budget.startDate,
@@ -131,66 +161,16 @@ class _BudgetListViewState extends State<BudgetListView> {
                 period: budget.period,
               );
 
-          return BudgetProgressCard(
-            progress: displayProgress,
-            onTap: () => _navigateToDetails(context, displayProgress),
-            onEdit: () => _navigateToEdit(context, budget),
-            onDelete: () => _confirmDelete(context, budget),
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: BudgetProgressCard(
+              progress: displayProgress,
+              onTap: () => _navigateToDetails(context, displayProgress),
+              onEdit: () => _navigateToEdit(context, budget),
+              onDelete: () => _confirmDelete(context, budget),
+            ),
           );
         }, childCount: state.budgets.length),
-      ),
-    );
-  }
-
-  Widget _buildSummaryCard(
-    BuildContext context,
-    BudgetLoaded state,
-    NumberFormat fmt,
-  ) {
-    final totalBudget = state.budgets.fold<double>(
-      0,
-      (sum, b) => sum + b.amount,
-    );
-    final totalSpent = state.progressByBudgetId.values.fold<double>(
-      0,
-      (sum, p) => sum + p.spentAmount,
-    );
-    final overallPercentage = totalBudget > 0
-        ? (totalSpent / totalBudget) * 100
-        : 0.0;
-    final colorScheme = Theme.of(context).colorScheme;
-
-    final indicatorColor = _getIndicatorColor(overallPercentage);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      child: AppSummaryCard(
-        title: 'Monthly Spending',
-        value: fmt.format(totalBudget),
-        bottomChild: state.budgets.isNotEmpty
-            ? Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
-                    child: LinearProgressIndicator(
-                      value: (overallPercentage / 100).clamp(0.0, 1.0),
-                      backgroundColor: colorScheme.onSurface.withAlpha(25),
-                      color: indicatorColor,
-                      minHeight: 8,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    '${state.budgets.length} budgets active',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: colorScheme.onSurface.withAlpha(140),
-                    ),
-                  ),
-                ],
-              )
-            : null,
       ),
     );
   }
@@ -218,7 +198,7 @@ class _BudgetListViewState extends State<BudgetListView> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Delete Budget'),
-        content: Text('Delete "${budget.categoryId ?? 'Overall'}" budget?'),
+        content: Text('Delete "${budget.name}" budget?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
@@ -244,16 +224,23 @@ class _BudgetListViewState extends State<BudgetListView> {
 
   @override
   Widget build(BuildContext context) {
-    final fmt = CurrencyFormatter.getFormatter(decimalDigits: 0);
-
     return BlocConsumer<BudgetBloc, BudgetState>(
       listener: _onStateChanged,
       builder: (context, state) {
         return switch (state) {
-          BudgetLoading() => const BudgetListSkeleton(),
-          BudgetError(:final message) => Center(child: Text('Error: $message')),
-          BudgetLoaded() => _buildLoadedState(context, state, fmt),
-          _ => const Center(child: Text('Load budgets to see data')),
+          BudgetLoading() => const Scaffold(
+            backgroundColor: BudgetUiTokens.bg,
+            body: BudgetListSkeleton(),
+          ),
+          BudgetError(:final message) => Scaffold(
+            backgroundColor: BudgetUiTokens.bg,
+            body: Center(child: Text('Error: $message')),
+          ),
+          BudgetLoaded() => _buildLoadedState(context, state),
+          _ => const Scaffold(
+            backgroundColor: BudgetUiTokens.bg,
+            body: Center(child: Text('Load budgets to see data')),
+          ),
         };
       },
     );

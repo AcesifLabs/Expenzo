@@ -4,7 +4,9 @@ import 'package:uuid/uuid.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/sync/sync_event.dart';
+import 'package:expense_tracker/core/database/app_database.dart' show Record;
 import 'package:expense_tracker/core/database/daos/sync_queue_dao.dart';
+import 'package:expense_tracker/core/sync/handlers/records_sync_handler.dart';
 import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../../domain/entities/budget.dart';
 import '../../domain/repositories/budget_repository.dart';
@@ -64,7 +66,7 @@ class BudgetRepositoryImpl implements BudgetRepository {
 
       await localDatasource.createBudget(budgetWithId);
       _enqueueSync('insert', id, {
-        'categoryId': budget.categoryId,
+        'name': budget.name,
         'amount': budget.amount,
         'period': budget.period.name,
         'startDate': budget.startDate.toUtc().toIso8601String(),
@@ -94,7 +96,7 @@ class BudgetRepositoryImpl implements BudgetRepository {
         return Left(CacheFailure(message: 'Cannot update budget without id'));
       }
       _enqueueSync('update', id, {
-        'categoryId': budget.categoryId,
+        'name': budget.name,
         'amount': budget.amount,
         'period': budget.period.name,
         'startDate': budget.startDate.toUtc().toIso8601String(),
@@ -117,8 +119,9 @@ class BudgetRepositoryImpl implements BudgetRepository {
   @override
   Future<Either<Failure, Unit>> deleteBudget(String id) async {
     try {
-      await localDatasource.deleteBudget(id);
+      final unlinkedRecords = await localDatasource.deleteBudget(id);
       _enqueueSync('delete', id);
+      _enqueueUnlinkedRecords(unlinkedRecords);
 
       return const Right(unit);
     } on CacheException catch (e) {
@@ -133,6 +136,23 @@ class BudgetRepositoryImpl implements BudgetRepository {
   @override
   Stream<List<Budget>> watchBudgets() {
     return localDatasource.watchBudgets();
+  }
+
+  /// Enqueues a records-table sync update for each record that was unlinked by
+  /// a budget deletion, so the null budget link propagates to other devices.
+  void _enqueueUnlinkedRecords(List<Record> records) {
+    final syncQueueDao = _syncQueueDao;
+    if (syncQueueDao == null || records.isEmpty) return;
+    final handler = RecordsSyncHandler();
+    for (final record in records) {
+      syncQueueDao.enqueue(
+        tableName: 'records',
+        recordId: record.id,
+        action: 'update',
+        payload: jsonEncode(handler.toSyncPayload(record)),
+      );
+    }
+    SyncEventBus().trigger();
   }
 
   void _enqueueSync(

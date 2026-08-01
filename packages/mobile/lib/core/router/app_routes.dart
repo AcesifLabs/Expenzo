@@ -8,6 +8,8 @@ import 'package:expense_tracker/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:expense_tracker/features/auth/presentation/pages/login_page.dart';
 import 'package:expense_tracker/features/auth/presentation/pages/sync_conflict_page.dart';
 import 'package:expense_tracker/features/budgets/presentation/bloc/budget_bloc.dart';
+import 'package:expense_tracker/features/budgets/presentation/bloc/budget_event.dart';
+import 'package:expense_tracker/features/budgets/presentation/pages/budget_details_page.dart';
 import 'package:expense_tracker/features/budgets/presentation/pages/budget_form_page.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:expense_tracker/features/categories/presentation/pages/category_form_page.dart';
@@ -64,6 +66,20 @@ List<RouteBase> _buildBudgetRoutes() {
       builder: (_, _) => BlocProvider(
         create: (_) => di.getIt<BudgetBloc>(),
         child: const BudgetFormPage(),
+      ),
+    ),
+    GoRoute(
+      path: 'budgets/:id',
+      builder: (context, state) => BlocProvider(
+        create: (_) => di.getIt<BudgetBloc>()..add(const LoadBudgets()),
+        child: BudgetDetailsPage(budgetId: state.pathParameters['id'] ?? ''),
+      ),
+    ),
+    GoRoute(
+      path: 'budgets/:id/edit',
+      builder: (context, state) => BlocProvider(
+        create: (_) => di.getIt<BudgetBloc>(),
+        child: BudgetFormPage(budgetId: state.pathParameters['id'] ?? ''),
       ),
     ),
   ];

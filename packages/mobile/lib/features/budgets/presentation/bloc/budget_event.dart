@@ -8,7 +8,9 @@ abstract class BudgetEvent extends Equatable {
   const BudgetEvent();
 }
 
-class LoadBudgets extends BudgetEvent {}
+class LoadBudgets extends BudgetEvent {
+  const LoadBudgets();
+}
 
 class CreateBudgetEvent extends BudgetEvent {
   final Budget budget;

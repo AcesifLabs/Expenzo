@@ -3,6 +3,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:dartz/dartz.dart';
 import 'package:talker/talker.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
+import 'package:expense_tracker/core/database/app_database.dart' as db;
 import 'package:expense_tracker/core/database/daos/sync_queue_dao.dart';
 import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/features/budgets/data/datasources/budget_local_datasource.dart';
@@ -16,6 +17,21 @@ class MockBudgetLocalDatasource extends Mock implements BudgetLocalDatasource {}
 class MockSyncQueueDao extends Mock implements SyncQueueDao {}
 
 class _BudgetFake extends Fake implements Budget {}
+
+/// Builds a drift Record row (already unlinked) for enqueue assertions.
+db.Record _record(String id) {
+  final now = DateTime(2026, 1, 1);
+  return db.Record(
+    id: id,
+    amount: -10,
+    description: 'x',
+    date: now,
+    source: 'manual',
+    recordType: 'OUT',
+    createdAt: now,
+    updatedAt: now,
+  );
+}
 
 void main() {
   late MockBudgetLocalDatasource mockDatasource;
@@ -158,7 +174,7 @@ void main() {
       test('returns Right(unit) on success', () async {
         when(
           () => mockDatasource.deleteBudget('budget-1'),
-        ).thenAnswer((_) async {});
+        ).thenAnswer((_) async => <db.Record>[]);
         when(
           () => mockSyncDao.enqueue(
             tableName: any(named: 'tableName'),
@@ -171,7 +187,46 @@ void main() {
         final result = await repository.deleteBudget('budget-1');
 
         expect(result, const Right(unit));
+        verify(
+          () => mockSyncDao.enqueue(
+            tableName: 'budgets',
+            recordId: 'budget-1',
+            action: 'delete',
+            payload: any(named: 'payload'),
+          ),
+        ).called(1);
       });
+
+      test(
+        'enqueues a records-table update for each unlinked record',
+        () async {
+          final unlinked = [_record('r1'), _record('r2')];
+          when(
+            () => mockDatasource.deleteBudget('budget-1'),
+          ).thenAnswer((_) async => unlinked);
+          when(
+            () => mockSyncDao.enqueue(
+              tableName: any(named: 'tableName'),
+              recordId: any(named: 'recordId'),
+              action: any(named: 'action'),
+              payload: any(named: 'payload'),
+            ),
+          ).thenAnswer((_) async {});
+
+          await repository.deleteBudget('budget-1');
+
+          for (final id in ['r1', 'r2']) {
+            verify(
+              () => mockSyncDao.enqueue(
+                tableName: 'records',
+                recordId: id,
+                action: 'update',
+                payload: any(named: 'payload'),
+              ),
+            ).called(1);
+          }
+        },
+      );
     });
   });
 }

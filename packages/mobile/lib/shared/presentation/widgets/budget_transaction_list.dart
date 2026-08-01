@@ -20,9 +20,10 @@ class BudgetTransactionList extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 32),
           child: Text(
             emptyMessage,
-            style: TextStyle(
+            style: const TextStyle(
+              fontFamily: 'Work Sans',
               fontSize: 14,
-              color: Theme.of(context).colorScheme.onSurface.withAlpha(120),
+              color: Color(0xFF8E8E93),
             ),
           ),
         ),
@@ -33,7 +34,7 @@ class BudgetTransactionList extends StatelessWidget {
       shrinkWrap: true,
       physics: const AlwaysScrollableScrollPhysics(),
       itemCount: records.length,
-      separatorBuilder: (_, _) => const Divider(height: 1, indent: 56),
+      separatorBuilder: (_, _) => const SizedBox(height: 8),
       itemBuilder: (context, index) {
         return ReadOnlyRecordTile(record: records[index]);
       },

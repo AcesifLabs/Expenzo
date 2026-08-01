@@ -2,7 +2,7 @@ import 'package:drift/drift.dart';
 
 class Budgets extends Table {
   TextColumn get id => text()();
-  TextColumn get categoryId => text().nullable()();
+  TextColumn get name => text()();
   RealColumn get amount => real()();
   TextColumn get period => text()();
   DateTimeColumn get startDate => dateTime()();
@@ -18,7 +18,6 @@ class Budgets extends Table {
   Set<Column> get primaryKey => {id};
 
   Set<TableIndex> get indexes => {
-    const TableIndex(name: 'idx_budgets_category_id', columns: {#categoryId}),
     const TableIndex(name: 'idx_budgets_user_id', columns: {#userId}),
   };
 }

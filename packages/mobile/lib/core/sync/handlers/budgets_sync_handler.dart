@@ -12,7 +12,7 @@ class BudgetsSyncHandler extends SyncTableHandler<$BudgetsTable, Budget> {
   @override
   Map<String, dynamic> toSyncPayload(Budget row) => {
     'id': row.id,
-    'categoryId': row.categoryId,
+    'name': row.name,
     'amount': row.amount,
     'period': row.period,
     'startDate': row.startDate.toUtc().toIso8601String(),
@@ -26,9 +26,7 @@ class BudgetsSyncHandler extends SyncTableHandler<$BudgetsTable, Budget> {
   Insertable<Budget> fromSyncPayload(String id, Map<String, dynamic> data) =>
       BudgetsCompanion.insert(
         id: id,
-        categoryId: data['categoryId'] != null
-            ? Value(data['categoryId'].toString())
-            : const Value.absent(),
+        name: data['name']?.toString() ?? 'Unnamed Budget',
         amount: parseSyncAmount(data['amount']),
         period: parseSyncString(data['period'], BudgetPeriod.monthly.name),
         startDate: parseSyncDate(data['startDate']),

@@ -39,7 +39,7 @@ void main() {
 
     final testBudget = Budget(
       id: 'budget_1',
-      categoryId: 'cat_1',
+      name: 'cat_1',
       amount: 5000.0,
       period: BudgetPeriod.monthly,
       startDate: DateTime.now(),
@@ -203,7 +203,7 @@ void main() {
     test('should calculate effective budget with rollover', () {
       final budget = Budget(
         id: 'budget_1',
-        categoryId: null,
+        name: 'Overall Budget',
         amount: 5000.0,
         period: BudgetPeriod.monthly,
         startDate: DateTime.now(),
@@ -219,7 +219,7 @@ void main() {
     test('should not include rollover when disabled', () {
       final budget = Budget(
         id: 'budget_1',
-        categoryId: null,
+        name: 'Overall Budget',
         amount: 5000.0,
         period: BudgetPeriod.monthly,
         startDate: DateTime.now(),

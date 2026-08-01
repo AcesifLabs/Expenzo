@@ -105,6 +105,7 @@ class RecordRemoteDatasourceImpl implements RecordRemoteDatasource {
       description: json['description'] as String? ?? '',
       date: DateTime.parse(json['date'] as String),
       categoryId: json['categoryId'] as String?,
+      budgetId: json['budgetId'] as String?,
       source: ExpenseSource.values.firstWhere(
         (s) =>
             s.name == (json['source'] as String? ?? ExpenseSource.manual.name),
