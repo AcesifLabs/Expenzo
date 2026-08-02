@@ -24,6 +24,14 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
     return query.get();
   }
 
+  /// Newest saves first — used by Home Recent Activity (not month-scoped).
+  Future<List<Record>> getRecentRecordsByCreatedAt({int limit = 5}) {
+    return (select(records)
+          ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
+          ..limit(limit))
+        .get();
+  }
+
   Future<Record?> getRecordById(String id) {
     return (select(records)..where((t) => t.id.equals(id))).getSingleOrNull();
   }
@@ -152,9 +160,36 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
     return total;
   }
 
+  /// Total expense spend linked to [budgetId] within the half-open range
+  /// [start, end). The end bound is exclusive so a record dated exactly at the
+  /// next period's start is not double-counted across adjacent periods.
+  Future<double> getBudgetSpending(
+    String budgetId,
+    DateTime start,
+    DateTime end,
+  ) async {
+    final amountSum = records.amount.sum();
+    final query = selectOnly(records)
+      ..addColumns([amountSum])
+      ..where(
+        records.budgetId.equals(budgetId) &
+            records.date.isBiggerOrEqualValue(start) &
+            records.date.isSmallerThanValue(end) &
+            records.recordType.equals(RecordType.expense.dbValue),
+      );
+
+    final row = await query.getSingleOrNull();
+
+    return (row?.read(amountSum) ?? 0).abs();
+  }
+
   Future<List<Record>> getRecordsByDateRangeOnly(DateTime start, DateTime end) {
     return (select(records)
-          ..where((t) => t.date.isBetweenValues(start, end))
+          ..where(
+            (t) =>
+                t.date.isBiggerOrEqualValue(start) &
+                t.date.isSmallerThanValue(end),
+          )
           ..orderBy([(t) => OrderingTerm.desc(t.date)]))
         .get();
   }

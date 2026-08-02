@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -11,9 +14,7 @@ import 'package:expense_tracker/features/auth/presentation/bloc/auth_event.dart'
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_state.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budget_progress.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets_with_progress.dart';
-import 'package:expense_tracker/features/budgets/domain/usecases/get_budget_transactions.dart';
-import 'package:expense_tracker/features/categories/domain/entities/category.dart';
-import 'package:expense_tracker/features/categories/domain/usecases/get_categories.dart';
+
 import 'package:expense_tracker/features/dashboard/presentation/models/dashboard_budget_preview.dart';
 import 'package:expense_tracker/features/dashboard/presentation/models/dashboard_supplementary_data.dart';
 import 'package:expense_tracker/features/dashboard/presentation/widgets/balance_row.dart';
@@ -29,7 +30,6 @@ import 'package:expense_tracker/features/settings/presentation/bloc/settings_eve
 import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_empty_state.dart';
 import 'package:expense_tracker/shared/presentation/widgets/budget_progress_indicator.dart';
-import 'package:expense_tracker/shared/presentation/widgets/budget_transaction_list.dart';
 import 'package:expense_tracker/shared/presentation/widgets/shimmer_box.dart';
 import '../../domain/entities/date_range.dart';
 import '../bloc/dashboard_bloc.dart';
@@ -38,8 +38,9 @@ import '../bloc/dashboard_state.dart';
 
 class DashboardPage extends StatelessWidget {
   final ValueChanged<int>? onNavigateToTab;
+  final ValueListenable<int>? refreshTick;
 
-  const DashboardPage({super.key, this.onNavigateToTab});
+  const DashboardPage({super.key, this.onNavigateToTab, this.refreshTick});
 
   @override
   Widget build(BuildContext context) {
@@ -48,15 +49,19 @@ class DashboardPage extends StatelessWidget {
         BlocProvider(create: (_) => di.getIt<DashboardBloc>()),
         BlocProvider(create: (_) => di.getIt<AuthBloc>()),
       ],
-      child: DashboardView(onNavigateToTab: onNavigateToTab),
+      child: DashboardView(
+        onNavigateToTab: onNavigateToTab,
+        refreshTick: refreshTick,
+      ),
     );
   }
 }
 
 class DashboardView extends StatefulWidget {
   final ValueChanged<int>? onNavigateToTab;
+  final ValueListenable<int>? refreshTick;
 
-  const DashboardView({super.key, this.onNavigateToTab});
+  const DashboardView({super.key, this.onNavigateToTab, this.refreshTick});
 
   @override
   State<DashboardView> createState() => _DashboardViewState();
@@ -73,6 +78,7 @@ class _DashboardViewState extends State<DashboardView> {
   @override
   void initState() {
     super.initState();
+    widget.refreshTick?.addListener(_onExternalRefresh);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || _initialLoadScheduled) return;
       _initialLoadScheduled = true;
@@ -82,6 +88,11 @@ class _DashboardViewState extends State<DashboardView> {
         ),
       );
     });
+  }
+
+  void _onExternalRefresh() {
+    if (!mounted) return;
+    unawaited(_onRefresh());
   }
 
   void _syncSecondaryDateRange(DateRange? nextRange) {
@@ -95,22 +106,13 @@ class _DashboardViewState extends State<DashboardView> {
   Future<DashboardSupplementaryData> _loadSupplementaryData() async {
     await di.featureDependenciesReady;
     final getBudgetsWithProgress = _tryGetBudgetsWithProgress();
-    final getCategories = _tryGetCategories();
 
-    if (getBudgetsWithProgress == null || getCategories == null) {
+    if (getBudgetsWithProgress == null) {
       return DashboardSupplementaryData.empty;
     }
 
-    final categoryResult = await getCategories(const GetCategoriesParams());
     final budgetResult = await getBudgetsWithProgress(limit: 5);
 
-    final categories = categoryResult.fold(
-      (_) => <Category>[],
-      (value) => value,
-    );
-    final categoriesById = {
-      for (final category in categories) ?category.id: category,
-    };
     final budgets = budgetResult.fold((failure) {
       debugPrint('DashboardPage: Failed to load budgets: ${failure.message}');
 
@@ -119,19 +121,14 @@ class _DashboardViewState extends State<DashboardView> {
 
     final previews = budgets
         .map(
-          (progress) => DashboardBudgetPreview(
-            progress: progress,
-            title: _resolveBudgetTitle(progress, categoriesById),
-            emoji: progress.categoryId == null
-                ? null
-                : categoriesById[progress.categoryId]?.emoji,
-          ),
+          (progress) =>
+              DashboardBudgetPreview(progress: progress, title: progress.name),
         )
         .toList();
 
     return DashboardSupplementaryData(
       budgetPreviews: previews,
-      categoriesById: categoriesById,
+      categoriesById: {},
     );
   }
 
@@ -172,16 +169,6 @@ class _DashboardViewState extends State<DashboardView> {
     context.read<DashboardBloc>().add(RefreshDashboard());
 
     return Future<void>.value();
-  }
-
-  String _resolveBudgetTitle(
-    BudgetProgress progress,
-    Map<String, Category> categoriesById,
-  ) {
-    final categoryId = progress.categoryId;
-    if (categoryId == null) return 'Overall Budget';
-
-    return categoriesById[categoryId]?.name ?? 'Budget';
   }
 
   String _displayName(String name) {
@@ -510,9 +497,8 @@ class _DashboardViewState extends State<DashboardView> {
                     _BudgetPreviewTile(
                       preview: data.budgetPreviews[i],
                       currencyFmt: currencyFmt,
-                      onTap: () => _showBudgetTransactions(
-                        context,
-                        data.budgetPreviews[i].progress,
+                      onTap: () => context.push(
+                        '/budgets/${data.budgetPreviews[i].progress.budgetId}',
                       ),
                     ),
                     if (i != data.budgetPreviews.length - 1)
@@ -538,8 +524,7 @@ class _DashboardViewState extends State<DashboardView> {
       child: FutureBuilder<DashboardSupplementaryData>(
         future: _supplementaryFuture,
         builder: (context, snapshot) {
-          final categoriesById =
-              snapshot.data?.categoriesById ?? const <String, Category>{};
+          final categoriesById = snapshot.data?.categoriesById ?? const {};
 
           if (transactions.isEmpty) {
             return Padding(
@@ -757,18 +742,6 @@ class _DashboardViewState extends State<DashboardView> {
     );
   }
 
-  void _showBudgetTransactions(BuildContext context, BudgetProgress bp) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => _buildBudgetTransactionSheet(bp),
-    );
-  }
-
   Widget _buildSkeletonTrendBar(int index) {
     return Expanded(
       child: Padding(
@@ -781,98 +754,11 @@ class _DashboardViewState extends State<DashboardView> {
     );
   }
 
-  Widget _buildBudgetTransactionSheet(BudgetProgress bp) {
-    return SafeArea(
-      child: DraggableScrollableSheet(
-        initialChildSize: 0.6,
-        minChildSize: 0.3,
-        maxChildSize: 0.9,
-        expand: false,
-        builder: (context, _) {
-          return Column(
-            children: [
-              _buildSheetHandle(context),
-              _buildSheetHeader(context, bp),
-              const Divider(height: 24),
-              _buildTransactionList(bp),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildSheetHandle(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 12, bottom: 8),
-      child: Container(
-        width: 36,
-        height: 4,
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.onSurface.withAlpha(50),
-          borderRadius: BorderRadius.circular(2),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSheetHeader(BuildContext context, BudgetProgress bp) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
-        children: [
-          const Text(
-            'Budget Transactions',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-          ),
-          const Spacer(),
-          Text(
-            CurrencyFormatter.getFormatter(
-              decimalDigits: 0,
-            ).format(bp.budgetAmount),
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTransactionList(BudgetProgress bp) {
-    return Expanded(
-      child: FutureBuilder<List<Record>>(
-        future: di.getIt<GetBudgetTransactions>()(bp.budgetId).then(
-          (result) => result.getOrElse(() => []),
-        ),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          return BudgetTransactionList(records: snapshot.data ?? []);
-        },
-      ),
-    );
-  }
-
   GetBudgetsWithProgress? _tryGetBudgetsWithProgress() {
     try {
       return di.getIt<GetBudgetsWithProgress>();
     } catch (e, s) {
       debugPrint('Dashboard budgets error: $e\n$s');
-
-      return null;
-    }
-  }
-
-  GetCategories? _tryGetCategories() {
-    try {
-      return di.getIt<GetCategories>();
-    } catch (e, s) {
-      debugPrint('Dashboard categories error: $e\n$s');
 
       return null;
     }
@@ -969,6 +855,12 @@ class _DashboardViewState extends State<DashboardView> {
   }
 
   @override
+  void dispose() {
+    widget.refreshTick?.removeListener(_onExternalRefresh);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, authState) {
@@ -1057,7 +949,7 @@ class _BudgetPreviewTile extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  '${currencyFmt.format(preview.progress.spentAmount)} of ${currencyFmt.format(preview.progress.budgetAmount)}',
+                  '${currencyFmt.format(preview.progress.spentAmount)} of ${currencyFmt.format(preview.progress.effectiveAmount)}',
                   style: TextStyle(
                     fontSize: 13,
                     color: colors.onSurface.withAlpha(170),

@@ -19,7 +19,7 @@ class BudgetProgressSummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final spent = currencyFmt.format(progress.spentAmount);
-    final budget = currencyFmt.format(progress.budgetAmount);
+    final budget = currencyFmt.format(progress.effectiveAmount);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -35,7 +35,7 @@ class BudgetProgressSummaryCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      progress.categoryId ?? 'Overall Budget',
+                      progress.name,
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,

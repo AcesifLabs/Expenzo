@@ -7,6 +7,7 @@ class Records extends Table {
   TextColumn get description => text()();
   DateTimeColumn get date => dateTime()();
   TextColumn get categoryId => text().nullable()();
+  TextColumn get budgetId => text().nullable()();
   TextColumn get source =>
       text().withDefault(Constant(ExpenseSource.manual.name))();
   TextColumn get sourceId => text().nullable()();
@@ -21,6 +22,7 @@ class Records extends Table {
   Set<TableIndex> get indexes => {
     const TableIndex(name: 'idx_records_date', columns: {#date}),
     const TableIndex(name: 'idx_records_category', columns: {#categoryId}),
+    const TableIndex(name: 'idx_records_budget_id', columns: {#budgetId}),
     const TableIndex(name: 'idx_records_source_id', columns: {#sourceId}),
     const TableIndex(name: 'idx_records_user_id', columns: {#userId}),
   };

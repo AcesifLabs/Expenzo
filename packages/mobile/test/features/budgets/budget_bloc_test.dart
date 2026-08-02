@@ -50,7 +50,7 @@ void main() {
   final now = DateTime.now();
   final testBudget = Budget(
     id: 'budget-1',
-    categoryId: null,
+    name: 'Overall Budget',
     amount: 1000,
     period: BudgetPeriod.monthly,
     startDate: DateTime(now.year, now.month, 1),
@@ -85,6 +85,7 @@ void main() {
       () async {
         final progress = BudgetProgress(
           budgetId: 'budget-1',
+          name: 'Test Budget',
           budgetAmount: 1000,
           effectiveAmount: 1000,
           spentAmount: 200,
@@ -115,7 +116,7 @@ void main() {
         ];
 
         expectLater(bloc.stream, emitsInOrder(expected));
-        bloc.add(LoadBudgets());
+        bloc.add(const LoadBudgets());
       },
     );
 
@@ -134,7 +135,7 @@ void main() {
       ];
 
       expectLater(bloc.stream, emitsInOrder(expected));
-      bloc.add(LoadBudgets());
+      bloc.add(const LoadBudgets());
     });
   });
 
@@ -142,6 +143,7 @@ void main() {
     test('emits loading then transactions on the loaded state', () async {
       final progress = BudgetProgress(
         budgetId: 'budget-1',
+        name: 'Test Budget',
         budgetAmount: 1000,
         effectiveAmount: 1000,
         spentAmount: 200,
@@ -181,7 +183,7 @@ void main() {
         ]),
       );
 
-      bloc.add(LoadBudgets());
+      bloc.add(const LoadBudgets());
       // Let the first load complete
       await Future.delayed(Duration.zero);
       bloc.add(const LoadBudgetTransactions('budget-1'));

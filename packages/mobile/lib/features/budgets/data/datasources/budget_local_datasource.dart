@@ -10,7 +10,10 @@ abstract class BudgetLocalDatasource {
   Future<domain.Budget?> getBudgetById(String id);
   Future<void> createBudget(domain.Budget budget);
   Future<void> updateBudget(domain.Budget budget);
-  Future<void> deleteBudget(String id);
+
+  /// Deletes the budget and unlinks its records. Returns the unlinked record
+  /// rows so the repository can enqueue them for sync.
+  Future<List<Record>> deleteBudget(String id);
   Stream<List<domain.Budget>> watchBudgets();
 }
 
@@ -44,7 +47,7 @@ class BudgetLocalDatasourceImpl implements BudgetLocalDatasource {
         id: Value(
           budget.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
         ),
-        categoryId: Value(budget.categoryId),
+        name: Value(budget.name),
         amount: Value(budget.amount),
         period: Value(budget.period.name),
         startDate: Value(budget.startDate),
@@ -66,7 +69,7 @@ class BudgetLocalDatasourceImpl implements BudgetLocalDatasource {
     await budgetDao.updateBudget(
       BudgetsCompanion(
         id: Value(id),
-        categoryId: Value(budget.categoryId),
+        name: Value(budget.name),
         amount: Value(budget.amount),
         period: Value(budget.period.name),
         startDate: Value(budget.startDate),
@@ -81,8 +84,8 @@ class BudgetLocalDatasourceImpl implements BudgetLocalDatasource {
 
   /// Throws: [CacheException] if a database error occurs.
   @override
-  Future<void> deleteBudget(String id) async {
-    await budgetDao.deleteBudget(id);
+  Future<List<Record>> deleteBudget(String id) async {
+    return budgetDao.deleteBudgetAndUnlinkRecords(id);
   }
 
   @override
@@ -95,7 +98,7 @@ class BudgetLocalDatasourceImpl implements BudgetLocalDatasource {
   domain.Budget _mapToEntity(Budget b) {
     return domain.Budget(
       id: b.id,
-      categoryId: b.categoryId,
+      name: b.name,
       amount: b.amount,
       period: _parsePeriod(b.period),
       startDate: b.startDate,

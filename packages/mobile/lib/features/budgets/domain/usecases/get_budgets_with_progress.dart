@@ -2,7 +2,6 @@ import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/utils/budget_period_utils.dart';
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
-import 'package:expense_tracker/features/categories/domain/repositories/category_repository.dart';
 import '../entities/budget.dart';
 import '../repositories/budget_repository.dart';
 import 'get_budget_progress.dart';
@@ -10,12 +9,10 @@ import 'get_budget_progress.dart';
 class GetBudgetsWithProgress {
   final BudgetRepository budgetRepository;
   final RecordRepository recordRepository;
-  final CategoryRepository categoryRepository;
 
   GetBudgetsWithProgress({
     required this.budgetRepository,
     required this.recordRepository,
-    required this.categoryRepository,
   });
 
   /// Returns [Right(T)] on success, [Left(Failure)] on failure.
@@ -34,23 +31,12 @@ class GetBudgetsWithProgress {
         budget.period,
       );
 
-      final catId = budget.categoryId;
-      double spentAmount = 0;
-
-      if (catId != null) {
-        final spendingResult = await recordRepository.getCategorySpending(
-          catId,
-          periodRange.start,
-          periodRange.end,
-        );
-        spentAmount = spendingResult.fold((_) => 0.0, (spent) => spent);
-      } else {
-        final spendingResult = await recordRepository.getTotalSpending(
-          periodRange.start,
-          periodRange.end,
-        );
-        spentAmount = spendingResult.fold((_) => 0.0, (spent) => spent);
-      }
+      final spendingResult = await recordRepository.getBudgetSpending(
+        budget.id ?? '',
+        periodRange.start,
+        periodRange.end,
+      );
+      final spentAmount = spendingResult.fold((_) => 0.0, (spent) => spent);
 
       final effectiveBudget =
           budget.amount + (budget.rolloverEnabled ? budget.rolloverAmount : 0);
@@ -67,7 +53,7 @@ class GetBudgetsWithProgress {
           rolloverAmount: budget.rolloverAmount,
           percentage: percentage,
           isOverBudget: spentAmount > effectiveBudget,
-          categoryId: budget.categoryId,
+          name: budget.name,
           periodRange: periodRange,
           period: budget.period,
         ),

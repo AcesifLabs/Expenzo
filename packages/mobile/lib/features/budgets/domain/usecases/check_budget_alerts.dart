@@ -34,7 +34,7 @@ class CheckBudgetAlerts {
         if (percentage >= 80) {
           await notificationService.showBudgetAlert(
             budgetId: budgetId,
-            budgetName: budget.categoryId ?? 'Overall Budget',
+            budgetName: budget.name,
             percentage: percentage,
           );
         }

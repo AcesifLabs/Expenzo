@@ -63,7 +63,7 @@ class AppDatabase extends _$AppDatabase {
   Future<String>? _dbPathFuture;
 
   @override
-  int get schemaVersion => 15;
+  int get schemaVersion => 16;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -117,6 +117,7 @@ class AppDatabase extends _$AppDatabase {
       _MigrationStep(13, _migrateV13),
       _MigrationStep(14, _migrateV14),
       _MigrationStep(15, _migrateV15),
+      _MigrationStep(16, _migrateV16),
     ];
 
     for (final step in steps) {
@@ -291,7 +292,6 @@ class AppDatabase extends _$AppDatabase {
     final queries = [
       'CREATE INDEX IF NOT EXISTS idx_records_user_id ON records (user_id)',
       'CREATE INDEX IF NOT EXISTS idx_categories_user_id ON categories (user_id)',
-      'CREATE INDEX IF NOT EXISTS idx_budgets_category_id ON budgets (category_id)',
       'CREATE INDEX IF NOT EXISTS idx_budgets_user_id ON budgets (user_id)',
       'CREATE INDEX IF NOT EXISTS idx_pending_recurring_req_id ON pending_recurring (recurring_id)',
       'CREATE INDEX IF NOT EXISTS idx_pending_recurring_cat_id ON pending_recurring (category_id)',
@@ -304,6 +304,45 @@ class AppDatabase extends _$AppDatabase {
     for (final query in queries) {
       await customStatement(query);
     }
+  }
+
+  Future<void> _migrateV16() async {
+    // Rebuild budgets: drop category_id, add NOT NULL name (no backfill -> '').
+    await customStatement('''
+      CREATE TABLE budgets_new (
+        id TEXT NOT NULL PRIMARY KEY,
+        name TEXT NOT NULL DEFAULT '',
+        amount REAL NOT NULL,
+        period TEXT NOT NULL,
+        start_date INTEGER NOT NULL,
+        rollover_enabled INTEGER NOT NULL DEFAULT 0,
+        rollover_amount REAL NOT NULL DEFAULT 0.0,
+        is_enabled INTEGER NOT NULL DEFAULT 1,
+        user_id INTEGER,
+        created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
+        updated_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
+      )
+    ''');
+    await customStatement('''
+      INSERT INTO budgets_new (
+        id, name, amount, period, start_date, rollover_enabled,
+        rollover_amount, is_enabled, user_id, created_at, updated_at
+      )
+      SELECT id, '', amount, period, start_date, rollover_enabled,
+             rollover_amount, is_enabled, user_id, created_at, updated_at
+      FROM budgets
+    ''');
+    await customStatement('DROP TABLE budgets');
+    await customStatement('ALTER TABLE budgets_new RENAME TO budgets');
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_budgets_user_id ON budgets (user_id)',
+    );
+
+    // Add budget_id link to records (nullable; existing rows stay unlinked).
+    await customStatement('ALTER TABLE records ADD COLUMN budget_id TEXT');
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_records_budget_id ON records (budget_id)',
+    );
   }
 
   Future<void> _createFtsTable(Future<void> Function(String) executor) async {

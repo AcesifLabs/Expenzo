@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:expense_tracker/core/theme/app_colors.dart';
+import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
-import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
-import 'package:expense_tracker/shared/presentation/widgets/budget_progress_indicator.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budget_progress.dart';
+import 'package:expense_tracker/features/budgets/presentation/constants/budget_ui_tokens.dart';
+import 'package:expense_tracker/features/budgets/presentation/helpers/budget_progress_colors.dart';
 
 class BudgetProgressCard extends StatelessWidget {
   final BudgetProgress progress;
@@ -20,91 +19,112 @@ class BudgetProgressCard extends StatelessWidget {
     required this.onDelete,
   });
 
-  void _onMenuSelected(String value) {
-    if (value == 'edit') onEdit();
-    if (value == 'delete') onDelete();
+  void _handleEdit(BuildContext context) {
+    Navigator.pop(context);
+    onEdit();
   }
 
-  Widget _buildHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(
-          child: Text(
-            progress.categoryId ?? 'Overall Budget',
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        PopupMenuButton<String>(
-          onSelected: _onMenuSelected,
-          itemBuilder: (context) => const [
-            PopupMenuItem(value: 'edit', child: Text('Edit')),
-            PopupMenuItem(value: 'delete', child: Text('Delete')),
-          ],
-        ),
-      ],
-    );
+  void _handleDelete(BuildContext context) {
+    Navigator.pop(context);
+    onDelete();
   }
 
-  Widget _buildProgressInfo(NumberFormat fmt) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '${fmt.format(progress.spentAmount)} spent / ${fmt.format(progress.budgetAmount)} budget',
-          style: TextStyle(fontSize: 14, color: AppColors.textSecondaryLight),
-        ),
-        if (progress.rolloverAmount > 0) ...[
-          const SizedBox(height: 4),
-          Text(
-            'Includes ${fmt.format(progress.rolloverAmount)} rollover',
-            style: TextStyle(fontSize: 12, color: AppColors.success),
-          ),
-        ],
-        const SizedBox(height: 12),
-        BudgetProgressIndicator(percentage: progress.percentage),
-        const SizedBox(height: 4),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              '${progress.percentage.toStringAsFixed(0)}% used',
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.textSecondaryLight,
-              ),
-            ),
-            if (progress.isOverBudget)
-              Text(
-                'OVER BUDGET',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.expense,
+  void _showOptions(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: BudgetUiTokens.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(
+                  PiconsRegular.pencilSimple,
+                  color: BudgetUiTokens.textPrimary,
                 ),
+                title: const Text(
+                  'Edit',
+                  style: TextStyle(color: BudgetUiTokens.textPrimary),
+                ),
+                onTap: () => _handleEdit(context),
               ),
-          ],
+              ListTile(
+                leading: const Icon(
+                  PiconsRegular.trash,
+                  color: BudgetUiTokens.error,
+                ),
+                title: const Text(
+                  'Delete',
+                  style: TextStyle(color: BudgetUiTokens.error),
+                ),
+                onTap: () => _handleDelete(context),
+              ),
+            ],
+          ),
         ),
-      ],
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final fmt = CurrencyFormatter.getFormatter(decimalDigits: 0);
+    final progressColor = budgetProgressColor(progress.percentage);
 
-    return AppCard(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+    return GestureDetector(
       onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeader(),
-          const SizedBox(height: 8),
-          _buildProgressInfo(fmt),
-        ],
+      onLongPress: () => _showOptions(context),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: BudgetUiTokens.surface,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    progress.name,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: BudgetUiTokens.textPrimary,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Text(
+                  '${fmt.format(progress.spentAmount)} of ${fmt.format(progress.effectiveAmount)}',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: BudgetUiTokens.textTertiary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: SizedBox(
+                height: 12,
+                child: LinearProgressIndicator(
+                  value: (progress.percentage / 100).clamp(0.0, 1.0),
+                  backgroundColor: BudgetUiTokens.progressTrack,
+                  color: progressColor,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

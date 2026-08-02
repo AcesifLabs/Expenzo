@@ -8,6 +8,7 @@ class Record extends Equatable {
   final String description;
   final DateTime date;
   final String? categoryId;
+  final String? budgetId;
   final ExpenseSource source;
   final String? sourceId;
   final RecordType recordType;
@@ -23,6 +24,7 @@ class Record extends Equatable {
     description,
     date,
     categoryId,
+    budgetId,
     source,
     sourceId,
     recordType,
@@ -36,6 +38,7 @@ class Record extends Equatable {
     required this.description,
     required this.date,
     this.categoryId,
+    this.budgetId,
     this.source = ExpenseSource.manual,
     this.sourceId,
     required this.recordType,
@@ -49,6 +52,7 @@ class Record extends Equatable {
     String? description,
     DateTime? date,
     String? categoryId,
+    String? budgetId,
     ExpenseSource? source,
     String? sourceId,
     RecordType? recordType,
@@ -61,6 +65,7 @@ class Record extends Equatable {
       description: _v(description, this.description),
       date: _v(date, this.date),
       categoryId: _v(categoryId, this.categoryId),
+      budgetId: _v(budgetId, this.budgetId),
       source: _v(source, this.source),
       sourceId: _v(sourceId, this.sourceId),
       recordType: _v(recordType, this.recordType),
