@@ -380,25 +380,6 @@ class RecordRepositoryImpl implements RecordRepository {
     }
   }
 
-  @override
-  Future<Either<CacheFailure, List<Record>>> getRecentRecordsByCreatedAt({
-    int limit = 5,
-  }) async {
-    try {
-      final records = await localDatasource.getRecentRecordsByCreatedAt(
-        limit: limit,
-      );
-
-      return Right(records);
-    } on CacheException catch (e) {
-      return Left(e.toFailure());
-    } catch (e, s) {
-      debugPrint('Error: $e\n$s');
-
-      return Left(CacheFailure(message: e.toString()));
-    }
-  }
-
   Future<bool> _checkConnectivity() async {
     try {
       return await connectivity.checkNow().timeout(
