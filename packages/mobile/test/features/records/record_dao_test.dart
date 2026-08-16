@@ -167,4 +167,40 @@ void main() {
       expect(results.length, 2);
     });
   });
+
+  group('RecordDao.getSpendingTrend', () {
+    final day = DateTime(2026, 8, 10);
+
+    Future<void> insertRecord({
+      required String id,
+      required double amount,
+      required DateTime date,
+      required String type,
+    }) async {
+      await db
+          .into(db.records)
+          .insert(
+            RecordsCompanion.insert(
+              id: id,
+              amount: amount,
+              description: 'Test $id',
+              date: date,
+              recordType: type,
+            ),
+          );
+    }
+
+    test('sums expenses only, so income cannot inflate a trend bar', () async {
+      await insertRecord(id: 'out-1', amount: 25, date: day, type: 'OUT');
+      await insertRecord(id: 'in-1', amount: 100, date: day, type: 'IN');
+
+      final rows = await dao.getSpendingTrend(
+        DateTime(2026, 8, 1),
+        DateTime(2026, 8, 31, 23, 59, 59),
+      );
+
+      expect(rows.length, 1);
+      expect(rows.first.read(dao.records.amount.sum()), 25);
+    });
+  });
 }

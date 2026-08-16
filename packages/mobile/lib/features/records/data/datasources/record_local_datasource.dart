@@ -62,10 +62,6 @@ abstract class RecordLocalDatasource {
   /// Returns the number of records that reference [categoryId].
   /// Throws: [CacheException] if a database error occurs.
   Future<int> getRecordCountByCategory(String categoryId);
-
-  /// Newest saves first — not filtered by transaction date.
-  /// Throws: [CacheException] if a database error occurs.
-  Future<List<rec.Record>> getRecentRecordsByCreatedAt({int limit = 5});
 }
 
 class RecordLocalDatasourceImpl implements RecordLocalDatasource {
@@ -370,18 +366,6 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
   Future<int> getRecordCountByCategory(String categoryId) async {
     try {
       return await recordDao.getRecordCountByCategory(categoryId);
-    } catch (e, s) {
-      appLogger.error('Record local datasource error', e, s);
-      throw CacheException(message: e.toString());
-    }
-  }
-
-  @override
-  Future<List<rec.Record>> getRecentRecordsByCreatedAt({int limit = 5}) async {
-    try {
-      final records = await recordDao.getRecentRecordsByCreatedAt(limit: limit);
-
-      return records.map<rec.Record>(_mapToEntity).toList();
     } catch (e, s) {
       appLogger.error('Record local datasource error', e, s);
       throw CacheException(message: e.toString());

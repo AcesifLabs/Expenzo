@@ -111,11 +111,4 @@ abstract class RecordRepository {
   ///
   /// Returns [Right(int)] on success, [Left(CacheFailure)] on failure.
   Future<Either<CacheFailure, int>> getRecordCountByCategory(String categoryId);
-
-  /// Newest saves first, regardless of transaction [Record.date].
-  ///
-  /// Returns [Right(List<Record>)] on success, [Left(CacheFailure)] on failure.
-  Future<Either<CacheFailure, List<Record>>> getRecentRecordsByCreatedAt({
-    int limit = 5,
-  });
 }

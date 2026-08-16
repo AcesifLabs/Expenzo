@@ -24,14 +24,6 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
     return query.get();
   }
 
-  /// Newest saves first — used by Home Recent Activity (not month-scoped).
-  Future<List<Record>> getRecentRecordsByCreatedAt({int limit = 5}) {
-    return (select(records)
-          ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
-          ..limit(limit))
-        .get();
-  }
-
   Future<Record?> getRecordById(String id) {
     return (select(records)..where((t) => t.id.equals(id))).getSingleOrNull();
   }
@@ -235,7 +227,10 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
     final amountSum = records.amount.sum();
     final query = selectOnly(records)
       ..addColumns([records.date, amountSum])
-      ..where(records.date.isBetweenValues(start, end))
+      ..where(
+        records.date.isBetweenValues(start, end) &
+            records.recordType.equals(RecordType.expense.dbValue),
+      )
       ..groupBy([records.date]);
 
     return query.get();
