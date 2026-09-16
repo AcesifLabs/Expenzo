@@ -1,3 +1,4 @@
+import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,6 +8,9 @@ import 'package:picons/picons.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_icons.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
+import 'package:expense_tracker/features/budgets/domain/entities/budget.dart';
+import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets.dart';
+import 'package:expense_tracker/features/records/domain/entities/record.dart';
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
 import '../../../../shared/presentation/widgets/shimmer_box.dart';
 import '../../../categories/presentation/bloc/category_bloc.dart';
@@ -59,6 +63,10 @@ class _RecordFormPageState extends State<RecordFormPage> {
   final _descriptionFocus = FocusNode();
   var _selectedDate = DateTime.now();
   String? _selectedCategoryId;
+  String? _selectedBudgetId;
+  List<Budget> _budgets = const [];
+  var _budgetsLoading = true;
+  Record? _loadedRecord;
   var _recordType = RecordType.expense;
   var _isLoading = false;
   String? _amountError;
@@ -79,6 +87,19 @@ class _RecordFormPageState extends State<RecordFormPage> {
       _initFromRecord(widget.record);
     }
     context.read<CategoryBloc>().add(const LoadCategories());
+    _loadBudgets();
+  }
+
+  Future<void> _loadBudgets() async {
+    final result = await di.getIt<GetBudgets>()();
+    if (!mounted) return;
+    setState(() {
+      _budgets = result
+          .getOrElse(() => const <Budget>[])
+          .where((b) => b.isEnabled)
+          .toList();
+      _budgetsLoading = false;
+    });
   }
 
   void _onAmountFocusChange() {
@@ -108,12 +129,14 @@ class _RecordFormPageState extends State<RecordFormPage> {
   }
 
   void _initFromRecord(Record? record) {
+    _loadedRecord = record;
     _amountController.text = record != null
         ? record.amount.abs().toString()
         : '';
     _descriptionController.text = record?.description ?? '';
     _selectedDate = record?.date ?? DateTime.now();
     _selectedCategoryId = record?.categoryId;
+    _selectedBudgetId = record?.budgetId;
     _recordType =
         record?.recordType ?? widget.initialType ?? RecordType.expense;
   }
@@ -319,14 +342,16 @@ class _RecordFormPageState extends State<RecordFormPage> {
         : rawAmount;
 
     final record = Record(
-      id: widget.record?.id ?? widget.recordId,
+      id: widget.record?.id ?? widget.recordId ?? _loadedRecord?.id,
       amount: finalAmount,
       description: _descriptionController.text,
       date: _selectedDate,
       categoryId: _selectedCategoryId,
-      source: ExpenseSource.manual,
+      budgetId: _recordType == RecordType.expense ? _selectedBudgetId : null,
+      source: _loadedRecord?.source ?? ExpenseSource.manual,
+      sourceId: _loadedRecord?.sourceId,
       recordType: _recordType,
-      createdAt: widget.record?.createdAt ?? now,
+      createdAt: _loadedRecord?.createdAt ?? widget.record?.createdAt ?? now,
       updatedAt: now,
     );
 
@@ -653,6 +678,74 @@ class _RecordFormPageState extends State<RecordFormPage> {
     }
   }
 
+  Widget _buildBudgetField() {
+    final noneOrEmpty = _budgetsLoading || _budgets.isEmpty;
+    final hintText = _budgetsLoading ? 'Loading budgets…' : 'No budget';
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildLabel('Budget'),
+          const SizedBox(height: 6),
+          Container(
+            height: 48,
+            decoration: BoxDecoration(
+              color: _inputFill,
+              borderRadius: _inputRadius,
+              border: Border.all(color: _inputStroke, width: 1),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            alignment: Alignment.centerLeft,
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String?>(
+                value: _selectedBudgetId,
+                hint: Text(
+                  hintText,
+                  style: const TextStyle(
+                    fontFamily: 'Work Sans',
+                    fontSize: 15,
+                    color: _textSecondary,
+                  ),
+                ),
+                isExpanded: true,
+                icon: const Icon(
+                  PiconsRegular.caretDown,
+                  size: 16,
+                  color: _textSecondary,
+                ),
+                dropdownColor: _inputFill,
+                style: const TextStyle(
+                  fontFamily: 'Work Sans',
+                  fontSize: 15,
+                  color: _textPrimary,
+                ),
+                items: [
+                  const DropdownMenuItem<String?>(
+                    value: null,
+                    child: Text('No budget', overflow: TextOverflow.ellipsis),
+                  ),
+                  for (final budget in _budgets)
+                    DropdownMenuItem<String?>(
+                      value: budget.id,
+                      child: Text(
+                        '${budget.name} · ${budget.period.displayName}',
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                ],
+                onChanged: noneOrEmpty
+                    ? null
+                    : (value) => setState(() => _selectedBudgetId = value),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   // -- Date Field --
   Widget _buildDatePicker() {
     return Padding(
@@ -811,6 +904,7 @@ class _RecordFormPageState extends State<RecordFormPage> {
                   BlocBuilder<CategoryBloc, CategoryState>(
                     builder: _buildCategoryField,
                   ),
+                  if (_recordType == RecordType.expense) _buildBudgetField(),
                   _buildDatePicker(),
                   const SizedBox(height: 24),
                   _buildSubmitButton(),
