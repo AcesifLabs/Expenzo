@@ -19,6 +19,7 @@ import '../../domain/entities/record.dart';
 import '../../domain/usecases/add_record.dart';
 import 'package:expense_tracker/features/budgets/domain/entities/budget.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets.dart';
+import 'package:expense_tracker/features/budgets/presentation/widgets/new_transaction_budget_chips.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
 import 'package:expense_tracker/features/recurring/domain/entities/recurring_transaction.dart';
 import 'package:expense_tracker/features/recurring/domain/repositories/recurring_repository.dart';
@@ -613,72 +614,12 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   }
 
   Widget _buildBudgetSelector(ColorScheme colors) {
-    final noneOrEmpty = _budgetsLoading || _budgets.isEmpty;
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 12, 24, 8),
-      child: InputDecorator(
-        decoration: _buildBudgetFieldDecoration(colors),
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton<String?>(
-            value: _selectedBudgetId,
-            hint: _buildBudgetHint(colors),
-            isExpanded: true,
-            icon: Icon(
-              PiconsRegular.caretDown,
-              color: colors.onSurface.withAlpha(120),
-            ),
-            dropdownColor: colors.surfaceContainerLow,
-            isDense: true,
-            items: [
-              const DropdownMenuItem<String?>(
-                value: null,
-                child: Text('No budget', overflow: TextOverflow.ellipsis),
-              ),
-              for (final budget in _budgets)
-                DropdownMenuItem<String?>(
-                  value: budget.id,
-                  child: Text(
-                    '${budget.name} · ${budget.period.displayName}',
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-            ],
-            onChanged: noneOrEmpty ? null : _onBudgetSelected,
-          ),
-        ),
-      ),
+    return NewTransactionBudgetChips(
+      budgets: _budgets,
+      loading: _budgetsLoading,
+      selectedBudgetId: _selectedBudgetId,
+      onSelected: (id) => setState(() => _selectedBudgetId = id),
     );
-  }
-
-  InputDecoration _buildBudgetFieldDecoration(ColorScheme colors) {
-    final idleBorder = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: BorderSide(color: colors.onSurface.withAlpha(12)),
-    );
-
-    return InputDecoration(
-      filled: true,
-      fillColor: colors.surfaceContainerLow,
-      border: idleBorder,
-      enabledBorder: idleBorder,
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: colors.primary, width: 2),
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-    );
-  }
-
-  void _onBudgetSelected(String? budgetId) {
-    setState(() => _selectedBudgetId = budgetId);
-  }
-
-  Widget _buildBudgetHint(ColorScheme colors) {
-    final hintColor = colors.onSurface.withAlpha(120);
-    final text = _budgetsLoading ? 'Loading budgets…' : 'No budget';
-
-    return Text(text, style: TextStyle(color: hintColor));
   }
 
   Widget _buildCategorySelectorContent(
