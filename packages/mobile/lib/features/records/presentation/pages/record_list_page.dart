@@ -192,6 +192,7 @@ class _RecordListViewState extends State<RecordListView> {
   }
 
   void _onUndoDelete(Record record) {
+    if (!mounted) return;
     context.read<RecordBloc>().add(AddRecordEvent(record));
   }
 
@@ -200,16 +201,22 @@ class _RecordListViewState extends State<RecordListView> {
     final recordId = record.id;
     if (recordId == null) return;
     bloc.add(DeleteRecordEvent(recordId));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Record deleted'),
-        duration: AppConstants.briefSnackbarDuration,
-        action: SnackBarAction(
-          label: 'Undo',
-          onPressed: () => _onUndoDelete(record),
+    // Evict any visible/queued SnackBar so a burst of deletes surfaces one
+    // toast (the newest) rather than a pile the user has to dismiss one by
+    // one. This matters most here: a SnackBar carrying an action defaults to
+    // `persist: true`, so without eviction each queued toast waits forever.
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(
+        SnackBar(
+          content: const Text('Record deleted'),
+          duration: AppConstants.undoSnackbarDuration,
+          action: SnackBarAction(
+            label: 'Undo',
+            onPressed: () => _onUndoDelete(record),
+          ),
         ),
-      ),
-    );
+      );
   }
 
   void Function({

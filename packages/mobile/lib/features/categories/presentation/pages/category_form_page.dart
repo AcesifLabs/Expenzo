@@ -86,9 +86,9 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
   void _saveCategory() {
     final name = _nameController.text.trim();
     if (name.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please enter a name')));
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(const SnackBar(content: Text('Please enter a name')));
 
       return;
     }
