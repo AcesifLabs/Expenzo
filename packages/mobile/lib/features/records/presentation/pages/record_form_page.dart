@@ -727,10 +727,7 @@ class _RecordFormPageState extends State<RecordFormPage> {
                   for (final budget in _budgets)
                     DropdownMenuItem<String?>(
                       value: budget.id,
-                      child: Text(
-                        '${budget.name} · ${budget.period.displayName}',
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      child: Text(budget.name, overflow: TextOverflow.ellipsis),
                     ),
                 ],
                 onChanged: noneOrEmpty

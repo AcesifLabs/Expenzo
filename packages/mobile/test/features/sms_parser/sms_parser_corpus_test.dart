@@ -88,33 +88,29 @@ void main() {
       }
     });
 
-    test(
-      'real parser pipeline does not throw on any corpus message',
-      () async {
-        var processed = 0;
-        for (final wb in corpus) {
-          for (final f in wb.fixtures) {
-            processed += 1;
-            try {
-              useCase.evaluateWithPreloadedContext(
-                context,
-                EvaluateRulesParams(
-                  rawMessage: f.body,
-                  sourceType: 'sms',
-                  sourceId: f.sourceId,
-                  address: f.sender,
-                  messageDate: f.date,
-                ),
-              );
-            } catch (e) {
-              fail('${wb.filename} row ${f.rowIndex} threw $e');
-            }
+    test('real parser pipeline does not throw on any corpus message', () async {
+      var processed = 0;
+      for (final wb in corpus) {
+        for (final f in wb.fixtures) {
+          processed += 1;
+          try {
+            useCase.evaluateWithPreloadedContext(
+              context,
+              EvaluateRulesParams(
+                rawMessage: f.body,
+                sourceType: 'sms',
+                sourceId: f.sourceId,
+                address: f.sender,
+                messageDate: f.date,
+              ),
+            );
+          } catch (e) {
+            fail('${wb.filename} row ${f.rowIndex} threw $e');
           }
         }
-        expect(processed, greaterThan(100));
-      },
-      timeout: const Timeout(Duration(minutes: 2)),
-    );
+      }
+      expect(processed, greaterThan(100));
+    }, timeout: const Timeout(Duration(minutes: 2)));
 
     test('try/catch wrapper produces "<file> row N threw ..." on '
         'per-row failure (simulated)', () {

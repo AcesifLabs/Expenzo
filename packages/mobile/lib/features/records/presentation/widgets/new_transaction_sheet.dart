@@ -19,7 +19,6 @@ import '../../domain/entities/record.dart';
 import '../../domain/usecases/add_record.dart';
 import 'package:expense_tracker/features/budgets/domain/entities/budget.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets.dart';
-import 'package:expense_tracker/features/budgets/presentation/widgets/new_transaction_budget_chips.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
 import 'package:expense_tracker/features/recurring/domain/entities/recurring_transaction.dart';
 import 'package:expense_tracker/features/recurring/domain/repositories/recurring_repository.dart';
@@ -119,7 +118,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     });
   }
 
-  void _showAllCategories(BuildContext context, RecordType type) async {
+  Future<void> _showAllCategories(BuildContext context, RecordType type) async {
     final result = await context.push<Category>(
       '/categories/picker',
       extra: {'type': type, 'selectedId': _selectedCategoryId},
@@ -136,6 +135,19 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     if (mounted) {
       _loadCategories();
     }
+  }
+
+  Future<void> _showAllBudgets(BuildContext context) async {
+    final picked = await context.push<String?>(
+      '/budgets/picker',
+      extra: {'selectedId': _selectedBudgetId},
+    );
+    if (!mounted || picked == null) return;
+
+    setState(() {
+      _selectedBudgetId = picked.isEmpty ? null : picked;
+    });
+    await _loadBudgets();
   }
 
   void _switchType(RecordType t) {
@@ -436,15 +448,19 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
         : colors.onSurface.withAlpha(12);
     final borderWidth = _labelError ? 1.5 : 1.0;
 
+    final titleLabel = '${_type.displayName} title';
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 12, 24, 8),
-      child: Column(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildPickerFieldLabel(colors, titleLabel, error: _labelError),
+                TextField(
                   controller: _noteCtrl,
                   cursorColor: _labelError ? colors.error : typeColor,
                   decoration: InputDecoration(
@@ -481,25 +497,38 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                   ),
                   style: TextStyle(fontSize: 15, color: colors.onSurface),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Material(
-                color: colors.secondary.withAlpha(32),
-                borderRadius: BorderRadius.circular(12),
-                child: InkWell(
-                  onTap: _isSubmitting
-                      ? null
-                      : () {
-                          unawaited(_openReceiptScan());
-                        },
-                  borderRadius: BorderRadius.circular(12),
-                  child: SizedBox(
-                    width: 48,
-                    height: 48,
-                    child: Icon(
-                      PiconsRegular.receipt,
-                      size: 22,
-                      color: colors.secondary,
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              _buildPickerFieldLabel(colors, 'Scan'),
+              Semantics(
+                button: true,
+                label: 'Scan receipt',
+                child: Tooltip(
+                  message: 'Scan receipt',
+                  child: Material(
+                    color: colors.secondary.withAlpha(32),
+                    borderRadius: BorderRadius.circular(12),
+                    child: InkWell(
+                      onTap: _isSubmitting
+                          ? null
+                          : () {
+                              unawaited(_openReceiptScan());
+                            },
+                      borderRadius: BorderRadius.circular(12),
+                      child: SizedBox(
+                        width: 48,
+                        height: 48,
+                        child: Icon(
+                          PiconsRegular.receipt,
+                          size: 22,
+                          color: colors.secondary,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -600,13 +629,6 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     if (picked != null) setState(() => _selectedDate = picked);
   }
 
-  Widget _buildAllCategoriesButton(ColorScheme colors) {
-    return _AllCategoriesButton(
-      colors: colors,
-      onTap: () => _showAllCategories(context, _type),
-    );
-  }
-
   Widget _buildCategorySelector(ColorScheme colors) {
     return BlocBuilder<CategoryBloc, CategoryState>(
       builder: (ctx, state) => _buildCategorySelectorContent(state, colors),
@@ -614,11 +636,117 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   }
 
   Widget _buildBudgetSelector(ColorScheme colors) {
-    return NewTransactionBudgetChips(
-      budgets: _budgets,
-      loading: _budgetsLoading,
-      selectedBudgetId: _selectedBudgetId,
-      onSelected: (id) => setState(() => _selectedBudgetId = id),
+    if (_budgetsLoading) {
+      return _buildBudgetSelectorLoading(colors);
+    }
+
+    final selectedBudget = _selectedBudgetId == null
+        ? null
+        : _budgets.cast<Budget?>().firstWhere(
+            (b) => b?.id == _selectedBudgetId,
+            orElse: () => null,
+          );
+
+    return _buildLabeledPickerSection(
+      colors: colors,
+      label: 'Budget',
+      child: _PickerFieldButton(
+        colors: colors,
+        semanticsLabel: 'Select a budget',
+        decoration: _buildPickerFieldDecoration(colors),
+        onTap: () => unawaited(_showAllBudgets(context)),
+        content: selectedBudget != null
+            ? _buildBudgetSelectedRow(selectedBudget, colors)
+            : _buildBudgetHint(colors),
+      ),
+    );
+  }
+
+  Widget _buildBudgetHint(ColorScheme colors) {
+    final hintColor = colors.onSurface.withAlpha(120);
+
+    return Row(
+      children: [
+        Icon(PiconsRegular.wallet, size: 20, color: hintColor),
+        const SizedBox(width: 12),
+        Text('Select a budget', style: TextStyle(color: hintColor)),
+      ],
+    );
+  }
+
+  Widget _buildBudgetSelectedRow(Budget budget, ColorScheme colors) {
+    return Row(
+      children: [
+        Icon(
+          PiconsRegular.wallet,
+          size: 20,
+          color: colors.onSurface.withAlpha(180),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            budget.name,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(color: colors.onSurface),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBudgetSelectorLoading(ColorScheme colors) {
+    return _buildLabeledPickerSection(
+      colors: colors,
+      label: 'Budget',
+      child: SizedBox(
+        height: 48,
+        child: Center(
+          child: SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: colors.onSurface.withAlpha(80),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLabeledPickerSection({
+    required ColorScheme colors,
+    required String label,
+    required Widget child,
+    bool labelError = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 12, 24, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildPickerFieldLabel(colors, label, error: labelError),
+          child,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPickerFieldLabel(
+    ColorScheme colors,
+    String label, {
+    bool error = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+          color: error ? colors.error : colors.onSurface.withAlpha(180),
+        ),
+      ),
     );
   }
 
@@ -634,18 +762,8 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       return _buildCategorySelectorLoading(colors);
     }
 
-    if (state is CategoryLoading || categories.isEmpty) {
-      if (state is CategoryLoading) {
-        return _buildCategorySelectorLoading(colors);
-      }
-
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
-        child: Text(
-          'No categories available',
-          style: TextStyle(color: colors.onSurface.withAlpha(80)),
-        ),
-      );
+    if (state is CategoryLoading) {
+      return _buildCategorySelectorLoading(colors);
     }
 
     Category? selectedCategory;
@@ -656,40 +774,32 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 12, 24, 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: InputDecorator(
-              decoration: _buildCategoryFieldDecoration(colors),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<Category>(
-                  value: selectedCategory,
-                  hint: _buildCategoryHint(colors),
-                  isExpanded: true,
-                  icon: Icon(
-                    PiconsRegular.caretDown,
-                    color: colors.onSurface.withAlpha(120),
-                  ),
-                  dropdownColor: colors.surfaceContainerLow,
-                  isDense: true,
-                  items: categories.map(_buildCategoryDropdownItem).toList(),
-                  onChanged: _onCategorySelected,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          _buildAllCategoriesButton(colors),
-        ],
+    return _buildLabeledPickerSection(
+      colors: colors,
+      label: 'Category',
+      labelError: _categoryError,
+      child: _PickerFieldButton(
+        colors: colors,
+        semanticsLabel: 'Select a category',
+        decoration: _buildPickerFieldDecoration(
+          colors,
+          hasError: _categoryError,
+          errorText: _categoryError ? 'Select a category' : null,
+        ),
+        onTap: () => unawaited(_showAllCategories(context, _type)),
+        content: selectedCategory != null
+            ? _buildCategorySelectedRow(selectedCategory)
+            : _buildCategoryHint(colors),
       ),
     );
   }
 
-  InputDecoration _buildCategoryFieldDecoration(ColorScheme colors) {
-    final idleBorderColor = _categoryError
+  InputDecoration _buildPickerFieldDecoration(
+    ColorScheme colors, {
+    bool hasError = false,
+    String? errorText,
+  }) {
+    final idleBorderColor = hasError
         ? colors.error
         : colors.onSurface.withAlpha(12);
     final idleBorder = OutlineInputBorder(
@@ -705,29 +815,13 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(
-          color: _categoryError ? colors.error : colors.primary,
+          color: hasError ? colors.error : colors.primary,
           width: 2,
         ),
       ),
-      errorText: _categoryError ? 'Select a category' : null,
+      errorText: errorText,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
     );
-  }
-
-  DropdownMenuItem<Category> _buildCategoryDropdownItem(Category cat) {
-    return DropdownMenuItem<Category>(
-      value: cat,
-      child: _buildCategoryDropdownRow(cat),
-    );
-  }
-
-  void _onCategorySelected(Category? cat) {
-    if (cat != null) {
-      setState(() {
-        _selectedCategoryId = cat.id;
-        _categoryError = false;
-      });
-    }
   }
 
   Widget _buildCategoryHint(ColorScheme colors) {
@@ -742,7 +836,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     );
   }
 
-  Widget _buildCategoryDropdownRow(Category category) {
+  Widget _buildCategorySelectedRow(Category category) {
     final color = _parseCategoryColor(category.color);
 
     return Row(
@@ -769,17 +863,21 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   }
 
   Widget _buildCategorySelectorLoading(ColorScheme colors) {
-    return Container(
-      height: 50,
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      alignment: Alignment.center,
+    return _buildLabeledPickerSection(
+      colors: colors,
+      label: 'Category',
+      labelError: _categoryError,
       child: SizedBox(
-        width: 20,
-        height: 20,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          color: colors.onSurface.withAlpha(80),
+        height: 48,
+        child: Center(
+          child: SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: colors.onSurface.withAlpha(80),
+            ),
+          ),
         ),
       ),
     );
@@ -914,38 +1012,41 @@ class _SubmitButton extends StatelessWidget {
   }
 }
 
-class _AllCategoriesButton extends StatelessWidget {
+class _PickerFieldButton extends StatelessWidget {
   final ColorScheme colors;
+  final String semanticsLabel;
+  final InputDecoration decoration;
   final VoidCallback onTap;
+  final Widget content;
 
-  const _AllCategoriesButton({required this.colors, required this.onTap});
+  const _PickerFieldButton({
+    required this.colors,
+    required this.semanticsLabel,
+    required this.decoration,
+    required this.onTap,
+    required this.content,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final trailingColor = colors.onSurface.withAlpha(120);
+
     return Semantics(
       button: true,
-      label: 'Show all categories',
-      child: Tooltip(
-        message: 'Show all categories',
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: colors.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: colors.onSurface.withAlpha(12)),
-              ),
-              alignment: Alignment.center,
-              child: Icon(
-                PiconsRegular.dotsThreeVertical,
-                size: 22,
-                color: colors.onSurface.withAlpha(150),
-              ),
+      label: semanticsLabel,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: InputDecorator(
+            decoration: decoration,
+            isEmpty: false,
+            child: Row(
+              children: [
+                Expanded(child: content),
+                Icon(PiconsRegular.caretRight, size: 20, color: trailingColor),
+              ],
             ),
           ),
         ),
