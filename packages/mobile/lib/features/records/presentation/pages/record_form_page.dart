@@ -1,4 +1,3 @@
-import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -94,10 +93,10 @@ class _RecordFormPageState extends State<RecordFormPage> {
     final result = await di.getIt<GetBudgets>()();
     if (!mounted) return;
     setState(() {
-      _budgets = result
-          .getOrElse(() => const <Budget>[])
-          .where((b) => b.isEnabled)
-          .toList();
+      _budgets = result.fold(
+        (_) => const <Budget>[],
+        (list) => list.where((b) => b.isEnabled).toList(),
+      );
       _budgetsLoading = false;
     });
   }
