@@ -191,9 +191,9 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     var hasError = false;
     if (amount <= 0) {
       hasError = true;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Enter an amount')));
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(const SnackBar(content: Text('Enter an amount')));
     }
     if (description.isEmpty) hasError = true;
     if (_selectedCategoryId == null) hasError = true;
@@ -242,9 +242,9 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
         'NewTransactionSheet: Failed to save record: ${failure.message}',
       );
       setState(() => _isSubmitting = false);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(failure.message)));
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(failure.message)));
 
       return true;
     }, (_) => false);
@@ -267,11 +267,13 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       final repo = widget.recurringRepository;
       if (repo == null) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Recurring transactions are not ready yet.'),
-            ),
-          );
+          ScaffoldMessenger.of(context)
+            ..clearSnackBars()
+            ..showSnackBar(
+              const SnackBar(
+                content: Text('Recurring transactions are not ready yet.'),
+              ),
+            );
         }
 
         return false;
@@ -299,14 +301,16 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
         'NewTransactionSheet: Failed to create recurring transaction: $e',
       );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Recurring transaction could not be saved. You can set it up later from the Recurring tab.',
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Recurring transaction could not be saved. You can set it up later from the Recurring tab.',
+              ),
+              duration: Duration(seconds: 3),
             ),
-            duration: Duration(seconds: 3),
-          ),
-        );
+          );
       }
 
       return false;

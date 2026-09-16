@@ -74,9 +74,11 @@ class _AllCategoriesPickerPageState extends State<AllCategoriesPickerPage> {
 
   Future<void> _onLongPressDelete(Category category) async {
     if (category.isDefault) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Default categories cannot be deleted')),
-      );
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(
+          const SnackBar(content: Text('Default categories cannot be deleted')),
+        );
 
       return;
     }

@@ -55,12 +55,14 @@ class _AiAssistantContentState extends State<_AiAssistantContent> {
   void _listenForErrors(BuildContext context, AiAssistantState state) {
     final error = state.error;
     if (error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(error),
-          backgroundColor: const Color(0xFFF48FB1),
-        ),
-      );
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(error),
+            backgroundColor: const Color(0xFFF48FB1),
+          ),
+        );
     }
   }
 

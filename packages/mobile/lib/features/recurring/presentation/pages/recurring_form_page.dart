@@ -110,9 +110,9 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
       case RecurringOperationSuccess():
         context.pop(true);
       case RecurringError(:final message):
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(message)));
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(content: Text(message)));
       default:
         break;
     }

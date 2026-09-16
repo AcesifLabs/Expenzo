@@ -112,9 +112,9 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
       case BudgetOperationSuccess():
         context.pop(true);
       case BudgetError(:final message):
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(message)));
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(content: Text(message)));
       default:
         break;
     }

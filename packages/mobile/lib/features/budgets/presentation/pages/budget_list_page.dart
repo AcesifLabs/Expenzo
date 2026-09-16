@@ -35,13 +35,15 @@ class _BudgetListViewState extends State<BudgetListView> {
   void _onStateChanged(BuildContext context, BudgetState state) {
     switch (state) {
       case BudgetOperationSuccess():
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Budget operation successful')),
-        );
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(
+            const SnackBar(content: Text('Budget operation successful')),
+          );
       case BudgetError(:final message):
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(message)));
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(content: Text(message)));
       default:
         break;
     }

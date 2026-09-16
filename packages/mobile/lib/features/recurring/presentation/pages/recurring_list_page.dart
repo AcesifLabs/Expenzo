@@ -37,13 +37,13 @@ class _RecurringListViewState extends State<RecurringListView> {
   void _onListener(BuildContext context, RecurringState state) {
     switch (state) {
       case RecurringOperationSuccess():
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Operation successful')));
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(const SnackBar(content: Text('Operation successful')));
       case RecurringError(:final message):
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(message)));
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(content: Text(message)));
       default:
         break;
     }

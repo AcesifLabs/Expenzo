@@ -489,12 +489,14 @@ class _InteractiveTemplateBuilderState
       case TemplateEditorSaved() when saved != null:
         unawaited(_handleSaveSuccess(context, saved));
       case TemplateEditorError(:final message):
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error saving template: $message'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(
+            SnackBar(
+              content: Text('Error saving template: $message'),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+          );
       default:
         break;
     }
@@ -514,13 +516,15 @@ class _InteractiveTemplateBuilderState
 
     if (!context.mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          isEdit ? 'Template updated' : 'Template saved successfully!',
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            isEdit ? 'Template updated' : 'Template saved successfully!',
+          ),
         ),
-      ),
-    );
+      );
     Navigator.of(context).pop();
   }
 

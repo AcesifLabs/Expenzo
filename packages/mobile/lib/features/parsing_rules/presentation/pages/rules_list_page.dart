@@ -239,11 +239,13 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
 
     context.read<ParsingRulesBloc>().add(CreateRuleEvent(rule));
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(widget.rule == null ? 'Rule created' : 'Rule updated'),
-      ),
-    );
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(widget.rule == null ? 'Rule created' : 'Rule updated'),
+        ),
+      );
 
     Navigator.of(context).pop();
   }
@@ -494,9 +496,9 @@ class AddTemplatesPage extends StatelessWidget {
   void _addTemplate(BuildContext context, DefaultRuleTemplate template) {
     final rule = template.toParsingRule();
     context.read<ParsingRulesBloc>().add(CreateRuleEvent(rule));
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Added "${template.name}"')));
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(SnackBar(content: Text('Added "${template.name}"')));
   }
 
   @override

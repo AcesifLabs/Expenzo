@@ -135,9 +135,11 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
       await _beginAnalysis(File(file.path), mimeType: 'image/jpeg');
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Failed to capture photo.')));
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(
+          const SnackBar(content: Text('Failed to capture photo.')),
+        );
     }
   }
 
@@ -168,11 +170,13 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
 
   void _showExtractFailure() {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Could not read receipt. Check logs for details.'),
-      ),
-    );
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(
+        const SnackBar(
+          content: Text('Could not read receipt. Check logs for details.'),
+        ),
+      );
     setState(() {
       _processing = false;
       _previewImage = null;
