@@ -22,7 +22,9 @@ class CheckBudgetAlerts {
     try {
       final result = await budgetRepository.getBudgetById(budgetId);
 
-      return result.fold((failure) => Left(failure), (budget) async {
+      return await result.fold((failure) async => Left(failure), (
+        budget,
+      ) async {
         final effectiveBudget =
             budget.amount +
             (budget.rolloverEnabled ? budget.rolloverAmount : 0);

@@ -25,7 +25,7 @@ class ConnectivityService {
     try {
       final results = await _connectivity.checkConnectivity();
 
-      return _checkConnectivity(results);
+      return await _checkConnectivity(results);
     } catch (e) {
       return _isOnline;
     }

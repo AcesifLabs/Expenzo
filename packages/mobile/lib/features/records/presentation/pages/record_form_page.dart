@@ -9,7 +9,6 @@ import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/features/budgets/domain/entities/budget.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets.dart';
-import 'package:expense_tracker/features/records/domain/entities/record.dart';
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
 import '../../../../shared/presentation/widgets/shimmer_box.dart';
 import '../../../categories/presentation/bloc/category_bloc.dart';

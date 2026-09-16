@@ -45,7 +45,7 @@ class SmsLocalDatasourceImpl implements SmsLocalDatasource {
       final messages = await _smsQuery.getAllSms;
 
       // Run filtering in a background isolate to avoid blocking the UI
-      return compute(
+      return await compute(
         _filterByDateRange,
         _DateRangeFilterParams(messages, start, end),
       );
