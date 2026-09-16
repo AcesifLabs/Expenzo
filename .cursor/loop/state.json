@@ -1,0 +1,14 @@
+{
+  "mode": "idle",
+  "max_tickets": 3,
+  "processed_this_run": 1,
+  "current": null,
+  "done": ["SAAP-54"],
+  "blocked": [],
+  "last_result": {
+    "ticket": "SAAP-54",
+    "status": "completed",
+    "branch": "feat/SAAP-54-budget-screens",
+    "tests": "36 passed (budget suite + record budget + migration v16)"
+  }
+}

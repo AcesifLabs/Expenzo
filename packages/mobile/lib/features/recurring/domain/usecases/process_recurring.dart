@@ -20,8 +20,8 @@ class ProcessRecurring {
     try {
       final dueRecurringResult = await repository.getDueRecurring();
 
-      return dueRecurringResult.fold(
-        (failure) => Left(failure),
+      return await dueRecurringResult.fold(
+        (failure) async => Left(failure),
         _processDueRecurring,
       );
     } on CacheException catch (e) {
