@@ -6,7 +6,6 @@ import 'package:expense_tracker/core/theme/currency_config.dart';
 import '../../domain/entities/user_settings.dart';
 
 abstract class SettingsLocalDatasource {
-  /// Throws: [CacheException] if a database error occurs.
   Future<UserSettings> getSettings();
   Future<UserSettings> updateSettings(UserSettings settings);
 }
@@ -17,7 +16,6 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
 
   SettingsLocalDatasourceImpl({required this.sharedPreferences});
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<UserSettings> getSettings() async {
     try {
@@ -45,7 +43,6 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
     }
   }
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<UserSettings> updateSettings(UserSettings settings) async {
     try {

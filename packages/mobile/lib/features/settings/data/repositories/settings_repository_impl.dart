@@ -11,7 +11,6 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
   SettingsRepositoryImpl({required this.localDatasource});
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, UserSettings>> getSettings() async {
     try {
@@ -27,7 +26,6 @@ class SettingsRepositoryImpl implements SettingsRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, UserSettings>> updateSettings(
     UserSettings settings,

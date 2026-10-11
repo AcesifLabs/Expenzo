@@ -8,7 +8,6 @@ class DeleteAccount extends UseCase<Unit, NoParams> {
 
   DeleteAccount(this.repository);
 
-  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, Unit>> call(NoParams params) {
     return repository.deleteAccount();

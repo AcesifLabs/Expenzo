@@ -9,7 +9,6 @@ class GetCategoryRecordCounts extends UseCase<Map<String, int>, NoParams> {
 
   GetCategoryRecordCounts(this.repository);
 
-  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, Map<String, int>>> call(NoParams params) {
     return repository.getCategoryRecordCounts();

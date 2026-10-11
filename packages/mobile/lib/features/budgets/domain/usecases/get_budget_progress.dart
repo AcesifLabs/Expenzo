@@ -11,8 +11,6 @@ class GetBudgetProgress {
 
   GetBudgetProgress({required this.repository});
 
-  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
-
   Future<Either<Failure, BudgetProgress>> call({
     required String budgetId,
     required double spentAmount,

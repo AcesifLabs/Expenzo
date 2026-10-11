@@ -29,7 +29,6 @@ class ScanSmsUseCase implements UseCase<SmsScanPage, ScanSmsParams> {
     required ParsingIsolateService parsingIsolateService,
   }) : _isolateService = parsingIsolateService;
 
-  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, SmsScanPage>> call(ScanSmsParams params) async {
     try {

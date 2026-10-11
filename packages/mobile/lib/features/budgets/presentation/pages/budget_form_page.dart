@@ -201,12 +201,10 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
     }
   }
 
-  // -- TopBar --
   PreferredSizeWidget _buildTopBar(String title) {
     return AppPageHeader(leading: const AppBackButton(), title: title);
   }
 
-  // -- Field label --
   Widget _buildLabel(String text) {
     return Text(
       text,
@@ -214,7 +212,6 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
     );
   }
 
-  // -- Error text --
   Widget _buildErrorText(String error) {
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.sm),
@@ -225,7 +222,6 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
     );
   }
 
-  // -- Amount Field --
   Widget _buildAmountField() {
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.smd),
@@ -293,7 +289,6 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
     );
   }
 
-  // -- Name Field --
   Widget _buildNameField() {
     final strings = t.budgets.form;
 
@@ -348,7 +343,6 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
     );
   }
 
-  // -- Period Field --
   Widget _buildPeriodField() {
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.smd),
@@ -412,7 +406,6 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
     );
   }
 
-  // -- Rollover Row --
   Widget _buildRolloverRow() {
     final strings = t.budgets.form;
 
@@ -465,7 +458,6 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
     );
   }
 
-  // -- Submit Button --
   Widget _buildSubmitButton(BudgetState state) {
     final label = isEditing ? t.common.save : t.budgets.form.add;
     final isLoading = state is BudgetLoading;
@@ -504,7 +496,6 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
     );
   }
 
-  // -- Form --
   Widget _buildForm(BudgetState state) {
     final strings = t.budgets.form;
     final title = isEditing ? strings.edit : strings.add;

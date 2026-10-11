@@ -39,7 +39,6 @@ DateTime _addMonths(DateTime date, int months, {int? dayOfMonth}) {
   return DateTime(targetYear, normalizedMonth, clampedDay);
 }
 
-/// Adds [years] years to [date], clamping for Feb 29 → Feb 28 on non-leap years.
 DateTime _addYears(DateTime date, int years, {int? dayOfMonth}) {
   final targetYear = date.year + years;
   final day = dayOfMonth ?? date.day;
@@ -51,6 +50,5 @@ DateTime _addYears(DateTime date, int years, {int? dayOfMonth}) {
 
 /// Returns the last day of the given month/year.
 int _lastDayOfMonth(int year, int month) {
-  // Day 0 of next month = last day of current month
   return DateTime(year, month + 1, 0).day;
 }

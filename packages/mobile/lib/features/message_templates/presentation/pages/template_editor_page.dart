@@ -212,10 +212,6 @@ class _InteractiveTemplateBuilderState
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // Step scaffold — shared layout for all steps
-  // ---------------------------------------------------------------------------
-
   Widget _buildStepScaffold({
     required String stepKey,
     required List<Widget> content,
@@ -242,10 +238,6 @@ class _InteractiveTemplateBuilderState
       ],
     );
   }
-
-  // ---------------------------------------------------------------------------
-  // Reusable content builders
-  // ---------------------------------------------------------------------------
 
   Widget _buildTriggerChipList() {
     return Wrap(
@@ -318,10 +310,6 @@ class _InteractiveTemplateBuilderState
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // Step 1 — Choose a key word
-  // ---------------------------------------------------------------------------
-
   Widget _buildStep1() {
     final editorT = t.messageTemplates.editor;
     final palette = context.palette;
@@ -372,10 +360,6 @@ class _InteractiveTemplateBuilderState
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // Step 2 — Select the Amount
-  // ---------------------------------------------------------------------------
-
   Widget _buildStep2() {
     final editorT = t.messageTemplates.editor;
     final palette = context.palette;
@@ -424,10 +408,6 @@ class _InteractiveTemplateBuilderState
       ),
     );
   }
-
-  // ---------------------------------------------------------------------------
-  // Step 3 — Review
-  // ---------------------------------------------------------------------------
 
   Widget _buildStep3() {
     final editorT = t.messageTemplates.editor;
@@ -531,10 +511,6 @@ class _InteractiveTemplateBuilderState
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // Save handling
-  // ---------------------------------------------------------------------------
-
   void _onTemplateSaveState(BuildContext context, TemplateEditorState state) {
     final saved = _savedTemplate;
     switch (state) {
@@ -590,10 +566,6 @@ class _InteractiveTemplateBuilderState
 
     return _buildStep3();
   }
-
-  // ---------------------------------------------------------------------------
-  // Build
-  // ---------------------------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {

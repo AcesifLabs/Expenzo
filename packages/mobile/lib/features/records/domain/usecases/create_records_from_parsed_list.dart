@@ -12,7 +12,6 @@ class CreateRecordsFromParsedList
 
   CreateRecordsFromParsedList(this.repository);
 
-  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, CreateRecordsResult>> call(
     List<ParsedTransaction> transactions,

@@ -10,7 +10,6 @@ class GetCategories extends UseCase<List<Category>, GetCategoriesParams> {
 
   GetCategories(this.repository);
 
-  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, List<Category>>> call(GetCategoriesParams params) {
     return repository.getCategories(

@@ -10,7 +10,6 @@ class UpdateRecurring
 
   UpdateRecurring(this.repository);
 
-  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, RecurringTransaction>> call(
     RecurringTransaction recurring,

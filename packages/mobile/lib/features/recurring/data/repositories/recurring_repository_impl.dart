@@ -25,7 +25,6 @@ class RecurringRepositoryImpl implements RecurringRepository {
     SyncQueueDao? syncQueueDao,
   }) : _syncQueueDao = syncQueueDao;
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, List<RecurringTransaction>>> getRecurringList() async {
     try {
@@ -41,7 +40,6 @@ class RecurringRepositoryImpl implements RecurringRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, RecurringTransaction>> getRecurringById(
     String id,
@@ -67,13 +65,11 @@ class RecurringRepositoryImpl implements RecurringRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, RecurringTransaction>> createRecurring(
     RecurringTransaction recurring,
   ) async {
     try {
-      // Generate id once if not provided, so datasource and sync use the same id
       final id = recurring.id ?? const Uuid().v4();
       final withId = recurring.id != null
           ? recurring
@@ -92,7 +88,6 @@ class RecurringRepositoryImpl implements RecurringRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, RecurringTransaction>> updateRecurring(
     RecurringTransaction recurring,
@@ -112,7 +107,6 @@ class RecurringRepositoryImpl implements RecurringRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, Unit>> updateRecurringBatch(
     List<RecurringTransaction> transactions,
@@ -136,7 +130,6 @@ class RecurringRepositoryImpl implements RecurringRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, Unit>> deleteRecurring(String id) async {
     try {
@@ -158,7 +151,6 @@ class RecurringRepositoryImpl implements RecurringRepository {
     return localDatasource.watchRecurringList();
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, List<RecurringTransaction>>> getDueRecurring() async {
     try {

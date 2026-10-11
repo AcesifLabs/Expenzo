@@ -89,7 +89,6 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     final currentState = state;
     if (currentState is! RecordLoaded) return;
 
-    // Preserve all active filter fields from the current state
     emit(
       currentState.copyWith(
         records: records,
@@ -261,7 +260,6 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
         ),
       );
 
-      // Re-subscribe to live updates with the current filter context
       _recordsSubscription = recordRepository
           .watchRecords(limit: _pageSize)
           .listen((updatedRecords) {

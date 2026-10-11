@@ -9,7 +9,6 @@ class GetRules implements UseCase<List<ParsingRule>, GetRulesParams> {
 
   GetRules(this.repository);
 
-  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, List<ParsingRule>>> call(GetRulesParams params) {
     return repository.getRules(

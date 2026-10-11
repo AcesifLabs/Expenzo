@@ -12,7 +12,6 @@ class SearchRepositoryImpl implements SearchRepository {
 
   SearchRepositoryImpl({required this.localDatasource});
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, List<SearchResult>>> searchRecords(
     SearchFilters filters,

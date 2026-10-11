@@ -76,7 +76,6 @@ class _AuthInterceptor extends Interceptor {
           return;
         }
 
-        // Single-flight: if a refresh is already in progress, await it
         final newJwt = await _refreshToken();
 
         if (newJwt != null) {
@@ -98,13 +97,11 @@ class _AuthInterceptor extends Interceptor {
   /// Performs a single-flight token refresh.
   /// Returns the new JWT string, or null if refresh fails.
   Future<String?> _refreshToken() {
-    // If a refresh is already in flight, await it
     final existingCompleter = _refreshCompleter;
     if (existingCompleter != null) {
       return existingCompleter.future;
     }
 
-    // Start a new refresh
     final completer = Completer<String?>();
     _refreshCompleter = completer;
 

@@ -10,7 +10,6 @@ class ProcessRecurring {
 
   ProcessRecurring(this.repository);
 
-  /// Returns [Right(list)] on success, [Left(Failure)] on failure.
   ///
   /// For each due recurring, advances occurrences until the next one is in the
   /// future (catch-up). Respects [RecurringTransaction.endDate]. Each elapsed
@@ -71,22 +70,17 @@ class ProcessRecurring {
     final processed = <RecurringTransaction>[];
     var count = 0;
 
-    // Catch up: advance until current is in the future
     while (!current.isAfter(now) && count < kMaxCatchUpOccurrences) {
-      // Check endDate before processing this occurrence
       final endDate = recurring.endDate;
       if (endDate != null && current.isAfter(endDate)) {
-        // This occurrence and all future ones are past endDate
         return _CatchUpResult(
           processed: processed,
           updated: recurring.copyWith(nextOccurrence: current, isActive: false),
         );
       }
 
-      // This occurrence is due — record it
       processed.add(recurring.copyWith(nextOccurrence: current));
 
-      // Advance to next occurrence
       current = calculateNextOccurrence(
         current,
         recurring.frequency,
@@ -95,7 +89,6 @@ class ProcessRecurring {
       count++;
     }
 
-    // Check if the final nextOccurrence exceeds endDate
     final endDate = recurring.endDate;
     final isPastEnd = endDate != null && current.isAfter(endDate);
 

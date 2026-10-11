@@ -8,8 +8,6 @@ class UpdateBudget {
 
   UpdateBudget({required this.repository});
 
-  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
-
   Future<Either<Failure, Budget>> call(Budget budget) {
     return repository.updateBudget(budget);
   }

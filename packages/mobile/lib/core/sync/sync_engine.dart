@@ -208,14 +208,12 @@ class SyncEngine {
   /// Concurrent triggers are coalesced: if a cycle is already running,
   /// exactly one more cycle will run after it completes.
   Future<void> _runSyncCycle() async {
-    // If a cycle is already in progress, mark a pending trigger and return
     if (_syncLock != null) {
       _hasPendingTrigger = true;
 
       return;
     }
 
-    // Acquire the lock
     _syncLock = Completer<void>();
 
     try {
@@ -231,7 +229,6 @@ class SyncEngine {
         await _runAfterSyncTasks();
       } while (_hasPendingTrigger);
     } finally {
-      // Release the lock
       final lock = _syncLock;
       if (lock != null) {
         lock.complete();
@@ -292,7 +289,6 @@ class SyncEngine {
     final results = response.data['results'] as List;
     final syncedIds = <int>[];
 
-    // Build a lookup map for id-based correlation if server echoes identifiers
     final batchByRecordId = <String, int>{};
     for (int i = 0; i < batch.length; i++) {
       batchByRecordId[batch[i].recordId] = batch[i].id;
@@ -302,7 +298,6 @@ class SyncEngine {
       final result = results[i] as Map<String, dynamic>;
       final status = SyncStatus.fromString(result['status'] as String);
       if (status == SyncStatus.success || status == SyncStatus.conflict) {
-        // Try id-based correlation first, fall back to positional
         final resultId = result['id']?.toString();
         int? queueId;
         if (resultId != null) {

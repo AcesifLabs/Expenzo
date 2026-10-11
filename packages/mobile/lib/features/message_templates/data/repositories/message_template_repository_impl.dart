@@ -11,7 +11,6 @@ class MessageTemplateRepositoryImpl implements MessageTemplateRepository {
 
   MessageTemplateRepositoryImpl(this.localDatasource);
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, List<MessageSource>>> getMessageSources() async {
     try {
@@ -25,7 +24,6 @@ class MessageTemplateRepositoryImpl implements MessageTemplateRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, MessageSource>> saveMessageSource(
     MessageSource source,
@@ -41,7 +39,6 @@ class MessageTemplateRepositoryImpl implements MessageTemplateRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, Unit>> deleteMessageSource(String id) async {
     try {
@@ -60,7 +57,6 @@ class MessageTemplateRepositoryImpl implements MessageTemplateRepository {
     return localDatasource.watchMessageSources();
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, List<ExpenseTemplate>>> getTemplatesForSource(
     String sourceId,
@@ -76,7 +72,6 @@ class MessageTemplateRepositoryImpl implements MessageTemplateRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, List<ExpenseTemplate>>> getAllTemplates() async {
     try {
@@ -90,7 +85,6 @@ class MessageTemplateRepositoryImpl implements MessageTemplateRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, ExpenseTemplate>> saveTemplate(
     ExpenseTemplate template,
@@ -106,7 +100,6 @@ class MessageTemplateRepositoryImpl implements MessageTemplateRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, Unit>> deleteTemplate(String id) async {
     try {

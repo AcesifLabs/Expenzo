@@ -41,7 +41,6 @@ class EvaluateRulesUseCase
     return RuleEvaluator.evaluateWithContext(context, params);
   }
 
-  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, ParsedTransaction?>> call(
     EvaluateRulesParams params,

@@ -10,7 +10,6 @@ import "package:expense_tracker/core/constants/source_types.dart";
 import '../../domain/repositories/record_repository.dart';
 
 abstract class RecordLocalDatasource {
-  /// Throws: [CacheException] if a database error occurs.
   Future<List<rec.Record>> getRecords({
     DateTimeRange? dateRange,
     String? categoryId,
@@ -18,14 +17,12 @@ abstract class RecordLocalDatasource {
     int? offset,
   });
 
-  /// Throws: [CacheException] if a database error occurs.
   Future<rec.Record?> getRecordById(String id);
   Future<rec.Record> addRecord(rec.Record record);
   Future<rec.Record> updateRecord(rec.Record record);
   Future<void> deleteRecord(String id);
   Stream<List<rec.Record>> watchRecords({int? limit, int? offset});
 
-  /// Throws: [CacheException] if a database error occurs.
   Future<bool> recordExistsBySourceId(String sourceId);
   Future<Set<String>> getExistingSourceIds(List<String> sourceIds);
   Future<void> addRecordsBatch(List<rec.Record> records);
@@ -35,19 +32,15 @@ abstract class RecordLocalDatasource {
     DateTime end,
   );
 
-  /// Throws: [CacheException] if a database error occurs.
   Future<double> getCategorySpending(
     String categoryId,
     DateTime start,
     DateTime end,
   );
 
-  /// Throws: [CacheException] if a database error occurs.
   Future<double> getTotalSpending(DateTime start, DateTime end);
 
   /// Expense spend per budget over each budget's own [start, end) period.
-  ///
-  /// Throws: [CacheException] if a database error occurs.
   Future<Map<String, double>> getSpendingForBudgets(
     Map<String, ({DateTime start, DateTime end})> periods,
   );
@@ -56,15 +49,12 @@ abstract class RecordLocalDatasource {
     DateTime end,
   );
 
-  /// Throws: [CacheException] if a database error occurs.
   Future<List<rec.Record>> getFilteredRecords(RecordFilter filter);
 
   /// Returns the number of records that reference [categoryId].
-  /// Throws: [CacheException] if a database error occurs.
   Future<int> getRecordCountByCategory(String categoryId);
 
   /// Returns the number of records per category id.
-  /// Throws: [CacheException] if a database error occurs.
   Future<Map<String, int>> getCategoryRecordCounts();
 }
 
@@ -73,7 +63,6 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
 
   RecordLocalDatasourceImpl({required this.recordDao});
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<List<rec.Record>> getRecords({
     DateTimeRange? dateRange,
@@ -83,7 +72,6 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
   }) async {
     try {
       if (dateRange != null) {
-        // Normalize end to end-of-day for inclusive queries
         final end = dateRange.end;
         final inclusiveEnd = DateTime(
           end.year,
@@ -118,7 +106,6 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
     }
   }
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<rec.Record?> getRecordById(String id) async {
     try {
@@ -131,7 +118,6 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
     }
   }
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<rec.Record> addRecord(rec.Record record) async {
     try {
@@ -159,7 +145,6 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
     }
   }
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<rec.Record> updateRecord(rec.Record record) async {
     try {
@@ -190,7 +175,6 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
     }
   }
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<void> deleteRecord(String id) async {
     try {
@@ -210,7 +194,6 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
         );
   }
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<bool> recordExistsBySourceId(String sourceId) async {
     try {
@@ -221,7 +204,6 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
     }
   }
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<Set<String>> getExistingSourceIds(List<String> sourceIds) async {
     try {
@@ -232,7 +214,6 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
     }
   }
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<List<rec.Record>> getRecordsByCategoryAndDateRange(
     String categoryId,
@@ -253,7 +234,6 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
     }
   }
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<double> getCategorySpending(
     String categoryId,
@@ -268,7 +248,6 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
     }
   }
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<double> getTotalSpending(DateTime start, DateTime end) async {
     try {
@@ -279,7 +258,6 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
     }
   }
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<Map<String, double>> getSpendingForBudgets(
     Map<String, ({DateTime start, DateTime end})> periods,
@@ -292,14 +270,12 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
     }
   }
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<List<rec.Record>> getRecordsByDateRangeOnly(
     DateTime start,
     DateTime end,
   ) async {
     try {
-      // Normalize end to end-of-day for inclusive queries
       final inclusiveEnd = DateTime(
         end.year,
         end.month,
@@ -321,7 +297,6 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
     }
   }
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<void> addRecordsBatch(List<rec.Record> records) async {
     try {
@@ -350,7 +325,6 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
     }
   }
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<List<rec.Record>> getFilteredRecords(RecordFilter filter) async {
     try {
@@ -363,7 +337,6 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
     }
   }
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<int> getRecordCountByCategory(String categoryId) async {
     try {
@@ -374,7 +347,6 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
     }
   }
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<Map<String, int>> getCategoryRecordCounts() async {
     try {
