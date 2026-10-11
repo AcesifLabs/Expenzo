@@ -103,7 +103,8 @@ class AppTheme {
   // Every color below comes from AppPalette (docs/adr/0003): primary is the
   // mint brand, secondary the lavender accent. Only Material-only roles
   // (containers, outlines) are spelled out here.
-  static ThemeData get lightTheme => _buildTheme(
+  // Built once and cached; ThemeData is immutable.
+  static final ThemeData _lightTheme = _buildTheme(
     _ThemeColors(
       brightness: Brightness.light,
       colorScheme: ColorScheme.light(
@@ -164,7 +165,7 @@ class AppTheme {
     ),
   );
 
-  static ThemeData get darkTheme => _buildTheme(
+  static final ThemeData _darkTheme = _buildTheme(
     _ThemeColors(
       brightness: Brightness.dark,
       colorScheme: ColorScheme.dark(
@@ -217,6 +218,10 @@ class AppTheme {
       palette: _dark,
     ),
   );
+
+  static ThemeData get lightTheme => _lightTheme;
+
+  static ThemeData get darkTheme => _darkTheme;
 
   AppTheme._();
 

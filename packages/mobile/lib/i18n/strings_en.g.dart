@@ -622,8 +622,8 @@ class Translations$settings$en {
 	/// en: 'Settings'
 	String get title => 'Settings';
 
-	/// en: 'Currency'
-	String get currency => 'Currency';
+	/// en: 'Default currency'
+	String get currency => 'Default currency';
 
 	/// en: 'Appearance'
 	String get appearance => 'Appearance';
@@ -634,8 +634,8 @@ class Translations$settings$en {
 	late final Translations$settings$sections$en sections = Translations$settings$sections$en.internal(_root);
 	late final Translations$settings$budgetAlerts$en budgetAlerts = Translations$settings$budgetAlerts$en.internal(_root);
 
-	/// en: 'Turn bank and payment messages into records'
-	String get autoImportSubtitle => 'Turn bank and payment messages into records';
+	/// en: 'Turn bank and payment messages into transactions'
+	String get autoImportSubtitle => 'Turn bank and payment messages into transactions';
 
 	/// en: 'Patterns for messages auto-import can't read yet'
 	String get matchingRulesSubtitle => 'Patterns for messages auto-import can\'t read yet';
@@ -653,6 +653,12 @@ class Translations$settings$en {
 
 	late final Translations$settings$signIn$en signIn = Translations$settings$signIn$en.internal(_root);
 	late final Translations$settings$deleteDialog$en deleteDialog = Translations$settings$deleteDialog$en.internal(_root);
+
+	/// en: 'Couldn't load your settings.'
+	String get loadFailed => 'Couldn\'t load your settings.';
+
+	late final Translations$settings$appearanceScreen$en appearanceScreen = Translations$settings$appearanceScreen$en.internal(_root);
+	late final Translations$settings$currencyScreen$en currencyScreen = Translations$settings$currencyScreen$en.internal(_root);
 }
 
 // Path: shell
@@ -2149,6 +2155,16 @@ class Translations$settings$language$en {
 
 	/// en: 'Language'
 	String get title => 'Language';
+
+	late final Translations$settings$language$sections$en sections = Translations$settings$language$sections$en.internal(_root);
+
+	/// en: 'Match device'
+	String get matchDevice => 'Match device';
+
+	/// en: 'Use your phone's language'
+	String get matchDeviceSubtitle => 'Use your phone\'s language';
+
+	late final Translations$settings$language$names$en names = Translations$settings$language$names$en.internal(_root);
 }
 
 // Path: settings.sections
@@ -2168,8 +2184,17 @@ class Translations$settings$sections$en {
 	/// en: 'Support'
 	String get support => 'Support';
 
-	/// en: 'Account'
-	String get account => 'Account';
+	/// en: 'Profile & account'
+	String get account => 'Profile & account';
+
+	/// en: 'Notifications'
+	String get notifications => 'Notifications';
+
+	/// en: 'Data & budget'
+	String get dataBudget => 'Data & budget';
+
+	/// en: 'General'
+	String get general => 'General';
 }
 
 // Path: settings.budgetAlerts
@@ -2195,8 +2220,8 @@ class Translations$settings$recurring$en {
 
 	// Translations
 
-	/// en: 'Recurring'
-	String get title => 'Recurring';
+	/// en: 'Recurring transactions'
+	String get title => 'Recurring transactions';
 
 	/// en: 'Bills and income that repeat every month'
 	String get subtitle => 'Bills and income that repeat every month';
@@ -2213,8 +2238,8 @@ class Translations$settings$signIn$en {
 	/// en: 'Sign in'
 	String get title => 'Sign in';
 
-	/// en: 'Back up and sync your records'
-	String get subtitle => 'Back up and sync your records';
+	/// en: 'Keep your data on all your devices'
+	String get subtitle => 'Keep your data on all your devices';
 }
 
 // Path: settings.deleteDialog
@@ -2254,6 +2279,43 @@ class Translations$settings$deleteDialog$en {
 
 	/// en: 'I understand and want to delete my account'
 	String get confirm => 'I understand and want to delete my account';
+}
+
+// Path: settings.appearanceScreen
+class Translations$settings$appearanceScreen$en {
+	Translations$settings$appearanceScreen$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	late final Translations$settings$appearanceScreen$sections$en sections = Translations$settings$appearanceScreen$sections$en.internal(_root);
+
+	/// en: 'Light mode preview'
+	String get lightTitle => 'Light mode preview';
+
+	/// en: 'Clean, bright interface with soft lavender accents.'
+	String get lightBody => 'Clean, bright interface with soft lavender accents.';
+
+	/// en: 'Dark mode preview'
+	String get darkTitle => 'Dark mode preview';
+
+	/// en: 'A deep charcoal background with lavender accents for a calm, focused look.'
+	String get darkBody => 'A deep charcoal background with lavender accents for a calm, focused look.';
+}
+
+// Path: settings.currencyScreen
+class Translations$settings$currencyScreen$en {
+	Translations$settings$currencyScreen$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Search currencies'
+	String get searchHint => 'Search currencies';
+
+	/// en: 'No currency matches "{query}"'
+	String noResults({required Object query}) => 'No currency matches "${query}"';
 }
 
 // Path: shell.tabs
@@ -2666,6 +2728,48 @@ class Translations$reports$insights$budgets$en {
 
 	/// en: 'Review your budgets to stay on track this month.'
 	String get description => 'Review your budgets to stay on track this month.';
+}
+
+// Path: settings.language.sections
+class Translations$settings$language$sections$en {
+	Translations$settings$language$sections$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'App language'
+	String get appLanguage => 'App language';
+}
+
+// Path: settings.language.names
+class Translations$settings$language$names$en {
+	Translations$settings$language$names$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'English'
+	String get en => 'English';
+
+	/// en: 'Bengali'
+	String get bn => 'Bengali';
+}
+
+// Path: settings.appearanceScreen.sections
+class Translations$settings$appearanceScreen$sections$en {
+	Translations$settings$appearanceScreen$sections$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Theme'
+	String get theme => 'Theme';
+
+	/// en: 'Preview'
+	String get preview => 'Preview';
 }
 
 /// The flat map containing all translations for locale <en>.
@@ -3179,27 +3283,35 @@ extension on Translations {
 			'reports.observations' => 'Key observations from your spending this month',
 			'reports.noData' => 'No data',
 			'settings.language.title' => 'Language',
+			'settings.language.sections.appLanguage' => 'App language',
+			'settings.language.matchDevice' => 'Match device',
+			'settings.language.matchDeviceSubtitle' => 'Use your phone\'s language',
+			'settings.language.names.en' => 'English',
+			'settings.language.names.bn' => 'Bengali',
 			'settings.title' => 'Settings',
-			'settings.currency' => 'Currency',
+			'settings.currency' => 'Default currency',
 			'settings.appearance' => 'Appearance',
 			'settings.notificationsBlocked' => 'Allow notifications for Expenzo in system settings to get budget alerts.',
+			_ => null,
+		} ?? switch (path) {
 			'settings.sections.preferences' => 'Preferences',
 			'settings.sections.automation' => 'Automation',
 			'settings.sections.support' => 'Support',
-			'settings.sections.account' => 'Account',
+			'settings.sections.account' => 'Profile & account',
+			'settings.sections.notifications' => 'Notifications',
+			'settings.sections.dataBudget' => 'Data & budget',
+			'settings.sections.general' => 'General',
 			'settings.budgetAlerts.title' => 'Budget alerts',
-			_ => null,
-		} ?? switch (path) {
 			'settings.budgetAlerts.subtitle' => 'Notify me at 80% and when over budget',
-			'settings.autoImportSubtitle' => 'Turn bank and payment messages into records',
+			'settings.autoImportSubtitle' => 'Turn bank and payment messages into transactions',
 			'settings.matchingRulesSubtitle' => 'Patterns for messages auto-import can\'t read yet',
-			'settings.recurring.title' => 'Recurring',
+			'settings.recurring.title' => 'Recurring transactions',
 			'settings.recurring.subtitle' => 'Bills and income that repeat every month',
 			'settings.feedbackSubtitle' => 'Report a problem or suggest an idea',
 			'settings.signOut' => 'Sign out',
 			'settings.deleteAccount' => 'Delete account',
 			'settings.signIn.title' => 'Sign in',
-			'settings.signIn.subtitle' => 'Back up and sync your records',
+			'settings.signIn.subtitle' => 'Keep your data on all your devices',
 			'settings.deleteDialog.title' => 'Delete account',
 			'settings.deleteDialog.question' => 'Are you sure you want to delete your account?',
 			'settings.deleteDialog.listTitle' => 'This permanently deletes:',
@@ -3210,6 +3322,15 @@ extension on Translations {
 			'settings.deleteDialog.rules' => '• All your matching rules',
 			'settings.deleteDialog.cannotUndo' => 'This cannot be undone.',
 			'settings.deleteDialog.confirm' => 'I understand and want to delete my account',
+			'settings.loadFailed' => 'Couldn\'t load your settings.',
+			'settings.appearanceScreen.sections.theme' => 'Theme',
+			'settings.appearanceScreen.sections.preview' => 'Preview',
+			'settings.appearanceScreen.lightTitle' => 'Light mode preview',
+			'settings.appearanceScreen.lightBody' => 'Clean, bright interface with soft lavender accents.',
+			'settings.appearanceScreen.darkTitle' => 'Dark mode preview',
+			'settings.appearanceScreen.darkBody' => 'A deep charcoal background with lavender accents for a calm, focused look.',
+			'settings.currencyScreen.searchHint' => 'Search currencies',
+			'settings.currencyScreen.noResults' => ({required Object query}) => 'No currency matches "${query}"',
 			'shell.tabs.home' => 'Home',
 			'shell.tabs.activity' => 'Activity',
 			'shell.tabs.budgets' => 'Budgets',

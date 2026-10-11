@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:expense_tracker/core/bloc/transformers.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
 import 'package:expense_tracker/features/auth/domain/usecases/delete_account.dart';
+import '../../domain/entities/user_settings.dart';
 import '../../domain/usecases/get_settings.dart';
 import '../../domain/usecases/update_settings.dart';
 import 'settings_event.dart';
@@ -12,6 +13,16 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   final GetSettings getSettings;
   final UpdateSettings updateSettings;
   final DeleteAccount deleteAccount;
+
+  /// The newest settings: the last loaded ones plus any change still being
+  /// saved. Derived events build on this, not on `state is SettingsLoaded`,
+  /// so a change made while a save runs is not dropped. Null until the first
+  /// load, and again after a failed save until the reload finishes.
+  UserSettings? _lastLoaded;
+
+  /// Saves still running. Saves run concurrently, so an older save's result
+  /// must not replace [_lastLoaded] while a newer one built on it is pending.
+  var _pendingSaves = 0;
 
   SettingsBloc({
     required this.getSettings,
@@ -46,7 +57,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     final result = await getSettings(NoParams());
     result.fold(
       (failure) => emit(SettingsError(failureText(failure))),
-      (settings) => emit(SettingsLoaded(settings)),
+      (settings) => _emitLoaded(emit, settings),
     );
   }
 
@@ -54,80 +65,49 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     UpdateSettingsEvent event,
     Emitter<SettingsState> emit,
   ) async {
+    _pendingSaves++;
     emit(const SettingsLoading());
     final result = await updateSettings(event.settings);
-    result.fold(
-      (failure) => emit(SettingsError(failureText(failure))),
-      (settings) => emit(SettingsLoaded(settings)),
-    );
+    _pendingSaves--;
+    result.fold((failure) {
+      // The cached change was never stored; forget it until the reload.
+      _lastLoaded = null;
+      emit(SettingsError(failureText(failure)));
+      add(const LoadSettings());
+    }, (settings) => _emitLoaded(emit, settings));
   }
 
   void _onDismissAutoImportPrompt(
     DismissAutoImportPrompt event,
     Emitter<SettingsState> emit,
   ) {
-    final currentState = state;
-    if (currentState is SettingsLoaded) {
-      add(
-        UpdateSettingsEvent(
-          currentState.settings.copyWith(autoImportPromptDismissed: true),
-        ),
-      );
-    }
+    _updateFromLast((s) => s.copyWith(autoImportPromptDismissed: true));
   }
 
   void _onUpdateCurrency(UpdateCurrency event, Emitter<SettingsState> emit) {
-    final currentState = state;
-    if (currentState is SettingsLoaded) {
-      final updated = currentState.settings.copyWith(
-        currencyCode: event.currencyCode,
-      );
-      add(UpdateSettingsEvent(updated));
-    }
+    _updateFromLast((s) => s.copyWith(currencyCode: event.currencyCode));
   }
 
   void _onUpdateEmailFetchLimit(
     UpdateEmailFetchLimit event,
     Emitter<SettingsState> emit,
   ) {
-    final currentState = state;
-    if (currentState is SettingsLoaded) {
-      final updated = currentState.settings.copyWith(
-        emailFetchLimit: event.limit,
-      );
-      add(UpdateSettingsEvent(updated));
-    }
+    _updateFromLast((s) => s.copyWith(emailFetchLimit: event.limit));
   }
 
   void _onUpdateNotificationsEnabled(
     UpdateNotificationsEnabled event,
     Emitter<SettingsState> emit,
   ) {
-    final currentState = state;
-    if (currentState is SettingsLoaded) {
-      final updated = currentState.settings.copyWith(
-        notificationsEnabled: event.enabled,
-      );
-      add(UpdateSettingsEvent(updated));
-    }
+    _updateFromLast((s) => s.copyWith(notificationsEnabled: event.enabled));
   }
 
   void _onUpdateTheme(UpdateTheme event, Emitter<SettingsState> emit) {
-    final currentState = state;
-    if (currentState is SettingsLoaded) {
-      final updated = currentState.settings.copyWith(theme: event.theme);
-      add(UpdateSettingsEvent(updated));
-    }
+    _updateFromLast((s) => s.copyWith(theme: event.theme));
   }
 
   void _onUpdateLanguage(UpdateLanguage event, Emitter<SettingsState> emit) {
-    final currentState = state;
-    if (currentState is SettingsLoaded) {
-      final updated = currentState.settings.copyWith(
-        languageCode: event.languageCode,
-      );
-      add(UpdateSettingsEvent(updated));
-    }
+    _updateFromLast((s) => s.copyWith(languageCode: event.languageCode));
   }
 
   Future<void> _onDeleteAccountEvent(
@@ -140,5 +120,23 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       (failure) => emit(SettingsError(failureText(failure))),
       (_) => emit(const AccountDeleted()),
     );
+  }
+
+  /// Emits [settings] once no newer save is pending, so the UI never steps
+  /// back to an older value.
+  void _emitLoaded(Emitter<SettingsState> emit, UserSettings settings) {
+    if (_pendingSaves > 0) return;
+    _lastLoaded = settings;
+    emit(SettingsLoaded(settings));
+  }
+
+  /// Saves [change] applied to the newest settings. Does nothing before the
+  /// first load.
+  void _updateFromLast(UserSettings Function(UserSettings) change) {
+    final last = _lastLoaded;
+    if (last == null) return;
+    final updated = change(last);
+    _lastLoaded = updated;
+    add(UpdateSettingsEvent(updated));
   }
 }

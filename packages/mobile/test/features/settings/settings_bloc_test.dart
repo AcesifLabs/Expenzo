@@ -109,22 +109,84 @@ void main() {
       bloc.add(UpdateSettingsEvent(testSettings));
     });
 
-    test('emits [SettingsLoading, SettingsError] on failure', () async {
+    test(
+      'on failure emits SettingsError, then reloads the stored settings',
+      () async {
+        when(
+          () => mockGetSettings(any()),
+        ).thenAnswer((_) async => Right(testSettings));
+        when(() => mockUpdateSettings(any())).thenAnswer(
+          (_) async => Left(ServerFailure(message: 'Update failed')),
+        );
+
+        final expected = [
+          isA<SettingsLoading>(),
+          isA<SettingsError>().having(
+            (s) => s.message,
+            'message',
+            t.common.errors.server,
+          ),
+          isA<SettingsLoading>(),
+          isA<SettingsLoaded>().having(
+            (s) => s.settings,
+            'settings',
+            testSettings,
+          ),
+        ];
+
+        final emitted = expectLater(bloc.stream, emitsInOrder(expected));
+        bloc.add(UpdateSettingsEvent(testSettings.copyWith(theme: 'dark')));
+        await emitted;
+      },
+    );
+
+    test('a change after a failed save is still saved', () async {
+      when(
+        () => mockGetSettings(any()),
+      ).thenAnswer((_) async => Right(testSettings));
       when(
         () => mockUpdateSettings(any()),
       ).thenAnswer((_) async => Left(ServerFailure(message: 'Update failed')));
+      bloc.add(UpdateSettingsEvent(testSettings.copyWith(theme: 'dark')));
+      await bloc.stream.firstWhere((s) => s is SettingsLoaded);
 
-      final expected = [
-        isA<SettingsLoading>(),
-        isA<SettingsError>().having(
-          (s) => s.message,
-          'message',
-          t.common.errors.server,
-        ),
-      ];
+      when(() => mockUpdateSettings(any())).thenAnswer(
+        (i) async => Right(i.positionalArguments.first as UserSettings),
+      );
+      bloc.add(const UpdateTheme('dark'));
+      final loaded = await bloc.stream.firstWhere(
+        (s) => s is SettingsLoaded && s.settings.theme == 'dark',
+      );
 
-      expectLater(bloc.stream, emitsInOrder(expected));
-      bloc.add(UpdateSettingsEvent(testSettings));
+      expect((loaded as SettingsLoaded).settings.theme, 'dark');
+    });
+
+    test('a change after a failed save and a failed reload does not '
+        're-save the failed value', () async {
+      when(
+        () => mockGetSettings(any()),
+      ).thenAnswer((_) async => Right(testSettings));
+      when(() => mockUpdateSettings(any())).thenAnswer(
+        (i) async => Right(i.positionalArguments.first as UserSettings),
+      );
+      bloc.add(const LoadSettings());
+      await bloc.stream.firstWhere((s) => s is SettingsLoaded);
+
+      when(
+        () => mockGetSettings(any()),
+      ).thenAnswer((_) async => Left(CacheFailure(message: 'read failed')));
+      when(
+        () => mockUpdateSettings(any()),
+      ).thenAnswer((_) async => Left(CacheFailure(message: 'write failed')));
+      bloc.add(const UpdateTheme('dark'));
+      await bloc.stream.firstWhere((s) => s is SettingsError);
+      await bloc.stream.firstWhere((s) => s is SettingsError);
+      clearInteractions(mockUpdateSettings);
+
+      bloc.add(const UpdateLanguage('bn'));
+      await Future<void>.delayed(Duration.zero);
+
+      verifyNever(() => mockUpdateSettings(any()));
     });
   });
 
@@ -198,6 +260,31 @@ void main() {
 
       expect(saved.autoImportPromptDismissed, isTrue);
       expect(saved.currencyCode, 'USD');
+    });
+
+    test('a change made while a save runs keeps both changes', () async {
+      when(
+        () => mockGetSettings(any()),
+      ).thenAnswer((_) async => Right(testSettings));
+      when(() => mockUpdateSettings(any())).thenAnswer(
+        (i) async => Right(i.positionalArguments.first as UserSettings),
+      );
+      bloc.add(const LoadSettings());
+      await bloc.stream.firstWhere((s) => s is SettingsLoaded);
+
+      bloc
+        ..add(const UpdateTheme('dark'))
+        ..add(const UpdateLanguage('bn'));
+      await bloc.stream.firstWhere(
+        (s) => s is SettingsLoaded && s.settings.languageCode == 'bn',
+      );
+
+      final saved = verify(
+        () => mockUpdateSettings(captureAny()),
+      ).captured.cast<UserSettings>();
+      expect(saved, hasLength(2));
+      expect(saved.last.theme, 'dark');
+      expect(saved.last.languageCode, 'bn');
     });
 
     test('derived updates do nothing before settings have loaded', () async {

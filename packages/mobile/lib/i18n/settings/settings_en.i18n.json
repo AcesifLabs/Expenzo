@@ -1,25 +1,37 @@
 {
   "language": {
-    "title": "Language"
+    "title": "Language",
+    "sections": {
+      "appLanguage": "App language"
+    },
+    "matchDevice": "Match device",
+    "matchDeviceSubtitle": "Use your phone's language",
+    "names": {
+      "en": "English",
+      "bn": "Bengali"
+    }
   },
   "title": "Settings",
-  "currency": "Currency",
+  "currency": "Default currency",
   "appearance": "Appearance",
   "notificationsBlocked": "Allow notifications for Expenzo in system settings to get budget alerts.",
   "sections": {
     "preferences": "Preferences",
     "automation": "Automation",
     "support": "Support",
-    "account": "Account"
+    "account": "Profile & account",
+    "notifications": "Notifications",
+    "dataBudget": "Data & budget",
+    "general": "General"
   },
   "budgetAlerts": {
     "title": "Budget alerts",
     "subtitle": "Notify me at 80% and when over budget"
   },
-  "autoImportSubtitle": "Turn bank and payment messages into records",
+  "autoImportSubtitle": "Turn bank and payment messages into transactions",
   "matchingRulesSubtitle": "Patterns for messages auto-import can't read yet",
   "recurring": {
-    "title": "Recurring",
+    "title": "Recurring transactions",
     "subtitle": "Bills and income that repeat every month"
   },
   "feedbackSubtitle": "Report a problem or suggest an idea",
@@ -27,7 +39,7 @@
   "deleteAccount": "Delete account",
   "signIn": {
     "title": "Sign in",
-    "subtitle": "Back up and sync your records"
+    "subtitle": "Keep your data on all your devices"
   },
   "deleteDialog": {
     "title": "Delete account",
@@ -40,5 +52,20 @@
     "rules": "• All your matching rules",
     "cannotUndo": "This cannot be undone.",
     "confirm": "I understand and want to delete my account"
+  },
+  "loadFailed": "Couldn't load your settings.",
+  "appearanceScreen": {
+    "sections": {
+      "theme": "Theme",
+      "preview": "Preview"
+    },
+    "lightTitle": "Light mode preview",
+    "lightBody": "Clean, bright interface with soft lavender accents.",
+    "darkTitle": "Dark mode preview",
+    "darkBody": "A deep charcoal background with lavender accents for a calm, focused look."
+  },
+  "currencyScreen": {
+    "searchHint": "Search currencies",
+    "noResults": "No currency matches \"{query}\""
   }
 }

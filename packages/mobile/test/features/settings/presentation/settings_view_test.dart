@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:expense_tracker/features/auth/domain/entities/user.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_state.dart';
 import 'package:expense_tracker/features/settings/presentation/bloc/settings_bloc.dart';
@@ -64,8 +66,38 @@ void main() {
     );
   }
 
-  Finder inDialog(String text) =>
-      find.descendant(of: find.byType(SimpleDialog), matching: find.text(text));
+  /// Settings inside a router whose `/settings` route has one child page,
+  /// so a row's `context.push('/settings/<child>')` can be checked.
+  Future<void> pumpSettingsRouter(
+    WidgetTester tester, {
+    required String child,
+  }) async {
+    final router = GoRouter(
+      initialLocation: '/settings',
+      routes: [
+        GoRoute(
+          path: '/settings',
+          builder: (_, _) => Scaffold(
+            body: SettingsView(requestNotificationPermission: () async => true),
+          ),
+          routes: [
+            GoRoute(path: child, builder: (_, _) => Text('$child-page')),
+          ],
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      MultiBlocProvider(
+        providers: [
+          BlocProvider<SettingsBloc>.value(value: settingsBloc),
+          BlocProvider<AuthBloc>.value(value: authBloc),
+        ],
+        child: translated(MaterialApp.router(routerConfig: router)),
+      ),
+    );
+  }
 
   testWidgets('budget alerts is a switch showing the stored value', (
     tester,
@@ -81,44 +113,98 @@ void main() {
     ).called(1);
   });
 
-  testWidgets('appearance can go back to matching the device', (tester) async {
-    await pumpSettings(tester);
-    expect(find.text('Dark'), findsOneWidget);
+  testWidgets('the appearance row opens /settings/appearance', (tester) async {
+    await pumpSettingsRouter(tester, child: 'appearance');
 
     await tester.tap(find.text('Appearance'));
     await tester.pumpAndSettle();
-    await tester.tap(inDialog('Match device'));
-    await tester.pumpAndSettle();
 
-    verify(() => settingsBloc.add(const UpdateTheme('system'))).called(1);
+    expect(find.text('appearance-page'), findsOneWidget);
   });
 
-  testWidgets('language can be set to Bangla', (tester) async {
-    await pumpSettings(tester);
+  testWidgets('the currency row opens /settings/currency', (tester) async {
+    await pumpSettingsRouter(tester, child: 'currency');
 
+    await tester.tap(find.text('Default currency'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('currency-page'), findsOneWidget);
+  });
+
+  testWidgets('the language row opens /settings/language', (tester) async {
+    await pumpSettingsRouter(tester, child: 'language');
+
+    await tester.scrollUntilVisible(find.text(t.settings.language.title), 200);
     await tester.tap(find.text(t.settings.language.title));
     await tester.pumpAndSettle();
-    await tester.tap(inDialog('বাংলা'));
-    await tester.pumpAndSettle();
 
-    verify(() => settingsBloc.add(const UpdateLanguage('bn'))).called(1);
+    expect(find.text('language-page'), findsOneWidget);
   });
 
   testWidgets('the language row renders in Bangla', (tester) async {
     await pumpSettings(tester, locale: AppLocale.bn);
 
+    await tester.scrollUntilVisible(find.text('ভাষা'), 200);
     expect(find.text('ভাষা'), findsOneWidget);
+    expect(find.text('সাধারণ'.toUpperCase()), findsOneWidget);
   });
 
-  testWidgets('auto-import is reachable from settings', (tester) async {
+  testWidgets('rows under every section are reachable', (tester) async {
     await pumpSettings(tester);
 
-    // Automation and account rows sit below the fold on a small screen.
-    await tester.scrollUntilVisible(find.text('Auto-import from SMS'), 200);
-    expect(find.text('Auto-import from SMS'), findsOneWidget);
-    await tester.scrollUntilVisible(find.text('Recurring'), 200);
-    expect(find.text('Recurring'), findsOneWidget);
-    await tester.scrollUntilVisible(find.text('Sign in'), 200);
+    // Lower rows sit below the fold on a small screen.
+    for (final label in [
+      'Sign in',
+      'Recurring transactions',
+      'Auto-import from SMS',
+      'Language',
+    ]) {
+      await tester.scrollUntilVisible(find.text(label), 200);
+      expect(find.text(label), findsOneWidget);
+    }
+  });
+
+  testWidgets('section headers appear in design order', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(400, 3000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpSettings(tester);
+
+    double top(String text) => tester.getTopLeft(find.text(text)).dy;
+    final order = [
+      'PROFILE & ACCOUNT',
+      'PREFERENCES',
+      'NOTIFICATIONS',
+      'DATA & BUDGET',
+      'AUTOMATION',
+      'GENERAL',
+      'SUPPORT',
+    ].map(top).toList();
+
+    expect(order, [...order]..sort());
+  });
+
+  testWidgets('signed in: delete account is in the account section and '
+      'sign out is the last row before Developer', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(400, 3000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    when(
+      () => authBloc.state,
+    ).thenReturn(const Authenticated(User(uid: 'u1', displayName: 'Sam')));
+    await pumpSettings(tester);
+
+    double top(String text) => tester.getTopLeft(find.text(text)).dy;
+    expect(top('Delete account'), lessThan(top('PREFERENCES')));
+    expect(top('Sign out'), greaterThan(top('Send feedback')));
+    expect(top('Sign out'), lessThan(top('DEVELOPER')));
+    expect(find.text('Sign in'), findsNothing);
+  });
+
+  testWidgets('signed out: no sign out row', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(400, 3000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpSettings(tester);
+
     expect(find.text('Sign in'), findsOneWidget);
+    expect(find.text('Sign out'), findsNothing);
   });
 }

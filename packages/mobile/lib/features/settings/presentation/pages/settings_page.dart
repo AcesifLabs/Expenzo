@@ -15,15 +15,20 @@ import 'package:expense_tracker/features/auth/presentation/bloc/auth_state.dart'
 import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_back_button.dart';
 import 'package:expense_tracker/shared/services/feedback_mailer.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 
 import '../../domain/entities/user_settings.dart';
 import '../bloc/settings_bloc.dart';
 import '../bloc/settings_event.dart';
 import '../bloc/settings_state.dart';
-import '../widgets/currency_selector.dart';
+import '../widgets/settings_section.dart';
+import '../widgets/settings_state_view.dart';
+import '../widgets/settings_tile.dart';
 import 'debug_db_inspector_page.dart';
+import 'appearance_page.dart';
 import 'delete_account_dialog.dart';
+import 'language_page.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -45,67 +50,37 @@ class SettingsPage extends StatelessWidget {
 Future<bool> _requestNotificationPermission() async =>
     (await Permission.notification.request()).isGranted;
 
+/// The main Settings list. Sections and rows, top to bottom (SAAP-60 README,
+/// "Settings row order"):
+///
+/// | Section (builder) | Rows now | Rows later tickets add, in final order |
+/// |---|---|---|
+/// | Profile & account (`_accountSection`) | Sign in (signed out) / Delete account (signed in) | SAAP-72 profile card above the section, then My profile (Delete account moves into it); SAAP-75 Family group right after My profile |
+/// | Preferences (`_preferencesSection`) | Default currency, Appearance | Default currency, Number format (SAAP-65), Font size (SAAP-66), Appearance, Calendar (SAAP-67) |
+/// | Notifications (`_notificationsSection`) | Budget alerts switch | SAAP-64 replaces the switch with a Notifications row |
+/// | Data & budget (`_dataSection`) | Recurring transactions | Recurring transactions, Sync (SAAP-71), Export data (SAAP-69), Delete all data (SAAP-70) |
+/// | Automation (`_automationSection`) | Auto-import from SMS, Matching rules | none |
+/// | General (`_generalSection`) | Language | Language, Home page (SAAP-68), Category settings (SAAP-61) |
+/// | Support (`_supportSection`) | Send feedback | SAAP-73 adds Help & Support and removes Send feedback |
+/// | none (`_signOutRow`) | Sign out (signed in only), always last | none |
+/// | Developer (`kDebugMode` only) | Database inspector | none |
+///
+/// Rows follow this order inside a section. A new row goes into an existing
+/// section. Hide a row (signed out, debug) with collection-if; a section with
+/// no visible rows disappears. No "coming soon" rows (ADR 0011). The Sync row
+/// reads "Sync" / "Keep your data on all your devices"; the UI never says
+/// "backup".
 class SettingsView extends StatelessWidget {
   const SettingsView({
     super.key,
     this.requestNotificationPermission = _requestNotificationPermission,
   });
 
-  static List<(String, String)> get _themeOptions {
-    final themeT = t.enums.theme;
-
-    return [
-      ('system', themeT.system),
-      ('light', themeT.light),
-      ('dark', themeT.dark),
-    ];
-  }
-
-  // Language names are shown in their own script, never translated.
-  static List<(String, String)> get _languageOptions => [
-    ('system', t.enums.theme.system),
-    ('en', 'English'),
-    ('bn', 'বাংলা'),
-  ];
-
-  static String _languageLabel(String languageCode) {
-    for (final (value, label) in _languageOptions) {
-      if (value == languageCode) return label;
-    }
-
-    return t.enums.theme.system;
-  }
-
-  static String _themeLabel(String theme) {
-    for (final (value, label) in _themeOptions) {
-      if (value == theme) return label;
-    }
-
-    return t.enums.theme.system;
-  }
-
   /// Asks Android for permission to post notifications; replaceable in tests.
   final Future<bool> Function() requestNotificationPermission;
 
-  void _handleCurrencyTap(BuildContext context) {
-    final state = context.read<SettingsBloc>().state;
-    if (state is SettingsLoaded) {
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: Text(t.settings.currency),
-          content: CurrencySelector(
-            currentCode: state.settings.currencyCode,
-            onCurrencySelected: (code) => _onCurrencySelected(context, code),
-          ),
-        ),
-      );
-    }
-  }
-
-  void _onCurrencySelected(BuildContext context, String code) {
-    context.read<SettingsBloc>().add(UpdateCurrency(code));
-    Navigator.of(context).pop();
+  void _openCurrency(BuildContext context) {
+    context.push('/settings/currency');
   }
 
   Future<void> _onNotificationsChanged(
@@ -127,53 +102,12 @@ class SettingsView extends StatelessWidget {
     bloc.add(UpdateNotificationsEnabled(enabled));
   }
 
-  Future<void> _handleAppearanceTap(
-    BuildContext context,
-    String current,
-  ) async {
-    final picked = await showDialog<String>(
-      context: context,
-      builder: (dialogContext) => SimpleDialog(
-        title: Text(t.settings.appearance),
-        children: [
-          for (final (value, label) in _themeOptions)
-            ListTile(
-              title: Text(label),
-              selected: value == current,
-              trailing: value == current
-                  ? const Icon(PiconsRegular.check)
-                  : null,
-              onTap: () => Navigator.of(dialogContext).pop(value),
-            ),
-        ],
-      ),
-    );
-    if (picked != null && context.mounted) {
-      context.read<SettingsBloc>().add(UpdateTheme(picked));
-    }
+  void _openAppearance(BuildContext context) {
+    context.push('/settings/appearance');
   }
 
-  Future<void> _handleLanguageTap(BuildContext context, String current) async {
-    final picked = await showDialog<String>(
-      context: context,
-      builder: (dialogContext) => SimpleDialog(
-        title: Text(t.settings.language.title),
-        children: [
-          for (final (value, label) in _languageOptions)
-            ListTile(
-              title: Text(label),
-              selected: value == current,
-              trailing: value == current
-                  ? const Icon(PiconsRegular.check)
-                  : null,
-              onTap: () => Navigator.of(dialogContext).pop(value),
-            ),
-        ],
-      ),
-    );
-    if (picked != null && context.mounted) {
-      context.read<SettingsBloc>().add(UpdateLanguage(picked));
-    }
+  void _openLanguage(BuildContext context) {
+    context.push('/settings/language');
   }
 
   void _handleDeleteAccountTap(BuildContext context) {
@@ -200,119 +134,180 @@ class SettingsView extends StatelessWidget {
     );
   }
 
-  List<Widget> _preferencesSection(
-    BuildContext context,
-    UserSettings? settings,
-  ) {
-    final settingsT = t.settings;
-    final budgetAlertsT = settingsT.budgetAlerts;
-    final currency = CurrencyConfig.byCode(
-      settings?.currencyCode ?? CurrencyConfig.defaultCode,
-    );
-    final theme = settings?.theme ?? 'system';
-    final languageCode = settings?.languageCode ?? 'system';
-
-    return [
-      _SectionHeader(settingsT.sections.preferences),
-      _SettingTile(
-        icon: PiconsRegular.currencyCircleDollar,
-        title: settingsT.currency,
-        subtitle: '${currency.displayName} (${currency.symbol.trim()})',
-        onTap: () => _handleCurrencyTap(context),
-      ),
-      _SettingTile(
-        icon: PiconsRegular.sun,
-        title: settingsT.appearance,
-        subtitle: _themeLabel(theme),
-        onTap: () => _handleAppearanceTap(context, theme),
-      ),
-      _SettingTile(
-        icon: PiconsRegular.translate,
-        title: settingsT.language.title,
-        subtitle: _languageLabel(languageCode),
-        onTap: () => _handleLanguageTap(context, languageCode),
-      ),
-      SwitchListTile(
-        secondary: const Icon(PiconsRegular.bell),
-        title: Text(budgetAlertsT.title),
-        subtitle: Text(budgetAlertsT.subtitle),
-        value: settings?.notificationsEnabled ?? false,
-        onChanged: settings == null
-            ? null
-            : (enabled) => _onNotificationsChanged(context, enabled),
-      ),
-    ];
-  }
-
-  List<Widget> _automationSection(BuildContext context) {
-    final settingsT = t.settings;
-    final commonT = t.common;
-    final recurringT = settingsT.recurring;
-
-    return [
-      _SectionHeader(settingsT.sections.automation),
-      _SettingTile(
-        icon: PiconsRegular.chatText,
-        title: commonT.autoImport,
-        subtitle: settingsT.autoImportSubtitle,
-        onTap: () => context.push('/settings/auto-import'),
-      ),
-      _SettingTile(
-        icon: PiconsRegular.funnel,
-        title: commonT.matchingRules,
-        subtitle: settingsT.matchingRulesSubtitle,
-        onTap: () => context.push('/settings/matching-rules'),
-      ),
-      _SettingTile(
-        icon: PiconsRegular.repeat,
-        title: recurringT.title,
-        subtitle: recurringT.subtitle,
-        onTap: () => context.push('/settings/recurring'),
-      ),
-    ];
-  }
-
-  List<Widget> _supportSection(BuildContext context) {
-    final settingsT = t.settings;
-
-    return [
-      _SectionHeader(settingsT.sections.support),
-      _SettingTile(
-        icon: PiconsRegular.envelopeSimple,
-        title: t.common.sendFeedback,
-        subtitle: settingsT.feedbackSubtitle,
-        onTap: () => sendFeedback(context),
-      ),
-    ];
-  }
-
-  List<Widget> _accountSection(BuildContext context) {
+  Widget _accountSection(BuildContext context) {
     final settingsT = t.settings;
     final signInT = settingsT.signIn;
     final isSignedIn = context.watch<AuthBloc>().state is Authenticated;
 
-    return [
-      _SectionHeader(settingsT.sections.account),
-      if (isSignedIn) ...[
-        _SettingTile(
+    return SettingsSection(
+      title: settingsT.sections.account,
+      children: [
+        if (isSignedIn)
+          SettingsTile(
+            icon: PiconsRegular.trash,
+            title: settingsT.deleteAccount,
+            titleColor: Theme.of(context).colorScheme.error,
+            onTap: () => _handleDeleteAccountTap(context),
+          )
+        else
+          SettingsTile(
+            icon: PiconsRegular.signIn,
+            title: signInT.title,
+            subtitle: signInT.subtitle,
+            onTap: () => context.push('/login'),
+          ),
+      ],
+    );
+  }
+
+  Widget _preferencesSection(BuildContext context, UserSettings? settings) {
+    final settingsT = t.settings;
+    final currency = CurrencyConfig.byCode(
+      settings?.currencyCode ?? CurrencyConfig.defaultCode,
+    );
+    final theme = settings?.theme ?? 'system';
+
+    return SettingsSection(
+      title: settingsT.sections.preferences,
+      children: [
+        SettingsTile(
+          icon: PiconsRegular.currencyCircleDollar,
+          title: settingsT.currency,
+          subtitle: '${currency.displayName} (${currency.symbol.trim()})',
+          onTap: () => _openCurrency(context),
+        ),
+        SettingsTile(
+          icon: PiconsRegular.sun,
+          title: settingsT.appearance,
+          subtitle: AppearanceView.labelFor(theme),
+          onTap: () => _openAppearance(context),
+        ),
+      ],
+    );
+  }
+
+  Widget _notificationsSection(BuildContext context, UserSettings? settings) {
+    final settingsT = t.settings;
+    final budgetAlertsT = settingsT.budgetAlerts;
+
+    return SettingsSection(
+      title: settingsT.sections.notifications,
+      children: [
+        SwitchListTile(
+          secondary: Icon(PiconsRegular.bell, color: context.palette.accent),
+          title: Text(budgetAlertsT.title),
+          subtitle: Text(budgetAlertsT.subtitle),
+          value: settings?.notificationsEnabled ?? false,
+          onChanged: settings == null
+              ? null
+              : (enabled) => _onNotificationsChanged(context, enabled),
+        ),
+      ],
+    );
+  }
+
+  Widget _dataSection(BuildContext context) {
+    final settingsT = t.settings;
+    final recurringT = settingsT.recurring;
+
+    return SettingsSection(
+      title: settingsT.sections.dataBudget,
+      children: [
+        SettingsTile(
+          icon: PiconsRegular.repeat,
+          title: recurringT.title,
+          subtitle: recurringT.subtitle,
+          onTap: () => context.push('/settings/recurring'),
+        ),
+      ],
+    );
+  }
+
+  Widget _automationSection(BuildContext context) {
+    final settingsT = t.settings;
+    final commonT = t.common;
+
+    return SettingsSection(
+      title: settingsT.sections.automation,
+      children: [
+        SettingsTile(
+          icon: PiconsRegular.chatText,
+          title: commonT.autoImport,
+          subtitle: settingsT.autoImportSubtitle,
+          onTap: () => context.push('/settings/auto-import'),
+        ),
+        SettingsTile(
+          icon: PiconsRegular.funnel,
+          title: commonT.matchingRules,
+          subtitle: settingsT.matchingRulesSubtitle,
+          onTap: () => context.push('/settings/matching-rules'),
+        ),
+      ],
+    );
+  }
+
+  Widget _generalSection(BuildContext context, UserSettings? settings) {
+    final settingsT = t.settings;
+    final languageCode = settings?.languageCode ?? 'system';
+
+    return SettingsSection(
+      title: settingsT.sections.general,
+      children: [
+        SettingsTile(
+          icon: PiconsRegular.translate,
+          title: settingsT.language.title,
+          subtitle: LanguageView.labelFor(languageCode),
+          onTap: () => _openLanguage(context),
+        ),
+      ],
+    );
+  }
+
+  Widget _supportSection(BuildContext context) {
+    final settingsT = t.settings;
+
+    return SettingsSection(
+      title: settingsT.sections.support,
+      children: [
+        SettingsTile(
+          icon: PiconsRegular.envelopeSimple,
+          title: t.common.sendFeedback,
+          subtitle: settingsT.feedbackSubtitle,
+          onTap: () => sendFeedback(context),
+        ),
+      ],
+    );
+  }
+
+  /// Sign out sits alone below every section, with no header.
+  Widget _signOutRow(BuildContext context) {
+    final isSignedIn = context.watch<AuthBloc>().state is Authenticated;
+    if (!isSignedIn) return const SizedBox.shrink();
+
+    return SettingsSection(
+      title: null,
+      children: [
+        SettingsTile(
           icon: PiconsRegular.signOut,
-          title: settingsT.signOut,
+          title: t.settings.signOut,
+          titleColor: Theme.of(context).colorScheme.error,
           onTap: () => context.read<AuthBloc>().add(const SignOutRequested()),
         ),
-        _SettingTile(
-          icon: PiconsRegular.trash,
-          title: settingsT.deleteAccount,
-          titleColor: Theme.of(context).colorScheme.error,
-          onTap: () => _handleDeleteAccountTap(context),
+      ],
+    );
+  }
+
+  Widget _developerSection(BuildContext context) {
+    return SettingsSection(
+      title: 'Developer',
+      children: [
+        SettingsTile(
+          icon: PiconsRegular.database,
+          title: 'Database inspector',
+          onTap: () => _openDbInspector(context),
         ),
-      ] else
-        _SettingTile(
-          icon: PiconsRegular.signIn,
-          title: signInT.title,
-          subtitle: signInT.subtitle,
-          onTap: () => context.push('/login'),
-        ),
-    ];
+      ],
+    );
   }
 
   @override
@@ -320,99 +315,37 @@ class SettingsView extends StatelessWidget {
     return AppScaffold(
       title: t.settings.title,
       leading: const AppBackButton(),
-      child: BlocBuilder<SettingsBloc, SettingsState>(
-        builder: (context, settingsState) {
-          final settings = settingsState is SettingsLoaded
-              ? settingsState.settings
-              : null;
+      child: BlocListener<SettingsBloc, SettingsState>(
+        listenWhen: (_, s) => s is SettingsError,
+        listener: SettingsStateView.showSaveFailed,
+        child: BlocBuilder<SettingsBloc, SettingsState>(
+          // A save's SettingsLoading must not blank the subtitles.
+          buildWhen: (previous, current) =>
+              current is SettingsLoaded || previous is SettingsInitial,
+          builder: (context, settingsState) {
+            final settings = settingsState is SettingsLoaded
+                ? settingsState.settings
+                : null;
 
-          return ListView(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.sm,
-              vertical: AppSpacing.sm,
-            ),
-            children: [
-              ..._preferencesSection(context, settings),
-              ..._automationSection(context),
-              ..._supportSection(context),
-              ..._accountSection(context),
-              if (kDebugMode) ...[
-                const _SectionHeader('Developer'),
-                _SettingTile(
-                  icon: PiconsRegular.database,
-                  title: 'Database inspector',
-                  onTap: () => _openDbInspector(context),
-                ),
+            return ListView(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.sm,
+                vertical: AppSpacing.sm,
+              ),
+              children: [
+                _accountSection(context),
+                _preferencesSection(context, settings),
+                _notificationsSection(context, settings),
+                _dataSection(context),
+                _automationSection(context),
+                _generalSection(context, settings),
+                _supportSection(context),
+                _signOutRow(context),
+                if (kDebugMode) _developerSection(context),
               ],
-            ],
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _SectionHeader extends StatelessWidget {
-  final String title;
-
-  const _SectionHeader(this.title);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.md,
-        AppSpacing.lg,
-        AppSpacing.md,
-        AppSpacing.sm,
-      ),
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
+            );
+          },
         ),
-      ),
-    );
-  }
-}
-
-class _SettingTile extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String? subtitle;
-  final VoidCallback onTap;
-  final Color? titleColor;
-
-  const _SettingTile({
-    required this.icon,
-    required this.title,
-    this.subtitle,
-    required this.onTap,
-    this.titleColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-
-    return ListTile(
-      onTap: onTap,
-      leading: Icon(icon, color: titleColor ?? colors.onSurface),
-      title: Text(
-        title,
-        style: TextStyle(
-          color: titleColor ?? colors.onSurface,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      subtitle: switch (subtitle) {
-        final s? => Text(s),
-        _ => null,
-      },
-      trailing: Icon(
-        PiconsRegular.caretRight,
-        size: 16,
-        color: colors.onSurface.withAlpha(100),
       ),
     );
   }
