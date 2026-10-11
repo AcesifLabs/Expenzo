@@ -21,8 +21,19 @@
     "default_out_gifts": "উপহার",
     "default_out_general": "সাধারণ"
   },
-  "title": "ক্যাটাগরি",
   "empty": "কোনো ক্যাটাগরি তৈরি করা হয়নি",
+  "settings": {
+    "title": "ক্যাটাগরি সেটিংস",
+    "sections": {
+      "expense": "খরচের ক্যাটাগরি",
+      "income": "আয়ের ক্যাটাগরি"
+    },
+    "recordCount": {
+      "one": "{n}টি লেনদেন",
+      "other": "{n}টি লেনদেন"
+    },
+    "deleteFailed": "ক্যাটাগরি মোছা যায়নি। আবার চেষ্টা করুন।"
+  },
   "defaultCannotDelete": "ডিফল্ট ক্যাটাগরি মোছা যায় না",
   "form": {
     "add": "ক্যাটাগরি যোগ করুন",

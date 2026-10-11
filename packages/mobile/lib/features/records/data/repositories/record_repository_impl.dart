@@ -380,6 +380,23 @@ class RecordRepositoryImpl implements RecordRepository {
     }
   }
 
+  /// Returns Left(Failure) on error.
+  @override
+  Future<Either<CacheFailure, Map<String, int>>>
+  getCategoryRecordCounts() async {
+    try {
+      final counts = await localDatasource.getCategoryRecordCounts();
+
+      return Right(counts);
+    } on CacheException catch (e) {
+      return Left(e.toFailure());
+    } catch (e, s) {
+      debugPrint('Error: $e\n$s');
+
+      return Left(CacheFailure(message: e.toString()));
+    }
+  }
+
   Future<bool> _checkConnectivity() async {
     try {
       return await connectivity.checkNow().timeout(

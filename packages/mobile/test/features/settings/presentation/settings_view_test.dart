@@ -149,6 +149,39 @@ void main() {
     expect(find.text('সাধারণ'.toUpperCase()), findsOneWidget);
   });
 
+  testWidgets('category settings is the last General row, below Language', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(400, 3000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpSettings(tester);
+
+    double top(String text) => tester.getTopLeft(find.text(text)).dy;
+
+    expect(top('Category settings'), greaterThan(top('GENERAL')));
+    expect(top('Category settings'), greaterThan(top('Language')));
+    expect(top('Category settings'), lessThan(top('SUPPORT')));
+  });
+
+  testWidgets('the category settings row renders in Bangla', (tester) async {
+    await pumpSettings(tester, locale: AppLocale.bn);
+
+    await tester.scrollUntilVisible(find.text('ক্যাটাগরি সেটিংস'), 200);
+    expect(find.text('ক্যাটাগরি সেটিংস'), findsOneWidget);
+  });
+
+  testWidgets('the category settings row opens /settings/categories', (
+    tester,
+  ) async {
+    await pumpSettingsRouter(tester, child: 'categories');
+
+    await tester.scrollUntilVisible(find.text('Category settings'), 200);
+    await tester.tap(find.text('Category settings'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('categories-page'), findsOneWidget);
+  });
+
   testWidgets('rows under every section are reachable', (tester) async {
     await pumpSettings(tester);
 

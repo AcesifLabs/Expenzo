@@ -14,6 +14,7 @@ import 'package:expense_tracker/features/budgets/presentation/pages/budget_detai
 import 'package:expense_tracker/features/budgets/presentation/pages/budget_form_page.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:expense_tracker/features/categories/presentation/pages/category_form_page.dart';
+import 'package:expense_tracker/features/categories/presentation/pages/category_list_page.dart';
 import 'package:expense_tracker/features/records/presentation/pages/all_categories_picker_page.dart';
 import 'package:expense_tracker/features/recurring/presentation/bloc/recurring_bloc.dart';
 import 'package:expense_tracker/features/recurring/presentation/pages/recurring_form_page.dart';
@@ -57,6 +58,10 @@ List<RouteBase> _buildNestedRoutes() {
         GoRoute(path: 'appearance', builder: (_, _) => const AppearancePage()),
         GoRoute(path: 'currency', builder: (_, _) => const CurrencyPage()),
         GoRoute(path: 'language', builder: (_, _) => const LanguagePage()),
+        GoRoute(
+          path: 'categories',
+          builder: (_, _) => const CategoryListPage(),
+        ),
         GoRoute(path: 'auto-import', builder: (_, _) => const AutoImportPage()),
         GoRoute(
           path: 'matching-rules',

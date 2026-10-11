@@ -34,23 +34,7 @@ class SettingsSection extends StatelessWidget {
         if (localTitle == null)
           const SizedBox(height: AppSpacing.lg)
         else
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.md,
-              AppSpacing.lg,
-              AppSpacing.md,
-              AppSpacing.sm,
-            ),
-            child: Semantics(
-              header: true,
-              child: Text(
-                localTitle.toUpperCase(),
-                style: Theme.of(
-                  context,
-                ).textTheme.labelMedium?.copyWith(color: palette.textSecondary),
-              ),
-            ),
-          ),
+          SettingsSectionHeader(title: localTitle),
         AppCard(
           backgroundColor: palette.surface,
           borderRadius: AppSpacing.radiusCard,
@@ -66,6 +50,80 @@ class SettingsSection extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// A [SettingsSection] header on its own, for lists that build their rows
+/// lazily with [SettingsSectionSlot].
+class SettingsSectionHeader extends StatelessWidget {
+  final String title;
+
+  const SettingsSectionHeader({super.key, required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        AppSpacing.lg,
+        AppSpacing.md,
+        AppSpacing.sm,
+      ),
+      child: Semantics(
+        header: true,
+        child: Text(
+          title.toUpperCase(),
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+            color: context.palette.textSecondary,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// One row's slice of a [SettingsSection] card, so a long section can be
+/// built lazily in a `ListView.builder` and still look like one card: only
+/// the first and last rows round their corners, and every row after the
+/// first starts with the section divider.
+class SettingsSectionSlot extends StatelessWidget {
+  final bool isFirst;
+  final bool isLast;
+  final Widget child;
+
+  const SettingsSectionSlot({
+    super.key,
+    required this.isFirst,
+    required this.isLast,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    const radius = Radius.circular(AppSpacing.radiusCard);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: palette.surface,
+        borderRadius: BorderRadius.vertical(
+          top: isFirst ? radius : Radius.zero,
+          bottom: isLast ? radius : Radius.zero,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Material(
+        color: Colors.transparent,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (!isFirst)
+              Divider(height: 1, thickness: 1, color: palette.divider),
+            child,
+          ],
+        ),
+      ),
     );
   }
 }

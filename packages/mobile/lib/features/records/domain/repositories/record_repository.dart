@@ -109,4 +109,10 @@ abstract class RecordRepository {
   ///
   /// Returns [Right(int)] on success, [Left(CacheFailure)] on failure.
   Future<Either<CacheFailure, int>> getRecordCountByCategory(String categoryId);
+
+  /// Returns the number of records per category id. Categories with no
+  /// records are absent from the map.
+  ///
+  /// Returns [Right(Map)] on success, [Left(CacheFailure)] on failure.
+  Future<Either<CacheFailure, Map<String, int>>> getCategoryRecordCounts();
 }
