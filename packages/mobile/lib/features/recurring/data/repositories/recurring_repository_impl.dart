@@ -80,7 +80,7 @@ class RecurringRepositoryImpl implements RecurringRepository {
           : recurring.copyWith(id: id);
 
       await localDatasource.createRecurring(withId);
-      _enqueueSync('insert', id, _toPayload(withId));
+      await _enqueueSync('insert', id, _toPayload(withId));
 
       return Right(withId);
     } on CacheException catch (e) {
@@ -100,7 +100,7 @@ class RecurringRepositoryImpl implements RecurringRepository {
     try {
       await localDatasource.updateRecurring(recurring);
       final id = recurring.id;
-      if (id != null) _enqueueSync('update', id, _toPayload(recurring));
+      if (id != null) await _enqueueSync('update', id, _toPayload(recurring));
 
       return Right(recurring);
     } on CacheException catch (e) {
@@ -123,7 +123,7 @@ class RecurringRepositoryImpl implements RecurringRepository {
       // or they post the same occurrence again.
       for (final recurring in transactions) {
         final id = recurring.id;
-        if (id != null) _enqueueSync('update', id, _toPayload(recurring));
+        if (id != null) await _enqueueSync('update', id, _toPayload(recurring));
       }
 
       return const Right(unit);
@@ -141,7 +141,7 @@ class RecurringRepositoryImpl implements RecurringRepository {
   Future<Either<Failure, Unit>> deleteRecurring(String id) async {
     try {
       await localDatasource.deleteRecurring(id);
-      _enqueueSync('delete', id);
+      await _enqueueSync('delete', id);
 
       return const Right(unit);
     } on CacheException catch (e) {
@@ -199,10 +199,16 @@ class RecurringRepositoryImpl implements RecurringRepository {
     'dayOfMonth': r.dayOfMonth,
   };
 
-  void _enqueueSync(String action, String id, [Map<String, dynamic>? data]) {
+  /// Awaited, so inside a database transaction the queue entry commits or
+  /// rolls back with the change.
+  Future<void> _enqueueSync(
+    String action,
+    String id, [
+    Map<String, dynamic>? data,
+  ]) async {
     final syncQueueDao = _syncQueueDao;
     if (syncQueueDao == null) return;
-    syncQueueDao.enqueue(
+    await syncQueueDao.enqueue(
       tableName: 'recurring_transactions',
       recordId: id,
       action: action,

@@ -1,35 +1,28 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:expense_tracker/core/bloc/transformers.dart';
-import 'package:expense_tracker/core/constants/record_type.dart';
-import 'package:expense_tracker/core/constants/source_types.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
-import '../../../records/domain/entities/record.dart';
-import '../../../records/domain/usecases/add_record.dart';
 import '../../domain/usecases/get_recurring_list.dart';
 import '../../domain/usecases/create_recurring.dart' as usecase;
 import '../../domain/usecases/update_recurring.dart' as usecase;
 import '../../domain/usecases/delete_recurring.dart' as usecase;
-import '../../domain/usecases/process_recurring.dart' as usecase;
+import '../../domain/usecases/post_due_recurring.dart';
 import '../bloc/recurring_event.dart';
 import '../bloc/recurring_state.dart';
 import 'package:expense_tracker/core/error/failure_message.dart';
-import 'package:expense_tracker/i18n/strings.g.dart';
 
 class RecurringBloc extends Bloc<RecurringEvent, RecurringState> {
   final GetRecurringList getRecurringList;
   final usecase.CreateRecurring createRecurring;
   final usecase.UpdateRecurring updateRecurring;
   final usecase.DeleteRecurring deleteRecurring;
-  final usecase.ProcessRecurring processRecurring;
-  final AddRecord addRecord;
+  final PostDueRecurring postDueRecurring;
 
   RecurringBloc({
     required this.getRecurringList,
     required this.createRecurring,
     required this.updateRecurring,
     required this.deleteRecurring,
-    required this.processRecurring,
-    required this.addRecord,
+    required this.postDueRecurring,
   }) : super(RecurringInitial()) {
     on<LoadRecurring>(_onLoadRecurring, transformer: concurrent());
     on<CreateRecurring>(_onCreateRecurring, transformer: sequential());
@@ -104,46 +97,13 @@ class RecurringBloc extends Bloc<RecurringEvent, RecurringState> {
   ) async {
     emit(RecurringLoading());
 
-    final result = await processRecurring();
+    final result = await postDueRecurring(automatic: event.automatic);
 
-    await result.fold(
-      (failure) async => emit(RecurringError(failureText(failure))),
-      (processed) async {
-        // Create expense records from processed recurrences
-        var createdCount = 0;
-        var failedCount = 0;
-
-        for (final recurring in processed) {
-          final now = DateTime.now().toUtc();
-          final record = Record(
-            amount: recurring.amount,
-            description: recurring.description,
-            date: recurring.nextOccurrence,
-            categoryId: recurring.categoryId,
-            source: ExpenseSource.recurring,
-            recordType: RecordType.expense,
-            createdAt: now,
-            updatedAt: now,
-          );
-
-          final addResult = await addRecord(record);
-          addResult.fold((failure) => failedCount++, (_) => createdCount++);
-        }
-
-        if (failedCount > 0) {
-          emit(
-            RecurringError(
-              t.recurring.errors.someNotCreated(
-                failed: failedCount,
-                total: createdCount + failedCount,
-              ),
-            ),
-          );
-        } else {
-          emit(const RecurringOperationSuccess());
-        }
-        add(LoadRecurring());
-      },
+    result.fold(
+      (failure) => emit(RecurringError(failureText(failure))),
+      (created) =>
+          emit(RecurringProcessed(created, automatic: event.automatic)),
     );
+    add(LoadRecurring());
   }
 }

@@ -28,6 +28,7 @@ import 'features/auth/presentation/bloc/auth_event.dart';
 import 'features/categories/presentation/bloc/category_bloc.dart';
 import 'features/categories/presentation/bloc/category_event.dart';
 import 'features/records/presentation/bloc/record_bloc.dart';
+import 'features/recurring/application/recurring_auto_poster.dart';
 import 'features/records/presentation/bloc/record_event.dart';
 import 'features/settings/presentation/bloc/settings_bloc.dart';
 import 'features/settings/presentation/bloc/settings_event.dart';
@@ -35,6 +36,13 @@ import 'features/settings/presentation/bloc/settings_state.dart';
 import 'features/sms_parser/application/realtime_sms_processor.dart';
 import 'features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
 import 'shared/presentation/widgets/app_error_fallback.dart';
+
+/// App-open work, run in order: auto-post due recurring items (SAAP-63),
+/// then recurring reminders (SAAP-64 Task 5 adds them here).
+Future<void> _autoPostRecurring() async {
+  if (!di.getIt.isRegistered<RecurringAutoPoster>()) return;
+  await di.getIt<RecurringAutoPoster>().runWhenReady();
+}
 
 class ExpenzoApp extends StatefulWidget {
   const ExpenzoApp({super.key});
@@ -91,6 +99,7 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
       // Feature deps no longer need the 500ms delay — the
       // `featureDependenciesReady` getter is self-healing.
       await di.initFeatureDependencies();
+      unawaited(_autoPostRecurring());
     } catch (e, stack) {
       debugPrint('App init failed: $e\n$stack');
       if (mounted) {
@@ -365,6 +374,7 @@ class _AppContentState extends State<_AppContent> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       unawaited(_tryDrainRealtimeSms());
+      unawaited(_autoPostRecurring());
     }
   }
 

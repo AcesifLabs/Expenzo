@@ -388,9 +388,15 @@ class _Translations$recurring$bn extends Translations$recurring$en {
 	final TranslationsBn _root; // ignore: unused_field
 
 	// Translations
-	@override late final _Translations$recurring$errors$bn errors = _Translations$recurring$errors$bn._(_root);
-	@override String get title => 'পুনরাবৃত্ত';
+	@override String get title => 'পুনরাবৃত্ত লেনদেন';
 	@override String get saved => 'পুনরাবৃত্ত লেনদেন সংরক্ষণ হয়েছে';
+	@override String posted({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n,
+		one: '${n}টি লেনদেন যোগ হয়েছে',
+		other: '${n}টি লেনদেন যোগ হয়েছে',
+	);
+	@override String get nothingDue => 'কোনো বকেয়া লেনদেন নেই';
+	@override late final _Translations$recurring$sections$bn sections = _Translations$recurring$sections$bn._(_root);
+	@override late final _Translations$recurring$defaults$bn defaults = _Translations$recurring$defaults$bn._(_root);
 	@override late final _Translations$recurring$empty$bn empty = _Translations$recurring$empty$bn._(_root);
 	@override String amountEvery({required Object amount, required Object frequency}) => '${amount} · ${frequency}';
 	@override String next({required Object date}) => 'পরবর্তী: ${date}';
@@ -1243,14 +1249,30 @@ class _Translations$records$sheet$bn extends Translations$records$sheet$en {
 	@override String get backspace => 'মুছুন';
 }
 
-// Path: recurring.errors
-class _Translations$recurring$errors$bn extends Translations$recurring$errors$en {
-	_Translations$recurring$errors$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+// Path: recurring.sections
+class _Translations$recurring$sections$bn extends Translations$recurring$sections$en {
+	_Translations$recurring$sections$bn._(TranslationsBn root) : this._root = root, super.internal(root);
 
 	final TranslationsBn _root; // ignore: unused_field
 
 	// Translations
-	@override String someNotCreated({required Object total, required Object failed}) => '${total}টির মধ্যে ${failed}টি রেকর্ড তৈরি করা যায়নি। আবার চেষ্টা করুন।';
+	@override String get defaultFrequency => 'ডিফল্ট পুনরাবৃত্তি';
+	@override String get autoCreate => 'নিজে থেকে তৈরি';
+	@override String get active => 'সক্রিয় পুনরাবৃত্ত';
+}
+
+// Path: recurring.defaults
+class _Translations$recurring$defaults$bn extends Translations$recurring$defaults$en {
+	_Translations$recurring$defaults$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get weeklyDetail => 'প্রতি 7 দিনে';
+	@override String get monthlyDetail => 'প্রতি মাসে একই তারিখে';
+	@override String get yearlyDetail => 'প্রতি বছর একই তারিখে';
+	@override String get autoCreate => 'নিজে থেকে লেনদেন তৈরি';
+	@override String get autoCreateDetail => 'অ্যাপ খুললে বকেয়া লেনদেন যোগ করুন';
 }
 
 // Path: recurring.empty
@@ -1291,8 +1313,8 @@ class _Translations$recurring$form$bn extends Translations$recurring$form$en {
 	@override String get endDate => 'শেষের তারিখ (ঐচ্ছিক)';
 	@override String get noEndDate => 'শেষের তারিখ নেই';
 	@override String get clearEndDate => 'শেষের তারিখ মুছুন';
-	@override String get autoCreate => 'নিজে থেকে খরচ তৈরি';
-	@override String get autoCreateDetail => 'সময় হলে নিজে থেকে খরচ তৈরি করুন';
+	@override String get autoCreate => 'নিজে থেকে তৈরিতে রাখুন';
+	@override String get autoCreateDetail => '‘নিজে থেকে তৈরি’ চালু থাকলে অ্যাপ খুললে যোগ হবে';
 	@override String get active => 'চালু';
 	@override String get activeDetail => 'এই পুনরাবৃত্ত লেনদেনটি প্রসেস করুন';
 	@override String get amountRequired => 'একটি পরিমাণ লিখুন';
@@ -1376,7 +1398,7 @@ class _Translations$settings$recurring$bn extends Translations$settings$recurrin
 
 	// Translations
 	@override String get title => 'পুনরাবৃত্ত লেনদেন';
-	@override String get subtitle => 'প্রতি মাসে আসা বিল ও আয়';
+	@override String get subtitle => 'নিয়মিত আসা বিল ও আয়';
 }
 
 // Path: settings.signIn
@@ -2208,9 +2230,18 @@ extension on TranslationsBn {
 			'records.sheet.repeatFailed' => 'সংরক্ষণ হয়েছে, কিন্তু পুনরাবৃত্তি চালু করা যায়নি। সেটিংস → পুনরাবৃত্ত থেকে সেট আপ করুন।',
 			'records.sheet.typeToggle' => 'লেনদেনের ধরন',
 			'records.sheet.backspace' => 'মুছুন',
-			'recurring.errors.someNotCreated' => ({required Object total, required Object failed}) => '${total}টির মধ্যে ${failed}টি রেকর্ড তৈরি করা যায়নি। আবার চেষ্টা করুন।',
-			'recurring.title' => 'পুনরাবৃত্ত',
+			'recurring.title' => 'পুনরাবৃত্ত লেনদেন',
 			'recurring.saved' => 'পুনরাবৃত্ত লেনদেন সংরক্ষণ হয়েছে',
+			'recurring.posted' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n, one: '${n}টি লেনদেন যোগ হয়েছে', other: '${n}টি লেনদেন যোগ হয়েছে', ), 
+			'recurring.nothingDue' => 'কোনো বকেয়া লেনদেন নেই',
+			'recurring.sections.defaultFrequency' => 'ডিফল্ট পুনরাবৃত্তি',
+			'recurring.sections.autoCreate' => 'নিজে থেকে তৈরি',
+			'recurring.sections.active' => 'সক্রিয় পুনরাবৃত্ত',
+			'recurring.defaults.weeklyDetail' => 'প্রতি 7 দিনে',
+			'recurring.defaults.monthlyDetail' => 'প্রতি মাসে একই তারিখে',
+			'recurring.defaults.yearlyDetail' => 'প্রতি বছর একই তারিখে',
+			'recurring.defaults.autoCreate' => 'নিজে থেকে লেনদেন তৈরি',
+			'recurring.defaults.autoCreateDetail' => 'অ্যাপ খুললে বকেয়া লেনদেন যোগ করুন',
 			'recurring.empty.title' => 'কোনো পুনরাবৃত্ত লেনদেন নেই',
 			'recurring.empty.body' => 'প্রথম পুনরাবৃত্ত খরচ তৈরি করতে + চাপুন',
 			'recurring.amountEvery' => ({required Object amount, required Object frequency}) => '${amount} · ${frequency}',
@@ -2228,8 +2259,8 @@ extension on TranslationsBn {
 			'recurring.form.endDate' => 'শেষের তারিখ (ঐচ্ছিক)',
 			'recurring.form.noEndDate' => 'শেষের তারিখ নেই',
 			'recurring.form.clearEndDate' => 'শেষের তারিখ মুছুন',
-			'recurring.form.autoCreate' => 'নিজে থেকে খরচ তৈরি',
-			'recurring.form.autoCreateDetail' => 'সময় হলে নিজে থেকে খরচ তৈরি করুন',
+			'recurring.form.autoCreate' => 'নিজে থেকে তৈরিতে রাখুন',
+			'recurring.form.autoCreateDetail' => '‘নিজে থেকে তৈরি’ চালু থাকলে অ্যাপ খুললে যোগ হবে',
 			'recurring.form.active' => 'চালু',
 			'recurring.form.activeDetail' => 'এই পুনরাবৃত্ত লেনদেনটি প্রসেস করুন',
 			'recurring.form.amountRequired' => 'একটি পরিমাণ লিখুন',
@@ -2256,6 +2287,8 @@ extension on TranslationsBn {
 			'reports.totalSpentInPeriod' => ({required Object amount}) => 'এই সময়ে মোট খরচ: ${amount}',
 			'reports.metrics.totalSpent' => 'মোট খরচ',
 			'reports.metrics.dailyAverage' => 'দৈনিক গড়',
+			_ => null,
+		} ?? switch (path) {
 			'reports.metrics.highestDay' => 'সর্বোচ্চ দিন',
 			'reports.spendingByCategory' => 'ক্যাটাগরি অনুযায়ী খরচ',
 			'reports.observations' => 'এই মাসের খরচ থেকে মূল পর্যবেক্ষণ',
@@ -2265,8 +2298,6 @@ extension on TranslationsBn {
 			'settings.language.matchDevice' => 'ডিভাইসের মতো',
 			'settings.language.matchDeviceSubtitle' => 'ফোনের ভাষা ব্যবহার করুন',
 			'settings.language.names.en' => 'ইংরেজি',
-			_ => null,
-		} ?? switch (path) {
 			'settings.language.names.bn' => 'বাংলা',
 			'settings.title' => 'সেটিংস',
 			'settings.currency' => 'ডিফল্ট মুদ্রা',
@@ -2284,7 +2315,7 @@ extension on TranslationsBn {
 			'settings.autoImportSubtitle' => 'ব্যাংক ও পেমেন্টের মেসেজ থেকে লেনদেন তৈরি করুন',
 			'settings.matchingRulesSubtitle' => 'যেসব মেসেজ অটো-ইমপোর্ট এখনো পড়তে পারে না, সেগুলোর প্যাটার্ন',
 			'settings.recurring.title' => 'পুনরাবৃত্ত লেনদেন',
-			'settings.recurring.subtitle' => 'প্রতি মাসে আসা বিল ও আয়',
+			'settings.recurring.subtitle' => 'নিয়মিত আসা বিল ও আয়',
 			'settings.feedbackSubtitle' => 'সমস্যা জানান বা কোনো আইডিয়া দিন',
 			'settings.signOut' => 'সাইন আউট',
 			'settings.deleteAccount' => 'অ্যাকাউন্ট মুছুন',

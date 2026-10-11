@@ -38,6 +38,17 @@ class RecurringError extends RecurringState {
   const RecurringError(this.message);
 }
 
+/// Due items were posted; [created] may be 0.
+class RecurringProcessed extends RecurringState {
+  final int created;
+  final bool automatic;
+
+  @override
+  List<Object?> get props => [created, automatic];
+
+  const RecurringProcessed(this.created, {this.automatic = false});
+}
+
 class RecurringOperationSuccess extends RecurringState {
   @override
   List<Object?> get props => [];

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
+import 'package:uuid/uuid.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/sync/sync_event.dart';
@@ -116,7 +117,7 @@ class RecordRepositoryImpl implements RecordRepository {
       final added = await localDatasource.addRecord(record);
       final addedId = added.id;
       if (addedId != null) {
-        _enqueueSync('insert', addedId, {
+        await _enqueueSync('insert', addedId, {
           'amount': added.amount,
           'description': added.description,
           'date': added.date.toUtc().toIso8601String(),
@@ -144,7 +145,7 @@ class RecordRepositoryImpl implements RecordRepository {
       final updated = await localDatasource.updateRecord(record);
       final updatedId = updated.id;
       if (updatedId != null) {
-        _enqueueSync('update', updatedId, {
+        await _enqueueSync('update', updatedId, {
           'amount': updated.amount,
           'description': updated.description,
           'date': updated.date.toUtc().toIso8601String(),
@@ -170,7 +171,7 @@ class RecordRepositoryImpl implements RecordRepository {
   Future<Either<CacheFailure, Unit>> deleteRecord(String id) async {
     try {
       await localDatasource.deleteRecord(id);
-      _enqueueSync('delete', id);
+      await _enqueueSync('delete', id);
 
       return const Right(unit);
     } on CacheException catch (e) {
@@ -336,11 +337,17 @@ class RecordRepositoryImpl implements RecordRepository {
     List<Record> records,
   ) async {
     try {
-      await localDatasource.addRecordsBatch(records);
-      for (final r in records) {
+      // Ids are set here, not in the datasource, so every row is queued for
+      // sync.
+      final withIds = [
+        for (final r in records)
+          r.id == null ? r.copyWith(id: const Uuid().v4()) : r,
+      ];
+      await localDatasource.addRecordsBatch(withIds);
+      for (final r in withIds) {
         final recordId = r.id;
         if (recordId != null) {
-          _enqueueSync('insert', recordId, {
+          await _enqueueSync('insert', recordId, {
             'amount': r.amount,
             'description': r.description,
             'date': r.date.toUtc().toIso8601String(),
@@ -411,14 +418,16 @@ class RecordRepositoryImpl implements RecordRepository {
     }
   }
 
-  void _enqueueSync(
+  /// Awaited, so inside a database transaction the queue entry commits or
+  /// rolls back with the change.
+  Future<void> _enqueueSync(
     String action,
     String recordId, [
     Map<String, dynamic>? data,
-  ]) {
+  ]) async {
     final syncQueueDao = _syncQueueDao;
     if (syncQueueDao == null) return;
-    syncQueueDao.enqueue(
+    await syncQueueDao.enqueue(
       tableName: 'records',
       recordId: recordId,
       action: action,

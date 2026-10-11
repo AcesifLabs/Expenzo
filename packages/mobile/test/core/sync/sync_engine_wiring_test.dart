@@ -70,6 +70,7 @@ void main() {
     bool keepLocalBudgetLinks = false,
     List<SyncTask> afterSyncTasks = const [],
     List<SyncTask> beforeLocalWipeTasks = const [],
+    List<SyncTask> stopTasks = const [],
   }) => running = SyncEngine(
     syncQueueDao: SyncQueueDao(db),
     apiClient: apiClient,
@@ -81,6 +82,7 @@ void main() {
       ),
     afterSyncTasks: afterSyncTasks,
     beforeLocalWipeTasks: beforeLocalWipeTasks,
+    stopTasks: stopTasks,
   );
 
   Map<String, dynamic> pulledBudget(String id, String name) => {
@@ -180,6 +182,52 @@ void main() {
       ).start();
 
       expect(ran, ['second']);
+    });
+
+    test('see whether the pull succeeded', () async {
+      bool? pulled;
+      late SyncEngine sync;
+      sync = engine(
+        afterSyncTasks: [() async => pulled = sync.lastPullSucceeded],
+      );
+
+      await sync.start();
+
+      expect(pulled, isTrue);
+    });
+
+    test('see a failed pull as not pulled', () async {
+      when(
+        () => dio.get<dynamic>(
+          ApiConstants.syncPull,
+          queryParameters: any(named: 'queryParameters'),
+        ),
+      ).thenThrow(Exception('server down'));
+      bool? pulled;
+      late SyncEngine sync;
+      sync = engine(
+        afterSyncTasks: [() async => pulled = sync.lastPullSucceeded],
+      );
+
+      await sync.start();
+
+      expect(pulled, isFalse);
+    });
+
+    test('stop runs the stop tasks, even after one fails', () async {
+      final ran = <String>[];
+      final sync = engine(
+        stopTasks: [
+          () async => throw Exception('boom'),
+          () async => ran.add('second'),
+        ],
+      );
+      await sync.start();
+
+      await sync.stop();
+
+      expect(ran, ['second']);
+      expect(sync.lastPullSucceeded, isFalse);
     });
 
     test('are skipped while offline', () async {

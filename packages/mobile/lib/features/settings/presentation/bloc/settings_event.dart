@@ -68,6 +68,25 @@ class UpdateLanguage extends SettingsEvent {
   const UpdateLanguage(this.languageCode);
 }
 
+class UpdateDefaultRecurringFrequency extends SettingsEvent {
+  /// 'weekly', 'monthly' or 'yearly'.
+  final String frequency;
+
+  @override
+  List<Object?> get props => [frequency];
+
+  const UpdateDefaultRecurringFrequency(this.frequency);
+}
+
+class UpdateRecurringAutoCreate extends SettingsEvent {
+  final bool enabled;
+
+  @override
+  List<Object?> get props => [enabled];
+
+  const UpdateRecurringAutoCreate(this.enabled);
+}
+
 class DeleteAccountEvent extends SettingsEvent {
   const DeleteAccountEvent();
 }

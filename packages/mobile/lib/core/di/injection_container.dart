@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:expense_tracker/core/database/app_database.dart';
 import 'package:expense_tracker/core/database/database_seeder.dart';
+import 'package:expense_tracker/core/database/transaction_runner.dart';
 import 'package:expense_tracker/core/database/daos/record_dao.dart';
 import 'package:expense_tracker/core/database/daos/category_dao.dart';
 import 'package:expense_tracker/core/database/daos/pending_recurring_dao.dart';
@@ -22,6 +23,7 @@ import 'package:expense_tracker/core/sync/sync_table_registry.dart';
 import 'package:expense_tracker/core/sync/default_sync_registry.dart';
 import 'package:expense_tracker/features/budgets/data/services/budget_name_repair.dart';
 import 'package:expense_tracker/features/records/data/services/record_budget_link_repair.dart';
+import 'package:expense_tracker/features/recurring/application/recurring_auto_poster.dart';
 
 import 'auth_module.dart';
 import 'category_module.dart';
@@ -73,6 +75,27 @@ void _registerDaoFactories() {
   getIt.registerFactory<UserDao>(() => UserDao(getIt<AppDatabase>()));
   getIt.registerFactory<BudgetDao>(() => BudgetDao(getIt<AppDatabase>()));
   getIt.registerFactory<SyncQueueDao>(() => SyncQueueDao(getIt<AppDatabase>()));
+  getIt.registerFactory<TransactionRunner>(
+    () => DriftTransactionRunner(getIt<AppDatabase>()),
+  );
+}
+
+/// Auto-create waits for the pull so it never posts an occurrence another
+/// device already moved past. Registered by initRecurringModule.
+Future<void> _autoPostRecurringAfterSync() async {
+  if (!getIt.isRegistered<RecurringAutoPoster>()) return;
+  await getIt<RecurringAutoPoster>().runAfterSync(
+    pulled: getIt<SyncEngine>().lastPullSucceeded,
+  );
+}
+
+/// Sign-out: the next account must pull before auto-create posts.
+Future<void> _resetRecurringAutoPost() {
+  if (getIt.isRegistered<RecurringAutoPoster>()) {
+    getIt<RecurringAutoPoster>().resetSession();
+  }
+
+  return Future.value();
 }
 
 Future<void> initCriticalDependencies() async {
@@ -133,12 +156,14 @@ Future<void> initCriticalDependencies() async {
             await getIt<RecordBudgetLinkRepair>().runOnce();
           }
         },
+        _autoPostRecurringAfterSync,
       ],
       // No guard: if a repair cannot run, the wipe must not happen.
       beforeLocalWipeTasks: [
         () => getIt<BudgetNameRepair>().runOnce(),
         () => getIt<RecordBudgetLinkRepair>().runOnce(),
       ],
+      stopTasks: [_resetRecurringAutoPost],
     ),
   );
 

@@ -37,9 +37,11 @@ class SyncEngine {
   final SyncTableRegistry _registry;
   final List<SyncTask> _afterSyncTasks;
   final List<SyncTask> _beforeLocalWipeTasks;
+  final List<SyncTask> _stopTasks;
   StreamSubscription? _connectivitySub;
   StreamSubscription? _syncEventSub;
   bool _initialized = false;
+  bool _lastPullSucceeded = false;
   int _retryCount = 0;
   Timer? _retryTimer;
 
@@ -48,6 +50,10 @@ class SyncEngine {
   /// are coalesced: exactly one more cycle will run after the current completes.
   Completer<void>? _syncLock;
   bool _hasPendingTrigger = false;
+
+  /// True when the latest pull reached the server and was applied. After-sync
+  /// tasks run even when it failed, so tasks that need fresh data check this.
+  bool get lastPullSucceeded => _lastPullSucceeded;
 
   AppDatabase get _db => di.getIt<AppDatabase>();
 
@@ -63,12 +69,16 @@ class SyncEngine {
 
     /// Run by [prepareForLocalWipe] before local data is replaced.
     List<SyncTask> beforeLocalWipeTasks = const [],
+
+    /// Run by [stop] (sign-out), so per-session state is cleared.
+    List<SyncTask> stopTasks = const [],
   }) : _syncQueueDao = syncQueueDao,
        _apiClient = apiClient,
        _connectivity = connectivity,
        _registry = registry,
        _afterSyncTasks = afterSyncTasks,
-       _beforeLocalWipeTasks = beforeLocalWipeTasks;
+       _beforeLocalWipeTasks = beforeLocalWipeTasks,
+       _stopTasks = stopTasks;
 
   Future<void> start() async {
     if (_initialized) return;
@@ -119,6 +129,14 @@ class SyncEngine {
     await _syncEventSub?.cancel();
     _syncEventSub = null;
     _initialized = false;
+    _lastPullSucceeded = false;
+    for (final task in _stopTasks) {
+      try {
+        await task();
+      } catch (e) {
+        debugPrint('SyncEngine: Stop task failed: ${e.runtimeType}');
+      }
+    }
   }
 
   Future<SyncConflictType> checkConflict() async {
@@ -302,6 +320,7 @@ class SyncEngine {
   }
 
   Future<void> _safePullChanges() async {
+    _lastPullSucceeded = false;
     try {
       if (!await _connectivity.checkNow()) return;
       final lastSync = await TokenStorage.getLastSyncAt();
@@ -316,6 +335,7 @@ class SyncEngine {
         () => _applyPulledChanges(changes.cast<Map<String, dynamic>>()),
       );
       await TokenStorage.saveLastSyncAt(serverTime);
+      _lastPullSucceeded = true;
     } catch (e, s) {
       debugPrint('Error: $e\n$s');
       debugPrint('SyncEngine pull failed: $e');

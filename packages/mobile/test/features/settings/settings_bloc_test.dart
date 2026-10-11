@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:dartz/dartz.dart';
@@ -262,6 +264,28 @@ void main() {
       expect(saved.currencyCode, 'USD');
     });
 
+    test('UpdateDefaultRecurringFrequency saves the frequency and keeps other '
+        'settings', () async {
+      final saved = await savedAfter(
+        const UpdateDefaultRecurringFrequency('yearly'),
+      );
+
+      expect(saved.defaultRecurringFrequency, 'yearly');
+      expect(saved.theme, 'light');
+      expect(saved.recurringAutoCreate, isFalse);
+    });
+
+    test(
+      'UpdateRecurringAutoCreate saves the switch and keeps other settings',
+      () async {
+        final saved = await savedAfter(const UpdateRecurringAutoCreate(true));
+
+        expect(saved.recurringAutoCreate, isTrue);
+        expect(saved.theme, 'light');
+        expect(saved.defaultRecurringFrequency, 'monthly');
+      },
+    );
+
     test('a change made while a save runs keeps both changes', () async {
       when(
         () => mockGetSettings(any()),
@@ -287,10 +311,30 @@ void main() {
       expect(saved.last.languageCode, 'bn');
     });
 
+    test('latestSettings has a change before its save finishes', () async {
+      when(
+        () => mockGetSettings(any()),
+      ).thenAnswer((_) async => Right(testSettings));
+      final saved = Completer<Either<Failure, UserSettings>>();
+      when(() => mockUpdateSettings(any())).thenAnswer((_) => saved.future);
+      bloc.add(const LoadSettings());
+      await bloc.stream.firstWhere((s) => s is SettingsLoaded);
+
+      bloc.add(const UpdateDefaultRecurringFrequency('yearly'));
+      await bloc.stream.firstWhere((s) => s is SettingsLoading);
+
+      expect(bloc.latestSettings?.defaultRecurringFrequency, 'yearly');
+      saved.complete(
+        Right(testSettings.copyWith(defaultRecurringFrequency: 'yearly')),
+      );
+    });
+
     test('derived updates do nothing before settings have loaded', () async {
       bloc
         ..add(const UpdateCurrency('BDT'))
-        ..add(const DismissAutoImportPrompt());
+        ..add(const DismissAutoImportPrompt())
+        ..add(const UpdateDefaultRecurringFrequency('weekly'))
+        ..add(const UpdateRecurringAutoCreate(true));
       await Future<void>.delayed(Duration.zero);
 
       verifyNever(() => mockUpdateSettings(any()));

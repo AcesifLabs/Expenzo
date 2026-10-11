@@ -24,6 +24,10 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   /// must not replace [_lastLoaded] while a newer one built on it is pending.
   var _pendingSaves = 0;
 
+  /// [_lastLoaded] for readers outside the bloc: unlike [state], it keeps
+  /// the newest values while a save runs.
+  UserSettings? get latestSettings => _lastLoaded;
+
   SettingsBloc({
     required this.getSettings,
     required this.updateSettings,
@@ -42,6 +46,14 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     );
     on<UpdateTheme>(_onUpdateTheme, transformer: concurrent());
     on<UpdateLanguage>(_onUpdateLanguage, transformer: concurrent());
+    on<UpdateDefaultRecurringFrequency>(
+      _onUpdateDefaultRecurringFrequency,
+      transformer: concurrent(),
+    );
+    on<UpdateRecurringAutoCreate>(
+      _onUpdateRecurringAutoCreate,
+      transformer: concurrent(),
+    );
     on<DismissAutoImportPrompt>(
       _onDismissAutoImportPrompt,
       transformer: concurrent(),
@@ -108,6 +120,22 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
 
   void _onUpdateLanguage(UpdateLanguage event, Emitter<SettingsState> emit) {
     _updateFromLast((s) => s.copyWith(languageCode: event.languageCode));
+  }
+
+  void _onUpdateDefaultRecurringFrequency(
+    UpdateDefaultRecurringFrequency event,
+    Emitter<SettingsState> emit,
+  ) {
+    _updateFromLast(
+      (s) => s.copyWith(defaultRecurringFrequency: event.frequency),
+    );
+  }
+
+  void _onUpdateRecurringAutoCreate(
+    UpdateRecurringAutoCreate event,
+    Emitter<SettingsState> emit,
+  ) {
+    _updateFromLast((s) => s.copyWith(recurringAutoCreate: event.enabled));
   }
 
   Future<void> _onDeleteAccountEvent(

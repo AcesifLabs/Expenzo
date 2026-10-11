@@ -98,4 +98,36 @@ void main() {
 
     expect((await datasource.getSettings()).autoImportPromptDismissed, isTrue);
   });
+
+  test('settings saved before recurring defaults existed load monthly and '
+      'auto-create off', () async {
+    final datasource = await datasourceWith(_storedSettings(code: 'BDT'));
+    final settings = await datasource.getSettings();
+
+    expect(settings.defaultRecurringFrequency, 'monthly');
+    expect(settings.recurringAutoCreate, isFalse);
+  });
+
+  test('the default recurring frequency is saved and read back', () async {
+    final datasource = await datasourceWith(_storedSettings(code: 'BDT'));
+    final settings = await datasource.getSettings();
+    await datasource.updateSettings(
+      settings.copyWith(defaultRecurringFrequency: 'weekly'),
+    );
+
+    expect(
+      (await datasource.getSettings()).defaultRecurringFrequency,
+      'weekly',
+    );
+  });
+
+  test('recurring auto-create is saved and read back', () async {
+    final datasource = await datasourceWith(_storedSettings(code: 'BDT'));
+    final settings = await datasource.getSettings();
+    await datasource.updateSettings(
+      settings.copyWith(recurringAutoCreate: true),
+    );
+
+    expect((await datasource.getSettings()).recurringAutoCreate, isTrue);
+  });
 }

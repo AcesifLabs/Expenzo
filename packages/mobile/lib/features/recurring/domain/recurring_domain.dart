@@ -5,3 +5,4 @@ export 'usecases/update_recurring.dart';
 export 'usecases/delete_recurring.dart';
 export 'usecases/get_recurring_list.dart';
 export 'usecases/process_recurring.dart';
+export 'usecases/post_due_recurring.dart';
