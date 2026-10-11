@@ -24,9 +24,39 @@
     "dataBudget": "Data & budget",
     "general": "General"
   },
-  "budgetAlerts": {
-    "title": "Budget alerts",
-    "subtitle": "Notify me at 80% and when over budget"
+  "notifications": {
+    "title": "Notifications",
+    "rowSubtitle": "{n} of 4 on",
+    "rowSubtitleOff": "Off",
+    "sections": {
+      "general": "General",
+      "budgetAlerts": "Budget alerts",
+      "recurring": "Recurring transactions"
+    },
+    "master": {
+      "title": "Allow notifications",
+      "subtitle": "Budget alerts, weekly summary and reminders"
+    },
+    "blocked": {
+      "title": "Notifications are blocked",
+      "action": "Open settings"
+    },
+    "over": {
+      "title": "Over budget alert",
+      "subtitle": "When spending exceeds budget limit"
+    },
+    "nearLimit": {
+      "title": "80% threshold",
+      "subtitle": "When 80% of budget is used"
+    },
+    "weekly": {
+      "title": "Weekly summary",
+      "subtitle": "{day} evening: this week's spending compared with last week"
+    },
+    "reminders": {
+      "title": "Reminder alerts",
+      "subtitle": "Get reminded a day before recurring transactions"
+    }
   },
   "autoImportSubtitle": "Turn bank and payment messages into transactions",
   "matchingRulesSubtitle": "Patterns for messages auto-import can't read yet",

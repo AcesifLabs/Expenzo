@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 
+import 'core/background/background_dispatcher.dart';
+import 'core/background/background_work.dart';
+import 'core/config/load_env.dart';
 import 'core/di/injection_container.dart' as di;
 import 'core/lifecycle/bootstrap_service.dart';
 import 'expenzo_app.dart';
@@ -13,6 +15,8 @@ import 'shared/presentation/widgets/app_critical_error.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Before anything can schedule background work.
+  await WorkmanagerBackgroundWork.initialize(backgroundTaskDispatcher);
   // Device language until saved settings load (ExpenzoApp._applySettings).
   registerPluralResolvers();
   final deviceLocale = LocaleSettings.useDeviceLocaleSync();
@@ -21,13 +25,7 @@ void main() async {
   DateFormat.useNativeDigitsByDefaultFor(AppLocale.bn.languageTag, false);
   Intl.defaultLocale = deviceLocale.languageTag;
 
-  const isProd = bool.fromEnvironment('dart.vm.product');
-  try {
-    await dotenv.load(fileName: isProd ? '.env.prod' : '.env.dev');
-  } catch (e, s) {
-    debugPrint('Error: $e\n$s');
-    debugPrint('Failed to load .env: $e');
-  }
+  await loadEnv();
 
   ErrorWidget.builder = (details) => AppCriticalError(details: details);
 

@@ -32,6 +32,7 @@ import 'parsing_module.dart';
 import 'report_module.dart';
 import 'budget_module.dart';
 import 'recurring_module.dart';
+import 'background_module.dart';
 import 'settings_module.dart';
 import 'dashboard_module.dart';
 import 'ai_assistant_module.dart';
@@ -224,6 +225,7 @@ Future<void> initFeatureDependencies() async {
   try {
     initBudgetModule(getIt);
     initRecurringModule(getIt);
+    initBackgroundModule(getIt);
     completer.complete();
   } catch (e, s) {
     completer.completeError(e, s);

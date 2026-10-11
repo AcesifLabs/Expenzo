@@ -24,6 +24,10 @@ import 'package:expense_tracker/features/recurring/application/recurring_auto_po
 import 'package:expense_tracker/features/budgets/domain/usecases/check_budget_alerts.dart';
 import 'package:expense_tracker/features/settings/domain/usecases/get_settings.dart';
 import 'package:expense_tracker/features/recurring/presentation/bloc/recurring_bloc.dart';
+import 'package:expense_tracker/features/recurring/data/services/shared_prefs_recurring_reminder_log.dart';
+import 'package:expense_tracker/features/recurring/domain/usecases/send_recurring_reminders.dart';
+import 'package:expense_tracker/shared/services/notification_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void initRecurringModule(GetIt getIt) {
   getIt.registerLazySingleton<RecurringLocalDatasource>(
@@ -73,6 +77,18 @@ void initRecurringModule(GetIt getIt) {
           await getIt<CheckBudgetAlerts>()();
         }
       },
+    ),
+  );
+  getIt.registerLazySingleton<RecurringReminderLog>(
+    () => SharedPrefsRecurringReminderLog(getIt<SharedPreferences>()),
+  );
+  // NotificationService is registered by initBudgetModule, which runs first.
+  getIt.registerLazySingleton(
+    () => SendRecurringReminders(
+      getRecurringList: getIt<GetRecurringList>(),
+      getSettings: getIt<GetSettings>(),
+      notificationService: getIt<NotificationService>(),
+      log: getIt<RecurringReminderLog>(),
     ),
   );
   getIt.registerFactory<RecurringBloc>(

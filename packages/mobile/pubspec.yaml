@@ -38,6 +38,7 @@ dependencies:
   permission_handler: ^12.0.1
   flutter_sms_inbox: ^1.0.4
   flutter_local_notifications: ^17.2.2
+  workmanager: ^0.9.0
   shared_preferences: ^2.5.5
   http: ^1.2.1
 

@@ -17,6 +17,7 @@ import 'package:expense_tracker/shared/presentation/widgets/locale_scope.dart';
 import 'package:expense_tracker/core/router/refresh_on_auth_change.dart';
 import 'package:expense_tracker/shared/services/feedback_mailer.dart';
 
+import 'core/background/background_task_scheduler.dart';
 import 'core/database/app_database.dart';
 import 'i18n/strings.g.dart';
 import 'core/di/injection_container.dart' as di;
@@ -29,6 +30,7 @@ import 'features/categories/presentation/bloc/category_bloc.dart';
 import 'features/categories/presentation/bloc/category_event.dart';
 import 'features/records/presentation/bloc/record_bloc.dart';
 import 'features/recurring/application/recurring_auto_poster.dart';
+import 'features/recurring/domain/usecases/send_recurring_reminders.dart';
 import 'features/records/presentation/bloc/record_event.dart';
 import 'features/settings/presentation/bloc/settings_bloc.dart';
 import 'features/settings/presentation/bloc/settings_event.dart';
@@ -38,10 +40,14 @@ import 'features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
 import 'shared/presentation/widgets/app_error_fallback.dart';
 
 /// App-open work, run in order: auto-post due recurring items (SAAP-63),
-/// then recurring reminders (SAAP-64 Task 5 adds them here).
-Future<void> _autoPostRecurring() async {
-  if (!di.getIt.isRegistered<RecurringAutoPoster>()) return;
-  await di.getIt<RecurringAutoPoster>().runWhenReady();
+/// then recurring reminders, so reminders see the advanced dates.
+Future<void> _runRecurringAppOpenWork() async {
+  if (di.getIt.isRegistered<RecurringAutoPoster>()) {
+    await di.getIt<RecurringAutoPoster>().runWhenReady();
+  }
+  if (di.getIt.isRegistered<SendRecurringReminders>()) {
+    await di.getIt<SendRecurringReminders>()(now: DateTime.now());
+  }
 }
 
 class ExpenzoApp extends StatefulWidget {
@@ -74,6 +80,10 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
   bool _error = false;
   String _errorRefId = '';
 
+  /// False until the first settings after a cold start re-arm background
+  /// work with fresh delays.
+  bool _backgroundArmed = false;
+
   Future<void> _startInitialization() async {
     try {
       await _initFirebase();
@@ -99,7 +109,7 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
       // Feature deps no longer need the 500ms delay — the
       // `featureDependenciesReady` getter is self-healing.
       await di.initFeatureDependencies();
-      unawaited(_autoPostRecurring());
+      unawaited(_runRecurringAppOpenWork());
     } catch (e, stack) {
       debugPrint('App init failed: $e\n$stack');
       if (mounted) {
@@ -165,6 +175,18 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
       settings.currencyCode,
     );
     _applyLanguage(settings.languageCode);
+    unawaited(_applyBackgroundWork(settings));
+  }
+
+  Future<void> _applyBackgroundWork(UserSettings settings) async {
+    try {
+      await di.featureDependenciesReady;
+      final force = !_backgroundArmed;
+      _backgroundArmed = true;
+      await di.getIt<BackgroundTaskScheduler>().apply(settings, force: force);
+    } catch (e, s) {
+      debugPrint('Background work scheduling failed: $e\n$s');
+    }
   }
 
   void _applyLanguage(String languageCode) {
@@ -374,7 +396,7 @@ class _AppContentState extends State<_AppContent> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       unawaited(_tryDrainRealtimeSms());
-      unawaited(_autoPostRecurring());
+      unawaited(_runRecurringAppOpenWork());
     }
   }
 

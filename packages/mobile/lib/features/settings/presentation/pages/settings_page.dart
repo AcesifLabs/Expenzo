@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:permission_handler/permission_handler.dart';
 import 'package:picons/picons.dart';
 
 import 'package:expense_tracker/core/database/app_database.dart';
@@ -15,9 +14,9 @@ import 'package:expense_tracker/features/auth/presentation/bloc/auth_state.dart'
 import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_back_button.dart';
 import 'package:expense_tracker/shared/services/feedback_mailer.dart';
-import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 
+import '../../domain/entities/notification_toggle.dart';
 import '../../domain/entities/user_settings.dart';
 import '../bloc/settings_bloc.dart';
 import '../bloc/settings_event.dart';
@@ -47,9 +46,6 @@ class SettingsPage extends StatelessWidget {
   }
 }
 
-Future<bool> _requestNotificationPermission() async =>
-    (await Permission.notification.request()).isGranted;
-
 /// The main Settings list. Sections and rows, top to bottom (SAAP-60 README,
 /// "Settings row order"):
 ///
@@ -57,7 +53,7 @@ Future<bool> _requestNotificationPermission() async =>
 /// |---|---|---|
 /// | Profile & account (`_accountSection`) | Sign in (signed out) / Delete account (signed in) | SAAP-72 profile card above the section, then My profile (Delete account moves into it); SAAP-75 Family group right after My profile |
 /// | Preferences (`_preferencesSection`) | Default currency, Appearance | Default currency, Number format (SAAP-65), Font size (SAAP-66), Appearance, Calendar (SAAP-67) |
-/// | Notifications (`_notificationsSection`) | Budget alerts switch | SAAP-64 replaces the switch with a Notifications row |
+/// | Notifications (`_notificationsSection`) | Notifications | none |
 /// | Data & budget (`_dataSection`) | Recurring transactions | Recurring transactions, Sync (SAAP-71), Export data (SAAP-69), Delete all data (SAAP-70) |
 /// | Automation (`_automationSection`) | Auto-import from SMS, Matching rules | none |
 /// | General (`_generalSection`) | Language | Language, Home page (SAAP-68), Category settings (SAAP-61) |
@@ -71,35 +67,25 @@ Future<bool> _requestNotificationPermission() async =>
 /// reads "Sync" / "Keep your data on all your devices"; the UI never says
 /// "backup".
 class SettingsView extends StatelessWidget {
-  const SettingsView({
-    super.key,
-    this.requestNotificationPermission = _requestNotificationPermission,
-  });
+  const SettingsView({super.key});
 
-  /// Asks Android for permission to post notifications; replaceable in tests.
-  final Future<bool> Function() requestNotificationPermission;
+  /// "Off", or how many of the four kinds are on.
+  static String _notificationsSummary(UserSettings? settings) {
+    final notificationsT = t.settings.notifications;
+    if (settings == null || !settings.notificationsEnabled) {
+      return notificationsT.rowSubtitleOff;
+    }
+    final on = NotificationToggle.values.where(settings.isEnabled).length;
+
+    return notificationsT.rowSubtitle(n: on);
+  }
 
   void _openCurrency(BuildContext context) {
     context.push('/settings/currency');
   }
 
-  Future<void> _onNotificationsChanged(
-    BuildContext context,
-    bool enabled,
-  ) async {
-    final bloc = context.read<SettingsBloc>();
-    // Turning alerts on is pointless if Android won't show them.
-    if (enabled && !await requestNotificationPermission()) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(
-          SnackBar(content: Text(t.settings.notificationsBlocked)),
-        );
-
-      return;
-    }
-    bloc.add(UpdateNotificationsEnabled(enabled));
+  void _openNotifications(BuildContext context) {
+    context.push('/settings/notifications');
   }
 
   void _openAppearance(BuildContext context) {
@@ -192,19 +178,15 @@ class SettingsView extends StatelessWidget {
 
   Widget _notificationsSection(BuildContext context, UserSettings? settings) {
     final settingsT = t.settings;
-    final budgetAlertsT = settingsT.budgetAlerts;
 
     return SettingsSection(
       title: settingsT.sections.notifications,
       children: [
-        SwitchListTile(
-          secondary: Icon(PiconsRegular.bell, color: context.palette.accent),
-          title: Text(budgetAlertsT.title),
-          subtitle: Text(budgetAlertsT.subtitle),
-          value: settings?.notificationsEnabled ?? false,
-          onChanged: settings == null
-              ? null
-              : (enabled) => _onNotificationsChanged(context, enabled),
+        SettingsTile(
+          icon: PiconsRegular.bell,
+          title: settingsT.notifications.title,
+          subtitle: _notificationsSummary(settings),
+          onTap: () => _openNotifications(context),
         ),
       ],
     );

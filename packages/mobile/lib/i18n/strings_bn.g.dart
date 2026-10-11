@@ -311,6 +311,7 @@ class _Translations$notifications$bn extends Translations$notifications$en {
 	@override late final _Translations$notifications$channel$bn channel = _Translations$notifications$channel$bn._(_root);
 	@override late final _Translations$notifications$budget$bn budget = _Translations$notifications$budget$bn._(_root);
 	@override late final _Translations$notifications$recurringDue$bn recurringDue = _Translations$notifications$recurringDue$bn._(_root);
+	@override late final _Translations$notifications$weeklySummary$bn weeklySummary = _Translations$notifications$weeklySummary$bn._(_root);
 	@override late final _Translations$notifications$scan$bn scan = _Translations$notifications$scan$bn._(_root);
 	@override late final _Translations$notifications$syncError$bn syncError = _Translations$notifications$syncError$bn._(_root);
 }
@@ -441,7 +442,7 @@ class _Translations$settings$bn extends Translations$settings$en {
 	@override String get appearance => 'থিম';
 	@override String get notificationsBlocked => 'বাজেট সতর্কতা পেতে সিস্টেম সেটিংসে Expenzo-র নোটিফিকেশন চালু করুন।';
 	@override late final _Translations$settings$sections$bn sections = _Translations$settings$sections$bn._(_root);
-	@override late final _Translations$settings$budgetAlerts$bn budgetAlerts = _Translations$settings$budgetAlerts$bn._(_root);
+	@override late final _Translations$settings$notifications$bn notifications = _Translations$settings$notifications$bn._(_root);
 	@override String get autoImportSubtitle => 'ব্যাংক ও পেমেন্টের মেসেজ থেকে লেনদেন তৈরি করুন';
 	@override String get matchingRulesSubtitle => 'যেসব মেসেজ অটো-ইমপোর্ট এখনো পড়তে পারে না, সেগুলোর প্যাটার্ন';
 	@override late final _Translations$settings$recurring$bn recurring = _Translations$settings$recurring$bn._(_root);
@@ -1032,7 +1033,7 @@ class _Translations$notifications$channel$bn extends Translations$notifications$
 
 	// Translations
 	@override String get name => 'অ্যাপের নোটিফিকেশন';
-	@override String get description => 'বাজেট সতর্কতা, পুনরাবৃত্ত রিমাইন্ডার ও স্ক্যানের ফলাফল';
+	@override String get description => 'বাজেট সতর্কতা, সাপ্তাহিক সারাংশ, পুনরাবৃত্ত রিমাইন্ডার ও স্ক্যানের ফলাফল';
 }
 
 // Path: notifications.budget
@@ -1054,7 +1055,22 @@ class _Translations$notifications$recurringDue$bn extends Translations$notificat
 	final TranslationsBn _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'পুনরাবৃত্ত খরচের সময় হয়েছে';
+	@override String get title => 'আগামীকাল পুনরাবৃত্ত লেনদেন';
+}
+
+// Path: notifications.weeklySummary
+class _Translations$notifications$weeklySummary$bn extends Translations$notifications$weeklySummary$en {
+	_Translations$notifications$weeklySummary$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'এই সপ্তাহের খরচ';
+	@override String up({required Object amount, required Object percent}) => 'এই সপ্তাহে আপনি ${amount} খরচ করেছেন, গত সপ্তাহের চেয়ে ${percent}% বেশি।';
+	@override String down({required Object amount, required Object percent}) => 'এই সপ্তাহে আপনি ${amount} খরচ করেছেন, গত সপ্তাহের চেয়ে ${percent}% কম।';
+	@override String same({required Object amount}) => 'এই সপ্তাহে আপনি ${amount} খরচ করেছেন, গত সপ্তাহের সমান।';
+	@override String noComparison({required Object amount}) => 'এই সপ্তাহে আপনি ${amount} খরচ করেছেন।';
+	@override String get nothing => 'এই সপ্তাহে কোনো খরচ লেখা হয়নি।';
 }
 
 // Path: notifications.scan
@@ -1379,15 +1395,23 @@ class _Translations$settings$sections$bn extends Translations$settings$sections$
 	@override String get general => 'সাধারণ';
 }
 
-// Path: settings.budgetAlerts
-class _Translations$settings$budgetAlerts$bn extends Translations$settings$budgetAlerts$en {
-	_Translations$settings$budgetAlerts$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+// Path: settings.notifications
+class _Translations$settings$notifications$bn extends Translations$settings$notifications$en {
+	_Translations$settings$notifications$bn._(TranslationsBn root) : this._root = root, super.internal(root);
 
 	final TranslationsBn _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'বাজেট সতর্কতা';
-	@override String get subtitle => '80% এ এবং বাজেট ছাড়ালে আমাকে জানান';
+	@override String get title => 'নোটিফিকেশন';
+	@override String rowSubtitle({required Object n}) => '4টির মধ্যে ${n}টি চালু';
+	@override String get rowSubtitleOff => 'বন্ধ';
+	@override late final _Translations$settings$notifications$sections$bn sections = _Translations$settings$notifications$sections$bn._(_root);
+	@override late final _Translations$settings$notifications$master$bn master = _Translations$settings$notifications$master$bn._(_root);
+	@override late final _Translations$settings$notifications$blocked$bn blocked = _Translations$settings$notifications$blocked$bn._(_root);
+	@override late final _Translations$settings$notifications$over$bn over = _Translations$settings$notifications$over$bn._(_root);
+	@override late final _Translations$settings$notifications$nearLimit$bn nearLimit = _Translations$settings$notifications$nearLimit$bn._(_root);
+	@override late final _Translations$settings$notifications$weekly$bn weekly = _Translations$settings$notifications$weekly$bn._(_root);
+	@override late final _Translations$settings$notifications$reminders$bn reminders = _Translations$settings$notifications$reminders$bn._(_root);
 }
 
 // Path: settings.recurring
@@ -1756,6 +1780,84 @@ class _Translations$settings$language$names$bn extends Translations$settings$lan
 	@override String get bn => 'বাংলা';
 }
 
+// Path: settings.notifications.sections
+class _Translations$settings$notifications$sections$bn extends Translations$settings$notifications$sections$en {
+	_Translations$settings$notifications$sections$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get general => 'সাধারণ';
+	@override String get budgetAlerts => 'বাজেট সতর্কতা';
+	@override String get recurring => 'পুনরাবৃত্ত লেনদেন';
+}
+
+// Path: settings.notifications.master
+class _Translations$settings$notifications$master$bn extends Translations$settings$notifications$master$en {
+	_Translations$settings$notifications$master$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'নোটিফিকেশন চালু রাখুন';
+	@override String get subtitle => 'বাজেট সতর্কতা, সাপ্তাহিক সারাংশ ও রিমাইন্ডার';
+}
+
+// Path: settings.notifications.blocked
+class _Translations$settings$notifications$blocked$bn extends Translations$settings$notifications$blocked$en {
+	_Translations$settings$notifications$blocked$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'নোটিফিকেশন বন্ধ করা আছে';
+	@override String get action => 'সেটিংস খুলুন';
+}
+
+// Path: settings.notifications.over
+class _Translations$settings$notifications$over$bn extends Translations$settings$notifications$over$en {
+	_Translations$settings$notifications$over$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'বাজেট ছাড়ানোর সতর্কতা';
+	@override String get subtitle => 'খরচ বাজেটের সীমা ছাড়ালে';
+}
+
+// Path: settings.notifications.nearLimit
+class _Translations$settings$notifications$nearLimit$bn extends Translations$settings$notifications$nearLimit$en {
+	_Translations$settings$notifications$nearLimit$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '80% সীমা';
+	@override String get subtitle => 'বাজেটের 80% খরচ হলে';
+}
+
+// Path: settings.notifications.weekly
+class _Translations$settings$notifications$weekly$bn extends Translations$settings$notifications$weekly$en {
+	_Translations$settings$notifications$weekly$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'সাপ্তাহিক সারাংশ';
+	@override String subtitle({required Object day}) => '${day} সন্ধ্যায়: এই সপ্তাহের খরচ, গত সপ্তাহের তুলনায়';
+}
+
+// Path: settings.notifications.reminders
+class _Translations$settings$notifications$reminders$bn extends Translations$settings$notifications$reminders$en {
+	_Translations$settings$notifications$reminders$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'রিমাইন্ডার';
+	@override String get subtitle => 'পুনরাবৃত্ত লেনদেনের এক দিন আগে মনে করিয়ে দিন';
+}
+
 // Path: settings.appearanceScreen.sections
 class _Translations$settings$appearanceScreen$sections$bn extends Translations$settings$appearanceScreen$sections$en {
 	_Translations$settings$appearanceScreen$sections$bn._(TranslationsBn root) : this._root = root, super.internal(root);
@@ -2096,11 +2198,17 @@ extension on TranslationsBn {
 			'messageTemplates.contacts.noMatch' => ({required Object query}) => '"${query}" এর সাথে মেলে এমন কোনো প্রেরক নেই।',
 			'messageTemplates.create' => 'নতুন SMS ফরম্যাট',
 			'notifications.channel.name' => 'অ্যাপের নোটিফিকেশন',
-			'notifications.channel.description' => 'বাজেট সতর্কতা, পুনরাবৃত্ত রিমাইন্ডার ও স্ক্যানের ফলাফল',
+			'notifications.channel.description' => 'বাজেট সতর্কতা, সাপ্তাহিক সারাংশ, পুনরাবৃত্ত রিমাইন্ডার ও স্ক্যানের ফলাফল',
 			'notifications.budget.title' => 'বাজেট সতর্কতা',
 			'notifications.budget.over' => ({required Object budget}) => 'আপনার "${budget}" বাজেট ছাড়িয়ে গেছে।',
 			'notifications.budget.used' => ({required Object budget, required Object percent}) => 'আপনার "${budget}" বাজেটের ${percent}% খরচ হয়েছে।',
-			'notifications.recurringDue.title' => 'পুনরাবৃত্ত খরচের সময় হয়েছে',
+			'notifications.recurringDue.title' => 'আগামীকাল পুনরাবৃত্ত লেনদেন',
+			'notifications.weeklySummary.title' => 'এই সপ্তাহের খরচ',
+			'notifications.weeklySummary.up' => ({required Object amount, required Object percent}) => 'এই সপ্তাহে আপনি ${amount} খরচ করেছেন, গত সপ্তাহের চেয়ে ${percent}% বেশি।',
+			'notifications.weeklySummary.down' => ({required Object amount, required Object percent}) => 'এই সপ্তাহে আপনি ${amount} খরচ করেছেন, গত সপ্তাহের চেয়ে ${percent}% কম।',
+			'notifications.weeklySummary.same' => ({required Object amount}) => 'এই সপ্তাহে আপনি ${amount} খরচ করেছেন, গত সপ্তাহের সমান।',
+			'notifications.weeklySummary.noComparison' => ({required Object amount}) => 'এই সপ্তাহে আপনি ${amount} খরচ করেছেন।',
+			'notifications.weeklySummary.nothing' => 'এই সপ্তাহে কোনো খরচ লেখা হয়নি।',
 			'notifications.scan.smsTitle' => 'SMS স্ক্যান শেষ',
 			'notifications.scan.emailTitle' => 'ইমেইল স্ক্যান শেষ',
 			'notifications.scan.found' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n, one: '${n}টি নতুন খরচ পাওয়া গেছে', other: '${n}টি নতুন খরচ পাওয়া গেছে', ), 
@@ -2281,14 +2389,14 @@ extension on TranslationsBn {
 			'reports.askAi' => 'AI-কে জিজ্ঞেস করুন',
 			'reports.last7Days' => 'গত ৭ দিন',
 			'reports.last30Days' => 'গত ৩০ দিন',
+			_ => null,
+		} ?? switch (path) {
 			'reports.noCategoryData' => 'ক্যাটাগরির কোনো ডেটা নেই',
 			'reports.noTrendData' => 'এখনো প্রবণতার ডেটা নেই',
 			'reports.noSpending' => 'এখনো খরচের ডেটা নেই',
 			'reports.totalSpentInPeriod' => ({required Object amount}) => 'এই সময়ে মোট খরচ: ${amount}',
 			'reports.metrics.totalSpent' => 'মোট খরচ',
 			'reports.metrics.dailyAverage' => 'দৈনিক গড়',
-			_ => null,
-		} ?? switch (path) {
 			'reports.metrics.highestDay' => 'সর্বোচ্চ দিন',
 			'reports.spendingByCategory' => 'ক্যাটাগরি অনুযায়ী খরচ',
 			'reports.observations' => 'এই মাসের খরচ থেকে মূল পর্যবেক্ষণ',
@@ -2310,8 +2418,24 @@ extension on TranslationsBn {
 			'settings.sections.notifications' => 'নোটিফিকেশন',
 			'settings.sections.dataBudget' => 'ডেটা ও বাজেট',
 			'settings.sections.general' => 'সাধারণ',
-			'settings.budgetAlerts.title' => 'বাজেট সতর্কতা',
-			'settings.budgetAlerts.subtitle' => '80% এ এবং বাজেট ছাড়ালে আমাকে জানান',
+			'settings.notifications.title' => 'নোটিফিকেশন',
+			'settings.notifications.rowSubtitle' => ({required Object n}) => '4টির মধ্যে ${n}টি চালু',
+			'settings.notifications.rowSubtitleOff' => 'বন্ধ',
+			'settings.notifications.sections.general' => 'সাধারণ',
+			'settings.notifications.sections.budgetAlerts' => 'বাজেট সতর্কতা',
+			'settings.notifications.sections.recurring' => 'পুনরাবৃত্ত লেনদেন',
+			'settings.notifications.master.title' => 'নোটিফিকেশন চালু রাখুন',
+			'settings.notifications.master.subtitle' => 'বাজেট সতর্কতা, সাপ্তাহিক সারাংশ ও রিমাইন্ডার',
+			'settings.notifications.blocked.title' => 'নোটিফিকেশন বন্ধ করা আছে',
+			'settings.notifications.blocked.action' => 'সেটিংস খুলুন',
+			'settings.notifications.over.title' => 'বাজেট ছাড়ানোর সতর্কতা',
+			'settings.notifications.over.subtitle' => 'খরচ বাজেটের সীমা ছাড়ালে',
+			'settings.notifications.nearLimit.title' => '80% সীমা',
+			'settings.notifications.nearLimit.subtitle' => 'বাজেটের 80% খরচ হলে',
+			'settings.notifications.weekly.title' => 'সাপ্তাহিক সারাংশ',
+			'settings.notifications.weekly.subtitle' => ({required Object day}) => '${day} সন্ধ্যায়: এই সপ্তাহের খরচ, গত সপ্তাহের তুলনায়',
+			'settings.notifications.reminders.title' => 'রিমাইন্ডার',
+			'settings.notifications.reminders.subtitle' => 'পুনরাবৃত্ত লেনদেনের এক দিন আগে মনে করিয়ে দিন',
 			'settings.autoImportSubtitle' => 'ব্যাংক ও পেমেন্টের মেসেজ থেকে লেনদেন তৈরি করুন',
 			'settings.matchingRulesSubtitle' => 'যেসব মেসেজ অটো-ইমপোর্ট এখনো পড়তে পারে না, সেগুলোর প্যাটার্ন',
 			'settings.recurring.title' => 'পুনরাবৃত্ত লেনদেন',

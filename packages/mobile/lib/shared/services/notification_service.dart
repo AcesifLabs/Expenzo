@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
+import 'package:expense_tracker/core/utils/currency_formatter.dart';
+import 'package:expense_tracker/features/reports/domain/entities/weekly_summary.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
 class NotificationService {
@@ -97,7 +99,7 @@ class NotificationService {
     final notificationDetails = NotificationDetails(android: androidDetails);
 
     await _notifications.show(
-      DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      _idFor(type, deepLink),
       title,
       body,
       notificationDetails,
@@ -145,6 +147,15 @@ class NotificationService {
     );
   }
 
+  Future<void> showWeeklySummary(WeeklySummary summary) async {
+    await showNotification(
+      title: t.notifications.weeklySummary.title,
+      body: weeklySummaryBody(summary),
+      type: NotificationType.weeklySummary,
+      deepLink: 'expenso://reports',
+    );
+  }
+
   Future<void> showScanComplete({
     required int foundCount,
     required String sourceType,
@@ -177,6 +188,24 @@ class NotificationService {
     await _notifications.cancel(id);
   }
 
+  @visibleForTesting
+  static String weeklySummaryBody(WeeklySummary summary) {
+    final strings = t.notifications.weeklySummary;
+    if (summary.thisWeekTotal == 0) return strings.nothing;
+
+    final amount = CurrencyFormatter.format(summary.thisWeekTotal);
+    final change = summary.changePercent;
+    if (change == null) return strings.noComparison(amount: amount);
+
+    final percent = change.round();
+    if (percent == 0) return strings.same(amount: amount);
+    final shown = percent.abs().toString();
+
+    return percent > 0
+        ? strings.up(amount: amount, percent: shown)
+        : strings.down(amount: amount, percent: shown);
+  }
+
   static void _onNotificationTapped(NotificationResponse response) {
     final payload = response.payload;
     if (payload == null) return;
@@ -207,6 +236,16 @@ class NotificationService {
     }
   }
 
+  /// Recurring reminders get one id per item, so reminders sent in the same
+  /// second don't replace each other; the rest use the time.
+  static int _idFor(NotificationType type, String? deepLink) {
+    if (type == NotificationType.recurringDue && deepLink != null) {
+      return deepLink.hashCode;
+    }
+
+    return DateTime.now().millisecondsSinceEpoch ~/ 1000;
+  }
+
   String _getTagForType(NotificationType type) {
     switch (type) {
       case NotificationType.budgetAlert:
@@ -217,6 +256,8 @@ class NotificationService {
         return 'sync_error';
       case NotificationType.scanComplete:
         return 'scan_complete';
+      case NotificationType.weeklySummary:
+        return 'weekly_summary';
       case NotificationType.general:
         return 'general';
     }
@@ -228,5 +269,6 @@ enum NotificationType {
   recurringDue,
   syncError,
   scanComplete,
+  weeklySummary,
   general,
 }
