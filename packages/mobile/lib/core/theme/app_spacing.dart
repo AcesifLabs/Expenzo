@@ -33,6 +33,12 @@ abstract final class AppSpacing {
   /// Minimum size of anything tappable (Material accessibility guideline).
   static const double minTapTarget = 48;
 
+  /// Square tile behind a row's leading icon or symbol.
+  static const double iconTile = 40;
+
+  /// Small trailing icons, such as a row's chevron.
+  static const double iconSm = 16;
+
   static const Duration durationFast = Duration(milliseconds: 150);
   static const Duration durationNormal = Duration(milliseconds: 250);
 }

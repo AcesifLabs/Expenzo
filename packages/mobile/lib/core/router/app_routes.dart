@@ -19,6 +19,9 @@ import 'package:expense_tracker/features/recurring/presentation/bloc/recurring_b
 import 'package:expense_tracker/features/recurring/presentation/pages/recurring_form_page.dart';
 import 'package:expense_tracker/features/reports/presentation/pages/reports_screen.dart';
 import 'package:expense_tracker/features/ai_assistant/presentation/pages/ai_assistant_page.dart';
+import 'package:expense_tracker/features/settings/presentation/pages/appearance_page.dart';
+import 'package:expense_tracker/features/settings/presentation/pages/currency_page.dart';
+import 'package:expense_tracker/features/settings/presentation/pages/language_page.dart';
 import 'package:expense_tracker/features/settings/presentation/pages/settings_page.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/pages/sms_scan_results_page.dart';
@@ -51,6 +54,9 @@ List<RouteBase> _buildNestedRoutes() {
       path: 'settings',
       builder: (_, _) => const SettingsPage(),
       routes: [
+        GoRoute(path: 'appearance', builder: (_, _) => const AppearancePage()),
+        GoRoute(path: 'currency', builder: (_, _) => const CurrencyPage()),
+        GoRoute(path: 'language', builder: (_, _) => const LanguagePage()),
         GoRoute(path: 'auto-import', builder: (_, _) => const AutoImportPage()),
         GoRoute(
           path: 'matching-rules',

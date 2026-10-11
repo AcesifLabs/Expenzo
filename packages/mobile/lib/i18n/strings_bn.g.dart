@@ -430,12 +430,12 @@ class _Translations$settings$bn extends Translations$settings$en {
 	// Translations
 	@override late final _Translations$settings$language$bn language = _Translations$settings$language$bn._(_root);
 	@override String get title => 'সেটিংস';
-	@override String get currency => 'মুদ্রা';
+	@override String get currency => 'ডিফল্ট মুদ্রা';
 	@override String get appearance => 'থিম';
 	@override String get notificationsBlocked => 'বাজেট সতর্কতা পেতে সিস্টেম সেটিংসে Expenzo-র নোটিফিকেশন চালু করুন।';
 	@override late final _Translations$settings$sections$bn sections = _Translations$settings$sections$bn._(_root);
 	@override late final _Translations$settings$budgetAlerts$bn budgetAlerts = _Translations$settings$budgetAlerts$bn._(_root);
-	@override String get autoImportSubtitle => 'ব্যাংক ও পেমেন্টের মেসেজ থেকে রেকর্ড তৈরি করুন';
+	@override String get autoImportSubtitle => 'ব্যাংক ও পেমেন্টের মেসেজ থেকে লেনদেন তৈরি করুন';
 	@override String get matchingRulesSubtitle => 'যেসব মেসেজ অটো-ইমপোর্ট এখনো পড়তে পারে না, সেগুলোর প্যাটার্ন';
 	@override late final _Translations$settings$recurring$bn recurring = _Translations$settings$recurring$bn._(_root);
 	@override String get feedbackSubtitle => 'সমস্যা জানান বা কোনো আইডিয়া দিন';
@@ -443,6 +443,9 @@ class _Translations$settings$bn extends Translations$settings$en {
 	@override String get deleteAccount => 'অ্যাকাউন্ট মুছুন';
 	@override late final _Translations$settings$signIn$bn signIn = _Translations$settings$signIn$bn._(_root);
 	@override late final _Translations$settings$deleteDialog$bn deleteDialog = _Translations$settings$deleteDialog$bn._(_root);
+	@override String get loadFailed => 'আপনার সেটিংস লোড করা যায়নি।';
+	@override late final _Translations$settings$appearanceScreen$bn appearanceScreen = _Translations$settings$appearanceScreen$bn._(_root);
+	@override late final _Translations$settings$currencyScreen$bn currencyScreen = _Translations$settings$currencyScreen$bn._(_root);
 }
 
 // Path: shell
@@ -1315,6 +1318,10 @@ class _Translations$settings$language$bn extends Translations$settings$language$
 
 	// Translations
 	@override String get title => 'ভাষা';
+	@override late final _Translations$settings$language$sections$bn sections = _Translations$settings$language$sections$bn._(_root);
+	@override String get matchDevice => 'ডিভাইসের মতো';
+	@override String get matchDeviceSubtitle => 'ফোনের ভাষা ব্যবহার করুন';
+	@override late final _Translations$settings$language$names$bn names = _Translations$settings$language$names$bn._(_root);
 }
 
 // Path: settings.sections
@@ -1327,7 +1334,10 @@ class _Translations$settings$sections$bn extends Translations$settings$sections$
 	@override String get preferences => 'পছন্দ';
 	@override String get automation => 'স্বয়ংক্রিয়';
 	@override String get support => 'সহায়তা';
-	@override String get account => 'অ্যাকাউন্ট';
+	@override String get account => 'প্রোফাইল ও অ্যাকাউন্ট';
+	@override String get notifications => 'নোটিফিকেশন';
+	@override String get dataBudget => 'ডেটা ও বাজেট';
+	@override String get general => 'সাধারণ';
 }
 
 // Path: settings.budgetAlerts
@@ -1338,7 +1348,7 @@ class _Translations$settings$budgetAlerts$bn extends Translations$settings$budge
 
 	// Translations
 	@override String get title => 'বাজেট সতর্কতা';
-	@override String get subtitle => '৮০% এ এবং বাজেট ছাড়ালে আমাকে জানান';
+	@override String get subtitle => '80% এ এবং বাজেট ছাড়ালে আমাকে জানান';
 }
 
 // Path: settings.recurring
@@ -1348,7 +1358,7 @@ class _Translations$settings$recurring$bn extends Translations$settings$recurrin
 	final TranslationsBn _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'পুনরাবৃত্ত';
+	@override String get title => 'পুনরাবৃত্ত লেনদেন';
 	@override String get subtitle => 'প্রতি মাসে আসা বিল ও আয়';
 }
 
@@ -1360,7 +1370,7 @@ class _Translations$settings$signIn$bn extends Translations$settings$signIn$en {
 
 	// Translations
 	@override String get title => 'সাইন ইন';
-	@override String get subtitle => 'আপনার রেকর্ডের ব্যাকআপ ও সিঙ্ক করুন';
+	@override String get subtitle => 'আপনার সব ডিভাইসে ডেটা রাখুন';
 }
 
 // Path: settings.deleteDialog
@@ -1380,6 +1390,31 @@ class _Translations$settings$deleteDialog$bn extends Translations$settings$delet
 	@override String get rules => '• আপনার সব মিলানোর নিয়ম';
 	@override String get cannotUndo => 'এটি আর ফেরানো যাবে না।';
 	@override String get confirm => 'আমি বুঝেছি এবং আমার অ্যাকাউন্ট মুছতে চাই';
+}
+
+// Path: settings.appearanceScreen
+class _Translations$settings$appearanceScreen$bn extends Translations$settings$appearanceScreen$en {
+	_Translations$settings$appearanceScreen$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override late final _Translations$settings$appearanceScreen$sections$bn sections = _Translations$settings$appearanceScreen$sections$bn._(_root);
+	@override String get lightTitle => 'লাইট মোড প্রিভিউ';
+	@override String get lightBody => 'নরম ল্যাভেন্ডার রঙের ছোঁয়ায় পরিষ্কার, উজ্জ্বল ইন্টারফেস।';
+	@override String get darkTitle => 'ডার্ক মোড প্রিভিউ';
+	@override String get darkBody => 'শান্ত, মনোযোগী অভিজ্ঞতার জন্য গাঢ় চারকোল পটভূমি আর ল্যাভেন্ডার রং।';
+}
+
+// Path: settings.currencyScreen
+class _Translations$settings$currencyScreen$bn extends Translations$settings$currencyScreen$en {
+	_Translations$settings$currencyScreen$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get searchHint => 'মুদ্রা খুঁজুন';
+	@override String noResults({required Object query}) => '"${query}"-এর সাথে মেলে এমন কোনো মুদ্রা নেই';
 }
 
 // Path: shell.tabs
@@ -1658,6 +1693,38 @@ class _Translations$reports$insights$budgets$bn extends Translations$reports$ins
 	// Translations
 	@override String get title => 'বাজেটের অবস্থা';
 	@override String get description => 'এই মাসে ঠিক পথে থাকতে আপনার বাজেটগুলো দেখুন।';
+}
+
+// Path: settings.language.sections
+class _Translations$settings$language$sections$bn extends Translations$settings$language$sections$en {
+	_Translations$settings$language$sections$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get appLanguage => 'অ্যাপের ভাষা';
+}
+
+// Path: settings.language.names
+class _Translations$settings$language$names$bn extends Translations$settings$language$names$en {
+	_Translations$settings$language$names$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get en => 'ইংরেজি';
+	@override String get bn => 'বাংলা';
+}
+
+// Path: settings.appearanceScreen.sections
+class _Translations$settings$appearanceScreen$sections$bn extends Translations$settings$appearanceScreen$sections$en {
+	_Translations$settings$appearanceScreen$sections$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get theme => 'থিম';
+	@override String get preview => 'প্রিভিউ';
 }
 
 /// The flat map containing all translations for locale <bn>.
@@ -2171,27 +2238,35 @@ extension on TranslationsBn {
 			'reports.observations' => 'এই মাসের খরচ থেকে মূল পর্যবেক্ষণ',
 			'reports.noData' => 'কোনো ডেটা নেই',
 			'settings.language.title' => 'ভাষা',
+			'settings.language.sections.appLanguage' => 'অ্যাপের ভাষা',
+			'settings.language.matchDevice' => 'ডিভাইসের মতো',
+			'settings.language.matchDeviceSubtitle' => 'ফোনের ভাষা ব্যবহার করুন',
+			'settings.language.names.en' => 'ইংরেজি',
+			'settings.language.names.bn' => 'বাংলা',
 			'settings.title' => 'সেটিংস',
-			'settings.currency' => 'মুদ্রা',
+			'settings.currency' => 'ডিফল্ট মুদ্রা',
 			'settings.appearance' => 'থিম',
 			'settings.notificationsBlocked' => 'বাজেট সতর্কতা পেতে সিস্টেম সেটিংসে Expenzo-র নোটিফিকেশন চালু করুন।',
+			_ => null,
+		} ?? switch (path) {
 			'settings.sections.preferences' => 'পছন্দ',
 			'settings.sections.automation' => 'স্বয়ংক্রিয়',
 			'settings.sections.support' => 'সহায়তা',
-			'settings.sections.account' => 'অ্যাকাউন্ট',
+			'settings.sections.account' => 'প্রোফাইল ও অ্যাকাউন্ট',
+			'settings.sections.notifications' => 'নোটিফিকেশন',
+			'settings.sections.dataBudget' => 'ডেটা ও বাজেট',
+			'settings.sections.general' => 'সাধারণ',
 			'settings.budgetAlerts.title' => 'বাজেট সতর্কতা',
-			_ => null,
-		} ?? switch (path) {
-			'settings.budgetAlerts.subtitle' => '৮০% এ এবং বাজেট ছাড়ালে আমাকে জানান',
-			'settings.autoImportSubtitle' => 'ব্যাংক ও পেমেন্টের মেসেজ থেকে রেকর্ড তৈরি করুন',
+			'settings.budgetAlerts.subtitle' => '80% এ এবং বাজেট ছাড়ালে আমাকে জানান',
+			'settings.autoImportSubtitle' => 'ব্যাংক ও পেমেন্টের মেসেজ থেকে লেনদেন তৈরি করুন',
 			'settings.matchingRulesSubtitle' => 'যেসব মেসেজ অটো-ইমপোর্ট এখনো পড়তে পারে না, সেগুলোর প্যাটার্ন',
-			'settings.recurring.title' => 'পুনরাবৃত্ত',
+			'settings.recurring.title' => 'পুনরাবৃত্ত লেনদেন',
 			'settings.recurring.subtitle' => 'প্রতি মাসে আসা বিল ও আয়',
 			'settings.feedbackSubtitle' => 'সমস্যা জানান বা কোনো আইডিয়া দিন',
 			'settings.signOut' => 'সাইন আউট',
 			'settings.deleteAccount' => 'অ্যাকাউন্ট মুছুন',
 			'settings.signIn.title' => 'সাইন ইন',
-			'settings.signIn.subtitle' => 'আপনার রেকর্ডের ব্যাকআপ ও সিঙ্ক করুন',
+			'settings.signIn.subtitle' => 'আপনার সব ডিভাইসে ডেটা রাখুন',
 			'settings.deleteDialog.title' => 'অ্যাকাউন্ট মুছুন',
 			'settings.deleteDialog.question' => 'আপনি কি নিশ্চিত যে আপনার অ্যাকাউন্ট মুছে ফেলতে চান?',
 			'settings.deleteDialog.listTitle' => 'এতে স্থায়ীভাবে মুছে যাবে:',
@@ -2202,6 +2277,15 @@ extension on TranslationsBn {
 			'settings.deleteDialog.rules' => '• আপনার সব মিলানোর নিয়ম',
 			'settings.deleteDialog.cannotUndo' => 'এটি আর ফেরানো যাবে না।',
 			'settings.deleteDialog.confirm' => 'আমি বুঝেছি এবং আমার অ্যাকাউন্ট মুছতে চাই',
+			'settings.loadFailed' => 'আপনার সেটিংস লোড করা যায়নি।',
+			'settings.appearanceScreen.sections.theme' => 'থিম',
+			'settings.appearanceScreen.sections.preview' => 'প্রিভিউ',
+			'settings.appearanceScreen.lightTitle' => 'লাইট মোড প্রিভিউ',
+			'settings.appearanceScreen.lightBody' => 'নরম ল্যাভেন্ডার রঙের ছোঁয়ায় পরিষ্কার, উজ্জ্বল ইন্টারফেস।',
+			'settings.appearanceScreen.darkTitle' => 'ডার্ক মোড প্রিভিউ',
+			'settings.appearanceScreen.darkBody' => 'শান্ত, মনোযোগী অভিজ্ঞতার জন্য গাঢ় চারকোল পটভূমি আর ল্যাভেন্ডার রং।',
+			'settings.currencyScreen.searchHint' => 'মুদ্রা খুঁজুন',
+			'settings.currencyScreen.noResults' => ({required Object query}) => '"${query}"-এর সাথে মেলে এমন কোনো মুদ্রা নেই',
 			'shell.tabs.home' => 'হোম',
 			'shell.tabs.activity' => 'লেনদেন',
 			'shell.tabs.budgets' => 'বাজেট',
