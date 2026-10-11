@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:expense_tracker/core/api/token_storage.dart';
 import 'package:expense_tracker/core/database/app_database.dart';
 import 'package:expense_tracker/core/database/daos/pending_recurring_dao.dart';
 import 'package:expense_tracker/core/database/daos/sync_queue_dao.dart';
@@ -14,7 +15,14 @@ import 'package:expense_tracker/features/recurring/domain/usecases/delete_recurr
     as delete_uc;
 import 'package:expense_tracker/features/recurring/domain/usecases/process_recurring.dart'
     as process_uc;
-import 'package:expense_tracker/features/records/domain/usecases/add_record.dart';
+import 'package:expense_tracker/core/database/transaction_runner.dart';
+import 'package:expense_tracker/features/categories/domain/repositories/category_repository.dart';
+import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
+import 'package:expense_tracker/features/categories/domain/usecases/get_categories.dart';
+import 'package:expense_tracker/features/recurring/domain/usecases/post_due_recurring.dart';
+import 'package:expense_tracker/features/recurring/application/recurring_auto_poster.dart';
+import 'package:expense_tracker/features/budgets/domain/usecases/check_budget_alerts.dart';
+import 'package:expense_tracker/features/settings/domain/usecases/get_settings.dart';
 import 'package:expense_tracker/features/recurring/presentation/bloc/recurring_bloc.dart';
 
 void initRecurringModule(GetIt getIt) {
@@ -45,14 +53,35 @@ void initRecurringModule(GetIt getIt) {
   getIt.registerLazySingleton(
     () => process_uc.ProcessRecurring(getIt<RecurringRepository>()),
   );
+  getIt.registerLazySingleton(
+    () => PostDueRecurring(
+      processRecurring: getIt<process_uc.ProcessRecurring>(),
+      recordRepository: getIt<RecordRepository>(),
+      categoryRepository: getIt<CategoryRepository>(),
+      getCategories: getIt<GetCategories>(),
+      transactionRunner: getIt<TransactionRunner>(),
+    ),
+  );
+  getIt.registerLazySingleton(
+    () => RecurringAutoPoster(
+      getSettings: getIt<GetSettings>(),
+      postDueRecurring: getIt<PostDueRecurring>(),
+      isSignedIn: TokenStorage.hasToken,
+      // Auto-posted expenses raise budget alerts like a manual save.
+      afterPost: () async {
+        if (getIt.isRegistered<CheckBudgetAlerts>()) {
+          await getIt<CheckBudgetAlerts>()();
+        }
+      },
+    ),
+  );
   getIt.registerFactory<RecurringBloc>(
     () => RecurringBloc(
       getRecurringList: getIt<GetRecurringList>(),
       createRecurring: getIt<create_uc.CreateRecurring>(),
       updateRecurring: getIt<update_uc.UpdateRecurring>(),
       deleteRecurring: getIt<delete_uc.DeleteRecurring>(),
-      processRecurring: getIt<process_uc.ProcessRecurring>(),
-      addRecord: getIt<AddRecord>(),
+      postDueRecurring: getIt<PostDueRecurring>(),
     ),
   );
 }

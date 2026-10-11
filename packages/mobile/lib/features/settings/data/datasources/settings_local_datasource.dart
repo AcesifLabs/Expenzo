@@ -68,6 +68,8 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
       'theme': settings.theme,
       'languageCode': settings.languageCode,
       'autoImportPromptDismissed': settings.autoImportPromptDismissed,
+      'defaultRecurringFrequency': settings.defaultRecurringFrequency,
+      'recurringAutoCreate': settings.recurringAutoCreate,
       'createdAt': settings.createdAt.toIso8601String(),
       'updatedAt': settings.updatedAt.toIso8601String(),
     };
@@ -83,6 +85,9 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
       languageCode: json['languageCode'] as String? ?? 'system',
       autoImportPromptDismissed:
           json['autoImportPromptDismissed'] as bool? ?? false,
+      defaultRecurringFrequency:
+          json['defaultRecurringFrequency'] as String? ?? 'monthly',
+      recurringAutoCreate: json['recurringAutoCreate'] as bool? ?? false,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );

@@ -8,6 +8,8 @@ UserSettings makeUserSettings({
   bool? notificationsEnabled,
   String? theme,
   String? languageCode,
+  String? defaultRecurringFrequency,
+  bool? recurringAutoCreate,
   DateTime? createdAt,
   DateTime? updatedAt,
 }) {
@@ -18,6 +20,8 @@ UserSettings makeUserSettings({
     notificationsEnabled: notificationsEnabled ?? true,
     theme: theme ?? 'system',
     languageCode: languageCode ?? 'system',
+    defaultRecurringFrequency: defaultRecurringFrequency ?? 'monthly',
+    recurringAutoCreate: recurringAutoCreate ?? false,
     createdAt: createdAt ?? DateTime(2024, 1, 1),
     updatedAt: updatedAt ?? DateTime(2024, 1, 1),
   );

@@ -14,15 +14,22 @@ class ProcessRecurring {
   ///
   /// For each due recurring, advances occurrences until the next one is in the
   /// future (catch-up). Respects [RecurringTransaction.endDate]. Each elapsed
-  /// occurrence produces one entry in the returned list if
-  /// [RecurringTransaction.autoCreateExpense] is true.
-  Future<Either<Failure, List<RecurringTransaction>>> call() async {
+  /// occurrence produces one entry in the returned list.
+  ///
+  /// With [onlyIncluded] (an automatic run), items whose
+  /// [RecurringTransaction.autoCreateExpense] is false are left untouched:
+  /// neither returned nor advanced, so a manual run still posts them.
+  Future<Either<Failure, List<RecurringTransaction>>> call({
+    bool onlyIncluded = false,
+  }) async {
     try {
       final dueRecurringResult = await repository.getDueRecurring();
 
       return dueRecurringResult.fold(
         (failure) => Left(failure),
-        _processDueRecurring,
+        (due) => _processDueRecurring(
+          onlyIncluded ? due.where((r) => r.autoCreateExpense).toList() : due,
+        ),
       );
     } on CacheException catch (e) {
       return Left(e.toFailure());
@@ -76,10 +83,8 @@ class ProcessRecurring {
         );
       }
 
-      // This occurrence is due — record it if autoCreateExpense
-      if (recurring.autoCreateExpense) {
-        processed.add(recurring.copyWith(nextOccurrence: current));
-      }
+      // This occurrence is due — record it
+      processed.add(recurring.copyWith(nextOccurrence: current));
 
       // Advance to next occurrence
       current = calculateNextOccurrence(

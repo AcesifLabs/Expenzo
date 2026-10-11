@@ -4,8 +4,6 @@ import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
 import 'package:expense_tracker/features/recurring/domain/entities/recurring_transaction.dart';
-import 'package:expense_tracker/features/records/domain/entities/record.dart';
-import 'package:expense_tracker/features/records/domain/usecases/add_record.dart';
 import 'package:expense_tracker/features/recurring/domain/usecases/get_recurring_list.dart';
 import 'package:expense_tracker/features/recurring/domain/usecases/create_recurring.dart'
     as create_uc;
@@ -13,8 +11,7 @@ import 'package:expense_tracker/features/recurring/domain/usecases/update_recurr
     as uc;
 import 'package:expense_tracker/features/recurring/domain/usecases/delete_recurring.dart'
     as uc;
-import 'package:expense_tracker/features/recurring/domain/usecases/process_recurring.dart'
-    as uc;
+import 'package:expense_tracker/features/recurring/domain/usecases/post_due_recurring.dart';
 import 'package:expense_tracker/features/recurring/presentation/bloc/recurring_bloc.dart';
 import 'package:expense_tracker/features/recurring/presentation/bloc/recurring_event.dart';
 import 'package:expense_tracker/features/recurring/presentation/bloc/recurring_state.dart';
@@ -28,28 +25,22 @@ class MockUpdateRecurring extends Mock implements uc.UpdateRecurring {}
 
 class MockDeleteRecurring extends Mock implements uc.DeleteRecurring {}
 
-class MockProcessRecurring extends Mock implements uc.ProcessRecurring {}
-
-class MockAddRecord extends Mock implements AddRecord {}
+class MockPostDueRecurring extends Mock implements PostDueRecurring {}
 
 class _NoParamsFake extends Fake implements NoParams {}
 
 class _RecurringTransactionFake extends Fake implements RecurringTransaction {}
 
-class _RecordFake extends Fake implements Record {}
-
 void main() {
   setUpAll(() {
     registerFallbackValue(_NoParamsFake());
     registerFallbackValue(_RecurringTransactionFake());
-    registerFallbackValue(_RecordFake());
   });
   late MockGetRecurringList mockGetRecurringList;
   late MockCreateRecurring mockCreateRecurring;
   late MockUpdateRecurring mockUpdateRecurring;
   late MockDeleteRecurring mockDeleteRecurring;
-  late MockProcessRecurring mockProcessRecurring;
-  late MockAddRecord mockAddRecord;
+  late MockPostDueRecurring mockPostDueRecurring;
   late RecurringBloc bloc;
 
   final testRecurring = RecurringTransaction(
@@ -69,15 +60,13 @@ void main() {
     mockCreateRecurring = MockCreateRecurring();
     mockUpdateRecurring = MockUpdateRecurring();
     mockDeleteRecurring = MockDeleteRecurring();
-    mockProcessRecurring = MockProcessRecurring();
-    mockAddRecord = MockAddRecord();
+    mockPostDueRecurring = MockPostDueRecurring();
     bloc = RecurringBloc(
       getRecurringList: mockGetRecurringList,
       createRecurring: mockCreateRecurring,
       updateRecurring: mockUpdateRecurring,
       deleteRecurring: mockDeleteRecurring,
-      processRecurring: mockProcessRecurring,
-      addRecord: mockAddRecord,
+      postDueRecurring: mockPostDueRecurring,
     );
   });
 
@@ -159,6 +148,78 @@ void main() {
 
       expectLater(bloc.stream, emitsInOrder(expected));
       bloc.add(CreateRecurring(testRecurring));
+    });
+  });
+
+  group('ProcessRecurring', () {
+    void posts(int created) {
+      when(
+        () => mockPostDueRecurring(automatic: any(named: 'automatic')),
+      ).thenAnswer((_) async => Right(created));
+      when(
+        () => mockGetRecurringList(any()),
+      ).thenAnswer((_) async => Right([testRecurring]));
+    }
+
+    test('posted items emit RecurringProcessed, then reload', () async {
+      posts(2);
+
+      final expected = [
+        isA<RecurringLoading>(),
+        const RecurringProcessed(2),
+        isA<RecurringLoading>(),
+        isA<RecurringLoaded>(),
+      ];
+
+      expectLater(bloc.stream, emitsInOrder(expected));
+      bloc.add(const ProcessRecurring());
+    });
+
+    test('nothing due emits RecurringProcessed(0)', () async {
+      posts(0);
+
+      expectLater(
+        bloc.stream,
+        emitsInOrder([isA<RecurringLoading>(), const RecurringProcessed(0)]),
+      );
+      bloc.add(const ProcessRecurring());
+    });
+
+    test('an automatic run is marked automatic and posts only included '
+        'items', () async {
+      posts(0);
+
+      final emitted = expectLater(
+        bloc.stream,
+        emitsInOrder([
+          isA<RecurringLoading>(),
+          const RecurringProcessed(0, automatic: true),
+        ]),
+      );
+      bloc.add(const ProcessRecurring(automatic: true));
+      await emitted;
+      verify(() => mockPostDueRecurring(automatic: true)).called(1);
+    });
+
+    test('a failure emits RecurringError, then reloads', () async {
+      when(
+        () => mockPostDueRecurring(automatic: any(named: 'automatic')),
+      ).thenAnswer((_) async => const Left(CacheFailure(message: 'db')));
+      when(
+        () => mockGetRecurringList(any()),
+      ).thenAnswer((_) async => const Right([]));
+
+      // The list reloads after a failure too, so it shows the real dates.
+      expectLater(
+        bloc.stream,
+        emitsInOrder([
+          isA<RecurringLoading>(),
+          isA<RecurringError>(),
+          isA<RecurringLoading>(),
+          isA<RecurringLoaded>(),
+        ]),
+      );
+      bloc.add(const ProcessRecurring());
     });
   });
 }

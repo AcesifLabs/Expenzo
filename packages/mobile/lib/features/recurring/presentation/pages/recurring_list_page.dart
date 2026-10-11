@@ -3,19 +3,23 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:picons/picons.dart';
+import 'package:expense_tracker/core/constants/app_constants.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_back_button.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_page_header.dart';
 import 'package:expense_tracker/core/theme/app_typography.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
+import 'package:expense_tracker/features/settings/presentation/widgets/settings_section.dart';
 
 import '../../domain/entities/recurring_transaction.dart';
 import '../bloc/recurring_bloc.dart';
 import '../bloc/recurring_event.dart';
 import '../bloc/recurring_state.dart';
+import '../widgets/recurring_defaults_section.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
-/// Lists recurring transactions. Expects a [RecurringBloc] above it.
+/// The recurring defaults and the recurring transactions. Expects a
+/// [RecurringBloc] and a [SettingsBloc] above it.
 class RecurringListView extends StatefulWidget {
   const RecurringListView({super.key});
 
@@ -24,6 +28,10 @@ class RecurringListView extends StatefulWidget {
 }
 
 class _RecurringListViewState extends State<RecurringListView> {
+  /// The last loaded list, kept on screen while a save, delete or processing
+  /// runs so the page does not blank out.
+  List<RecurringTransaction>? _lastItems;
+
   @override
   void initState() {
     super.initState();
@@ -36,6 +44,8 @@ class _RecurringListViewState extends State<RecurringListView> {
         ScaffoldMessenger.of(context)
           ..clearSnackBars()
           ..showSnackBar(SnackBar(content: Text(t.recurring.saved)));
+      case RecurringProcessed(:final created, :final automatic):
+        _showProcessed(context, created, automatic: automatic);
       case RecurringError(:final message):
         ScaffoldMessenger.of(context)
           ..clearSnackBars()
@@ -43,6 +53,24 @@ class _RecurringListViewState extends State<RecurringListView> {
       default:
         break;
     }
+  }
+
+  /// Automatic runs (turning Auto-create on) stay silent when nothing is due.
+  void _showProcessed(
+    BuildContext context,
+    int created, {
+    required bool automatic,
+  }) {
+    if (created == 0 && automatic) return;
+    final messenger = ScaffoldMessenger.of(context)..clearSnackBars();
+    messenger.showSnackBar(
+      created > 0
+          ? SnackBar(content: Text(t.recurring.posted(n: created)))
+          : SnackBar(
+              content: Text(t.recurring.nothingDue),
+              duration: AppConstants.briefSnackbarDuration,
+            ),
+    );
   }
 
   void _onRefresh() {
@@ -70,9 +98,9 @@ class _RecurringListViewState extends State<RecurringListView> {
     final emptyT = t.recurring.empty;
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Center(
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             PiconsRegular.arrowsCounterClockwise,
@@ -88,78 +116,108 @@ class _RecurringListViewState extends State<RecurringListView> {
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
-          Text(emptyT.body, style: TextStyle(color: colorScheme.outline)),
+          Text(
+            emptyT.body,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: colorScheme.outline),
+          ),
         ],
       ),
     );
   }
 
+  /// [interactive] is false while the bloc is busy: a toggle built from the
+  /// shown copy would write back dates that processing just moved forward.
   Widget _buildRecurringItem(
     RecurringTransaction recurring,
-    DateFormat dateFormat,
-  ) {
+    DateFormat dateFormat, {
+    required bool interactive,
+  }) {
     final colorScheme = Theme.of(context).colorScheme;
     final isDue = recurring.isDue();
 
-    return Card(
-      margin: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.xs,
+    return ListTile(
+      leading: CircleAvatar(
+        backgroundColor: isDue
+            ? colorScheme.tertiary.withAlpha(51)
+            : colorScheme.onSurface.withAlpha(26),
+        child: Icon(
+          PiconsRegular.arrowsCounterClockwise,
+          color: isDue ? colorScheme.tertiary : colorScheme.onSurfaceVariant,
+        ),
       ),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: isDue
-              ? colorScheme.tertiary.withAlpha(51)
-              : colorScheme.onSurface.withAlpha(26),
-          child: Icon(
-            PiconsRegular.arrowsCounterClockwise,
-            color: isDue ? colorScheme.tertiary : colorScheme.onSurfaceVariant,
+      title: Text(recurring.description),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            t.recurring.amountEvery(
+              amount: CurrencyFormatter.format(recurring.amount),
+              frequency: recurring.frequency.displayName,
+            ),
           ),
-        ),
-        title: Text(recurring.description),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              t.recurring.amountEvery(
-                amount: CurrencyFormatter.format(recurring.amount),
-                frequency: recurring.frequency.displayName,
-              ),
+          Text(
+            t.recurring.next(date: dateFormat.format(recurring.nextOccurrence)),
+            style: AppTypography.bodySmall.copyWith(
+              color: isDue
+                  ? colorScheme.tertiary
+                  : colorScheme.onSurfaceVariant,
             ),
-            Text(
-              t.recurring.next(
-                date: dateFormat.format(recurring.nextOccurrence),
-              ),
-              style: AppTypography.bodySmall.copyWith(
-                color: isDue
-                    ? colorScheme.tertiary
-                    : colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-        trailing: Switch(
-          value: recurring.isActive,
-          onChanged: (value) => _onSwitchChanged(recurring, value),
-        ),
-        onTap: () => _navigateToForm(context, recurring),
-        onLongPress: () => _showDeleteDialog(context, recurring),
+          ),
+        ],
       ),
+      trailing: Switch(
+        value: recurring.isActive,
+        onChanged: interactive
+            ? (value) => _onSwitchChanged(recurring, value)
+            : null,
+      ),
+      onTap: interactive ? () => _navigateToForm(context, recurring) : null,
+      onLongPress: interactive
+          ? () => _showDeleteDialog(context, recurring)
+          : null,
     );
   }
 
-  Widget _buildLoadedState(RecurringLoaded state, DateFormat dateFormat) {
-    final items = state.recurringList;
-
-    if (items.isEmpty) return _buildEmptyState();
+  /// One lazy list: the defaults, then ACTIVE RECURRING built row by row
+  /// with [SettingsSectionSlot], so a long list only builds what is visible.
+  Widget _buildLoadedState(
+    List<RecurringTransaction> items, {
+    bool interactive = true,
+  }) {
+    final dateFormat = DateFormat('MMM dd, yyyy');
+    final before = <Widget>[
+      const RecurringDefaultsSection(),
+      if (items.isNotEmpty)
+        SettingsSectionHeader(title: t.recurring.sections.active),
+    ];
+    final after = <Widget>[
+      if (items.isEmpty) _buildEmptyState(),
+      // Room for the FAB over the last row.
+      const SizedBox(height: AppSpacing.xxl + AppSpacing.xl),
+    ];
 
     return RefreshIndicator(
       onRefresh: () async => _onRefresh(),
       child: ListView.builder(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-        itemCount: items.length,
-        itemBuilder: (context, index) =>
-            _buildRecurringItem(items[index], dateFormat),
+        padding: AppSpacing.pagePadding,
+        physics: const AlwaysScrollableScrollPhysics(),
+        itemCount: before.length + items.length + after.length,
+        itemBuilder: (_, index) {
+          if (index < before.length) return before[index];
+          final row = index - before.length;
+          if (row >= items.length) return after[row - items.length];
+
+          return SettingsSectionSlot(
+            isFirst: row == 0,
+            isLast: row == items.length - 1,
+            child: _buildRecurringItem(
+              items[row],
+              dateFormat,
+              interactive: interactive,
+            ),
+          );
+        },
       ),
     );
   }
@@ -224,12 +282,33 @@ class _RecurringListViewState extends State<RecurringListView> {
   }
 
   Widget _buildBody(BuildContext _, RecurringState state) {
+    if (state is RecurringLoaded) _lastItems = state.recurringList;
+    final lastItems = _lastItems;
+
     return switch (state) {
-      RecurringLoading() => const Center(child: CircularProgressIndicator()),
+      RecurringLoaded(:final recurringList) => _buildLoadedState(recurringList),
+      RecurringInitial() => const SizedBox.shrink(),
+      RecurringLoading() when lastItems != null => _buildLoadedState(
+        lastItems,
+        interactive: false,
+      ),
+      _ when lastItems != null => _buildLoadedState(lastItems),
       RecurringError() => _buildErrorState(state),
-      RecurringLoaded() => _buildLoadedState(state, DateFormat('MMM dd, yyyy')),
-      _ => const SizedBox.shrink(),
+      _ => const Center(child: CircularProgressIndicator()),
     };
+  }
+
+  Widget _buildProcessButton(BuildContext _, RecurringState state) {
+    return IconButton(
+      icon: const Icon(PiconsRegular.arrowsCounterClockwise),
+      // Disabled while busy: no double taps.
+      onPressed: state is RecurringLoading ? null : _onProcessPending,
+      tooltip: t.recurring.processPending,
+    );
+  }
+
+  void _onProcessPending() {
+    context.read<RecurringBloc>().add(const ProcessRecurring());
   }
 
   @override
@@ -239,11 +318,8 @@ class _RecurringListViewState extends State<RecurringListView> {
         leading: const AppBackButton(),
         title: t.recurring.title,
         actions: [
-          IconButton(
-            icon: const Icon(PiconsRegular.arrowsCounterClockwise),
-            onPressed: () =>
-                context.read<RecurringBloc>().add(const ProcessRecurring()),
-            tooltip: t.recurring.processPending,
+          BlocBuilder<RecurringBloc, RecurringState>(
+            builder: _buildProcessButton,
           ),
         ],
       ),

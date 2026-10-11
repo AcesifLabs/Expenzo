@@ -1,10 +1,24 @@
 {
   "@@i18n-review": "Machine-drafted Bangla. Needs native review before release.",
-  "errors": {
-    "someNotCreated": "{total}টির মধ্যে {failed}টি রেকর্ড তৈরি করা যায়নি। আবার চেষ্টা করুন।"
-  },
-  "title": "পুনরাবৃত্ত",
+  "title": "পুনরাবৃত্ত লেনদেন",
   "saved": "পুনরাবৃত্ত লেনদেন সংরক্ষণ হয়েছে",
+  "posted": {
+    "one": "{n}টি লেনদেন যোগ হয়েছে",
+    "other": "{n}টি লেনদেন যোগ হয়েছে"
+  },
+  "nothingDue": "কোনো বকেয়া লেনদেন নেই",
+  "sections": {
+    "defaultFrequency": "ডিফল্ট পুনরাবৃত্তি",
+    "autoCreate": "নিজে থেকে তৈরি",
+    "active": "সক্রিয় পুনরাবৃত্ত"
+  },
+  "defaults": {
+    "weeklyDetail": "প্রতি 7 দিনে",
+    "monthlyDetail": "প্রতি মাসে একই তারিখে",
+    "yearlyDetail": "প্রতি বছর একই তারিখে",
+    "autoCreate": "নিজে থেকে লেনদেন তৈরি",
+    "autoCreateDetail": "অ্যাপ খুললে বকেয়া লেনদেন যোগ করুন"
+  },
   "empty": {
     "title": "কোনো পুনরাবৃত্ত লেনদেন নেই",
     "body": "প্রথম পুনরাবৃত্ত খরচ তৈরি করতে + চাপুন"
@@ -27,8 +41,8 @@
     "endDate": "শেষের তারিখ (ঐচ্ছিক)",
     "noEndDate": "শেষের তারিখ নেই",
     "clearEndDate": "শেষের তারিখ মুছুন",
-    "autoCreate": "নিজে থেকে খরচ তৈরি",
-    "autoCreateDetail": "সময় হলে নিজে থেকে খরচ তৈরি করুন",
+    "autoCreate": "নিজে থেকে তৈরিতে রাখুন",
+    "autoCreateDetail": "‘নিজে থেকে তৈরি’ চালু থাকলে অ্যাপ খুললে যোগ হবে",
     "active": "চালু",
     "activeDetail": "এই পুনরাবৃত্ত লেনদেনটি প্রসেস করুন",
     "amountRequired": "একটি পরিমাণ লিখুন",

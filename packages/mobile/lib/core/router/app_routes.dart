@@ -16,6 +16,8 @@ import 'package:expense_tracker/features/categories/presentation/bloc/category_b
 import 'package:expense_tracker/features/categories/presentation/pages/category_form_page.dart';
 import 'package:expense_tracker/features/categories/presentation/pages/category_list_page.dart';
 import 'package:expense_tracker/features/records/presentation/pages/all_categories_picker_page.dart';
+import 'package:expense_tracker/features/recurring/domain/entities/recurring_frequency.dart';
+import 'package:expense_tracker/features/recurring/domain/helpers/default_frequency.dart';
 import 'package:expense_tracker/features/recurring/presentation/bloc/recurring_bloc.dart';
 import 'package:expense_tracker/features/recurring/presentation/pages/recurring_form_page.dart';
 import 'package:expense_tracker/features/reports/presentation/pages/reports_screen.dart';
@@ -23,6 +25,7 @@ import 'package:expense_tracker/features/ai_assistant/presentation/pages/ai_assi
 import 'package:expense_tracker/features/settings/presentation/pages/appearance_page.dart';
 import 'package:expense_tracker/features/settings/presentation/pages/currency_page.dart';
 import 'package:expense_tracker/features/settings/presentation/pages/language_page.dart';
+import 'package:expense_tracker/features/settings/presentation/bloc/settings_bloc.dart';
 import 'package:expense_tracker/features/settings/presentation/pages/settings_page.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/pages/sms_scan_results_page.dart';
@@ -74,8 +77,12 @@ List<RouteBase> _buildNestedRoutes() {
           path: 'recurring',
           // create:, not a bloc built in the builder: go_router rebuilds
           // this route when pages are pushed on top of it.
-          builder: (_, _) => BlocProvider(
-            create: (_) => di.getIt<RecurringBloc>(),
+          builder: (_, _) => MultiBlocProvider(
+            providers: [
+              BlocProvider(create: (_) => di.getIt<RecurringBloc>()),
+              // The app-wide singleton; `create` would close it on pop.
+              BlocProvider.value(value: di.getIt<SettingsBloc>()),
+            ],
             child: const RecurringListView(),
           ),
         ),
@@ -134,7 +141,7 @@ List<RouteBase> _buildRecurringRoutes() {
       path: 'recurring/new',
       builder: (_, _) => BlocProvider(
         create: (_) => di.getIt<RecurringBloc>(),
-        child: const RecurringFormPage(),
+        child: RecurringFormPage(defaultFrequency: _storedDefaultFrequency()),
       ),
     ),
     GoRoute(
@@ -145,6 +152,14 @@ List<RouteBase> _buildRecurringRoutes() {
       ),
     ),
   ];
+}
+
+/// The Recurring screen's default frequency, including a change still
+/// being saved; monthly until settings load.
+RecurringFrequency _storedDefaultFrequency() {
+  return defaultFrequencyFrom(
+    di.getIt<SettingsBloc>().latestSettings?.defaultRecurringFrequency,
+  );
 }
 
 /// Choosing or adding a category is a short task opened from a form, so it

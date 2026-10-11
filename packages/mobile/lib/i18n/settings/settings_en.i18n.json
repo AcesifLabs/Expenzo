@@ -32,7 +32,7 @@
   "matchingRulesSubtitle": "Patterns for messages auto-import can't read yet",
   "recurring": {
     "title": "Recurring transactions",
-    "subtitle": "Bills and income that repeat every month"
+    "subtitle": "Bills and income that repeat"
   },
   "feedbackSubtitle": "Report a problem or suggest an idea",
   "signOut": "Sign out",

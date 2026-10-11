@@ -14,6 +14,13 @@ class UserSettings extends Equatable {
 
   /// True once the user dismissed the Home "Set up auto-import" card.
   final bool autoImportPromptDismissed;
+
+  /// Frequency preselected for new recurring items: 'weekly', 'monthly'
+  /// or 'yearly' (a `RecurringFrequency` name).
+  final String defaultRecurringFrequency;
+
+  /// When true, due recurring items become Records on app open/resume.
+  final bool recurringAutoCreate;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -26,6 +33,8 @@ class UserSettings extends Equatable {
     theme,
     languageCode,
     autoImportPromptDismissed,
+    defaultRecurringFrequency,
+    recurringAutoCreate,
     createdAt,
     updatedAt,
   ];
@@ -38,6 +47,8 @@ class UserSettings extends Equatable {
     required this.theme,
     this.languageCode = 'system',
     this.autoImportPromptDismissed = false,
+    this.defaultRecurringFrequency = 'monthly',
+    this.recurringAutoCreate = false,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -50,6 +61,8 @@ class UserSettings extends Equatable {
     String? theme,
     String? languageCode,
     bool? autoImportPromptDismissed,
+    String? defaultRecurringFrequency,
+    bool? recurringAutoCreate,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -62,6 +75,9 @@ class UserSettings extends Equatable {
       languageCode: languageCode ?? this.languageCode,
       autoImportPromptDismissed:
           autoImportPromptDismissed ?? this.autoImportPromptDismissed,
+      defaultRecurringFrequency:
+          defaultRecurringFrequency ?? this.defaultRecurringFrequency,
+      recurringAutoCreate: recurringAutoCreate ?? this.recurringAutoCreate,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

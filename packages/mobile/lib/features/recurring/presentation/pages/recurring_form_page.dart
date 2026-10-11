@@ -24,7 +24,15 @@ class RecurringFormPage extends StatefulWidget {
   final RecurringTransaction? recurring;
   final String? recurringId;
 
-  const RecurringFormPage({super.key, this.recurring, this.recurringId});
+  /// Preselected for a new item; an edited item keeps its own frequency.
+  final RecurringFrequency defaultFrequency;
+
+  const RecurringFormPage({
+    super.key,
+    this.recurring,
+    this.recurringId,
+    this.defaultFrequency = RecurringFrequency.monthly,
+  });
 
   @override
   State<RecurringFormPage> createState() => _RecurringFormPageState();
@@ -98,7 +106,7 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
       _descriptionController.text = '';
       _startDate = DateTime.now();
       _endDate = null;
-      _frequency = RecurringFrequency.monthly;
+      _frequency = widget.defaultFrequency;
       _autoCreateExpense = true;
       _dayOfMonth = null;
       _isActive = true;

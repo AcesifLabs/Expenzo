@@ -1,9 +1,23 @@
 {
-  "errors": {
-    "someNotCreated": "{failed} of {total} records couldn't be created. Try again."
-  },
-  "title": "Recurring",
+  "title": "Recurring transactions",
   "saved": "Recurring transaction saved",
+  "posted": {
+    "one": "{n} transaction added",
+    "other": "{n} transactions added"
+  },
+  "nothingDue": "No transactions due",
+  "sections": {
+    "defaultFrequency": "Default frequency",
+    "autoCreate": "Auto-create",
+    "active": "Active recurring"
+  },
+  "defaults": {
+    "weeklyDetail": "Every 7 days",
+    "monthlyDetail": "Same date every month",
+    "yearlyDetail": "Same date every year",
+    "autoCreate": "Auto-create transactions",
+    "autoCreateDetail": "Add due transactions when you open the app"
+  },
   "empty": {
     "title": "No recurring transactions",
     "body": "Tap + to create your first recurring expense"
@@ -26,8 +40,8 @@
     "endDate": "End date (optional)",
     "noEndDate": "No end date",
     "clearEndDate": "Clear end date",
-    "autoCreate": "Auto-create expenses",
-    "autoCreateDetail": "Automatically create expenses when due",
+    "autoCreate": "Include in auto-create",
+    "autoCreateDetail": "Added when the app opens, if Auto-create is on",
     "active": "Active",
     "activeDetail": "Process this recurring transaction",
     "amountRequired": "Enter an amount",

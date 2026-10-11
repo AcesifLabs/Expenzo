@@ -38,5 +38,12 @@ class DeleteRecurring extends RecurringEvent {
 }
 
 class ProcessRecurring extends RecurringEvent {
-  const ProcessRecurring();
+  /// True when turning on Auto-create: posts only included items and stays
+  /// silent when nothing is due. The "Process pending" button is manual.
+  final bool automatic;
+
+  @override
+  List<Object?> get props => [automatic];
+
+  const ProcessRecurring({this.automatic = false});
 }

@@ -541,14 +541,24 @@ class Translations$recurring$en {
 	final Translations _root; // ignore: unused_field
 
 	// Translations
-	late final Translations$recurring$errors$en errors = Translations$recurring$errors$en.internal(_root);
 
-	/// en: 'Recurring'
-	String get title => 'Recurring';
+	/// en: 'Recurring transactions'
+	String get title => 'Recurring transactions';
 
 	/// en: 'Recurring transaction saved'
 	String get saved => 'Recurring transaction saved';
 
+	/// en: '(one) {{n} transaction added} (other) {{n} transactions added}'
+	String posted({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: '${n} transaction added',
+		other: '${n} transactions added',
+	);
+
+	/// en: 'No transactions due'
+	String get nothingDue => 'No transactions due';
+
+	late final Translations$recurring$sections$en sections = Translations$recurring$sections$en.internal(_root);
+	late final Translations$recurring$defaults$en defaults = Translations$recurring$defaults$en.internal(_root);
 	late final Translations$recurring$empty$en empty = Translations$recurring$empty$en.internal(_root);
 
 	/// en: '{amount} · {frequency}'
@@ -2036,16 +2046,46 @@ class Translations$records$sheet$en {
 	String get backspace => 'Backspace';
 }
 
-// Path: recurring.errors
-class Translations$recurring$errors$en {
-	Translations$recurring$errors$en.internal(this._root);
+// Path: recurring.sections
+class Translations$recurring$sections$en {
+	Translations$recurring$sections$en.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
 	// Translations
 
-	/// en: '{failed} of {total} records couldn't be created. Try again.'
-	String someNotCreated({required Object failed, required Object total}) => '${failed} of ${total} records couldn\'t be created. Try again.';
+	/// en: 'Default frequency'
+	String get defaultFrequency => 'Default frequency';
+
+	/// en: 'Auto-create'
+	String get autoCreate => 'Auto-create';
+
+	/// en: 'Active recurring'
+	String get active => 'Active recurring';
+}
+
+// Path: recurring.defaults
+class Translations$recurring$defaults$en {
+	Translations$recurring$defaults$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Every 7 days'
+	String get weeklyDetail => 'Every 7 days';
+
+	/// en: 'Same date every month'
+	String get monthlyDetail => 'Same date every month';
+
+	/// en: 'Same date every year'
+	String get yearlyDetail => 'Same date every year';
+
+	/// en: 'Auto-create transactions'
+	String get autoCreate => 'Auto-create transactions';
+
+	/// en: 'Add due transactions when you open the app'
+	String get autoCreateDetail => 'Add due transactions when you open the app';
 }
 
 // Path: recurring.empty
@@ -2113,11 +2153,11 @@ class Translations$recurring$form$en {
 	/// en: 'Clear end date'
 	String get clearEndDate => 'Clear end date';
 
-	/// en: 'Auto-create expenses'
-	String get autoCreate => 'Auto-create expenses';
+	/// en: 'Include in auto-create'
+	String get autoCreate => 'Include in auto-create';
 
-	/// en: 'Automatically create expenses when due'
-	String get autoCreateDetail => 'Automatically create expenses when due';
+	/// en: 'Added when the app opens, if Auto-create is on'
+	String get autoCreateDetail => 'Added when the app opens, if Auto-create is on';
 
 	/// en: 'Active'
 	String get active => 'Active';
@@ -2248,8 +2288,8 @@ class Translations$settings$recurring$en {
 	/// en: 'Recurring transactions'
 	String get title => 'Recurring transactions';
 
-	/// en: 'Bills and income that repeat every month'
-	String get subtitle => 'Bills and income that repeat every month';
+	/// en: 'Bills and income that repeat'
+	String get subtitle => 'Bills and income that repeat';
 }
 
 // Path: settings.signIn
@@ -3245,9 +3285,18 @@ extension on Translations {
 			'records.sheet.repeatFailed' => 'Saved, but it couldn\'t be set to repeat. Set it up in Settings → Recurring.',
 			'records.sheet.typeToggle' => 'Transaction type',
 			'records.sheet.backspace' => 'Backspace',
-			'recurring.errors.someNotCreated' => ({required Object failed, required Object total}) => '${failed} of ${total} records couldn\'t be created. Try again.',
-			'recurring.title' => 'Recurring',
+			'recurring.title' => 'Recurring transactions',
 			'recurring.saved' => 'Recurring transaction saved',
+			'recurring.posted' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} transaction added', other: '${n} transactions added', ), 
+			'recurring.nothingDue' => 'No transactions due',
+			'recurring.sections.defaultFrequency' => 'Default frequency',
+			'recurring.sections.autoCreate' => 'Auto-create',
+			'recurring.sections.active' => 'Active recurring',
+			'recurring.defaults.weeklyDetail' => 'Every 7 days',
+			'recurring.defaults.monthlyDetail' => 'Same date every month',
+			'recurring.defaults.yearlyDetail' => 'Same date every year',
+			'recurring.defaults.autoCreate' => 'Auto-create transactions',
+			'recurring.defaults.autoCreateDetail' => 'Add due transactions when you open the app',
 			'recurring.empty.title' => 'No recurring transactions',
 			'recurring.empty.body' => 'Tap + to create your first recurring expense',
 			'recurring.amountEvery' => ({required Object amount, required Object frequency}) => '${amount} · ${frequency}',
@@ -3265,8 +3314,8 @@ extension on Translations {
 			'recurring.form.endDate' => 'End date (optional)',
 			'recurring.form.noEndDate' => 'No end date',
 			'recurring.form.clearEndDate' => 'Clear end date',
-			'recurring.form.autoCreate' => 'Auto-create expenses',
-			'recurring.form.autoCreateDetail' => 'Automatically create expenses when due',
+			'recurring.form.autoCreate' => 'Include in auto-create',
+			'recurring.form.autoCreateDetail' => 'Added when the app opens, if Auto-create is on',
 			'recurring.form.active' => 'Active',
 			'recurring.form.activeDetail' => 'Process this recurring transaction',
 			'recurring.form.amountRequired' => 'Enter an amount',
@@ -3293,6 +3342,8 @@ extension on Translations {
 			'reports.totalSpentInPeriod' => ({required Object amount}) => 'Total spent: ${amount} in this period',
 			'reports.metrics.totalSpent' => 'Total spent',
 			'reports.metrics.dailyAverage' => 'Daily average',
+			_ => null,
+		} ?? switch (path) {
 			'reports.metrics.highestDay' => 'Highest day',
 			'reports.spendingByCategory' => 'Spending by category',
 			'reports.observations' => 'Key observations from your spending this month',
@@ -3302,8 +3353,6 @@ extension on Translations {
 			'settings.language.matchDevice' => 'Match device',
 			'settings.language.matchDeviceSubtitle' => 'Use your phone\'s language',
 			'settings.language.names.en' => 'English',
-			_ => null,
-		} ?? switch (path) {
 			'settings.language.names.bn' => 'Bengali',
 			'settings.title' => 'Settings',
 			'settings.currency' => 'Default currency',
@@ -3321,7 +3370,7 @@ extension on Translations {
 			'settings.autoImportSubtitle' => 'Turn bank and payment messages into transactions',
 			'settings.matchingRulesSubtitle' => 'Patterns for messages auto-import can\'t read yet',
 			'settings.recurring.title' => 'Recurring transactions',
-			'settings.recurring.subtitle' => 'Bills and income that repeat every month',
+			'settings.recurring.subtitle' => 'Bills and income that repeat',
 			'settings.feedbackSubtitle' => 'Report a problem or suggest an idea',
 			'settings.signOut' => 'Sign out',
 			'settings.deleteAccount' => 'Delete account',
