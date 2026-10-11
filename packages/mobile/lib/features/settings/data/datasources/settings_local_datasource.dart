@@ -1,5 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:expense_tracker/core/constants/digit_grouping.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/core/theme/currency_config.dart';
@@ -71,6 +72,8 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
       'autoImportPromptDismissed': settings.autoImportPromptDismissed,
       'defaultRecurringFrequency': settings.defaultRecurringFrequency,
       'recurringAutoCreate': settings.recurringAutoCreate,
+      'decimalPlaces': settings.decimalPlaces,
+      'digitGrouping': settings.digitGrouping.name,
       'createdAt': settings.createdAt.toIso8601String(),
       'updatedAt': settings.updatedAt.toIso8601String(),
     };
@@ -95,6 +98,8 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
       defaultRecurringFrequency:
           json['defaultRecurringFrequency'] as String? ?? 'monthly',
       recurringAutoCreate: json['recurringAutoCreate'] as bool? ?? false,
+      decimalPlaces: _decimalPlacesFrom(json),
+      digitGrouping: DigitGrouping.fromName(json['digitGrouping'] as String?),
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
@@ -110,5 +115,15 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
     }
 
     return CurrencyConfig.defaultCode;
+  }
+
+  // Missing before SAAP-65; anything outside the allowed values reads as 2.
+  int _decimalPlacesFrom(Map<String, dynamic> json) {
+    final places = json['decimalPlaces'];
+    if (places is int && UserSettings.allowedDecimalPlaces.contains(places)) {
+      return places;
+    }
+
+    return 2;
   }
 }

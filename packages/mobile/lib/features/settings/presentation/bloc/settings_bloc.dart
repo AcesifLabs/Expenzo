@@ -58,6 +58,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       _onUpdateRecurringAutoCreate,
       transformer: concurrent(),
     );
+    on<UpdateNumberFormat>(_onUpdateNumberFormat, transformer: concurrent());
     on<DismissAutoImportPrompt>(
       _onDismissAutoImportPrompt,
       transformer: concurrent(),
@@ -147,6 +148,18 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     Emitter<SettingsState> emit,
   ) {
     _updateFromLast((s) => s.copyWith(recurringAutoCreate: event.enabled));
+  }
+
+  void _onUpdateNumberFormat(
+    UpdateNumberFormat event,
+    Emitter<SettingsState> emit,
+  ) {
+    _updateFromLast(
+      (s) => s.copyWith(
+        decimalPlaces: event.decimalPlaces,
+        digitGrouping: event.digitGrouping,
+      ),
+    );
   }
 
   Future<void> _onDeleteAccountEvent(

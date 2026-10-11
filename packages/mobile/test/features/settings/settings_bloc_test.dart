@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:dartz/dartz.dart';
+import 'package:expense_tracker/core/constants/digit_grouping.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
 import 'package:expense_tracker/features/auth/domain/usecases/delete_account.dart';
@@ -286,6 +287,14 @@ void main() {
         expect(saved.defaultRecurringFrequency, 'monthly');
       },
     );
+
+    test('UpdateNumberFormat changes only the given field', () async {
+      final saved = await savedAfter(
+        const UpdateNumberFormat(digitGrouping: DigitGrouping.dot),
+      );
+
+      expect(saved, testSettings.copyWith(digitGrouping: DigitGrouping.dot));
+    });
 
     test('UpdateNotificationToggle saves only its own toggle', () async {
       final saved = await savedAfter(

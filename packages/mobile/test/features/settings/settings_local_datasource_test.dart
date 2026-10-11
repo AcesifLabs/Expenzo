@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:expense_tracker/core/constants/digit_grouping.dart';
 import 'package:expense_tracker/features/settings/data/datasources/settings_local_datasource.dart';
 
 Map<String, Object?> _storedSettings({String? currencySymbol, String? code}) {
@@ -160,4 +161,40 @@ void main() {
     expect(reloaded.weeklySummaryEnabled, isTrue);
     expect(reloaded.recurringRemindersEnabled, isFalse);
   });
+
+  test('settings saved before number format existed load 2 places and '
+      'comma grouping', () async {
+    final datasource = await datasourceWith(_storedSettings(code: 'BDT'));
+    final settings = await datasource.getSettings();
+
+    expect(settings.decimalPlaces, 2);
+    expect(settings.digitGrouping, DigitGrouping.comma);
+  });
+
+  test('the number format is saved and read back', () async {
+    final datasource = await datasourceWith(_storedSettings(code: 'BDT'));
+    final settings = await datasource.getSettings();
+    await datasource.updateSettings(
+      settings.copyWith(decimalPlaces: 0, digitGrouping: DigitGrouping.space),
+    );
+
+    final reloaded = await datasource.getSettings();
+    expect(reloaded.decimalPlaces, 0);
+    expect(reloaded.digitGrouping, DigitGrouping.space);
+  });
+
+  test(
+    'invalid stored number format values fall back to the defaults',
+    () async {
+      final datasource = await datasourceWith({
+        ..._storedSettings(code: 'BDT'),
+        'decimalPlaces': 3,
+        'digitGrouping': 'apostrophe',
+      });
+      final settings = await datasource.getSettings();
+
+      expect(settings.decimalPlaces, 2);
+      expect(settings.digitGrouping, DigitGrouping.comma);
+    },
+  );
 }
