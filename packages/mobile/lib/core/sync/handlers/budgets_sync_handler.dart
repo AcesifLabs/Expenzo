@@ -26,7 +26,7 @@ class BudgetsSyncHandler extends SyncTableHandler<$BudgetsTable, Budget> {
   Insertable<Budget> fromSyncPayload(String id, Map<String, dynamic> data) =>
       BudgetsCompanion.insert(
         id: id,
-        name: data['name']?.toString() ?? 'Unnamed Budget',
+        name: data['name']?.toString() ?? 'Unnamed budget',
         amount: parseSyncAmount(data['amount']),
         period: parseSyncString(data['period'], BudgetPeriod.monthly.name),
         startDate: parseSyncDate(data['startDate']),

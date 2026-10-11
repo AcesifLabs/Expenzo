@@ -1,0 +1,49 @@
+{
+  "range": {
+    "thisMonth": "This month",
+    "lastMonth": "Last month",
+    "thisYear": "This year",
+    "net": {
+      "thisMonth": "Net this month",
+      "lastMonth": "Net last month",
+      "thisYear": "Net this year"
+    },
+    "previous": {
+      "thisMonth": "last month",
+      "lastMonth": "the month before",
+      "thisYear": "last year"
+    }
+  },
+  "greeting": "Hi, {name}",
+  "userFallback": "User",
+  "income": "Income",
+  "expense": "Expense",
+  "sections": {
+    "budgets": "Budgets",
+    "recentActivity": "Recent activity",
+    "spendingPatterns": "Spending patterns",
+    "seeAll": "See all"
+  },
+  "noBudgets": "No budgets yet",
+  "noTransactions": "No transactions yet",
+  "menu": {
+    "profile": "Profile",
+    "signIn": "Sign in",
+    "settings": "Settings",
+    "signOut": "Sign out"
+  },
+  "budgetSpentOf": "{spent} of {total}",
+  "trend": {
+    "noPrevious": "No spending {period} to compare",
+    "same": "Same as {period}",
+    "up": "+{percent}% vs {period}",
+    "down": "-{percent}% vs {period}",
+    "spent": "{amount} spent",
+    "noData": "No trend data yet"
+  },
+  "autoImport": {
+    "title": "Add expenses from SMS",
+    "body": "Let Expenzo read bank and payment messages and add them for you. Messages stay on this phone.",
+    "setUp": "Set up"
+  }
+}

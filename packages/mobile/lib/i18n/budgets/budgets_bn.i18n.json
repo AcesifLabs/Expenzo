@@ -1,0 +1,62 @@
+{
+  "@@i18n-review": "Machine-drafted Bangla. Needs native review before release.",
+  "title": "বাজেট",
+  "subtitle": "আপনার মাসিক সীমা দেখুন",
+  "empty": {
+    "title": "এখনো কোনো বাজেট নেই",
+    "body": "কত টাকা বাকি আছে দেখতে একটি মাসিক সীমা ঠিক করুন।"
+  },
+  "saved": "বাজেট সংরক্ষণ হয়েছে",
+  "loadPrompt": "ডেটা দেখতে বাজেট লোড করুন",
+  "edit": "সম্পাদনা",
+  "delete": {
+    "title": "বাজেট মুছুন",
+    "confirm": "\"{name}\" বাজেট মুছবেন?"
+  },
+  "card": {
+    "overBy": "{amount} বেশি খরচ",
+    "left": "{amount} বাকি",
+    "spentOf": "{total}-এর মধ্যে {spent} খরচ",
+    "a11y": "{name}, {headline}, {daysLeft}। অপশন দেখতে চেপে ধরে রাখুন।"
+  },
+  "days": {
+    "ended": "সময় শেষ",
+    "lastDay": "শেষ দিন",
+    "left": {
+      "one": "{n} দিন বাকি",
+      "other": "{n} দিন বাকি"
+    }
+  },
+  "form": {
+    "add": "বাজেট যোগ করুন",
+    "edit": "বাজেট সম্পাদনা",
+    "amount": "পরিমাণ",
+    "name": "নাম",
+    "nameHint": "যেমন: খাবার ও পানীয়",
+    "period": "সময়কাল",
+    "rollover": "অব্যবহৃত টাকা পরের সময়ে নিন",
+    "rolloverDetail": "যে টাকা খরচ হয়নি তা পরের সময়ে যোগ হবে",
+    "amountRequired": "একটি পরিমাণ লিখুন",
+    "amountInvalid": "সঠিক সংখ্যা লিখুন",
+    "nameRequired": "একটি নাম লিখুন"
+  },
+  "details": {
+    "title": "বাজেটের বিস্তারিত",
+    "loadFailed": "বাজেটের বিস্তারিত লোড করা যায়নি। আবার চেষ্টা করুন।",
+    "notFound": "বাজেট পাওয়া যায়নি।",
+    "ofTotal": " / {total}",
+    "periodBudget": {
+      "weekly": "সাপ্তাহিক বাজেট",
+      "monthly": "মাসিক বাজেট",
+      "yearly": "বার্ষিক বাজেট"
+    },
+    "used": "{percent}% খরচ হয়েছে",
+    "over": "বাজেট ছাড়িয়ে গেছে",
+    "transactionsFailed": "লেনদেন লোড করা যায়নি",
+    "noExpenses": "এই বাজেটে এখনো কোনো খরচ নেই",
+    "noExpensesBody": "এই বাজেটের সাথে যুক্ত খরচ এখানে দেখা যাবে।",
+    "transactions": "লেনদেন",
+    "unableToLoad": "বাজেট লোড করা যায়নি",
+    "unableToLoadBody": "বাজেটের বিস্তারিত লোড করা যায়নি।"
+  }
+}

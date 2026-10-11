@@ -1,0 +1,69 @@
+{
+  "range": {
+    "last7Days": "Last 7 days",
+    "last30Days": "Last 30 days",
+    "last3Months": "Last 3 months",
+    "allTime": "All time",
+    "custom": "Custom date range",
+    "from": "From {date}",
+    "until": "Until {date}",
+    "selectDate": "Select date"
+  },
+  "summary": {
+    "range": "Range",
+    "matches": "Matches",
+    "selected": "Selected"
+  },
+  "card": {
+    "rule": "Rule: {id}"
+  },
+  "options": {
+    "title": "Scan past SMS for records"
+  },
+  "toolbar": {
+    "sender": "Sender",
+    "flatList": "Flat list",
+    "clear": "Clear"
+  },
+  "section": {
+    "selectAll": "Select all",
+    "clear": "Clear",
+    "counts": {
+      "one": "{n} message · {selected} selected",
+      "other": "{n} messages · {selected} selected"
+    }
+  },
+  "customRange": {
+    "title": "Select custom range",
+    "body": "Choose a start and end date before scanning past SMS for records.",
+    "start": "Start date",
+    "end": "End date",
+    "invalid": "Pick a valid start and end date.",
+    "apply": "Apply"
+  },
+  "results": {
+    "title": "Scan results",
+    "empty": "No new records found",
+    "emptyBody": "Try scanning again or add more matching rules",
+    "create": {
+      "one": "Add {n} selected record",
+      "other": "Add {n} selected records"
+    }
+  },
+  "autoImport": {
+    "scanPast": "Scan past SMS"
+  },
+  "permission": {
+    "denied": "SMS permission was permanently denied. Enable it in app settings.",
+    "timedOut": "Permission request timed out. Try again.",
+    "privacyTitle": "Your privacy is protected",
+    "privacyBody": "All SMS data is processed on your device. We never upload your messages to any server.",
+    "localTitle": "Stored only on this phone",
+    "localBody": "Detected expenses are stored on this phone. No personal messages are saved.",
+    "controlTitle": "You're in control",
+    "controlBody": "Choose which SMS to turn into expenses. You can always edit or delete them.",
+    "title": "Turn on SMS scanning",
+    "body": "We scan your SMS to detect expenses from banks and payment apps automatically.",
+    "next": "Continue"
+  }
+}

@@ -2,6 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
+import 'package:picons/picons.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class AppCriticalError extends StatefulWidget {
   final FlutterErrorDetails details;
@@ -48,28 +52,29 @@ class _AppCriticalErrorState extends State<AppCriticalError> {
         child: SafeArea(
           child: Center(
             child: Padding(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(AppSpacing.lg),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.error_outline, color: scheme.error, size: 64),
-                  const SizedBox(height: 24),
+                  Icon(
+                    PiconsRegular.warningCircle,
+                    color: scheme.error,
+                    size: 64,
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
                   Text(
-                    'Unexpected error occurred',
+                    t.common.fallback.criticalTitle,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                    style: AppTypography.headlineSmall.copyWith(
                       color: scheme.onSurface,
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.smd),
                   Text(
-                    'The app will close shortly.',
+                    t.common.fallback.criticalBody,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 14,
+                    style: AppTypography.bodyMedium.copyWith(
                       height: 1.5,
                       color: scheme.onSurface.withAlpha(140),
                     ),

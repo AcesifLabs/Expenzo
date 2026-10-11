@@ -5,6 +5,9 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/features/sms_parser/application/realtime_sms_processor.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class SmsPermissionGate extends StatefulWidget {
   final Widget child;
@@ -91,7 +94,7 @@ class _SmsPermissionGateState extends State<SmsPermissionGate> {
 
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -100,27 +103,31 @@ class _SmsPermissionGateState extends State<SmsPermissionGate> {
               size: 80,
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
-            const SizedBox(height: 24),
-            const Text(
-              'SMS Access Required',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              t.common.smsGate.title,
+              style: AppTypography.headlineSmall,
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 16),
-            const Text(
-              'Expenzo needs access to your SMS to automatically track expenses from your bank and payment apps. '
-              'Your messages never leave your device.',
-              style: TextStyle(fontSize: 16),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              t.common.smsGate.body,
+              style: AppTypography.bodyLarge,
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: AppSpacing.xl),
             ElevatedButton.icon(
-              icon: Icon(PiconsRegular.check),
-              label: const Text('Grant Access', style: TextStyle(fontSize: 18)),
+              icon: const Icon(PiconsRegular.check),
+              label: Text(
+                t.common.smsGate.allow,
+                style: AppTypography.titleLarge.copyWith(
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 32,
-                  vertical: 16,
+                  horizontal: AppSpacing.xl,
+                  vertical: AppSpacing.md,
                 ),
               ),
               onPressed: () => _requestPermission(),
@@ -142,18 +149,16 @@ class _PermissionRequiredDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Permission Required'),
-      content: const Text(
-        'SMS permission is permanently denied. Please enable it in app settings to use the smart scanner.',
-      ),
+      title: Text(t.common.smsGate.deniedTitle),
+      content: Text(t.common.smsGate.deniedBody),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(t.common.cancel),
         ),
         ElevatedButton(
           onPressed: _openAppSettings,
-          child: const Text('Open Settings'),
+          child: Text(t.common.openSettings),
         ),
       ],
     );

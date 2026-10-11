@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:expense_tracker/core/theme/app_colors.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
 
-Color budgetProgressColor(double percentage) {
-  if (percentage > 100) return AppColors.expenseDark;
-  if (percentage >= 80) return AppColors.warningDark;
+Color budgetProgressColor(AppPalette palette, double percentage) {
+  if (percentage > 100) return palette.expense;
+  if (percentage >= 80) return palette.warning;
 
-  return AppColors.successDark;
+  return palette.income;
 }

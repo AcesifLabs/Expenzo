@@ -1,13 +1,15 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:expense_tracker/core/theme/app_typography.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/core/sync/sync_engine.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_event.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
+import 'package:picons/picons.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class SyncConflictPage extends StatefulWidget {
   const SyncConflictPage({super.key});
@@ -30,41 +32,41 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
+    final palette = context.palette;
+
     return Column(
       children: [
-        const SizedBox(height: 32),
-        const Icon(Icons.sync, size: 64, color: AppColors.primary),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.xl),
+        Icon(PiconsRegular.arrowsClockwise, size: 64, color: palette.brand),
+        const SizedBox(height: AppSpacing.md),
         Text(
-          'Sync Conflict',
-          style: AppTypography.headlineLarge.copyWith(color: AppColors.primary),
+          t.auth.syncConflict.title,
+          style: AppTypography.headlineLarge.copyWith(color: palette.brand),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         Text(
-          'You have data on this device and in the cloud.\nHow would you like to proceed?',
+          t.auth.syncConflict.body,
           textAlign: TextAlign.center,
-          style: AppTypography.bodyLarge.copyWith(
-            color: AppColors.textSecondaryLight,
-          ),
+          style: AppTypography.bodyLarge.copyWith(color: palette.textSecondary),
         ),
-        const SizedBox(height: 32),
+        const SizedBox(height: AppSpacing.xl),
         _decisionButton(
-          'Merge My Data',
-          'Keep all data from both sources',
-          AppColors.primary,
+          t.auth.syncConflict.merge,
+          t.auth.syncConflict.mergeDetail,
+          palette.brand,
           _onMergePressed,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.smd),
         _decisionButton(
-          'Replace with Cloud Data',
-          'Delete local data, use cloud version',
+          t.auth.syncConflict.useAccount,
+          t.auth.syncConflict.useAccountDetail,
           colors.error,
           _onReplacePressed,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.smd),
         _decisionButton(
-          'Overwrite Cloud with Local',
-          'Replace cloud data with this device',
+          t.auth.syncConflict.keepPhone,
+          t.auth.syncConflict.keepPhoneDetail,
           colors.tertiary,
           _onOverwritePressed,
         ),
@@ -87,7 +89,7 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
           foregroundColor: color,
           padding: AppSpacing.paddingMd,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
             side: BorderSide(color: color.withAlpha(50)),
           ),
           elevation: 0,
@@ -95,14 +97,13 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            const SizedBox(height: 4),
+            Text(title, style: AppTypography.titleMedium),
+            const SizedBox(height: AppSpacing.xs),
             Text(
               subtitle,
-              style: TextStyle(fontSize: 13, color: color.withAlpha(180)),
+              style: AppTypography.bodyMedium.copyWith(
+                color: color.withAlpha(180),
+              ),
             ),
           ],
         ),
@@ -137,7 +138,7 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
               ),
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.lg),
           Text(
             _status,
             textAlign: TextAlign.center,
@@ -154,19 +155,17 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
       context: context,
       barrierDismissible: false,
       builder: (_) => AlertDialog(
-        title: const Text('Replace Local Data?'),
-        content: const Text(
-          'This will permanently delete all data on this device and replace it with your cloud data.',
-        ),
+        title: Text(t.auth.syncConflict.replaceTitle),
+        content: Text(t.auth.syncConflict.replaceBody),
         actions: [
           TextButton(
             onPressed: Navigator.of(context).pop,
-            child: const Text('Cancel'),
+            child: Text(t.common.cancel),
           ),
           TextButton(
             onPressed: _onConfirmReplace,
             child: Text(
-              'Replace',
+              t.auth.syncConflict.replace,
               style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           ),
@@ -197,14 +196,14 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
     setState(() {
       _syncing = true;
       _progress = 0;
-      _status = 'Preparing...';
+      _status = t.auth.syncConflict.preparing;
     });
 
     try {
       final engine = di.getIt<SyncEngine>();
       engine.onProgress = _onProgress;
       if (mode == SyncMode.cloudWins) {
-        setState(() => _status = 'Resetting database...');
+        setState(() => _status = t.auth.syncConflict.clearing);
         await di.resetDatabaseInstance();
       }
       await engine.executeDecision(mode);
@@ -212,7 +211,7 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
       if (!mounted) return;
       setState(() {
         _progress = 1.0;
-        _status = 'Complete!';
+        _status = t.auth.syncConflict.done;
       });
       await Future.delayed(const Duration(seconds: 1));
       if (mounted) {
@@ -223,8 +222,7 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
       if (mounted) {
         setState(() {
           _syncing = false;
-          _status =
-              'Error: ${e.toString().substring(0, min(50, e.toString().length))}';
+          _status = t.common.errors.generic;
         });
       }
     }
@@ -234,7 +232,7 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
     if (mounted) {
       setState(() {
         _progress = p;
-        _status = 'Syncing...';
+        _status = t.auth.syncConflict.syncing;
       });
     }
   }

@@ -1,0 +1,50 @@
+{
+  "errors": {
+    "deleteFailed": "Couldn't delete the SMS format. Try again.",
+    "restoreFailed": "Couldn't restore the SMS format. Try again."
+  },
+  "alreadyExists": "SMS format already exists",
+  "edit": "Edit SMS format",
+  "delete": "Delete SMS format",
+  "deleted": "SMS format deleted",
+  "dismiss": "Dismiss",
+  "retro": {
+    "title": "Scanning past messages",
+    "scanning": "Looking for past expenses that match this SMS format…",
+    "saved": "SMS format saved. New messages like this are added automatically.",
+    "review": "Go to Settings → Auto-import from SMS to review and add any past expenses we found."
+  },
+  "editor": {
+    "noNumbers": "No numbers found in this message.",
+    "amountsFound": "Amounts found in this message:",
+    "step1": "Step 1 of 3: Choose a key word",
+    "step1Body": "Choose a word that appears in every message of this type, like \"debited\", \"paid\" or \"spent\".",
+    "wordsInMessage": "Words in this message",
+    "step1Hint": "Choose a word to continue.",
+    "step2": "Step 2 of 3: Choose the amount",
+    "step2Body": "Which number is the amount you spent?",
+    "step2Hint": "Choose the amount to continue.",
+    "step3": "Step 3 of 3: Review",
+    "step3Body": "From now on, messages like this one are added as expenses automatically.",
+    "sender": "Sender",
+    "keyWord": "Key word",
+    "amountInMessage": "Amount in this message",
+    "saveFailed": "Couldn't save the SMS format: {reason}",
+    "updated": "SMS format updated",
+    "saved": "SMS format saved"
+  },
+  "analyzer": {
+    "title": "Messages from {sender}",
+    "intro": "Pick a message to teach Expenzo this SMS format. Similar messages will then be added as records automatically.",
+    "useMessage": "Use this message",
+    "noMessages": "No recent messages from this sender."
+  },
+  "contacts": {
+    "subtitle": "Pick the senders that text you about payments. Expenzo learns their message format and adds records for you.",
+    "search": "Search senders",
+    "active": "Active",
+    "empty": "No text messages on this phone yet. Senders show up here once you receive SMS.",
+    "noMatch": "No senders match \"{query}\"."
+  },
+  "create": "New SMS format"
+}

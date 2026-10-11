@@ -28,6 +28,11 @@ import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanne
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets_with_progress.dart';
 import 'package:expense_tracker/features/records/domain/usecases/create_records_from_parsed_list.dart';
+import 'package:expense_tracker/features/parsing_rules/domain/usecases/get_rules.dart';
+import 'package:expense_tracker/features/parsing_rules/domain/usecases/update_rule.dart';
+import 'package:expense_tracker/features/parsing_rules/domain/usecases/delete_rule.dart';
+import 'package:expense_tracker/features/parsing_rules/presentation/bloc/parsing_rules_bloc.dart';
+import 'package:expense_tracker/features/budgets/domain/usecases/check_budget_alerts.dart';
 
 void initParsingModule(GetIt getIt) {
   _initParsingInfrastructure(getIt);
@@ -48,6 +53,22 @@ void _initParsingInfrastructure(GetIt getIt) {
   getIt.registerLazySingleton<ParsingRulesRepository>(
     () => ParsingRulesRepositoryImpl(
       localDatasource: getIt<ParsingRulesLocalDatasource>(),
+    ),
+  );
+  // Settings → Matching rules.
+  getIt.registerLazySingleton(() => GetRules(getIt<ParsingRulesRepository>()));
+  getIt.registerLazySingleton(
+    () => UpdateRule(getIt<ParsingRulesRepository>()),
+  );
+  getIt.registerLazySingleton(
+    () => DeleteRule(getIt<ParsingRulesRepository>()),
+  );
+  getIt.registerFactory<ParsingRulesBloc>(
+    () => ParsingRulesBloc(
+      getRules: getIt<GetRules>(),
+      updateRule: getIt<UpdateRule>(),
+      deleteRuleUseCase: getIt<DeleteRule>(),
+      repository: getIt<ParsingRulesRepository>(),
     ),
   );
 }
@@ -132,6 +153,7 @@ void _initSmsParsing(GetIt getIt) {
       parsingIsolateService: getIt<ParsingIsolateService>(),
       recordRepository: getIt<RecordRepository>(),
       createRecordsFromParsedList: getIt<CreateRecordsFromParsedList>(),
+      checkBudgetAlerts: getIt<CheckBudgetAlerts>(),
     ),
   );
 }

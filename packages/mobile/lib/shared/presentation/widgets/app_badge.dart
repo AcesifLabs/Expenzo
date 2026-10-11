@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 
 class AppBadge extends StatelessWidget {
   final String label;
@@ -34,14 +35,14 @@ class AppBadge extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: hPad, vertical: vPad),
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
             Icon(icon, size: iconSize, color: textColor),
-            const SizedBox(width: 3),
+            const SizedBox(width: AppSpacing.xs),
           ],
           Text(
             label,

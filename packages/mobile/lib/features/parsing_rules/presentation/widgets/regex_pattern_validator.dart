@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/core/utils/regex_utils.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
+import 'package:picons/picons.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class RegexPatternValidator extends StatelessWidget {
   final String pattern;
@@ -21,20 +26,22 @@ class RegexPatternValidator extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(AppSpacing.sm),
       decoration: BoxDecoration(
         color: colorScheme.tertiaryContainer,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
         border: Border.all(color: colorScheme.tertiary),
       ),
       child: Row(
         children: [
-          Icon(Icons.warning, color: colorScheme.tertiary, size: 20),
-          const SizedBox(width: 8),
+          Icon(PiconsRegular.warning, color: colorScheme.tertiary, size: 20),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
               validation,
-              style: TextStyle(color: colorScheme.tertiary, fontSize: 12),
+              style: AppTypography.bodySmall.copyWith(
+                color: colorScheme.tertiary,
+              ),
             ),
           ),
         ],
@@ -84,7 +91,9 @@ class _RegexValidatorIndicatorState extends State<RegexValidatorIndicator> {
       debugPrint('Error: $e\n$s');
       setState(() {
         _isValid = false;
-        _errorMessage = 'Invalid regex: ${e.toString()}';
+        _errorMessage = t.parsingRules.validation.invalidRegexDetail(
+          detail: e.toString(),
+        );
       });
     }
   }
@@ -107,21 +116,20 @@ class _RegexValidatorIndicatorState extends State<RegexValidatorIndicator> {
 
     if (!_isValid || _errorMessage != null) {
       return Padding(
-        padding: const EdgeInsets.only(top: 4),
+        padding: const EdgeInsets.only(top: AppSpacing.xs),
         child: Row(
           children: [
             Icon(
-              _isValid ? Icons.warning : Icons.error,
+              _isValid ? PiconsRegular.warning : PiconsRegular.warningCircle,
               color: _isValid ? colorScheme.tertiary : colorScheme.error,
               size: 16,
             ),
-            const SizedBox(width: 4),
+            const SizedBox(width: AppSpacing.xs),
             Expanded(
               child: Text(
                 _errorMessage ?? '',
-                style: TextStyle(
+                style: AppTypography.bodySmall.copyWith(
                   color: _isValid ? colorScheme.tertiary : colorScheme.error,
-                  fontSize: 12,
                 ),
               ),
             ),
@@ -132,11 +140,17 @@ class _RegexValidatorIndicatorState extends State<RegexValidatorIndicator> {
 
     return Row(
       children: [
-        Icon(Icons.check_circle, color: colorScheme.secondary, size: 16),
-        const SizedBox(width: 4),
+        Icon(
+          PiconsRegular.checkCircle,
+          color: context.palette.income,
+          size: 16,
+        ),
+        const SizedBox(width: AppSpacing.xs),
         Text(
-          'Valid pattern',
-          style: TextStyle(color: colorScheme.secondary, fontSize: 12),
+          t.parsingRules.validation.valid,
+          style: AppTypography.bodySmall.copyWith(
+            color: context.palette.income,
+          ),
         ),
       ],
     );

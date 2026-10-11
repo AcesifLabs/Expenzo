@@ -14,6 +14,7 @@ import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanne
 import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanner_state.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanner_view_mode.dart';
 import '../../../support/factories/sms_scan_result_item_factory.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class MockScanSmsUseCase extends Mock implements ScanSmsUseCase {}
 
@@ -112,7 +113,7 @@ void main() {
           isA<SmsScannerError>().having(
             (state) => state.message,
             'message',
-            'scan failed',
+            t.common.errors.smsScan,
           ),
         ]),
       );
@@ -327,7 +328,7 @@ void main() {
                 )
                 as SmsScannerScanComplete;
         expect(failureState.results, [scanItem]);
-        expect(failureState.submissionErrorMessage, 'create failed');
+        expect(failureState.submissionErrorMessage, t.common.errors.storage);
       },
     );
 

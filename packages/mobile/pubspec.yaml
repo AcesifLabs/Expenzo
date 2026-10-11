@@ -60,9 +60,8 @@ dependencies:
   go_router: ^14.8.0
 
   # UI
-  intl: ^0.19.0
+  intl: ^0.20.2
   shimmer: ^3.0.0
-  google_fonts: ^6.2.1
 
 # Phase 2 - Parsing Engine
   permission_handler: ^12.0.1
@@ -91,6 +90,11 @@ dependencies:
   flutter_markdown: ^0.7.7+1
   camera: ^0.12.0+2
   image_picker: ^1.2.3
+  url_launcher: ^6.3.3
+  slang: ^4.19.2
+  slang_flutter: ^4.19.0
+  flutter_localizations:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:
@@ -131,16 +135,18 @@ flutter:
 
   # Custom fonts
   fonts:
-    - family: Browni
-      fonts:
-        - asset: assets/fonts/Browni.ttf
     - family: Lato
       fonts:
         - asset: assets/fonts/Lato-Regular.ttf
           weight: 400
-        - asset: assets/fonts/Lato-Light.ttf
-          weight: 300
         - asset: assets/fonts/Lato-Bold.ttf
+          weight: 700
+    # Bangla fallback for Lato (AppTypography.fontFamilyFallback).
+    - family: NotoSansBengali
+      fonts:
+        - asset: assets/fonts/NotoSansBengali-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/NotoSansBengali-Bold.ttf
           weight: 700
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -169,14 +175,5 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
 
-# ── App Icon Configuration ──
-# Run: dart run flutter_launcher_icons
-flutter_launcher_icons:
-  android: true
-  ios: true
-  image_path: "assets/images/logo.png"
-  adaptive_icon_background: "#1C1C1E"
-  adaptive_icon_foreground: "assets/images/logo.png"
-
 dependency_overrides:
-  shared_preferences_android: ^2.4.24
+  shared_preferences_android: 2.4.23

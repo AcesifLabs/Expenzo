@@ -12,6 +12,8 @@ import '../../domain/usecases/delete_recurring.dart' as usecase;
 import '../../domain/usecases/process_recurring.dart' as usecase;
 import '../bloc/recurring_event.dart';
 import '../bloc/recurring_state.dart';
+import 'package:expense_tracker/core/error/failure_message.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class RecurringBloc extends Bloc<RecurringEvent, RecurringState> {
   final GetRecurringList getRecurringList;
@@ -45,7 +47,7 @@ class RecurringBloc extends Bloc<RecurringEvent, RecurringState> {
     final result = await getRecurringList(NoParams());
 
     result.fold(
-      (failure) => emit(RecurringError(failure.message)),
+      (failure) => emit(RecurringError(failureText(failure))),
       (recurringList) => emit(RecurringLoaded(recurringList)),
     );
   }
@@ -58,7 +60,7 @@ class RecurringBloc extends Bloc<RecurringEvent, RecurringState> {
 
     final result = await createRecurring(event.recurring);
 
-    result.fold((failure) => emit(RecurringError(failure.message)), (
+    result.fold((failure) => emit(RecurringError(failureText(failure))), (
       recurring,
     ) {
       emit(const RecurringOperationSuccess());
@@ -74,7 +76,7 @@ class RecurringBloc extends Bloc<RecurringEvent, RecurringState> {
 
     final result = await updateRecurring(event.recurring);
 
-    result.fold((failure) => emit(RecurringError(failure.message)), (
+    result.fold((failure) => emit(RecurringError(failureText(failure))), (
       recurring,
     ) {
       emit(const RecurringOperationSuccess());
@@ -90,7 +92,7 @@ class RecurringBloc extends Bloc<RecurringEvent, RecurringState> {
 
     final result = await deleteRecurring(event.id);
 
-    result.fold((failure) => emit(RecurringError(failure.message)), (_) {
+    result.fold((failure) => emit(RecurringError(failureText(failure))), (_) {
       emit(const RecurringOperationSuccess());
       add(LoadRecurring());
     });
@@ -105,7 +107,7 @@ class RecurringBloc extends Bloc<RecurringEvent, RecurringState> {
     final result = await processRecurring();
 
     await result.fold(
-      (failure) async => emit(RecurringError(failure.message)),
+      (failure) async => emit(RecurringError(failureText(failure))),
       (processed) async {
         // Create expense records from processed recurrences
         var createdCount = 0;
@@ -131,7 +133,10 @@ class RecurringBloc extends Bloc<RecurringEvent, RecurringState> {
         if (failedCount > 0) {
           emit(
             RecurringError(
-              'Created $createdCount records, $failedCount failed',
+              t.recurring.errors.someNotCreated(
+                failed: failedCount,
+                total: createdCount + failedCount,
+              ),
             ),
           );
         } else {

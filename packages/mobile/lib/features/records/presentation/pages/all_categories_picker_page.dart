@@ -6,13 +6,20 @@ import 'package:go_router/go_router.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
-import 'package:expense_tracker/shared/presentation/widgets/app_icons.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/features/categories/domain/entities/category.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_event.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_state.dart';
 import 'package:expense_tracker/features/categories/presentation/widgets/delete_category_dialog.dart';
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_back_button.dart';
+import 'package:expense_tracker/shared/presentation/widgets/category_tile.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_page_header.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
+import 'package:expense_tracker/features/categories/presentation/helpers/category_display_name.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 /// Full-screen category picker matching the .pen design.
 ///
@@ -34,6 +41,8 @@ class AllCategoriesPickerPage extends StatefulWidget {
 }
 
 class _AllCategoriesPickerPageState extends State<AllCategoriesPickerPage> {
+  AppPalette get _palette => context.palette;
+
   final _searchController = TextEditingController();
   Timer? _debounce;
   String _pendingQuery = '';
@@ -77,7 +86,7 @@ class _AllCategoriesPickerPageState extends State<AllCategoriesPickerPage> {
       ScaffoldMessenger.of(context)
         ..clearSnackBars()
         ..showSnackBar(
-          const SnackBar(content: Text('Default categories cannot be deleted')),
+          SnackBar(content: Text(t.categories.defaultCannotDelete)),
         );
 
       return;
@@ -98,7 +107,7 @@ class _AllCategoriesPickerPageState extends State<AllCategoriesPickerPage> {
 
     final confirmed = await DeleteCategoryDialog.show(
       context: context,
-      categoryName: category.name,
+      categoryName: category.displayName,
       transactionCount: transactionCount,
     );
 
@@ -111,66 +120,49 @@ class _AllCategoriesPickerPageState extends State<AllCategoriesPickerPage> {
     context.push('/categories/new', extra: {'initialType': widget.type});
   }
 
-  Widget _buildTopBar() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 24, 0),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: const Icon(
-              PiconsRegular.x,
-              size: 24,
-              color: Color(0xFFF5F7FA),
-            ),
-          ),
-          const SizedBox(width: 12),
-          const Text(
-            'Choose Category',
-            style: TextStyle(
-              fontFamily: 'Work Sans',
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFFF5F7FA),
-            ),
-          ),
-        ],
-      ),
+  PreferredSizeWidget _buildTopBar() {
+    return AppPageHeader(
+      leading: AppBackButton(icon: PiconsRegular.x),
+      title: t.records.picker.title,
     );
   }
 
   Widget _buildSearchBar() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.md,
+        AppSpacing.lg,
+        0,
+      ),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.smd,
+        ),
         decoration: BoxDecoration(
-          color: const Color(0xFF1C1B1D),
-          borderRadius: BorderRadius.circular(16),
+          color: _palette.surface,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
         ),
         child: Row(
           children: [
-            const Icon(
+            Icon(
               PiconsRegular.magnifyingGlass,
               size: 16,
-              color: Color(0xFF8E8E93),
+              color: _palette.textSecondary,
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: TextField(
                 controller: _searchController,
                 onChanged: _debounceAndSearch,
-                style: const TextStyle(
-                  fontFamily: 'Work Sans',
-                  fontSize: 14,
-                  color: Color(0xFFF5F7FA),
+                style: AppTypography.bodyMedium.copyWith(
+                  color: _palette.textPrimary,
                 ),
                 decoration: InputDecoration(
-                  hintText: 'Search categories...',
-                  hintStyle: const TextStyle(
-                    fontFamily: 'Work Sans',
-                    fontSize: 14,
-                    color: Color(0xFF8E8E93),
+                  hintText: t.records.picker.search,
+                  hintStyle: AppTypography.bodyMedium.copyWith(
+                    color: _palette.textSecondary,
                   ),
                   filled: false,
                   border: InputBorder.none,
@@ -191,10 +183,10 @@ class _AllCategoriesPickerPageState extends State<AllCategoriesPickerPage> {
     return BlocBuilder<CategoryBloc, CategoryState>(
       builder: (context, state) {
         if (state is CategoryLoading) {
-          return const Center(
+          return Center(
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              color: Color(0xFF8E8E93),
+              color: _palette.textSecondary,
             ),
           );
         }
@@ -203,10 +195,8 @@ class _AllCategoriesPickerPageState extends State<AllCategoriesPickerPage> {
           return Center(
             child: Text(
               state.message,
-              style: const TextStyle(
-                fontFamily: 'Work Sans',
-                fontSize: 14,
-                color: Color(0xFF8E8E93),
+              style: AppTypography.bodyMedium.copyWith(
+                color: _palette.textSecondary,
               ),
             ),
           );
@@ -222,13 +212,11 @@ class _AllCategoriesPickerPageState extends State<AllCategoriesPickerPage> {
         }
 
         if (categories.isEmpty) {
-          return const Center(
+          return Center(
             child: Text(
-              'No categories found',
-              style: TextStyle(
-                fontFamily: 'Work Sans',
-                fontSize: 14,
-                color: Color(0xFF8E8E93),
+              t.records.picker.noneFound,
+              style: AppTypography.bodyMedium.copyWith(
+                color: _palette.textSecondary,
               ),
             ),
           );
@@ -242,14 +230,19 @@ class _AllCategoriesPickerPageState extends State<AllCategoriesPickerPage> {
             .toList();
 
         return ListView(
-          padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.md,
+            AppSpacing.lg,
+            AppSpacing.md,
+          ),
           children: [
             if (expenseCategories.isNotEmpty) ...[
-              _buildSectionHeader('EXPENSE'),
+              _buildSectionHeader(RecordType.expense.displayName.toUpperCase()),
               ...expenseCategories.map((cat) => _buildCategoryRow(cat)),
             ],
             if (incomeCategories.isNotEmpty) ...[
-              _buildSectionHeader('INCOME'),
+              _buildSectionHeader(RecordType.income.displayName.toUpperCase()),
               ...incomeCategories.map((cat) => _buildCategoryRow(cat)),
             ],
           ],
@@ -260,15 +253,12 @@ class _AllCategoriesPickerPageState extends State<AllCategoriesPickerPage> {
 
   Widget _buildSectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsets.only(top: 16, bottom: 8),
+      padding: const EdgeInsets.only(top: AppSpacing.md, bottom: AppSpacing.sm),
       child: Text(
         title,
-        style: const TextStyle(
-          fontFamily: 'Work Sans',
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
+        style: AppTypography.labelMedium.copyWith(
           letterSpacing: 0.05,
-          color: Color(0xFF8E8E93),
+          color: _palette.textSecondary,
         ),
       ),
     );
@@ -276,88 +266,65 @@ class _AllCategoriesPickerPageState extends State<AllCategoriesPickerPage> {
 
   Widget _buildCategoryRow(Category category) {
     final isSelected = category.id == widget.selectedId;
-    final iconColor = _getCategoryColor(category);
 
     return GestureDetector(
       onTap: () => _onCategoryTap(category),
       onLongPress: () => _onLongPressDelete(category),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        color: const Color(0xFF1C1B1D),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.smd,
+        ),
+        color: _palette.surface,
         child: Row(
           children: [
-            Icon(
-              AppIcons.getCategoryIcon(category.emoji),
-              size: 20,
-              color: iconColor,
+            CategoryTile(
+              colorHex: category.color,
+              iconKey: category.emoji,
+              size: 32,
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.smd),
             Expanded(
               child: Text(
-                category.name,
-                style: const TextStyle(
-                  fontFamily: 'Work Sans',
-                  fontSize: 14,
-                  color: Color(0xFFF5F7FA),
+                category.displayName,
+                style: AppTypography.bodyMedium.copyWith(
+                  color: _palette.textPrimary,
                 ),
               ),
             ),
             if (isSelected)
-              const Icon(
-                PiconsRegular.checkCircle,
-                size: 20,
-                color: Color(0xFFD1C4E9),
-              ),
+              Icon(PiconsRegular.checkCircle, size: 20, color: _palette.brand),
           ],
         ),
       ),
     );
   }
 
-  Color _getCategoryColor(Category category) {
-    final colorHex = category.color;
-    if (colorHex.isNotEmpty) {
-      try {
-        final hex = colorHex.replaceFirst('#', '');
-
-        return Color(int.parse('0xFF$hex'));
-      } catch (_) {
-        // Fallback to default color
-      }
-    }
-
-    return const Color(0xFF8E8E93);
-  }
-
   Widget _buildAddCategoryButton() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.sm,
+        AppSpacing.lg,
+        AppSpacing.lg,
+      ),
       child: GestureDetector(
         onTap: _onAddNew,
         child: Container(
           height: 48,
           decoration: BoxDecoration(
-            color: const Color(0xFF1C1B1D),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: const Color(0xFF8E8E93).withAlpha(64)),
+            color: _palette.surface,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
+            border: Border.all(color: _palette.textSecondary.withAlpha(64)),
           ),
-          child: const Row(
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                PiconsRegular.plusCircle,
-                size: 18,
-                color: Color(0xFFD1C4E9),
-              ),
-              SizedBox(width: 8),
+              Icon(PiconsRegular.plusCircle, size: 18, color: _palette.brand),
+              const SizedBox(width: AppSpacing.sm),
               Text(
-                'Add New Category',
-                style: TextStyle(
-                  fontFamily: 'Work Sans',
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFFD1C4E9),
-                ),
+                t.records.picker.addCategory,
+                style: AppTypography.bodyMedium.copyWith(color: _palette.brand),
               ),
             ],
           ),
@@ -375,14 +342,12 @@ class _AllCategoriesPickerPageState extends State<AllCategoriesPickerPage> {
 
   @override
   Widget build(BuildContext context) {
-    const backgroundColor = Color(0xFF141315);
-
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: _palette.bg,
+      appBar: _buildTopBar(),
       body: SafeArea(
         child: Column(
           children: [
-            _buildTopBar(),
             _buildSearchBar(),
             Expanded(child: _buildCategoryList()),
             _buildAddCategoryButton(),

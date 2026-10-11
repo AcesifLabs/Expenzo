@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 
 class TypingIndicator extends StatefulWidget {
   const TypingIndicator({super.key});
@@ -33,9 +35,9 @@ class _TypingIndicatorState extends State<TypingIndicator>
         return Container(
           width: 8,
           height: 8,
-          margin: const EdgeInsets.symmetric(horizontal: 2),
+          margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
           decoration: BoxDecoration(
-            color: const Color(0xFF8E8E93).withValues(alpha: opacity),
+            color: context.palette.textSecondary.withValues(alpha: opacity),
             shape: BoxShape.circle,
           ),
         );

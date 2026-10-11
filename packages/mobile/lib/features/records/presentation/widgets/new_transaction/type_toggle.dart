@@ -1,5 +1,8 @@
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class TypeToggle extends StatelessWidget {
   final RecordType type;
@@ -16,7 +19,7 @@ class TypeToggle extends StatelessWidget {
 
     return Semantics(
       container: true,
-      label: 'Transaction type',
+      label: t.records.sheet.typeToggle,
       child: SizedBox(
         width: double.infinity,
         height: 48,
@@ -24,24 +27,24 @@ class TypeToggle extends StatelessWidget {
           children: [
             Expanded(
               child: _ToggleTab(
-                label: 'Expense',
+                label: RecordType.expense.displayName,
                 isActive: isExpense,
                 activeColor: expenseColor,
                 colors: colors,
                 borderRadius: const BorderRadius.horizontal(
-                  left: Radius.circular(12),
+                  left: Radius.circular(AppSpacing.radiusControl),
                 ),
                 onTap: () => onSwitch(RecordType.expense),
               ),
             ),
             Expanded(
               child: _ToggleTab(
-                label: 'Income',
+                label: RecordType.income.displayName,
                 isActive: !isExpense,
                 activeColor: incomeColor,
                 colors: colors,
                 borderRadius: const BorderRadius.horizontal(
-                  right: Radius.circular(12),
+                  right: Radius.circular(AppSpacing.radiusControl),
                 ),
                 onTap: () => onSwitch(RecordType.income),
               ),
@@ -87,7 +90,10 @@ class _ToggleTab extends StatelessWidget {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 180),
             curve: Curves.easeOut,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.smd,
+            ),
             decoration: BoxDecoration(
               color: isActive ? activeColor.withAlpha(32) : Colors.transparent,
               borderRadius: borderRadius,
@@ -96,10 +102,9 @@ class _ToggleTab extends StatelessWidget {
               child: Text(
                 label,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                style: AppTypography.bodyMedium.copyWith(
                   color: fgColor,
+                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
                 ),
               ),
             ),

@@ -1,0 +1,65 @@
+{
+  "appName": "Expenzo",
+  "add": "Add",
+  "save": "Save",
+  "delete": "Delete",
+  "cancel": "Cancel",
+  "close": "Close",
+  "done": "Done",
+  "next": "Next",
+  "back": "Back",
+  "undo": "Undo",
+  "tryAgain": "Try again",
+  "notNow": "Not now",
+  "openSettings": "Open settings",
+  "addExpense": "Add expense",
+  "newBudget": "New budget",
+  "sendFeedback": "Send feedback",
+  "autoImport": "Auto-import from SMS",
+  "matchingRules": "Matching rules",
+  "errors": {
+    "generic": "Something went wrong. Try again.",
+    "storage": "Couldn't read or save your data. Try again.",
+    "network": "You're offline. Check your connection and try again.",
+    "server": "The server didn't respond. Try again in a moment.",
+    "auth": "There was a problem with your sign-in. Sign in again and retry.",
+    "permission": "Expenzo doesn't have permission to do this. Allow it in system settings.",
+    "notFound": "This item no longer exists.",
+    "smsScan": "Couldn't read your messages. Try again."
+  },
+  "dates": {
+    "today": "Today",
+    "yesterday": "Yesterday"
+  },
+  "a11y": {
+    "expenseAmount": "Expense, {amount} {currency}",
+    "incomeAmount": "Income, {amount} {currency}"
+  },
+  "feedback": {
+    "subject": "Expenzo feedback",
+    "noMailApp": "No email app was found. Write to us at {email}.",
+    "copyAddress": "Copy address"
+  },
+  "search": "Search",
+  "clearSearch": "Clear search",
+  "addTransaction": "Add transaction",
+  "noTransactionsInPeriod": "No transactions in this period",
+  "fallback": {
+    "initTitle": "App could not start",
+    "errorTitle": "Something went wrong",
+    "initBody": "We could not finish setting up the app. This is usually temporary. Try again, or restart the app.",
+    "errorBody": "We hit an unexpected error. You can try again, restart the app, or send us feedback so we can fix it.",
+    "reference": "Ref: {id}",
+    "closeApp": "Close app",
+    "debugDetails": "Details (debug)",
+    "criticalTitle": "Unexpected error occurred",
+    "criticalBody": "The app will close shortly."
+  },
+  "smsGate": {
+    "title": "SMS access required",
+    "body": "Expenzo needs access to your SMS to automatically track expenses from your bank and payment apps. Your messages never leave your device.",
+    "allow": "Allow access",
+    "deniedTitle": "Permission needed",
+    "deniedBody": "SMS permission is permanently denied. Enable it in app settings to use the smart scanner."
+  }
+}

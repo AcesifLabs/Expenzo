@@ -1,16 +1,15 @@
+import 'package:expense_tracker/i18n/strings.g.dart';
+
 enum BudgetPeriod {
   weekly,
   monthly,
   yearly;
 
   String get displayName {
-    switch (this) {
-      case BudgetPeriod.weekly:
-        return 'Weekly';
-      case BudgetPeriod.monthly:
-        return 'Monthly';
-      case BudgetPeriod.yearly:
-        return 'Yearly';
-    }
+    return switch (this) {
+      BudgetPeriod.weekly => t.enums.period.weekly,
+      BudgetPeriod.monthly => t.enums.period.monthly,
+      BudgetPeriod.yearly => t.enums.period.yearly,
+    };
   }
 }

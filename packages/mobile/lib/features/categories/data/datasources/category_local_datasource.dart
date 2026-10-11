@@ -6,6 +6,7 @@ import 'package:expense_tracker/core/database/daos/category_dao.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../../domain/entities/category.dart';
+import 'package:expense_tracker/core/utils/category_display_name.dart';
 
 abstract class CategoryLocalDatasource {
   /// Throws: [CacheException] if a database error occurs.
@@ -166,12 +167,24 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
     RecordType? type,
   }) async {
     try {
-      final categories = await categoryDao.searchCategories(
-        query: query,
+      // Match the stored name and the name shown in the app language, so a
+      // translated default category is found by what the user sees.
+      final needle = query.trim().toLowerCase();
+      final categories = await categoryDao.getAllCategories(
         type: type?.dbValue,
       );
 
-      return categories.map(_mapToEntity).toList();
+      return categories
+          .map(_mapToEntity)
+          .where(
+            (category) =>
+                category.name.toLowerCase().contains(needle) ||
+                categoryDisplayName(
+                  id: category.id,
+                  name: category.name,
+                ).toLowerCase().contains(needle),
+          )
+          .toList();
     } catch (e, s) {
       appLogger.error('Error searching categories', e, s);
       throw CacheException(message: e.toString());

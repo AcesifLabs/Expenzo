@@ -11,5 +11,4 @@ export 'presentation/bloc/record_bloc.dart';
 export 'presentation/bloc/record_event.dart';
 export 'presentation/bloc/record_state.dart';
 export 'presentation/pages/record_list_page.dart';
-export 'presentation/pages/record_form_page.dart';
 export 'presentation/widgets/record_card.dart';

@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:picons/picons.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
+import 'package:expense_tracker/core/theme/category_palette.dart';
+import 'package:expense_tracker/core/utils/color_utils.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
+/// Picks one of the [CategoryPalette] colors.
 class ColorPickerRow extends StatelessWidget {
-  static const List<String> colorOptions = [
-    '#D1C4E9',
-    '#F48FB1',
-    '#A2D3A4',
-    '#90CAF9',
-    '#FFD700',
-    '#FF8A65',
-  ];
-
   final String selectedColor;
   final ValueChanged<String> onColorSelected;
 
@@ -20,44 +17,34 @@ class ColorPickerRow extends StatelessWidget {
     required this.onColorSelected,
   });
 
-  Color _parseColor(String hex) {
-    final sanitized = hex.replaceFirst('#', '');
-
-    return Color(int.parse('0xFF$sanitized'));
-  }
-
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.only(top: 16),
+        Padding(
+          padding: const EdgeInsets.only(top: AppSpacing.md),
           child: Text(
-            'Choose Color',
-            style: TextStyle(
-              fontFamily: 'Work Sans',
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: _DesignTokens.mutedColor,
-            ),
+            t.categories.form.color,
+            style: Theme.of(
+              context,
+            ).textTheme.labelMedium?.copyWith(color: palette.textSecondary),
           ),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Row(
-            children: colorOptions.map((hex) {
-              final isSelected = hex == selectedColor;
-
-              return Padding(
-                padding: const EdgeInsets.only(right: 10),
-                child: _ColorSwatch(
-                  color: _parseColor(hex),
-                  isSelected: isSelected,
-                  onTap: () => onColorSelected(hex),
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+          child: Wrap(
+            children: [
+              for (final option in CategoryPalette.all)
+                _ColorSwatch(
+                  option: option,
+                  isSelected:
+                      option.hex.toUpperCase() == selectedColor.toUpperCase(),
+                  onTap: () => onColorSelected(option.hex),
                 ),
-              );
-            }).toList(),
+            ],
           ),
         ),
       ],
@@ -66,51 +53,55 @@ class ColorPickerRow extends StatelessWidget {
 }
 
 class _ColorSwatch extends StatelessWidget {
-  final Color color;
+  final CategoryColor option;
   final bool isSelected;
   final VoidCallback onTap;
 
   const _ColorSwatch({
-    required this.color,
+    required this.option,
     required this.isSelected,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          color: color,
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: isSelected
-                ? _DesignTokens.selectedBorder
-                : Colors.transparent,
-            width: 2,
+    final color = ColorUtils.fromHex(option.hex);
+
+    // 36dp swatch inside a 48dp tap target.
+    return Semantics(
+      label: t.categories.colors[option.name] ?? option.name,
+      selected: isSelected,
+      button: true,
+      child: InkResponse(
+        onTap: onTap,
+        radius: AppSpacing.minTapTarget / 2,
+        child: SizedBox.square(
+          dimension: AppSpacing.minTapTarget,
+          child: Center(
+            child: Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: color,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected
+                      ? context.palette.textPrimary
+                      : Colors.transparent,
+                  width: 2,
+                ),
+              ),
+              child: isSelected
+                  ? Icon(
+                      PiconsRegular.check,
+                      size: 16,
+                      color: CategoryPalette.iconOn(color),
+                    )
+                  : null,
+            ),
           ),
         ),
-        child: isSelected
-            ? const Center(
-                child: Icon(
-                  PiconsRegular.check,
-                  size: 16,
-                  color: _DesignTokens.checkColor,
-                ),
-              )
-            : null,
       ),
     );
   }
-}
-
-class _DesignTokens {
-  static const Color selectedBorder = Color(0xFFF5F7FA);
-  static const Color checkColor = Color(0xFF141315);
-  static const Color mutedColor = Color(0xFF8E8E93);
-
-  _DesignTokens._();
 }

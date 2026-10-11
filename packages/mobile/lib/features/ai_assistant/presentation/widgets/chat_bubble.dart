@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:picons/picons.dart';
 import 'package:intl/intl.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 import '../../domain/entities/chat_message.dart';
 
 class ChatBubble extends StatelessWidget {
@@ -9,34 +12,30 @@ class ChatBubble extends StatelessWidget {
 
   const ChatBubble({super.key, required this.message});
 
-  Widget _buildUserBubble() {
+  Widget _buildUserBubble(AppPalette palette) {
     return Align(
       alignment: Alignment.centerRight,
       child: Container(
         constraints: const BoxConstraints(maxWidth: 280),
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(AppSpacing.smd),
         decoration: BoxDecoration(
-          color: const Color(0xFFD1C4E9),
+          color: palette.brandFill,
           borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(14),
-            topRight: Radius.circular(14),
-            bottomLeft: Radius.circular(14),
-            bottomRight: Radius.circular(4),
+            topLeft: Radius.circular(AppSpacing.radiusControl),
+            topRight: Radius.circular(AppSpacing.radiusControl),
+            bottomLeft: Radius.circular(AppSpacing.radiusControl),
+            bottomRight: Radius.circular(AppSpacing.radiusPill),
           ),
         ),
         child: Text(
           message.content,
-          style: const TextStyle(
-            fontFamily: 'Work Sans',
-            fontSize: 13,
-            color: Color(0xFF141315),
-          ),
+          style: AppTypography.bodyMedium.copyWith(color: palette.onBrandFill),
         ),
       ),
     );
   }
 
-  Widget _buildAssistantBubble(String timeStr) {
+  Widget _buildAssistantBubble(AppPalette palette, String timeStr) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -44,31 +43,31 @@ class ChatBubble extends StatelessWidget {
           width: 35,
           height: 35,
           decoration: BoxDecoration(
-            color: const Color(0xFFD1C4E9),
-            borderRadius: BorderRadius.circular(14),
+            color: palette.brandFill,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
           ),
-          child: const Center(
+          child: Center(
             child: Icon(
               PiconsRegular.robot,
               size: 24,
-              color: Color(0xFF141315),
+              color: palette.onBrandFill,
             ),
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(AppSpacing.smd),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1C1B1D),
+                  color: palette.surface,
                   borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(14),
-                    topRight: Radius.circular(14),
-                    bottomLeft: Radius.circular(14),
-                    bottomRight: Radius.circular(4),
+                    topLeft: Radius.circular(AppSpacing.radiusControl),
+                    topRight: Radius.circular(AppSpacing.radiusControl),
+                    bottomLeft: Radius.circular(AppSpacing.radiusControl),
+                    bottomRight: Radius.circular(AppSpacing.radiusPill),
                   ),
                 ),
                 child: MarkdownBody(
@@ -76,16 +75,14 @@ class ChatBubble extends StatelessWidget {
                   selectable: false,
                   shrinkWrap: true,
                   softLineBreak: true,
-                  styleSheet: _assistantMarkdownStyleSheet(),
+                  styleSheet: _assistantMarkdownStyleSheet(palette),
                 ),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: AppSpacing.sm),
               Text(
                 timeStr,
-                style: const TextStyle(
-                  fontFamily: 'Work Sans',
-                  fontSize: 11,
-                  color: Color(0xFF8E8E93),
+                style: AppTypography.bodySmall.copyWith(
+                  color: palette.textSecondary,
                 ),
               ),
             ],
@@ -95,74 +92,41 @@ class ChatBubble extends StatelessWidget {
     );
   }
 
-  MarkdownStyleSheet _assistantMarkdownStyleSheet() {
+  MarkdownStyleSheet _assistantMarkdownStyleSheet(AppPalette palette) {
     return MarkdownStyleSheet(
-      p: const TextStyle(
-        fontFamily: 'Work Sans',
-        fontSize: 13,
-        color: Color(0xFFF5F7FA),
+      p: AppTypography.bodyMedium.copyWith(
+        color: palette.textPrimary,
         height: 1.4,
       ),
-      h1: const TextStyle(
-        fontFamily: 'Work Sans',
-        fontSize: 18,
-        fontWeight: FontWeight.w700,
-        color: Color(0xFFF5F7FA),
-      ),
-      h2: const TextStyle(
-        fontFamily: 'Work Sans',
-        fontSize: 16,
-        fontWeight: FontWeight.w700,
-        color: Color(0xFFF5F7FA),
-      ),
-      h3: const TextStyle(
-        fontFamily: 'Work Sans',
-        fontSize: 14,
-        fontWeight: FontWeight.w700,
-        color: Color(0xFFF5F7FA),
-      ),
-      strong: const TextStyle(
-        fontFamily: 'Work Sans',
-        fontSize: 13,
-        fontWeight: FontWeight.w700,
-        color: Color(0xFFF5F7FA),
-      ),
-      em: const TextStyle(
-        fontFamily: 'Work Sans',
-        fontSize: 13,
+      h1: AppTypography.titleLarge.copyWith(color: palette.textPrimary),
+      h2: AppTypography.titleMedium.copyWith(color: palette.textPrimary),
+      h3: AppTypography.labelLarge.copyWith(color: palette.textPrimary),
+      strong: AppTypography.labelLarge.copyWith(color: palette.textPrimary),
+      em: AppTypography.bodyMedium.copyWith(
         fontStyle: FontStyle.italic,
-        color: Color(0xFFF5F7FA),
+        color: palette.textPrimary,
       ),
-      code: const TextStyle(
+      code: AppTypography.bodySmall.copyWith(
         fontFamily: 'monospace',
-        fontSize: 12,
-        color: Color(0xFFF5F7FA),
+        color: palette.textPrimary,
       ),
       codeblockDecoration: BoxDecoration(
-        color: const Color(0xFF2B292C),
-        borderRadius: BorderRadius.circular(8),
+        color: palette.surfaceHigh,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
       ),
-      blockquote: const TextStyle(
-        fontFamily: 'Work Sans',
-        fontSize: 13,
-        color: Color(0xFFB8B3B6),
+      blockquote: AppTypography.bodyMedium.copyWith(
+        color: palette.textSecondary,
         height: 1.4,
       ),
-      blockquotePadding: const EdgeInsets.all(12),
+      blockquotePadding: const EdgeInsets.all(AppSpacing.smd),
       blockquoteDecoration: BoxDecoration(
-        color: const Color(0xFF2B292C),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0x408E8E93)),
+        color: palette.surfaceHigh,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
+        border: Border.all(color: palette.textSecondary.withAlpha(0x40)),
       ),
-      listBullet: const TextStyle(
-        fontFamily: 'Work Sans',
-        fontSize: 13,
-        color: Color(0xFFF5F7FA),
-      ),
-      a: const TextStyle(
-        fontFamily: 'Work Sans',
-        fontSize: 13,
-        color: Color(0xFFD1C4E9),
+      listBullet: AppTypography.bodyMedium.copyWith(color: palette.textPrimary),
+      a: AppTypography.bodyMedium.copyWith(
+        color: palette.brand,
         decoration: TextDecoration.underline,
       ),
     );
@@ -170,13 +134,14 @@ class ChatBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final isUser = message.role == ChatRole.user;
     final timeStr = DateFormat('h:mm a').format(message.timestamp);
 
     if (isUser) {
-      return _buildUserBubble();
+      return _buildUserBubble(palette);
     }
 
-    return _buildAssistantBubble(timeStr);
+    return _buildAssistantBubble(palette, timeStr);
   }
 }

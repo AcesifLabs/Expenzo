@@ -9,6 +9,7 @@ import 'package:expense_tracker/features/message_templates/domain/repositories/m
 import 'package:expense_tracker/features/message_templates/presentation/bloc/template_editor_bloc.dart';
 import 'package:expense_tracker/features/message_templates/presentation/bloc/template_editor_event.dart';
 import 'package:expense_tracker/features/message_templates/presentation/bloc/template_editor_state.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class MockSaveTemplate extends Mock implements SaveTemplate {}
 
@@ -97,7 +98,7 @@ void main() {
           isA<TemplateEditorError>().having(
             (s) => s.message,
             'message',
-            'Save failed',
+            t.common.errors.server,
           ),
         ];
 

@@ -1,0 +1,45 @@
+{
+  "@@i18n-review": "Machine-drafted Bangla. Needs native review before release.",
+  "language": {
+    "title": "ভাষা"
+  },
+  "title": "সেটিংস",
+  "currency": "মুদ্রা",
+  "appearance": "থিম",
+  "notificationsBlocked": "বাজেট সতর্কতা পেতে সিস্টেম সেটিংসে Expenzo-র নোটিফিকেশন চালু করুন।",
+  "sections": {
+    "preferences": "পছন্দ",
+    "automation": "স্বয়ংক্রিয়",
+    "support": "সহায়তা",
+    "account": "অ্যাকাউন্ট"
+  },
+  "budgetAlerts": {
+    "title": "বাজেট সতর্কতা",
+    "subtitle": "৮০% এ এবং বাজেট ছাড়ালে আমাকে জানান"
+  },
+  "autoImportSubtitle": "ব্যাংক ও পেমেন্টের মেসেজ থেকে রেকর্ড তৈরি করুন",
+  "matchingRulesSubtitle": "যেসব মেসেজ অটো-ইমপোর্ট এখনো পড়তে পারে না, সেগুলোর প্যাটার্ন",
+  "recurring": {
+    "title": "পুনরাবৃত্ত",
+    "subtitle": "প্রতি মাসে আসা বিল ও আয়"
+  },
+  "feedbackSubtitle": "সমস্যা জানান বা কোনো আইডিয়া দিন",
+  "signOut": "সাইন আউট",
+  "deleteAccount": "অ্যাকাউন্ট মুছুন",
+  "signIn": {
+    "title": "সাইন ইন",
+    "subtitle": "আপনার রেকর্ডের ব্যাকআপ ও সিঙ্ক করুন"
+  },
+  "deleteDialog": {
+    "title": "অ্যাকাউন্ট মুছুন",
+    "question": "আপনি কি নিশ্চিত যে আপনার অ্যাকাউন্ট মুছে ফেলতে চান?",
+    "listTitle": "এতে স্থায়ীভাবে মুছে যাবে:",
+    "expenses": "• আপনার সব খরচ",
+    "categories": "• আপনার সব ক্যাটাগরি",
+    "budgets": "• আপনার সব বাজেট",
+    "recurring": "• আপনার সব পুনরাবৃত্ত লেনদেন",
+    "rules": "• আপনার সব মিলানোর নিয়ম",
+    "cannotUndo": "এটি আর ফেরানো যাবে না।",
+    "confirm": "আমি বুঝেছি এবং আমার অ্যাকাউন্ট মুছতে চাই"
+  }
+}

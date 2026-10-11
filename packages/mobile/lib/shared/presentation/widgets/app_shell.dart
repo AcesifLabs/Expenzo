@@ -1,26 +1,17 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:picons/picons.dart';
+import 'package:expense_tracker/core/router/app_root_tab.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
-import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/features/dashboard/presentation/pages/dashboard_page.dart';
-import 'package:expense_tracker/features/records/presentation/bloc/record_bloc.dart';
 import 'package:expense_tracker/features/records/presentation/pages/record_list_page.dart';
 import 'package:expense_tracker/features/records/presentation/widgets/new_transaction_sheet.dart';
 import 'package:expense_tracker/features/budgets/presentation/pages/budget_list_page.dart';
-import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
-import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanner_event.dart';
-import 'package:expense_tracker/features/sms_parser/presentation/models/sms_scan_range_selection.dart';
-import 'package:expense_tracker/features/sms_parser/presentation/widgets/sms_scan_options_sheet.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
-import 'package:expense_tracker/features/categories/presentation/bloc/category_event.dart';
-import 'package:expense_tracker/shared/presentation/widgets/sms_permission_gate.dart';
-import 'package:expense_tracker/features/message_templates/presentation/pages/contact_selector_page.dart';
+import 'package:expense_tracker/features/reports/presentation/pages/reports_screen.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
 import 'lazy_indexed_stack.dart';
+import 'nav_bar_metrics.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -30,11 +21,16 @@ class AppShell extends StatefulWidget {
 }
 
 class _AppShellState extends State<AppShell> {
-  static const _labels = ['Home', 'Activity', 'Scan', 'Budgets'];
+  static List<String> get _labels => [
+    t.shell.tabs.home,
+    t.shell.tabs.activity,
+    t.shell.tabs.budgets,
+    t.shell.tabs.reports,
+  ];
 
-  int _currentIndex = 0;
   DateTime? _lastFabPress;
   final ValueNotifier<int> _homeRefreshTick = ValueNotifier(0);
+  final ValueNotifier<int> _reportsRefreshTick = ValueNotifier(0);
 
   IconData _navIcon(int i, {bool fill = false}) {
     if (fill) {
@@ -44,24 +40,24 @@ class _AppShellState extends State<AppShell> {
         case 1:
           return PiconsFill.listDashes;
         case 2:
-          return PiconsFill.chat;
-        case 3:
           return PiconsFill.wallet;
+        case 3:
+          return PiconsFill.chartBar;
         default:
           return PiconsFill.circle;
       }
     }
     switch (i) {
       case 0:
-        return PiconsLight.house;
+        return PiconsRegular.house;
       case 1:
-        return PiconsLight.listDashes;
+        return PiconsRegular.listDashes;
       case 2:
-        return PiconsLight.chat;
+        return PiconsRegular.wallet;
       case 3:
-        return PiconsLight.wallet;
+        return PiconsRegular.chartBar;
       default:
-        return PiconsLight.circle;
+        return PiconsRegular.circle;
     }
   }
 
@@ -69,18 +65,28 @@ class _AppShellState extends State<AppShell> {
     return ScaleTransition(scale: animation, child: child);
   }
 
+  // The selected tab is driven by the `tab` query on `/` so other screens
+  // can navigate straight to a root tab (see [AppRootTab]).
+  int get _currentIndex =>
+      AppRootTab.fromUri(GoRouterState.of(context).uri).index;
+
   Widget _buildBottomNav(ColorScheme colors, bool showFab) {
     const leftCount = 2;
     const rightCount = 2;
 
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.md,
+          0,
+          AppSpacing.md,
+          NavBarMetrics.bottomMargin,
+        ),
         child: Container(
-          height: 72,
+          height: NavBarMetrics.height,
           decoration: BoxDecoration(
             color: colors.surface.withAlpha(240),
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
             boxShadow: [
               BoxShadow(
                 color: Theme.of(context).colorScheme.onSurface.withAlpha(20),
@@ -91,7 +97,7 @@ class _AppShellState extends State<AppShell> {
             border: Border.all(color: colors.onSurface.withAlpha(10), width: 1),
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.smd),
             child: Row(
               children: [
                 ...List.generate(leftCount, (i) => _navItem(i, colors)),
@@ -119,9 +125,9 @@ class _AppShellState extends State<AppShell> {
     return Expanded(
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () => setState(() => _currentIndex = i),
+        onTap: () => _switchToTab(i),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 4),
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -135,13 +141,12 @@ class _AppShellState extends State<AppShell> {
                   size: 24,
                 ),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: AppSpacing.xs),
               AnimatedDefaultTextStyle(
                 duration: AppSpacing.durationFast,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: sel ? FontWeight.w600 : FontWeight.w400,
+                style: AppTypography.bodySmall.copyWith(
                   color: sel ? colors.primary : mutedColor,
+                  fontWeight: sel ? FontWeight.w600 : FontWeight.w400,
                 ),
                 child: Text(_labels[i]),
               ),
@@ -154,7 +159,11 @@ class _AppShellState extends State<AppShell> {
 
   void _switchToTab(int index) {
     if (!mounted || _currentIndex == index) return;
-    setState(() => _currentIndex = index);
+    // Reports stays alive in the tab stack; refresh it each time it is shown.
+    if (AppRootTab.values[index] == AppRootTab.reports) {
+      _reportsRefreshTick.value++;
+    }
+    context.go(AppRootTab.values[index].location);
   }
 
   void _onFabPressed(BuildContext context) async {
@@ -165,30 +174,17 @@ class _AppShellState extends State<AppShell> {
       return;
     }
     _lastFabPress = now;
-    final saved = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: const Color(0x00000000),
-      builder: (_) => MultiBlocProvider(
-        providers: [
-          BlocProvider.value(value: context.read<RecordBloc>()),
-          BlocProvider.value(value: context.read<CategoryBloc>()),
-        ],
-        child: const NewTransactionSheet(),
-      ),
-    );
-    // Reload all categories after sheet closes to restore full list
-    if (context.mounted) {
-      context.read<CategoryBloc>().add(const LoadCategories());
-      if (saved == true) {
-        _homeRefreshTick.value++;
-      }
+    final saved = await showTransactionSheet(context);
+    if (saved) {
+      _homeRefreshTick.value++;
+      _reportsRefreshTick.value++;
     }
   }
 
   @override
   void dispose() {
     _homeRefreshTick.dispose();
+    _reportsRefreshTick.dispose();
     super.dispose();
   }
 
@@ -196,7 +192,8 @@ class _AppShellState extends State<AppShell> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final keyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
-    final showFab = _currentIndex <= 1 && !keyboardOpen;
+    // One add button on every tab: it always adds a transaction.
+    final showFab = !keyboardOpen;
 
     return Scaffold(
       extendBody: true,
@@ -204,20 +201,21 @@ class _AppShellState extends State<AppShell> {
         index: _currentIndex,
         children: [
           DashboardPage(
-            onNavigateToTab: _switchToTab,
+            onNavigateToTab: (tab) => _switchToTab(tab.index),
             refreshTick: _homeRefreshTick,
           ),
           const RecordListPage(),
-          _ScanPageWithFab(),
           const BudgetListPage(),
+          ReportsScreen(isTab: true, refreshTick: _reportsRefreshTick),
         ],
       ),
       floatingActionButton: showFab
           ? FloatingActionButton(
               heroTag: null,
               onPressed: () => _onFabPressed(context),
+              tooltip: t.common.addTransaction,
               shape: const CircleBorder(),
-              child: Icon(PiconsBold.plus),
+              child: const Icon(PiconsRegular.plus, size: 28),
             )
           : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -225,126 +223,3 @@ class _AppShellState extends State<AppShell> {
     );
   }
 }
-
-class _ScanPageWithFab extends StatefulWidget {
-  const _ScanPageWithFab();
-
-  @override
-  State<_ScanPageWithFab> createState() => _ScanPageWithFabState();
-}
-
-class _ScanPageWithFabState extends State<_ScanPageWithFab>
-    with WidgetsBindingObserver {
-  bool _hasSmsPermission = false;
-  bool _keyboardOpen = false;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    unawaited(_loadInitialPermission());
-  }
-
-  Future<void> _loadInitialPermission() async {
-    final status = await Permission.sms.status;
-    if (!mounted) return;
-
-    setState(() {
-      _hasSmsPermission = status.isGranted;
-    });
-  }
-
-  void _onPermissionChanged(bool granted) {
-    if (!mounted || _hasSmsPermission == granted) {
-      return;
-    }
-    setState(() {
-      _hasSmsPermission = granted;
-    });
-  }
-
-  Future<void> _showScanOptions(BuildContext context) async {
-    final selection = await showModalBottomSheet<SmsScanRangeSelection>(
-      context: context,
-      backgroundColor: const Color(0x00000000),
-      builder: (_) => SmsScanOptionsSheet(now: DateTime.now()),
-    );
-    if (!context.mounted || selection == null) {
-      return;
-    }
-
-    _startScan(context, selection);
-  }
-
-  void _startScan(BuildContext context, SmsScanRangeSelection selection) {
-    final smsBloc = di.getIt<SmsScannerBloc>();
-    smsBloc.add(
-      StartScan(
-        startDate: selection.startDate,
-        endDate: selection.endDate,
-        filterDuplicates: true,
-      ),
-    );
-    context.push('/scan-results', extra: <String, dynamic>{'smsBloc': smsBloc});
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangeMetrics() {
-    super.didChangeMetrics();
-
-    // The outer AppShell Scaffold consumes viewInsets for its body, so reading
-    // MediaQuery here would always report 0. Read the true keyboard inset from
-    // the platform view instead.
-    final bottomInset = WidgetsBinding
-        .instance
-        .platformDispatcher
-        .views
-        .first
-        .viewInsets
-        .bottom;
-    final keyboardOpen = bottomInset > 0;
-
-    if (!mounted || _keyboardOpen == keyboardOpen) {
-      return;
-    }
-
-    setState(() {
-      _keyboardOpen = keyboardOpen;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SmsPermissionGate(
-        onPermissionChanged: _onPermissionChanged,
-        child: const ContactSelectorPage(),
-      ),
-      floatingActionButton:
-          shouldShowScanFab(
-            hasSmsPermission: _hasSmsPermission,
-            keyboardOpen: _keyboardOpen,
-          )
-          ? Padding(
-              padding: const EdgeInsets.only(bottom: 80),
-              child: FloatingActionButton(
-                heroTag: 'scan_fab',
-                onPressed: () => _showScanOptions(context),
-                child: Icon(PiconsBold.scan),
-              ),
-            )
-          : null,
-    );
-  }
-}
-
-bool shouldShowScanFab({
-  required bool hasSmsPermission,
-  required bool keyboardOpen,
-}) => hasSmsPermission && !keyboardOpen;

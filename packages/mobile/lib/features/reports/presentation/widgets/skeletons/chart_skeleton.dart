@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 import '../../../../../shared/presentation/widgets/shimmer_box.dart';
 
 class ChartSkeleton extends StatelessWidget {
   const ChartSkeleton({super.key});
 
   Widget _buildChipRow() {
-    final chip = ShimmerBox.rectangle(width: 80, height: 32, borderRadius: 16);
+    final chip = ShimmerBox.rectangle(
+      width: 80,
+      height: 32,
+      borderRadius: AppSpacing.radiusControl,
+    );
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         chip,
-        const SizedBox(width: 8),
+        const SizedBox(width: AppSpacing.sm),
         chip,
-        const SizedBox(width: 8),
+        const SizedBox(width: AppSpacing.sm),
         chip,
       ],
     );
@@ -35,12 +40,12 @@ class ChartSkeleton extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           _buildYAxis(),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: ShimmerBox.rectangle(
               width: double.infinity,
               height: double.infinity,
-              borderRadius: 12,
+              borderRadius: AppSpacing.radiusControl,
             ),
           ),
         ],
@@ -62,13 +67,13 @@ class ChartSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ShimmerBox(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           children: [
             _buildChipRow(),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
             _buildChartArea(),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             _buildXAxis(),
           ],
         ),

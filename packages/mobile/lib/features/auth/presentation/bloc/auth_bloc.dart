@@ -13,6 +13,8 @@ import '../../domain/usecases/sign_out.dart';
 import '../../domain/entities/user.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
+import 'package:expense_tracker/core/error/failure_message.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final SignInWithGoogle signInWithGoogle;
@@ -61,7 +63,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       if (user == null) {
         emit(
           AuthError(
-            result.fold((f) => f.message, (_) => 'Unknown error'),
+            result.fold((f) => failureText(f), (_) => t.common.errors.generic),
             isUserInitiated: true,
           ),
         );
@@ -71,7 +73,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       await _onAuthSuccess(user, emit);
     } catch (e, s) {
       addError(e, s);
-      emit(AuthError(e.toString(), isUserInitiated: true));
+      emit(AuthError(t.common.errors.generic, isUserInitiated: true));
     }
   }
 
@@ -83,7 +85,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     await _authRepository.stopSyncEngine();
     final result = await signOut(NoParams());
     result.fold(
-      (failure) => emit(AuthError(failure.message)),
+      (failure) => emit(AuthError(failureText(failure))),
       (_) => emit(const Unauthenticated()),
     );
   }

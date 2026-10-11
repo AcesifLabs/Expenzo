@@ -2,6 +2,10 @@ import 'package:drift/drift.dart' show QueryRow, TableInfo;
 import 'package:flutter/material.dart';
 
 import 'package:expense_tracker/core/database/app_database.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_back_button.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_page_header.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
+import 'package:picons/picons.dart';
 
 const Set<String> _internalTables = {'expense_fts'};
 const int _rowLimit = 200;
@@ -19,9 +23,9 @@ class DebugDbInspectorPage extends StatelessWidget {
     final table = tables[i];
 
     return ListTile(
-      leading: const Icon(Icons.table_chart),
+      leading: const Icon(PiconsRegular.table),
       title: Text(table.actualTableName),
-      trailing: const Icon(Icons.chevron_right),
+      trailing: const Icon(PiconsRegular.caretRight),
       onTap: () => _openTable(context, table),
     );
   }
@@ -41,10 +45,9 @@ class DebugDbInspectorPage extends StatelessWidget {
         .toList();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Database Inspector'),
-        leading: const Icon(Icons.bug_report),
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+      appBar: const AppPageHeader(
+        leading: AppBackButton(),
+        title: 'Database inspector',
       ),
       body: ListView.separated(
         itemCount: tables.length,
@@ -113,7 +116,7 @@ class _TableRowsPageState extends State<_TableRowsPage> {
 
   Widget _buildError(AsyncSnapshot<List<QueryRow>> snapshot, ThemeData theme) {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.md),
       child: Text(
         'Error: ${snapshot.error}',
         style: TextStyle(color: theme.colorScheme.error),
@@ -125,7 +128,10 @@ class _TableRowsPageState extends State<_TableRowsPage> {
     return Container(
       width: double.infinity,
       color: theme.colorScheme.surfaceContainerHigh,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
       child: Text(
         'Showing ${rows.length} rows'
         '${rows.length == _rowLimit ? ' (capped at $_rowLimit)' : ''}',
@@ -151,14 +157,19 @@ class _TableRowsPageState extends State<_TableRowsPage> {
         overflow: TextOverflow.ellipsis,
         style: theme.textTheme.bodySmall,
       ),
-      childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      childrenPadding: const EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        0,
+        AppSpacing.md,
+        AppSpacing.md,
+      ),
       children: entry.entries.map((e) => _buildFieldRow(e)).toList(),
     );
   }
 
   Widget _buildFieldRow(MapEntry<String, dynamic> field) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -180,13 +191,12 @@ class _TableRowsPageState extends State<_TableRowsPage> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.table.actualTableName),
-        leading: const Icon(Icons.bug_report),
-        backgroundColor: theme.colorScheme.surfaceContainerHighest,
+      appBar: AppPageHeader(
+        leading: const AppBackButton(),
+        title: widget.table.actualTableName,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(PiconsRegular.arrowsClockwise),
             tooltip: 'Refresh',
             onPressed: _refresh,
           ),

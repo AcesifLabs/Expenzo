@@ -1,0 +1,38 @@
+{
+  "errors": {
+    "someNotCreated": "{failed} of {total} records couldn't be created. Try again."
+  },
+  "title": "Recurring",
+  "saved": "Recurring transaction saved",
+  "empty": {
+    "title": "No recurring transactions",
+    "body": "Tap + to create your first recurring expense"
+  },
+  "amountEvery": "{amount} · {frequency}",
+  "next": "Next: {date}",
+  "processPending": "Process pending",
+  "newTooltip": "New recurring transaction",
+  "delete": {
+    "title": "Delete recurring transaction",
+    "confirm": "Are you sure you want to delete \"{name}\"?"
+  },
+  "form": {
+    "edit": "Edit recurring",
+    "amount": "Amount",
+    "name": "Name",
+    "nameHint": "What is this recurring expense for?",
+    "frequency": "Frequency",
+    "startDate": "Start date",
+    "endDate": "End date (optional)",
+    "noEndDate": "No end date",
+    "clearEndDate": "Clear end date",
+    "autoCreate": "Auto-create expenses",
+    "autoCreateDetail": "Automatically create expenses when due",
+    "active": "Active",
+    "activeDetail": "Process this recurring transaction",
+    "amountRequired": "Enter an amount",
+    "amountInvalid": "Enter a valid number",
+    "nameRequired": "Enter a name",
+    "create": "New recurring"
+  }
+}

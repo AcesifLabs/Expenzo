@@ -1,8 +1,8 @@
 import 'dart:async';
+import 'package:expense_tracker/core/constants/budget_period.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/core/logger/app_logger.dart';
@@ -12,10 +12,16 @@ import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets_wit
 import 'package:expense_tracker/features/budgets/presentation/bloc/budget_bloc.dart';
 import 'package:expense_tracker/features/budgets/presentation/bloc/budget_event.dart';
 import 'package:expense_tracker/features/budgets/presentation/bloc/budget_state.dart';
-import 'package:expense_tracker/features/budgets/presentation/constants/budget_ui_tokens.dart';
 import 'package:expense_tracker/features/budgets/presentation/helpers/budget_progress_colors.dart';
 import 'package:expense_tracker/shared/presentation/widgets/budget_transaction_list.dart';
 import 'package:expense_tracker/shared/presentation/widgets/shimmer_box.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_back_button.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
+import 'package:expense_tracker/features/records/presentation/widgets/new_transaction_sheet.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_page_header.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class BudgetDetailsPage extends StatefulWidget {
   final BudgetProgress? progress;
@@ -29,13 +35,15 @@ class BudgetDetailsPage extends StatefulWidget {
 
 class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
   BudgetProgress? _progress;
-  String _name = 'Budget Details';
+  String _name = t.budgets.details.title;
   var _isLoading = false;
   String? _errorMessage;
   var _transactionsDispatched = false;
   StreamSubscription<BudgetState>? _budgetLoadedSub;
 
   String get _budgetId => widget.progress?.budgetId ?? widget.budgetId ?? '';
+
+  AppPalette get _palette => context.palette;
 
   @override
   void initState() {
@@ -67,7 +75,7 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
         );
         setState(() {
           _isLoading = false;
-          _errorMessage = 'Unable to load budget details. Please try again.';
+          _errorMessage = t.budgets.details.loadFailed;
         });
       },
       (progressList) {
@@ -82,7 +90,7 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
         if (progress == null) {
           setState(() {
             _isLoading = false;
-            _errorMessage = 'Budget not found.';
+            _errorMessage = t.budgets.details.notFound;
           });
 
           return;
@@ -142,32 +150,8 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
     _loadBudgetData(budgetId);
   }
 
-  Widget _buildTopBar() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => context.pop(),
-            child: const Icon(
-              PiconsRegular.caretLeft,
-              size: 24,
-              color: BudgetUiTokens.textPrimary,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            _name,
-            style: const TextStyle(
-              fontFamily: 'Work Sans',
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: BudgetUiTokens.textPrimary,
-            ),
-          ),
-        ],
-      ),
-    );
+  PreferredSizeWidget _buildTopBar() {
+    return AppPageHeader(leading: const AppBackButton(), title: _name);
   }
 
   Widget _buildAmountRow(BudgetProgress progress) {
@@ -179,32 +163,30 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
         RichText(
           text: TextSpan(
             text: fmt.format(progress.spentAmount),
-            style: const TextStyle(
-              fontFamily: 'Work Sans',
-              fontSize: 24,
-              fontWeight: FontWeight.w700,
-              color: BudgetUiTokens.textPrimary,
+            style: AppTypography.headlineSmall.copyWith(
+              color: _palette.textPrimary,
             ),
             children: [
               TextSpan(
-                text: ' / ${fmt.format(progress.effectiveAmount)}',
-                style: const TextStyle(
-                  fontFamily: 'Work Sans',
-                  fontSize: 24,
-                  fontWeight: FontWeight.normal,
-                  color: BudgetUiTokens.textSecondary,
+                text: t.budgets.details.ofTotal(
+                  total: fmt.format(progress.effectiveAmount),
+                ),
+                style: AppTypography.headlineSmall.copyWith(
+                  color: _palette.textSecondary,
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: AppSpacing.xs),
         Text(
-          '${progress.period.displayName} budget',
-          style: const TextStyle(
-            fontFamily: 'Work Sans',
-            fontSize: 13,
-            color: BudgetUiTokens.textSecondary,
+          switch (progress.period) {
+            BudgetPeriod.weekly => t.budgets.details.periodBudget.weekly,
+            BudgetPeriod.monthly => t.budgets.details.periodBudget.monthly,
+            BudgetPeriod.yearly => t.budgets.details.periodBudget.yearly,
+          },
+          style: AppTypography.bodyMedium.copyWith(
+            color: _palette.textSecondary,
           ),
         ),
       ],
@@ -213,12 +195,12 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
 
   Widget _buildProgressBar(double percentage, Color progressColor) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(6),
+      borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
       child: SizedBox(
         height: 12,
         child: LinearProgressIndicator(
           value: percentage / 100,
-          backgroundColor: BudgetUiTokens.progressTrack,
+          backgroundColor: _palette.progressTrack,
           color: progressColor,
         ),
       ),
@@ -230,22 +212,17 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          '${progress.percentage.toStringAsFixed(0)}% used',
-          style: const TextStyle(
-            fontFamily: 'Work Sans',
-            fontSize: 13,
-            color: BudgetUiTokens.textSecondary,
+          t.budgets.details.used(
+            percent: progress.percentage.toStringAsFixed(0),
+          ),
+          style: AppTypography.bodyMedium.copyWith(
+            color: _palette.textSecondary,
           ),
         ),
         if (progress.isOverBudget)
-          const Text(
-            'OVER BUDGET',
-            style: TextStyle(
-              fontFamily: 'Work Sans',
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: BudgetUiTokens.error,
-            ),
+          Text(
+            t.budgets.details.over,
+            style: AppTypography.labelLarge.copyWith(color: _palette.error),
           ),
       ],
     );
@@ -256,22 +233,22 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
     if (progress == null) return const SizedBox.shrink();
 
     final percentage = progress.percentage.clamp(0.0, 100.0);
-    final progressColor = budgetProgressColor(progress.percentage);
+    final progressColor = budgetProgressColor(_palette, progress.percentage);
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: BudgetUiTokens.surface,
-        borderRadius: BorderRadius.circular(24),
+        color: _palette.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildAmountRow(progress),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.lg),
           _buildProgressBar(percentage, progressColor),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.smd),
           _buildStatusRow(progress),
         ],
       ),
@@ -283,58 +260,84 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
+          Icon(
             PiconsRegular.warningCircle,
             size: 40,
-            color: BudgetUiTokens.textSecondary,
+            color: _palette.textSecondary,
           ),
-          const SizedBox(height: 12),
-          const Text(
-            'Unable to load transactions',
-            style: TextStyle(
-              fontFamily: 'Work Sans',
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: BudgetUiTokens.textPrimary,
+          const SizedBox(height: AppSpacing.smd),
+          Text(
+            t.budgets.details.transactionsFailed,
+            style: AppTypography.titleMedium.copyWith(
+              color: _palette.textPrimary,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             message,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontFamily: 'Work Sans',
-              fontSize: 13,
-              color: BudgetUiTokens.textSecondary,
+            style: AppTypography.bodyMedium.copyWith(
+              color: _palette.textSecondary,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           TextButton(
             onPressed: _onRetryTransactions,
-            child: const Text('Retry'),
+            child: Text(t.common.tryAgain),
           ),
         ],
       ),
     );
   }
 
+  Widget _buildNoTransactions() {
+    final textTheme = Theme.of(context).textTheme;
+
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(t.budgets.details.noExpenses, style: textTheme.titleSmall),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            t.budgets.details.noExpensesBody,
+            textAlign: TextAlign.center,
+            style: textTheme.bodyMedium?.copyWith(
+              color: _palette.textSecondary,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          ElevatedButton.icon(
+            icon: const Icon(PiconsRegular.plus, size: 18),
+            label: Text(t.common.addExpense),
+            onPressed: _addExpense,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _addExpense() async {
+    final saved = await showTransactionSheet(context, budgetId: _budgetId);
+    if (!saved || !mounted) return;
+    // Refresh the totals above and the list below.
+    _onRetryBudget(_budgetId);
+  }
+
   Widget _buildTransactionsSection() {
     return Expanded(
       child: Padding(
-        padding: const EdgeInsets.only(top: 24),
+        padding: const EdgeInsets.only(top: AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Transactions',
-              style: TextStyle(
-                fontFamily: 'Work Sans',
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: BudgetUiTokens.textPrimary,
+            Text(
+              t.budgets.details.transactions,
+              style: AppTypography.titleMedium.copyWith(
+                color: _palette.textPrimary,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.smd),
             Expanded(
               child: BlocBuilder<BudgetBloc, BudgetState>(
                 builder: (context, state) {
@@ -350,6 +353,10 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
                   final error = state.transactionsError;
                   if (error != null) {
                     return _buildTransactionsError(error);
+                  }
+
+                  if (state.selectedBudgetTransactions.isEmpty) {
+                    return _buildNoTransactions();
                   }
 
                   return BudgetTransactionList(
@@ -368,49 +375,49 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
     final budgetId = widget.budgetId ?? '';
 
     return Scaffold(
-      backgroundColor: BudgetUiTokens.bg,
+      backgroundColor: _palette.bg,
+      appBar: _buildTopBar(),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.md,
+            AppSpacing.lg,
+            AppSpacing.md,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildTopBar(),
               const Spacer(),
               Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
+                    Icon(
                       PiconsRegular.warningCircle,
                       size: 48,
-                      color: BudgetUiTokens.textSecondary,
+                      color: _palette.textSecondary,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.md),
                     Text(
-                      _errorMessage ?? 'Unable to load budget',
-                      style: const TextStyle(
-                        fontFamily: 'Work Sans',
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: BudgetUiTokens.textPrimary,
+                      _errorMessage ?? t.budgets.details.unableToLoad,
+                      style: AppTypography.titleLarge.copyWith(
+                        color: _palette.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Budget details could not be loaded.',
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      t.budgets.details.unableToLoadBody,
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: 'Work Sans',
-                        fontSize: 14,
-                        color: BudgetUiTokens.textSecondary,
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: _palette.textSecondary,
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.lg),
                     if (budgetId.isNotEmpty)
                       ElevatedButton(
                         onPressed: () => _onRetryBudget(budgetId),
-                        child: const Text('Retry'),
+                        child: Text(t.common.tryAgain),
                       ),
                   ],
                 ),
@@ -425,18 +432,23 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
 
   Widget _buildLoadingSkeleton() {
     return Scaffold(
-      backgroundColor: BudgetUiTokens.bg,
+      backgroundColor: _palette.bg,
+      appBar: _buildTopBar(),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.md,
+            AppSpacing.lg,
+            AppSpacing.md,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildTopBar(),
               ShimmerBox.rectangle(
                 width: double.infinity,
                 height: 180,
-                borderRadius: 24,
+                borderRadius: AppSpacing.radiusCard,
               ),
             ],
           ),
@@ -462,17 +474,19 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
     }
 
     return Scaffold(
-      backgroundColor: BudgetUiTokens.bg,
+      backgroundColor: _palette.bg,
+      appBar: _buildTopBar(),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.md,
+            AppSpacing.lg,
+            AppSpacing.md,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildTopBar(),
-              _buildSummaryCard(),
-              _buildTransactionsSection(),
-            ],
+            children: [_buildSummaryCard(), _buildTransactionsSection()],
           ),
         ),
       ),

@@ -45,11 +45,11 @@ abstract class RecordLocalDatasource {
   /// Throws: [CacheException] if a database error occurs.
   Future<double> getTotalSpending(DateTime start, DateTime end);
 
+  /// Expense spend per budget over each budget's own [start, end) period.
+  ///
   /// Throws: [CacheException] if a database error occurs.
-  Future<double> getBudgetSpending(
-    String budgetId,
-    DateTime start,
-    DateTime end,
+  Future<Map<String, double>> getSpendingForBudgets(
+    Map<String, ({DateTime start, DateTime end})> periods,
   );
   Future<List<rec.Record>> getRecordsByDateRangeOnly(
     DateTime start,
@@ -277,13 +277,11 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
 
   /// Throws: [CacheException] if a database error occurs.
   @override
-  Future<double> getBudgetSpending(
-    String budgetId,
-    DateTime start,
-    DateTime end,
+  Future<Map<String, double>> getSpendingForBudgets(
+    Map<String, ({DateTime start, DateTime end})> periods,
   ) async {
     try {
-      return await recordDao.getBudgetSpending(budgetId, start, end);
+      return await recordDao.getSpendingForBudgets(periods);
     } catch (e, s) {
       appLogger.error('Record local datasource error', e, s);
       throw CacheException(message: e.toString());

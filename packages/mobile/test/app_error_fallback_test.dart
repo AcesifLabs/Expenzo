@@ -1,6 +1,8 @@
 import 'package:expense_tracker/shared/presentation/widgets/app_error_fallback.dart';
 import 'package:flutter/material.dart';
+import 'package:picons/picons.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'support/pump_localized.dart';
 
 class _TestBoomException implements Exception {
   const _TestBoomException(this.message);
@@ -12,7 +14,7 @@ void main() {
     const secret = 'BOOM_TEST_MARKER_leaked_to_ui';
 
     Widget wrap(Widget child) {
-      return MaterialApp(home: child);
+      return translated(MaterialApp(home: child));
     }
 
     testWidgets('renders without throwing in all four contexts', (
@@ -94,17 +96,15 @@ void main() {
         ),
       );
 
-      await tester.tap(find.text('Try Again'));
-      await tester.tap(find.text('Close App'));
+      await tester.tap(find.text('Try again'));
+      await tester.tap(find.text('Close app'));
       await tester.pump();
 
       expect(retry, 1);
       expect(restart, 1);
     });
 
-    testWidgets('hides Send Feedback when feedbackBuilder is not provided', (
-      tester,
-    ) async {
+    testWidgets('hides Send feedback when no handler is given', (tester) async {
       await tester.pumpWidget(
         wrap(
           AppErrorFallback(
@@ -115,12 +115,11 @@ void main() {
           ),
         ),
       );
-      expect(find.text('Send Feedback'), findsNothing);
+      expect(find.text('Send feedback'), findsNothing);
     });
 
-    testWidgets('shows Send Feedback when feedbackBuilder is provided', (
-      tester,
-    ) async {
+    testWidgets('Send feedback calls the handler', (tester) async {
+      var sent = 0;
       await tester.pumpWidget(
         wrap(
           AppErrorFallback(
@@ -128,11 +127,12 @@ void main() {
             referenceId: 'ABC123',
             onRetry: () {},
             onRestart: () {},
-            feedbackBuilder: (_) => const Scaffold(body: Text('FEEDBACK')),
+            onSendFeedback: () => sent++,
           ),
         ),
       );
-      expect(find.text('Send Feedback'), findsOneWidget);
+      await tester.tap(find.text('Send feedback'));
+      expect(sent, 1);
     });
 
     testWidgets('hides Close App when callback is not provided', (
@@ -147,7 +147,7 @@ void main() {
           ),
         ),
       );
-      expect(find.text('Close App'), findsNothing);
+      expect(find.text('Close app'), findsNothing);
     });
 
     testWidgets(
@@ -164,13 +164,13 @@ void main() {
         );
 
         expect(find.text('_TestBoomException'), findsNothing);
-        expect(find.byIcon(Icons.expand_more), findsOneWidget);
+        expect(find.byIcon(PiconsRegular.caretDown), findsOneWidget);
 
-        await tester.tap(find.byIcon(Icons.expand_more));
+        await tester.tap(find.byIcon(PiconsRegular.caretDown));
         await tester.pump();
 
         expect(find.text('_TestBoomException'), findsOneWidget);
-        expect(find.byIcon(Icons.expand_less), findsOneWidget);
+        expect(find.byIcon(PiconsRegular.caretUp), findsOneWidget);
 
         expect(find.textContaining(secret), findsNothing);
       },
@@ -190,7 +190,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byIcon(Icons.expand_more));
+      await tester.tap(find.byIcon(PiconsRegular.caretDown));
       await tester.pump();
 
       expect(find.text('FAKE'), findsOneWidget);

@@ -1,7 +1,8 @@
+import 'dart:async';
+
 import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/constants/app_constants.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
@@ -9,15 +10,21 @@ import 'package:expense_tracker/features/categories/presentation/bloc/category_b
 import 'package:expense_tracker/features/categories/presentation/bloc/category_event.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_state.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
+import 'package:expense_tracker/shared/presentation/widgets/nav_bar_metrics.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_search_bar.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_empty_state.dart';
 import 'package:expense_tracker/shared/presentation/widgets/shimmer_box.dart';
+import 'package:expense_tracker/features/records/presentation/widgets/new_transaction_sheet.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 import '../../domain/entities/record.dart';
 import '../bloc/record_bloc.dart';
 import '../bloc/record_event.dart';
 import '../bloc/record_state.dart';
+import '../helpers/record_day_groups.dart';
 import '../widgets/record_card.dart';
 import '../widgets/record_filter_modal.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
+import 'package:expense_tracker/features/categories/presentation/helpers/category_display_name.dart';
 
 class RecordListPage extends StatelessWidget {
   const RecordListPage({super.key});
@@ -79,7 +86,7 @@ class _RecordListViewState extends State<RecordListView> {
     if (matched.isEmpty) return const CategoryInfo();
 
     return CategoryInfo(
-      name: matched.first.name,
+      name: matched.first.displayName,
       emoji: matched.first.emoji,
       color: matched.first.color,
     );
@@ -102,46 +109,93 @@ class _RecordListViewState extends State<RecordListView> {
         final isLoadingMore = listState.$3;
 
         if (records.isEmpty) {
-          return AppEmptyState(
-            icon: PiconsRegular.list,
-            message: 'No transactions found',
-          );
+          final filtered = _searchCtrl.text.isNotEmpty || _hasFilters(state);
+
+          return filtered
+              ? AppEmptyState(
+                  icon: PiconsRegular.funnel,
+                  message: t.records.list.noMatches,
+                )
+              : AppEmptyState(
+                  icon: PiconsRegular.receipt,
+                  message: t.records.list.empty,
+                  actionLabel: t.common.addExpense,
+                  onAction: () => _navigateToForm(context, null),
+                );
         }
 
         final catState = context.watch<CategoryBloc>().state;
 
         return RefreshIndicator(
           onRefresh: () async => _onRefresh(),
-          child: ListView.separated(
+          child: CustomScrollView(
             controller: _scrollController,
-            padding: const EdgeInsets.fromLTRB(24, 4, 24, 100),
-            itemCount: records.length + (hasMore ? 1 : 0),
-            separatorBuilder: (_, _) => const SizedBox(height: 12),
-            itemBuilder: (context, index) {
-              if (index >= records.length) {
-                return _buildLoadMore(isLoadingMore);
-              }
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              for (final group in groupRecordsByDay(records))
+                SliverMainAxisGroup(
+                  slivers: [
+                    SliverPersistentHeader(
+                      pinned: true,
+                      delegate: _DayHeaderDelegate(dayHeaderLabel(group.day)),
+                    ),
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.lg,
+                      ),
+                      sliver: SliverList.separated(
+                        itemCount: group.records.length,
+                        separatorBuilder: (_, _) =>
+                            const SizedBox(height: AppSpacing.sm),
+                        itemBuilder: (context, index) {
+                          final record = group.records[index];
 
-              final record = records[index];
-
-              return RecordCard(
-                record: record,
-                onTap: () => _navigateToForm(context, record),
-                onDelete: () => _handleDelete(context, record),
-                categoryInfo: _resolveCategory(record, catState),
-              );
-            },
+                          return RecordCard(
+                            record: record,
+                            onTap: () => _navigateToForm(context, record),
+                            onDelete: () => _handleDelete(context, record),
+                            categoryInfo: _resolveCategory(record, catState),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              if (hasMore)
+                SliverToBoxAdapter(child: _buildLoadMore(isLoadingMore)),
+              // Room for the last record above the floating nav bar.
+              SliverToBoxAdapter(
+                child: SizedBox(height: NavBarMetrics.clearance(context)),
+              ),
+            ],
           ),
         );
       },
     );
   }
 
+  bool _hasFilters(RecordState state) => switch (state) {
+    RecordLoaded(
+      :final filterStartDate,
+      :final filterEndDate,
+      :final filterCategoryIds,
+      :final filterRecordType,
+    ) =>
+      filterStartDate != null ||
+          filterEndDate != null ||
+          (filterCategoryIds?.isNotEmpty ?? false) ||
+          filterRecordType != null,
+    _ => false,
+  };
+
   Widget _buildShimmerList() {
     return ShimmerList(
       itemCount: 6,
       itemBuilder: (context, index) => AppCard(
-        margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
+        margin: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.sm,
+        ),
         child: ListTile(
           leading: ShimmerBox.circle(size: 40),
           title: ShimmerBox.textLine(width: 150),
@@ -165,12 +219,12 @@ class _RecordListViewState extends State<RecordListView> {
 
   Widget _buildLoadMore(bool isLoadingMore) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.md),
       alignment: Alignment.center,
       child: isLoadingMore
           ? const CircularProgressIndicator()
           : Text(
-              'Scroll for more...',
+              t.records.list.scrollForMore,
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onSurface.withAlpha(100),
               ),
@@ -179,16 +233,7 @@ class _RecordListViewState extends State<RecordListView> {
   }
 
   void _navigateToForm(BuildContext context, Record? record) {
-    final extra = <String, dynamic>{
-      'recordBloc': context.read<RecordBloc>(),
-      'categoryBloc': context.read<CategoryBloc>(),
-    };
-    final recordId = record?.id;
-    if (recordId != null) {
-      context.push('/records/$recordId/edit', extra: extra);
-    } else {
-      context.push('/records/new', extra: extra);
-    }
+    unawaited(showTransactionSheet(context, record: record));
   }
 
   void _onUndoDelete(Record record) {
@@ -209,10 +254,10 @@ class _RecordListViewState extends State<RecordListView> {
       ..clearSnackBars()
       ..showSnackBar(
         SnackBar(
-          content: const Text('Record deleted'),
+          content: Text(t.records.list.deleted),
           duration: AppConstants.undoSnackbarDuration,
           action: SnackBarAction(
-            label: 'Undo',
+            label: t.common.undo,
             onPressed: () => _onUndoDelete(record),
           ),
         ),
@@ -290,22 +335,26 @@ class _RecordListViewState extends State<RecordListView> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      title: 'Activity',
-      subtitle: 'Transaction history',
+      title: t.records.list.title,
+      subtitle: t.records.list.subtitle,
       actions: [
-        IconButton(
-          icon: Icon(PiconsLight.funnel),
-          color: Theme.of(context).colorScheme.onSurface.withAlpha(160),
+        TextButton.icon(
           onPressed: () => _showFilterModal(context),
+          icon: const Icon(PiconsRegular.funnel, size: 20),
+          label: Text(t.records.list.filter),
+          style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
         ),
       ],
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.sm,
+            ),
             child: AppSearchBar(
               controller: _searchCtrl,
-              hintText: 'Search transactions...',
+              hintText: t.records.list.search,
               onChanged: (v) =>
                   context.read<RecordBloc>().add(SearchRecords(v)),
             ),
@@ -314,6 +363,8 @@ class _RecordListViewState extends State<RecordListView> {
             child: GestureDetector(
               onTap: () => FocusScope.of(context).unfocus(),
               behavior: HitTestBehavior.translucent,
+              // Dismissing the keyboard isn't an action a screen reader needs.
+              excludeFromSemantics: true,
               child: Scrollbar(
                 controller: _scrollController,
                 child: _buildRecordsList(),
@@ -324,4 +375,43 @@ class _RecordListViewState extends State<RecordListView> {
       ),
     );
   }
+}
+
+/// A pinned date heading ("Today", "Mon, 6 Oct") above each day's records.
+class _DayHeaderDelegate extends SliverPersistentHeaderDelegate {
+  static const _height = 40.0;
+
+  final String label;
+
+  const _DayHeaderDelegate(this.label);
+
+  @override
+  double get minExtent => _height;
+
+  @override
+  double get maxExtent => _height;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlaps) {
+    final theme = Theme.of(context);
+
+    return Container(
+      color: theme.scaffoldBackgroundColor,
+      alignment: Alignment.centerLeft,
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      child: Semantics(
+        header: true,
+        child: Text(
+          label,
+          style: theme.textTheme.labelLarge?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  bool shouldRebuild(_DayHeaderDelegate oldDelegate) =>
+      oldDelegate.label != label;
 }

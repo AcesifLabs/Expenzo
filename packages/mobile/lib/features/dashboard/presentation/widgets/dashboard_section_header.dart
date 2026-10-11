@@ -1,47 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class DashboardSectionHeader extends StatelessWidget {
   final String title;
-  final String trailingLabel;
+
+  /// Defaults to "See all" in the app language.
+  final String? trailingLabel;
   final VoidCallback? onTrailingTap;
 
   const DashboardSectionHeader({
     super.key,
     required this.title,
-    this.trailingLabel = 'See all',
+    this.trailingLabel,
     this.onTrailingTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
+    final onTrailingTap = this.onTrailingTap;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: colors.onSurface,
-          ),
+        Flexible(
+          child: Text(title, style: Theme.of(context).textTheme.titleLarge),
         ),
-        GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: onTrailingTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Text(
-              trailingLabel,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: colors.primary,
-              ),
-            ),
+        if (onTrailingTap != null)
+          TextButton(
+            onPressed: onTrailingTap,
+            style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
+            child: Text(trailingLabel ?? t.dashboard.sections.seeAll),
           ),
-        ),
       ],
     );
   }

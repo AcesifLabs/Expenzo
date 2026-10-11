@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:expense_tracker/core/theme/app_colors.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class DeleteAccountDialog extends StatefulWidget {
   final VoidCallback onConfirm;
@@ -29,47 +30,45 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Delete Account'),
+      title: Text(t.settings.deleteDialog.title),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Are you absolutely sure you want to delete your account?',
+          Text(t.settings.deleteDialog.question),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            t.settings.deleteDialog.listTitle,
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 16),
-          const Text(
-            'This will permanently delete:',
-            style: TextStyle(fontWeight: FontWeight.bold),
+          const SizedBox(height: AppSpacing.sm),
+          Text(t.settings.deleteDialog.expenses),
+          Text(t.settings.deleteDialog.categories),
+          Text(t.settings.deleteDialog.budgets),
+          Text(t.settings.deleteDialog.recurring),
+          Text(t.settings.deleteDialog.rules),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            t.settings.deleteDialog.cannotUndo,
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
           ),
-          const SizedBox(height: 8),
-          const Text('• All your expenses'),
-          const Text('• All your categories'),
-          const Text('• All your budgets'),
-          const Text('• All your recurring transactions'),
-          const Text('• All your parsing rules'),
-          const SizedBox(height: 16),
-          const Text(
-            'This action cannot be undone.',
-            style: TextStyle(color: AppColors.error),
-          ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           Row(
             children: [
               Checkbox(value: _confirmed, onChanged: _onCheckboxChanged),
-              const Expanded(
-                child: Text('I understand and want to delete my account'),
-              ),
+              Expanded(child: Text(t.settings.deleteDialog.confirm)),
             ],
           ),
         ],
       ),
       actions: [
-        TextButton(onPressed: _onCancel, child: const Text('Cancel')),
+        TextButton(onPressed: _onCancel, child: Text(t.common.cancel)),
         TextButton(
           onPressed: _confirmed ? _onDelete : null,
-          style: TextButton.styleFrom(foregroundColor: AppColors.error),
-          child: const Text('Delete'),
+          style: TextButton.styleFrom(
+            foregroundColor: Theme.of(context).colorScheme.error,
+          ),
+          child: Text(t.common.delete),
         ),
       ],
     );

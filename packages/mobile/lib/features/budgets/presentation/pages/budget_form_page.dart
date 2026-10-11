@@ -1,21 +1,27 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/shared/services/notification_permission.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/constants/budget_period.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
-import 'package:expense_tracker/core/error/usecase.dart';
 import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
-import 'package:expense_tracker/features/settings/domain/usecases/get_settings.dart';
 import 'package:expense_tracker/shared/presentation/widgets/shimmer_box.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_back_button.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_page_header.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 import '../../domain/entities/budget.dart';
 import '../../domain/repositories/budget_repository.dart';
 import '../bloc/budget_bloc.dart';
 import '../bloc/budget_event.dart';
 import '../bloc/budget_state.dart';
-import '../constants/budget_ui_tokens.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class BudgetFormPage extends StatefulWidget {
   final Budget? budget;
@@ -26,6 +32,13 @@ class BudgetFormPage extends StatefulWidget {
   @override
   State<BudgetFormPage> createState() => _BudgetFormPageState();
 }
+
+const _inputRadius = BorderRadius.all(
+  Radius.circular(AppSpacing.radiusControl),
+);
+const _buttonRadius = BorderRadius.all(
+  Radius.circular(AppSpacing.radiusControl),
+);
 
 class _BudgetFormPageState extends State<BudgetFormPage> {
   final _amountController = TextEditingController();
@@ -38,41 +51,28 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
   var _amountFocused = false;
   String? _amountError;
   String? _nameError;
-  String _currencySymbol = CurrencyFormatter.getFormatter(
-    decimalDigits: 0,
-  ).currencySymbol;
 
   bool get isEditing => widget.budget != null || widget.budgetId != null;
 
-  Color get _amountBorderColor {
-    if (_amountError != null) return BudgetUiTokens.error;
-    if (_amountFocused) return BudgetUiTokens.primary;
+  AppPalette get _palette => context.palette;
 
-    return BudgetUiTokens.inputStroke;
+  Color get _amountBorderColor {
+    if (_amountError != null) return _palette.error;
+    if (_amountFocused) return _palette.brand;
+
+    return _palette.inputStroke;
   }
 
   @override
   void initState() {
     super.initState();
     _amountFocus.addListener(_onAmountFocusChange);
-    _loadCurrencySymbol();
     final budgetId = widget.budgetId;
     if (budgetId != null) {
       _isLoading = true;
       _loadBudget(budgetId);
     } else {
       _initFromBudget(widget.budget);
-    }
-  }
-
-  Future<void> _loadCurrencySymbol() async {
-    final getSettings = di.getIt<GetSettings>();
-    final result = await getSettings(NoParams());
-    if (!mounted) return;
-    // On failure, keep the default currency symbol.
-    final settings = result.fold((_) => null, (settings) => settings);
-    if (settings != null) {
-      setState(() => _currencySymbol = settings.currencySymbol);
     }
   }
 
@@ -100,7 +100,7 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
 
   void _initFromBudget(Budget? budget) {
     if (budget != null) {
-      _amountController.text = budget.amount.toString();
+      _amountController.text = CurrencyFormatter.formatInput(budget.amount);
       _nameController.text = budget.name;
       _selectedPeriod = budget.period;
       _rolloverEnabled = budget.rolloverEnabled;
@@ -110,6 +110,7 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
   void _onBudgetOperation(BuildContext context, BudgetState state) {
     switch (state) {
       case BudgetOperationSuccess():
+        if (!isEditing) unawaited(requestBudgetAlertPermissionIfNeeded());
         context.pop(true);
       case BudgetError(:final message):
         ScaffoldMessenger.of(context)
@@ -127,16 +128,16 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
 
     final amount = _amountController.text;
     if (amount.isEmpty) {
-      amountError = 'Please enter an amount';
+      amountError = t.budgets.form.amountRequired;
       valid = false;
     } else if (double.tryParse(amount) == null) {
-      amountError = 'Please enter a valid number';
+      amountError = t.budgets.form.amountInvalid;
       valid = false;
     }
 
     final name = _nameController.text.trim();
     if (name.isEmpty) {
-      nameError = 'Please enter a name';
+      nameError = t.budgets.form.nameRequired;
       valid = false;
     }
 
@@ -192,58 +193,25 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
   }
 
   // -- TopBar --
-  Widget _buildTopBar(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => context.pop(),
-            child: const Icon(
-              PiconsRegular.caretLeft,
-              size: 24,
-              color: BudgetUiTokens.textPrimary,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            title,
-            style: const TextStyle(
-              fontFamily: 'Work Sans',
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: BudgetUiTokens.textPrimary,
-            ),
-          ),
-        ],
-      ),
-    );
+  PreferredSizeWidget _buildTopBar(String title) {
+    return AppPageHeader(leading: const AppBackButton(), title: title);
   }
 
   // -- Field label --
   Widget _buildLabel(String text) {
     return Text(
       text,
-      style: const TextStyle(
-        fontFamily: 'Work Sans',
-        fontSize: 12,
-        fontWeight: FontWeight.w500,
-        color: BudgetUiTokens.textSecondary,
-      ),
+      style: AppTypography.bodySmall.copyWith(color: _palette.textSecondary),
     );
   }
 
   // -- Error text --
   Widget _buildErrorText(String error) {
     return Padding(
-      padding: const EdgeInsets.only(top: 6),
+      padding: const EdgeInsets.only(top: AppSpacing.sm),
       child: Text(
         error,
-        style: const TextStyle(
-          fontFamily: 'Work Sans',
-          fontSize: 12,
-          color: BudgetUiTokens.error,
-        ),
+        style: AppTypography.bodySmall.copyWith(color: _palette.error),
       ),
     );
   }
@@ -251,41 +219,38 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
   // -- Amount Field --
   Widget _buildAmountField() {
     return Padding(
-      padding: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.only(top: AppSpacing.smd),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildLabel('Budget Amount'),
-          const SizedBox(height: 6),
+          _buildLabel(t.budgets.form.amount),
+          const SizedBox(height: AppSpacing.sm),
           Container(
             height: 52,
             decoration: BoxDecoration(
-              color: BudgetUiTokens.inputFill,
-              borderRadius: BudgetUiTokens.inputRadius,
+              color: _palette.inputFill,
+              borderRadius: _inputRadius,
               border: Border.all(
                 color: _amountBorderColor,
                 width: _amountFocused || _amountError != null ? 1.5 : 1,
               ),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
             alignment: Alignment.centerLeft,
             child: Row(
               children: [
                 Text(
-                  _currencySymbol,
-                  style: const TextStyle(
-                    fontFamily: 'Work Sans',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: BudgetUiTokens.textSecondary,
+                  CurrencyFormatter.current.value.symbol.trim(),
+                  style: AppTypography.bodyLarge.copyWith(
+                    color: _palette.textSecondary,
                   ),
                 ),
-                const SizedBox(width: 6),
+                const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: TextFormField(
                     controller: _amountController,
                     focusNode: _amountFocus,
-                    cursorColor: BudgetUiTokens.primary,
+                    cursorColor: _palette.brand,
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
@@ -294,15 +259,12 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
                         RegExp(r'^\d*\.?\d{0,2}'),
                       ),
                     ],
-                    style: const TextStyle(
-                      fontFamily: 'Work Sans',
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: BudgetUiTokens.textPrimary,
+                    style: AppTypography.bodyLarge.copyWith(
+                      color: _palette.textPrimary,
                     ),
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       hintText: '0.00',
-                      hintStyle: TextStyle(color: BudgetUiTokens.textSecondary),
+                      hintStyle: TextStyle(color: _palette.textSecondary),
                       border: InputBorder.none,
                       enabledBorder: InputBorder.none,
                       focusedBorder: InputBorder.none,
@@ -325,38 +287,35 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
   // -- Name Field --
   Widget _buildNameField() {
     return Padding(
-      padding: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.only(top: AppSpacing.smd),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildLabel('Budget Name'),
-          const SizedBox(height: 6),
+          _buildLabel(t.budgets.form.name),
+          const SizedBox(height: AppSpacing.sm),
           Container(
             height: 52,
             decoration: BoxDecoration(
-              color: BudgetUiTokens.inputFill,
-              borderRadius: BudgetUiTokens.inputRadius,
+              color: _palette.inputFill,
+              borderRadius: _inputRadius,
               border: Border.all(
                 color: _nameError != null
-                    ? BudgetUiTokens.error
-                    : BudgetUiTokens.inputStroke,
+                    ? _palette.error
+                    : _palette.inputStroke,
                 width: _nameError != null ? 1.5 : 1,
               ),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
             alignment: Alignment.centerLeft,
             child: TextFormField(
               controller: _nameController,
-              cursorColor: BudgetUiTokens.primary,
-              style: const TextStyle(
-                fontFamily: 'Work Sans',
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: BudgetUiTokens.textPrimary,
+              cursorColor: _palette.brand,
+              style: AppTypography.bodyLarge.copyWith(
+                color: _palette.textPrimary,
               ),
-              decoration: const InputDecoration(
-                hintText: 'e.g. Food & Drinks',
-                hintStyle: TextStyle(color: BudgetUiTokens.textSecondary),
+              decoration: InputDecoration(
+                hintText: t.budgets.form.nameHint,
+                hintStyle: TextStyle(color: _palette.textSecondary),
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
@@ -376,29 +335,29 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
   // -- Period Field --
   Widget _buildPeriodField() {
     return Padding(
-      padding: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.only(top: AppSpacing.smd),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildLabel('Period'),
-          const SizedBox(height: 6),
+          _buildLabel(t.budgets.form.period),
+          const SizedBox(height: AppSpacing.sm),
           Container(
             height: 52,
             decoration: BoxDecoration(
-              color: BudgetUiTokens.inputFill,
-              borderRadius: BudgetUiTokens.inputRadius,
-              border: Border.all(color: BudgetUiTokens.inputStroke, width: 1),
+              color: _palette.inputFill,
+              borderRadius: _inputRadius,
+              border: Border.all(color: _palette.inputStroke, width: 1),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
             alignment: Alignment.centerLeft,
             child: DropdownButtonFormField<BudgetPeriod>(
               initialValue: _selectedPeriod,
-              icon: const Icon(
+              icon: Icon(
                 PiconsRegular.caretDown,
                 size: 16,
-                color: BudgetUiTokens.textSecondary,
+                color: _palette.textSecondary,
               ),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
@@ -406,38 +365,28 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
                 contentPadding: EdgeInsets.zero,
                 isDense: true,
                 prefixIcon: Padding(
-                  padding: EdgeInsets.only(right: 8),
+                  padding: const EdgeInsets.only(right: AppSpacing.sm),
                   child: Icon(
                     PiconsRegular.calendar,
                     size: 18,
-                    color: BudgetUiTokens.primary,
+                    color: _palette.brand,
                   ),
                 ),
-                prefixIconConstraints: BoxConstraints(
+                prefixIconConstraints: const BoxConstraints(
                   minWidth: 18,
                   minHeight: 18,
                 ),
               ),
-              dropdownColor: BudgetUiTokens.inputFill,
-              style: const TextStyle(
-                fontFamily: 'Work Sans',
-                fontSize: 15,
-                fontWeight: FontWeight.normal,
-                color: BudgetUiTokens.textPrimary,
+              dropdownColor: _palette.inputFill,
+              style: AppTypography.bodyLarge.copyWith(
+                color: _palette.textPrimary,
               ),
-              items: const [
-                DropdownMenuItem(
-                  value: BudgetPeriod.weekly,
-                  child: Text('Weekly'),
-                ),
-                DropdownMenuItem(
-                  value: BudgetPeriod.monthly,
-                  child: Text('Monthly'),
-                ),
-                DropdownMenuItem(
-                  value: BudgetPeriod.yearly,
-                  child: Text('Yearly'),
-                ),
+              items: [
+                for (final period in BudgetPeriod.values)
+                  DropdownMenuItem(
+                    value: period,
+                    child: Text(period.displayName),
+                  ),
               ],
               onChanged: _onPeriodChanged,
             ),
@@ -450,40 +399,35 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
   // -- Rollover Row --
   Widget _buildRolloverRow() {
     return Padding(
-      padding: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.only(top: AppSpacing.smd),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.smd,
+        ),
         decoration: BoxDecoration(
-          color: BudgetUiTokens.surface,
-          borderRadius: BorderRadius.circular(12),
+          color: _palette.surface,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
         ),
         child: Row(
           children: [
-            const Icon(
-              PiconsRegular.arrowsClockwise,
-              color: BudgetUiTokens.primary,
-            ),
-            const SizedBox(width: 12),
+            Icon(PiconsRegular.arrowsClockwise, color: _palette.brand),
+            const SizedBox(width: AppSpacing.smd),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
+                children: [
                   Text(
-                    'Enable Rollover',
-                    style: TextStyle(
-                      fontFamily: 'Work Sans',
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: BudgetUiTokens.textPrimary,
+                    t.budgets.form.rollover,
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: _palette.textPrimary,
                     ),
                   ),
-                  SizedBox(height: 2),
+                  const SizedBox(height: AppSpacing.xs),
                   Text(
-                    'Carry forward unspent amount',
-                    style: TextStyle(
-                      fontFamily: 'Work Sans',
-                      fontSize: 12,
-                      color: BudgetUiTokens.textSecondary,
+                    t.budgets.form.rolloverDetail,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: _palette.textSecondary,
                     ),
                   ),
                 ],
@@ -492,10 +436,10 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
             Switch(
               value: _rolloverEnabled,
               onChanged: _onRolloverChanged,
-              activeThumbColor: BudgetUiTokens.primary,
-              activeTrackColor: BudgetUiTokens.primary.withAlpha(0x40),
-              inactiveThumbColor: BudgetUiTokens.toggleKnob,
-              inactiveTrackColor: BudgetUiTokens.toggleTrack,
+              activeThumbColor: _palette.brand,
+              activeTrackColor: _palette.brand.withAlpha(0x40),
+              inactiveThumbColor: _palette.toggleKnob,
+              inactiveTrackColor: _palette.toggleTrack,
             ),
           ],
         ),
@@ -505,11 +449,11 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
 
   // -- Submit Button --
   Widget _buildSubmitButton(BudgetState state) {
-    final label = isEditing ? 'Update Budget' : 'Create Budget';
+    final label = isEditing ? t.common.save : t.budgets.form.add;
     final isLoading = state is BudgetLoading;
 
     return Padding(
-      padding: const EdgeInsets.only(top: 24),
+      padding: const EdgeInsets.only(top: AppSpacing.lg),
       child: GestureDetector(
         onTap: isLoading ? null : _submit,
         child: Container(
@@ -517,27 +461,24 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
           height: 52,
           decoration: BoxDecoration(
             color: isLoading
-                ? BudgetUiTokens.primary.withAlpha(0x80)
-                : BudgetUiTokens.primary,
-            borderRadius: BudgetUiTokens.buttonRadius,
+                ? _palette.brandFill.withAlpha(0x80)
+                : _palette.brandFill,
+            borderRadius: _buttonRadius,
           ),
           alignment: Alignment.center,
           child: isLoading
-              ? const SizedBox(
+              ? SizedBox(
                   width: 24,
                   height: 24,
                   child: CircularProgressIndicator(
-                    color: BudgetUiTokens.onPrimary,
+                    color: _palette.onBrandFill,
                     strokeWidth: 2.5,
                   ),
                 )
               : Text(
                   label,
-                  style: const TextStyle(
-                    fontFamily: 'Work Sans',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: BudgetUiTokens.onPrimary,
+                  style: AppTypography.titleMedium.copyWith(
+                    color: _palette.onBrandFill,
                   ),
                 ),
         ),
@@ -547,17 +488,22 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
 
   // -- Form --
   Widget _buildForm(BudgetState state) {
-    final title = isEditing ? 'Edit Budget' : 'Create Budget';
+    final title = isEditing ? t.budgets.form.edit : t.budgets.form.add;
 
     return Scaffold(
-      backgroundColor: BudgetUiTokens.bg,
+      backgroundColor: _palette.bg,
+      appBar: _buildTopBar(title),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.md,
+            AppSpacing.lg,
+            AppSpacing.lg,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildTopBar(title),
               _buildAmountField(),
               _buildNameField(),
               _buildPeriodField(),
@@ -572,16 +518,16 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
 
   Widget _buildFieldShimmer(String label) {
     return Padding(
-      padding: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.only(top: AppSpacing.smd),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildLabel(label),
-          const SizedBox(height: 6),
+          const SizedBox(height: AppSpacing.sm),
           ShimmerBox.rectangle(
             width: double.infinity,
             height: 52,
-            borderRadius: 12,
+            borderRadius: AppSpacing.radiusControl,
           ),
         ],
       ),
@@ -598,21 +544,26 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
 
   @override
   Widget build(BuildContext context) {
-    final title = isEditing ? 'Edit Budget' : 'Create Budget';
+    final title = isEditing ? t.budgets.form.edit : t.budgets.form.add;
 
     if (_isLoading) {
       return Scaffold(
-        backgroundColor: BudgetUiTokens.bg,
+        backgroundColor: _palette.bg,
+        appBar: _buildTopBar(title),
         body: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.md,
+              AppSpacing.lg,
+              AppSpacing.md,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildTopBar(title),
-                _buildFieldShimmer('Budget Amount'),
-                _buildFieldShimmer('Budget Name'),
-                _buildFieldShimmer('Period'),
+                _buildFieldShimmer(t.budgets.form.amount),
+                _buildFieldShimmer(t.budgets.form.name),
+                _buildFieldShimmer(t.budgets.form.period),
               ],
             ),
           ),

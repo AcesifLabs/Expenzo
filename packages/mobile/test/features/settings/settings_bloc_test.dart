@@ -10,6 +10,7 @@ import 'package:expense_tracker/features/settings/domain/usecases/update_setting
 import 'package:expense_tracker/features/settings/presentation/bloc/settings_bloc.dart';
 import 'package:expense_tracker/features/settings/presentation/bloc/settings_event.dart';
 import 'package:expense_tracker/features/settings/presentation/bloc/settings_state.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class MockGetSettings extends Mock implements GetSettings {}
 
@@ -32,7 +33,7 @@ void main() {
   late SettingsBloc bloc;
 
   final testSettings = UserSettings(
-    currencySymbol: '\$',
+    currencyCode: 'USD',
     theme: 'light',
     notificationsEnabled: true,
     emailFetchLimit: 10,
@@ -64,9 +65,9 @@ void main() {
       final expected = [
         isA<SettingsLoading>(),
         isA<SettingsLoaded>().having(
-          (s) => s.settings.currencySymbol,
-          'currencySymbol',
-          '\$',
+          (s) => s.settings.currencyCode,
+          'currencyCode',
+          'USD',
         ),
       ];
 
@@ -84,7 +85,7 @@ void main() {
         isA<SettingsError>().having(
           (s) => s.message,
           'message',
-          'Failed to load',
+          t.common.errors.server,
         ),
       ];
 
@@ -118,7 +119,7 @@ void main() {
         isA<SettingsError>().having(
           (s) => s.message,
           'message',
-          'Update failed',
+          t.common.errors.server,
         ),
       ];
 
@@ -147,12 +148,65 @@ void main() {
         isA<SettingsError>().having(
           (s) => s.message,
           'message',
-          'Delete failed',
+          t.common.errors.auth,
         ),
       ];
 
       expectLater(bloc.stream, emitsInOrder(expected));
       bloc.add(const DeleteAccountEvent());
+    });
+  });
+
+  group('derived updates', () {
+    Future<UserSettings> savedAfter(SettingsEvent event) async {
+      when(
+        () => mockGetSettings(any()),
+      ).thenAnswer((_) async => Right(testSettings));
+      when(() => mockUpdateSettings(any())).thenAnswer(
+        (i) async => Right(i.positionalArguments.first as UserSettings),
+      );
+      bloc.add(const LoadSettings());
+      await bloc.stream.firstWhere((s) => s is SettingsLoaded);
+
+      bloc.add(event);
+      await bloc.stream.firstWhere((s) => s is SettingsLoaded);
+
+      return verify(() => mockUpdateSettings(captureAny())).captured.single
+          as UserSettings;
+    }
+
+    test(
+      'UpdateCurrency saves the ISO code and keeps other settings',
+      () async {
+        final saved = await savedAfter(const UpdateCurrency('BDT'));
+
+        expect(saved.currencyCode, 'BDT');
+        expect(saved.theme, 'light');
+        expect(saved.notificationsEnabled, isTrue);
+      },
+    );
+
+    test('UpdateLanguage saves the code and keeps other settings', () async {
+      final saved = await savedAfter(const UpdateLanguage('bn'));
+
+      expect(saved.languageCode, 'bn');
+      expect(saved.theme, 'light');
+    });
+
+    test('DismissAutoImportPrompt saves the dismissal', () async {
+      final saved = await savedAfter(const DismissAutoImportPrompt());
+
+      expect(saved.autoImportPromptDismissed, isTrue);
+      expect(saved.currencyCode, 'USD');
+    });
+
+    test('derived updates do nothing before settings have loaded', () async {
+      bloc
+        ..add(const UpdateCurrency('BDT'))
+        ..add(const DismissAutoImportPrompt());
+      await Future<void>.delayed(Duration.zero);
+
+      verifyNever(() => mockUpdateSettings(any()));
     });
   });
 }

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/logger/app_logger.dart';
+import 'package:expense_tracker/features/budgets/domain/usecases/check_budget_alerts.dart';
 import 'package:expense_tracker/features/message_templates/domain/entities/message_source.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/entities/parsed_transaction.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/entities/parsing_context.dart';
@@ -27,6 +28,8 @@ class MockRecordRepository extends Mock implements RecordRepository {}
 
 class MockCreateRecordsFromParsedList extends Mock
     implements CreateRecordsFromParsedList {}
+
+class MockCheckBudgetAlerts extends Mock implements CheckBudgetAlerts {}
 
 void main() {
   setUpAll(() {
@@ -567,4 +570,92 @@ void main() {
       verify(() => listener.start()).called(2);
     },
   );
+
+  group('budget alerts', () {
+    late MockCheckBudgetAlerts checkBudgetAlerts;
+    late RealtimeSmsProcessor alertingProcessor;
+    final event = IncomingSmsEvent(
+      address: 'VK-BANK',
+      body: 'debited 900',
+      receivedAt: DateTime.parse('2026-05-26T10:00:00Z'),
+    );
+
+    setUp(() {
+      checkBudgetAlerts = MockCheckBudgetAlerts();
+      when(
+        () => checkBudgetAlerts(),
+      ).thenAnswer((_) async => const Right(unit));
+      alertingProcessor = RealtimeSmsProcessor(
+        listener: listener,
+        evaluateRules: evaluateRules,
+        parsingIsolateService: parsingIsolateService,
+        recordRepository: recordRepository,
+        createRecordsFromParsedList: createRecordsFromParsedList,
+        checkBudgetAlerts: checkBudgetAlerts,
+      );
+      when(() => evaluateRules.loadContext()).thenAnswer(
+        (_) async => ParsingContext(
+          rules: [],
+          templates: [],
+          sources: [monitoredSource],
+        ),
+      );
+      when(
+        () => parsingIsolateService.parseMessages(
+          messages: any(named: 'messages'),
+          context: any(named: 'context'),
+          sourceType: any(named: 'sourceType'),
+        ),
+      ).thenAnswer(
+        (_) async => [
+          ParsedTransaction(
+            rawMessage: event.body,
+            amount: 900,
+            date: event.receivedAt,
+            description: 'Debited',
+            categoryId: 'cat-1',
+            sourceType: 'sms',
+            sourceId: event.sourceId,
+            confidenceScore: 0.95,
+            matchedRuleId: 'rule-1',
+            parseFailed: false,
+          ),
+        ],
+      );
+      when(() => createRecordsFromParsedList(any())).thenAnswer(
+        (_) async => const Right(
+          CreateRecordsResult(
+            createdCount: 1,
+            skippedDuplicates: 0,
+            errors: [],
+          ),
+        ),
+      );
+      when(
+        () => listener.drainPendingMessages(),
+      ).thenAnswer((_) async => [event]);
+    });
+
+    tearDown(() => alertingProcessor.stop());
+
+    test('are checked after an SMS adds records', () async {
+      when(
+        () => recordRepository.getExistingSourceIds(any()),
+      ).thenAnswer((_) async => const Right(<String>{}));
+
+      await alertingProcessor.start();
+
+      verify(() => checkBudgetAlerts()).called(1);
+    });
+
+    test('are not checked when every message was already imported', () async {
+      when(
+        () => recordRepository.getExistingSourceIds(any()),
+      ).thenAnswer((_) async => Right(<String>{event.sourceId}));
+
+      await alertingProcessor.start();
+
+      verifyNever(() => checkBudgetAlerts());
+    });
+  });
 }

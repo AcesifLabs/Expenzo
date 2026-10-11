@@ -1,0 +1,41 @@
+{
+  "@@i18n-review": "Machine-drafted Bangla. Needs native review before release.",
+  "insights": {
+    "highestDay": {
+      "title": "সবচেয়ে বেশি খরচের দিন",
+      "description": "{day} আপনার সবচেয়ে বেশি খরচের দিন, দৈনিক গড়ের চেয়ে {percent}% বেশি।"
+    },
+    "topCategory": {
+      "title": "সবচেয়ে বেশি খরচের ক্যাটাগরি",
+      "description": "আপনার খরচের {percent}% {category}-এ।"
+    },
+    "bestWeek": {
+      "title": "সবচেয়ে সাশ্রয়ী সপ্তাহ",
+      "description": "{range} ছিল আপনার সবচেয়ে কম খরচের সপ্তাহ।"
+    },
+    "recurring": {
+      "title": "পুনরাবৃত্ত খরচ",
+      "description": "আসন্ন খরচের জন্য আপনার পুনরাবৃত্ত লেনদেনগুলো দেখুন।"
+    },
+    "budgets": {
+      "title": "বাজেটের অবস্থা",
+      "description": "এই মাসে ঠিক পথে থাকতে আপনার বাজেটগুলো দেখুন।"
+    }
+  },
+  "title": "রিপোর্ট",
+  "askAi": "AI-কে জিজ্ঞেস করুন",
+  "last7Days": "গত ৭ দিন",
+  "last30Days": "গত ৩০ দিন",
+  "noCategoryData": "ক্যাটাগরির কোনো ডেটা নেই",
+  "noTrendData": "এখনো প্রবণতার ডেটা নেই",
+  "noSpending": "এখনো খরচের ডেটা নেই",
+  "totalSpentInPeriod": "এই সময়ে মোট খরচ: {amount}",
+  "metrics": {
+    "totalSpent": "মোট খরচ",
+    "dailyAverage": "দৈনিক গড়",
+    "highestDay": "সর্বোচ্চ দিন"
+  },
+  "spendingByCategory": "ক্যাটাগরি অনুযায়ী খরচ",
+  "observations": "এই মাসের খরচ থেকে মূল পর্যবেক্ষণ",
+  "noData": "কোনো ডেটা নেই"
+}

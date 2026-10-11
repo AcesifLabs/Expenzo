@@ -11,6 +11,7 @@ import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../../domain/entities/budget.dart';
 import '../../domain/repositories/budget_repository.dart';
 import '../datasources/budget_local_datasource.dart';
+import 'package:expense_tracker/core/error/failure_message.dart';
 
 class BudgetRepositoryImpl implements BudgetRepository {
   final BudgetLocalDatasource localDatasource;
@@ -43,7 +44,12 @@ class BudgetRepositoryImpl implements BudgetRepository {
     try {
       final budget = await localDatasource.getBudgetById(id);
       if (budget == null) {
-        return const Left(CacheFailure(message: 'Budget not found'));
+        return const Left(
+          CacheFailure(
+            message: 'Budget not found',
+            errorCode: FailureCodes.notFound,
+          ),
+        );
       }
 
       return Right(budget);

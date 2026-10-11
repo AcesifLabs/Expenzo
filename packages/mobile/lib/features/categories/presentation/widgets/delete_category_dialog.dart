@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:picons/picons.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 /// A reusable delete-confirmation dialog for categories, matching the
 /// `DeleteCategoryDialog` spec in `expenzo.pen`.
@@ -39,17 +43,19 @@ class DeleteCategoryDialog extends StatelessWidget {
 
   String _buildDescription() {
     if (transactionCount > 0) {
-      return 'Are you sure you want to delete "$categoryName"? '
-          '$transactionCount transactions using this category will be uncategorized.';
+      return t.categories.delete.withRecords(
+        n: transactionCount,
+        name: categoryName,
+      );
     }
 
-    return 'Are you sure you want to delete "$categoryName"?';
+    return t.categories.delete.confirm(name: categoryName);
   }
 
-  Widget _buildButtonRow() {
-    const errorColor = Color(0xFFF48FB1);
-    const textPrimary = Color(0xFFF5F7FA);
-    const cancelBg = Color(0xFF2B292C);
+  Widget _buildButtonRow(AppPalette palette) {
+    final errorColor = palette.error;
+    final textPrimary = palette.textPrimary;
+    final cancelBg = palette.surfaceHigh;
 
     return SizedBox(
       height: 48,
@@ -62,22 +68,17 @@ class DeleteCategoryDialog extends StatelessWidget {
                 height: 48,
                 decoration: BoxDecoration(
                   color: cancelBg,
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
                 ),
                 alignment: Alignment.center,
-                child: const Text(
-                  'Cancel',
-                  style: TextStyle(
-                    fontFamily: 'Work Sans',
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: textPrimary,
-                  ),
+                child: Text(
+                  t.common.cancel,
+                  style: AppTypography.titleMedium.copyWith(color: textPrimary),
                 ),
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.smd),
           Expanded(
             child: GestureDetector(
               onTap: onDelete,
@@ -85,17 +86,12 @@ class DeleteCategoryDialog extends StatelessWidget {
                 height: 48,
                 decoration: BoxDecoration(
                   color: errorColor,
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
                 ),
                 alignment: Alignment.center,
-                child: const Text(
-                  'Delete',
-                  style: TextStyle(
-                    fontFamily: 'Work Sans',
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF141315),
-                  ),
+                child: Text(
+                  t.common.delete,
+                  style: AppTypography.titleMedium.copyWith(color: palette.bg),
                 ),
               ),
             ),
@@ -107,54 +103,43 @@ class DeleteCategoryDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const surfaceColor = Color(0xFF1C1B1D);
-    const errorColor = Color(0xFFF48FB1);
-    const textPrimary = Color(0xFFF5F7FA);
-    const textSecondary = Color(0xFF8E8E93);
+    final palette = context.palette;
+    final surfaceColor = palette.surface;
+    final errorColor = palette.error;
+    final textPrimary = palette.textPrimary;
+    final textSecondary = palette.textSecondary;
 
     return Dialog(
-      backgroundColor: const Color(0xFF141315),
-      insetPadding: const EdgeInsets.symmetric(horizontal: 24),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      backgroundColor: palette.bg,
+      insetPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+      ),
       child: Container(
         width: 312,
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
           color: surfaceColor,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
-              PiconsRegular.warningCircle,
-              size: 48,
-              color: errorColor,
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Delete Category?',
-              style: TextStyle(
-                fontFamily: 'Work Sans',
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: textPrimary,
-              ),
+            Icon(PiconsRegular.warningCircle, size: 48, color: errorColor),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              t.categories.delete.title,
+              style: AppTypography.headlineSmall.copyWith(color: textPrimary),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
             Text(
               _buildDescription(),
-              style: const TextStyle(
-                fontFamily: 'Work Sans',
-                fontSize: 14,
-                fontWeight: FontWeight.normal,
-                color: textSecondary,
-              ),
+              style: AppTypography.bodyMedium.copyWith(color: textSecondary),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
-            _buildButtonRow(),
+            const SizedBox(height: AppSpacing.lg),
+            _buildButtonRow(palette),
           ],
         ),
       ),

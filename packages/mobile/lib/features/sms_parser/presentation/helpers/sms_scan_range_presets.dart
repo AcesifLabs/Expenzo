@@ -12,25 +12,21 @@ SmsScanRangeSelection buildPresetScanRange({
       preset: preset,
       startDate: today.subtract(const Duration(days: 6)),
       endDate: today,
-      label: 'Last 7 Days',
     ),
     SmsScanRangePreset.last30Days => SmsScanRangeSelection(
       preset: preset,
       startDate: today.subtract(const Duration(days: 29)),
       endDate: today,
-      label: 'Last 30 Days',
     ),
     SmsScanRangePreset.last3Months => SmsScanRangeSelection(
       preset: preset,
       startDate: DateTime(today.year, today.month - 2, today.day),
       endDate: today,
-      label: 'Last 3 Months',
     ),
     SmsScanRangePreset.allTime => const SmsScanRangeSelection(
       preset: SmsScanRangePreset.allTime,
       startDate: null,
       endDate: null,
-      label: 'All Time',
     ),
     SmsScanRangePreset.custom => throw ArgumentError(
       'Custom range must be built from explicit dates.',

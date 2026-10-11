@@ -3,10 +3,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/models/sms_scan_range_preset.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/models/sms_scan_range_selection.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/widgets/sms_scan_options_sheet.dart';
+import '../../../../support/pump_localized.dart';
 
 void main() {
   Widget wrap(Widget child) {
-    return MaterialApp(home: Scaffold(body: child));
+    return translated(MaterialApp(home: Scaffold(body: child)));
   }
 
   testWidgets('selects preset range and returns inclusive bounds', (
@@ -33,7 +34,7 @@ void main() {
 
     await tester.tap(find.text('Open'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Last 7 Days'));
+    await tester.tap(find.text('Last 7 days'));
     await tester.pumpAndSettle();
 
     expect(result, isNotNull);
@@ -60,7 +61,6 @@ void main() {
                     preset: SmsScanRangePreset.custom,
                     startDate: DateTime(2026, 7, 1),
                     endDate: DateTime(2026, 7, 11),
-                    label: 'Custom Range',
                   ),
                 ),
               );

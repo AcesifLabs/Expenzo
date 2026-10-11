@@ -10,6 +10,7 @@ import 'package:expense_tracker/features/message_templates/presentation/bloc/sam
 import 'package:expense_tracker/features/message_templates/presentation/bloc/sample_analyzer_state.dart';
 import 'package:expense_tracker/features/sms_parser/data/datasources/sms_local_datasource.dart';
 import 'package:expense_tracker/features/sms_parser/domain/entities/sms_message.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class MockSmsLocalDatasource extends Mock implements SmsLocalDatasource {}
 
@@ -188,7 +189,7 @@ void main() {
         expect(state.templatesBySample.containsKey(testMessage.body), isTrue);
         // PendingDeletion cleared and the failure surfaced via lastError.
         expect(state.pendingDeletion, isNull);
-        expect(state.lastError, contains('Could not delete template'));
+        expect(state.lastError, t.messageTemplates.errors.deleteFailed);
       },
     );
   });
@@ -292,7 +293,7 @@ void main() {
 
       final state = bloc.state as SampleAnalyzerLoaded;
       expect(state.pendingDeletion, isNull);
-      expect(state.lastError, contains('Could not restore template'));
+      expect(state.lastError, t.messageTemplates.errors.restoreFailed);
     });
   });
 

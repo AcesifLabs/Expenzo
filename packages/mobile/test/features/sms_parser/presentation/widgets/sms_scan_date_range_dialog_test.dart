@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/models/sms_scan_range_selection.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/widgets/sms_scan_date_range_dialog.dart';
+import '../../../../support/pump_localized.dart';
 
 void main() {
   Widget wrap(Widget child) {
-    return MaterialApp(home: Scaffold(body: child));
+    return translated(MaterialApp(home: Scaffold(body: child)));
   }
 
   testWidgets('does not apply invalid inverted range', (tester) async {

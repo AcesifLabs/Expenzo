@@ -1,0 +1,68 @@
+{
+  "uncategorized": "Uncategorized",
+  "defaults": {
+    "default_in_salary": "Salary",
+    "default_in_freelance": "Freelance",
+    "default_in_investment": "Investment",
+    "default_in_refund": "Refund",
+    "default_in_gift": "Gift",
+    "default_in_general": "General",
+    "default_out_food": "Food & Dining",
+    "default_out_shopping": "Shopping",
+    "default_out_transport": "Transport",
+    "default_out_home": "Home",
+    "default_out_health": "Health",
+    "default_out_entertainment": "Entertainment",
+    "default_out_bills": "Bills & Utilities",
+    "default_out_travel": "Travel",
+    "default_out_education": "Education",
+    "default_out_investment": "Investment",
+    "default_out_gifts": "Gifts",
+    "default_out_general": "General"
+  },
+  "title": "Categories",
+  "empty": "No categories created",
+  "defaultCannotDelete": "Default categories cannot be deleted",
+  "form": {
+    "add": "Add category",
+    "edit": "Edit category",
+    "name": "Name",
+    "nameHint": "Groceries",
+    "nameRequired": "Enter a name",
+    "icon": "Icon",
+    "color": "Choose color"
+  },
+  "delete": {
+    "title": "Delete category?",
+    "confirm": "Are you sure you want to delete \"{name}\"?",
+    "withRecords": {
+      "one": "Are you sure you want to delete \"{name}\"? {n} transaction using this category will be uncategorized.",
+      "other": "Are you sure you want to delete \"{name}\"? {n} transactions using this category will be uncategorized."
+    }
+  },
+  "iconLabel": "{name} icon",
+  "icons": {
+    "shoppingCart": "Shopping cart",
+    "forkKnife": "Fork and knife",
+    "car": "Car",
+    "bag": "Bag",
+    "heart": "Heart",
+    "bookOpen": "Book",
+    "filmStrip": "Film",
+    "lightning": "Lightning",
+    "coffee": "Coffee",
+    "gift": "Gift",
+    "dog": "Dog",
+    "airplane": "Airplane"
+  },
+  "colors": {
+    "Lavender": "Lavender",
+    "Rose": "Rose",
+    "Mint": "Mint",
+    "Sky": "Sky",
+    "Amber": "Amber",
+    "Teal": "Teal",
+    "Peach": "Peach",
+    "Slate": "Slate"
+  }
+}

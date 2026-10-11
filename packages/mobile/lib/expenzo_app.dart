@@ -5,10 +5,20 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:saropa_drift_advisor/saropa_drift_advisor.dart';
+import 'package:expense_tracker/core/theme/currency_config.dart';
+import 'package:expense_tracker/core/utils/currency_formatter.dart';
+import 'package:expense_tracker/features/settings/domain/entities/user_settings.dart';
+import 'package:expense_tracker/shared/presentation/widgets/currency_scope.dart';
+import 'package:expense_tracker/shared/presentation/widgets/locale_scope.dart';
+import 'package:expense_tracker/core/router/refresh_on_auth_change.dart';
+import 'package:expense_tracker/shared/services/feedback_mailer.dart';
 
 import 'core/database/app_database.dart';
+import 'i18n/strings.g.dart';
 import 'core/di/injection_container.dart' as di;
 import 'core/lifecycle/bootstrap_service.dart';
 import 'core/router/app_router.dart';
@@ -24,7 +34,6 @@ import 'features/settings/presentation/bloc/settings_event.dart';
 import 'features/settings/presentation/bloc/settings_state.dart';
 import 'features/sms_parser/application/realtime_sms_processor.dart';
 import 'features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
-import 'shared/presentation/pages/feedback_page.dart';
 import 'shared/presentation/widgets/app_error_fallback.dart';
 
 class ExpenzoApp extends StatefulWidget {
@@ -38,10 +47,17 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
   final _navigatorKey = GlobalKey<NavigatorState>();
   final _themeModeNotifier = ValueNotifier<ThemeMode>(ThemeMode.system);
 
+  // Keeps DateFormat in step with `t`, including when slang follows an OS
+  // language change on its own in "Match device" mode.
+  StreamSubscription<AppLocale>? _localeSubscription;
+
   @override
   void initState() {
     super.initState();
     _appRouter = AppRouter(navigatorKey: _navigatorKey);
+    _localeSubscription = LocaleSettings.getLocaleStream().listen(
+      (locale) => Intl.defaultLocale = locale.languageTag,
+    );
     _startInitialization();
   }
 
@@ -127,11 +143,26 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
     final bloc = di.getIt<SettingsBloc>()..add(const LoadSettings());
     bloc.stream.listen((state) {
       if (state is SettingsLoaded) {
-        _themeModeNotifier.value = _themeModeFromString(state.settings.theme);
+        _applySettings(state.settings);
       } else if (state is SettingsUpdateSuccess) {
-        _themeModeNotifier.value = _themeModeFromString(state.settings.theme);
+        _applySettings(state.settings);
       }
     });
+  }
+
+  void _applySettings(UserSettings settings) {
+    _themeModeNotifier.value = _themeModeFromString(settings.theme);
+    CurrencyFormatter.current.value = CurrencyConfig.byCode(
+      settings.currencyCode,
+    );
+    _applyLanguage(settings.languageCode);
+  }
+
+  void _applyLanguage(String languageCode) {
+    final locale = languageCode == 'system'
+        ? LocaleSettings.useDeviceLocaleSync()
+        : LocaleSettings.setLocaleRawSync(languageCode);
+    Intl.defaultLocale = locale.languageTag;
   }
 
   Future<void> _tryStartRealtimeSmsProcessing() async {
@@ -183,45 +214,65 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
 
   @override
   void dispose() {
+    _localeSubscription?.cancel();
     _themeModeNotifier.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<ThemeMode>(
-      valueListenable: _themeModeNotifier,
-      builder: (context, themeMode, _) {
-        return MaterialApp.router(
-          title: 'Expenzo',
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          themeMode: themeMode,
-          routerConfig: _appRouter?.config,
-          debugShowCheckedModeBanner: false,
-          builder: (context, child) {
-            return MultiBlocProvider(
-              providers: [
-                BlocProvider<AuthBloc>(create: (_) => di.getIt<AuthBloc>()),
-                BlocProvider<CategoryBloc>(
-                  create: (_) => di.getIt<CategoryBloc>(),
+    return TranslationProvider(
+      child: ValueListenableBuilder<ThemeMode>(
+        valueListenable: _themeModeNotifier,
+        builder: (context, themeMode, _) {
+          return MaterialApp.router(
+            onGenerateTitle: (context) => t.common.appName,
+            locale: TranslationProvider.of(context).flutterLocale,
+            supportedLocales: AppLocaleUtils.supportedLocales,
+            localizationsDelegates: GlobalMaterialLocalizations.delegates,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeMode,
+            routerConfig: _appRouter?.config,
+            debugShowCheckedModeBanner: false,
+            builder: (context, child) {
+              return LocaleScope(
+                child: CurrencyScope(
+                  child: MultiBlocProvider(
+                    providers: [
+                      BlocProvider<AuthBloc>(
+                        create: (_) => di.getIt<AuthBloc>(),
+                      ),
+                      BlocProvider<CategoryBloc>(
+                        create: (_) => di.getIt<CategoryBloc>(),
+                      ),
+                      BlocProvider<RecordBloc>(
+                        create: (_) => di.getIt<RecordBloc>(),
+                      ),
+                      BlocProvider<SmsScannerBloc>(
+                        create: (_) => di.getIt<SmsScannerBloc>(),
+                      ),
+                    ],
+                    // Re-run router redirects (sync conflict, login) when the
+                    // signed-in state changes; AuthBloc exists only after init.
+                    child: RefreshOnAuthChange(
+                      enabled: _initialized,
+                      onAuthChanged: () => _appRouter?.config.refresh(),
+                      child: _AppContent(
+                        initialized: _initialized,
+                        error: _error,
+                        errorRefId: _errorRefId,
+                        onInitLoads: _dispatchInitialLoads,
+                        child: child ?? const SizedBox.shrink(),
+                      ),
+                    ),
+                  ),
                 ),
-                BlocProvider<RecordBloc>(create: (_) => di.getIt<RecordBloc>()),
-                BlocProvider<SmsScannerBloc>(
-                  create: (_) => di.getIt<SmsScannerBloc>(),
-                ),
-              ],
-              child: _AppContent(
-                initialized: _initialized,
-                error: _error,
-                errorRefId: _errorRefId,
-                onInitLoads: _dispatchInitialLoads,
-                child: child ?? const SizedBox.shrink(),
-              ),
-            );
-          },
-        );
-      },
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
@@ -323,7 +374,8 @@ class _AppContentState extends State<_AppContent> with WidgetsBindingObserver {
       return AppErrorFallback(
         fallbackContext: AppFallbackContext.init,
         referenceId: widget.errorRefId,
-        feedbackBuilder: (_) => const FeedbackPage(),
+        onSendFeedback: () =>
+            sendFeedback(context, errorReference: widget.errorRefId),
         onRetry: _handleRetry,
         onHardReset: _handleHardReset,
         onRestart: _handleRestart,

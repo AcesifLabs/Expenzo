@@ -1,0 +1,32 @@
+{
+  "names": {
+    "BDT": "Bangladeshi taka",
+    "USD": "US dollar",
+    "EUR": "Euro",
+    "GBP": "British pound",
+    "INR": "Indian rupee",
+    "PKR": "Pakistani rupee",
+    "NPR": "Nepalese rupee",
+    "LKR": "Sri Lankan rupee",
+    "AED": "UAE dirham",
+    "SAR": "Saudi riyal",
+    "MYR": "Malaysian ringgit",
+    "SGD": "Singapore dollar",
+    "THB": "Thai baht",
+    "PHP": "Philippine peso",
+    "IDR": "Indonesian rupiah",
+    "VND": "Vietnamese dong",
+    "JPY": "Japanese yen",
+    "KRW": "South Korean won",
+    "CNY": "Chinese yuan",
+    "AUD": "Australian dollar",
+    "CAD": "Canadian dollar",
+    "CHF": "Swiss franc",
+    "SEK": "Swedish krona",
+    "PLN": "Polish złoty",
+    "TRY": "Turkish lira",
+    "RUB": "Russian ruble",
+    "BRL": "Brazilian real",
+    "ZAR": "South African rand"
+  }
+}

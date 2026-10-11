@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 
 class BalanceRow extends StatelessWidget {
   final IconData icon;
@@ -25,23 +27,32 @@ class BalanceRow extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(icon, color: color, size: 18),
-        const SizedBox(width: 6),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: TextStyle(fontSize: 12, color: onSurface.withAlpha(140)),
-            ),
-            Text(
-              currencyFmt.format(amount),
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: onSurface,
+        const SizedBox(width: AppSpacing.sm),
+        // Large amounts shrink to fit rather than overflow the half-width row.
+        Flexible(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: AppTypography.bodySmall.copyWith(
+                  color: onSurface.withAlpha(140),
+                ),
               ),
-            ),
-          ],
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  currencyFmt.format(amount),
+                  maxLines: 1,
+                  style: AppTypography.titleMedium.copyWith(
+                    color: onSurface,
+                    fontFeatures: AppTypography.tabularFigures,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );

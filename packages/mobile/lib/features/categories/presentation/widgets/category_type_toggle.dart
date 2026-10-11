@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 
 class CategoryTypeToggle extends StatelessWidget {
   final RecordType type;
@@ -13,32 +16,36 @@ class CategoryTypeToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final isExpense = type == RecordType.expense;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+      padding: const EdgeInsets.symmetric(
+        vertical: AppSpacing.smd,
+        horizontal: AppSpacing.lg,
+      ),
       child: Row(
         children: [
           Expanded(
             child: _TabButton(
-              label: 'Expense',
+              label: RecordType.expense.displayName,
               isActive: isExpense,
-              activeColor: _DesignTokens.expenseColor,
-              activeFill: _DesignTokens.expenseFill,
+              activeColor: palette.expense,
+              activeFill: palette.expense.withAlpha(0x20),
               borderRadius: const BorderRadius.horizontal(
-                left: Radius.circular(12),
+                left: Radius.circular(AppSpacing.radiusControl),
               ),
               onTap: () => onSwitch(RecordType.expense),
             ),
           ),
           Expanded(
             child: _TabButton(
-              label: 'Income',
+              label: RecordType.income.displayName,
               isActive: !isExpense,
-              activeColor: _DesignTokens.incomeColor,
-              activeFill: _DesignTokens.incomeFill,
+              activeColor: palette.income,
+              activeFill: palette.income.withAlpha(0x20),
               borderRadius: const BorderRadius.horizontal(
-                right: Radius.circular(12),
+                right: Radius.circular(AppSpacing.radiusControl),
               ),
               onTap: () => onSwitch(RecordType.income),
             ),
@@ -68,10 +75,15 @@ class _TabButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
+        padding: const EdgeInsets.symmetric(
+          vertical: AppSpacing.sm,
+          horizontal: AppSpacing.lg,
+        ),
         decoration: BoxDecoration(
           color: isActive ? activeFill : Colors.transparent,
           borderRadius: borderRadius,
@@ -79,25 +91,13 @@ class _TabButton extends StatelessWidget {
         child: Center(
           child: Text(
             label,
-            style: TextStyle(
-              fontFamily: 'Work Sans',
-              fontSize: 14,
+            style: AppTypography.bodyMedium.copyWith(
+              color: isActive ? activeColor : palette.textSecondary,
               fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-              color: isActive ? activeColor : _DesignTokens.mutedColor,
             ),
           ),
         ),
       ),
     );
   }
-}
-
-class _DesignTokens {
-  static const Color expenseColor = Color(0xFFF48FB1);
-  static const Color expenseFill = Color(0x20F48FB1);
-  static const Color incomeColor = Color(0xFFA2D3A4);
-  static const Color incomeFill = Color(0x20A2D3A4);
-  static const Color mutedColor = Color(0xFF8E8E93);
-
-  _DesignTokens._();
 }

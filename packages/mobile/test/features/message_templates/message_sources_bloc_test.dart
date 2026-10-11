@@ -9,6 +9,7 @@ import 'package:expense_tracker/features/message_templates/domain/usecases/save_
 import 'package:expense_tracker/features/message_templates/presentation/bloc/message_sources_bloc.dart';
 import 'package:expense_tracker/features/message_templates/presentation/bloc/message_sources_event.dart';
 import 'package:expense_tracker/features/message_templates/presentation/bloc/message_sources_state.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class MockGetMessageSources extends Mock implements GetMessageSources {}
 
@@ -81,7 +82,7 @@ void main() {
           isA<MessageSourcesError>().having(
             (s) => s.message,
             'message',
-            'Failed to load',
+            t.common.errors.server,
           ),
         ];
 

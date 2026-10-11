@@ -1,3 +1,5 @@
+import 'package:expense_tracker/i18n/strings.g.dart';
+
 enum TransactionFrequency {
   daily,
   weekly,
@@ -6,17 +8,12 @@ enum TransactionFrequency {
   yearly;
 
   String get displayName {
-    switch (this) {
-      case TransactionFrequency.daily:
-        return 'Daily';
-      case TransactionFrequency.weekly:
-        return 'Weekly';
-      case TransactionFrequency.biweekly:
-        return 'Biweekly';
-      case TransactionFrequency.monthly:
-        return 'Monthly';
-      case TransactionFrequency.yearly:
-        return 'Yearly';
-    }
+    return switch (this) {
+      TransactionFrequency.daily => t.enums.frequency.daily,
+      TransactionFrequency.weekly => t.enums.frequency.weekly,
+      TransactionFrequency.biweekly => t.enums.frequency.biweekly,
+      TransactionFrequency.monthly => t.enums.frequency.monthly,
+      TransactionFrequency.yearly => t.enums.frequency.yearly,
+    };
   }
 }

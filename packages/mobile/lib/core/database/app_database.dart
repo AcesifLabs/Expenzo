@@ -30,6 +30,7 @@ import 'daos/parsing_rule_dao.dart';
 import 'daos/message_template_dao.dart';
 import 'daos/user_dao.dart';
 import 'daos/sync_queue_dao.dart';
+import 'package:expense_tracker/core/theme/category_palette.dart';
 
 part 'app_database.g.dart';
 
@@ -63,7 +64,7 @@ class AppDatabase extends _$AppDatabase {
   Future<String>? _dbPathFuture;
 
   @override
-  int get schemaVersion => 16;
+  int get schemaVersion => 17;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -118,6 +119,7 @@ class AppDatabase extends _$AppDatabase {
       _MigrationStep(14, _migrateV14),
       _MigrationStep(15, _migrateV15),
       _MigrationStep(16, _migrateV16),
+      _MigrationStep(17, _migrateV17),
     ];
 
     for (final step in steps) {
@@ -303,6 +305,45 @@ class AppDatabase extends _$AppDatabase {
 
     for (final query in queries) {
       await customStatement(query);
+    }
+  }
+
+  /// Moves untouched default categories to the new category palette.
+  ///
+  /// A default category is only recolored while it still has its old seed
+  /// color, so colors the user picked are kept. Each change is queued for
+  /// sync like a normal category edit, otherwise the next pull would restore
+  /// the old color. Rollback: `CategoryPalette.legacySeedColors`.
+  Future<void> _migrateV17() async {
+    for (final MapEntry(key: id, value: oldColor)
+        in CategoryPalette.legacySeedColors.entries) {
+      final newColor = CategoryPalette.seedColors[id];
+      if (newColor == null || newColor == oldColor) continue;
+      final changed = await customUpdate(
+        "UPDATE categories SET color = ?, updated_at = strftime('%s','now') "
+        'WHERE id = ? AND is_default = 1 AND upper(color) = ?',
+        variables: [
+          Variable.withString(newColor),
+          Variable.withString(id),
+          Variable.withString(oldColor.toUpperCase()),
+        ],
+        updates: {categories},
+      );
+      if (changed == 0) continue;
+      await customStatement(
+        '''
+        INSERT INTO sync_queue (entity_table, record_id, action, payload, created_at)
+        SELECT 'categories', id, 'update',
+               json_object(
+                 'name', name, 'emoji', emoji, 'color', color,
+                 'type', category_type,
+                 'isDefault', json(CASE WHEN is_default THEN 'true' ELSE 'false' END)
+               ),
+               strftime('%s','now')
+        FROM categories WHERE id = ?
+        ''',
+        [id],
+      );
     }
   }
 

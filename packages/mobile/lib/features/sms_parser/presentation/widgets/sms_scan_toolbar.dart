@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:picons/picons.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 
 import '../bloc/sms_scanner_view_mode.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class SmsScanToolbar extends StatelessWidget {
   final SmsScannerViewMode viewMode;
@@ -23,24 +26,28 @@ class SmsScanToolbar extends StatelessWidget {
     return InkWell(
       key: const Key('sender_mode_chip'),
       onTap: onToggleViewMode,
-      borderRadius: BorderRadius.circular(999),
+      borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.smd,
+          vertical: AppSpacing.sm,
+        ),
         decoration: BoxDecoration(
           color: isGrouped ? colors.primary.withAlpha(30) : colors.surface,
-          borderRadius: BorderRadius.circular(999),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(PiconsRegular.buildings, size: 14, color: chipFg),
-            const SizedBox(width: 4),
+            const SizedBox(width: AppSpacing.xs),
             Text(
-              isGrouped ? 'Sender' : 'Flat List',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: isGrouped ? FontWeight.w600 : FontWeight.w500,
+              isGrouped
+                  ? t.smsParser.toolbar.sender
+                  : t.smsParser.toolbar.flatList,
+              style: AppTypography.bodySmall.copyWith(
                 color: chipFg,
+                fontWeight: isGrouped ? FontWeight.w600 : FontWeight.w500,
               ),
             ),
           ],
@@ -55,25 +62,24 @@ class SmsScanToolbar extends StatelessWidget {
     return InkWell(
       key: const Key('date_range_chip'),
       onTap: onToggleViewMode,
-      borderRadius: BorderRadius.circular(999),
+      borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.smd,
+          vertical: AppSpacing.sm,
+        ),
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: BorderRadius.circular(999),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(PiconsRegular.calendarBlank, size: 14, color: chipFg),
-            const SizedBox(width: 4),
+            const SizedBox(width: AppSpacing.xs),
             Text(
               rangeLabel,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-                color: chipFg,
-              ),
+              style: AppTypography.bodySmall.copyWith(color: chipFg),
             ),
           ],
         ),
@@ -87,25 +93,24 @@ class SmsScanToolbar extends StatelessWidget {
     return InkWell(
       key: const Key('clear_selection_chip'),
       onTap: onClearSelection,
-      borderRadius: BorderRadius.circular(999),
+      borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.smd,
+          vertical: AppSpacing.sm,
+        ),
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: BorderRadius.circular(999),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(PiconsRegular.x, size: 14, color: chipFg),
-            const SizedBox(width: 4),
+            const SizedBox(width: AppSpacing.xs),
             Text(
-              'Clear',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-                color: chipFg,
-              ),
+              t.smsParser.toolbar.clear,
+              style: AppTypography.bodySmall.copyWith(color: chipFg),
             ),
           ],
         ),
@@ -119,10 +124,13 @@ class SmsScanToolbar extends StatelessWidget {
     final isGrouped = viewMode == SmsScannerViewMode.groupedBySender;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.smd,
+        vertical: AppSpacing.sm,
+      ),
       decoration: BoxDecoration(
         color: colors.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
       ),
       child: Wrap(
         spacing: 6,

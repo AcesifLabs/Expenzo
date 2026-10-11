@@ -1,0 +1,40 @@
+{
+  "insights": {
+    "highestDay": {
+      "title": "Highest spending day",
+      "description": "{day} is your biggest spending day, {percent}% above your daily average."
+    },
+    "topCategory": {
+      "title": "Most frequent category",
+      "description": "{category} accounts for {percent}% of your spending."
+    },
+    "bestWeek": {
+      "title": "Best savings week",
+      "description": "{range} was your lowest spending week."
+    },
+    "recurring": {
+      "title": "Recurring expenses",
+      "description": "Check your recurring transactions for upcoming charges."
+    },
+    "budgets": {
+      "title": "Budget status",
+      "description": "Review your budgets to stay on track this month."
+    }
+  },
+  "title": "Reports",
+  "askAi": "Ask AI",
+  "last7Days": "Last 7 days",
+  "last30Days": "Last 30 days",
+  "noCategoryData": "No category data",
+  "noTrendData": "No trend data yet",
+  "noSpending": "No spending data yet",
+  "totalSpentInPeriod": "Total spent: {amount} in this period",
+  "metrics": {
+    "totalSpent": "Total spent",
+    "dailyAverage": "Daily average",
+    "highestDay": "Highest day"
+  },
+  "spendingByCategory": "Spending by category",
+  "observations": "Key observations from your spending this month",
+  "noData": "No data"
+}

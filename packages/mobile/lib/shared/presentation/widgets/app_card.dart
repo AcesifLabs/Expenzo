@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:picons/picons.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 
 class AppCard extends StatelessWidget {
   final Widget child;
@@ -32,12 +33,12 @@ class AppCard extends StatelessWidget {
   Widget _buildDismissibleBackground(ColorScheme colors, double radius) {
     return Container(
       alignment: Alignment.centerRight,
-      padding: const EdgeInsets.only(right: 20),
+      padding: const EdgeInsets.only(right: AppSpacing.lg),
       decoration: BoxDecoration(
         color: colors.error,
         borderRadius: BorderRadius.circular(radius),
       ),
-      child: Icon(PiconsRegular.trash, color: colors.onSecondary),
+      child: Icon(PiconsRegular.trash, color: colors.onError),
     );
   }
 
@@ -69,7 +70,7 @@ class AppCard extends StatelessWidget {
       ),
       clipBehavior: clipBehavior,
       child: Material(
-        color: const Color(0x00000000),
+        color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
           onLongPress: onLongPress,

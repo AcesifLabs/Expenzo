@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:picons/picons.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class AppSearchBar extends StatefulWidget {
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
-  final String hintText;
+
+  /// Defaults to "Search" in the app language.
+  final String? hintText;
   final FocusNode? focusNode;
 
   const AppSearchBar({
     super.key,
     required this.controller,
     required this.onChanged,
-    this.hintText = 'Search...',
+    this.hintText,
     this.focusNode,
   });
 
@@ -68,31 +73,32 @@ class _AppSearchBarState extends State<AppSearchBar> {
         focusNode: widget.focusNode,
         onChanged: widget.onChanged,
         decoration: InputDecoration(
-          hintText: widget.hintText,
+          hintText: widget.hintText ?? t.common.search,
           hintStyle: TextStyle(color: mutedColor),
           prefixIcon: Icon(
-            PiconsLight.magnifyingGlass,
+            PiconsRegular.magnifyingGlass,
             color: mutedColor,
             size: 20,
           ),
           suffixIcon: _hasText
               ? IconButton(
-                  icon: Icon(PiconsLight.x, size: 18),
+                  icon: const Icon(PiconsRegular.x, size: 18),
+                  tooltip: t.common.clearSearch,
                   onPressed: _onClearPressed,
                 )
               : null,
           filled: true,
           fillColor: colors.onSurface.withAlpha(10),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
             borderSide: BorderSide.none,
           ),
           contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 10,
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.smd,
           ),
         ),
-        style: TextStyle(fontSize: 15, color: colors.onSurface),
+        style: AppTypography.bodyLarge.copyWith(color: colors.onSurface),
       ),
     );
   }

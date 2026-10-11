@@ -8,7 +8,9 @@ import 'package:expense_tracker/features/reports/domain/usecases/get_spending_tr
 import 'package:expense_tracker/features/reports/domain/usecases/get_category_breakdown.dart';
 import 'package:expense_tracker/features/reports/domain/usecases/get_spending_insights.dart';
 import 'package:expense_tracker/features/reports/presentation/bloc/reports_bloc.dart';
+import 'package:expense_tracker/features/reports/presentation/bloc/reports_event.dart';
 import 'package:expense_tracker/features/reports/presentation/bloc/reports_state.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class MockGetSpendingTrend extends Mock implements GetSpendingTrend {}
 
@@ -137,12 +139,69 @@ void main() {
           isA<ReportsError>().having(
             (s) => s.message,
             'message',
-            'Trend failed',
+            t.common.errors.server,
           ),
         ]),
       );
 
       bloc.close();
+    });
+  });
+
+  group('RefreshReports', () {
+    test('reloads the same length of range, ending now', () async {
+      when(
+        () => mockGetSpendingTrend(
+          startDate: any(named: 'startDate'),
+          endDate: any(named: 'endDate'),
+          granularity: any(named: 'granularity'),
+        ),
+      ).thenAnswer((_) async => const Right([]));
+      when(
+        () => mockGetCategoryBreakdown(
+          startDate: any(named: 'startDate'),
+          endDate: any(named: 'endDate'),
+        ),
+      ).thenAnswer((_) async => const Right([]));
+      when(
+        () => mockGetSpendingInsights(
+          startDate: any(named: 'startDate'),
+          endDate: any(named: 'endDate'),
+        ),
+      ).thenAnswer(
+        (_) async => const Right(
+          SpendingInsights(
+            highestDayAmount: 0,
+            avgDailySpending: 0,
+            totalTransactionCount: 0,
+            totalSpent: 0,
+          ),
+        ),
+      );
+      // A range opened a day ago: 30 days ending yesterday.
+      final openedEnd = DateTime.now().subtract(const Duration(days: 1));
+      final openedStart = openedEnd.subtract(const Duration(days: 30));
+      bloc = ReportsBloc(
+        getSpendingTrend: mockGetSpendingTrend,
+        getCategoryBreakdown: mockGetCategoryBreakdown,
+        getSpendingInsights: mockGetSpendingInsights,
+        startDate: openedStart,
+        endDate: openedEnd,
+        granularity: Granularity.daily,
+      );
+      await bloc.stream.firstWhere((s) => s is ReportsLoaded);
+
+      final before = DateTime.now();
+      bloc.add(const RefreshReports());
+      final refreshed =
+          await bloc.stream.firstWhere((s) => s is ReportsLoaded)
+              as ReportsLoaded;
+
+      expect(refreshed.endDate.isBefore(before), isFalse);
+      expect(
+        refreshed.endDate.difference(refreshed.startDate),
+        const Duration(days: 30),
+      );
     });
   });
 }

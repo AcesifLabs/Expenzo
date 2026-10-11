@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 import '../../../../../shared/presentation/widgets/shimmer_box.dart';
 
 class InsightsSkeleton extends StatelessWidget {
@@ -8,7 +9,7 @@ class InsightsSkeleton extends StatelessWidget {
 
   Widget _buildSkeletonItem(int index) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: AppSpacing.smd),
       child: ListTile(
         leading: ShimmerBox.circle(size: 40),
         title: ShimmerBox.textLine(height: 14),
@@ -22,7 +23,7 @@ class InsightsSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ShimmerBox(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: ListView(
           physics: const NeverScrollableScrollPhysics(),
           children: List.generate(itemCount, _buildSkeletonItem),

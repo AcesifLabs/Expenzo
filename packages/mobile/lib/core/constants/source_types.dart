@@ -1,3 +1,5 @@
+import 'package:expense_tracker/i18n/strings.g.dart';
+
 enum ExpenseSource {
   manual,
   sms,
@@ -5,16 +7,12 @@ enum ExpenseSource {
   recurring;
 
   String get displayName {
-    switch (this) {
-      case ExpenseSource.manual:
-        return 'Manual';
-      case ExpenseSource.sms:
-        return 'SMS';
-      case ExpenseSource.email:
-        return 'Email';
-      case ExpenseSource.recurring:
-        return 'Recurring';
-    }
+    return switch (this) {
+      ExpenseSource.manual => t.enums.source.manual,
+      ExpenseSource.sms => t.enums.source.sms,
+      ExpenseSource.email => t.enums.source.email,
+      ExpenseSource.recurring => t.enums.source.recurring,
+    };
   }
 
   String get icon {

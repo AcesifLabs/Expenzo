@@ -12,6 +12,7 @@ import 'package:expense_tracker/features/records/domain/usecases/get_records.dar
 import 'package:expense_tracker/features/records/domain/usecases/update_record.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class MockRecordRepository extends Mock implements RecordRepository {}
 
@@ -143,7 +144,7 @@ void main() {
 
       expect(states[0], isA<RecordLoading>());
       expect(states[1], isA<RecordError>());
-      expect((states[1] as RecordError).message, 'Server error');
+      expect((states[1] as RecordError).message, t.common.errors.server);
     });
   });
 

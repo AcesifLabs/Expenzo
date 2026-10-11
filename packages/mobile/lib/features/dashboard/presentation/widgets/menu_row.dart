@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 
 class MenuRow extends StatelessWidget {
   final IconData icon;
@@ -17,8 +19,8 @@ class MenuRow extends StatelessWidget {
     return Row(
       children: [
         Icon(icon, size: 20),
-        const SizedBox(width: 12),
-        Expanded(child: Text(text, style: const TextStyle(fontSize: 14))),
+        const SizedBox(width: AppSpacing.smd),
+        Expanded(child: Text(text, style: AppTypography.bodyMedium)),
         if (trailing != null) Icon(trailing, size: 18),
       ],
     );

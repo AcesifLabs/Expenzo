@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:expense_tracker/core/utils/navigation_utils.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_back_button.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_page_header.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
+import 'package:picons/picons.dart';
 import '../../data/datasources/default_rules_templates.dart';
 import '../../domain/entities/parsing_rule.dart';
 import '../bloc/parsing_rules_bloc.dart';
@@ -9,6 +14,7 @@ import '../bloc/parsing_rules_state.dart';
 import '../widgets/rule_card.dart';
 import '../widgets/regex_tester_widget.dart';
 import '../widgets/regex_pattern_validator.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class RulesListPage extends StatelessWidget {
   const RulesListPage({super.key});
@@ -37,15 +43,16 @@ class RulesListPage extends StatelessWidget {
 
   IconButton _buildAddTemplateButton(BuildContext context) {
     return IconButton(
-      icon: const Icon(Icons.library_add),
-      tooltip: 'Add templates',
+      icon: const Icon(PiconsRegular.listPlus),
+      tooltip: t.parsingRules.addFromFormats,
       onPressed: () => _navigateToTemplates(context),
     );
   }
 
   IconButton _buildAddRuleButton(BuildContext context) {
     return IconButton(
-      icon: const Icon(Icons.add),
+      icon: const Icon(PiconsRegular.plus),
+      tooltip: t.parsingRules.newRule,
       onPressed: () => _navigateToEditor(context),
     );
   }
@@ -67,11 +74,11 @@ class RulesListPage extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text('Error: $message'),
-          const SizedBox(height: 16),
+          Text(message),
+          const SizedBox(height: AppSpacing.md),
           ElevatedButton(
             onPressed: () => context.read<ParsingRulesBloc>().add(LoadRules()),
-            child: const Text('Retry'),
+            child: Text(t.common.tryAgain),
           ),
         ],
       ),
@@ -81,29 +88,23 @@ class RulesListPage extends StatelessWidget {
   Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(AppSpacing.xl),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.rule,
+              PiconsRegular.listChecks,
               size: 64,
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
-            const SizedBox(height: 16),
-            const Text(
-              'No rules yet',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Add one to start parsing SMS and emails automatically!',
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.md),
+            Text(t.parsingRules.empty.title, style: AppTypography.titleLarge),
+            const SizedBox(height: AppSpacing.sm),
+            Text(t.parsingRules.empty.body, textAlign: TextAlign.center),
+            const SizedBox(height: AppSpacing.lg),
             ElevatedButton.icon(
-              icon: const Icon(Icons.add),
-              label: const Text('Add Rule'),
+              icon: const Icon(PiconsRegular.plus),
+              label: Text(t.parsingRules.empty.add),
               onPressed: () => _navigateToEditor(context),
             ),
           ],
@@ -122,7 +123,7 @@ class RulesListPage extends StatelessWidget {
     return RefreshIndicator(
       onRefresh: () => _onRefreshRules(context),
       child: ListView.builder(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
         itemCount: rules.length,
         itemBuilder: (context, index) => _buildRuleItem(context, rules[index]),
       ),
@@ -151,8 +152,9 @@ class RulesListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Parsing Rules'),
+      appBar: AppPageHeader(
+        leading: const AppBackButton(),
+        title: t.common.matchingRules,
         actions: [
           _buildAddTemplateButton(context),
           _buildAddRuleButton(context),
@@ -243,7 +245,11 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
       ..clearSnackBars()
       ..showSnackBar(
         SnackBar(
-          content: Text(widget.rule == null ? 'Rule created' : 'Rule updated'),
+          content: Text(
+            widget.rule == null
+                ? t.parsingRules.created
+                : t.parsingRules.updated,
+          ),
         ),
       );
 
@@ -252,7 +258,7 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
 
   String? _validateName(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Name is required';
+      return t.parsingRules.validation.nameRequired;
     }
 
     return null;
@@ -260,7 +266,7 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
 
   String? _validateTriggerWords(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'At least one trigger word is required';
+      return t.parsingRules.validation.triggerRequired;
     }
 
     return null;
@@ -268,14 +274,14 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
 
   String? _validateAmountPattern(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Amount pattern is required';
+      return t.parsingRules.validation.amountRequired;
     }
     try {
       RegExp(value);
     } catch (e, s) {
       debugPrint('Error: $e\n$s');
 
-      return 'Invalid regex pattern';
+      return t.parsingRules.validation.invalidRegex;
     }
 
     return null;
@@ -296,9 +302,9 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
   TextFormField _buildNameField() {
     return TextFormField(
       controller: _nameController,
-      decoration: const InputDecoration(
-        labelText: 'Rule Name *',
-        hintText: 'e.g., HDFC Bank SMS',
+      decoration: InputDecoration(
+        labelText: t.parsingRules.form.name,
+        hintText: t.parsingRules.form.nameHint,
         border: OutlineInputBorder(),
       ),
       validator: _validateName,
@@ -308,11 +314,11 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
   TextFormField _buildTriggerWordsField() {
     return TextFormField(
       controller: _triggerWordsController,
-      decoration: const InputDecoration(
-        labelText: 'Trigger Words *',
-        hintText: 'HDFC, debit, account (comma-separated)',
+      decoration: InputDecoration(
+        labelText: t.parsingRules.form.keyWords,
+        hintText: t.parsingRules.form.keyWordsHint,
         border: OutlineInputBorder(),
-        helperText: 'Words that indicate this rule should be tried',
+        helperText: t.parsingRules.form.keyWordsHelper,
       ),
       validator: _validateTriggerWords,
     );
@@ -322,17 +328,17 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Amount Pattern (Regex) *',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        Text(
+          t.parsingRules.form.amountPattern,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         RegexValidatorIndicator(pattern: _amountPatternController.text),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         TextFormField(
           controller: _amountPatternController,
-          decoration: const InputDecoration(
-            labelText: 'Amount Regex',
+          decoration: InputDecoration(
+            labelText: t.parsingRules.form.amountRegex,
             hintText: r'Rs\.?\s*([\d,]+\.?\d*)',
             border: OutlineInputBorder(),
             helperText:
@@ -340,7 +346,7 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
           ),
           validator: _validateAmountPattern,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         RegexTesterWidget(
           pattern: _amountPatternController.text,
           datePattern: _datePatternController.text,
@@ -353,18 +359,18 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Date Pattern (Optional)',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        Text(
+          t.parsingRules.form.datePattern,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         TextFormField(
           controller: _datePatternController,
-          decoration: const InputDecoration(
-            labelText: 'Date Regex (Optional)',
+          decoration: InputDecoration(
+            labelText: t.parsingRules.form.dateRegex,
             hintText: r'(\d{2}/\d{2}/\d{4})',
             border: OutlineInputBorder(),
-            helperText: 'Leave empty if date is not needed',
+            helperText: t.parsingRules.form.dateHelper,
           ),
         ),
       ],
@@ -375,27 +381,27 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Source Type',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        Text(
+          t.parsingRules.form.source,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         SegmentedButton<SourceType>(
-          segments: const [
+          segments: [
             ButtonSegment(
               value: SourceType.sms,
-              label: Text('SMS'),
-              icon: Icon(Icons.sms),
+              label: Text(SourceType.sms.displayName),
+              icon: const Icon(PiconsRegular.chatText),
             ),
             ButtonSegment(
               value: SourceType.email,
-              label: Text('Email'),
-              icon: Icon(Icons.email),
+              label: Text(SourceType.email.displayName),
+              icon: const Icon(PiconsRegular.envelope),
             ),
             ButtonSegment(
               value: SourceType.both,
-              label: Text('Both'),
-              icon: Icon(Icons.sync),
+              label: Text(SourceType.both.displayName),
+              icon: const Icon(PiconsRegular.arrowsClockwise),
             ),
           ],
           selected: {_sourceType},
@@ -408,11 +414,11 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
   TextFormField _buildPriorityField() {
     return TextFormField(
       controller: _priorityController,
-      decoration: const InputDecoration(
-        labelText: 'Priority',
+      decoration: InputDecoration(
+        labelText: t.parsingRules.form.priority,
         hintText: '0',
         border: OutlineInputBorder(),
-        helperText: 'Higher priority rules are tried first',
+        helperText: t.parsingRules.form.priorityHelper,
       ),
       keyboardType: TextInputType.number,
     );
@@ -420,8 +426,8 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
 
   SwitchListTile _buildEnabledSwitch() {
     return SwitchListTile(
-      title: const Text('Enabled'),
-      subtitle: const Text('Enable this rule for parsing'),
+      title: Text(t.parsingRules.form.enabled),
+      subtitle: Text(t.parsingRules.form.enabledDetail),
       value: _isEnabled,
       onChanged: _onEnabledChanged,
     );
@@ -442,27 +448,28 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
     final isEditing = widget.rule != null;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(isEditing ? 'Edit Rule' : 'New Rule'),
-        actions: [TextButton(onPressed: _saveRule, child: const Text('Save'))],
+      appBar: AppPageHeader(
+        leading: const AppBackButton(),
+        title: isEditing ? t.parsingRules.editRule : t.parsingRules.newRule,
+        actions: [TextButton(onPressed: _saveRule, child: Text(t.common.save))],
       ),
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.md),
           children: [
             _buildNameField(),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
             _buildTriggerWordsField(),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.lg),
             _buildAmountPatternSection(),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.lg),
             _buildDatePatternSection(),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.lg),
             _buildSourceTypeSection(),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.lg),
             _buildPriorityField(),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
             _buildEnabledSwitch(),
           ],
         ),
@@ -474,20 +481,31 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
 class AddTemplatesPage extends StatelessWidget {
   const AddTemplatesPage({super.key});
 
+  /// Translation key for a built-in template ("HDFC Bank SMS" → hdfc_bank_sms).
+  static String _templateKey(String name) => name
+      .toLowerCase()
+      .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
+      .replaceAll(RegExp(r'^_|_$'), '');
+
   Card _buildTemplateCard(BuildContext context, DefaultRuleTemplate template) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: ListTile(
         leading: CircleAvatar(
           child: Icon(
-            template.sourceType == SourceType.sms ? Icons.sms : Icons.email,
+            template.sourceType == SourceType.sms
+                ? PiconsRegular.chatText
+                : PiconsRegular.envelope,
           ),
         ),
         title: Text(template.name),
-        subtitle: Text(template.description),
+        subtitle: Text(
+          t.parsingRules.templates[_templateKey(template.name)] ??
+              template.description,
+        ),
         trailing: ElevatedButton(
           onPressed: () => _addTemplate(context, template),
-          child: const Text('Add'),
+          child: Text(t.parsingRules.add),
         ),
       ),
     );
@@ -498,17 +516,22 @@ class AddTemplatesPage extends StatelessWidget {
     context.read<ParsingRulesBloc>().add(CreateRuleEvent(rule));
     ScaffoldMessenger.of(context)
       ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text('Added "${template.name}"')));
+      ..showSnackBar(
+        SnackBar(content: Text(t.parsingRules.added(name: template.name))),
+      );
   }
 
   @override
   Widget build(BuildContext context) {
-    final templates = DefaultRulesTemplates.templates;
+    const templates = DefaultRulesTemplates.templates;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Template Rules')),
+      appBar: AppPageHeader(
+        leading: AppBackButton(),
+        title: t.parsingRules.addFromFormats,
+      ),
       body: ListView.builder(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.md),
         itemCount: templates.length,
         itemBuilder: (context, index) =>
             _buildTemplateCard(context, templates[index]),

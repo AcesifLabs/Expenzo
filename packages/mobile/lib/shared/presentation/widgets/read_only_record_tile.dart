@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
-import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:expense_tracker/features/records/domain/entities/record.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
+import 'package:expense_tracker/core/utils/currency_formatter.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 
 /// A read-only record tile for dashboard summary lists.
 ///
@@ -17,13 +20,17 @@ class ReadOnlyRecordTile extends StatelessWidget {
   final double avatarRadius;
   final double iconSize;
 
-  static final _dateFormat = DateFormat('MMM dd');
+  // A getter, not cached: DateFormat keeps the language it was created in.
+  static DateFormat get _dateFormat => DateFormat('MMM dd');
 
   const ReadOnlyRecordTile({
     super.key,
     required this.record,
     this.amountFormat,
-    this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+    this.padding = const EdgeInsets.symmetric(
+      horizontal: AppSpacing.md,
+      vertical: AppSpacing.smd,
+    ),
     this.avatarRadius = 18,
     this.iconSize = 16,
   });
@@ -35,13 +42,13 @@ class ReadOnlyRecordTile extends StatelessWidget {
     }
     final prefix = record.recordType == RecordType.expense ? '-' : '+';
 
-    return '$prefix\$${record.amount.abs().toStringAsFixed(2)}';
+    return '$prefix${CurrencyFormatter.format(record.amount.abs())}';
   }
 
   String _description() {
     if (record.description.isNotEmpty) return record.description;
 
-    return record.recordType == RecordType.expense ? 'Expense' : 'Income';
+    return record.recordType.displayName;
   }
 
   Widget _leadingIcon(Color amtColor) {
@@ -50,8 +57,8 @@ class ReadOnlyRecordTile extends StatelessWidget {
       backgroundColor: amtColor.withAlpha(25),
       child: Icon(
         record.recordType == RecordType.expense
-            ? PiconsFill.trendDown
-            : PiconsFill.trendUp,
+            ? PiconsRegular.trendDown
+            : PiconsRegular.trendUp,
         color: amtColor,
         size: iconSize,
       ),
@@ -65,19 +72,14 @@ class ReadOnlyRecordTile extends StatelessWidget {
         children: [
           Text(
             _description(),
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: colors.onSurface,
-            ),
+            style: AppTypography.bodyMedium.copyWith(color: colors.onSurface),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             _dateFormat.format(record.date),
-            style: TextStyle(
-              fontSize: 12,
+            style: AppTypography.bodySmall.copyWith(
               color: colors.onSurface.withAlpha(120),
             ),
           ),
@@ -89,18 +91,19 @@ class ReadOnlyRecordTile extends StatelessWidget {
   Widget _amountText(Color amtColor) {
     return Text(
       _formatAmount(),
-      style: TextStyle(
-        fontSize: 15,
-        fontWeight: FontWeight.w600,
-        color: amtColor,
+      semanticsLabel: CurrencyFormatter.semanticsLabel(
+        record.amount,
+        isExpense: record.recordType == RecordType.expense,
       ),
+      style: AppTypography.titleMedium.copyWith(color: amtColor),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final isExpense = record.recordType == RecordType.expense;
-    final amtColor = isExpense ? AppColors.expense : AppColors.success;
+    final palette = context.palette;
+    final amtColor = isExpense ? palette.expense : palette.income;
     final colors = Theme.of(context).colorScheme;
 
     return Padding(
@@ -108,7 +111,7 @@ class ReadOnlyRecordTile extends StatelessWidget {
       child: Row(
         children: [
           _leadingIcon(amtColor),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.smd),
           _titleAndDate(colors),
           _amountText(amtColor),
         ],

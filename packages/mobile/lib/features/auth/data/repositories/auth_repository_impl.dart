@@ -13,6 +13,8 @@ import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_datasource.dart';
 import 'package:expense_tracker/core/sync/sync_engine.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
+import 'package:expense_tracker/i18n/strings.g.dart';
+import 'package:expense_tracker/core/error/failure_message.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDatasource remoteDatasource;
@@ -27,10 +29,10 @@ class AuthRepositoryImpl implements AuthRepository {
           type == DioExceptionType.receiveTimeout ||
           type == DioExceptionType.connectionError ||
           e.error is SocketException) {
-        return 'Unable to connect. Please check your internet connection and try again.';
+        return t.auth.errors.cannotConnect;
       }
 
-      return 'Something went wrong on our end. Please try again later.';
+      return t.auth.errors.serverProblem;
     }
 
     if (e is fb.FirebaseAuthException) {
@@ -42,10 +44,10 @@ class AuthRepositoryImpl implements AuthRepository {
     }
 
     if (e is TimeoutException) {
-      return 'The request timed out. Please check your connection and try again.';
+      return t.auth.errors.timedOut;
     }
 
-    return 'Something went wrong. Please try again.';
+    return t.auth.errors.generic;
   }
 
   /// Returns Left(Failure) on error.
@@ -56,9 +58,17 @@ class AuthRepositoryImpl implements AuthRepository {
 
       return Right(user);
     } on AuthException catch (e) {
-      return Left(e.toFailure());
+      // AuthException messages are written for the user (see datasource).
+      return Left(
+        AuthFailure(message: e.message, errorCode: FailureCodes.userMessage),
+      );
     } catch (e) {
-      return Left(AuthFailure(message: mapExceptionToMessage(e)));
+      return Left(
+        AuthFailure(
+          message: mapExceptionToMessage(e),
+          errorCode: FailureCodes.userMessage,
+        ),
+      );
     }
   }
 
@@ -70,9 +80,17 @@ class AuthRepositoryImpl implements AuthRepository {
 
       return const Right(unit);
     } on AuthException catch (e) {
-      return Left(e.toFailure());
+      // AuthException messages are written for the user (see datasource).
+      return Left(
+        AuthFailure(message: e.message, errorCode: FailureCodes.userMessage),
+      );
     } catch (e) {
-      return Left(AuthFailure(message: mapExceptionToMessage(e)));
+      return Left(
+        AuthFailure(
+          message: mapExceptionToMessage(e),
+          errorCode: FailureCodes.userMessage,
+        ),
+      );
     }
   }
 
@@ -84,9 +102,17 @@ class AuthRepositoryImpl implements AuthRepository {
 
       return Right(user);
     } on AuthException catch (e) {
-      return Left(e.toFailure());
+      // AuthException messages are written for the user (see datasource).
+      return Left(
+        AuthFailure(message: e.message, errorCode: FailureCodes.userMessage),
+      );
     } catch (e) {
-      return Left(AuthFailure(message: mapExceptionToMessage(e)));
+      return Left(
+        AuthFailure(
+          message: mapExceptionToMessage(e),
+          errorCode: FailureCodes.userMessage,
+        ),
+      );
     }
   }
 
@@ -98,7 +124,12 @@ class AuthRepositoryImpl implements AuthRepository {
 
       return Right(isSignedIn);
     } catch (e) {
-      return Left(AuthFailure(message: mapExceptionToMessage(e)));
+      return Left(
+        AuthFailure(
+          message: mapExceptionToMessage(e),
+          errorCode: FailureCodes.userMessage,
+        ),
+      );
     }
   }
 
@@ -110,9 +141,17 @@ class AuthRepositoryImpl implements AuthRepository {
 
       return const Right(unit);
     } on AuthException catch (e) {
-      return Left(e.toFailure());
+      // AuthException messages are written for the user (see datasource).
+      return Left(
+        AuthFailure(message: e.message, errorCode: FailureCodes.userMessage),
+      );
     } catch (e) {
-      return Left(AuthFailure(message: mapExceptionToMessage(e)));
+      return Left(
+        AuthFailure(
+          message: mapExceptionToMessage(e),
+          errorCode: FailureCodes.userMessage,
+        ),
+      );
     }
   }
 
@@ -124,7 +163,12 @@ class AuthRepositoryImpl implements AuthRepository {
 
       return Right(hasScope);
     } catch (e) {
-      return Left(AuthFailure(message: mapExceptionToMessage(e)));
+      return Left(
+        AuthFailure(
+          message: mapExceptionToMessage(e),
+          errorCode: FailureCodes.userMessage,
+        ),
+      );
     }
   }
 
@@ -151,25 +195,25 @@ class AuthRepositoryImpl implements AuthRepository {
     switch (e.code) {
       case 'user-cancelled':
       case 'cancelled':
-        return 'Sign-in was cancelled.';
+        return t.auth.errors.cancelled;
       case 'network-request-failed':
-        return 'Network error. Please check your connection and try again.';
+        return t.auth.errors.network;
       case 'too-many-requests':
-        return 'Too many attempts. Please try again later.';
+        return t.auth.errors.tooManyAttempts;
       default:
-        return 'Authentication failed. Please try again.';
+        return t.auth.errors.failed;
     }
   }
 
   static String _mapPlatformException(PlatformException e) {
     if (e.code == 'network_error' || e.code == 'network-error') {
-      return 'Network error. Please check your connection and try again.';
+      return t.auth.errors.network;
     }
 
     if (e.code == 'sign_in_canceled' || e.code == 'sign_in_failed') {
-      return 'Sign-in was cancelled.';
+      return t.auth.errors.cancelled;
     }
 
-    return 'Authentication failed. Please try again.';
+    return t.auth.errors.failed;
   }
 }

@@ -1,6 +1,7 @@
 // ignore_for_file: unused_import, unused_local_variable
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:expense_tracker/features/message_templates/presentation/bloc/contact_selector_bloc.dart';
 import 'package:expense_tracker/features/message_templates/presentation/bloc/contact_selector_event.dart';
@@ -57,7 +58,7 @@ void main() {
           isA<ContactSelectorError>().having(
             (s) => s.message,
             'message',
-            'Exception: Database error',
+            t.common.errors.generic,
           ),
         ];
 

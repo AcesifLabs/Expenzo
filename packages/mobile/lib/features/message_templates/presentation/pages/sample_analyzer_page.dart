@@ -13,22 +13,14 @@ import '../../domain/entities/message_source.dart';
 import '../widgets/manage_template_sheet.dart';
 import 'template_editor_page.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
+import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/features/sms_parser/domain/entities/sms_message.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_back_button.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_page_header.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
-const Color _background = Color(0xFF141315);
-const Color _surface = Color(0xFF1C1B1D);
-const Color _primary = Color(0xFFD1C4E9);
-const Color _primaryGlow = Color(0x1FD1C4E9);
-const Color _disabledChip = Color(0xFF2C2C2E);
-const Color _disabledChipBorder = Color(0xFF3A3A3C);
-const Color _textPrimary = Color(0xFFF5F7FA);
-const Color _textSecondary = Color(0xFF8E8E93);
-const AlwaysStoppedAnimation<Color> _indicatorColor =
-    AlwaysStoppedAnimation<Color>(_primary);
-const TextStyle _textSecondaryStyle = TextStyle(
-  color: _textSecondary,
-  fontFamily: 'Work Sans',
-);
 const Duration _undoWindowDuration = Duration(seconds: 5);
 const Duration _errorWindowDuration = Duration(seconds: 5);
 
@@ -172,9 +164,9 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
       SnackBar(
         duration: _undoWindowDuration,
         behavior: SnackBarBehavior.floating,
-        content: const Text('Template deleted'),
+        content: Text(t.messageTemplates.deleted),
         action: SnackBarAction(
-          label: 'Undo',
+          label: t.common.undo,
           onPressed: () => _onUndoPressed(template),
         ),
       ),
@@ -219,7 +211,7 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
         backgroundColor: theme.colorScheme.error,
         content: Text(message),
         action: SnackBarAction(
-          label: 'Dismiss',
+          label: t.messageTemplates.dismiss,
           onPressed: () => _onDismissError(),
         ),
       ),
@@ -254,44 +246,26 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
     _lastErrorTimer = null;
   }
 
-  Widget _buildTopBar() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: const Icon(Icons.arrow_back, color: _textPrimary, size: 24),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            'Samples: ${widget.source.contactName}',
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: _textPrimary,
-              fontFamily: 'Work Sans',
-            ),
-          ),
-        ],
+  PreferredSizeWidget _buildTopBar() {
+    return AppPageHeader(
+      leading: const AppBackButton(),
+      title: t.messageTemplates.analyzer.title(
+        sender: widget.source.contactName,
       ),
     );
   }
 
   Widget _buildInfoBanner() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: _surface,
-        borderRadius: BorderRadius.circular(16),
+        color: context.palette.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
       ),
-      child: const Text(
-        'Select a message below to create an expense template. '
-        'The app will learn to extract amounts from similar messages.',
-        style: TextStyle(
-          fontSize: 14,
-          color: _textSecondary,
-          fontFamily: 'Work Sans',
+      child: Text(
+        t.messageTemplates.analyzer.intro,
+        style: AppTypography.bodyMedium.copyWith(
+          color: context.palette.textSecondary,
         ),
       ),
     );
@@ -302,42 +276,40 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
     required bool isTemplated,
     ExpenseTemplate? existingTemplate,
   }) {
+    final palette = context.palette;
+
     return Container(
       decoration: BoxDecoration(
-        color: _surface,
-        borderRadius: BorderRadius.circular(16),
+        color: palette.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
       ),
       child: Material(
-        color: const Color(0x00000000),
+        color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
           onTap: isTemplated ? null : () => _onMessageTap(msg),
           onLongPress: isTemplated && existingTemplate != null
               ? () => _onTemplatedLongPress(msg, existingTemplate)
               : null,
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppSpacing.md),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   DateFormat('MMM dd, yyyy - hh:mm a').format(msg.date),
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: _textSecondary,
-                    fontFamily: 'Work Sans',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: palette.textSecondary,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 Text(
                   msg.body,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: _textPrimary,
-                    fontFamily: 'Work Sans',
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: palette.textPrimary,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.smd),
                 Align(
                   alignment: Alignment.centerRight,
                   child: isTemplated && existingTemplate != null
@@ -353,27 +325,26 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
   }
 
   Widget _buildUseAsTemplateButton(SmsMessage msg) {
+    final accent = context.palette.brand;
+
     return GestureDetector(
       onTap: () => _onMessageTap(msg),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: _primaryGlow,
-          borderRadius: BorderRadius.circular(8),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.smd,
+          vertical: AppSpacing.sm,
         ),
-        child: const Row(
+        decoration: BoxDecoration(
+          color: accent.withAlpha(0x1F),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
+        ),
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.auto_fix_high, size: 16, color: _primary),
-            SizedBox(width: 6),
+            Icon(PiconsRegular.magicWand, size: 16, color: accent),
             Text(
-              'Use as Template',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: _primary,
-                fontFamily: 'Work Sans',
-              ),
+              t.messageTemplates.analyzer.useMessage,
+              style: AppTypography.bodySmall.copyWith(color: accent),
             ),
           ],
         ),
@@ -382,30 +353,39 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
   }
 
   Widget _buildTemplatedChip(ExpenseTemplate _) {
+    final palette = context.palette;
+
     // Painted via `Ink` (not an opaque `Container`) so the chip's grey fill
     // shares the card's InkWell material canvas. This lets the card's
     // long-press highlight overlay the chip too, instead of the chip's fill
     // blocking the ink. The chip has no gesture handlers of its own — the
     // parent card `InkWell` still owns the long-press.
     return Ink(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: _disabledChip,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: _disabledChipBorder, width: 1),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.smd,
+        vertical: AppSpacing.sm,
       ),
-      child: const Row(
+      decoration: BoxDecoration(
+        color: palette.surfaceHigh,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
+        border: Border.all(
+          color: palette.textSecondary.withAlpha(0x40),
+          width: 1,
+        ),
+      ),
+      child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(PiconsRegular.checkCircle, size: 14, color: _textSecondary),
-          SizedBox(width: 6),
+          Icon(
+            PiconsRegular.checkCircle,
+            size: 14,
+            color: palette.textSecondary,
+          ),
+          const SizedBox(width: AppSpacing.sm),
           Text(
-            'Template already exists',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: _textSecondary,
-              fontFamily: 'Work Sans',
+            t.messageTemplates.alreadyExists,
+            style: AppTypography.bodySmall.copyWith(
+              color: palette.textSecondary,
             ),
           ),
         ],
@@ -414,21 +394,26 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
   }
 
   Widget _buildLoading() {
-    return const Center(
-      child: CircularProgressIndicator(valueColor: _indicatorColor),
+    return Center(
+      child: CircularProgressIndicator(color: context.palette.brand),
     );
   }
 
   Widget _buildError(String message) {
-    return Center(child: Text(message, style: _textSecondaryStyle));
+    return Center(
+      child: Text(
+        message,
+        style: TextStyle(color: context.palette.textSecondary),
+      ),
+    );
   }
 
   Widget _buildLoaded(SampleAnalyzerLoaded state) {
     if (state.messages.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
-          'No recent messages found.',
-          style: TextStyle(color: _textSecondary, fontFamily: 'Work Sans'),
+          t.messageTemplates.analyzer.noMessages,
+          style: TextStyle(color: context.palette.textSecondary),
         ),
       );
     }
@@ -437,14 +422,14 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
 
     return ListView.builder(
       controller: _scrollController,
-      padding: const EdgeInsets.only(top: 16),
+      padding: const EdgeInsets.only(top: AppSpacing.md),
       itemCount: state.hasReachedMax ? messageCount : messageCount + 1,
       itemBuilder: (context, index) {
         if (index >= state.messages.length) {
-          return const Center(
+          return Center(
             child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: CircularProgressIndicator(valueColor: _indicatorColor),
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: CircularProgressIndicator(color: context.palette.brand),
             ),
           );
         }
@@ -453,7 +438,7 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
         final existing = state.matchedTemplatesByMessageBody[msg.body];
 
         return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.only(bottom: AppSpacing.smd),
           child: _buildMessageCard(
             msg,
             isTemplated: existing != null,
@@ -506,7 +491,8 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _background,
+      backgroundColor: context.palette.bg,
+      appBar: _buildTopBar(),
       body: MultiBlocListener(
         listeners: [
           // Undo SnackBar — fires when `pendingDeletion` transitions
@@ -536,14 +522,16 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
         child: SafeArea(
           bottom: false,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.md,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _buildTopBar(),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.smd),
                 _buildInfoBanner(),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.smd),
                 Expanded(child: _buildContent()),
               ],
             ),

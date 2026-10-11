@@ -79,7 +79,7 @@ void main() {
     test('makeUserSettings with defaults produces valid UserSettings', () {
       final s = makeUserSettings();
       expect(s.id, 1);
-      expect(s.currencySymbol, '\$');
+      expect(s.currencyCode, 'USD');
       expect(s.notificationsEnabled, true);
       expect(s.theme, 'system');
     });

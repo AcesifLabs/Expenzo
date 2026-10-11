@@ -8,6 +8,7 @@ import 'package:expense_tracker/features/dashboard/domain/usecases/get_dashboard
 import 'package:expense_tracker/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:expense_tracker/features/dashboard/presentation/bloc/dashboard_event.dart';
 import 'package:expense_tracker/features/dashboard/presentation/bloc/dashboard_state.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class MockGetDashboardSummary extends Mock implements GetDashboardSummary {}
 
@@ -71,7 +72,7 @@ void main() {
         isA<DashboardError>().having(
           (s) => s.message,
           'message',
-          'Failed to load',
+          t.common.errors.server,
         ),
       ];
 

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:expense_tracker/core/utils/color_utils.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
-import 'package:expense_tracker/shared/presentation/widgets/app_icons.dart';
+import 'package:expense_tracker/shared/presentation/widgets/category_tile.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 import '../../domain/entities/category.dart';
+import 'package:expense_tracker/features/categories/presentation/helpers/category_display_name.dart';
 
 class CategoryCard extends StatelessWidget {
   final Category category;
@@ -18,29 +19,19 @@ class CategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final parsedColor = ColorUtils.fromHex(category.color);
+    final textTheme = Theme.of(context).textTheme;
 
     return AppCard(
       onTap: onTap,
       onLongPress: onLongPress,
-      backgroundColor: const Color(0x00000000),
-      borderColor: parsedColor,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            AppIcons.getCategoryIcon(category.emoji),
-            size: 32,
-            color: parsedColor,
-          ),
-          const SizedBox(height: 8),
+          CategoryTile(colorHex: category.color, iconKey: category.emoji),
+          const SizedBox(height: AppSpacing.sm),
           Text(
-            category.name,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: parsedColor,
-            ),
+            category.displayName,
+            style: textTheme.titleSmall,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

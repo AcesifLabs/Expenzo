@@ -1,6 +1,9 @@
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
+import 'package:picons/picons.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class AppErrorFallback extends StatelessWidget {
   static String generateReferenceId() {
@@ -18,7 +21,9 @@ class AppErrorFallback extends StatelessWidget {
   final VoidCallback? onRetry;
   final VoidCallback? onHardReset;
   final VoidCallback? onRestart;
-  final WidgetBuilder? feedbackBuilder;
+
+  /// Shows the Send feedback action when set.
+  final VoidCallback? onSendFeedback;
 
   const AppErrorFallback({
     super.key,
@@ -30,52 +35,34 @@ class AppErrorFallback extends StatelessWidget {
     this.onRetry,
     this.onHardReset,
     this.onRestart,
-    this.feedbackBuilder,
+    this.onSendFeedback,
   });
 
   String get _title {
     return switch (fallbackContext) {
-      AppFallbackContext.init => 'App could not start',
-      AppFallbackContext.build => 'Something went wrong',
-      AppFallbackContext.framework => 'Something went wrong',
-      AppFallbackContext.async => 'Something went wrong',
+      AppFallbackContext.init => t.common.fallback.initTitle,
+      AppFallbackContext.build => t.common.fallback.errorTitle,
+      AppFallbackContext.framework => t.common.fallback.errorTitle,
+      AppFallbackContext.async => t.common.fallback.errorTitle,
     };
   }
 
   String get _body {
     return switch (fallbackContext) {
-      AppFallbackContext.init =>
-        'We could not finish setting up the app. '
-            'This is usually temporary — please try again, or restart the app.',
-      _ =>
-        'We hit an unexpected error. '
-            'You can try again, restart the app, or send us feedback '
-            'so we can fix it.',
-    };
-  }
-
-  VoidCallback? _buildSendFeedbackHandler(BuildContext context) {
-    final builder = feedbackBuilder;
-    if (builder == null) return null;
-
-    return () {
-      context.push('/feedback');
+      AppFallbackContext.init => t.common.fallback.initBody,
+      _ => t.common.fallback.errorBody,
     };
   }
 
   Widget _errorIcon(ColorScheme scheme) {
-    return Icon(Icons.error_outline, color: scheme.error, size: 64);
+    return Icon(PiconsRegular.warningCircle, color: scheme.error, size: 64);
   }
 
   Widget _errorTitle(ColorScheme scheme) {
     return Text(
       _title,
       textAlign: TextAlign.center,
-      style: TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.bold,
-        color: scheme.onSurface,
-      ),
+      style: AppTypography.headlineSmall.copyWith(color: scheme.onSurface),
     );
   }
 
@@ -83,8 +70,7 @@ class AppErrorFallback extends StatelessWidget {
     return Text(
       _body,
       textAlign: TextAlign.center,
-      style: TextStyle(
-        fontSize: 14,
+      style: AppTypography.bodyMedium.copyWith(
         height: 1.5,
         color: scheme.onSurface.withAlpha(140),
       ),
@@ -93,21 +79,20 @@ class AppErrorFallback extends StatelessWidget {
 
   Widget _referenceLabel(ColorScheme scheme) {
     return SelectableText(
-      'Ref: $referenceId',
+      t.common.fallback.reference(id: referenceId),
       textAlign: TextAlign.center,
-      style: TextStyle(
-        fontSize: 12,
+      style: AppTypography.bodySmall.copyWith(
         letterSpacing: 0.5,
         color: scheme.onSurface.withAlpha(100),
-        fontFeatures: const [FontFeature.tabularFigures()],
+        fontFeatures: [const FontFeature.tabularFigures()],
       ),
     );
   }
 
   Widget _retryButton() {
     return _FallbackButton(
-      label: 'Try Again',
-      icon: Icons.refresh,
+      label: t.common.tryAgain,
+      icon: PiconsRegular.arrowsClockwise,
       filled: true,
       onTap: onRetry,
       onLongPress: onHardReset,
@@ -118,19 +103,19 @@ class AppErrorFallback extends StatelessWidget {
     return [
       _retryButton(),
       if (onRestart != null) ...[
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         _FallbackButton(
-          label: 'Close App',
-          icon: Icons.power_settings_new,
+          label: t.common.fallback.closeApp,
+          icon: PiconsRegular.power,
           filled: false,
           onTap: onRestart,
         ),
       ],
       if (onSendFeedback != null) ...[
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         _FallbackButton(
-          label: 'Send Feedback',
-          icon: Icons.feedback_outlined,
+          label: t.common.sendFeedback,
+          icon: PiconsRegular.chatCircleText,
           filled: false,
           textOnly: true,
           onTap: onSendFeedback,
@@ -142,7 +127,6 @@ class AppErrorFallback extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final onSendFeedback = _buildSendFeedbackHandler(context);
     final localException = exception;
 
     return Material(
@@ -150,7 +134,7 @@ class AppErrorFallback extends StatelessWidget {
       child: SafeArea(
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(AppSpacing.lg),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 420),
               child: SingleChildScrollView(
@@ -159,20 +143,20 @@ class AppErrorFallback extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     _errorIcon(scheme),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.lg),
                     _errorTitle(scheme),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.smd),
                     _errorBody(scheme),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.smd),
                     _referenceLabel(scheme),
                     if (kDebugMode && localException != null) ...[
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppSpacing.md),
                       _DebugDetails(
                         exception: localException,
                         formatDebugType: formatDebugType,
                       ),
                     ],
-                    const SizedBox(height: 32),
+                    const SizedBox(height: AppSpacing.xl),
                     ..._buildActions(onSendFeedback),
                   ],
                 ),
@@ -206,12 +190,12 @@ class _FallbackButton extends StatelessWidget {
 
   (Color, Color, BorderSide?) _resolveStyle(ColorScheme scheme) {
     if (textOnly) {
-      return (const Color(0x00000000), scheme.primary, null);
+      return (Colors.transparent, scheme.primary, null);
     } else if (filled) {
       return (scheme.primary, scheme.onPrimary, null);
     } else {
       return (
-        const Color(0x00000000),
+        Colors.transparent,
         scheme.primary,
         BorderSide(color: scheme.primary, width: 1),
       );
@@ -228,28 +212,27 @@ class _FallbackButton extends StatelessWidget {
       child: Material(
         color: bg,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
           side: border ?? BorderSide.none,
         ),
         child: InkWell(
           onTap: onTap,
           onLongPress: onLongPress,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.md,
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(icon, size: 18, color: fg),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 Text(
                   label,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: fg,
-                  ),
+                  style: AppTypography.labelLarge.copyWith(color: fg),
                 ),
               ],
             ),
@@ -282,21 +265,24 @@ class _DebugDetailsState extends State<_DebugDetails> {
   Widget _expandToggle(Color mutedColor) {
     return InkWell(
       onTap: () => setState(() => _expanded = !_expanded),
-      borderRadius: BorderRadius.circular(4),
+      borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+        padding: const EdgeInsets.symmetric(
+          vertical: AppSpacing.xs,
+          horizontal: AppSpacing.xs,
+        ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              _expanded ? Icons.expand_less : Icons.expand_more,
+              _expanded ? PiconsRegular.caretUp : PiconsRegular.caretDown,
               size: 18,
               color: mutedColor,
             ),
-            const SizedBox(width: 4),
+            const SizedBox(width: AppSpacing.xs),
             Text(
-              'Details (debug)',
-              style: TextStyle(fontSize: 12, color: mutedColor),
+              t.common.fallback.debugDetails,
+              style: AppTypography.bodySmall.copyWith(color: mutedColor),
             ),
           ],
         ),
@@ -307,16 +293,15 @@ class _DebugDetailsState extends State<_DebugDetails> {
   Widget _detailContent(ColorScheme scheme) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(AppSpacing.smd),
       decoration: BoxDecoration(
         color: scheme.onSurface.withAlpha(10),
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
       ),
       child: Text(
         _format(widget.exception),
-        style: TextStyle(
+        style: AppTypography.bodySmall.copyWith(
           fontFamily: 'monospace',
-          fontSize: 11,
           color: scheme.onSurface.withAlpha(150),
         ),
       ),
@@ -332,7 +317,10 @@ class _DebugDetailsState extends State<_DebugDetails> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _expandToggle(mutedColor),
-        if (_expanded) ...[const SizedBox(height: 4), _detailContent(scheme)],
+        if (_expanded) ...[
+          const SizedBox(height: AppSpacing.xs),
+          _detailContent(scheme),
+        ],
       ],
     );
   }

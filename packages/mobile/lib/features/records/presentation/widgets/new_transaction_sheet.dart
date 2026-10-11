@@ -8,10 +8,8 @@ import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/core/logger/app_logger.dart';
-import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:expense_tracker/features/categories/domain/entities/category.dart';
 import 'package:expense_tracker/features/categories/domain/usecases/get_categories.dart';
-import 'package:expense_tracker/shared/presentation/widgets/app_icons.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_state.dart';
 import '../../../categories/presentation/bloc/category_event.dart';
@@ -25,14 +23,73 @@ import 'package:expense_tracker/features/recurring/domain/repositories/recurring
 import 'package:expense_tracker/features/receipt_scan/domain/entities/receipt_extraction.dart';
 import 'package:expense_tracker/features/receipt_scan/presentation/helpers/category_name_matcher.dart';
 import 'package:expense_tracker/features/receipt_scan/presentation/pages/receipt_scan_camera_page.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
+import 'package:expense_tracker/shared/presentation/widgets/category_tile.dart';
+import 'package:expense_tracker/core/utils/currency_formatter.dart';
+import 'package:expense_tracker/features/records/domain/usecases/update_record.dart';
+import 'package:expense_tracker/features/records/domain/usecases/delete_record.dart';
+import 'package:expense_tracker/features/records/presentation/bloc/record_bloc.dart';
+import 'package:expense_tracker/features/records/presentation/bloc/record_event.dart';
+import 'package:expense_tracker/features/records/presentation/bloc/record_state.dart';
 import 'new_transaction/numeric_keypad.dart';
 import 'new_transaction/type_toggle.dart';
 import 'new_transaction/typewriter_animation_mixin.dart';
+import 'package:expense_tracker/features/budgets/domain/usecases/check_budget_alerts.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
+import 'package:expense_tracker/core/error/failure_message.dart';
+import 'package:expense_tracker/features/categories/presentation/helpers/category_display_name.dart';
 
+/// Opens the transaction sheet to add a record, or to edit [record].
+///
+/// Returns true when something was saved or deleted.
+Future<bool> showTransactionSheet(
+  BuildContext context, {
+  Record? record,
+  String? budgetId,
+}) async {
+  final saved = await showModalBottomSheet<bool>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (_) => MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: context.read<RecordBloc>()),
+        BlocProvider.value(value: context.read<CategoryBloc>()),
+      ],
+      child: NewTransactionSheet(
+        initialRecord: record,
+        initialBudgetId: budgetId,
+        recurringRepository: di.getIt<RecurringRepository>(),
+      ),
+    ),
+  );
+  // The sheet filters categories by type; restore the full list.
+  if (context.mounted) {
+    context.read<CategoryBloc>().add(const LoadCategories());
+  }
+
+  return saved == true;
+}
+
+/// The one Record editor (docs/adr/0004): adds a record, or edits
+/// [initialRecord] when given. Pops `true` after a save or delete.
 class NewTransactionSheet extends StatefulWidget {
   final RecurringRepository? recurringRepository;
 
-  const NewTransactionSheet({super.key, this.recurringRepository});
+  /// The record to edit; null to add a new one.
+  final Record? initialRecord;
+
+  /// Preselects a budget when adding from a budget's page.
+  final String? initialBudgetId;
+
+  const NewTransactionSheet({
+    super.key,
+    this.recurringRepository,
+    this.initialRecord,
+    this.initialBudgetId,
+  });
 
   @override
   State<NewTransactionSheet> createState() => _NewTransactionSheetState();
@@ -40,23 +97,11 @@ class NewTransactionSheet extends StatefulWidget {
 
 class _NewTransactionSheetState extends State<NewTransactionSheet>
     with TickerProviderStateMixin, TypewriterAnimationMixin {
-  static const _expensePlaceholders = [
-    'Groceries',
-    'Uber to office',
-    'Lunch with colleague',
-    'Netflix subscription',
-    'Electricity bill',
-    'Gas station',
-  ];
+  static List<String> get _expensePlaceholders =>
+      t.records.sheet.placeholders.expense;
 
-  static const _incomePlaceholders = [
-    'Salary',
-    'Freelance payment',
-    'Side hustle',
-    'Refund',
-    'Bonus',
-    'Investment dividend',
-  ];
+  static List<String> get _incomePlaceholders =>
+      t.records.sheet.placeholders.income;
 
   RecordType _type = RecordType.expense;
   final _amountText = ValueNotifier<String>('');
@@ -73,20 +118,41 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
 
   double get _parsedAmount => double.tryParse(_amountText.value) ?? 0;
 
+  bool get _isEditing => widget.initialRecord != null;
+
   Color get _typeAccentColor => _type == RecordType.expense
-      ? Theme.of(context).colorScheme.error
-      : Theme.of(context).colorScheme.primary;
+      ? context.palette.expense
+      : context.palette.income;
 
   @override
   void initState() {
     super.initState();
+    _prefillFrom(widget.initialRecord);
+    _selectedBudgetId ??= widget.initialBudgetId;
     _loadCategories();
     _loadBudgets();
-    initTypewriter(_expensePlaceholders);
+    initTypewriter(
+      _type == RecordType.expense ? _expensePlaceholders : _incomePlaceholders,
+    );
     _noteCtrl.addListener(_onNoteChanged);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) startTypewriter();
-    });
+    // A prefilled name needs no example names cycling behind it.
+    if (_isEditing) {
+      pauseTypewriter();
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) startTypewriter();
+      });
+    }
+  }
+
+  void _prefillFrom(Record? record) {
+    if (record == null) return;
+    _type = record.recordType;
+    _amountText.value = CurrencyFormatter.formatInput(record.amount.abs());
+    _noteCtrl.text = record.description;
+    _selectedCategoryId = record.categoryId;
+    _selectedBudgetId = record.budgetId;
+    _selectedDate = record.date;
   }
 
   void _onNoteChanged() {
@@ -111,7 +177,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     if (!mounted) return;
     setState(() {
       _budgets = result
-          .getOrElse(() => const <Budget>[])
+          .getOrElse(() => <Budget>[])
           .where((b) => b.isEnabled)
           .toList();
       _budgetsLoading = false;
@@ -137,10 +203,10 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     }
   }
 
-  void _switchType(RecordType t) {
+  void _switchType(RecordType type) {
     stopTypewriter();
     setState(() {
-      _type = t;
+      _type = type;
       _selectedCategoryId = null;
       _selectedBudgetId = null;
       _labelError = false;
@@ -148,7 +214,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     });
     _loadCategories();
     initTypewriter(
-      t == RecordType.expense ? _expensePlaceholders : _incomePlaceholders,
+      type == RecordType.expense ? _expensePlaceholders : _incomePlaceholders,
     );
     if (!isTypewriterPaused) startTypewriter();
   }
@@ -163,7 +229,8 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
 
   void _appendDigit(String d) {
     final current = _amountText.value;
-    if (d == '.' && current.contains('.')) return;
+    final digits = CurrencyFormatter.current.value.decimalDigits;
+    if (d == '.' && (digits == 0 || current.contains('.'))) return;
 
     if (current == '0' && d != '.') {
       _amountText.value = d;
@@ -172,7 +239,9 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     }
 
     final dotIndex = current.indexOf('.');
-    if (dotIndex != -1 && current.substring(dotIndex + 1).length >= 2) return;
+    if (dotIndex != -1 && current.substring(dotIndex + 1).length >= digits) {
+      return;
+    }
 
     if (current.replaceAll('.', '').length >= 10) return;
     _amountText.value = current + d;
@@ -193,7 +262,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       hasError = true;
       ScaffoldMessenger.of(context)
         ..clearSnackBars()
-        ..showSnackBar(const SnackBar(content: Text('Enter an amount')));
+        ..showSnackBar(SnackBar(content: Text(t.records.sheet.enterAmount)));
     }
     if (description.isEmpty) hasError = true;
     if (_selectedCategoryId == null) hasError = true;
@@ -220,21 +289,38 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
 
     final now = DateTime.now().toUtc();
     final finalAmount = _type == RecordType.expense ? -amount : amount;
+    final budgetId = _type == RecordType.expense ? _selectedBudgetId : null;
+    final original = widget.initialRecord;
 
-    final record = Record(
-      amount: finalAmount,
-      description: description,
-      date: _selectedDate,
-      categoryId: _selectedCategoryId,
-      budgetId: _type == RecordType.expense ? _selectedBudgetId : null,
-      source: ExpenseSource.manual,
-      recordType: _type,
-      createdAt: now,
-      updatedAt: now,
-    );
+    // Editing keeps what this sheet doesn't show (id, source, createdAt).
+    // copyWith clears a field passed as null, so "no budget" (or switching
+    // to income) saves budgetId as null.
+    final record = original != null
+        ? original.copyWith(
+            amount: finalAmount,
+            description: description,
+            date: _selectedDate,
+            categoryId: _selectedCategoryId,
+            budgetId: budgetId,
+            recordType: _type,
+            updatedAt: now,
+          )
+        : Record(
+            amount: finalAmount,
+            description: description,
+            date: _selectedDate,
+            categoryId: _selectedCategoryId,
+            budgetId: budgetId,
+            source: ExpenseSource.manual,
+            recordType: _type,
+            createdAt: now,
+            updatedAt: now,
+          );
 
-    // Await insert so Home can refresh against committed data after pop(true).
-    final result = await di.getIt<AddRecord>()(record);
+    // Await the write so lists refresh against committed data after pop.
+    final result = original != null
+        ? await di.getIt<UpdateRecord>()(record)
+        : await di.getIt<AddRecord>()(record);
     if (!mounted) return;
 
     final failed = result.fold((failure) {
@@ -244,22 +330,73 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       setState(() => _isSubmitting = false);
       ScaffoldMessenger.of(context)
         ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(failure.message)));
+        ..showSnackBar(SnackBar(content: Text(failureText(failure))));
 
       return true;
     }, (_) => false);
     if (failed) return;
 
-    if (_isRecurring) {
-      final created = await _createRecurringTransaction(finalAmount);
-      if (!created) {
-        if (mounted) setState(() => _isSubmitting = false);
-
-        return;
-      }
+    // The record is already saved, so close even if the repeat fails: staying
+    // open would invite a second tap and a duplicate record.
+    if (_isRecurring && !_isEditing) {
+      await _createRecurringTransaction(finalAmount);
     }
 
-    if (mounted) Navigator.pop(context, true);
+    _closeAfterChange();
+  }
+
+  void _closeAfterChange() {
+    if (!mounted) return;
+    // A loaded list already follows the records stream; reloading would
+    // throw away the Activity search, filters and scroll position.
+    final records = context.read<RecordBloc>();
+    if (records.state is! RecordLoaded) records.add(const LoadRecords());
+    if (di.getIt.isRegistered<CheckBudgetAlerts>()) {
+      unawaited(di.getIt<CheckBudgetAlerts>()());
+    }
+    Navigator.pop(context, true);
+  }
+
+  Future<void> _confirmDelete() async {
+    final record = widget.initialRecord;
+    final id = record?.id;
+    if (record == null || id == null) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(
+          record.recordType == RecordType.expense
+              ? t.records.sheet.deleteExpenseTitle
+              : t.records.sheet.deleteIncomeTitle,
+        ),
+        content: Text(t.records.sheet.cannotUndo),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(t.common.cancel),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(dialogContext).colorScheme.error,
+            ),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(t.common.delete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _isSubmitting = true);
+    final result = await di.getIt<DeleteRecord>()(id);
+    if (!mounted) return;
+    result.fold((failure) {
+      setState(() => _isSubmitting = false);
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(failureText(failure))));
+    }, (_) => _closeAfterChange());
   }
 
   Future<bool> _createRecurringTransaction(double finalAmount) async {
@@ -270,16 +407,14 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
           ScaffoldMessenger.of(context)
             ..clearSnackBars()
             ..showSnackBar(
-              const SnackBar(
-                content: Text('Recurring transactions are not ready yet.'),
-              ),
+              SnackBar(content: Text(t.records.sheet.repeatFailed)),
             );
         }
 
         return false;
       }
 
-      await repo.createRecurring(
+      final result = await repo.createRecurring(
         RecurringTransaction(
           description: _noteCtrl.text.trim(),
           amount: finalAmount,
@@ -293,8 +428,10 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
           dayOfMonth: _selectedDate.day,
         ),
       );
-
-      return true;
+      // A failure comes back as a value, not an exception.
+      return result.fold((failure) {
+        throw StateError(failure.message);
+      }, (_) => true);
     } catch (e, s) {
       debugPrint('Error: $e\n$s');
       debugPrint(
@@ -304,10 +441,8 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
         ScaffoldMessenger.of(context)
           ..clearSnackBars()
           ..showSnackBar(
-            const SnackBar(
-              content: Text(
-                'Recurring transaction could not be saved. You can set it up later from the Recurring tab.',
-              ),
+            SnackBar(
+              content: Text(t.records.sheet.repeatFailed),
               duration: Duration(seconds: 3),
             ),
           );
@@ -325,7 +460,9 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       return typewriterDisplayText;
     }
 
-    return _type == RecordType.expense ? 'Name of expense' : 'Name of income';
+    return _type == RecordType.expense
+        ? t.records.sheet.nameHintExpense
+        : t.records.sheet.nameHintIncome;
   }
 
   String _formatAmount(double amount) {
@@ -345,7 +482,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     );
 
     return result.fold(
-      (_) => const <Category>[],
+      (_) => <Category>[],
       (categories) =>
           categories.where((c) => c.type == RecordType.expense).toList(),
     );
@@ -399,7 +536,12 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
 
   Widget _buildTypeToggle() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 12, 24, 8),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.smd,
+        AppSpacing.lg,
+        AppSpacing.sm,
+      ),
       child: TypeToggle(type: _type, onSwitch: _switchType),
     );
   }
@@ -408,17 +550,24 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     return ValueListenableBuilder<String>(
       valueListenable: _amountText,
       builder: (_, val, _) {
-        final displayVal = val.isEmpty ? '0' : val;
+        // No sign on the empty "0": "-0" reads as a value.
+        final isEmpty = val.isEmpty;
         final sign = _type == RecordType.expense ? '-' : '+';
+        final symbol = CurrencyFormatter.current.value.symbol;
 
         return Padding(
-          padding: const EdgeInsets.fromLTRB(0, 8, 0, 4),
+          padding: const EdgeInsets.fromLTRB(
+            0,
+            AppSpacing.sm,
+            0,
+            AppSpacing.xs,
+          ),
           child: Text(
-            '$sign$displayVal',
-            style: TextStyle(
-              fontSize: 48,
-              fontWeight: FontWeight.w700,
-              color: _typeAccentColor,
+            isEmpty ? '${symbol}0' : '$sign$symbol$val',
+            style: AppTypography.headlineLarge.copyWith(
+              color: isEmpty
+                  ? Theme.of(context).colorScheme.onSurface.withAlpha(90)
+                  : _typeAccentColor,
               letterSpacing: -1,
             ),
           ),
@@ -436,7 +585,12 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     final borderWidth = _labelError ? 1.5 : 1.0;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 12, 24, 8),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.smd,
+        AppSpacing.lg,
+        AppSpacing.sm,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -448,24 +602,32 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                   cursorColor: _labelError ? colors.error : typeColor,
                   decoration: InputDecoration(
                     hintText: _getHintText(),
-                    errorText: _labelError ? 'Description is required' : null,
+                    errorText: _labelError
+                        ? t.records.sheet.nameRequired
+                        : null,
                     hintStyle: TextStyle(color: colors.onSurface.withAlpha(80)),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusControl,
+                      ),
                       borderSide: BorderSide(
                         color: borderColor,
                         width: borderWidth,
                       ),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusControl,
+                      ),
                       borderSide: BorderSide(
                         color: borderColor,
                         width: borderWidth,
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusControl,
+                      ),
                       borderSide: BorderSide(
                         color: _labelError ? colors.error : typeColor,
                         width: 2.0,
@@ -474,31 +636,38 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                     filled: true,
                     fillColor: colors.surfaceContainerLow,
                     contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.md,
                     ),
                   ),
-                  style: TextStyle(fontSize: 15, color: colors.onSurface),
+                  style: AppTypography.bodyLarge.copyWith(
+                    color: colors.onSurface,
+                  ),
                 ),
               ),
-              const SizedBox(width: 8),
-              Material(
-                color: colors.secondary.withAlpha(32),
-                borderRadius: BorderRadius.circular(12),
-                child: InkWell(
-                  onTap: _isSubmitting
-                      ? null
-                      : () {
-                          unawaited(_openReceiptScan());
-                        },
-                  borderRadius: BorderRadius.circular(12),
-                  child: SizedBox(
-                    width: 48,
-                    height: 48,
-                    child: Icon(
-                      PiconsRegular.receipt,
-                      size: 22,
-                      color: colors.secondary,
+              const SizedBox(width: AppSpacing.sm),
+              Tooltip(
+                message: t.records.sheet.scanReceipt,
+                child: Material(
+                  color: colors.primary.withAlpha(32),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
+                  child: InkWell(
+                    onTap: _isSubmitting
+                        ? null
+                        : () {
+                            unawaited(_openReceiptScan());
+                          },
+                    borderRadius: BorderRadius.circular(
+                      AppSpacing.radiusControl,
+                    ),
+                    child: SizedBox(
+                      width: 48,
+                      height: 48,
+                      child: Icon(
+                        PiconsRegular.receipt,
+                        size: 22,
+                        color: colors.primary,
+                      ),
                     ),
                   ),
                 ),
@@ -514,28 +683,33 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     return Expanded(
       child: InkWell(
         onTap: () => _pickDate(context),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          constraints: const BoxConstraints(minHeight: AppSpacing.minTapTarget),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.smd,
+          ),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
             border: Border.all(color: colors.onSurface.withAlpha(12)),
             color: colors.surfaceContainerLow,
           ),
           child: Row(
             children: [
               Icon(
-                PiconsLight.calendar,
+                PiconsRegular.calendar,
                 size: 20,
                 color: colors.onSurface.withAlpha(120),
               ),
-              const SizedBox(width: 10),
-              Text(
-                dateFmt.format(_selectedDate),
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: colors.onSurface,
+              const SizedBox(width: AppSpacing.smd),
+              Flexible(
+                child: Text(
+                  dateFmt.format(_selectedDate),
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: colors.onSurface,
+                  ),
                 ),
               ),
             ],
@@ -550,51 +724,37 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     final mutedIconColor = colors.onSurface.withAlpha(120);
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 12, 24, 8),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.smd,
+        AppSpacing.lg,
+        AppSpacing.sm,
+      ),
       child: Row(
         children: [
           _buildDatePicker(colors, dateFmt),
-          const SizedBox(width: 12),
-          _RecurringCheckbox(
-            isRecurring: _isRecurring,
-            type: _type,
-            colors: colors,
-            mutedIconColor: mutedIconColor,
-            onChanged: (v) => setState(() => _isRecurring = v),
-          ),
+          // Repeating is set up when adding; editing changes one record.
+          if (!_isEditing) ...[
+            const SizedBox(width: AppSpacing.smd),
+            _RecurringCheckbox(
+              isRecurring: _isRecurring,
+              type: _type,
+              colors: colors,
+              mutedIconColor: mutedIconColor,
+              onChanged: (v) => setState(() => _isRecurring = v),
+            ),
+          ],
         ],
       ),
     );
   }
 
   Future<void> _pickDate(BuildContext context) async {
-    final typePrimary = _typeAccentColor;
     final picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
-      builder: (ctx, child) {
-        final ctxColorScheme = Theme.of(ctx).colorScheme;
-        final ctxOnSurface = ctxColorScheme.onSurface;
-        final isDark =
-            Theme.of(context).colorScheme.brightness == Brightness.dark;
-
-        return Theme(
-          data: Theme.of(ctx).copyWith(
-            colorScheme: isDark
-                ? ColorScheme.dark(
-                    primary: typePrimary,
-                    onPrimary: ctxOnSurface,
-                    surface: AppColors.surfaceDark,
-                    onSurface: ctxOnSurface,
-                    onSurfaceVariant: ctxOnSurface.withAlpha(180),
-                  )
-                : null,
-          ),
-          child: child ?? const SizedBox.shrink(),
-        );
-      },
     );
     if (picked != null) setState(() => _selectedDate = picked);
   }
@@ -614,14 +774,26 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
 
   Widget _buildBudgetSelector(ColorScheme colors) {
     final noneOrEmpty = _budgetsLoading || _budgets.isEmpty;
+    final selectedId = _selectedBudgetId;
+    final isListed = _budgets.any((b) => b.id == selectedId);
+    // An edited record can point at a budget that is still loading, or that
+    // has since been disabled. Keep the link (it is saved unchanged) but only
+    // hand the dropdown a value it has an item for.
+    final showInactiveLink =
+        selectedId != null && !isListed && !_budgetsLoading;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 12, 24, 8),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.smd,
+        AppSpacing.lg,
+        AppSpacing.sm,
+      ),
       child: InputDecorator(
         decoration: _buildBudgetFieldDecoration(colors),
         child: DropdownButtonHideUnderline(
           child: DropdownButton<String?>(
-            value: _selectedBudgetId,
+            value: isListed || showInactiveLink ? selectedId : null,
             hint: _buildBudgetHint(colors),
             isExpanded: true,
             icon: Icon(
@@ -631,20 +803,36 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
             dropdownColor: colors.surfaceContainerLow,
             isDense: true,
             items: [
-              const DropdownMenuItem<String?>(
+              DropdownMenuItem<String?>(
                 value: null,
-                child: Text('No budget', overflow: TextOverflow.ellipsis),
+                child: Text(
+                  t.records.sheet.noBudget,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
               for (final budget in _budgets)
                 DropdownMenuItem<String?>(
                   value: budget.id,
                   child: Text(
-                    '${budget.name} · ${budget.period.displayName}',
+                    t.records.sheet.budgetOption(
+                      name: budget.name,
+                      period: budget.period.displayName,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              if (showInactiveLink)
+                DropdownMenuItem<String?>(
+                  value: selectedId,
+                  child: Text(
+                    t.records.sheet.previousBudget,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
             ],
-            onChanged: noneOrEmpty ? null : _onBudgetSelected,
+            onChanged: noneOrEmpty && !showInactiveLink
+                ? null
+                : _onBudgetSelected,
           ),
         ),
       ),
@@ -653,7 +841,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
 
   InputDecoration _buildBudgetFieldDecoration(ColorScheme colors) {
     final idleBorder = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
       borderSide: BorderSide(color: colors.onSurface.withAlpha(12)),
     );
 
@@ -663,10 +851,13 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       border: idleBorder,
       enabledBorder: idleBorder,
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
         borderSide: BorderSide(color: colors.primary, width: 2),
       ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.smd,
+      ),
     );
   }
 
@@ -676,7 +867,9 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
 
   Widget _buildBudgetHint(ColorScheme colors) {
     final hintColor = colors.onSurface.withAlpha(120);
-    final text = _budgetsLoading ? 'Loading budgets…' : 'No budget';
+    final text = _budgetsLoading
+        ? t.records.sheet.loadingBudgets
+        : t.records.sheet.noBudget;
 
     return Text(text, style: TextStyle(color: hintColor));
   }
@@ -699,9 +892,14 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       }
 
       return Padding(
-        padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.sm,
+          AppSpacing.lg,
+          0,
+        ),
         child: Text(
-          'No categories available',
+          t.records.sheet.noCategories,
           style: TextStyle(color: colors.onSurface.withAlpha(80)),
         ),
       );
@@ -716,7 +914,12 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     }
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 12, 24, 8),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.smd,
+        AppSpacing.lg,
+        AppSpacing.sm,
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -740,7 +943,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
               ),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
           _buildAllCategoriesButton(colors),
         ],
       ),
@@ -752,7 +955,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
         ? colors.error
         : colors.onSurface.withAlpha(12);
     final idleBorder = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
       borderSide: BorderSide(color: idleBorderColor),
     );
 
@@ -762,14 +965,17 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       border: idleBorder,
       enabledBorder: idleBorder,
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
         borderSide: BorderSide(
           color: _categoryError ? colors.error : colors.primary,
           width: 2,
         ),
       ),
-      errorText: _categoryError ? 'Select a category' : null,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      errorText: _categoryError ? t.records.sheet.selectCategory : null,
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.smd,
+      ),
     );
   }
 
@@ -795,43 +1001,39 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     return Row(
       children: [
         Icon(PiconsRegular.tag, size: 20, color: hintColor),
-        const SizedBox(width: 12),
-        Text('Select a category', style: TextStyle(color: hintColor)),
+        const SizedBox(width: AppSpacing.smd),
+        Flexible(
+          child: Text(
+            t.records.sheet.selectCategory,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(color: hintColor),
+          ),
+        ),
       ],
     );
   }
 
   Widget _buildCategoryDropdownRow(Category category) {
-    final color = _parseCategoryColor(category.color);
-
     return Row(
       children: [
-        Icon(AppIcons.getCategoryIcon(category.emoji), size: 20, color: color),
-        const SizedBox(width: 12),
-        Expanded(child: Text(category.name, overflow: TextOverflow.ellipsis)),
+        CategoryTile(
+          colorHex: category.color,
+          iconKey: category.emoji,
+          size: 28,
+        ),
+        const SizedBox(width: AppSpacing.smd),
+        Expanded(
+          child: Text(category.displayName, overflow: TextOverflow.ellipsis),
+        ),
       ],
     );
-  }
-
-  Color _parseCategoryColor(String colorHex) {
-    if (colorHex.isNotEmpty) {
-      try {
-        final hex = colorHex.replaceFirst('#', '');
-
-        return Color(int.parse('0xFF$hex'));
-      } catch (_) {
-        // Fallback to default color
-      }
-    }
-
-    return const Color(0xFF8E8E93);
   }
 
   Widget _buildCategorySelectorLoading(ColorScheme colors) {
     return Container(
       height: 50,
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      margin: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       alignment: Alignment.center,
       child: SizedBox(
         width: 20,
@@ -845,11 +1047,32 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   }
 
   Widget _buildSubmitButton(ColorScheme colors) {
-    return _SubmitButton(
-      isSubmitting: _isSubmitting,
-      type: _type,
-      colors: colors,
-      onSubmit: _submit,
+    return Column(
+      children: [
+        _SubmitButton(
+          isSubmitting: _isSubmitting,
+          label: _isEditing
+              ? t.common.save
+              : _type == RecordType.expense
+              ? t.common.addExpense
+              : t.records.sheet.addIncome,
+          onSubmit: _submit,
+        ),
+        if (_isEditing)
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.md),
+            child: TextButton.icon(
+              style: TextButton.styleFrom(foregroundColor: colors.error),
+              onPressed: _isSubmitting ? null : _confirmDelete,
+              icon: const Icon(PiconsRegular.trash, size: 18),
+              label: Text(
+                _type == RecordType.expense
+                    ? t.records.sheet.deleteExpense
+                    : t.records.sheet.deleteIncome,
+              ),
+            ),
+          ),
+      ],
     );
   }
 
@@ -870,12 +1093,16 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       onTap: () => FocusScope.of(context).unfocus(),
       onHorizontalDragEnd: _onHorizontalSwipe,
       behavior: HitTestBehavior.translucent,
+      // Keyboard dismissal and the type swipe both have explicit controls.
+      excludeFromSemantics: true,
       child: Padding(
         padding: EdgeInsets.only(bottom: bottomInset),
         child: Container(
           decoration: BoxDecoration(
             color: colors.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(AppSpacing.radiusCard),
+            ),
           ),
           child: SingleChildScrollView(
             child: Column(
@@ -911,13 +1138,16 @@ class _DragHandle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 12, bottom: 4),
+      padding: const EdgeInsets.only(
+        top: AppSpacing.smd,
+        bottom: AppSpacing.xs,
+      ),
       child: Container(
         width: 40,
         height: 4,
         decoration: BoxDecoration(
           color: colors.onSurface.withAlpha(50),
-          borderRadius: BorderRadius.circular(2),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
         ),
       ),
     );
@@ -926,45 +1156,29 @@ class _DragHandle extends StatelessWidget {
 
 class _SubmitButton extends StatelessWidget {
   final bool isSubmitting;
-  final RecordType type;
-  final ColorScheme colors;
+  final String label;
   final Future<void> Function() onSubmit;
 
   const _SubmitButton({
     required this.isSubmitting,
-    required this.type,
-    required this.colors,
+    required this.label,
     required this.onSubmit,
   });
 
+  // Styled by the app's ElevatedButton theme: the brand mint fill.
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 8, 0, 16),
+      padding: const EdgeInsets.fromLTRB(0, AppSpacing.sm, 0, AppSpacing.md),
       child: Align(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 320),
           child: SizedBox(
             width: double.infinity,
             height: 52,
-            child: FilledButton(
+            child: ElevatedButton(
               onPressed: isSubmitting ? null : () => unawaited(onSubmit()),
-              style: FilledButton.styleFrom(
-                backgroundColor: type == RecordType.expense
-                    ? colors.error
-                    : colors.primary,
-                foregroundColor: colors.onPrimary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
-              child: Text(
-                'Add ${type.displayName}',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
+              child: Text(label),
             ),
           ),
         ),
@@ -983,20 +1197,20 @@ class _AllCategoriesButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: 'Show all categories',
+      label: t.records.sheet.showAllCategories,
       child: Tooltip(
-        message: 'Show all categories',
+        message: t.records.sheet.showAllCategories,
         child: Material(
           color: Colors.transparent,
           child: InkWell(
             onTap: onTap,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
             child: Container(
               width: 48,
               height: 48,
               decoration: BoxDecoration(
                 color: colors.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
                 border: Border.all(color: colors.onSurface.withAlpha(12)),
               ),
               alignment: Alignment.center,
@@ -1038,10 +1252,13 @@ class _RecurringCheckbox extends StatelessWidget {
       color: Colors.transparent,
       child: MergeSemantics(
         child: InkWell(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
           onTap: () => onChanged(!isRecurring),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.xs,
+              vertical: AppSpacing.xs,
+            ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -1049,7 +1266,9 @@ class _RecurringCheckbox extends StatelessWidget {
                   data: Theme.of(context).copyWith(
                     checkboxTheme: CheckboxThemeData(
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusPill,
+                        ),
                       ),
                       side: BorderSide(color: mutedIconColor, width: 1.5),
                       fillColor: WidgetStateProperty.resolveWith((states) {
@@ -1067,12 +1286,10 @@ class _RecurringCheckbox extends StatelessWidget {
                     onChanged: (value) => onChanged(value ?? false),
                   ),
                 ),
-                const SizedBox(width: 2),
+                const SizedBox(width: AppSpacing.xs),
                 Text(
-                  'Recurring?',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w400,
+                  t.records.sheet.repeatMonthly,
+                  style: AppTypography.bodyMedium.copyWith(
                     color: mutedIconColor,
                   ),
                 ),

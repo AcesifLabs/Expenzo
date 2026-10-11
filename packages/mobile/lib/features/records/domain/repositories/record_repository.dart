@@ -89,14 +89,12 @@ abstract class RecordRepository {
     DateTime end,
   );
 
-  /// Total expense spend linked to [budgetId] within the half-open range
-  /// [start, end).
+  /// Expense spend per budget id, each over its own half-open [start, end)
+  /// period, read in a single query. Every requested id is in the result.
   ///
-  /// Returns [Right(double)] on success, [Left(CacheFailure)] on failure.
-  Future<Either<CacheFailure, double>> getBudgetSpending(
-    String budgetId,
-    DateTime start,
-    DateTime end,
+  /// Returns [Right(Map)] on success, [Left(CacheFailure)] on failure.
+  Future<Either<CacheFailure, Map<String, double>>> getSpendingForBudgets(
+    Map<String, ({DateTime start, DateTime end})> periods,
   );
 
   /// Retrieves records by [start] and [end] date range only.

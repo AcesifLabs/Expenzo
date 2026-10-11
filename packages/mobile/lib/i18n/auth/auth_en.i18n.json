@@ -1,0 +1,35 @@
+{
+  "errors": {
+    "cannotConnect": "Can't connect. Check your internet connection and try again.",
+    "serverProblem": "Something went wrong on our end. Try again later.",
+    "timedOut": "The request timed out. Check your connection and try again.",
+    "generic": "Something went wrong. Try again.",
+    "cancelled": "Sign-in was cancelled.",
+    "network": "Network error. Check your connection and try again.",
+    "tooManyAttempts": "Too many attempts. Try again later.",
+    "failed": "Sign-in failed. Try again."
+  },
+  "syncConflict": {
+    "title": "Sync conflict",
+    "body": "You have records on this phone and in your account. Choose which to keep.",
+    "merge": "Merge my data",
+    "mergeDetail": "Keep records from both",
+    "useAccount": "Use my account data",
+    "useAccountDetail": "Delete the records on this phone and use your account copy",
+    "keepPhone": "Keep this phone's data",
+    "keepPhoneDetail": "Replace your account copy with the records on this phone",
+    "replaceTitle": "Replace data on this phone?",
+    "replaceBody": "This permanently deletes the records on this phone and replaces them with your account copy.",
+    "replace": "Replace",
+    "preparing": "Preparing…",
+    "clearing": "Clearing this phone…",
+    "done": "Done",
+    "syncing": "Syncing…"
+  },
+  "login": {
+    "google": "Sign in with Google",
+    "logo": "Expenzo logo",
+    "pitch": "Sign in to back up your records and keep them in sync on all your devices.",
+    "signingIn": "Signing in…"
+  }
+}

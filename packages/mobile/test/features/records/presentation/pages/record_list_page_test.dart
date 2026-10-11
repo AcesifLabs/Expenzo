@@ -20,6 +20,7 @@ import 'package:expense_tracker/features/records/presentation/bloc/record_state.
 import 'package:expense_tracker/features/records/presentation/pages/record_list_page.dart';
 
 import '../../../../support/factories/record_factory.dart';
+import '../../../../support/pump_localized.dart';
 
 class _MockGetRecords extends Mock implements GetRecords {}
 
@@ -97,14 +98,16 @@ Widget _wrap(RecordBloc recordBloc, CategoryBloc categoryBloc) {
   // RecordListView (not RecordListPage) because the page resolves its blocs
   // from getIt. The outer Scaffold is required: showSnackBar asserts a
   // registered Scaffold, and AppScaffold is a Material, not a Scaffold.
-  return MaterialApp(
-    home: Scaffold(
-      body: MultiBlocProvider(
-        providers: [
-          BlocProvider<RecordBloc>.value(value: recordBloc),
-          BlocProvider<CategoryBloc>.value(value: categoryBloc),
-        ],
-        child: const RecordListView(),
+  return translated(
+    MaterialApp(
+      home: Scaffold(
+        body: MultiBlocProvider(
+          providers: [
+            BlocProvider<RecordBloc>.value(value: recordBloc),
+            BlocProvider<CategoryBloc>.value(value: categoryBloc),
+          ],
+          child: const RecordListView(),
+        ),
       ),
     ),
   );

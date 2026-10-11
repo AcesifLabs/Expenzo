@@ -6,6 +6,7 @@ import '../../domain/usecases/save_message_source.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
 import 'message_sources_event.dart';
 import 'message_sources_state.dart';
+import 'package:expense_tracker/core/error/failure_message.dart';
 
 class MessageSourcesBloc
     extends Bloc<MessageSourcesEvent, MessageSourcesState> {
@@ -34,7 +35,7 @@ class MessageSourcesBloc
     emit(MessageSourcesLoading());
     final result = await getMessageSources(NoParams());
     result.fold(
-      (failure) => emit(MessageSourcesError(message: failure.message)),
+      (failure) => emit(MessageSourcesError(message: failureText(failure))),
       (sources) => emit(MessageSourcesLoaded(sources: sources)),
     );
   }
@@ -52,7 +53,7 @@ class MessageSourcesBloc
       final result = await saveMessageSource(updatedSource);
 
       result.fold(
-        (failure) => emit(MessageSourcesError(message: failure.message)),
+        (failure) => emit(MessageSourcesError(message: failureText(failure))),
         (_) => add(LoadMessageSources()),
       );
     }
@@ -71,7 +72,7 @@ class MessageSourcesBloc
       final result = await saveMessageSource(updatedSource);
 
       result.fold(
-        (failure) => emit(MessageSourcesError(message: failure.message)),
+        (failure) => emit(MessageSourcesError(message: failureText(failure))),
         (_) => add(LoadMessageSources()),
       );
     }

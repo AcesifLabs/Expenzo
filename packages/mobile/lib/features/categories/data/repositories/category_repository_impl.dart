@@ -9,6 +9,7 @@ import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../../domain/entities/category.dart';
 import '../../domain/repositories/category_repository.dart';
 import '../datasources/category_local_datasource.dart';
+import 'package:expense_tracker/core/error/failure_message.dart';
 
 class CategoryRepositoryImpl implements CategoryRepository {
   final CategoryLocalDatasource localDatasource;
@@ -47,7 +48,12 @@ class CategoryRepositoryImpl implements CategoryRepository {
     try {
       final category = await localDatasource.getCategoryById(id);
       if (category == null) {
-        return const Left(CacheFailure(message: 'Category not found'));
+        return const Left(
+          CacheFailure(
+            message: 'Category not found',
+            errorCode: FailureCodes.notFound,
+          ),
+        );
       }
 
       return Right(category);

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 import 'package:picons/picons.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 
 import '../helpers/sms_scan_range_presets.dart';
 import '../models/sms_scan_range_preset.dart';
@@ -52,58 +55,68 @@ class SmsScanOptionsSheet extends StatelessWidget {
     return SafeArea(
       child: Material(
         color: colors.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(AppSpacing.radiusCard),
+        ),
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                margin: const EdgeInsets.only(top: 12, bottom: 8),
+                margin: const EdgeInsets.only(
+                  top: AppSpacing.smd,
+                  bottom: AppSpacing.sm,
+                ),
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
                   color: colors.onSurface.withAlpha(60),
-                  borderRadius: BorderRadius.circular(999),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
                 ),
               ),
-              const Padding(
-                padding: EdgeInsets.fromLTRB(24, 8, 24, 20),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  AppSpacing.sm,
+                  AppSpacing.lg,
+                  AppSpacing.lg,
+                ),
                 child: Center(
                   child: Text(
-                    'Scan past SMS for records',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                    t.smsParser.options.title,
+                    style: AppTypography.titleLarge,
                   ),
                 ),
               ),
               _ScanOptionTile(
-                label: 'Last 7 Days',
+                label: t.smsParser.range.last7Days,
                 icon: PiconsRegular.clockCounterClockwise,
                 onTap: () =>
                     _selectPreset(context, SmsScanRangePreset.last7Days),
               ),
               const Divider(height: 1),
               _ScanOptionTile(
-                label: 'Last 30 Days',
+                label: t.smsParser.range.last30Days,
                 icon: PiconsRegular.calendar,
                 onTap: () =>
                     _selectPreset(context, SmsScanRangePreset.last30Days),
               ),
               const Divider(height: 1),
               _ScanOptionTile(
-                label: 'Last 3 Months',
+                label: t.smsParser.range.last3Months,
                 icon: PiconsRegular.calendarBlank,
                 onTap: () =>
                     _selectPreset(context, SmsScanRangePreset.last3Months),
               ),
               const Divider(height: 1),
               _ScanOptionTile(
-                label: 'All Time',
+                label: t.smsParser.range.allTime,
                 icon: PiconsRegular.infinity,
                 onTap: () => _selectPreset(context, SmsScanRangePreset.allTime),
               ),
               const Divider(height: 1),
               _ScanOptionTile(
-                label: 'Custom date range',
+                label: t.smsParser.range.custom,
                 icon: PiconsRegular.calendarPlus,
                 trailing: const Icon(PiconsRegular.caretRight),
                 onTap: () => _selectPreset(context, SmsScanRangePreset.custom),

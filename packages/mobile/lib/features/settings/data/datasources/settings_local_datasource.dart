@@ -2,6 +2,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/logger/app_logger.dart';
+import 'package:expense_tracker/core/theme/currency_config.dart';
 import '../../domain/entities/user_settings.dart';
 
 abstract class SettingsLocalDatasource {
@@ -24,10 +25,11 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
       if (jsonString == null) {
         final now = DateTime.now().toUtc();
         final defaultSettings = UserSettings(
-          currencySymbol: '\$',
+          currencyCode: CurrencyConfig.defaultCode,
           emailFetchLimit: 100,
           notificationsEnabled: true,
           theme: 'system',
+          languageCode: 'system',
           createdAt: now,
           updatedAt: now,
         );
@@ -60,10 +62,12 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
   Map<String, dynamic> _mapToJson(UserSettings settings) {
     return {
       'id': settings.id,
-      'currencySymbol': settings.currencySymbol,
+      'currencyCode': settings.currencyCode,
       'emailFetchLimit': settings.emailFetchLimit,
       'notificationsEnabled': settings.notificationsEnabled,
       'theme': settings.theme,
+      'languageCode': settings.languageCode,
+      'autoImportPromptDismissed': settings.autoImportPromptDismissed,
       'createdAt': settings.createdAt.toIso8601String(),
       'updatedAt': settings.updatedAt.toIso8601String(),
     };
@@ -72,12 +76,27 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
   UserSettings _mapFromJson(Map<String, dynamic> json) {
     return UserSettings(
       id: json['id'] as int?,
-      currencySymbol: json['currencySymbol'] as String,
+      currencyCode: _currencyCodeFrom(json),
       emailFetchLimit: json['emailFetchLimit'] as int,
       notificationsEnabled: json['notificationsEnabled'] as bool,
       theme: json['theme'] as String,
+      languageCode: json['languageCode'] as String? ?? 'system',
+      autoImportPromptDismissed:
+          json['autoImportPromptDismissed'] as bool? ?? false,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
+  }
+
+  // Older versions stored only a free-text symbol (default '\$').
+  String _currencyCodeFrom(Map<String, dynamic> json) {
+    final code = json['currencyCode'];
+    if (code is String) return code;
+    final legacySymbol = json['currencySymbol'];
+    if (legacySymbol is String) {
+      return CurrencyConfig.codeForLegacySymbol(legacySymbol);
+    }
+
+    return CurrencyConfig.defaultCode;
   }
 }

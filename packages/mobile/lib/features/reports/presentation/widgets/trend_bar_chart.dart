@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 import '../../domain/entities/date_amount.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class TrendBarChart extends StatelessWidget {
-  static const _defaultColor = Color(0x308E8E93);
-  static const _primaryColor = Color(0xFFD1C4E9);
-  static const _peakColor = Color(0xFFF48FB1);
-
   final List<DateAmount> data;
 
   const TrendBarChart({super.key, required this.data});
 
   List<double> _normalizedBars() {
-    if (data.isEmpty) return const [];
+    if (data.isEmpty) return [];
 
     final amounts = data.map((item) => item.amount.abs()).toList();
     final maxAmount = amounts.reduce((a, b) => a > b ? a : b);
@@ -19,36 +19,44 @@ class TrendBarChart extends StatelessWidget {
       return List<double>.filled(amounts.length, 0.2);
     }
 
+    // Empty days keep a hairline so the timeline still reads.
     return amounts
-        .map((amount) => (amount / maxAmount).clamp(0.14, 1.0))
+        .map(
+          (amount) => amount == 0 ? 0.0 : (amount / maxAmount).clamp(0.14, 1.0),
+        )
         .toList();
   }
 
-  Color _barColor(int index, int length, double height) {
-    if (height >= 0.92) return _peakColor;
-    if (index == length - 1 || index % 5 == 0) return _primaryColor;
+  // The peak day matches the "Highest day" figure; the latest bar is marked.
+  Color _barColor(AppPalette palette, int index, int length, double height) {
+    if (height == 1.0) return palette.expense;
+    if (index == length - 1) return palette.accent;
+    if (height == 0) return palette.textSecondary.withAlpha(0x18);
 
-    return _defaultColor;
+    return palette.textSecondary.withAlpha(0x30);
   }
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final bars = _normalizedBars();
 
     if (bars.isEmpty) {
-      return const SizedBox(
+      return SizedBox(
         height: 200,
         child: Center(
           child: Text(
-            'No trend data yet',
-            style: TextStyle(fontSize: 12, color: Color(0x80F5F7FA)),
+            t.reports.noTrendData,
+            style: AppTypography.bodySmall.copyWith(
+              color: palette.textPrimary.withAlpha(0x80),
+            ),
           ),
         ),
       );
     }
 
     return Padding(
-      padding: const EdgeInsets.only(top: 16),
+      padding: const EdgeInsets.only(top: AppSpacing.md),
       child: SizedBox(
         height: 200,
         child: Row(
@@ -59,17 +67,18 @@ class TrendBarChart extends StatelessWidget {
                 child: Align(
                   alignment: Alignment.bottomCenter,
                   child: Container(
-                    height: 200 * bars[i],
+                    constraints: const BoxConstraints(maxWidth: 24),
+                    height: 200 * bars[i] + (bars[i] == 0 ? 2 : 0),
                     decoration: BoxDecoration(
-                      color: _barColor(i, bars.length, bars[i]),
+                      color: _barColor(palette, i, bars.length, bars[i]),
                       borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(2),
+                        top: Radius.circular(AppSpacing.radiusPill),
                       ),
                     ),
                   ),
                 ),
               ),
-              if (i != bars.length - 1) const SizedBox(width: 3),
+              if (i != bars.length - 1) const SizedBox(width: AppSpacing.xs),
             ],
           ],
         ),

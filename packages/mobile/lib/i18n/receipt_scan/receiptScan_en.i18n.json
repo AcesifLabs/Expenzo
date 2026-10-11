@@ -1,0 +1,13 @@
+{
+  "permissionRequired": "Camera permission is required to scan receipts.",
+  "noCamera": "No camera available on this device.",
+  "cameraFailed": "Couldn't open the camera.",
+  "captureFailed": "Couldn't take the photo. Try again.",
+  "readFailed": "Couldn't read the receipt. Try again or add it by hand.",
+  "chooseFromGallery": "Choose from gallery",
+  "flashOff": "Turn flash off",
+  "flashOn": "Turn flash on",
+  "align": "Align receipt with the frame",
+  "reading": "Reading your receipt",
+  "takePhoto": "Take photo"
+}

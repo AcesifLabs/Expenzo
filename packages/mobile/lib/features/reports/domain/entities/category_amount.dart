@@ -7,6 +7,9 @@ class CategoryAmount extends Equatable {
   final double amount;
   final double percentage;
 
+  /// The category's own color (hex), or null for uncategorized spending.
+  final String? colorHex;
+
   @override
   List<Object?> get props => [
     categoryId,
@@ -14,6 +17,7 @@ class CategoryAmount extends Equatable {
     emoji,
     amount,
     percentage,
+    colorHex,
   ];
 
   const CategoryAmount({
@@ -22,5 +26,6 @@ class CategoryAmount extends Equatable {
     required this.emoji,
     required this.amount,
     required this.percentage,
+    this.colorHex,
   });
 }

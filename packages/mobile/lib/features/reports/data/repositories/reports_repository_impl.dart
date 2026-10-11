@@ -9,7 +9,9 @@ import '../../domain/entities/date_amount.dart';
 import '../../domain/entities/category_amount.dart';
 import '../../domain/entities/spending_insights.dart';
 import '../../domain/entities/granularity.dart';
+import '../../domain/helpers/zero_fill_trend.dart';
 import '../../domain/repositories/reports_repository.dart';
+import 'package:expense_tracker/core/utils/category_display_name.dart';
 
 class ReportsRepositoryImpl implements ReportsRepository {
   final RecordDao recordDao;
@@ -27,28 +29,23 @@ class ReportsRepositoryImpl implements ReportsRepository {
     try {
       final results = await recordDao.getSpendingTrend(startDate, endDate);
 
-      final Map<String, double> grouped = {};
+      final totals = <DateTime, double>{};
       for (final row in results) {
         final date = row.read(recordDao.records.date) ?? DateTime.now();
         final amount = row.read(recordDao.records.amount.sum()) ?? 0.0;
 
-        final key = _getDateKey(date, granularity);
-        grouped[key] = (grouped[key] ?? 0.0) + amount.abs();
+        final key = periodStart(date, granularity);
+        totals[key] = (totals[key] ?? 0.0) + amount.abs();
       }
 
-      final List<DateAmount> trend = [];
-      for (final entry in grouped.entries) {
-        trend.add(
-          DateAmount(
-            date: _parseDateKey(entry.key, granularity),
-            amount: entry.value,
-          ),
-        );
-      }
-
-      trend.sort((a, b) => a.date.compareTo(b.date));
-
-      return Right(trend);
+      return Right(
+        zeroFillTrend(
+          totals: totals,
+          start: startDate,
+          end: endDate,
+          granularity: granularity,
+        ),
+      );
     } catch (e, s) {
       appLogger.error('Reports repository error', e, s);
 
@@ -173,10 +170,11 @@ class ReportsRepositoryImpl implements ReportsRepository {
 
       return CategoryAmount(
         categoryId: entry.key,
-        categoryName: cat?.name ?? 'Uncategorized',
+        categoryName: cat?.name ?? uncategorizedName,
         emoji: cat?.emoji ?? '📌',
         amount: entry.value,
         percentage: percentage,
+        colorHex: cat?.color,
       );
     }).toList();
   }
@@ -215,33 +213,5 @@ class ReportsRepositoryImpl implements ReportsRepository {
     }
 
     return (date: highestDayDate, amount: highestAmount);
-  }
-
-  String _getDateKey(DateTime date, Granularity granularity) {
-    switch (granularity) {
-      case Granularity.daily:
-        return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-      case Granularity.weekly:
-        final startOfWeek = date.subtract(Duration(days: date.weekday - 1));
-
-        return '${startOfWeek.year}-${startOfWeek.month.toString().padLeft(2, '0')}-${startOfWeek.day.toString().padLeft(2, '0')}';
-      case Granularity.monthly:
-        return '${date.year}-${date.month.toString().padLeft(2, '0')}';
-    }
-  }
-
-  DateTime _parseDateKey(String key, Granularity granularity) {
-    final parts = key.split('-');
-    switch (granularity) {
-      case Granularity.daily:
-      case Granularity.weekly:
-        return DateTime(
-          int.parse(parts.first),
-          int.parse(parts[1]),
-          int.parse(parts[2]),
-        );
-      case Granularity.monthly:
-        return DateTime(int.parse(parts.first), int.parse(parts[1]), 1);
-    }
   }
 }

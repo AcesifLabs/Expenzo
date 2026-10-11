@@ -13,9 +13,7 @@ import 'package:expense_tracker/features/budgets/presentation/pages/budget_detai
 import 'package:expense_tracker/features/budgets/presentation/pages/budget_form_page.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:expense_tracker/features/categories/presentation/pages/category_form_page.dart';
-import 'package:expense_tracker/features/records/presentation/bloc/record_bloc.dart';
 import 'package:expense_tracker/features/records/presentation/pages/all_categories_picker_page.dart';
-import 'package:expense_tracker/features/records/presentation/pages/record_form_page.dart';
 import 'package:expense_tracker/features/recurring/presentation/bloc/recurring_bloc.dart';
 import 'package:expense_tracker/features/recurring/presentation/pages/recurring_form_page.dart';
 import 'package:expense_tracker/features/reports/presentation/pages/reports_screen.dart';
@@ -23,7 +21,11 @@ import 'package:expense_tracker/features/ai_assistant/presentation/pages/ai_assi
 import 'package:expense_tracker/features/settings/presentation/pages/settings_page.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/pages/sms_scan_results_page.dart';
-import 'package:expense_tracker/shared/presentation/pages/feedback_page.dart';
+import 'package:expense_tracker/features/sms_parser/presentation/pages/auto_import_page.dart';
+import 'package:expense_tracker/features/recurring/presentation/pages/recurring_list_page.dart';
+import 'package:expense_tracker/features/parsing_rules/presentation/bloc/parsing_rules_bloc.dart';
+import 'package:expense_tracker/features/parsing_rules/presentation/bloc/parsing_rules_event.dart';
+import 'package:expense_tracker/features/parsing_rules/presentation/pages/rules_list_page.dart';
 
 import '../../features/auth/presentation/bloc/auth_state.dart';
 import 'auth_aware_app_shell.dart';
@@ -44,10 +46,29 @@ List<RouteBase> buildAppRoutes() {
 
 List<RouteBase> _buildNestedRoutes() {
   return [
-    GoRoute(path: 'settings', builder: (_, _) => const SettingsPage()),
-    GoRoute(path: 'feedback', builder: (_, _) => const FeedbackPage()),
-    GoRoute(path: 'records/new', builder: _buildNewRecordRoute),
-    GoRoute(path: 'records/:id/edit', builder: _buildEditRecordRoute),
+    GoRoute(
+      path: 'settings',
+      builder: (_, _) => const SettingsPage(),
+      routes: [
+        GoRoute(path: 'auto-import', builder: (_, _) => const AutoImportPage()),
+        GoRoute(
+          path: 'matching-rules',
+          builder: (_, _) => BlocProvider(
+            create: (_) => di.getIt<ParsingRulesBloc>()..add(LoadRules()),
+            child: const RulesListPage(),
+          ),
+        ),
+        GoRoute(
+          path: 'recurring',
+          // create:, not a bloc built in the builder: go_router rebuilds
+          // this route when pages are pushed on top of it.
+          builder: (_, _) => BlocProvider(
+            create: (_) => di.getIt<RecurringBloc>(),
+            child: const RecurringListView(),
+          ),
+        ),
+      ],
+    ),
     ..._buildBudgetRoutes(),
     ..._buildRecurringRoutes(),
     ..._buildCategoryRoutes(),
@@ -94,85 +115,70 @@ List<RouteBase> _buildRecurringRoutes() {
         child: const RecurringFormPage(),
       ),
     ),
+    GoRoute(
+      path: 'recurring/:id/edit',
+      builder: (_, state) => BlocProvider(
+        create: (_) => di.getIt<RecurringBloc>(),
+        child: RecurringFormPage(recurringId: state.pathParameters['id']),
+      ),
+    ),
   ];
+}
+
+/// Choosing or adding a category is a short task opened from a form, so it
+/// opens as a full-screen dialog with a close button (see AppBackButton).
+Page<Object?> _dialogPage(GoRouterState state, Widget child) {
+  return MaterialPage<Object?>(
+    key: state.pageKey,
+    fullscreenDialog: true,
+    child: child,
+  );
 }
 
 List<RouteBase> _buildCategoryRoutes() {
   return [
     GoRoute(
       path: 'categories/new',
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final extra = state.extra as Map<String, dynamic>?;
         final type = extra?['initialType'] as RecordType?;
 
-        return BlocProvider.value(
-          value: context.read<CategoryBloc>(),
-          child: CategoryFormPage(initialType: type),
+        return _dialogPage(
+          state,
+          BlocProvider.value(
+            value: context.read<CategoryBloc>(),
+            child: CategoryFormPage(initialType: type),
+          ),
         );
       },
     ),
     GoRoute(
       path: 'categories/:id/edit',
-      builder: (context, state) => BlocProvider.value(
-        value: context.read<CategoryBloc>(),
-        child: CategoryFormPage(categoryId: state.pathParameters['id']),
+      pageBuilder: (context, state) => _dialogPage(
+        state,
+        BlocProvider.value(
+          value: context.read<CategoryBloc>(),
+          child: CategoryFormPage(categoryId: state.pathParameters['id']),
+        ),
       ),
     ),
     GoRoute(
       path: 'categories/picker',
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final extra = state.extra as Map<String, dynamic>?;
         final type = extra?['type'] as RecordType? ?? RecordType.expense;
         final selectedId = extra?['selectedId'] as String?;
 
-        return BlocProvider.value(
-          value: context.read<CategoryBloc>(),
-          child: AllCategoriesPickerPage(type: type, selectedId: selectedId),
+        return _dialogPage(
+          state,
+          BlocProvider.value(
+            value: context.read<CategoryBloc>(),
+            child: AllCategoriesPickerPage(type: type, selectedId: selectedId),
+          ),
         );
       },
     ),
   ];
-}
-
-Widget _buildNewRecordRoute(BuildContext _, GoRouterState state) {
-  final extra = state.extra as Map<String, dynamic>?;
-  final recordBloc = extra?['recordBloc'] as RecordBloc?;
-  final categoryBloc = extra?['categoryBloc'] as CategoryBloc?;
-
-  return MultiBlocProvider(
-    providers: [
-      if (recordBloc != null)
-        BlocProvider.value(value: recordBloc)
-      else
-        BlocProvider(create: (_) => di.getIt<RecordBloc>()),
-      if (categoryBloc != null)
-        BlocProvider.value(value: categoryBloc)
-      else
-        BlocProvider(create: (_) => di.getIt<CategoryBloc>()),
-    ],
-    child: const RecordFormPage(),
-  );
-}
-
-Widget _buildEditRecordRoute(BuildContext _, GoRouterState state) {
-  final id = state.pathParameters['id'] ?? '';
-  final extra = state.extra as Map<String, dynamic>?;
-  final recordBloc = extra?['recordBloc'] as RecordBloc?;
-  final categoryBloc = extra?['categoryBloc'] as CategoryBloc?;
-
-  return MultiBlocProvider(
-    providers: [
-      if (recordBloc != null)
-        BlocProvider.value(value: recordBloc)
-      else
-        BlocProvider(create: (_) => di.getIt<RecordBloc>()),
-      if (categoryBloc != null)
-        BlocProvider.value(value: categoryBloc)
-      else
-        BlocProvider(create: (_) => di.getIt<CategoryBloc>()),
-    ],
-    child: RecordFormPage(recordId: id),
-  );
 }
 
 Widget _buildScanResultsRoute(BuildContext _, GoRouterState state) {
@@ -188,27 +194,29 @@ Widget _buildScanResultsRoute(BuildContext _, GoRouterState state) {
   );
 }
 
-/// Redirects the user to /sync-conflict or back to / when they are
-/// authenticated and try to reach /login. Returns null to let the
-/// requested route resolve normally.
-String? authRedirect(BuildContext context, GoRouterState state) {
-  final authState = context.read<AuthBloc>().state;
+/// Redirects the user to /sync-conflict while a sync conflict is pending and
+/// back out of it once it is resolved. Returns null to let the requested
+/// route resolve normally.
+///
+/// Leaving /login after signing in is LoginPage's job: it pops back to the
+/// screen that opened it. Redirecting here too would race that pop.
+String? authRedirect(BuildContext context, GoRouterState state) =>
+    authRedirectFor(context.read<AuthBloc>().state, state.matchedLocation);
 
+@visibleForTesting
+String? authRedirectFor(AuthState authState, String location) {
   if (authState is AuthInitial || authState is AuthLoading) {
     return null;
   }
 
-  final isAuth = authState is Authenticated;
-  final isLoginRoute = state.matchedLocation == '/login';
-  final isConflictRoute = state.matchedLocation == '/sync-conflict';
+  final isConflictRoute = location == '/sync-conflict';
+  final isConflictPending = authState is AuthSyncConflictPending;
 
-  if (authState is AuthSyncConflictPending && !isConflictRoute) {
-    return '/sync-conflict';
-  }
+  if (isConflictPending && !isConflictRoute) return '/sync-conflict';
 
-  if (isAuth && isLoginRoute) {
-    return '/';
-  }
+  // The conflict page has no way out of its own (it blocks back), so leave
+  // it as soon as the conflict is resolved.
+  if (!isConflictPending && isConflictRoute) return '/';
 
   return null;
 }

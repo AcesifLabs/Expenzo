@@ -2,11 +2,14 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class NotificationService {
   static const String _channelId = 'app_notifications';
-  static const String _channelName = 'App Notifications';
-  static const String _channelDescription = 'All app notifications';
+  // Shown in Android's notification settings, in the language of the moment
+  // the channel was created or a notification was posted.
+  static String get _channelName => t.notifications.channel.name;
+  static String get _channelDescription => t.notifications.channel.description;
 
   final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
@@ -38,7 +41,7 @@ class NotificationService {
       onDidReceiveNotificationResponse: _onNotificationTapped,
     );
 
-    const androidChannel = AndroidNotificationChannel(
+    final androidChannel = AndroidNotificationChannel(
       _channelId,
       _channelName,
       description: _channelDescription,
@@ -55,6 +58,18 @@ class NotificationService {
     if (kDebugMode) {
       debugPrint('NotificationService initialized');
     }
+  }
+
+  /// Whether the system will actually show our notifications. On Android 13+
+  /// that needs the runtime permission; other platforms report true.
+  Future<bool> canNotify() async {
+    if (!_isInitialized) await initialize();
+    final android = _notifications
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+
+    return await android?.areNotificationsEnabled() ?? true;
   }
 
   Future<void> showNotification({
@@ -92,15 +107,21 @@ class NotificationService {
     required String budgetId,
     required String budgetName,
     required double percentage,
+    required bool isOver,
   }) async {
     final deepLink = 'expenso://budgets/$budgetId';
 
-    final body = percentage >= 100
-        ? 'Budget "$budgetName" has been exceeded!'
-        : 'Budget "$budgetName" is at ${percentage.toStringAsFixed(0)}%';
+    // isOver comes from CheckBudgetAlerts so the text matches the rule that
+    // fired: exactly at the limit is "used 100%", not "went over".
+    final body = isOver
+        ? t.notifications.budget.over(budget: budgetName)
+        : t.notifications.budget.used(
+            budget: budgetName,
+            percent: percentage.toStringAsFixed(0),
+          );
 
     await showNotification(
-      title: 'Budget Alert',
+      title: t.notifications.budget.title,
       body: body,
       type: NotificationType.budgetAlert,
       deepLink: deepLink,
@@ -114,7 +135,7 @@ class NotificationService {
     final deepLink = 'expenso://recurring/$recurringId';
 
     await showNotification(
-      title: 'Recurring Expense Due',
+      title: t.notifications.recurringDue.title,
       body: description,
       type: NotificationType.recurringDue,
       deepLink: deepLink,
@@ -130,8 +151,10 @@ class NotificationService {
         : 'expenso://scan/email';
 
     await showNotification(
-      title: '${sourceType.toUpperCase()} Scan Complete',
-      body: '$foundCount new expenses found',
+      title: sourceType == ExpenseSource.sms.name
+          ? t.notifications.scan.smsTitle
+          : t.notifications.scan.emailTitle,
+      body: t.notifications.scan.found(n: foundCount),
       type: NotificationType.scanComplete,
       deepLink: deepLink,
     );
@@ -139,7 +162,7 @@ class NotificationService {
 
   Future<void> showSyncError({required String message}) async {
     await showNotification(
-      title: 'Sync Error',
+      title: t.notifications.syncError.title,
       body: message,
       type: NotificationType.syncError,
     );

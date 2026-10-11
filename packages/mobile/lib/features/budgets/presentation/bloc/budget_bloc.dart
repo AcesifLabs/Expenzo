@@ -8,6 +8,7 @@ import '../../domain/usecases/get_budgets_with_progress.dart';
 import '../../domain/usecases/get_budget_transactions.dart';
 import 'budget_event.dart';
 import 'budget_state.dart';
+import 'package:expense_tracker/core/error/failure_message.dart';
 
 class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
   final GetBudgets getBudgets;
@@ -43,22 +44,23 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
 
     final result = await getBudgets();
 
-    await result.fold((failure) async => emit(BudgetError(failure.message)), (
-      budgets,
-    ) async {
-      final progressResult = await getBudgetsWithProgress(
-        limit: budgets.length,
-      );
-      final progressList = progressResult.getOrElse(() => []);
-      emit(
-        BudgetLoaded(
-          budgets,
-          progressByBudgetId: {
-            for (final progress in progressList) progress.budgetId: progress,
-          },
-        ),
-      );
-    });
+    await result.fold(
+      (failure) async => emit(BudgetError(failureText(failure))),
+      (budgets) async {
+        final progressResult = await getBudgetsWithProgress(
+          limit: budgets.length,
+        );
+        final progressList = progressResult.getOrElse(() => []);
+        emit(
+          BudgetLoaded(
+            budgets,
+            progressByBudgetId: {
+              for (final progress in progressList) progress.budgetId: progress,
+            },
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _onCreateBudget(
@@ -69,7 +71,7 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
 
     final result = await createBudget(event.budget);
 
-    result.fold((failure) => emit(BudgetError(failure.message)), (budget) {
+    result.fold((failure) => emit(BudgetError(failureText(failure))), (budget) {
       emit(const BudgetOperationSuccess());
       add(LoadBudgets());
     });
@@ -83,7 +85,7 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
 
     final result = await updateBudget(event.budget);
 
-    result.fold((failure) => emit(BudgetError(failure.message)), (budget) {
+    result.fold((failure) => emit(BudgetError(failureText(failure))), (budget) {
       emit(const BudgetOperationSuccess());
       add(LoadBudgets());
     });
@@ -97,7 +99,7 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
 
     final result = await deleteBudget(event.id);
 
-    result.fold((failure) => emit(BudgetError(failure.message)), (_) {
+    result.fold((failure) => emit(BudgetError(failureText(failure))), (_) {
       emit(const BudgetOperationSuccess());
       add(LoadBudgets());
     });
@@ -129,7 +131,7 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
         emit(
           latest.copyWith(
             isLoadingTransactions: false,
-            transactionsError: failure.message,
+            transactionsError: failureText(failure),
           ),
         );
       },

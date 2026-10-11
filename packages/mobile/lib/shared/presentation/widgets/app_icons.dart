@@ -27,6 +27,10 @@ class AppIcons {
     'lightning': PiconsRegular.lightning,
     'coffee': PiconsRegular.coffee,
     'dog': PiconsRegular.dog,
+    // Used by seeded default categories.
+    'trendUp': PiconsRegular.trendUp,
+    'tag': PiconsRegular.tag,
+    'ticket': PiconsRegular.ticket,
   };
 
   static const Map<String, IconData> _iconNameLookup = {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:expense_tracker/core/theme/app_colors.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:expense_tracker/core/theme/app_typography.dart';
 
@@ -13,10 +13,6 @@ enum _StepDotState { completed, active, inactive }
 /// completed (green), the current step is active (purple), and steps
 /// after are inactive (dimmed).
 class StepProgressIndicator extends StatelessWidget {
-  static const _completedColor = AppColors.secondary; // #A2D3A4
-  static const _activeColor = AppColors.primary; // #D1C4E9
-  static const _inactiveColor = Color(0xFF8E8E93);
-
   final int currentStep;
   final int totalSteps;
 
@@ -33,29 +29,32 @@ class StepProgressIndicator extends StatelessWidget {
     return _StepDotState.inactive;
   }
 
-  Color _colorFor(_StepDotState state) {
+  Color _colorFor(_StepDotState state, AppPalette palette) {
     return switch (state) {
-      _StepDotState.completed => _completedColor,
-      _StepDotState.active => _activeColor,
-      _StepDotState.inactive => _inactiveColor.withAlpha(0x40),
+      _StepDotState.completed => palette.income,
+      _StepDotState.active => palette.brand,
+      _StepDotState.inactive => palette.textSecondary.withAlpha(0x40),
     };
   }
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.sm),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           for (int i = 1; i <= totalSteps; i++) ...[
-            _StepDot(color: _colorFor(_stateFor(i))),
+            _StepDot(color: _colorFor(_stateFor(i), palette)),
             if (i < totalSteps)
               _StepLine(
                 color: _colorFor(
                   i < currentStep
                       ? _StepDotState.completed
                       : _StepDotState.inactive,
+                  palette,
                 ),
               ),
           ],
@@ -92,7 +91,7 @@ class _StepLine extends StatelessWidget {
       height: 2,
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(1),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
         color: color,
       ),
     );
@@ -112,12 +111,14 @@ class MessagePreviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.surfaceDark,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+        color: palette.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -125,7 +126,7 @@ class MessagePreviewCard extends StatelessWidget {
           Text(
             senderName,
             style: AppTypography.labelMedium.copyWith(
-              color: AppColors.primary,
+              color: palette.brand,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -133,7 +134,7 @@ class MessagePreviewCard extends StatelessWidget {
           Text(
             messageBody,
             style: AppTypography.bodyMedium.copyWith(
-              color: AppColors.textPrimaryDark,
+              color: palette.textPrimary,
             ),
           ),
         ],
@@ -165,32 +166,50 @@ class TriggerWordChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: _handleTap,
-      child: AnimatedScale(
-        scale: isSelected ? 1.0 : 0.98,
+    final palette = context.palette;
+
+    // Compact chip, full 48dp touch area.
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      child: GestureDetector(
+        onTap: _handleTap,
+        behavior: HitTestBehavior.opaque,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: AppSpacing.minTapTarget),
+          child: Center(widthFactor: 1, child: _chip(palette)),
+        ),
+      ),
+    );
+  }
+
+  Widget _chip(AppPalette palette) {
+    return AnimatedScale(
+      scale: isSelected ? 1.0 : 0.98,
+      duration: AppSpacing.durationFast,
+      curve: Curves.easeOut,
+      child: AnimatedContainer(
         duration: AppSpacing.durationFast,
-        curve: Curves.easeOut,
-        child: AnimatedContainer(
-          duration: AppSpacing.durationFast,
-          curve: Curves.easeInOut,
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? AppColors.primary.withAlpha(0x20)
-                : const Color(0xFF2B292C),
-            borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
-            border: Border.all(
-              color: isSelected ? AppColors.primary : Colors.transparent,
-              width: 1,
-            ),
+        curve: Curves.easeInOut,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.smd,
+          vertical: AppSpacing.xs,
+        ),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? palette.brand.withAlpha(0x20)
+              : palette.surfaceHigh,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
+          border: Border.all(
+            color: isSelected ? palette.brand : Colors.transparent,
+            width: 1,
           ),
-          child: Text(
-            word,
-            style: AppTypography.bodyMedium.copyWith(
-              color: isSelected ? AppColors.primary : AppColors.textPrimaryDark,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-            ),
+        ),
+        child: Text(
+          word,
+          style: AppTypography.bodyMedium.copyWith(
+            color: isSelected ? palette.brand : palette.textPrimary,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
           ),
         ),
       ),
@@ -221,40 +240,47 @@ class AmountRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: _handleTap,
-      child: AnimatedScale(
-        scale: isSelected ? 1.0 : 0.98,
-        duration: AppSpacing.durationFast,
-        curve: Curves.easeOut,
-        child: AnimatedContainer(
+    final palette = context.palette;
+
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      child: GestureDetector(
+        onTap: _handleTap,
+        child: AnimatedScale(
+          scale: isSelected ? 1.0 : 0.98,
           duration: AppSpacing.durationFast,
-          curve: Curves.easeInOut,
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            color: AppColors.surfaceDark,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-            border: Border.all(
-              color: isSelected ? AppColors.primary : Colors.transparent,
-              width: 1,
+          curve: Curves.easeOut,
+          child: AnimatedContainer(
+            duration: AppSpacing.durationFast,
+            curve: Curves.easeInOut,
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.md,
             ),
-          ),
-          child: Row(
-            children: [
-              _RadioButton(isSelected: isSelected),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  amount,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
+            decoration: BoxDecoration(
+              color: palette.surface,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
+              border: Border.all(
+                color: isSelected ? palette.brand : Colors.transparent,
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                _RadioButton(isSelected: isSelected),
+                const SizedBox(width: AppSpacing.smd),
+                Expanded(
+                  child: Text(
+                    amount,
+                    style: AppTypography.titleLarge.copyWith(
+                      color: palette.brand,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -272,15 +298,17 @@ class _RadioButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     return AnimatedContainer(
       duration: AppSpacing.durationFast,
       width: _size,
       height: _size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: isSelected ? AppColors.primary : Colors.transparent,
+        color: isSelected ? palette.brand : Colors.transparent,
         border: Border.all(
-          color: isSelected ? AppColors.primary : const Color(0xFF8E8E93),
+          color: isSelected ? palette.brand : palette.textSecondary,
           width: 2,
         ),
       ),
@@ -292,9 +320,9 @@ class _RadioButton extends StatelessWidget {
           child: Container(
             width: _dotSize,
             height: _dotSize,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.backgroundDark,
+              color: palette.bg,
             ),
           ),
         ),

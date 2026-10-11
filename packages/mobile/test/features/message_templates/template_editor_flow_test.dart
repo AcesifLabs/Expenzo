@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -14,6 +15,7 @@ import 'package:expense_tracker/features/message_templates/presentation/bloc/mes
 import 'package:expense_tracker/features/message_templates/presentation/pages/template_editor_page.dart';
 import 'package:expense_tracker/features/message_templates/presentation/widgets/template_editor_components.dart';
 import 'package:expense_tracker/features/sms_parser/domain/entities/sms_message.dart';
+import '../../support/pump_localized.dart';
 
 class MockTemplateEditorBloc extends Mock implements TemplateEditorBloc {}
 
@@ -74,15 +76,17 @@ void main() {
   });
 
   Widget buildTestWidget() {
-    return MaterialApp(
-      home: MultiBlocProvider(
-        providers: [
-          BlocProvider<TemplateEditorBloc>.value(value: mockEditorBloc),
-          BlocProvider<MessageSourcesBloc>.value(value: mockSourcesBloc),
-        ],
-        child: InteractiveTemplateBuilder(
-          source: testSource,
-          sampleMessage: testSms,
+    return translated(
+      MaterialApp(
+        home: MultiBlocProvider(
+          providers: [
+            BlocProvider<TemplateEditorBloc>.value(value: mockEditorBloc),
+            BlocProvider<MessageSourcesBloc>.value(value: mockSourcesBloc),
+          ],
+          child: InteractiveTemplateBuilder(
+            source: testSource,
+            sampleMessage: testSms,
+          ),
         ),
       ),
     );
@@ -93,7 +97,7 @@ void main() {
       await tester.pumpWidget(buildTestWidget());
       await tester.pumpAndSettle();
 
-      expect(find.text('Step 1: Pick a Trigger Word'), findsOneWidget);
+      expect(find.text('Step 1 of 3: Choose a key word'), findsOneWidget);
       expect(find.byType(StepProgressIndicator), findsOneWidget);
       expect(find.byType(MessagePreviewCard), findsOneWidget);
 
@@ -109,7 +113,7 @@ void main() {
 
       // Next button should be disabled (no trigger selected)
       final nextButton = tester.widget<ElevatedButton>(
-        find.widgetWithText(ElevatedButton, 'Next: Select Amount'),
+        find.widgetWithText(ElevatedButton, 'Next'),
       );
       expect(nextButton.onPressed, isNull);
     });
@@ -124,7 +128,7 @@ void main() {
 
       // Next button should now be enabled
       final nextButton = tester.widget<ElevatedButton>(
-        find.widgetWithText(ElevatedButton, 'Next: Select Amount'),
+        find.widgetWithText(ElevatedButton, 'Next'),
       );
       expect(nextButton.onPressed, isNotNull);
     });
@@ -136,20 +140,18 @@ void main() {
       await tester.pumpAndSettle();
 
       // --- Step 1: Pick a Trigger Word ---
-      expect(find.text('Step 1: Pick a Trigger Word'), findsOneWidget);
+      expect(find.text('Step 1 of 3: Choose a key word'), findsOneWidget);
 
       // Tap the "debited" trigger word chip
       await tester.tap(find.text('debited'));
       await tester.pumpAndSettle();
 
       // Tap Next to go to Step 2
-      await tester.tap(
-        find.widgetWithText(ElevatedButton, 'Next: Select Amount'),
-      );
+      await tester.tap(find.widgetWithText(ElevatedButton, 'Next'));
       await tester.pumpAndSettle();
 
       // --- Step 2: Select the Amount ---
-      expect(find.text('Step 2: Select the Amount'), findsOneWidget);
+      expect(find.text('Step 2 of 3: Choose the amount'), findsOneWidget);
       expect(find.byType(MessagePreviewCard), findsOneWidget);
 
       // Section label should be present
@@ -164,26 +166,26 @@ void main() {
 
       // Next: Review button should be enabled
       final reviewButton = tester.widget<ElevatedButton>(
-        find.widgetWithText(ElevatedButton, 'Next: Review'),
+        find.widgetWithText(ElevatedButton, 'Next'),
       );
       expect(reviewButton.onPressed, isNotNull);
 
       // Tap Next: Review
-      await tester.tap(find.widgetWithText(ElevatedButton, 'Next: Review'));
+      await tester.tap(find.widgetWithText(ElevatedButton, 'Next'));
       await tester.pumpAndSettle();
 
       // --- Step 3: Review ---
-      expect(find.text('Step 3: Review'), findsOneWidget);
+      expect(find.text('Step 3 of 3: Review'), findsOneWidget);
 
       // Review card should show the selected values
       expect(find.text('Sender'), findsOneWidget);
-      expect(find.text('Trigger Word'), findsOneWidget);
-      expect(find.text('Sample Amount'), findsOneWidget);
+      expect(find.text('Key word'), findsOneWidget);
+      expect(find.text('Amount in this message'), findsOneWidget);
       expect(find.text('debited'), findsOneWidget); // in review card
       expect(find.text('500.00'), findsOneWidget); // in review card
 
       // Tap Save & Finish
-      await tester.tap(find.widgetWithText(ElevatedButton, 'Save & Finish'));
+      await tester.tap(find.widgetWithText(ElevatedButton, 'Save'));
       // Use pump() instead of pumpAndSettle() to avoid waiting for
       // the RetroactiveScanDialog's 2-second timer
       await tester.pump();
@@ -207,19 +209,17 @@ void main() {
       // Select trigger and go to Step 2
       await tester.tap(find.text('debited'));
       await tester.pumpAndSettle();
-      await tester.tap(
-        find.widgetWithText(ElevatedButton, 'Next: Select Amount'),
-      );
+      await tester.tap(find.widgetWithText(ElevatedButton, 'Next'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Step 2: Select the Amount'), findsOneWidget);
+      expect(find.text('Step 2 of 3: Choose the amount'), findsOneWidget);
 
       // Tap Back
       await tester.tap(find.widgetWithText(TextButton, 'Back'));
       await tester.pumpAndSettle();
 
       // Should be back on Step 1
-      expect(find.text('Step 1: Pick a Trigger Word'), findsOneWidget);
+      expect(find.text('Step 1 of 3: Choose a key word'), findsOneWidget);
     });
 
     testWidgets('back navigation works from Step 3 to Step 2', (tester) async {
@@ -229,25 +229,23 @@ void main() {
       // Step 1 → Step 2
       await tester.tap(find.text('debited'));
       await tester.pumpAndSettle();
-      await tester.tap(
-        find.widgetWithText(ElevatedButton, 'Next: Select Amount'),
-      );
+      await tester.tap(find.widgetWithText(ElevatedButton, 'Next'));
       await tester.pumpAndSettle();
 
       // Step 2 → Step 3
       await tester.tap(find.text('500.00'));
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(ElevatedButton, 'Next: Review'));
+      await tester.tap(find.widgetWithText(ElevatedButton, 'Next'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Step 3: Review'), findsOneWidget);
+      expect(find.text('Step 3 of 3: Review'), findsOneWidget);
 
       // Tap Back
       await tester.tap(find.widgetWithText(TextButton, 'Back'));
       await tester.pumpAndSettle();
 
       // Should be back on Step 2
-      expect(find.text('Step 2: Select the Amount'), findsOneWidget);
+      expect(find.text('Step 2 of 3: Choose the amount'), findsOneWidget);
     });
 
     testWidgets('deselecting a trigger word disables Next button', (
@@ -261,18 +259,20 @@ void main() {
       await tester.pumpAndSettle();
 
       var nextButton = tester.widget<ElevatedButton>(
-        find.widgetWithText(ElevatedButton, 'Next: Select Amount'),
+        find.widgetWithText(ElevatedButton, 'Next'),
       );
       expect(nextButton.onPressed, isNotNull);
+      expect(find.text('Choose a word to continue.'), findsNothing);
 
       // Deselect trigger by tapping again
       await tester.tap(find.text('debited'));
       await tester.pumpAndSettle();
 
       nextButton = tester.widget<ElevatedButton>(
-        find.widgetWithText(ElevatedButton, 'Next: Select Amount'),
+        find.widgetWithText(ElevatedButton, 'Next'),
       );
       expect(nextButton.onPressed, isNull);
+      expect(find.text('Choose a word to continue.'), findsOneWidget);
     });
 
     testWidgets('Step 3 shows error snackbar on save failure', (tester) async {
@@ -292,17 +292,15 @@ void main() {
       // Complete full flow through Step 3
       await tester.tap(find.text('debited'));
       await tester.pumpAndSettle();
-      await tester.tap(
-        find.widgetWithText(ElevatedButton, 'Next: Select Amount'),
-      );
+      await tester.tap(find.widgetWithText(ElevatedButton, 'Next'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('500.00'));
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(ElevatedButton, 'Next: Review'));
+      await tester.tap(find.widgetWithText(ElevatedButton, 'Next'));
       await tester.pumpAndSettle();
 
       // Tap Save & Finish
-      await tester.tap(find.widgetWithText(ElevatedButton, 'Save & Finish'));
+      await tester.tap(find.widgetWithText(ElevatedButton, 'Save'));
       await tester.pump();
 
       // Verify save event was dispatched
@@ -318,7 +316,9 @@ void main() {
 
       // Error snackbar should appear
       expect(
-        find.text('Error saving template: Database error'),
+        find.text(
+          t.messageTemplates.editor.saveFailed(reason: 'Database error'),
+        ),
         findsOneWidget,
       );
 
@@ -335,16 +335,14 @@ void main() {
       // Go to Step 2
       await tester.tap(find.text('debited'));
       await tester.pumpAndSettle();
-      await tester.tap(
-        find.widgetWithText(ElevatedButton, 'Next: Select Amount'),
-      );
+      await tester.tap(find.widgetWithText(ElevatedButton, 'Next'));
       await tester.pumpAndSettle();
       expect(find.byType(StepProgressIndicator), findsOneWidget);
 
       // Go to Step 3
       await tester.tap(find.text('500.00'));
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(ElevatedButton, 'Next: Review'));
+      await tester.tap(find.widgetWithText(ElevatedButton, 'Next'));
       await tester.pumpAndSettle();
       expect(find.byType(StepProgressIndicator), findsOneWidget);
     });

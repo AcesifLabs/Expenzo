@@ -2,14 +2,17 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:picons/picons.dart';
+import 'package:expense_tracker/shared/presentation/widgets/category_tile.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 
 import '../../../categories/presentation/bloc/category_bloc.dart';
 import '../../../categories/presentation/bloc/category_event.dart';
 import '../../../categories/presentation/bloc/category_state.dart';
 import '../../../categories/domain/entities/category.dart';
 import '../../../../core/constants/record_type.dart';
-import '../../../../shared/presentation/widgets/app_icons.dart';
 import '../bloc/record_bloc.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
+import 'package:expense_tracker/features/categories/presentation/helpers/category_display_name.dart';
 
 class RecordFilterModal extends StatefulWidget {
   final DateTime? startDate;
@@ -113,11 +116,12 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
   }
 
   String _categoryLabel(int selectedCount, int totalCount) {
-    if (selectedCount == 0) return 'All categories';
+    if (selectedCount == 0) return t.records.filter.allCategories;
+    if (selectedCount == totalCount) {
+      return t.records.filter.allCount(n: selectedCount);
+    }
 
-    if (selectedCount == totalCount) return 'All ($selectedCount)';
-
-    return '$selectedCount selected';
+    return t.records.filter.selectedCount(n: selectedCount);
   }
 
   String _formatDate(DateTime dt) {
@@ -143,8 +147,8 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Date Range', style: theme.textTheme.titleSmall),
-        const SizedBox(height: 8),
+        Text(t.records.filter.dateRange, style: theme.textTheme.titleSmall),
+        const SizedBox(height: AppSpacing.sm),
         _DateRangeBox(
           startDate: sd,
           endDate: ed,
@@ -160,15 +164,23 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Record Type', style: theme.textTheme.titleSmall),
-        const SizedBox(height: 8),
+        Text(t.records.filter.type, style: theme.textTheme.titleSmall),
+        const SizedBox(height: AppSpacing.sm),
         Wrap(
           spacing: 8,
           runSpacing: 8,
           children: [
-            _buildTypeChip('All', null, theme),
-            _buildTypeChip('Income', RecordType.income, theme),
-            _buildTypeChip('Expense', RecordType.expense, theme),
+            _buildTypeChip(t.records.filter.all, null, theme),
+            _buildTypeChip(
+              RecordType.income.displayName,
+              RecordType.income,
+              theme,
+            ),
+            _buildTypeChip(
+              RecordType.expense.displayName,
+              RecordType.expense,
+              theme,
+            ),
           ],
         ),
       ],
@@ -179,8 +191,8 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Categories', style: theme.textTheme.titleSmall),
-        const SizedBox(height: 8),
+        Text(t.records.filter.categories, style: theme.textTheme.titleSmall),
+        const SizedBox(height: AppSpacing.sm),
         _buildCategoryDropdown(theme),
       ],
     );
@@ -192,14 +204,14 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
         Expanded(
           child: OutlinedButton(
             onPressed: _handleClear,
-            child: const Text('Clear Filter'),
+            child: Text(t.records.filter.clear),
           ),
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: AppSpacing.md),
         Expanded(
           child: ElevatedButton(
             onPressed: _handleApply,
-            child: const Text('Apply Filter'),
+            child: Text(t.records.filter.apply),
           ),
         ),
       ],
@@ -230,7 +242,7 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
 
   Widget _buildCategoryDropdownEmpty(ThemeData theme) {
     return Text(
-      'No categories',
+      t.records.filter.noCategories,
       style: theme.textTheme.bodySmall?.copyWith(
         color: theme.colorScheme.onSurface.withAlpha(100),
       ),
@@ -250,18 +262,21 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
 
     return InkWell(
       onTap: () => _showCategoryDialog(context, categories, theme),
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.md,
+        ),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
           border: Border.all(color: csOutline60),
         ),
         child: Row(
           children: [
             Icon(PiconsRegular.tag, size: 20, color: csOnSurface160),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.smd),
             Expanded(
               child: Text(
                 label,
@@ -303,7 +318,7 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
         return StatefulBuilder(
           builder: (ctx, setDialogState) {
             return AlertDialog(
-              title: const Text('Categories'),
+              title: Text(t.records.filter.categories),
               content: SizedBox(
                 width: double.maxFinite,
                 child: ListView.builder(
@@ -321,13 +336,13 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
                       visualDensity: VisualDensity.compact,
                       title: Row(
                         children: [
-                          Icon(
-                            AppIcons.getCategoryIcon(cat.emoji),
-                            size: 18,
-                            color: theme.colorScheme.primary,
+                          CategoryTile(
+                            colorHex: cat.color,
+                            iconKey: cat.emoji,
+                            size: 24,
                           ),
-                          const SizedBox(width: 8),
-                          Text(cat.name),
+                          const SizedBox(width: AppSpacing.sm),
+                          Text(cat.displayName),
                         ],
                       ),
                       controlAffinity: ListTileControlAffinity.leading,
@@ -338,7 +353,7 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(dialogCtx),
-                  child: const Text('Done'),
+                  child: Text(t.common.done),
                 ),
               ],
             );
@@ -355,7 +370,7 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
 
     return Stack(
       children: [
-        _FilterBackdrop(),
+        const _FilterBackdrop(),
         Center(
           child: ConstrainedBox(
             constraints: BoxConstraints(
@@ -365,23 +380,23 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
             child: SingleChildScrollView(
               child: Material(
                 color: surface,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
                 elevation: 4,
                 clipBehavior: Clip.antiAlias,
                 child: Padding(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(AppSpacing.lg),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _FilterHeader(),
-                      const SizedBox(height: 24),
+                      const _FilterHeader(),
+                      const SizedBox(height: AppSpacing.lg),
                       _buildDateRangeSection(theme),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: AppSpacing.lg),
                       _buildTypeSection(theme),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: AppSpacing.lg),
                       _buildCategorySection(theme),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: AppSpacing.lg),
                       _buildActions(),
                     ],
                   ),
@@ -424,14 +439,15 @@ class _FilterHeader extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
-          child: Text('Filter Records', style: theme.textTheme.titleLarge),
+          child: Text(
+            t.records.filter.title,
+            style: theme.textTheme.titleLarge,
+          ),
         ),
         IconButton(
           icon: Icon(PiconsRegular.x, color: onSurface120),
+          tooltip: t.common.close,
           onPressed: () => Navigator.of(context).pop(),
-          visualDensity: VisualDensity.compact,
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
         ),
       ],
     );
@@ -465,24 +481,30 @@ class _DateRangeBox extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.md,
+        ),
         decoration: BoxDecoration(
           color: colorScheme.surface,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
           border: Border.all(color: outline60),
         ),
         child: Row(
           children: [
             Icon(PiconsRegular.calendar, size: 20, color: onSurface160),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.smd),
             Expanded(
               child: Text(
                 sd != null && ed != null
-                    ? '${formatDate(sd)} - ${formatDate(ed)}'
-                    : 'Select date range',
+                    ? t.records.filter.range(
+                        start: formatDate(sd),
+                        end: formatDate(ed),
+                      )
+                    : t.records.filter.selectDateRange,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: sd != null ? colorScheme.onSurface : onSurface120,
                 ),
