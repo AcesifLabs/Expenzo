@@ -5,6 +5,7 @@ class ApiConstants {
   static const String login = '/auth/login';
   static const String records = '/records';
   static const String recordsBulk = '/records/bulk';
+  static const String recordBudgetLinks = '/records/budget-links';
   static const String categories = '/categories';
   static const String budgets = '/budgets';
   static const String budgetNames = '/budgets/names';

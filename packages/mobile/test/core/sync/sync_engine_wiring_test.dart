@@ -8,6 +8,7 @@ import 'package:expense_tracker/core/database/daos/sync_queue_dao.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/core/sync/connectivity_service.dart';
 import 'package:expense_tracker/core/sync/handlers/budgets_sync_handler.dart';
+import 'package:expense_tracker/core/sync/handlers/records_sync_handler.dart';
 import 'package:expense_tracker/core/sync/sync_engine.dart';
 import 'package:expense_tracker/core/sync/sync_table_registry.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -66,6 +67,7 @@ void main() {
 
   SyncEngine engine({
     bool keepLocalNames = false,
+    bool keepLocalBudgetLinks = false,
     List<SyncTask> afterSyncTasks = const [],
     List<SyncTask> beforeLocalWipeTasks = const [],
   }) => running = SyncEngine(
@@ -73,7 +75,10 @@ void main() {
     apiClient: apiClient,
     connectivity: connectivity,
     registry: SyncTableRegistry()
-      ..register(BudgetsSyncHandler(keepLocalNames: () => keepLocalNames)),
+      ..register(BudgetsSyncHandler(keepLocalNames: () => keepLocalNames))
+      ..register(
+        RecordsSyncHandler(keepLocalBudgetLinks: () => keepLocalBudgetLinks),
+      ),
     afterSyncTasks: afterSyncTasks,
     beforeLocalWipeTasks: beforeLocalWipeTasks,
   );
@@ -122,6 +127,44 @@ void main() {
       await engine().executeDecision(SyncMode.cloudWins);
 
       expect((await localNames())['b1'], AppConstants.defaultBudgetName);
+    });
+  });
+
+  group('pull record budget links', () {
+    Map<String, dynamic> pulledRecord(String? budgetId) => {
+      'table': 'records',
+      'action': 'insert',
+      'id': 'r1',
+      'data': {
+        'amount': 10,
+        'description': 'Lunch',
+        'date': '2026-10-01T00:00:00.000Z',
+        'recordType': 'OUT',
+        'budgetId': budgetId,
+      },
+    };
+
+    Future<String?> localBudgetId() async =>
+        (await db.select(db.records).getSingle()).budgetId;
+
+    setUp(() async {
+      pullReturns([pulledRecord('bud-1')]);
+      await engine().executeDecision(SyncMode.cloudWins);
+      pullReturns([pulledRecord(null)]);
+    });
+
+    test('keeps the local link while the link repair is pending', () async {
+      await engine(
+        keepLocalBudgetLinks: true,
+      ).executeDecision(SyncMode.cloudWins);
+
+      expect(await localBudgetId(), 'bud-1');
+    });
+
+    test('clears the local link once the repair is done', () async {
+      await engine().executeDecision(SyncMode.cloudWins);
+
+      expect(await localBudgetId(), isNull);
     });
   });
 

@@ -5,3 +5,7 @@ export interface PaginatedResult<T> {
   nextCursor: string | null;
   total: number;
 }
+
+export interface FillRecordBudgetLinksResult {
+  updated: number;
+}

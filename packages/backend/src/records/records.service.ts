@@ -5,7 +5,8 @@ import { Record } from './entities/record.entity';
 import { CreateRecordDto } from './dto/create-record.dto';
 import { UpdateRecordDto } from './dto/update-record.dto';
 import { QueryRecordsDto } from './dto/query-records.dto';
-import { PaginatedResult } from './records.types';
+import { FillRecordBudgetLinksResult, PaginatedResult } from './records.types';
+import { RecordBudgetLinkItem } from './dto/fill-record-budget-links.dto';
 
 @Injectable()
 export class RecordsService {
@@ -57,5 +58,33 @@ export class RecordsService {
   async remove(userId: string, id: string): Promise<void> {
     const result = await this.recordRepository.delete({ id, userId });
     if (result.affected === 0) throw new NotFoundException(`Record ${id} not found`);
+  }
+
+  /**
+   * Restores budget links the server dropped before records had a budgetId
+   * column. Only rows of this user without a link are touched; nothing is
+   * created and no other field changes. The budget is not checked against the
+   * user's budgets: Family members link Records to an Admin's Shared Budget.
+   *
+   * `updatedAt` is left alone on purpose: bumping it would make sync reject
+   * edits other devices queued earlier as conflicts (ADR 0012).
+   *
+   * One raw statement fills every row at once; the repository API would need
+   * a query per link. The table and column names below mirror the Record
+   * entity mapping and must change with it.
+   */
+  async fillMissingBudgetLinks(userId: string, links: RecordBudgetLinkItem[]): Promise<FillRecordBudgetLinksResult> {
+    if (links.length === 0) return { updated: 0 };
+
+    const result: unknown = await this.recordRepository.query(
+      `UPDATE "records" AS r
+          SET "budgetId" = v."budgetId"
+         FROM unnest($1::text[], $2::text[]) AS v("id", "budgetId")
+        WHERE r."id" = v."id" AND r."userId" = $3 AND r."budgetId" IS NULL`,
+      [links.map((l) => l.id), links.map((l) => l.budgetId), userId],
+    );
+    // pg returns [rows, rowCount] for UPDATE through TypeORM's query().
+    const updated = Array.isArray(result) && typeof result[1] === 'number' ? result[1] : 0;
+    return { updated };
   }
 }

@@ -93,6 +93,24 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
     return counts;
   }
 
+  /// Id and budget of every record linked to a budget.
+  Future<List<({String id, String budgetId})>> getBudgetLinks() async {
+    final query = selectOnly(records)
+      ..addColumns([records.id, records.budgetId])
+      ..where(records.budgetId.isNotNull());
+    final rows = await query.get();
+
+    final links = <({String id, String budgetId})>[];
+    for (final row in rows) {
+      final id = row.read(records.id);
+      final budgetId = row.read(records.budgetId);
+      if (id == null || budgetId == null) continue;
+      links.add((id: id, budgetId: budgetId));
+    }
+
+    return links;
+  }
+
   Future<bool> existsBySourceId(String sourceId) async {
     final count = countAll();
     final query = selectOnly(records)

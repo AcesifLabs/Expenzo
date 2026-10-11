@@ -21,18 +21,20 @@ describe('SyncService', () => {
   let service: SyncService;
   let recordRepo: AnyRepo;
   let budgetRepo: AnyRepo;
+  let module: TestingModule;
 
   const mockRepo = () => ({
     findOne: jest.fn(),
     create: jest.fn(),
     save: jest.fn(),
     delete: jest.fn(),
+    exists: jest.fn().mockResolvedValue(false),
     find: jest.fn().mockResolvedValue([]),
     count: jest.fn().mockResolvedValue(0),
   });
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
+    module = await Test.createTestingModule({
       providers: [
         SyncService,
         { provide: getRepositoryToken(RecordEntity), useFactory: mockRepo },
@@ -237,6 +239,103 @@ describe('SyncService', () => {
       await pushBudget(withoutName);
 
       expect(budgetRepo.create).toHaveBeenCalledWith(expect.not.objectContaining({ name: expect.anything() }));
+    });
+  });
+
+  describe('owner checks', () => {
+    const tables = Object.values(SyncTable);
+    const entityFor: Record<SyncTable, unknown> = {
+      [SyncTable.RECORDS]: RecordEntity,
+      [SyncTable.CATEGORIES]: Category,
+      [SyncTable.BUDGETS]: Budget,
+      [SyncTable.MESSAGE_SOURCES]: MessageSource,
+      [SyncTable.EXPENSE_TEMPLATES]: ExpenseTemplate,
+      [SyncTable.PARSING_RULES]: ParsingRule,
+      [SyncTable.RECURRING_TRANSACTIONS]: RecurringTransaction,
+      [SyncTable.PENDING_RECURRING]: PendingRecurring,
+    };
+    const repoFor = (table: SyncTable): AnyRepo => module.get(getRepositoryToken(entityFor[table] as any));
+
+    const push = (table: SyncTable, action: SyncAction, data: Record<string, unknown> | null = { amount: 1 }) =>
+      service.pushChanges('user-2', { changes: [{ table, action, id: 'row-1', data }] });
+
+    const ownedByOther = (repo: AnyRepo) => {
+      repo.findOne.mockResolvedValue(null);
+      repo.exists.mockResolvedValue(true);
+      repo.delete.mockResolvedValue({ affected: 0 });
+    };
+
+    it.each(tables)('should not insert over another user\'s %s row', async (table) => {
+      const repo = repoFor(table);
+      ownedByOther(repo);
+
+      const result = await push(table, SyncAction.INSERT);
+
+      expect(result.results[0]).toEqual({ id: 'row-1', status: SyncStatus.CONFLICT, serverId: 'row-1', message: 'Not the owner' });
+      expect(repo.save).not.toHaveBeenCalled();
+    });
+
+    it.each(tables)('should not update another user\'s %s row', async (table) => {
+      const repo = repoFor(table);
+      ownedByOther(repo);
+
+      const result = await push(table, SyncAction.UPDATE);
+
+      expect(result.results[0]).toEqual({ id: 'row-1', status: SyncStatus.CONFLICT, serverId: 'row-1', message: 'Not the owner' });
+      expect(repo.findOne).toHaveBeenCalledWith({ where: { id: 'row-1', userId: 'user-2' } });
+      expect(repo.save).not.toHaveBeenCalled();
+    });
+
+    it.each(tables)('should not delete another user\'s %s row', async (table) => {
+      const repo = repoFor(table);
+      ownedByOther(repo);
+
+      const result = await push(table, SyncAction.DELETE, null);
+
+      expect(result.results[0]).toEqual({ id: 'row-1', status: SyncStatus.CONFLICT, serverId: 'row-1', message: 'Not the owner' });
+      expect(repo.delete).toHaveBeenCalledWith({ id: 'row-1', userId: 'user-2' });
+    });
+
+    it.each(tables)('should update an own %s row', async (table) => {
+      const repo = repoFor(table);
+      repo.findOne.mockResolvedValue({ id: 'row-1', userId: 'user-2', updatedAt: new Date('2025-01-01') });
+      repo.save.mockImplementation((entity: any) => Promise.resolve(entity));
+
+      const result = await push(table, SyncAction.UPDATE);
+
+      expect(result.results[0].status).toBe(SyncStatus.SUCCESS);
+      expect(repo.findOne).toHaveBeenCalledWith({ where: { id: 'row-1', userId: 'user-2' } });
+      expect(repo.exists).not.toHaveBeenCalled();
+    });
+
+    it.each(tables)('should create a %s row for the caller when an update has an unknown id', async (table) => {
+      const repo = repoFor(table);
+      repo.findOne.mockResolvedValue(null);
+      repo.create.mockImplementation((data: any) => ({ ...data }));
+      repo.save.mockImplementation((entity: any) => Promise.resolve(entity));
+
+      const result = await push(table, SyncAction.UPDATE);
+
+      expect(result.results[0].status).toBe(SyncStatus.SUCCESS);
+      expect(repo.save).toHaveBeenCalledWith(expect.objectContaining({ id: 'row-1', userId: 'user-2' }));
+    });
+
+    it.each(tables)('should succeed when deleting an unknown %s id', async (table) => {
+      const repo = repoFor(table);
+      repo.delete.mockResolvedValue({ affected: 0 });
+
+      const result = await push(table, SyncAction.DELETE, null);
+
+      expect(result.results[0].status).toBe(SyncStatus.SUCCESS);
+    });
+
+    it('should ignore a userId sent in the update data', async () => {
+      recordRepo.findOne.mockResolvedValue({ id: 'row-1', userId: 'user-2', updatedAt: new Date('2025-01-01') });
+      recordRepo.save.mockImplementation((entity: any) => Promise.resolve(entity));
+
+      await push(SyncTable.RECORDS, SyncAction.UPDATE, { userId: 'user-1', amount: 5 });
+
+      expect(recordRepo.save).toHaveBeenCalledWith(expect.objectContaining({ userId: 'user-2', amount: 5 }));
     });
   });
 });

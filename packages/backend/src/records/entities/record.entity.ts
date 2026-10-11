@@ -6,6 +6,7 @@ import { CategoryType } from '../../common/enums/category-type.enum';
 @Entity('records')
 @Index(['userId', 'date'])
 @Index(['userId', 'categoryId'])
+@Index(['userId', 'budgetId'])
 @Index(['userId', 'updatedAt'])
 export class Record {
   @PrimaryColumn('text')
@@ -29,6 +30,13 @@ export class Record {
 
   @Column('text', { nullable: true })
   categoryId: string;
+
+  /**
+   * The Budget this Record counts towards. No foreign key: a Record can point at
+   * a budget the server has not received yet, or at a Family Admin's Shared Budget.
+   */
+  @Column('text', { nullable: true })
+  budgetId: string | null;
 
   @Column({ type: 'varchar', default: RecordSource.MANUAL })
   source: RecordSource;

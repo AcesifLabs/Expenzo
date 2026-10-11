@@ -1,4 +1,7 @@
+import 'package:drift/drift.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:expense_tracker/core/database/app_database.dart';
+import 'package:expense_tracker/core/sync/handlers/records_sync_handler.dart';
 import 'package:expense_tracker/core/sync/handlers/sync_parse_helpers.dart';
 
 void main() {
@@ -71,6 +74,62 @@ void main() {
       test('converts non-string to string', () {
         expect(parseSyncString(123), '123');
       });
+    });
+  });
+
+  group('RecordsSyncHandler budget links', () {
+    final base = {
+      'amount': 10,
+      'description': 'Lunch',
+      'date': '2026-10-01T00:00:00.000Z',
+      'recordType': 'OUT',
+    };
+
+    Value<String?> pulledBudgetId(
+      Map<String, dynamic> data, {
+      bool Function()? keepLocal,
+    }) =>
+        (RecordsSyncHandler(
+                  keepLocalBudgetLinks: keepLocal,
+                ).fromSyncPayload('r1', data)
+                as RecordsCompanion)
+            .budgetId;
+
+    test('a pulled null keeps the local link while the repair is pending', () {
+      expect(
+        pulledBudgetId({...base, 'budgetId': null}, keepLocal: () => true),
+        const Value<String?>.absent(),
+      );
+    });
+
+    test('a pulled null clears the local link once the repair is done', () {
+      expect(
+        pulledBudgetId({...base, 'budgetId': null}, keepLocal: () => false),
+        const Value<String?>(null),
+      );
+    });
+
+    test('a pulled link replaces the local one either way', () {
+      for (final keep in [true, false]) {
+        expect(
+          pulledBudgetId({...base, 'budgetId': 'bud-1'}, keepLocal: () => keep),
+          const Value<String?>('bud-1'),
+        );
+      }
+    });
+
+    test('a payload without budgetId never changes the local link', () {
+      expect(
+        pulledBudgetId(base, keepLocal: () => false),
+        const Value<String?>.absent(),
+      );
+    });
+
+    test('the default handler keeps local links', () {
+      expect(
+        pulledBudgetId({...base, 'budgetId': null}),
+        const Value<String?>.absent(),
+      );
     });
   });
 }
