@@ -12,6 +12,7 @@ import 'package:expense_tracker/features/records/domain/usecases/create_records_
 import 'sms_scanner_event.dart';
 import 'sms_scanner_submission_status.dart';
 import 'sms_scanner_state.dart';
+import 'package:expense_tracker/core/error/failure_message.dart';
 
 const _scanPageSize = 10;
 
@@ -58,7 +59,7 @@ class SmsScannerBloc extends Bloc<SmsScannerEvent, SmsScannerState> {
     );
 
     await scanResult.fold(
-      (failure) async => emit(SmsScannerError(message: failure.message)),
+      (failure) async => emit(SmsScannerError(message: failureText(failure))),
       (page) async {
         if (page.results.isEmpty) {
           _emitEmptyResults(emit, event);
@@ -108,7 +109,7 @@ class SmsScannerBloc extends Bloc<SmsScannerEvent, SmsScannerState> {
     );
 
     await result.fold(
-      (failure) async => emit(SmsScannerError(message: failure.message)),
+      (failure) async => emit(SmsScannerError(message: failureText(failure))),
       (page) async {
         final newFiltered = await _filterDuplicates(
           page.results,
@@ -304,7 +305,7 @@ class SmsScannerBloc extends Bloc<SmsScannerEvent, SmsScannerState> {
   ) {
     return currentState.copyWith(
       submissionStatus: SmsScannerSubmissionStatus.failure,
-      submissionErrorMessage: failure.message,
+      submissionErrorMessage: failureText(failure),
     );
   }
 }

@@ -8,6 +8,7 @@ import '../../domain/usecases/search_categories.dart';
 import '../../domain/usecases/update_category.dart';
 import 'category_event.dart';
 import 'category_state.dart';
+import 'package:expense_tracker/core/error/failure_message.dart';
 
 class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   final GetCategories getCategories;
@@ -41,7 +42,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       GetCategoriesParams(type: event.type, sortByUsage: event.sortByUsage),
     );
     result.fold(
-      (failure) => emit(CategoryError(failure.message)),
+      (failure) => emit(CategoryError(failureText(failure))),
       (categories) => emit(CategoryLoaded(categories, type: event.type)),
     );
   }
@@ -53,7 +54,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     emit(const CategoryLoading());
     final result = await createCategory(event.category);
     result.fold(
-      (failure) => emit(CategoryError(failure.message)),
+      (failure) => emit(CategoryError(failureText(failure))),
       (_) => add(LoadCategories(type: _lastRequestedType, sortByUsage: true)),
     );
   }
@@ -65,7 +66,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     emit(const CategoryLoading());
     final result = await updateCategory(event.category);
     result.fold(
-      (failure) => emit(CategoryError(failure.message)),
+      (failure) => emit(CategoryError(failureText(failure))),
       (_) => add(LoadCategories(type: _lastRequestedType, sortByUsage: true)),
     );
   }
@@ -77,7 +78,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     emit(const CategoryLoading());
     final result = await deleteCategory(event.id);
     result.fold(
-      (failure) => emit(CategoryError(failure.message)),
+      (failure) => emit(CategoryError(failureText(failure))),
       (_) => add(LoadCategories(type: _lastRequestedType, sortByUsage: true)),
     );
   }
@@ -96,7 +97,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       SearchCategoriesParams(query: event.query, type: event.type),
     );
     result.fold(
-      (failure) => emit(CategoryError(failure.message)),
+      (failure) => emit(CategoryError(failureText(failure))),
       (categories) => emit(CategorySearchResults(categories)),
     );
   }

@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:expense_tracker/core/utils/regex_utils.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class RegexTesterWidget extends StatefulWidget {
   final String pattern;
@@ -199,10 +202,10 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
         child: Row(
           children: [
             Icon(PiconsRegular.warning, color: colors.tertiary),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(
-                '⏱️ Timeout - Pattern took more than 2 seconds',
+                t.parsingRules.tester.timeout,
                 style: TextStyle(color: colors.tertiary),
               ),
             ),
@@ -225,9 +228,9 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
             Row(
               children: [
                 Icon(PiconsRegular.warningCircle, color: colors.error),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 Text(
-                  'Error',
+                  t.parsingRules.tester.error,
                   style: TextStyle(
                     color: colors.error,
                     fontWeight: FontWeight.bold,
@@ -235,7 +238,7 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
                 ),
               ],
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: AppSpacing.xs),
             Text(error),
           ],
         ),
@@ -253,7 +256,7 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
             _buildHeaderRow(result),
             if (result.matchFound) ...[
               const Divider(),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               _buildDetailsRow(result),
             ],
           ],
@@ -264,31 +267,30 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
 
   Row _buildHeaderRow(ParsedTestResult result) {
     final colors = Theme.of(context).colorScheme;
+    final testerT = t.parsingRules.tester;
+    final income = context.palette.income;
 
     return Row(
       children: [
         Icon(
-          result.matchFound ? PiconsFill.checkCircle : PiconsFill.xCircle,
-          color: result.matchFound ? colors.secondary : colors.onSurfaceVariant,
+          result.matchFound ? PiconsRegular.checkCircle : PiconsRegular.xCircle,
+          color: result.matchFound ? income : colors.onSurfaceVariant,
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: AppSpacing.sm),
         Text(
-          result.matchFound ? 'Match found' : 'No match',
+          result.matchFound ? testerT.match : testerT.noMatch,
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: result.matchFound
-                ? colors.secondary
-                : colors.onSurfaceVariant,
+            color: result.matchFound ? income : colors.onSurfaceVariant,
           ),
         ),
         const Spacer(),
         Text(
-          '⏱️ ${result.elapsedMs}ms',
-          style: TextStyle(
+          testerT.elapsed(ms: result.elapsedMs),
+          style: AppTypography.bodySmall.copyWith(
             color: result.elapsedMs > 1000
                 ? colors.tertiary
                 : colors.onSurfaceVariant,
-            fontSize: 12,
           ),
         ),
       ],
@@ -296,13 +298,15 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
   }
 
   Row _buildDetailsRow(ParsedTestResult result) {
+    final testerT = t.parsingRules.tester;
+
     return Row(
       children: [
-        _buildFieldResult('Amount', result.amount?.toString()),
-        const SizedBox(width: 16),
-        _buildFieldResult('Date', result.date?.toString()),
+        _buildFieldResult(testerT.amount, result.amount?.toString()),
+        const SizedBox(width: AppSpacing.md),
+        _buildFieldResult(testerT.date, result.date?.toString()),
         const Spacer(),
-        Text('${(result.confidence * 100).toInt()}% confidence'),
+        Text(testerT.confidence(percent: (result.confidence * 100).toInt())),
       ],
     );
   }
@@ -315,13 +319,17 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
       children: [
         Text(
           label,
-          style: TextStyle(fontSize: 10, color: colors.onSurfaceVariant),
+          style: AppTypography.bodySmall.copyWith(
+            color: colors.onSurfaceVariant,
+          ),
         ),
         Text(
           value ?? '-',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: value != null ? colors.secondary : colors.onSurfaceVariant,
+            color: value != null
+                ? context.palette.income
+                : colors.onSurfaceVariant,
           ),
         ),
       ],
@@ -337,20 +345,22 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final testerT = t.parsingRules.tester;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         TextField(
           controller: _sampleController,
-          decoration: const InputDecoration(
-            labelText: 'Sample message to test',
-            hintText: 'Enter a sample SMS or email text',
+          decoration: InputDecoration(
+            labelText: testerT.sample,
+            hintText: testerT.sampleHint,
             border: OutlineInputBorder(),
           ),
           maxLines: 3,
           onChanged: _onSampleChanged,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
         if (_result != null) ...[
           _buildResultCard(),
         ] else ...[
@@ -358,7 +368,7 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
             child: Padding(
               padding: AppSpacing.paddingMd,
               child: Text(
-                'Enter a sample message above to test the pattern',
+                testerT.enterSample,
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),

@@ -8,6 +8,8 @@ import '../../domain/usecases/delete_rule.dart';
 import '../../domain/repositories/parsing_rules_repository.dart';
 import 'parsing_rules_event.dart';
 import 'parsing_rules_state.dart';
+import 'package:expense_tracker/core/error/failure_message.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class ParsingRulesBloc extends Bloc<ParsingRulesEvent, ParsingRulesState> {
   final GetRules getRules;
@@ -52,7 +54,7 @@ class ParsingRulesBloc extends Bloc<ParsingRulesEvent, ParsingRulesState> {
 
     final result = await getRules(GetRulesParams());
     result.fold(
-      (failure) => emit(ParsingRulesError(message: failure.message)),
+      (failure) => emit(ParsingRulesError(message: failureText(failure))),
       (rules) => emit(ParsingRulesLoaded(rules: rules)),
     );
   }
@@ -67,7 +69,7 @@ class ParsingRulesBloc extends Bloc<ParsingRulesEvent, ParsingRulesState> {
   ) async {
     final result = await repository.createRule(event.rule);
     result.fold(
-      (failure) => emit(ParsingRulesError(message: failure.message)),
+      (failure) => emit(ParsingRulesError(message: failureText(failure))),
       (_) => add(RefreshRules()),
     );
   }
@@ -78,7 +80,7 @@ class ParsingRulesBloc extends Bloc<ParsingRulesEvent, ParsingRulesState> {
   ) async {
     final result = await getRules(GetRulesParams());
     result.fold(
-      (failure) => emit(ParsingRulesError(message: failure.message)),
+      (failure) => emit(ParsingRulesError(message: failureText(failure))),
       (rules) => emit(ParsingRulesLoaded(rules: rules)),
     );
   }
@@ -91,7 +93,7 @@ class ParsingRulesBloc extends Bloc<ParsingRulesEvent, ParsingRulesState> {
     if (currentState is ParsingRulesLoaded) {
       final matching = currentState.rules.where((r) => r.id == event.ruleId);
       if (matching.isEmpty) {
-        emit(const ParsingRulesError(message: 'Rule not found'));
+        emit(ParsingRulesError(message: t.common.errors.notFound));
 
         return;
       }
@@ -104,7 +106,7 @@ class ParsingRulesBloc extends Bloc<ParsingRulesEvent, ParsingRulesState> {
 
       final result = await updateRule(updatedRule);
       result.fold(
-        (failure) => emit(ParsingRulesError(message: failure.message)),
+        (failure) => emit(ParsingRulesError(message: failureText(failure))),
         (_) => null,
       );
     }
@@ -116,7 +118,7 @@ class ParsingRulesBloc extends Bloc<ParsingRulesEvent, ParsingRulesState> {
   ) async {
     final result = await deleteRuleUseCase(event.ruleId);
     result.fold(
-      (failure) => emit(ParsingRulesError(message: failure.message)),
+      (failure) => emit(ParsingRulesError(message: failureText(failure))),
       (_) => null,
     );
   }

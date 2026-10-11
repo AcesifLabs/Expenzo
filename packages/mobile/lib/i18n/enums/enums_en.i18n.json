@@ -1,0 +1,7 @@
+{
+  "recordType": { "income": "Income", "expense": "Expense" },
+  "period": { "weekly": "Weekly", "monthly": "Monthly", "yearly": "Yearly" },
+  "frequency": { "daily": "Daily", "weekly": "Weekly", "biweekly": "Biweekly", "monthly": "Monthly", "yearly": "Yearly" },
+  "source": { "manual": "Manual", "sms": "SMS", "email": "Email", "recurring": "Recurring", "both": "Both" },
+  "theme": { "system": "Match device", "light": "Light", "dark": "Dark" }
+}

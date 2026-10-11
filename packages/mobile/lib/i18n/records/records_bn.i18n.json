@@ -1,0 +1,76 @@
+{
+  "@@i18n-review": "Machine-drafted Bangla. Needs native review before release.",
+  "filter": {
+    "title": "ফিল্টার",
+    "dateRange": "তারিখের সীমা",
+    "type": "ধরন",
+    "all": "সব",
+    "categories": "ক্যাটাগরি",
+    "clear": "মুছুন",
+    "apply": "প্রয়োগ করুন",
+    "noCategories": "কোনো ক্যাটাগরি নেই",
+    "allCategories": "সব ক্যাটাগরি",
+    "allCount": "সব ({n})",
+    "selectedCount": "{n}টি বাছাই করা",
+    "selectDateRange": "তারিখের সীমা বেছে নিন",
+    "range": "{start} - {end}"
+  },
+  "list": {
+    "title": "লেনদেন",
+    "subtitle": "লেনদেনের ইতিহাস",
+    "filter": "ফিল্টার",
+    "search": "লেনদেন খুঁজুন",
+    "noMatches": "আপনার খোঁজ বা ফিল্টারের সাথে মেলে এমন কোনো লেনদেন নেই।",
+    "empty": "এখনো কোনো লেনদেন নেই",
+    "scrollForMore": "আরও দেখতে স্ক্রল করুন",
+    "deleted": "রেকর্ড মুছে ফেলা হয়েছে"
+  },
+  "picker": {
+    "title": "ক্যাটাগরি বেছে নিন",
+    "search": "ক্যাটাগরি খুঁজুন",
+    "noneFound": "কোনো ক্যাটাগরি পাওয়া যায়নি",
+    "addCategory": "ক্যাটাগরি যোগ করুন"
+  },
+  "sheet": {
+    "placeholders": {
+      "expense": [
+        "বাজার-সদাই",
+        "অফিসে উবার",
+        "সহকর্মীর সাথে দুপুরের খাবার",
+        "নেটফ্লিক্স সাবস্ক্রিপশন",
+        "বিদ্যুৎ বিল",
+        "পেট্রোল পাম্প"
+      ],
+      "income": [
+        "বেতন",
+        "ফ্রিল্যান্স পেমেন্ট",
+        "বাড়তি আয়",
+        "ফেরত",
+        "বোনাস",
+        "বিনিয়োগের লভ্যাংশ"
+      ]
+    },
+    "enterAmount": "একটি পরিমাণ লিখুন",
+    "nameHintExpense": "নাম, যেমন: দুপুরের খাবার",
+    "nameHintIncome": "নাম, যেমন: বেতন",
+    "nameRequired": "একটি নাম দিন",
+    "scanReceipt": "রসিদ স্ক্যান করুন",
+    "noBudget": "কোনো বাজেট নয়",
+    "budgetOption": "{name} · {period}",
+    "previousBudget": "আগের বাজেট (এখন আর চালু নেই)",
+    "loadingBudgets": "বাজেট লোড হচ্ছে…",
+    "noCategories": "কোনো ক্যাটাগরি নেই",
+    "selectCategory": "একটি ক্যাটাগরি বেছে নিন",
+    "showAllCategories": "সব ক্যাটাগরি দেখুন",
+    "repeatMonthly": "প্রতি মাসে পুনরাবৃত্তি",
+    "addIncome": "আয় যোগ করুন",
+    "deleteExpense": "খরচ মুছুন",
+    "deleteIncome": "আয় মুছুন",
+    "deleteExpenseTitle": "এই খরচটি মুছবেন?",
+    "deleteIncomeTitle": "এই আয়টি মুছবেন?",
+    "cannotUndo": "এটি আর ফেরানো যাবে না।",
+    "repeatFailed": "সংরক্ষণ হয়েছে, কিন্তু পুনরাবৃত্তি চালু করা যায়নি। সেটিংস → পুনরাবৃত্ত থেকে সেট আপ করুন।",
+    "typeToggle": "লেনদেনের ধরন",
+    "backspace": "মুছুন"
+  }
+}

@@ -1,5 +1,9 @@
 import 'dart:ui' show lerpDouble;
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class ReportsTabBar extends StatelessWidget {
   static const _tabs = ['Trend', 'Categories', 'Insights'];
@@ -7,6 +11,12 @@ class ReportsTabBar extends StatelessWidget {
     'Trend': 40.0,
     'Categories': 60.0,
     'Insights': 50.0,
+  };
+
+  static String _label(String tab) => switch (tab) {
+    'Trend' => t.shell.reportsTabs.trend,
+    'Categories' => t.shell.reportsTabs.categories,
+    _ => t.shell.reportsTabs.insights,
   };
 
   final TabController controller;
@@ -18,13 +28,9 @@ class ReportsTabBar extends StatelessWidget {
     required this.onTabChanged,
   });
 
-  Color _labelColor(double selectedness) {
-    return Color.lerp(
-          const Color(0xFF8E8E93),
-          const Color(0xFFD1C4E9),
-          selectedness,
-        ) ??
-        const Color(0xFF8E8E93);
+  Color _labelColor(AppPalette palette, double selectedness) {
+    return Color.lerp(palette.textSecondary, palette.brand, selectedness) ??
+        palette.textSecondary;
   }
 
   FontWeight _fontWeight(double selectedness) {
@@ -39,17 +45,19 @@ class ReportsTabBar extends StatelessWidget {
   double _underlineWidth(double value) {
     final leftIndex = value.floor().clamp(0, _tabs.length - 1);
     final rightIndex = value.ceil().clamp(0, _tabs.length - 1);
-    final t = value - leftIndex;
+    final progress = value - leftIndex;
     final leftWidth = _activeWidths[_tabs[leftIndex]] ?? 40;
     final rightWidth = _activeWidths[_tabs[rightIndex]] ?? 40;
 
-    return lerpDouble(leftWidth, rightWidth, t) ?? leftWidth;
+    return lerpDouble(leftWidth, rightWidth, progress) ?? leftWidth;
   }
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     return SizedBox(
-      height: 40,
+      height: AppSpacing.minTapTarget,
       child: AnimatedBuilder(
         animation: controller.animation ?? controller,
         builder: (context, _) {
@@ -75,23 +83,25 @@ class ReportsTabBar extends StatelessWidget {
                       );
 
                       return Expanded(
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () => onTabChanged(tab),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                tab,
-                                style: TextStyle(
-                                  fontFamily: 'Work Sans',
-                                  fontSize: 14,
-                                  fontWeight: _fontWeight(selectedness),
-                                  color: _labelColor(selectedness),
+                        child: Semantics(
+                          button: true,
+                          selected: index == value.round(),
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () => onTabChanged(tab),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  _label(tab),
+                                  style: AppTypography.bodyMedium.copyWith(
+                                    color: _labelColor(palette, selectedness),
+                                    fontWeight: _fontWeight(selectedness),
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 9),
-                            ],
+                                const SizedBox(height: AppSpacing.sm),
+                              ],
+                            ),
                           ),
                         ),
                       );
@@ -104,8 +114,10 @@ class ReportsTabBar extends StatelessWidget {
                       width: underlineWidth,
                       height: 3,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFD1C4E9),
-                        borderRadius: BorderRadius.circular(1.5),
+                        color: palette.brand,
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusPill,
+                        ),
                       ),
                     ),
                   ),

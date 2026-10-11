@@ -1,19 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 import '../../domain/entities/insight_item.dart';
 
 class InsightCard extends StatelessWidget {
+  static Color _toneColor(AppPalette palette, InsightTone tone) {
+    return switch (tone) {
+      InsightTone.warning => palette.expense,
+      InsightTone.positive => palette.income,
+      InsightTone.info => palette.accent,
+      InsightTone.investment => palette.info,
+    };
+  }
+
   final InsightItem item;
 
   const InsightCard({super.key, required this.item});
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C1B1D),
-        borderRadius: BorderRadius.circular(16),
+        color: palette.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -22,14 +36,18 @@ class InsightCard extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: const Color(0xFF2B292C),
-              borderRadius: BorderRadius.circular(12),
+              color: palette.surfaceHigh,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
             ),
             child: Center(
-              child: Icon(item.icon, size: 20, color: item.iconColor),
+              child: Icon(
+                item.icon,
+                size: 20,
+                color: _toneColor(palette, item.tone),
+              ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.smd),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -37,20 +55,15 @@ class InsightCard extends StatelessWidget {
               children: [
                 Text(
                   item.title,
-                  style: const TextStyle(
-                    fontFamily: 'Work Sans',
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFFF5F7FA),
+                  style: AppTypography.labelLarge.copyWith(
+                    color: palette.textPrimary,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSpacing.xs),
                 Text(
                   item.description,
-                  style: const TextStyle(
-                    fontFamily: 'Work Sans',
-                    fontSize: 13,
-                    color: Color(0xFF8E8E93),
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: palette.textSecondary,
                   ),
                 ),
               ],

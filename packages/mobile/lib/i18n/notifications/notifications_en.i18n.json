@@ -1,0 +1,25 @@
+{
+  "channel": {
+    "name": "App notifications",
+    "description": "Budget alerts, recurring reminders and scan results"
+  },
+  "budget": {
+    "title": "Budget alert",
+    "over": "You went over your \"{budget}\" budget.",
+    "used": "You have used {percent}% of your \"{budget}\" budget."
+  },
+  "recurringDue": {
+    "title": "Recurring expense due"
+  },
+  "scan": {
+    "smsTitle": "SMS scan complete",
+    "emailTitle": "Email scan complete",
+    "found": {
+      "one": "{n} new expense found",
+      "other": "{n} new expenses found"
+    }
+  },
+  "syncError": {
+    "title": "Sync error"
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "@@i18n-review": "Machine-drafted Bangla. Needs native review before release.",
+  "tabs": { "home": "হোম", "activity": "লেনদেন", "budgets": "বাজেট", "reports": "রিপোর্ট" },
+  "reportsTabs": { "trend": "প্রবণতা", "categories": "ক্যাটাগরি", "insights": "বিশ্লেষণ" }
+}

@@ -1,25 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
 import '../../domain/entities/category_amount.dart';
+import '../helpers/category_chart_color.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class CategoryDonutChart extends StatelessWidget {
-  static const _colors = [
-    Color(0xFFD1C4E9),
-    Color(0xFFA2D3A4),
-    Color(0xFF90CAF9),
-    Color(0xFFF48FB1),
-    Color(0x608E8E93),
-  ];
-
   final List<CategoryAmount> data;
 
   const CategoryDonutChart({super.key, required this.data});
 
-  List<PieChartSectionData> _buildSections() {
-    return data.asMap().entries.map((entry) {
-      final index = entry.key;
-      final item = entry.value;
-      final color = _colors[index % _colors.length];
+  List<PieChartSectionData> _buildSections(AppPalette palette) {
+    return data.map((item) {
+      final color = categoryChartColor(item, palette);
 
       return PieChartSectionData(
         color: color,
@@ -33,13 +27,15 @@ class CategoryDonutChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (data.isEmpty) {
-      return const SizedBox(
+      return SizedBox(
         width: 160,
         height: 160,
         child: Center(
           child: Text(
-            'No category data',
-            style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
+            t.reports.noCategoryData,
+            style: AppTypography.bodySmall.copyWith(
+              color: context.palette.textSecondary,
+            ),
           ),
         ),
       );
@@ -52,7 +48,7 @@ class CategoryDonutChart extends StatelessWidget {
         PieChartData(
           centerSpaceRadius: 48,
           sectionsSpace: 2,
-          sections: _buildSections(),
+          sections: _buildSections(context.palette),
         ),
       ),
     );

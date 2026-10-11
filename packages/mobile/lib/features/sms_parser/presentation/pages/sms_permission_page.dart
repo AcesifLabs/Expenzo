@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:picons/picons.dart';
-import 'package:expense_tracker/core/theme/app_colors.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 import '../bloc/sms_permission_bloc.dart';
 import '../bloc/sms_permission_event.dart';
 import '../bloc/sms_permission_state.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class SmsPermissionPage extends StatelessWidget {
   final VoidCallback onPermissionGranted;
@@ -30,7 +33,8 @@ class SmsPermissionPage extends StatelessWidget {
     context.read<SmsPermissionBloc>().add(const OpenAppSettings());
   }
 
-  Widget _buildInfoCard({
+  Widget _buildInfoCard(
+    BuildContext context, {
     required IconData icon,
     required String title,
     required String description,
@@ -39,29 +43,25 @@ class SmsPermissionPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(AppSpacing.sm),
           decoration: BoxDecoration(
-            color: AppColors.primary.withAlpha(26),
-            borderRadius: BorderRadius.circular(8),
+            color: context.palette.accentFill.withAlpha(60),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
           ),
-          child: Icon(icon, color: AppColors.primary, size: 24),
+          child: Icon(icon, color: context.palette.brand, size: 24),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: AppSpacing.smd),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 4),
+              Text(title, style: AppTypography.labelLarge),
+              const SizedBox(height: AppSpacing.xs),
               Text(
                 description,
-                style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                style: AppTypography.bodyMedium.copyWith(
+                  color: context.palette.textSecondary,
+                ),
               ),
             ],
           ),
@@ -76,35 +76,34 @@ class SmsPermissionPage extends StatelessWidget {
       child: ElevatedButton(
         onPressed: () => _onRequestPermission(context),
         style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
         ),
-        child: const Text('Continue'),
+        child: Text(t.smsParser.permission.next),
       ),
     );
   }
 
   Widget _buildPermanentlyDeniedSection(BuildContext context) {
+    final palette = context.palette;
+
     return Column(
       children: [
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
-            color: AppColors.warning.withAlpha(51),
-            borderRadius: BorderRadius.circular(8),
+            color: palette.warning.withAlpha(51),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
           ),
           child: Column(
             children: [
-              Icon(PiconsRegular.warning, color: AppColors.warning),
-              const SizedBox(height: 8),
-              const Text(
-                'SMS permission was permanently denied. Please enable it in app settings.',
-                textAlign: TextAlign.center,
-              ),
+              Icon(PiconsRegular.warning, color: palette.warning),
+              const SizedBox(height: AppSpacing.sm),
+              Text(t.smsParser.permission.denied, textAlign: TextAlign.center),
             ],
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.smd),
         _buildOpenSettingsButton(context),
       ],
     );
@@ -115,60 +114,64 @@ class SmsPermissionPage extends StatelessWidget {
       width: double.infinity,
       child: OutlinedButton(
         onPressed: () => _onOpenSettings(context),
-        child: const Text('Open Settings'),
+        child: Text(t.common.openSettings),
       ),
     );
   }
 
   Widget _buildTimeoutSection(BuildContext context) {
+    final palette = context.palette;
+
     return Column(
       children: [
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
-            color: AppColors.error.withAlpha(51),
-            borderRadius: BorderRadius.circular(8),
+            color: palette.error.withAlpha(51),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
           ),
           child: Column(
             children: [
-              Icon(PiconsRegular.warningCircle, color: AppColors.error),
-              const SizedBox(height: 8),
-              const Text(
-                'Permission request timed out. Please try again.',
+              Icon(PiconsRegular.warningCircle, color: palette.error),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                t.smsParser.permission.timedOut,
                 textAlign: TextAlign.center,
               ),
             ],
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.smd),
         _buildRetryButton(context),
       ],
     );
   }
 
-  Widget _buildInfoSection() {
+  Widget _buildInfoSection(BuildContext context) {
+    final strings = t.smsParser.permission;
+
     return Column(
       children: [
         _buildInfoCard(
+          context,
           icon: PiconsRegular.lock,
-          title: 'Your Privacy Protected',
-          description:
-              'All SMS data is processed locally on your device. We never upload your messages to any server.',
+          title: strings.privacyTitle,
+          description: strings.privacyBody,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.smd),
         _buildInfoCard(
+          context,
           icon: PiconsRegular.database,
-          title: 'Local Storage Only',
-          description:
-              'Detected expenses are stored locally. No personal messages are saved.',
+          title: strings.localTitle,
+          description: strings.localBody,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.smd),
         _buildInfoCard(
+          context,
           icon: PiconsRegular.slidersHorizontal,
-          title: 'You\'re in Control',
-          description:
-              'Choose which SMS to convert to expenses. You can always edit or delete them.',
+          title: strings.controlTitle,
+          description: strings.controlBody,
         ),
       ],
     );
@@ -179,47 +182,46 @@ class SmsPermissionPage extends StatelessWidget {
       width: double.infinity,
       child: ElevatedButton(
         onPressed: () => _onRequestPermission(context),
-        child: const Text('Try Again'),
+        child: Text(t.common.tryAgain),
       ),
     );
   }
 
   Widget _buildPageContent(BuildContext context, SmsPermissionState state) {
     final theme = Theme.of(context);
+    final palette = context.palette;
+    final strings = t.smsParser.permission;
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: palette.bg,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Spacer(),
-              Icon(PiconsRegular.chat, size: 80, color: AppColors.primary),
-              const SizedBox(height: 24),
+              Icon(PiconsRegular.chat, size: 80, color: palette.brand),
+              const SizedBox(height: AppSpacing.lg),
               Text(
-                'Enable SMS Scanning',
+                strings.title,
                 style: theme.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 16),
-              Text(
-                'We scan your SMS to automatically detect expenses from banks and payment apps.',
-                style: theme.textTheme.bodyLarge,
-              ),
-              const SizedBox(height: 24),
-              _buildInfoSection(),
+              const SizedBox(height: AppSpacing.md),
+              Text(strings.body, style: theme.textTheme.bodyLarge),
+              const SizedBox(height: AppSpacing.lg),
+              _buildInfoSection(context),
               if (state is SmsPermissionLoading)
                 const Center(child: CircularProgressIndicator())
               else ...[
                 _buildContinueButton(context),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.smd),
                 Center(
                   child: TextButton(
                     onPressed: onSkip,
-                    child: const Text('Not now'),
+                    child: Text(t.common.notNow),
                   ),
                 ),
               ],
@@ -229,7 +231,7 @@ class SmsPermissionPage extends StatelessWidget {
               if (state is SmsPermissionTimeout) ...[
                 _buildTimeoutSection(context),
               ],
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.lg),
             ],
           ),
         ),

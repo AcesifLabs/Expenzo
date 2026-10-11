@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:flutter/services.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/features/ai_assistant/domain/constants/ai_assistant.constants.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class ChatInput extends StatelessWidget {
   final TextEditingController controller;
@@ -21,36 +25,36 @@ class ChatInput extends StatelessWidget {
 
   OutlineInputBorder _border(Color color) {
     return OutlineInputBorder(
-      borderRadius: BorderRadius.circular(22),
+      borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
       borderSide: BorderSide(color: color, width: 1),
     );
   }
 
-  InputDecoration _decoration() {
-    final defaultBorder = _border(const Color(0x408E8E93));
+  InputDecoration _decoration(AppPalette palette) {
+    final defaultBorder = _border(palette.textSecondary.withAlpha(0x40));
 
     return InputDecoration(
-      hintText: 'Ask about your finances...',
-      hintStyle: const TextStyle(
-        fontFamily: 'Work Sans',
-        fontSize: 14,
-        color: Color(0xFF8E8E93),
+      hintText: t.aiAssistant.inputHint,
+      hintStyle: AppTypography.bodyMedium.copyWith(
+        color: palette.textSecondary,
       ),
       filled: true,
-      fillColor: const Color(0xFF1C1B1D),
+      fillColor: palette.surface,
       counterText: '',
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
       border: defaultBorder,
       enabledBorder: defaultBorder,
-      focusedBorder: _border(const Color(0xFFD1C4E9)),
-      disabledBorder: _border(const Color(0x208E8E93)),
+      focusedBorder: _border(palette.brand),
+      disabledBorder: _border(palette.inputStroke),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     return Padding(
-      padding: const EdgeInsets.only(top: 8, bottom: 8),
+      padding: const EdgeInsets.only(top: AppSpacing.sm, bottom: AppSpacing.sm),
       child: Row(
         children: [
           Expanded(
@@ -63,34 +67,35 @@ class ChatInput extends StatelessWidget {
                 maxLength: AiAssistantConstants.maxUserPromptLength,
                 maxLengthEnforcement: MaxLengthEnforcement.enforced,
                 onSubmitted: onSubmitted,
-                style: const TextStyle(
-                  fontFamily: 'Work Sans',
-                  fontSize: 14,
-                  color: Color(0xFFF5F7FA),
+                style: AppTypography.bodyMedium.copyWith(
+                  color: palette.textPrimary,
                 ),
-                decoration: _decoration(),
+                decoration: _decoration(palette),
               ),
             ),
           ),
-          const SizedBox(width: 8),
-          GestureDetector(
-            onTap: enabled ? onSend : null,
-            child: Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: enabled
-                    ? const Color(0xFFD1C4E9)
-                    : const Color(0xFF2B292C),
-                borderRadius: BorderRadius.circular(22),
-              ),
-              child: Center(
-                child: Icon(
-                  PiconsRegular.paperPlaneRight,
-                  size: 20,
-                  color: enabled
-                      ? const Color(0xFF141315)
-                      : const Color(0xFF8E8E93),
+          const SizedBox(width: AppSpacing.sm),
+          Semantics(
+            button: true,
+            enabled: enabled,
+            label: t.aiAssistant.send,
+            child: GestureDetector(
+              onTap: enabled ? onSend : null,
+              child: Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: enabled ? palette.brandFill : palette.surfaceHigh,
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+                ),
+                child: Center(
+                  child: Icon(
+                    PiconsRegular.paperPlaneRight,
+                    size: 20,
+                    color: enabled
+                        ? palette.onBrandFill
+                        : palette.textSecondary,
+                  ),
                 ),
               ),
             ),

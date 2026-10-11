@@ -6,6 +6,7 @@ import '../../domain/usecases/save_template.dart';
 import '../../domain/repositories/message_template_repository.dart';
 import 'template_editor_event.dart';
 import 'template_editor_state.dart';
+import 'package:expense_tracker/core/error/failure_message.dart';
 
 class TemplateEditorBloc
     extends Bloc<TemplateEditorEvent, TemplateEditorState> {
@@ -30,14 +31,14 @@ class TemplateEditorBloc
 
     final sourceError = sourceResult.fold((failure) => failure, (_) => null);
     if (sourceError != null) {
-      emit(TemplateEditorError(sourceError.message));
+      emit(TemplateEditorError(failureText(sourceError)));
 
       return;
     }
 
     final result = await saveTemplateUseCase(event.template);
     result.fold(
-      (failure) => emit(TemplateEditorError(failure.message)),
+      (failure) => emit(TemplateEditorError(failureText(failure))),
       (_) => emit(TemplateEditorSaved()),
     );
   }
@@ -49,7 +50,7 @@ class TemplateEditorBloc
     emit(TemplateEditorSaving());
     final result = await repository.deleteTemplate(event.templateId);
     result.fold(
-      (failure) => emit(TemplateEditorError(failure.message)),
+      (failure) => emit(TemplateEditorError(failureText(failure))),
       (_) => emit(TemplateEditorDeleted()),
     );
   }

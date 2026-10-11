@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class SmsScanSummaryCard extends StatelessWidget {
   final String rangeLabel;
@@ -32,7 +34,7 @@ class SmsScanSummaryCard extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             value,
             style: theme.textTheme.labelLarge?.copyWith(
@@ -48,22 +50,23 @@ class SmsScanSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final strings = t.smsParser.summary;
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(AppSpacing.smd),
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
       ),
       child: Row(
         children: [
-          _buildStat(context, 'Range', rangeLabel),
-          const SizedBox(width: 8),
-          _buildStat(context, 'Matches', '$matchCount'),
-          const SizedBox(width: 8),
+          _buildStat(context, strings.range, rangeLabel),
+          const SizedBox(width: AppSpacing.sm),
+          _buildStat(context, strings.matches, '$matchCount'),
+          const SizedBox(width: AppSpacing.sm),
           _buildStat(
             context,
-            'Selected',
+            strings.selected,
             '$selectedCount',
             valueColor: colors.primary,
           ),

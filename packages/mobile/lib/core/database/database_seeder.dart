@@ -1,30 +1,38 @@
 import 'package:drift/drift.dart';
 import '../constants/record_type.dart';
+import '../theme/category_palette.dart';
 import 'app_database.dart';
 
 class DatabaseSeeder {
+  /// Seeded English name per default category id. A default category whose
+  /// stored name still matches is shown translated (`categoryDisplayName`).
+  static final Map<String, String> seedNames = {
+    for (final (id, name, _) in [..._incomeCategories, ..._expenseCategories])
+      id: name,
+  };
+
   static const _incomeCategories = [
-    ('default_in_salary', 'Salary', 'currencyDollar', '#A2D3A4'),
-    ('default_in_freelance', 'Freelance', 'briefcase', '#D1C4E9'),
-    ('default_in_investment', 'Investment', 'trendUp', '#90CAF9'),
-    ('default_in_refund', 'Refund', 'arrowULeftDown', '#FF9800'),
-    ('default_in_gift', 'Gift', 'gift', '#FFB300'),
-    ('default_in_general', 'General', 'tag', '#8E8E93'),
+    ('default_in_salary', 'Salary', 'currencyDollar'),
+    ('default_in_freelance', 'Freelance', 'briefcase'),
+    ('default_in_investment', 'Investment', 'trendUp'),
+    ('default_in_refund', 'Refund', 'arrowULeftDown'),
+    ('default_in_gift', 'Gift', 'gift'),
+    ('default_in_general', 'General', 'tag'),
   ];
 
   static const _expenseCategories = [
-    ('default_out_food', 'Food & Dining', 'forkKnife', '#F48FB1'),
-    ('default_out_shopping', 'Shopping', 'bag', '#D1C4E9'),
-    ('default_out_transport', 'Transport', 'car', '#90CAF9'),
-    ('default_out_home', 'Home', 'house', '#5E35B1'),
-    ('default_out_health', 'Health', 'heartbeat', '#F48FB1'),
-    ('default_out_entertainment', 'Entertainment', 'ticket', '#A2D3A4'),
-    ('default_out_bills', 'Bills & Utilities', 'lightning', '#FFD700'),
-    ('default_out_travel', 'Travel', 'airplane', '#3949AB'),
-    ('default_out_education', 'Education', 'bookOpen', '#90CAF9'),
-    ('default_out_investment', 'Investment', 'currencyDollar', '#90CAF9'),
-    ('default_out_gifts', 'Gifts', 'gift', '#FFB300'),
-    ('default_out_general', 'General', 'tag', '#8E8E93'),
+    ('default_out_food', 'Food & Dining', 'forkKnife'),
+    ('default_out_shopping', 'Shopping', 'bag'),
+    ('default_out_transport', 'Transport', 'car'),
+    ('default_out_home', 'Home', 'house'),
+    ('default_out_health', 'Health', 'heartbeat'),
+    ('default_out_entertainment', 'Entertainment', 'ticket'),
+    ('default_out_bills', 'Bills & Utilities', 'lightning'),
+    ('default_out_travel', 'Travel', 'airplane'),
+    ('default_out_education', 'Education', 'bookOpen'),
+    ('default_out_investment', 'Investment', 'currencyDollar'),
+    ('default_out_gifts', 'Gifts', 'gift'),
+    ('default_out_general', 'General', 'tag'),
   ];
 
   static Future<void> seedInitialCategories(AppDatabase db) async {
@@ -56,7 +64,7 @@ class DatabaseSeeder {
   }
 
   static CategoriesCompanion _buildCategoryCompanion(
-    (String, String, String, String) cat,
+    (String, String, String) cat,
     String categoryType,
     DateTime now,
   ) {
@@ -64,7 +72,9 @@ class DatabaseSeeder {
       id: cat.$1,
       name: cat.$2,
       emoji: Value(cat.$3),
-      color: Value(cat.$4),
+      color: Value(
+        CategoryPalette.seedColors[cat.$1] ?? CategoryPalette.slate.hex,
+      ),
       categoryType: Value(categoryType),
       isDefault: const Value(true),
       createdAt: Value(now),

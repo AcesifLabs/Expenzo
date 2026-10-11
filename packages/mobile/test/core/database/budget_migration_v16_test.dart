@@ -72,6 +72,33 @@ void main() {
       "INSERT INTO records (id, amount, description, date, record_type) VALUES ('r1', -20.0, 'Old expense', 0, 'OUT')",
       const [],
     );
+    // Later steps (v17 category recolor) read these tables; every real V15
+    // database has them.
+    await raw.runCustom('''
+      CREATE TABLE categories (
+        id TEXT NOT NULL PRIMARY KEY,
+        name TEXT NOT NULL,
+        emoji TEXT NOT NULL DEFAULT 'package',
+        color TEXT NOT NULL DEFAULT '#2196F3',
+        is_default INTEGER NOT NULL DEFAULT 0,
+        category_type TEXT NOT NULL DEFAULT 'OUT',
+        usage_count INTEGER NOT NULL DEFAULT 0,
+        user_id INTEGER,
+        created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
+        updated_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
+      )
+    ''', const []);
+    await raw.runCustom('''
+      CREATE TABLE sync_queue (
+        id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+        entity_table TEXT NOT NULL,
+        record_id TEXT NOT NULL,
+        action TEXT NOT NULL,
+        payload TEXT NOT NULL,
+        created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
+        synced_at INTEGER
+      )
+    ''', const []);
     await raw.runCustom('PRAGMA user_version = 15', const []);
     await raw.close();
   }

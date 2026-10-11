@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,6 +16,7 @@ import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanne
 import 'package:expense_tracker/features/sms_parser/presentation/pages/sms_scan_results_page.dart';
 
 import '../../../../support/factories/sms_scan_result_item_factory.dart';
+import '../../../../support/pump_localized.dart';
 
 class _MockScanSmsUseCase extends Mock implements ScanSmsUseCase {}
 
@@ -47,8 +49,13 @@ class _TestSmsScannerBloc extends SmsScannerBloc {
 
 void main() {
   Widget wrapWithBloc(SmsScannerBloc bloc) {
-    return MaterialApp(
-      home: BlocProvider.value(value: bloc, child: const SmsScanResultsPage()),
+    return translated(
+      MaterialApp(
+        home: BlocProvider.value(
+          value: bloc,
+          child: const SmsScanResultsPage(),
+        ),
+      ),
     );
   }
 
@@ -80,7 +87,7 @@ void main() {
     expect(find.text('Bank A'), findsOneWidget);
     expect(find.text('Bank B'), findsOneWidget);
     expect(find.byKey(const Key('sender_mode_chip')), findsOneWidget);
-    expect(find.text('Create 1 Selected'), findsOneWidget);
+    expect(find.text(t.smsParser.results.create(n: 1)), findsOneWidget);
   });
 
   testWidgets('shows flat list chip label in flat list mode', (tester) async {
@@ -98,7 +105,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('Flat List'), findsOneWidget);
+    expect(find.text('Flat list'), findsOneWidget);
   });
 
   testWidgets('shows inline submission failure message', (tester) async {
@@ -140,7 +147,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('Create 1 Selected'), findsOneWidget);
-    expect(find.text('Create 1 Selected'), findsWidgets);
+    expect(find.text(t.smsParser.results.create(n: 1)), findsOneWidget);
+    expect(find.text(t.smsParser.results.create(n: 1)), findsWidgets);
   });
 }

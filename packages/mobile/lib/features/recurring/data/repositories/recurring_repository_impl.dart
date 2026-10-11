@@ -8,6 +8,7 @@ import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../../domain/entities/recurring_transaction.dart';
 import '../../domain/repositories/recurring_repository.dart';
 import '../datasources/recurring_local_datasource.dart';
+import 'package:expense_tracker/core/error/failure_message.dart';
 
 class RecurringRepositoryImpl implements RecurringRepository {
   final RecurringLocalDatasource localDatasource;
@@ -43,7 +44,10 @@ class RecurringRepositoryImpl implements RecurringRepository {
       final recurring = await localDatasource.getRecurringById(id);
       if (recurring == null) {
         return const Left(
-          CacheFailure(message: 'Recurring transaction not found'),
+          CacheFailure(
+            message: 'Recurring transaction not found',
+            errorCode: FailureCodes.notFound,
+          ),
         );
       }
 

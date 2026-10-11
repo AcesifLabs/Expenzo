@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 import '../../domain/entities/category_amount.dart';
+import '../helpers/category_chart_color.dart';
+import 'package:expense_tracker/core/utils/category_display_name.dart';
 
 class CategoryLegend extends StatelessWidget {
-  static const _colors = [
-    Color(0xFFD1C4E9),
-    Color(0xFFA2D3A4),
-    Color(0xFF90CAF9),
-    Color(0xFFF48FB1),
-    Color(0x608E8E93),
-  ];
-
   final List<CategoryAmount> data;
 
   const CategoryLegend({super.key, required this.data});
@@ -19,19 +16,18 @@ class CategoryLegend extends StatelessWidget {
   Widget build(BuildContext context) {
     if (data.isEmpty) return const SizedBox.shrink();
 
+    final palette = context.palette;
     final fmt = CurrencyFormatter.getFormatter(decimalDigits: 0);
 
     return Padding(
-      padding: const EdgeInsets.only(top: 16),
+      padding: const EdgeInsets.only(top: AppSpacing.md),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        children: data.asMap().entries.map((entry) {
-          final index = entry.key;
-          final item = entry.value;
-          final color = _colors[index % _colors.length];
+        children: data.map((item) {
+          final color = categoryChartColor(item, palette);
 
           return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 5),
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
             child: Row(
               children: [
                 Container(
@@ -42,24 +38,22 @@ class CategoryLegend extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: AppSpacing.smd),
                 Expanded(
                   child: Text(
-                    item.categoryName,
-                    style: const TextStyle(
-                      fontFamily: 'Work Sans',
-                      fontSize: 14,
-                      color: Color(0xFFF5F7FA),
+                    categoryDisplayName(
+                      id: item.categoryId,
+                      name: item.categoryName,
+                    ),
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: palette.textPrimary,
                     ),
                   ),
                 ),
                 Text(
                   fmt.format(item.amount),
-                  style: const TextStyle(
-                    fontFamily: 'Work Sans',
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFFF5F7FA),
+                  style: AppTypography.labelLarge.copyWith(
+                    color: palette.textPrimary,
                   ),
                 ),
               ],

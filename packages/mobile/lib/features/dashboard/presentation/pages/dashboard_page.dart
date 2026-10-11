@@ -25,30 +25,38 @@ import 'package:expense_tracker/features/records/domain/entities/record.dart';
 import 'package:expense_tracker/features/reports/domain/entities/date_amount.dart';
 import 'package:expense_tracker/features/reports/domain/entities/granularity.dart';
 import 'package:expense_tracker/features/reports/domain/usecases/get_spending_trend.dart';
-import 'package:expense_tracker/features/settings/presentation/bloc/settings_bloc.dart';
-import 'package:expense_tracker/features/settings/presentation/bloc/settings_event.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_empty_state.dart';
 import 'package:expense_tracker/shared/presentation/widgets/budget_progress_indicator.dart';
 import 'package:expense_tracker/shared/presentation/widgets/shimmer_box.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
+import 'package:expense_tracker/shared/presentation/widgets/category_tile.dart';
+import 'package:expense_tracker/core/router/app_root_tab.dart';
+import 'package:expense_tracker/features/dashboard/presentation/widgets/auto_import_prompt_card.dart';
+import 'package:expense_tracker/features/records/presentation/widgets/new_transaction_sheet.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
+import 'package:expense_tracker/features/categories/domain/entities/category.dart'
+    as cat;
+import 'package:expense_tracker/features/categories/domain/usecases/get_categories.dart';
 import '../../domain/entities/date_range.dart';
 import '../bloc/dashboard_bloc.dart';
 import '../bloc/dashboard_event.dart';
 import '../bloc/dashboard_state.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
+import 'package:expense_tracker/features/categories/presentation/helpers/category_display_name.dart';
 
 class DashboardPage extends StatelessWidget {
-  final ValueChanged<int>? onNavigateToTab;
+  final ValueChanged<AppRootTab>? onNavigateToTab;
   final ValueListenable<int>? refreshTick;
 
   const DashboardPage({super.key, this.onNavigateToTab, this.refreshTick});
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(create: (_) => di.getIt<DashboardBloc>()),
-        BlocProvider(create: (_) => di.getIt<AuthBloc>()),
-      ],
+    // AuthBloc comes from ExpenzoApp so sign-in state is shared app-wide.
+    return BlocProvider(
+      create: (_) => di.getIt<DashboardBloc>(),
       child: DashboardView(
         onNavigateToTab: onNavigateToTab,
         refreshTick: refreshTick,
@@ -58,7 +66,7 @@ class DashboardPage extends StatelessWidget {
 }
 
 class DashboardView extends StatefulWidget {
-  final ValueChanged<int>? onNavigateToTab;
+  final ValueChanged<AppRootTab>? onNavigateToTab;
   final ValueListenable<int>? refreshTick;
 
   const DashboardView({super.key, this.onNavigateToTab, this.refreshTick});
@@ -95,6 +103,16 @@ class _DashboardViewState extends State<DashboardView> {
     unawaited(_onRefresh());
   }
 
+  Future<void> _addRecord() async {
+    if (await showTransactionSheet(context)) _onExternalRefresh();
+  }
+
+  Future<void> _editRecord(Record record) async {
+    if (await showTransactionSheet(context, record: record)) {
+      _onExternalRefresh();
+    }
+  }
+
   void _syncSecondaryDateRange(DateRange? nextRange) {
     if (nextRange == null) return;
     if (_secondaryDateRange == nextRange) return;
@@ -105,30 +123,42 @@ class _DashboardViewState extends State<DashboardView> {
 
   Future<DashboardSupplementaryData> _loadSupplementaryData() async {
     await di.featureDependenciesReady;
-    final getBudgetsWithProgress = _tryGetBudgetsWithProgress();
 
-    if (getBudgetsWithProgress == null) {
-      return DashboardSupplementaryData.empty;
-    }
+    return DashboardSupplementaryData(
+      budgetPreviews: await _loadBudgetPreviews(),
+      categoriesById: await _loadCategoriesById(),
+    );
+  }
+
+  Future<List<DashboardBudgetPreview>> _loadBudgetPreviews() async {
+    final getBudgetsWithProgress = _tryGetBudgetsWithProgress();
+    if (getBudgetsWithProgress == null) return const [];
 
     final budgetResult = await getBudgetsWithProgress(limit: 5);
-
     final budgets = budgetResult.fold((failure) {
       debugPrint('DashboardPage: Failed to load budgets: ${failure.message}');
 
       return <BudgetProgress>[];
     }, (value) => value);
 
-    final previews = budgets
+    return budgets
         .map(
           (progress) =>
               DashboardBudgetPreview(progress: progress, title: progress.name),
         )
         .toList();
+  }
 
-    return DashboardSupplementaryData(
-      budgetPreviews: previews,
-      categoriesById: {},
+  /// Lets the recent activity rows show each record's category tile and name.
+  Future<Map<String, cat.Category>> _loadCategoriesById() async {
+    if (!di.getIt.isRegistered<GetCategories>()) return const {};
+    final result = await di.getIt<GetCategories>()(const GetCategoriesParams());
+
+    return result.fold(
+      (_) => const {},
+      (categories) => {
+        for (final category in categories) ?category.id: category,
+      },
     );
   }
 
@@ -171,12 +201,18 @@ class _DashboardViewState extends State<DashboardView> {
     return Future<void>.value();
   }
 
-  String _displayName(String name) {
-    final parts = name.trim().split(RegExp(r'\s+'));
-    if (parts.isEmpty || parts.first.isEmpty) return 'User';
+  /// The first name, or null when signed out or the account has no name.
+  String? _firstName(AuthState authState) {
+    if (authState is! Authenticated) return null;
+    final first = (authState.user.displayName ?? '').trim().split(' ').first;
 
-    return parts.first;
+    return first.isEmpty ? null : first;
   }
+
+  /// "Hi, Sam" when we know the name, otherwise today's date.
+  String _greeting(String? firstName) => firstName == null
+      ? DateFormat('EEEE, d MMMM').format(DateTime.now())
+      : t.dashboard.greeting(name: firstName);
 
   Widget _buildAvatarWidget(
     BuildContext context,
@@ -192,11 +228,7 @@ class _DashboardViewState extends State<DashboardView> {
     } else if (authState is Authenticated) {
       avatarChild = Text(
         name.isNotEmpty ? name[0].toUpperCase() : '?',
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          color: colors.onPrimary,
-        ),
+        style: AppTypography.titleMedium.copyWith(color: colors.onPrimary),
       );
     } else {
       avatarChild = Icon(PiconsRegular.user, color: colors.onPrimary, size: 20);
@@ -229,46 +261,42 @@ class _DashboardViewState extends State<DashboardView> {
   }
 
   Widget _buildHeader(
-    BuildContext context,
-    AuthState authState,
-    String displayName,
-    String? photoUrl,
-  ) {
+    BuildContext context, {
+    required String greeting,
+    required Widget avatar,
+  }) {
     final colors = Theme.of(context).colorScheme;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         _horizontalPadding,
-        24,
+        AppSpacing.lg,
         _horizontalPadding,
-        8,
+        AppSpacing.sm,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Hi, $displayName',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w600,
-                  color: colors.onSurface,
-                ),
+          Expanded(
+            child: Text(
+              greeting,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTypography.headlineSmall.copyWith(
+                color: colors.onSurface,
               ),
-            ],
+            ),
           ),
           PopupMenuButton<String>(
             offset: const Offset(0, 48),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
             ),
             onSelected: (value) => _handleMenuAction(context, value),
             itemBuilder: (context) => _buildMenuItems(context),
             padding: EdgeInsets.zero,
-            icon: _buildAvatarWidget(context, authState, displayName, photoUrl),
+            icon: avatar,
           ),
         ],
       ),
@@ -282,51 +310,48 @@ class _DashboardViewState extends State<DashboardView> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         _horizontalPadding,
-        8,
+        AppSpacing.sm,
         _horizontalPadding,
         0,
       ),
       child: AppCard(
-        borderRadius: 24,
-        padding: const EdgeInsets.all(20),
+        borderRadius: AppSpacing.radiusCard,
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Total Balance',
-              style: TextStyle(
-                fontSize: 13,
+              (state.dateRange ?? DateRange.thisMonth()).netLabel,
+              style: AppTypography.bodyMedium.copyWith(
                 color: colors.onSurface.withAlpha(170),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             Text(
-              currencyFmt.format(state.summary.totalBalance),
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.w700,
+              CurrencyFormatter.formatSigned(state.summary.net),
+              style: AppTypography.headlineLarge.copyWith(
                 color: colors.onSurface,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
             Row(
               children: [
                 Expanded(
                   child: BalanceRow(
-                    icon: PiconsFill.trendUp,
-                    label: 'Income',
+                    icon: PiconsRegular.trendUp,
+                    label: t.dashboard.income,
                     amount: state.summary.totalIncome,
-                    color: colors.secondary,
+                    color: context.palette.income,
                     currencyFmt: currencyFmt,
                   ),
                 ),
-                const SizedBox(width: 24),
+                const SizedBox(width: AppSpacing.lg),
                 Expanded(
                   child: BalanceRow(
-                    icon: PiconsFill.trendDown,
-                    label: 'Expense',
+                    icon: PiconsRegular.trendDown,
+                    label: t.dashboard.expense,
                     amount: state.summary.totalExpense,
-                    color: colors.error,
+                    color: context.palette.expense,
                     currencyFmt: currencyFmt,
                   ),
                 ),
@@ -341,38 +366,42 @@ class _DashboardViewState extends State<DashboardView> {
   List<Widget> _buildLoadingContent(BuildContext context, DateRange dateRange) {
     _ensureSupplementaryFuture();
     _ensureTrendFuture(dateRange);
+    final sections = t.dashboard.sections;
 
     return [
       SliverToBoxAdapter(child: _buildBalanceSkeleton(context)),
-      const SliverToBoxAdapter(child: SizedBox(height: 20)),
+      const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
       SliverPadding(
         padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
         sliver: SliverToBoxAdapter(
           child: DashboardSectionHeader(
-            title: 'Budgets',
-            onTrailingTap: () => widget.onNavigateToTab?.call(3),
+            title: sections.budgets,
+            onTrailingTap: () =>
+                widget.onNavigateToTab?.call(AppRootTab.budgets),
           ),
         ),
       ),
       SliverToBoxAdapter(child: _buildBudgetSkeleton(context)),
-      const SliverToBoxAdapter(child: SizedBox(height: 20)),
+      const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
       SliverPadding(
         padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
         sliver: SliverToBoxAdapter(
           child: DashboardSectionHeader(
-            title: 'Recent Activity',
-            onTrailingTap: () => widget.onNavigateToTab?.call(1),
+            title: sections.recentActivity,
+            onTrailingTap: () =>
+                widget.onNavigateToTab?.call(AppRootTab.activity),
           ),
         ),
       ),
       SliverToBoxAdapter(child: _buildRecentActivitySkeleton(context)),
-      const SliverToBoxAdapter(child: SizedBox(height: 20)),
+      const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
       SliverPadding(
         padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
         sliver: SliverToBoxAdapter(
           child: DashboardSectionHeader(
-            title: 'Spending Patterns',
-            onTrailingTap: () => context.push('/reports'),
+            title: sections.spendingPatterns,
+            onTrailingTap: () =>
+                widget.onNavigateToTab?.call(AppRootTab.reports),
           ),
         ),
       ),
@@ -388,23 +417,23 @@ class _DashboardViewState extends State<DashboardView> {
           padding: const EdgeInsets.all(_horizontalPadding),
           child: Center(
             child: AppCard(
-              borderRadius: 24,
-              padding: const EdgeInsets.all(24),
+              borderRadius: AppSpacing.radiusCard,
+              padding: const EdgeInsets.all(AppSpacing.lg),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    PiconsLight.warningCircle,
+                    PiconsRegular.warningCircle,
                     size: 48,
                     color: Theme.of(context).colorScheme.error,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.smd),
                   Text(state.message, textAlign: TextAlign.center),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.md),
                   ElevatedButton(
                     onPressed: () =>
                         context.read<DashboardBloc>().add(RefreshDashboard()),
-                    child: const Text('Retry'),
+                    child: Text(t.common.tryAgain),
                   ),
                 ],
               ),
@@ -419,37 +448,43 @@ class _DashboardViewState extends State<DashboardView> {
     BuildContext context,
     DashboardLoaded state,
   ) {
+    final sections = t.dashboard.sections;
+
     return [
       SliverToBoxAdapter(child: _buildBalanceCard(context, state)),
-      const SliverToBoxAdapter(child: SizedBox(height: 20)),
+      const SliverToBoxAdapter(child: AutoImportPromptCard()),
+      const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
       SliverPadding(
         padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
         sliver: SliverToBoxAdapter(
           child: DashboardSectionHeader(
-            title: 'Budgets',
-            onTrailingTap: () => widget.onNavigateToTab?.call(3),
+            title: sections.budgets,
+            onTrailingTap: () =>
+                widget.onNavigateToTab?.call(AppRootTab.budgets),
           ),
         ),
       ),
       _buildBudgetsSection(),
-      const SliverToBoxAdapter(child: SizedBox(height: 20)),
+      const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
       SliverPadding(
         padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
         sliver: SliverToBoxAdapter(
           child: DashboardSectionHeader(
-            title: 'Recent Activity',
-            onTrailingTap: () => widget.onNavigateToTab?.call(1),
+            title: sections.recentActivity,
+            onTrailingTap: () =>
+                widget.onNavigateToTab?.call(AppRootTab.activity),
           ),
         ),
       ),
       _buildRecentTransactionsSection(state.summary.recentTransactions),
-      const SliverToBoxAdapter(child: SizedBox(height: 20)),
+      const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
       SliverPadding(
         padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
         sliver: SliverToBoxAdapter(
           child: DashboardSectionHeader(
-            title: 'Spending Patterns',
-            onTrailingTap: () => context.push('/reports'),
+            title: sections.spendingPatterns,
+            onTrailingTap: () =>
+                widget.onNavigateToTab?.call(AppRootTab.reports),
           ),
         ),
       ),
@@ -476,11 +511,13 @@ class _DashboardViewState extends State<DashboardView> {
                 horizontal: _horizontalPadding,
               ),
               child: AppCard(
-                borderRadius: 16,
-                padding: const EdgeInsets.symmetric(vertical: 24),
+                borderRadius: AppSpacing.radiusControl,
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
                 child: AppEmptyState(
-                  icon: PiconsRegular.tray,
-                  message: 'No budgets set',
+                  icon: PiconsRegular.wallet,
+                  message: t.dashboard.noBudgets,
+                  actionLabel: t.common.newBudget,
+                  onAction: () => context.push('/budgets/new'),
                 ),
               ),
             );
@@ -489,8 +526,8 @@ class _DashboardViewState extends State<DashboardView> {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
             child: AppCard(
-              borderRadius: 16,
-              padding: const EdgeInsets.all(16),
+              borderRadius: AppSpacing.radiusControl,
+              padding: const EdgeInsets.all(AppSpacing.md),
               child: Column(
                 children: [
                   for (var i = 0; i < data.budgetPreviews.length; i++) ...[
@@ -503,7 +540,7 @@ class _DashboardViewState extends State<DashboardView> {
                     ),
                     if (i != data.budgetPreviews.length - 1)
                       const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 12),
+                        padding: EdgeInsets.symmetric(vertical: AppSpacing.smd),
                         child: Divider(height: 1),
                       ),
                   ],
@@ -532,11 +569,13 @@ class _DashboardViewState extends State<DashboardView> {
                 horizontal: _horizontalPadding,
               ),
               child: AppCard(
-                borderRadius: 16,
-                padding: const EdgeInsets.symmetric(vertical: 32),
+                borderRadius: AppSpacing.radiusControl,
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
                 child: AppEmptyState(
-                  icon: PiconsRegular.tray,
-                  message: 'No transactions yet',
+                  icon: PiconsRegular.receipt,
+                  message: t.dashboard.noTransactions,
+                  actionLabel: t.common.addExpense,
+                  onAction: () => unawaited(_addRecord()),
                 ),
               ),
             );
@@ -552,12 +591,14 @@ class _DashboardViewState extends State<DashboardView> {
             final record = recentTwo[i];
             final categoryName = record.categoryId == null
                 ? record.recordType.displayName
-                : categoriesById[record.categoryId]?.name;
+                : categoriesById[record.categoryId]?.displayName;
             children.add(
               _RecentTile(
                 record: record,
                 fmt: currencyFmt,
                 categoryName: categoryName,
+                category: categoriesById[record.categoryId],
+                onTap: () => _editRecord(record),
               ),
             );
             if (i < recentTwo.length - 1) {
@@ -568,7 +609,7 @@ class _DashboardViewState extends State<DashboardView> {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
             child: AppCard(
-              borderRadius: 16,
+              borderRadius: AppSpacing.radiusControl,
               clipBehavior: Clip.antiAlias,
               child: Column(children: children),
             ),
@@ -600,7 +641,8 @@ class _DashboardViewState extends State<DashboardView> {
               title: dateRange.label,
               totalSpent: state.summary.totalSpent,
               percentChange: state.summary.percentChange,
-              trend: snapshot.data ?? const [],
+              previousPeriodLabel: dateRange.previousPeriodNoun,
+              trend: snapshot.data ?? [],
             ),
           );
         },
@@ -614,11 +656,11 @@ class _DashboardViewState extends State<DashboardView> {
       child: Container(
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
         ),
         child: ShimmerBox(
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppSpacing.md),
             child: Column(children: List.generate(2, _buildSkeletonBudgetRow)),
           ),
         ),
@@ -628,19 +670,19 @@ class _DashboardViewState extends State<DashboardView> {
 
   Widget _buildSkeletonBudgetRow(int index) {
     return Padding(
-      padding: EdgeInsets.only(bottom: index == 1 ? 0 : 20),
+      padding: EdgeInsets.only(bottom: index == 1 ? 0 : AppSpacing.lg),
       child: Column(
         children: [
           Row(
             children: [
               ShimmerBox.circle(size: 20),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.sm),
               Expanded(child: ShimmerBox.textLine(width: 120, height: 14)),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.sm),
               ShimmerBox.textLine(width: 90, height: 12),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.smd),
           ShimmerBox.rectangle(width: double.infinity, height: 12),
         ],
       ),
@@ -655,22 +697,22 @@ class _DashboardViewState extends State<DashboardView> {
       child: Container(
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
         ),
         child: ShimmerBox(
           child: Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(AppSpacing.lg),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ShimmerBox.textLine(width: 96, height: 12),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 ShimmerBox.textLine(width: 180, height: 32),
-                const SizedBox(height: 20),
+                const SizedBox(height: AppSpacing.lg),
                 Row(
                   children: [
                     Expanded(child: shimmerTextLine),
-                    const SizedBox(width: 24),
+                    const SizedBox(width: AppSpacing.lg),
                     Expanded(child: shimmerTextLine),
                   ],
                 ),
@@ -688,11 +730,11 @@ class _DashboardViewState extends State<DashboardView> {
       child: Container(
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
         ),
-        child: ShimmerBox(
+        child: const ShimmerBox(
           child: Column(
-            children: const [
+            children: [
               _RecentActivityTileSkeleton(),
               Divider(height: 1),
               _RecentActivityTileSkeleton(),
@@ -709,11 +751,11 @@ class _DashboardViewState extends State<DashboardView> {
       child: Container(
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
         ),
         child: ShimmerBox(
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppSpacing.md),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -724,7 +766,7 @@ class _DashboardViewState extends State<DashboardView> {
                     ShimmerBox.textLine(width: 100, height: 14),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.md),
                 SizedBox(
                   height: 48,
                   child: Row(
@@ -732,7 +774,7 @@ class _DashboardViewState extends State<DashboardView> {
                     children: List.generate(14, _buildSkeletonTrendBar),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 ShimmerBox.textLine(width: 120, height: 12),
               ],
             ),
@@ -745,7 +787,7 @@ class _DashboardViewState extends State<DashboardView> {
   Widget _buildSkeletonTrendBar(int index) {
     return Expanded(
       child: Padding(
-        padding: EdgeInsets.only(right: index == 13 ? 0 : 3),
+        padding: EdgeInsets.only(right: index == 13 ? 0 : AppSpacing.xs),
         child: ShimmerBox.rectangle(
           width: double.infinity,
           height: 12 + (index % 5) * 6,
@@ -755,68 +797,42 @@ class _DashboardViewState extends State<DashboardView> {
   }
 
   GetBudgetsWithProgress? _tryGetBudgetsWithProgress() {
-    try {
-      return di.getIt<GetBudgetsWithProgress>();
-    } catch (e, s) {
-      debugPrint('Dashboard budgets error: $e\n$s');
+    if (!di.getIt.isRegistered<GetBudgetsWithProgress>()) return null;
 
-      return null;
-    }
+    return di.getIt<GetBudgetsWithProgress>();
   }
 
   GetSpendingTrend? _tryGetSpendingTrend() {
-    try {
-      return di.getIt<GetSpendingTrend>();
-    } catch (e, s) {
-      debugPrint('Dashboard trend error: $e\n$s');
+    if (!di.getIt.isRegistered<GetSpendingTrend>()) return null;
 
-      return null;
-    }
+    return di.getIt<GetSpendingTrend>();
   }
 
+  // Theme and everything else live in Settings (docs/adr/0006).
   List<PopupMenuEntry<String>> _buildMenuItems(BuildContext context) {
-    final authState = context.read<AuthBloc>().state;
-    final isAuth = authState is Authenticated;
-    final isDark = Theme.of(context).colorScheme.brightness == Brightness.dark;
+    final isAuth = context.read<AuthBloc>().state is Authenticated;
+    final menu = t.dashboard.menu;
 
     return [
       if (isAuth)
         PopupMenuItem(
-          value: 'account',
-          child: MenuRow(icon: PiconsLight.user, text: 'Profile'),
+          value: 'settings',
+          child: MenuRow(icon: PiconsRegular.user, text: menu.profile),
         )
       else
         PopupMenuItem(
           value: 'sign_in',
-          child: MenuRow(icon: PiconsLight.signIn, text: 'Sign In'),
+          child: MenuRow(icon: PiconsRegular.signIn, text: menu.signIn),
         ),
-      const PopupMenuDivider(),
       PopupMenuItem(
         value: 'settings',
-        child: MenuRow(icon: PiconsLight.gear, text: 'Settings'),
-      ),
-      PopupMenuItem(
-        value: 'theme',
-        child: MenuRow(
-          icon: isDark ? PiconsFill.moon : PiconsFill.sun,
-          text: isDark ? 'Dark Mode' : 'Light Mode',
-          trailing: isDark ? PiconsBold.check : null,
-        ),
-      ),
-      PopupMenuItem(
-        value: 'language',
-        child: MenuRow(icon: PiconsLight.translate, text: 'Language'),
-      ),
-      const PopupMenuDivider(),
-      PopupMenuItem(
-        value: 'feedback',
-        child: MenuRow(icon: PiconsLight.chatTeardrop, text: 'Feedback'),
+        child: MenuRow(icon: PiconsRegular.gear, text: menu.settings),
       ),
       if (isAuth) ...[
         const PopupMenuDivider(),
         PopupMenuItem(
           value: 'sign_out',
-          child: MenuRow(icon: PiconsLight.signOut, text: 'Sign Out'),
+          child: MenuRow(icon: PiconsRegular.signOut, text: menu.signOut),
         ),
       ],
     ];
@@ -824,18 +840,10 @@ class _DashboardViewState extends State<DashboardView> {
 
   void _handleMenuAction(BuildContext context, String value) {
     switch (value) {
-      case 'account':
       case 'settings':
-      case 'language':
         context.push('/settings');
       case 'sign_in':
         context.push('/login');
-      case 'theme':
-        final isDark =
-            Theme.of(context).colorScheme.brightness == Brightness.dark;
-        di.getIt<SettingsBloc>().add(UpdateTheme(isDark ? 'light' : 'dark'));
-      case 'feedback':
-        context.push('/feedback');
       case 'sign_out':
         context.read<AuthBloc>().add(const SignOutRequested());
     }
@@ -864,10 +872,8 @@ class _DashboardViewState extends State<DashboardView> {
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, authState) {
-        final rawName = authState is Authenticated
-            ? (authState.user.displayName ?? 'User')
-            : 'User';
-        final displayName = _displayName(rawName);
+        final firstName = _firstName(authState);
+        final displayName = firstName ?? t.dashboard.userFallback;
         final photoUrl = authState is Authenticated
             ? authState.user.photoUrl
             : null;
@@ -887,9 +893,13 @@ class _DashboardViewState extends State<DashboardView> {
                     SliverToBoxAdapter(
                       child: _buildHeader(
                         context,
-                        authState,
-                        displayName,
-                        photoUrl,
+                        greeting: _greeting(firstName),
+                        avatar: _buildAvatarWidget(
+                          context,
+                          authState,
+                          displayName,
+                          photoUrl,
+                        ),
                       ),
                     ),
                     ..._buildContent(context, state, dateRange),
@@ -922,44 +932,41 @@ class _BudgetPreviewTile extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 if (preview.emoji != null) ...[
-                  Text(
-                    preview.emoji ?? '',
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  const SizedBox(width: 8),
+                  Text(preview.emoji ?? '', style: AppTypography.bodyLarge),
+                  const SizedBox(width: AppSpacing.sm),
                 ],
                 Expanded(
                   child: Text(
                     preview.title,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
+                    style: AppTypography.bodyMedium.copyWith(
                       color: colors.onSurface,
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 Text(
-                  '${currencyFmt.format(preview.progress.spentAmount)} of ${currencyFmt.format(preview.progress.effectiveAmount)}',
-                  style: TextStyle(
-                    fontSize: 13,
+                  t.dashboard.budgetSpentOf(
+                    spent: currencyFmt.format(preview.progress.spentAmount),
+                    total: currencyFmt.format(preview.progress.effectiveAmount),
+                  ),
+                  style: AppTypography.bodyMedium.copyWith(
                     color: colors.onSurface.withAlpha(170),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.smd),
             ClipRRect(
-              borderRadius: BorderRadius.circular(999),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
               child: BudgetProgressIndicator(
                 percentage: preview.progress.percentage,
                 height: 12,
@@ -973,17 +980,22 @@ class _BudgetPreviewTile extends StatelessWidget {
 }
 
 class _RecentTile extends StatelessWidget {
-  static final _timeFormat = DateFormat('h:mm a');
-  static final _dayFormat = DateFormat('MMM d');
+  // Getters, not cached: DateFormat keeps the language it was created in.
+  static DateFormat get _timeFormat => DateFormat('h:mm a');
+  static DateFormat get _dayFormat => DateFormat('MMM d');
 
   final Record record;
   final NumberFormat fmt;
   final String? categoryName;
+  final cat.Category? category;
+  final VoidCallback? onTap;
 
   const _RecentTile({
+    this.onTap,
     required this.record,
     required this.fmt,
     this.categoryName,
+    this.category,
   });
 
   String _timeLabel() {
@@ -993,81 +1005,103 @@ class _RecentTile extends StatelessWidget {
     final difference = today.difference(date).inDays;
 
     if (difference == 0) return _timeFormat.format(record.date);
-    if (difference == 1) return 'Yesterday';
+    if (difference == 1) return t.common.dates.yesterday;
 
     return _dayFormat.format(record.date);
+  }
+
+  Widget _leading(BuildContext context, bool isExpense) {
+    final recordCategory = category;
+    if (recordCategory != null) {
+      return CategoryTile(
+        colorHex: recordCategory.color,
+        iconKey: recordCategory.emoji,
+      );
+    }
+
+    // Uncategorized: a neutral tile so rows still line up.
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        color: context.palette.surfaceHigh,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
+      ),
+      child: Icon(
+        isExpense ? PiconsRegular.receipt : PiconsRegular.wallet,
+        size: 20,
+        color: context.palette.textSecondary,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final isExpense = record.recordType == RecordType.expense;
-    final amountColor = isExpense ? colors.error : colors.secondary;
+    final amountColor = isExpense
+        ? context.palette.expense
+        : context.palette.income;
     final mutedColor = colors.onSurface.withAlpha(140);
     final displayName = record.recordType.displayName;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: colors.surface,
-              borderRadius: BorderRadius.circular(12),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.smd,
+        ),
+        child: Row(
+          children: [
+            _leading(context, isExpense),
+            const SizedBox(width: AppSpacing.smd),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    record.description.isEmpty
+                        ? displayName
+                        : record.description,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.bodyLarge.copyWith(
+                      color: colors.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    categoryName ?? displayName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.bodyMedium.copyWith(color: mutedColor),
+                  ),
+                ],
+              ),
             ),
-            child: Icon(
-              isExpense ? PiconsRegular.receipt : PiconsRegular.wallet,
-              size: 20,
-              color: colors.primary,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            const SizedBox(width: AppSpacing.smd),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  record.description.isEmpty ? displayName : record.description,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: colors.onSurface,
+                  '${isExpense ? '-' : '+'}${fmt.format(record.amount.abs())}',
+                  semanticsLabel: CurrencyFormatter.semanticsLabel(
+                    record.amount,
+                    isExpense: isExpense,
                   ),
+                  style: AppTypography.titleMedium.copyWith(color: amountColor),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSpacing.xs),
                 Text(
-                  categoryName ?? displayName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 13, color: mutedColor),
+                  _timeLabel(),
+                  style: AppTypography.bodySmall.copyWith(color: mutedColor),
                 ),
               ],
             ),
-          ),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '${isExpense ? '-' : '+'}${fmt.format(record.amount.abs())}',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: amountColor,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                _timeLabel(),
-                style: TextStyle(fontSize: 12, color: mutedColor),
-              ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -1079,27 +1113,30 @@ class _RecentActivityTileSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.smd,
+      ),
       child: Row(
         children: [
           ShimmerBox.circle(size: 40),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.smd),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ShimmerBox.textLine(height: 14),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSpacing.xs),
                 ShimmerBox.textLine(width: 80, height: 12),
               ],
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.smd),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               ShimmerBox.textLine(width: 60, height: 16),
-              const SizedBox(height: 4),
+              const SizedBox(height: AppSpacing.xs),
               ShimmerBox.textLine(width: 48, height: 12),
             ],
           ),

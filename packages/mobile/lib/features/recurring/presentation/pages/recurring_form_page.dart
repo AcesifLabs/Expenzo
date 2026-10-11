@@ -7,6 +7,10 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
+import 'package:expense_tracker/shared/presentation/widgets/app_back_button.dart';
+import 'package:expense_tracker/core/utils/currency_formatter.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_page_header.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 import '../../../categories/presentation/bloc/category_bloc.dart';
 import '../../../categories/presentation/bloc/category_event.dart';
 import '../../domain/entities/recurring_transaction.dart';
@@ -14,6 +18,7 @@ import '../../domain/repositories/recurring_repository.dart';
 import '../bloc/recurring_bloc.dart';
 import '../bloc/recurring_event.dart';
 import '../bloc/recurring_state.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class RecurringFormPage extends StatefulWidget {
   final RecurringTransaction? recurring;
@@ -37,6 +42,11 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
   var _isActive = true;
   var _isLoading = false;
   String? _categoryId;
+
+  /// The recurring transaction being edited, once loaded. Its schedule
+  /// (nextOccurrence) must survive the edit, or processing backfills
+  /// occurrences that were already created.
+  RecurringTransaction? _original;
 
   bool get _isEditing => widget.recurring != null || widget.recurringId != null;
 
@@ -82,6 +92,7 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
   }
 
   void _initFromRecurring(RecurringTransaction? recurring) {
+    _original = recurring;
     if (recurring == null) {
       _amountController.text = '';
       _descriptionController.text = '';
@@ -94,7 +105,7 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
 
       return;
     }
-    _amountController.text = recurring.amount.toString();
+    _amountController.text = CurrencyFormatter.formatInput(recurring.amount);
     _descriptionController.text = recurring.description;
     _startDate = recurring.startDate;
     _endDate = recurring.endDate;
@@ -146,7 +157,7 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
       frequency: _frequency,
       startDate: _startDate,
       endDate: _endDate,
-      nextOccurrence: widget.recurring?.nextOccurrence ?? _startDate,
+      nextOccurrence: _original?.nextOccurrence ?? _startDate,
       isActive: _isActive,
       autoCreateExpense: _autoCreateExpense,
       dayOfMonth: _dayOfMonth,
@@ -184,14 +195,15 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
   }
 
   String? _validateAmount(String? value) {
-    if (value == null || value.isEmpty) return 'Please enter an amount';
-    if (double.tryParse(value) == null) return 'Please enter a valid number';
+    final form = t.recurring.form;
+    if (value == null || value.isEmpty) return form.amountRequired;
+    if (double.tryParse(value) == null) return form.amountInvalid;
 
     return null;
   }
 
   String? _validateDescription(String? value) {
-    if (value == null || value.isEmpty) return 'Please enter a description';
+    if (value == null || value.isEmpty) return t.recurring.form.nameRequired;
 
     return null;
   }
@@ -199,9 +211,9 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
   Widget _buildAmountField() {
     return TextFormField(
       controller: _amountController,
-      decoration: const InputDecoration(
-        labelText: 'Amount',
-        prefixText: '\$ ',
+      decoration: InputDecoration(
+        labelText: t.recurring.form.amount,
+        prefixText: '${CurrencyFormatter.current.value.symbol.trim()} ',
         hintText: '0.00',
       ),
       keyboardType: const TextInputType.numberWithOptions(
@@ -216,11 +228,13 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
   }
 
   Widget _buildDescriptionField() {
+    final form = t.recurring.form;
+
     return TextFormField(
       controller: _descriptionController,
-      decoration: const InputDecoration(
-        labelText: 'Description',
-        hintText: 'What is this recurring expense for?',
+      decoration: InputDecoration(
+        labelText: form.name,
+        hintText: form.nameHint,
       ),
       maxLines: 2,
       validator: _validateDescription,
@@ -230,21 +244,13 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
   Widget _buildFrequencyDropdown() {
     return DropdownButtonFormField<RecurringFrequency>(
       initialValue: _frequency,
-      decoration: const InputDecoration(labelText: 'Frequency'),
-      items: const [
-        DropdownMenuItem(value: RecurringFrequency.daily, child: Text('Daily')),
-        DropdownMenuItem(
-          value: RecurringFrequency.weekly,
-          child: Text('Weekly'),
-        ),
-        DropdownMenuItem(
-          value: RecurringFrequency.monthly,
-          child: Text('Monthly'),
-        ),
-        DropdownMenuItem(
-          value: RecurringFrequency.yearly,
-          child: Text('Yearly'),
-        ),
+      decoration: InputDecoration(labelText: t.recurring.form.frequency),
+      items: [
+        for (final frequency in RecurringFrequency.values)
+          DropdownMenuItem(
+            value: frequency,
+            child: Text(frequency.displayName),
+          ),
       ],
       onChanged: _onFrequencyChanged,
     );
@@ -253,28 +259,33 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
   Widget _buildStartDateTile(DateFormat dateFormat) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      title: const Text('Start Date'),
+      title: Text(t.recurring.form.startDate),
       subtitle: Text(dateFormat.format(_startDate)),
-      trailing: Icon(PiconsRegular.calendar),
+      trailing: const Icon(PiconsRegular.calendar),
       onTap: () => unawaited(_selectStartDate()),
     );
   }
 
   Widget _buildEndDateTile(DateFormat dateFormat) {
+    final form = t.recurring.form;
     final endDate = _endDate;
 
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      title: const Text('End Date (Optional)'),
+      title: Text(form.endDate),
       subtitle: Text(
-        endDate != null ? dateFormat.format(endDate) : 'No end date',
+        endDate != null ? dateFormat.format(endDate) : form.noEndDate,
       ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (endDate != null)
-            IconButton(icon: Icon(PiconsRegular.x), onPressed: _clearEndDate),
-          Icon(PiconsRegular.calendar),
+            IconButton(
+              icon: const Icon(PiconsRegular.x),
+              tooltip: form.clearEndDate,
+              onPressed: _clearEndDate,
+            ),
+          const Icon(PiconsRegular.calendar),
         ],
       ),
       onTap: () => unawaited(_selectEndDate()),
@@ -282,18 +293,22 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
   }
 
   Widget _buildAutoCreateSwitch() {
+    final form = t.recurring.form;
+
     return SwitchListTile(
-      title: const Text('Auto-create expenses'),
-      subtitle: const Text('Automatically create expenses when due'),
+      title: Text(form.autoCreate),
+      subtitle: Text(form.autoCreateDetail),
       value: _autoCreateExpense,
       onChanged: _onAutoCreateChanged,
     );
   }
 
   Widget _buildActiveSwitch() {
+    final form = t.recurring.form;
+
     return SwitchListTile(
-      title: const Text('Active'),
-      subtitle: const Text('Process this recurring transaction'),
+      title: Text(form.active),
+      subtitle: Text(form.activeDetail),
       value: _isActive,
       onChanged: _onIsActiveChanged,
     );
@@ -302,7 +317,7 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
   Widget _buildSubmitButton(RecurringState state) {
     return ElevatedButton(
       onPressed: state is RecurringLoading ? null : _submit,
-      child: Text(_isEditing ? 'Update' : 'Create'),
+      child: Text(_isEditing ? t.common.save : t.common.add),
     );
   }
 
@@ -315,41 +330,44 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
 
   @override
   Widget build(BuildContext context) {
+    final form = t.recurring.form;
     final dateFormat = DateFormat('MMM dd, yyyy');
 
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(
-          title: Text(_isEditing ? 'Edit Recurring' : 'New Recurring'),
+        appBar: AppPageHeader(
+          leading: const AppBackButton(),
+          title: _isEditing ? form.edit : form.create,
         ),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_isEditing ? 'Edit Recurring' : 'New Recurring'),
+      appBar: AppPageHeader(
+        leading: const AppBackButton(),
+        title: _isEditing ? form.edit : form.create,
       ),
       body: BlocConsumer<RecurringBloc, RecurringState>(
         listener: _onRecurringListener,
         builder: (context, state) => Form(
           key: _formKey,
           child: ListView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppSpacing.md),
             children: [
               _buildAmountField(),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               _buildDescriptionField(),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               _buildFrequencyDropdown(),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               _buildStartDateTile(dateFormat),
               _buildEndDateTile(dateFormat),
               const Divider(),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               _buildAutoCreateSwitch(),
               _buildActiveSwitch(),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.lg),
               _buildSubmitButton(state),
             ],
           ),

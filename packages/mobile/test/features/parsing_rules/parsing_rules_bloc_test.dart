@@ -10,6 +10,7 @@ import 'package:expense_tracker/features/parsing_rules/domain/repositories/parsi
 import 'package:expense_tracker/features/parsing_rules/presentation/bloc/parsing_rules_bloc.dart';
 import 'package:expense_tracker/features/parsing_rules/presentation/bloc/parsing_rules_event.dart';
 import 'package:expense_tracker/features/parsing_rules/presentation/bloc/parsing_rules_state.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class MockGetRules extends Mock implements GetRules {}
 
@@ -101,7 +102,7 @@ void main() {
         isA<ParsingRulesError>().having(
           (s) => s.message,
           'message',
-          'Failed to load',
+          t.common.errors.server,
         ),
       ];
 

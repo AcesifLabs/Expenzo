@@ -12,6 +12,11 @@ import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets_wit
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budget_transactions.dart';
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
 import 'package:expense_tracker/features/budgets/presentation/bloc/budget_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:expense_tracker/features/budgets/data/services/shared_prefs_budget_alert_log.dart';
+import 'package:expense_tracker/features/budgets/domain/usecases/check_budget_alerts.dart';
+import 'package:expense_tracker/features/settings/domain/usecases/get_settings.dart';
+import 'package:expense_tracker/shared/services/notification_service.dart';
 
 void initBudgetModule(GetIt getIt) {
   getIt.registerLazySingleton<BudgetLocalDatasource>(
@@ -45,6 +50,19 @@ void initBudgetModule(GetIt getIt) {
     () => GetBudgetTransactions(
       budgetRepository: getIt<BudgetRepository>(),
       recordRepository: getIt<RecordRepository>(),
+    ),
+  );
+  // Budget alerts (Settings → Budget alerts).
+  getIt.registerLazySingleton<NotificationService>(NotificationService.new);
+  getIt.registerLazySingleton<BudgetAlertLog>(
+    () => SharedPrefsBudgetAlertLog(getIt<SharedPreferences>()),
+  );
+  getIt.registerLazySingleton(
+    () => CheckBudgetAlerts(
+      getBudgetsWithProgress: getIt<GetBudgetsWithProgress>(),
+      getSettings: getIt<GetSettings>(),
+      notificationService: getIt<NotificationService>(),
+      alertLog: getIt<BudgetAlertLog>(),
     ),
   );
   getIt.registerFactory<BudgetBloc>(

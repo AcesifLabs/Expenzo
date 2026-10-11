@@ -7,6 +7,8 @@ import 'package:expense_tracker/features/dashboard/domain/entities/dashboard_sum
 import 'package:expense_tracker/features/dashboard/domain/entities/date_range.dart';
 import 'package:expense_tracker/features/reports/domain/usecases/get_spending_insights.dart';
 import 'package:expense_tracker/features/reports/domain/usecases/get_category_breakdown.dart';
+import 'package:expense_tracker/core/utils/currency_formatter.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class BuildFinancialContext {
   final GetDashboardSummary getDashboardSummary;
@@ -36,13 +38,15 @@ class BuildFinancialContext {
       await _appendCategorySection(buffer, startDate, endDate);
       await _appendInsightsSection(buffer, startDate, endDate);
 
+      final currency = CurrencyFormatter.current.value;
       buffer.writeln();
       buffer.writeln(
-        'Currency: BDT (Bangladeshi Taka). Always mention currency when discussing amounts.',
+        'Currency: ${currency.code} (${currency.name}). Always mention currency when discussing amounts.',
       );
       buffer.writeln(
         'Answer concisely. Use the data above — do not guess or invent numbers.',
       );
+      buffer.writeln('Reply in ${_replyLanguage()}.');
 
       return Right(redactAiContext(buffer.toString()));
     });
@@ -61,10 +65,10 @@ class BuildFinancialContext {
       '- Total expense (OUT records / spending): ${summary.totalExpense.toStringAsFixed(2)}',
     );
     buffer.writeln(
-      '- Balance (income − expense): ${summary.totalBalance.toStringAsFixed(2)}',
+      '- Net (income − expense): ${summary.net.toStringAsFixed(2)}',
     );
     buffer.writeln(
-      '- Change vs previous month: ${(summary.percentChange * 100).toStringAsFixed(1)}%',
+      '- Spending change vs previous period: ${_describeChange(summary.percentChange)}',
     );
 
     if (summary.recentTransactions.isNotEmpty) {
@@ -129,4 +133,17 @@ class BuildFinancialContext {
       );
     });
   }
+
+  // percentChange is already a percentage; null means no earlier spending.
+  String _describeChange(double? percentChange) {
+    if (percentChange == null) return 'no spending in the previous period';
+
+    return '${percentChange.toStringAsFixed(1)}%';
+  }
+
+  /// The app language, named for the model.
+  String _replyLanguage() => switch (LocaleSettings.currentLocale) {
+    AppLocale.bn => 'Bangla (Bengali script)',
+    AppLocale.en => 'English',
+  };
 }

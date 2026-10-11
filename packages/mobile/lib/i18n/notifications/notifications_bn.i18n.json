@@ -1,0 +1,26 @@
+{
+  "@@i18n-review": "Machine-drafted Bangla. Needs native review before release.",
+  "channel": {
+    "name": "অ্যাপের নোটিফিকেশন",
+    "description": "বাজেট সতর্কতা, পুনরাবৃত্ত রিমাইন্ডার ও স্ক্যানের ফলাফল"
+  },
+  "budget": {
+    "title": "বাজেট সতর্কতা",
+    "over": "আপনার \"{budget}\" বাজেট ছাড়িয়ে গেছে।",
+    "used": "আপনার \"{budget}\" বাজেটের {percent}% খরচ হয়েছে।"
+  },
+  "recurringDue": {
+    "title": "পুনরাবৃত্ত খরচের সময় হয়েছে"
+  },
+  "scan": {
+    "smsTitle": "SMS স্ক্যান শেষ",
+    "emailTitle": "ইমেইল স্ক্যান শেষ",
+    "found": {
+      "one": "{n}টি নতুন খরচ পাওয়া গেছে",
+      "other": "{n}টি নতুন খরচ পাওয়া গেছে"
+    }
+  },
+  "syncError": {
+    "title": "সিঙ্কে সমস্যা"
+  }
+}

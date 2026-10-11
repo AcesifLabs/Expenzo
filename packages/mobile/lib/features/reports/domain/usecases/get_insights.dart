@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:flutter/material.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import '../entities/insight_item.dart';
@@ -20,7 +19,6 @@ class GetInsights {
 
       final highestDayDate = insights.highestDayDate;
       if (highestDayDate != null) {
-        final dayName = _weekdayName(highestDayDate);
         final aboveAvg = insights.avgDailySpending > 0
             ? ((insights.highestDayAmount / insights.avgDailySpending - 1) *
                       100)
@@ -30,10 +28,10 @@ class GetInsights {
         items.add(
           InsightItem(
             icon: PiconsRegular.trendUp,
-            iconColor: const Color(0xFFF48FB1),
-            title: 'Highest Spending Day',
-            description:
-                '$dayName is your biggest spending day — $aboveAvg% above daily average.',
+            tone: InsightTone.warning,
+            kind: InsightKind.highestSpendingDay,
+            day: highestDayDate,
+            percent: aboveAvg,
           ),
         );
       }
@@ -44,10 +42,11 @@ class GetInsights {
         items.add(
           InsightItem(
             icon: PiconsRegular.shoppingCart,
-            iconColor: const Color(0xFFD1C4E9),
-            title: 'Most Frequent Category',
-            description:
-                '${top.categoryName} accounts for ${top.percentage.toStringAsFixed(0)}% of your spending.',
+            tone: InsightTone.info,
+            kind: InsightKind.topCategory,
+            categoryId: top.categoryId,
+            categoryName: top.categoryName,
+            percent: top.percentage.round(),
           ),
         );
       }
@@ -58,10 +57,10 @@ class GetInsights {
           items.add(
             InsightItem(
               icon: PiconsRegular.arrowDown,
-              iconColor: const Color(0xFFA2D3A4),
-              title: 'Best Savings Week',
-              description:
-                  '${_formatDateRange(lowestWeek.start, lowestWeek.end)} was your lowest spending week.',
+              tone: InsightTone.positive,
+              kind: InsightKind.bestSavingsWeek,
+              weekStart: lowestWeek.start,
+              weekEnd: lowestWeek.end,
             ),
           );
         }
@@ -70,19 +69,16 @@ class GetInsights {
       items.add(
         const InsightItem(
           icon: PiconsRegular.coffee,
-          iconColor: Color(0xFF90CAF9),
-          title: 'Recurring Expenses',
-          description:
-              'Check your recurring transactions for upcoming charges.',
+          tone: InsightTone.investment,
+          kind: InsightKind.recurringReminder,
         ),
       );
 
       items.add(
         const InsightItem(
           icon: PiconsRegular.bell,
-          iconColor: Color(0xFFD1C4E9),
-          title: 'Budget Status',
-          description: 'Review your budgets to stay on track this month.',
+          tone: InsightTone.info,
+          kind: InsightKind.budgetReminder,
         ),
       );
 
@@ -90,20 +86,6 @@ class GetInsights {
     } catch (e) {
       return Left(ServerFailure(message: 'Failed to compute insights: $e'));
     }
-  }
-
-  String _weekdayName(DateTime date) {
-    const days = [
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
-      'Sunday',
-    ];
-
-    return days[date.weekday - 1];
   }
 
   _WeekRange? _findLowestWeek(List<DateAmount> trend) {
@@ -123,25 +105,6 @@ class GetInsights {
     }
 
     return best;
-  }
-
-  String _formatDateRange(DateTime start, DateTime end) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-
-    return '${months[start.month - 1]} ${start.day}–${end.day}';
   }
 }
 

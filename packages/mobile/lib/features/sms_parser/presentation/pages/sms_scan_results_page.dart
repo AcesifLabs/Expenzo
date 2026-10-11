@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:picons/picons.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_back_button.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_page_header.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 import '../bloc/sms_scanner_bloc.dart';
 import '../bloc/sms_scanner_event.dart';
 import '../bloc/sms_scanner_submission_status.dart';
@@ -12,6 +16,7 @@ import '../widgets/sms_scan_sender_section.dart';
 import '../widgets/sms_scan_summary_card.dart';
 import '../widgets/sms_scan_toolbar.dart';
 import '../../../parsing_rules/presentation/widgets/transaction_list_skeleton.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class SmsScanResultsPage extends StatefulWidget {
   final bool filterDuplicates;
@@ -100,18 +105,22 @@ class _SmsScanResultsPageState extends State<SmsScanResultsPage> {
   }
 
   Widget _buildEmptyResults() {
+    final strings = t.smsParser.results;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(PiconsRegular.checkCircle, size: 64, color: Colors.green),
-          const SizedBox(height: 16),
-          const Text('No new records found', style: TextStyle(fontSize: 18)),
-          const SizedBox(height: 8),
-          const Text(
-            'Try scanning again or add more parsing rules',
-            textAlign: TextAlign.center,
+          const Icon(PiconsRegular.checkCircle, size: 64, color: Colors.green),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            strings.empty,
+            style: AppTypography.titleLarge.copyWith(
+              fontWeight: FontWeight.w400,
+            ),
           ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(strings.emptyBody, textAlign: TextAlign.center),
         ],
       ),
     );
@@ -134,7 +143,7 @@ class _SmsScanResultsPageState extends State<SmsScanResultsPage> {
   Widget _buildFlatResultsList(SmsScannerScanComplete state) {
     return ListView.builder(
       controller: _scrollController,
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       itemCount: state.flatResults.length + (state.isLoadingMore ? 10 : 0),
       itemBuilder: (context, index) => _buildResultCard(context, index, state),
     );
@@ -143,7 +152,12 @@ class _SmsScanResultsPageState extends State<SmsScanResultsPage> {
   Widget _buildGroupedResults(SmsScannerScanComplete state) {
     return ListView(
       controller: _scrollController,
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        AppSpacing.sm,
+        AppSpacing.md,
+        AppSpacing.sm,
+      ),
       children: [
         for (final section in state.senderSections) ...[
           SmsScanSenderSection(
@@ -153,7 +167,7 @@ class _SmsScanResultsPageState extends State<SmsScanResultsPage> {
             onClear: () => _onDeselectSenderGroup(section.senderKey),
             onToggleSelection: _onToggleSelection,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.smd),
         ],
         if (state.isLoadingMore)
           ...List.generate(3, (_) => const TransactionCardSkeleton()),
@@ -163,7 +177,12 @@ class _SmsScanResultsPageState extends State<SmsScanResultsPage> {
 
   Widget _buildHeaderSection(SmsScannerScanComplete state) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        AppSpacing.smd,
+        AppSpacing.md,
+        0,
+      ),
       child: Column(
         children: [
           SmsScanToolbar(
@@ -172,7 +191,7 @@ class _SmsScanResultsPageState extends State<SmsScanResultsPage> {
             onToggleViewMode: () => _onToggleViewMode(state),
             onClearSelection: _onDeselectAll,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.smd),
           SmsScanSummaryCard(
             rangeLabel: state.activeRangeLabel,
             matchCount: state.results.length,
@@ -180,7 +199,7 @@ class _SmsScanResultsPageState extends State<SmsScanResultsPage> {
           ),
           if (state.submissionStatus == SmsScannerSubmissionStatus.failure &&
               state.submissionErrorMessage != null) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.smd),
             Builder(
               builder: (context) {
                 final colors = Theme.of(context).colorScheme;
@@ -188,10 +207,12 @@ class _SmsScanResultsPageState extends State<SmsScanResultsPage> {
 
                 return Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(AppSpacing.smd),
                   decoration: BoxDecoration(
                     color: colors.error.withAlpha(20),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(
+                      AppSpacing.radiusControl,
+                    ),
                   ),
                   child: Text(
                     errorMessage,
@@ -215,7 +236,7 @@ class _SmsScanResultsPageState extends State<SmsScanResultsPage> {
     return Column(
       children: [
         _buildHeaderSection(state),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.smd),
         Expanded(
           child: state.viewMode == SmsScannerViewMode.groupedBySender
               ? _buildGroupedResults(state)
@@ -231,13 +252,13 @@ class _SmsScanResultsPageState extends State<SmsScanResultsPage> {
     }
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.md),
       child: ElevatedButton(
         onPressed:
             state.submissionStatus == SmsScannerSubmissionStatus.submitting
             ? null
             : () => _onCreateSelected(state),
-        child: Text('Create ${state.selectedIds.length} Selected'),
+        child: Text(t.smsParser.results.create(n: state.selectedIds.length)),
       ),
     );
   }
@@ -272,7 +293,10 @@ class _SmsScanResultsPageState extends State<SmsScanResultsPage> {
       listenWhen: _listenWhenSubmissionChanged,
       listener: _onSubmissionListener,
       child: Scaffold(
-        appBar: AppBar(title: const Text('Scan Results')),
+        appBar: AppPageHeader(
+          leading: AppBackButton(),
+          title: t.smsParser.results.title,
+        ),
         body: BlocBuilder<SmsScannerBloc, SmsScannerState>(
           buildWhen: (previous, current) =>
               current is SmsScannerScanComplete ||

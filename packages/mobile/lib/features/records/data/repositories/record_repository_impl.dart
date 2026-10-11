@@ -9,6 +9,7 @@ import 'package:expense_tracker/core/database/daos/sync_queue_dao.dart';
 import '../../domain/repositories/record_repository.dart';
 import '../datasources/record_local_datasource.dart';
 import '../datasources/record_remote_datasource.dart';
+import 'package:expense_tracker/core/error/failure_message.dart';
 
 class RecordRepositoryImpl implements RecordRepository {
   final RecordLocalDatasource localDatasource;
@@ -90,7 +91,12 @@ class RecordRepositoryImpl implements RecordRepository {
     try {
       final record = await localDatasource.getRecordById(id);
       if (record == null) {
-        return const Left(CacheFailure(message: 'Record not found'));
+        return const Left(
+          CacheFailure(
+            message: 'Record not found',
+            errorCode: FailureCodes.notFound,
+          ),
+        );
       }
 
       return Right(record);
@@ -286,17 +292,11 @@ class RecordRepositoryImpl implements RecordRepository {
 
   /// Returns Left(Failure) on error.
   @override
-  Future<Either<CacheFailure, double>> getBudgetSpending(
-    String budgetId,
-    DateTime start,
-    DateTime end,
+  Future<Either<CacheFailure, Map<String, double>>> getSpendingForBudgets(
+    Map<String, ({DateTime start, DateTime end})> periods,
   ) async {
     try {
-      final spending = await localDatasource.getBudgetSpending(
-        budgetId,
-        start,
-        end,
-      );
+      final spending = await localDatasource.getSpendingForBudgets(periods);
 
       return Right(spending);
     } on CacheException catch (e) {

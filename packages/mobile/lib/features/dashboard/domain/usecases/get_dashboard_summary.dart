@@ -7,6 +7,7 @@ import '../../../records/domain/repositories/record_repository.dart';
 import '../../../categories/domain/repositories/category_repository.dart';
 import '../../domain/entities/dashboard_summary.dart';
 import '../../domain/entities/date_range.dart';
+import 'package:expense_tracker/core/utils/category_display_name.dart';
 
 class GetDashboardSummary implements UseCase<DashboardSummary, DateRange> {
   final RecordRepository recordRepository;
@@ -33,7 +34,7 @@ class GetDashboardSummary implements UseCase<DashboardSummary, DateRange> {
         RecordType.expense,
       );
 
-      double percentChange = 0;
+      double? percentChange;
       if (previousPeriodTotal > 0) {
         percentChange =
             ((totalSpent - previousPeriodTotal) / previousPeriodTotal) * 100;
@@ -119,7 +120,7 @@ class GetDashboardSummary implements UseCase<DashboardSummary, DateRange> {
             CategoryAmount(
               categoryId: entry.key,
               emoji: '❓',
-              categoryName: 'Uncategorized',
+              categoryName: uncategorizedName,
               amount: entry.value,
               percentage: (entry.value / totalExpense) * 100,
             ),

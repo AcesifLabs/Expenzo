@@ -152,27 +152,43 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
     return total;
   }
 
-  /// Total expense spend linked to [budgetId] within the half-open range
-  /// [start, end). The end bound is exclusive so a record dated exactly at the
-  /// next period's start is not double-counted across adjacent periods.
-  Future<double> getBudgetSpending(
-    String budgetId,
-    DateTime start,
-    DateTime end,
+  /// Expense spend per budget, each over its own half-open [start, end)
+  /// period, in one query instead of one per budget.
+  ///
+  /// The end bound is exclusive so a record dated exactly at the next period's
+  /// start is not double-counted across adjacent periods. Every requested
+  /// budget is in the result, with 0.0 when nothing was spent.
+  Future<Map<String, double>> getSpendingForBudgets(
+    Map<String, ({DateTime start, DateTime end})> periods,
   ) async {
-    final amountSum = records.amount.sum();
+    if (periods.isEmpty) return const {};
+
+    final starts = periods.values.map((p) => p.start);
+    final ends = periods.values.map((p) => p.end);
+    final earliest = starts.reduce((a, b) => a.isBefore(b) ? a : b);
+    final latest = ends.reduce((a, b) => a.isAfter(b) ? a : b);
+
     final query = selectOnly(records)
-      ..addColumns([amountSum])
+      ..addColumns([records.budgetId, records.date, records.amount])
       ..where(
-        records.budgetId.equals(budgetId) &
-            records.date.isBiggerOrEqualValue(start) &
-            records.date.isSmallerThanValue(end) &
+        records.budgetId.isIn(periods.keys) &
+            records.date.isBiggerOrEqualValue(earliest) &
+            records.date.isSmallerThanValue(latest) &
             records.recordType.equals(RecordType.expense.dbValue),
       );
 
-    final row = await query.getSingleOrNull();
+    final sums = {for (final id in periods.keys) id: 0.0};
+    for (final row in await query.get()) {
+      final budgetId = row.read(records.budgetId);
+      final date = row.read(records.date);
+      final period = periods[budgetId];
+      if (budgetId == null || date == null || period == null) continue;
+      // The query window covers every budget; keep each row to its own one.
+      if (date.isBefore(period.start) || !date.isBefore(period.end)) continue;
+      sums[budgetId] = sums[budgetId]! + (row.read(records.amount) ?? 0);
+    }
 
-    return (row?.read(amountSum) ?? 0).abs();
+    return sums.map((id, sum) => MapEntry(id, sum.abs()));
   }
 
   Future<List<Record>> getRecordsByDateRangeOnly(DateTime start, DateTime end) {

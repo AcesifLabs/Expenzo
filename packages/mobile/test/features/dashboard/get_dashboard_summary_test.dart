@@ -129,4 +129,34 @@ void main() {
       'in-4',
     ]);
   });
+
+  test('percent change compares with last month\'s spending', () async {
+    // Previous month holds one 10 expense (receiptSave); this month 20.
+    stubGetRecords([inMonthNewer, inMonthOlder]);
+
+    final summary = (await useCase(
+      thisMonth,
+    )).getOrElse(() => throw StateError('expected summary'));
+
+    expect(summary.percentChange, 100);
+    expect(summary.net, -20);
+  });
+
+  test('percent change is null when last month had no spending', () async {
+    when(
+      () => records.getRecords(dateRange: any(named: 'dateRange')),
+    ).thenAnswer((invocation) async {
+      final range = invocation.namedArguments[#dateRange] as DateTimeRange;
+
+      return Right(
+        range.start == thisMonth.startDate ? [inMonthOlder] : <Record>[],
+      );
+    });
+
+    final summary = (await useCase(
+      thisMonth,
+    )).getOrElse(() => throw StateError('expected summary'));
+
+    expect(summary.percentChange, isNull);
+  });
 }

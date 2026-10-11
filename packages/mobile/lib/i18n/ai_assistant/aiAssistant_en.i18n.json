@@ -1,0 +1,21 @@
+{
+  "title": "AI assistant",
+  "inputHint": "Ask about your spending",
+  "send": "Send message",
+  "disclaimer": "Expenzo AI provides suggestions based on your data. It is not a licensed financial advisor.",
+  "suggestions": {
+    "topExpenses": "Top expenses",
+    "budget": "How's my budget?"
+  },
+  "refusals": {
+    "outOfScope": "I can only help with your Expenzo finances: spending, budgets, categories, income, balance, savings, transactions, reports and recurring bills. Ask a question about your own data.",
+    "promptInjection": "I can't help with hidden instructions, internal context, secrets or requests to override my rules. Ask about your finances in Expenzo.",
+    "tooLong": "That message is too long. Ask a shorter question about your Expenzo finances.",
+    "empty": "Type a question about your Expenzo finances.",
+    "cooldown": "Wait a few seconds before sending another question.",
+    "contextUnavailable": "I can't read your finance data right now. Try again shortly."
+  },
+  "errors": {
+    "contextFailed": "Couldn't load your finance data. Try again."
+  }
+}

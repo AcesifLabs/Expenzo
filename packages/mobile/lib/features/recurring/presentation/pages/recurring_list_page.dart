@@ -3,23 +3,19 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:picons/picons.dart';
+import 'package:expense_tracker/core/utils/currency_formatter.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_back_button.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_page_header.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 
 import '../../domain/entities/recurring_transaction.dart';
 import '../bloc/recurring_bloc.dart';
 import '../bloc/recurring_event.dart';
 import '../bloc/recurring_state.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
-class RecurringListPage extends StatelessWidget {
-  final RecurringBloc bloc;
-
-  const RecurringListPage({super.key, required this.bloc});
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocProvider.value(value: bloc, child: const RecurringListView());
-  }
-}
-
+/// Lists recurring transactions. Expects a [RecurringBloc] above it.
 class RecurringListView extends StatefulWidget {
   const RecurringListView({super.key});
 
@@ -39,7 +35,7 @@ class _RecurringListViewState extends State<RecurringListView> {
       case RecurringOperationSuccess():
         ScaffoldMessenger.of(context)
           ..clearSnackBars()
-          ..showSnackBar(const SnackBar(content: Text('Operation successful')));
+          ..showSnackBar(SnackBar(content: Text(t.recurring.saved)));
       case RecurringError(:final message):
         ScaffoldMessenger.of(context)
           ..clearSnackBars()
@@ -70,20 +66,8 @@ class _RecurringListViewState extends State<RecurringListView> {
     context.read<RecurringBloc>().add(DeleteRecurring(id));
   }
 
-  String _frequencyLabel(RecurringFrequency frequency) {
-    switch (frequency) {
-      case RecurringFrequency.daily:
-        return 'Daily';
-      case RecurringFrequency.weekly:
-        return 'Weekly';
-      case RecurringFrequency.monthly:
-        return 'Monthly';
-      case RecurringFrequency.yearly:
-        return 'Yearly';
-    }
-  }
-
   Widget _buildEmptyState() {
+    final emptyT = t.recurring.empty;
     final colorScheme = Theme.of(context).colorScheme;
 
     return Center(
@@ -95,16 +79,16 @@ class _RecurringListViewState extends State<RecurringListView> {
             size: 64,
             color: colorScheme.onSurface.withAlpha(100),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           Text(
-            'No recurring transactions',
-            style: TextStyle(fontSize: 18, color: colorScheme.onSurfaceVariant),
+            emptyT.title,
+            style: AppTypography.titleLarge.copyWith(
+              color: colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w400,
+            ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Tap + to create your first recurring expense',
-            style: TextStyle(color: colorScheme.outline),
-          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(emptyT.body, style: TextStyle(color: colorScheme.outline)),
         ],
       ),
     );
@@ -118,7 +102,10 @@ class _RecurringListViewState extends State<RecurringListView> {
     final isDue = recurring.isDue();
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      margin: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.xs,
+      ),
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: isDue
@@ -134,15 +121,19 @@ class _RecurringListViewState extends State<RecurringListView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '\$${recurring.amount.toStringAsFixed(2)} - ${_frequencyLabel(recurring.frequency)}',
+              t.recurring.amountEvery(
+                amount: CurrencyFormatter.format(recurring.amount),
+                frequency: recurring.frequency.displayName,
+              ),
             ),
             Text(
-              'Next: ${dateFormat.format(recurring.nextOccurrence)}',
-              style: TextStyle(
+              t.recurring.next(
+                date: dateFormat.format(recurring.nextOccurrence),
+              ),
+              style: AppTypography.bodySmall.copyWith(
                 color: isDue
                     ? colorScheme.tertiary
                     : colorScheme.onSurfaceVariant,
-                fontSize: 12,
               ),
             ),
           ],
@@ -165,7 +156,7 @@ class _RecurringListViewState extends State<RecurringListView> {
     return RefreshIndicator(
       onRefresh: () async => _onRefresh(),
       child: ListView.builder(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
         itemCount: items.length,
         itemBuilder: (context, index) =>
             _buildRecurringItem(items[index], dateFormat),
@@ -173,32 +164,37 @@ class _RecurringListViewState extends State<RecurringListView> {
     );
   }
 
-  void _navigateToForm(BuildContext context, RecurringTransaction? recurring) {
+  Future<void> _navigateToForm(
+    BuildContext context,
+    RecurringTransaction? recurring,
+  ) async {
     final recurringId = recurring?.id;
-    if (recurringId != null) {
-      context.push('/recurring/$recurringId/edit');
-    } else {
-      context.push('/recurring/new');
-    }
+    final bloc = context.read<RecurringBloc>();
+    final path = recurringId != null
+        ? '/recurring/$recurringId/edit'
+        : '/recurring/new';
+    final saved = await context.push<bool>(path);
+    // The form saves through its own bloc; refresh this list.
+    if (saved == true) bloc.add(LoadRecurring());
   }
 
   void _showDeleteDialog(BuildContext context, RecurringTransaction recurring) {
+    final deleteT = t.recurring.delete;
+
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete Recurring'),
-        content: Text(
-          'Are you sure you want to delete "${recurring.description}"?',
-        ),
+        title: Text(deleteT.title),
+        content: Text(deleteT.confirm(name: recurring.description)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
+            child: Text(t.common.cancel),
           ),
           TextButton(
             onPressed: () => _onDeleteDialogConfirm(dialogContext, recurring),
             child: Text(
-              'Delete',
+              t.common.delete,
               style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           ),
@@ -215,12 +211,12 @@ class _RecurringListViewState extends State<RecurringListView> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(PiconsRegular.warningCircle, size: 48, color: colorScheme.error),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           Text(state.message),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           ElevatedButton(
             onPressed: () => context.read<RecurringBloc>().add(LoadRecurring()),
-            child: const Text('Retry'),
+            child: Text(t.common.tryAgain),
           ),
         ],
       ),
@@ -239,14 +235,15 @@ class _RecurringListViewState extends State<RecurringListView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Recurring Transactions'),
+      appBar: AppPageHeader(
+        leading: const AppBackButton(),
+        title: t.recurring.title,
         actions: [
           IconButton(
-            icon: Icon(PiconsRegular.arrowsCounterClockwise),
+            icon: const Icon(PiconsRegular.arrowsCounterClockwise),
             onPressed: () =>
                 context.read<RecurringBloc>().add(const ProcessRecurring()),
-            tooltip: 'Process pending',
+            tooltip: t.recurring.processPending,
           ),
         ],
       ),
@@ -256,7 +253,8 @@ class _RecurringListViewState extends State<RecurringListView> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToForm(context, null),
-        child: Icon(PiconsRegular.plus),
+        tooltip: t.recurring.newTooltip,
+        child: const Icon(PiconsRegular.plus),
       ),
     );
   }

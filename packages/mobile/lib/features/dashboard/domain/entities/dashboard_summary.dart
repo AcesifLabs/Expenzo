@@ -6,15 +6,16 @@ class DashboardSummary extends Equatable {
   final double totalExpense;
   final double totalSpent;
   final double previousPeriodTotal;
-  final double percentChange;
+
+  /// Expense change vs the previous period, in percent. Null when the
+  /// previous period had no expenses, so there is nothing to compare to.
+  final double? percentChange;
   final List<CategoryAmount> categoryBreakdown;
   final List<Record> recentTransactions;
 
-  double get totalBalance => totalIncome - totalExpense;
-
-  bool get isIncreased => percentChange > 0;
-  bool get isDecreased => percentChange < 0;
-  bool get hasNoChange => percentChange == 0;
+  /// Income minus expense for the period. Not a balance: the app has no
+  /// accounts or opening balance (see CONTEXT.md, "Net").
+  double get net => totalIncome - totalExpense;
 
   @override
   List<Object?> get props => [
@@ -32,7 +33,7 @@ class DashboardSummary extends Equatable {
     required this.totalExpense,
     required this.totalSpent,
     required this.previousPeriodTotal,
-    required this.percentChange,
+    this.percentChange,
     required this.categoryBreakdown,
     required this.recentTransactions,
   });

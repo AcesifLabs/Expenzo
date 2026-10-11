@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 
 import '../models/sender_result_section.dart';
 import 'parsed_transaction_card.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class SmsScanSenderSection extends StatelessWidget {
   final SenderResultSection section;
@@ -27,7 +29,8 @@ class SmsScanSenderSection extends StatelessWidget {
         .where((item) => selectedIds.contains(item.sourceId))
         .length;
     final allSelected = selectedCount == section.items.length;
-    final actionLabel = allSelected ? 'Clear' : 'Select all';
+    final sectionT = t.smsParser.section;
+    final actionLabel = allSelected ? sectionT.clear : sectionT.selectAll;
     final actionColor = allSelected ? colors.primary : colors.onSurface;
 
     return Column(
@@ -46,7 +49,10 @@ class SmsScanSenderSection extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '${section.items.length} messages · $selectedCount selected',
+                  sectionT.counts(
+                    n: section.items.length,
+                    selected: selectedCount,
+                  ),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: colors.onSurface.withAlpha(170),
                   ),
@@ -60,7 +66,7 @@ class SmsScanSenderSection extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         ...section.items.map(
           (item) => ParsedTransactionCard(
             transaction: item.parsedTransaction,

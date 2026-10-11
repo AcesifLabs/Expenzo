@@ -12,6 +12,7 @@ import 'package:expense_tracker/features/categories/domain/usecases/search_categ
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_event.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_state.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class MockGetCategories extends Mock implements GetCategories {}
 
@@ -84,7 +85,7 @@ void main() {
         isA<CategoryError>().having(
           (s) => s.message,
           'message',
-          'Failed to load',
+          t.common.errors.server,
         ),
       ];
 
@@ -123,7 +124,7 @@ void main() {
         isA<CategoryError>().having(
           (s) => s.message,
           'message',
-          'Create failed',
+          t.common.errors.server,
         ),
       ];
 

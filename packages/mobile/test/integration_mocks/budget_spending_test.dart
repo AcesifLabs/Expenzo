@@ -30,16 +30,19 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(DateTime.now());
+    registerFallbackValue(<String, ({DateTime start, DateTime end})>{});
   });
 
   /// Stubs budget-scoped spend keyed by budgetId so different budgets can
   /// report different spend within the same period.
   void stubSpendByBudget(Map<String, double> spendById) {
-    when(
-      () => mockRecordRepository.getBudgetSpending(any(), any(), any()),
-    ).thenAnswer((invocation) async {
-      final budgetId = invocation.positionalArguments[0] as String;
-      return Right(spendById[budgetId] ?? 0.0);
+    when(() => mockRecordRepository.getSpendingForBudgets(any())).thenAnswer((
+      invocation,
+    ) async {
+      final periods =
+          invocation.positionalArguments[0]
+              as Map<String, ({DateTime start, DateTime end})>;
+      return Right({for (final id in periods.keys) id: spendById[id] ?? 0.0});
     });
   }
 
@@ -143,9 +146,22 @@ void main() {
         expect(progressList.isEmpty, true);
       });
 
-      verifyNever(
-        () => mockRecordRepository.getBudgetSpending(any(), any(), any()),
+      verifyNever(() => mockRecordRepository.getSpendingForBudgets(any()));
+    });
+
+    test('reads every budget\'s spend in a single call', () async {
+      when(() => mockBudgetRepository.getBudgets()).thenAnswer(
+        (_) async => Right([
+          makeBudget(id: 'a', amount: 100, startDate: periodStart),
+          makeBudget(id: 'b', amount: 100, startDate: periodStart),
+          makeBudget(id: 'c', amount: 100, startDate: periodStart),
+        ]),
       );
+      stubSpendByBudget({'a': 10, 'b': 20, 'c': 30});
+
+      await getBudgetsWithProgress();
+
+      verify(() => mockRecordRepository.getSpendingForBudgets(any())).called(1);
     });
 
     test('rollover is included in the effective amount', () async {

@@ -10,6 +10,7 @@ import 'package:expense_tracker/features/sms_parser/domain/entities/incoming_sms
 import 'package:expense_tracker/features/sms_parser/domain/entities/monitored_source.dart';
 import 'package:expense_tracker/features/sms_parser/domain/services/realtime_sms_listener.dart';
 import 'package:expense_tracker/features/sms_parser/domain/services/sms_sender_normalizer.dart';
+import 'package:expense_tracker/features/budgets/domain/usecases/check_budget_alerts.dart';
 
 class RealtimeSmsProcessor {
   final RealtimeSmsListener _listener;
@@ -17,6 +18,7 @@ class RealtimeSmsProcessor {
   final ParsingIsolateService _parsingIsolateService;
   final RecordRepository _recordRepository;
   final CreateRecordsFromParsedList _createRecordsFromParsedList;
+  final CheckBudgetAlerts? _checkBudgetAlerts;
 
   StreamSubscription<IncomingSmsEvent>? _subscription;
   Future<void> _processingChain = Future<void>.value();
@@ -28,7 +30,9 @@ class RealtimeSmsProcessor {
     required ParsingIsolateService parsingIsolateService,
     required RecordRepository recordRepository,
     required CreateRecordsFromParsedList createRecordsFromParsedList,
-  }) : _listener = listener,
+    CheckBudgetAlerts? checkBudgetAlerts,
+  }) : _checkBudgetAlerts = checkBudgetAlerts,
+       _listener = listener,
        _evaluateRules = evaluateRules,
        _parsingIsolateService = parsingIsolateService,
        _recordRepository = recordRepository,
@@ -137,6 +141,7 @@ class RealtimeSmsProcessor {
       }
 
       await _createRecordsFromParsedList(nonDuplicateResults);
+      await _checkBudgetAlerts?.call();
     } catch (error, stackTrace) {
       _logError('event processing failed', error, stackTrace);
 

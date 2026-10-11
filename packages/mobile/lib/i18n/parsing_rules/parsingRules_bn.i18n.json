@@ -1,0 +1,69 @@
+{
+  "@@i18n-review": "Machine-drafted Bangla. Needs native review before release.",
+  "addFromFormats": "SMS ফরম্যাট থেকে নিয়ম যোগ করুন",
+  "newRule": "নতুন নিয়ম",
+  "editRule": "নিয়ম সম্পাদনা",
+  "add": "যোগ করুন",
+  "added": "\"{name}\" যোগ হয়েছে",
+  "empty": {
+    "title": "এখনো কোনো নিয়ম নেই",
+    "body": "মিলে যাওয়া SMS ও ইমেইলকে রেকর্ডে বদলাতে একটি নিয়ম যোগ করুন।",
+    "add": "নিয়ম যোগ করুন"
+  },
+  "created": "নিয়ম তৈরি হয়েছে",
+  "updated": "নিয়ম আপডেট হয়েছে",
+  "delete": {
+    "title": "নিয়ম মুছুন",
+    "confirm": "আপনি কি নিশ্চিত যে \"{name}\" মুছতে চান?"
+  },
+  "validation": {
+    "nameRequired": "নাম দিতে হবে",
+    "triggerRequired": "অন্তত একটি মূল শব্দ দিতে হবে",
+    "amountRequired": "পরিমাণের প্যাটার্ন দিতে হবে",
+    "invalidRegex": "রেগুলার এক্সপ্রেশন সঠিক নয়",
+    "invalidRegexDetail": "রেগুলার এক্সপ্রেশন সঠিক নয়: {detail}",
+    "valid": "প্যাটার্ন সঠিক"
+  },
+  "form": {
+    "name": "নাম *",
+    "nameHint": "যেমন: HDFC Bank SMS",
+    "keyWords": "মূল শব্দ *",
+    "keyWordsHint": "HDFC, debit, account (কমা দিয়ে আলাদা করুন)",
+    "keyWordsHelper": "যেসব শব্দ থাকলে এই নিয়মটি চেষ্টা করা হবে",
+    "amountPattern": "পরিমাণের প্যাটার্ন (regex) *",
+    "amountRegex": "পরিমাণের regex",
+    "datePattern": "তারিখের প্যাটার্ন (ঐচ্ছিক)",
+    "dateRegex": "তারিখের regex (ঐচ্ছিক)",
+    "dateHelper": "তারিখ না লাগলে খালি রাখুন",
+    "source": "উৎস",
+    "priority": "অগ্রাধিকার",
+    "priorityHelper": "বেশি অগ্রাধিকারের নিয়ম আগে চেষ্টা করা হয়",
+    "enabled": "চালু",
+    "enabledDetail": "মেসেজ পড়ার সময় এই নিয়মটি ব্যবহার করুন"
+  },
+  "tester": {
+    "timeout": "সময় শেষ: প্যাটার্নটি ২ সেকেন্ডের বেশি সময় নিয়েছে",
+    "error": "সমস্যা",
+    "match": "মিল পাওয়া গেছে",
+    "noMatch": "মিল নেই",
+    "elapsed": "{ms} ms",
+    "amount": "পরিমাণ",
+    "date": "তারিখ",
+    "confidence": "{percent}% নিশ্চয়তা",
+    "sample": "পরীক্ষার জন্য নমুনা মেসেজ",
+    "sampleHint": "একটি নমুনা SMS বা ইমেইলের লেখা দিন",
+    "enterSample": "প্যাটার্ন পরীক্ষা করতে ওপরে একটি নমুনা মেসেজ দিন"
+  },
+  "templates": {
+    "hdfc_bank_sms": "HDFC ব্যাংকের ডেবিট নোটিফিকেশন পড়ে",
+    "icici_bank_sms": "ICICI ব্যাংকের ডেবিট নোটিফিকেশন পড়ে",
+    "sbi_sms": "স্টেট ব্যাংক অব ইন্ডিয়ার ডেবিট নোটিফিকেশন পড়ে",
+    "upi_payment_sms": "UPI পেমেন্টের নোটিফিকেশন পড়ে (PhonePe, Google Pay, Paytm)",
+    "amazon_order_sms": "Amazon অর্ডার কনফার্মেশন ও ডেলিভারির SMS পড়ে",
+    "amazon_order_email": "Amazon অর্ডারের ইমেইল পড়ে",
+    "swiggy_order_email": "Swiggy অর্ডার কনফার্মেশনের ইমেইল পড়ে",
+    "zomato_order_email": "Zomato অর্ডার কনফার্মেশনের ইমেইল পড়ে",
+    "flipkart_order_email": "Flipkart অর্ডারের ইমেইল পড়ে",
+    "generic_payment_email": "সাধারণ পেমেন্ট কনফার্মেশনের ইমেইল পড়ে"
+  }
+}

@@ -2,6 +2,14 @@ import 'package:equatable/equatable.dart';
 import "package:expense_tracker/core/constants/source_types.dart";
 import "package:expense_tracker/core/constants/record_type.dart";
 
+/// Distinguishes "not passed" from "set to null" in [Record.copyWith], the
+/// same way [RecurringTransaction.copyWith] does.
+class _RecordSentinel {
+  const _RecordSentinel();
+}
+
+const _sentinel = _RecordSentinel();
+
 class Record extends Equatable {
   final String? id;
   final double amount;
@@ -46,15 +54,17 @@ class Record extends Equatable {
     required this.updatedAt,
   });
 
+  /// Passing null for [categoryId], [budgetId] or [sourceId] clears it;
+  /// leaving them out keeps the current value.
   Record copyWith({
     String? id,
     double? amount,
     String? description,
     DateTime? date,
-    String? categoryId,
-    String? budgetId,
+    Object? categoryId = _sentinel,
+    Object? budgetId = _sentinel,
     ExpenseSource? source,
-    String? sourceId,
+    Object? sourceId = _sentinel,
     RecordType? recordType,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -64,10 +74,12 @@ class Record extends Equatable {
       amount: _v(amount, this.amount),
       description: _v(description, this.description),
       date: _v(date, this.date),
-      categoryId: _v(categoryId, this.categoryId),
-      budgetId: _v(budgetId, this.budgetId),
+      categoryId: categoryId == _sentinel
+          ? this.categoryId
+          : categoryId as String?,
+      budgetId: budgetId == _sentinel ? this.budgetId : budgetId as String?,
       source: _v(source, this.source),
-      sourceId: _v(sourceId, this.sourceId),
+      sourceId: sourceId == _sentinel ? this.sourceId : sourceId as String?,
       recordType: _v(recordType, this.recordType),
       createdAt: _v(createdAt, this.createdAt),
       updatedAt: _v(updatedAt, this.updatedAt),

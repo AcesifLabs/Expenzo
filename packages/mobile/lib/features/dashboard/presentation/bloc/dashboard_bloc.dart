@@ -4,6 +4,7 @@ import '../../domain/entities/date_range.dart';
 import '../../domain/usecases/get_dashboard_summary.dart';
 import 'dashboard_event.dart';
 import 'dashboard_state.dart';
+import 'package:expense_tracker/core/error/failure_message.dart';
 
 class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   final GetDashboardSummary getDashboardSummary;
@@ -24,7 +25,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     final result = await getDashboardSummary(event.dateRange);
 
     result.fold(
-      (failure) => emit(DashboardError(message: failure.message)),
+      (failure) => emit(DashboardError(message: failureText(failure))),
       (summary) =>
           emit(DashboardLoaded(summary: summary, dateRange: event.dateRange)),
     );

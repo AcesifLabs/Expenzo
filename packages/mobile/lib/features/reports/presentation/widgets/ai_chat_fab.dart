@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:picons/picons.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
+/// Opens the AI assistant from Reports. Labelled, so it reads as "ask about
+/// these numbers" rather than a second add button.
 class AIChatFAB extends StatelessWidget {
   final VoidCallback? onPressed;
 
@@ -8,19 +11,12 @@ class AIChatFAB extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onPressed,
-      child: Container(
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          color: const Color(0xFFD1C4E9),
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: const Center(
-          child: Icon(PiconsRegular.robot, size: 24, color: Color(0xFF141315)),
-        ),
-      ),
+    return FloatingActionButton.extended(
+      // The app shell has its own add button on the same screen.
+      heroTag: 'reports-ask-ai',
+      onPressed: onPressed,
+      icon: const Icon(PiconsRegular.robot),
+      label: Text(t.reports.askAi),
     );
   }
 }

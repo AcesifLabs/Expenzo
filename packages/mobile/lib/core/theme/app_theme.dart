@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'app_colors.dart';
+import 'app_palette.dart';
 import 'app_spacing.dart';
 import 'app_typography.dart';
 
@@ -31,6 +31,7 @@ class _ThemeColors {
   final Color chipBg;
   final Color chipLabel;
   final Color dividerColor;
+  final AppPalette palette;
 
   const _ThemeColors({
     required this.brightness,
@@ -60,15 +61,22 @@ class _ThemeColors {
     required this.chipBg,
     required this.chipLabel,
     required this.dividerColor,
+    required this.palette,
   });
 }
 
 class AppTheme {
-  static const _cardBorderRadius = BorderRadius.all(Radius.circular(10));
-  static const _buttonBorderRadius = BorderRadius.all(Radius.circular(8));
-  static const _dialogBorderRadius = BorderRadius.all(Radius.circular(10));
-  static const _chipBorderRadius = BorderRadius.all(Radius.circular(6));
-  static const _snackBorderRadius = BorderRadius.all(Radius.circular(8));
+  static const _cardBorderRadius = BorderRadius.all(
+    Radius.circular(AppSpacing.radiusCard),
+  );
+  static const _controlBorderRadius = BorderRadius.all(
+    Radius.circular(AppSpacing.radiusControl),
+  );
+  static const _pillBorderRadius = BorderRadius.all(
+    Radius.circular(AppSpacing.radiusPill),
+  );
+  static const _light = AppPalette.light;
+  static const _dark = AppPalette.dark;
   static const _buttonPadding = EdgeInsets.symmetric(
     horizontal: 24,
     vertical: 14,
@@ -92,118 +100,137 @@ class AppTheme {
     labelSmall: AppTypography.labelSmall,
   );
 
+  // Every color below comes from AppPalette (docs/adr/0003): primary is the
+  // mint brand, secondary the lavender accent. Only Material-only roles
+  // (containers, outlines) are spelled out here.
   static ThemeData get lightTheme => _buildTheme(
     _ThemeColors(
       brightness: Brightness.light,
-      colorScheme: const ColorScheme.light(
-        primary: AppColors.primary,
-        secondary: AppColors.secondary,
-        error: AppColors.error,
-        surface: AppColors.surfaceLight,
-        onPrimary: AppColors.onPrimary,
-        onSecondary: AppColors.onSecondary,
-        onSurface: AppColors.textPrimaryLight,
+      colorScheme: ColorScheme.light(
+        primary: _light.brand,
+        onPrimary: Colors.white,
+        primaryContainer: _light.brandFill,
+        onPrimaryContainer: _light.onBrandFill,
+        secondary: _light.accent,
+        onSecondary: Colors.white,
+        secondaryContainer: _light.accentFill,
+        onSecondaryContainer: const Color(0xFF342C49),
+        tertiary: _light.info,
+        onTertiary: Colors.white,
+        error: _light.expense,
         onError: Colors.white,
-        surfaceTint: AppColors.primary,
-        errorContainer: Color(0xFFFFDAD6),
-        onErrorContainer: Color(0xFF410002),
-        primaryContainer: Color(0xFFEDE1FF),
-        onPrimaryContainer: Color(0xFF342C49),
-        secondaryContainer: Color(0xFFA2D3A4),
-        onSecondaryContainer: Color(0xFF0A3817),
-        tertiary: Color(0xFFB3C9FF),
-        outline: Color(0xFF948F97),
-        outlineVariant: Color(0xFF49454D),
+        errorContainer: const Color(0xFFFFDAD6),
+        onErrorContainer: const Color(0xFF410002),
+        surface: _light.surface,
+        onSurface: _light.textPrimary,
+        onSurfaceVariant: _light.textSecondary,
+        surfaceContainerLowest: const Color(0xFFFFFFFF),
+        surfaceContainerLow: const Color(0xFFF7F7FA),
+        surfaceContainer: const Color(0xFFF1F1F4),
+        surfaceContainerHigh: _light.surfaceHigh,
+        surfaceContainerHighest: const Color(0xFFE5E5EA),
+        surfaceTint: _light.brand,
+        outline: const Color(0xFF7A757F),
+        outlineVariant: const Color(0xFFCAC4CF),
       ),
-      scaffoldBg: AppColors.backgroundLight,
-      appBarBg: AppColors.surfaceLight,
-      appBarFg: AppColors.textPrimaryLight,
-      cardColor: AppColors.surfaceLight,
+      scaffoldBg: _light.bg,
+      appBarBg: _light.surface,
+      appBarFg: _light.textPrimary,
+      cardColor: _light.surface,
       cardShadow: Colors.black.withAlpha(10),
-      inputFill: AppColors.backgroundLight,
-      inputBorder: AppColors.textSecondaryLight.withAlpha(60),
-      inputFocused: AppColors.primary,
-      buttonBg: AppColors.primary,
-      buttonFg: AppColors.onPrimary,
-      outlineFg: AppColors.primary,
-      outlineBorder: AppColors.primary.withAlpha(80),
-      textFg: AppColors.primary,
-      fabBg: AppColors.primary,
-      fabFg: AppColors.onPrimary,
-      navBg: AppColors.surfaceLight,
-      navSelected: AppColors.primary,
-      navUnselected: AppColors.textSecondaryLight,
-      navIndicator: AppColors.primary.withAlpha(25),
-      snackBg: AppColors.textPrimaryLight,
+      // Theme-styled fields mostly sit on white cards and dialogs, so they
+      // take the page background as fill (form pages use palette.inputFill).
+      inputFill: _light.bg,
+      inputBorder: _light.inputStroke,
+      inputFocused: _light.brand,
+      buttonBg: _light.brandFill,
+      buttonFg: _light.onBrandFill,
+      outlineFg: _light.brand,
+      outlineBorder: _light.brand.withAlpha(80),
+      textFg: _light.brand,
+      fabBg: _light.brandFill,
+      fabFg: _light.onBrandFill,
+      navBg: _light.surface,
+      navSelected: _light.brand,
+      navUnselected: _light.textSecondary,
+      navIndicator: _light.brandFill.withAlpha(60),
+      snackBg: _light.textPrimary,
       snackContent: Colors.white,
-      dialogBg: AppColors.surfaceLight,
-      chipBg: AppColors.primary.withAlpha(20),
-      chipLabel: AppColors.primary,
-      dividerColor: AppColors.textSecondaryLight.withAlpha(40),
+      dialogBg: _light.surface,
+      chipBg: _light.accentFill.withAlpha(60),
+      chipLabel: _light.accent,
+      dividerColor: _light.divider,
+      palette: _light,
     ),
   );
 
   static ThemeData get darkTheme => _buildTheme(
     _ThemeColors(
       brightness: Brightness.dark,
-      colorScheme: const ColorScheme.dark(
-        primary: AppColors.secondary,
-        secondary: AppColors.primary,
-        error: AppColors.errorDark,
-        surface: AppColors.surfaceDark,
-        onPrimary: AppColors.backgroundDark,
-        onSecondary: AppColors.backgroundDark,
-        onSurface: AppColors.textPrimaryDark,
-        onError: Colors.white,
-        surfaceTint: AppColors.secondary,
-        errorContainer: Color(0xFF93000A),
-        onErrorContainer: Color(0xFFFFDAD6),
-        primaryContainer: Color(0xFF4B4363),
-        onPrimaryContainer: Color(0xFFEDE1FF),
-        secondaryContainer: Color(0xFF1E5730),
-        onSecondaryContainer: Color(0xFFA2D3A4),
-        tertiary: Color(0xFF6D8ECF),
-        outline: Color(0xFF948F97),
-        outlineVariant: Color(0xFF49454D),
+      colorScheme: ColorScheme.dark(
+        primary: _dark.brand,
+        onPrimary: _dark.onBrandFill,
+        primaryContainer: _dark.brandFill,
+        onPrimaryContainer: _dark.onBrandFill,
+        secondary: _dark.accent,
+        onSecondary: _dark.onAccentFill,
+        secondaryContainer: const Color(0xFF4B4363),
+        onSecondaryContainer: const Color(0xFFEDE1FF),
+        tertiary: _dark.info,
+        onTertiary: _dark.bg,
+        error: _dark.expense,
+        onError: _dark.bg,
+        errorContainer: const Color(0xFF93000A),
+        onErrorContainer: const Color(0xFFFFDAD6),
+        surface: _dark.surface,
+        onSurface: _dark.textPrimary,
+        onSurfaceVariant: _dark.textSecondary,
+        surfaceTint: _dark.brand,
+        outline: const Color(0xFF948F97),
+        outlineVariant: const Color(0xFF49454D),
       ),
-      scaffoldBg: AppColors.backgroundDark,
-      appBarBg: AppColors.surfaceDark,
-      appBarFg: AppColors.textPrimaryDark,
-      cardColor: AppColors.surfaceDark,
+      scaffoldBg: _dark.bg,
+      appBarBg: _dark.surface,
+      appBarFg: _dark.textPrimary,
+      cardColor: _dark.surface,
       cardShadow: Colors.black45,
-      inputFill: Color(0xFF2C2C2E),
-      inputBorder: AppColors.textSecondaryDark.withAlpha(40),
-      inputFocused: AppColors.secondary,
-      buttonBg: AppColors.secondary,
-      buttonFg: AppColors.backgroundDark,
-      outlineFg: AppColors.secondary,
-      outlineBorder: AppColors.secondary.withAlpha(80),
-      textFg: AppColors.secondary,
-      fabBg: AppColors.secondary,
-      fabFg: Colors.white,
-      navBg: AppColors.surfaceDark,
-      navSelected: AppColors.secondary,
-      navUnselected: AppColors.textSecondaryDark,
-      navIndicator: AppColors.secondary.withAlpha(25),
-      snackBg: AppColors.surfaceDark,
-      snackContent: AppColors.textPrimaryDark,
-      dialogBg: AppColors.surfaceDark,
-      chipBg: AppColors.secondary.withAlpha(25),
-      chipLabel: AppColors.secondary,
-      dividerColor: AppColors.textSecondaryDark.withAlpha(40),
+      inputFill: _dark.surfaceHigh,
+      inputBorder: _dark.inputStroke,
+      inputFocused: _dark.brand,
+      buttonBg: _dark.brandFill,
+      buttonFg: _dark.onBrandFill,
+      outlineFg: _dark.brand,
+      outlineBorder: _dark.brand.withAlpha(80),
+      textFg: _dark.brand,
+      fabBg: _dark.brandFill,
+      fabFg: _dark.onBrandFill,
+      navBg: _dark.surface,
+      navSelected: _dark.brand,
+      navUnselected: _dark.textSecondary,
+      navIndicator: _dark.brandFill.withAlpha(25),
+      snackBg: _dark.surface,
+      snackContent: _dark.textPrimary,
+      dialogBg: _dark.surface,
+      chipBg: _dark.accentFill.withAlpha(25),
+      chipLabel: _dark.accent,
+      dividerColor: _dark.divider,
+      palette: _dark,
     ),
   );
 
   AppTheme._();
 
   static ThemeData _buildTheme(_ThemeColors c) {
-    final primaryWithAlpha40 = c.colorScheme.primary.withAlpha(40);
+    final scheme = c.colorScheme;
+    final primaryWithAlpha40 = scheme.primary.withAlpha(40);
 
     return ThemeData(
       useMaterial3: true,
       brightness: c.brightness,
-      colorScheme: c.colorScheme,
+      colorScheme: scheme,
       scaffoldBackgroundColor: c.scaffoldBg,
+      fontFamily: AppTypography.fontFamily,
+      fontFamilyFallback: AppTypography.fontFamilyFallback,
       textTheme: _textTheme,
       appBarTheme: _appBarTheme(c),
       cardTheme: _cardTheme(c),
@@ -221,25 +248,40 @@ class AppTheme {
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return c.colorScheme.primary;
+            return scheme.primary;
           }
 
           return null;
         }),
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
-        color: c.colorScheme.primary,
+        color: scheme.primary,
         linearTrackColor: primaryWithAlpha40,
       ),
       popupMenuTheme: PopupMenuThemeData(
-        color: c.colorScheme.surface,
+        color: scheme.surface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
         ),
       ),
       datePickerTheme: _datePickerTheme(c),
       bottomNavigationBarTheme: _bottomNavTheme(c),
       navigationBarTheme: _navBarTheme(c),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: scheme.surface,
+        modalBackgroundColor: scheme.surface,
+        dragHandleColor: scheme.onSurface.withAlpha(60),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppSpacing.radiusCard),
+          ),
+        ),
+      ),
+      listTileTheme: ListTileThemeData(
+        iconColor: scheme.onSurface,
+        textColor: scheme.onSurface,
+      ),
+      extensions: [c.palette],
     );
   }
 
@@ -263,15 +305,15 @@ class AppTheme {
         filled: true,
         fillColor: c.inputFill,
         border: const OutlineInputBorder(
-          borderRadius: _cardBorderRadius,
+          borderRadius: _controlBorderRadius,
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: _cardBorderRadius,
+          borderRadius: _controlBorderRadius,
           borderSide: BorderSide(color: c.inputBorder, width: 0.5),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: _cardBorderRadius,
+          borderRadius: _controlBorderRadius,
           borderSide: BorderSide(color: c.inputFocused, width: 1.5),
         ),
         contentPadding: const EdgeInsets.symmetric(
@@ -288,7 +330,7 @@ class AppTheme {
           padding: _buttonPadding,
           elevation: 0,
           shape: const RoundedRectangleBorder(
-            borderRadius: _buttonBorderRadius,
+            borderRadius: _controlBorderRadius,
           ),
         ),
       );
@@ -300,7 +342,7 @@ class AppTheme {
           side: BorderSide(color: c.outlineBorder),
           padding: _buttonPadding,
           shape: const RoundedRectangleBorder(
-            borderRadius: _buttonBorderRadius,
+            borderRadius: _controlBorderRadius,
           ),
         ),
       );
@@ -310,25 +352,34 @@ class AppTheme {
         backgroundColor: c.fabBg,
         foregroundColor: c.fabFg,
         elevation: 0,
-        shape: const CircleBorder(),
+        // Stadium, not circle: a square FAB still renders as a circle, and an
+        // extended FAB ("Ask AI") becomes a pill as wide as its label.
+        shape: const StadiumBorder(),
+        extendedPadding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md + AppSpacing.xs,
+        ),
+        // No extendedTextStyle: the default (textTheme.labelLarge) is already
+        // Lato bold. A raw AppTypography style here has inherit: true, and
+        // the FAB animates between label styles, which throws when the two
+        // styles disagree on inherit.
       );
 
   static DialogThemeData _dialogTheme(_ThemeColors c) => DialogThemeData(
     backgroundColor: c.dialogBg,
-    shape: const RoundedRectangleBorder(borderRadius: _dialogBorderRadius),
+    shape: const RoundedRectangleBorder(borderRadius: _cardBorderRadius),
   );
 
   static SnackBarThemeData _snackBarTheme(_ThemeColors c) => SnackBarThemeData(
     backgroundColor: c.snackBg,
     contentTextStyle: AppTypography.bodyMedium.copyWith(color: c.snackContent),
     behavior: SnackBarBehavior.floating,
-    shape: const RoundedRectangleBorder(borderRadius: _snackBorderRadius),
+    shape: const RoundedRectangleBorder(borderRadius: _controlBorderRadius),
   );
 
   static ChipThemeData _chipTheme(_ThemeColors c) => ChipThemeData(
     backgroundColor: c.chipBg,
     labelStyle: AppTypography.labelMedium.copyWith(color: c.chipLabel),
-    shape: const RoundedRectangleBorder(borderRadius: _chipBorderRadius),
+    shape: const RoundedRectangleBorder(borderRadius: _pillBorderRadius),
     side: BorderSide.none,
   );
 

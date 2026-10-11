@@ -1,7 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:picons/picons.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'keypad_button.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class NumericKeypad extends StatefulWidget {
   final void Function(String) onDigit;
@@ -24,7 +28,7 @@ class _NumericKeypadState extends State<NumericKeypad> {
   Timer? _initialDelayTimer;
 
   static TextStyle _keypadTextStyle(Color color) =>
-      TextStyle(fontSize: 20, fontWeight: FontWeight.w500, color: color);
+      AppTypography.headlineSmall.copyWith(color: color);
 
   void _cancelBackspaceTimers() {
     _initialDelayTimer?.cancel();
@@ -57,7 +61,7 @@ class _NumericKeypadState extends State<NumericKeypad> {
     return Row(
       children: [
         for (var index = 0; index < buttons.length; index++) ...[
-          if (index > 0) const SizedBox(width: 2),
+          if (index > 0) const SizedBox(width: AppSpacing.xs),
           buttons[index],
         ],
       ],
@@ -72,7 +76,7 @@ class _NumericKeypadState extends State<NumericKeypad> {
     return KeypadButton(
       color: btnColor,
       height: 48,
-      radius: 8,
+      radius: AppSpacing.radiusControl,
       onTap: () => widget.onDigit(digit),
       child: Text(digit, style: style),
     );
@@ -82,13 +86,13 @@ class _NumericKeypadState extends State<NumericKeypad> {
     return KeypadButton(
       color: btnColor,
       height: 48,
-      radius: 8,
-      semanticLabel: 'Backspace',
+      radius: AppSpacing.radiusControl,
+      semanticLabel: t.records.sheet.backspace,
       onTap: widget.onBackspace,
       onLongPressStart: _onBackspaceLongPressStart,
       onLongPressEnd: _onBackspaceLongPressEnd,
       onLongPressCancel: _cancelBackspaceTimers,
-      child: Icon(PiconsLight.backspace, color: txtColor, size: 20),
+      child: Icon(PiconsRegular.backspace, color: txtColor, size: 20),
     );
   }
 
@@ -100,13 +104,19 @@ class _NumericKeypadState extends State<NumericKeypad> {
 
   @override
   Widget build(BuildContext context) {
-    const btnColor = Color(0xFF201F21);
-    const backspaceColor = Color(0xFF2B292C);
+    final palette = context.palette;
+    // surfaceHigh, not inputFill: in light mode inputFill is the sheet's own
+    // white, which made the keys invisible.
+    final btnColor = palette.surfaceHigh;
+    final backspaceColor = palette.surfaceHigh;
     final txtColor = widget.color.onSurface;
     final style = _keypadTextStyle(txtColor);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.sm,
+      ),
       child: Column(
         children: [
           _buildKeypadRow([
@@ -114,19 +124,19 @@ class _NumericKeypadState extends State<NumericKeypad> {
             _buildDigitButton('2', style, btnColor),
             _buildDigitButton('3', style, btnColor),
           ]),
-          const SizedBox(height: 2),
+          const SizedBox(height: AppSpacing.xs),
           _buildKeypadRow([
             _buildDigitButton('4', style, btnColor),
             _buildDigitButton('5', style, btnColor),
             _buildDigitButton('6', style, btnColor),
           ]),
-          const SizedBox(height: 2),
+          const SizedBox(height: AppSpacing.xs),
           _buildKeypadRow([
             _buildDigitButton('7', style, btnColor),
             _buildDigitButton('8', style, btnColor),
             _buildDigitButton('9', style, btnColor),
           ]),
-          const SizedBox(height: 2),
+          const SizedBox(height: AppSpacing.xs),
           _buildKeypadRow([
             _buildDigitButton('.', style, btnColor),
             _buildDigitButton('0', style, btnColor),

@@ -14,6 +14,7 @@ import '../../data/datasources/sms_local_datasource.dart';
 import '../entities/sms_scan_page.dart';
 import '../entities/sms_scan_result_item.dart';
 import '../entities/sms_message.dart';
+import 'package:expense_tracker/core/error/failure_message.dart';
 
 const _minimumRawBatchSize = 50;
 
@@ -264,7 +265,7 @@ class ScanSmsParams {
 
 class SmsScanFailure extends Failure {
   const SmsScanFailure({required super.message})
-    : super(errorCode: 'SMS_SCAN_ERROR');
+    : super(errorCode: FailureCodes.smsScan);
 }
 
 class _BatchConsumptionResult {

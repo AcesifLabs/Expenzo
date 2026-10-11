@@ -1,16 +1,22 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/shared/services/notification_permission.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budget_progress.dart';
 import 'package:expense_tracker/features/budgets/domain/entities/budget.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_page_header.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 import '../bloc/budget_bloc.dart';
 import '../bloc/budget_event.dart';
 import '../bloc/budget_state.dart';
-import '../constants/budget_ui_tokens.dart';
 import '../widgets/budget_progress_card.dart';
 import '../widgets/skeletons/budget_list_skeleton.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class BudgetListPage extends StatelessWidget {
   const BudgetListPage({super.key});
@@ -18,7 +24,7 @@ class BudgetListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => di.getIt<BudgetBloc>()..add(LoadBudgets()),
+      create: (context) => di.getIt<BudgetBloc>()..add(const LoadBudgets()),
       child: const BudgetListView(),
     );
   }
@@ -32,14 +38,24 @@ class BudgetListView extends StatefulWidget {
 }
 
 class _BudgetListViewState extends State<BudgetListView> {
+  AppPalette get _palette => context.palette;
+
+  /// Ask for notification permission at most once per app run, and only
+  /// once there is a budget to be alerted about.
+  static bool _askedForAlertPermission = false;
+
   void _onStateChanged(BuildContext context, BudgetState state) {
+    if (state is BudgetLoaded &&
+        state.budgets.isNotEmpty &&
+        !_askedForAlertPermission) {
+      _askedForAlertPermission = true;
+      unawaited(requestBudgetAlertPermissionIfNeeded());
+    }
     switch (state) {
       case BudgetOperationSuccess():
         ScaffoldMessenger.of(context)
           ..clearSnackBars()
-          ..showSnackBar(
-            const SnackBar(content: Text('Budget operation successful')),
-          );
+          ..showSnackBar(SnackBar(content: Text(t.budgets.saved)));
       case BudgetError(:final message):
         ScaffoldMessenger.of(context)
           ..clearSnackBars()
@@ -50,43 +66,17 @@ class _BudgetListViewState extends State<BudgetListView> {
   }
 
   Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              Text(
-                'Budgets',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w600,
-                  color: BudgetUiTokens.textPrimary,
-                ),
-              ),
-              SizedBox(height: 4),
-              Text(
-                'Track your monthly limits',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: BudgetUiTokens.textTertiary,
-                ),
-              ),
-            ],
-          ),
-          IconButton(
-            icon: const Icon(
-              PiconsLight.plus,
-              color: BudgetUiTokens.textPrimary,
-            ),
-            tooltip: 'Add Budget',
-            onPressed: () => _navigateToCreate(context),
-          ),
-        ],
-      ),
+    return AppPageHeader(
+      title: t.budgets.title,
+      subtitle: t.budgets.subtitle,
+      actions: [
+        // Labelled so it isn't confused with the add-transaction button.
+        TextButton.icon(
+          icon: const Icon(PiconsRegular.plus, size: 18),
+          label: Text(t.common.newBudget),
+          onPressed: () => _navigateToCreate(context),
+        ),
+      ],
     );
   }
 
@@ -98,14 +88,17 @@ class _BudgetListViewState extends State<BudgetListView> {
   }
 
   Future<void> _onRefresh() {
-    context.read<BudgetBloc>().add(LoadBudgets());
+    context.read<BudgetBloc>().add(const LoadBudgets());
 
     return Future<void>.value();
   }
 
   Widget _buildLoadedState(BuildContext context, BudgetLoaded state) {
+    final textTheme = Theme.of(context).textTheme;
+    final emptyStrings = t.budgets.empty;
+
     return Scaffold(
-      backgroundColor: BudgetUiTokens.bg,
+      backgroundColor: _palette.bg,
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: _onRefresh,
@@ -114,15 +107,29 @@ class _BudgetListViewState extends State<BudgetListView> {
             slivers: [
               SliverToBoxAdapter(child: _buildHeader(context)),
               if (state.budgets.isEmpty)
-                const SliverFillRemaining(
-                  child: Center(
-                    child: Text(
-                      'No Budgets Present',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: BudgetUiTokens.textSecondary,
-                      ),
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(emptyStrings.title, style: textTheme.titleMedium),
+                        const SizedBox(height: AppSpacing.sm),
+                        Text(
+                          emptyStrings.body,
+                          textAlign: TextAlign.center,
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: _palette.textSecondary,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        ElevatedButton.icon(
+                          icon: const Icon(PiconsRegular.plus, size: 18),
+                          label: Text(t.common.newBudget),
+                          onPressed: () => _navigateToCreate(context),
+                        ),
+                      ],
                     ),
                   ),
                 )
@@ -137,7 +144,12 @@ class _BudgetListViewState extends State<BudgetListView> {
 
   Widget _buildBudgetList(BudgetLoaded state) {
     return SliverPadding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        AppSpacing.sm,
+        AppSpacing.md,
+        AppSpacing.lg,
+      ),
       sliver: SliverList(
         delegate: SliverChildBuilderDelegate((context, index) {
           final budget = state.budgets[index];
@@ -164,7 +176,7 @@ class _BudgetListViewState extends State<BudgetListView> {
               );
 
           return Padding(
-            padding: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.only(bottom: AppSpacing.md),
             child: BudgetProgressCard(
               progress: displayProgress,
               onTap: () => _navigateToDetails(context, displayProgress),
@@ -184,31 +196,32 @@ class _BudgetListViewState extends State<BudgetListView> {
   Future<void> _navigateToCreate(BuildContext context) async {
     final result = await context.push<bool>('/budgets/new');
     if (result == true && context.mounted) {
-      context.read<BudgetBloc>().add(LoadBudgets());
+      context.read<BudgetBloc>().add(const LoadBudgets());
     }
   }
 
   Future<void> _navigateToEdit(BuildContext context, Budget budget) async {
     final result = await context.push<bool>('/budgets/${budget.id}/edit');
     if (result == true && context.mounted) {
-      context.read<BudgetBloc>().add(LoadBudgets());
+      context.read<BudgetBloc>().add(const LoadBudgets());
     }
   }
 
   void _confirmDelete(BuildContext context, Budget budget) {
+    final strings = t.budgets.delete;
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete Budget'),
-        content: Text('Delete "${budget.name}" budget?'),
+        title: Text(strings.title),
+        content: Text(strings.confirm(name: budget.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
+            child: Text(t.common.cancel),
           ),
           TextButton(
             onPressed: () => _onConfirmDelete(dialogContext, context, budget),
-            child: const Text('Delete'),
+            child: Text(t.common.delete),
           ),
         ],
       ),
@@ -230,18 +243,18 @@ class _BudgetListViewState extends State<BudgetListView> {
       listener: _onStateChanged,
       builder: (context, state) {
         return switch (state) {
-          BudgetLoading() => const Scaffold(
-            backgroundColor: BudgetUiTokens.bg,
-            body: BudgetListSkeleton(),
+          BudgetLoading() => Scaffold(
+            backgroundColor: _palette.bg,
+            body: const BudgetListSkeleton(),
           ),
           BudgetError(:final message) => Scaffold(
-            backgroundColor: BudgetUiTokens.bg,
-            body: Center(child: Text('Error: $message')),
+            backgroundColor: _palette.bg,
+            body: Center(child: Text(message)),
           ),
           BudgetLoaded() => _buildLoadedState(context, state),
-          _ => const Scaffold(
-            backgroundColor: BudgetUiTokens.bg,
-            body: Center(child: Text('Load budgets to see data')),
+          _ => Scaffold(
+            backgroundColor: _palette.bg,
+            body: Center(child: Text(t.budgets.loadPrompt)),
           ),
         };
       },

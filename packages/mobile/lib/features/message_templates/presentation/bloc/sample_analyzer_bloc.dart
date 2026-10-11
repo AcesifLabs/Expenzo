@@ -8,6 +8,7 @@ import '../../domain/entities/expense_template.dart';
 import '../../domain/repositories/message_template_repository.dart';
 import 'sample_analyzer_event.dart';
 import 'sample_analyzer_state.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class SampleAnalyzerBloc
     extends Bloc<SampleAnalyzerEvent, SampleAnalyzerState> {
@@ -142,7 +143,7 @@ class SampleAnalyzerBloc
         initialTickCompleter.complete();
       }
       addError(e, s);
-      emit(SampleAnalyzerError(message: e.toString()));
+      emit(SampleAnalyzerError(message: t.common.errors.generic));
     }
   }
 
@@ -189,7 +190,7 @@ class SampleAnalyzerBloc
       _currentOffset += messages.length;
     } catch (e, s) {
       addError(e, s);
-      emit(SampleAnalyzerError(message: e.toString()));
+      emit(SampleAnalyzerError(message: t.common.errors.generic));
     }
   }
 
@@ -216,11 +217,13 @@ class SampleAnalyzerBloc
         emit(
           latest.copyWith(
             clearPendingDeletion: true,
-            lastError: 'Could not delete template: $e',
+            lastError: t.messageTemplates.errors.deleteFailed,
           ),
         );
       } else {
-        emit(SampleAnalyzerError(message: 'Could not delete template: $e'));
+        emit(
+          SampleAnalyzerError(message: t.messageTemplates.errors.deleteFailed),
+        );
       }
     }
   }
@@ -255,13 +258,13 @@ class SampleAnalyzerBloc
             emit(
               latest.copyWith(
                 clearPendingDeletion: true,
-                lastError: 'Could not restore template: ${failure.message}',
+                lastError: t.messageTemplates.errors.restoreFailed,
               ),
             );
           } else {
             emit(
               SampleAnalyzerError(
-                message: 'Could not restore template: ${failure.message}',
+                message: t.messageTemplates.errors.restoreFailed,
               ),
             );
           }
@@ -280,11 +283,13 @@ class SampleAnalyzerBloc
         emit(
           latest.copyWith(
             clearPendingDeletion: true,
-            lastError: 'Could not restore template: $e',
+            lastError: t.messageTemplates.errors.restoreFailed,
           ),
         );
       } else {
-        emit(SampleAnalyzerError(message: 'Could not restore template: $e'));
+        emit(
+          SampleAnalyzerError(message: t.messageTemplates.errors.restoreFailed),
+        );
       }
     }
   }

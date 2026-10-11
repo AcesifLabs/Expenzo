@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class DateRange extends Equatable {
   final DateRangePreset preset;
@@ -51,16 +52,25 @@ class DateRange extends Equatable {
     }
   }
 
-  String get label {
-    switch (preset) {
-      case DateRangePreset.thisMonth:
-        return 'This Month';
-      case DateRangePreset.lastMonth:
-        return 'Last Month';
-      case DateRangePreset.thisYear:
-        return 'This Year';
-    }
-  }
+  String get label => switch (preset) {
+    DateRangePreset.thisMonth => t.dashboard.range.thisMonth,
+    DateRangePreset.lastMonth => t.dashboard.range.lastMonth,
+    DateRangePreset.thisYear => t.dashboard.range.thisYear,
+  };
+
+  /// "Net this month", for the balance row.
+  String get netLabel => switch (preset) {
+    DateRangePreset.thisMonth => t.dashboard.range.net.thisMonth,
+    DateRangePreset.lastMonth => t.dashboard.range.net.lastMonth,
+    DateRangePreset.thisYear => t.dashboard.range.net.thisYear,
+  };
+
+  /// How the previous period reads in a sentence ("vs last month").
+  String get previousPeriodNoun => switch (preset) {
+    DateRangePreset.thisMonth => t.dashboard.range.previous.thisMonth,
+    DateRangePreset.lastMonth => t.dashboard.range.previous.lastMonth,
+    DateRangePreset.thisYear => t.dashboard.range.previous.thisYear,
+  };
 
   @override
   List<Object?> get props => [preset, customStart, customEnd];

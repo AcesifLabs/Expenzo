@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:picons/picons.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 /// The action the user chose in the [ManageTemplateSheet].
 enum ManageTemplateAction { edit, delete }
@@ -28,24 +31,22 @@ class ManageTemplateSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(AppSpacing.md),
             child: Text(
-              'Template already exists',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+              t.messageTemplates.alreadyExists,
+              style: AppTypography.titleMedium.copyWith(
                 color: colors.onSurface,
               ),
             ),
           ),
           ListTile(
             leading: const Icon(PiconsRegular.pen),
-            title: const Text('Edit template'),
+            title: Text(t.messageTemplates.edit),
             onTap: () => Navigator.of(context).pop(ManageTemplateAction.edit),
           ),
           ListTile(
             leading: const Icon(PiconsRegular.trash),
-            title: const Text('Delete template'),
+            title: Text(t.messageTemplates.delete),
             onTap: () => Navigator.of(context).pop(ManageTemplateAction.delete),
           ),
         ],

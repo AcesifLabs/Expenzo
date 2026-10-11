@@ -1,0 +1,50 @@
+{
+  "@@i18n-review": "Machine-drafted Bangla. Needs native review before release.",
+  "range": {
+    "thisMonth": "এই মাস",
+    "lastMonth": "গত মাস",
+    "thisYear": "এই বছর",
+    "net": {
+      "thisMonth": "এই মাসের নিট",
+      "lastMonth": "গত মাসের নিট",
+      "thisYear": "এই বছরের নিট"
+    },
+    "previous": {
+      "thisMonth": "গত মাস",
+      "lastMonth": "তার আগের মাস",
+      "thisYear": "গত বছর"
+    }
+  },
+  "greeting": "হ্যালো, {name}",
+  "userFallback": "ব্যবহারকারী",
+  "income": "আয়",
+  "expense": "খরচ",
+  "sections": {
+    "budgets": "বাজেট",
+    "recentActivity": "সাম্প্রতিক লেনদেন",
+    "spendingPatterns": "খরচের ধরন",
+    "seeAll": "সব দেখুন"
+  },
+  "noBudgets": "এখনো কোনো বাজেট নেই",
+  "noTransactions": "এখনো কোনো লেনদেন নেই",
+  "menu": {
+    "profile": "প্রোফাইল",
+    "signIn": "সাইন ইন",
+    "settings": "সেটিংস",
+    "signOut": "সাইন আউট"
+  },
+  "budgetSpentOf": "{total}-এর মধ্যে {spent}",
+  "trend": {
+    "noPrevious": "{period}-এর সাথে তুলনা করার মতো খরচ নেই",
+    "same": "{period}-এর সমান",
+    "up": "{period}-এর চেয়ে +{percent}%",
+    "down": "{period}-এর চেয়ে -{percent}%",
+    "spent": "{amount} খরচ",
+    "noData": "এখনো প্রবণতার ডেটা নেই"
+  },
+  "autoImport": {
+    "title": "SMS থেকে খরচ যোগ করুন",
+    "body": "Expenzo-কে ব্যাংক ও পেমেন্টের মেসেজ পড়ে আপনার হয়ে খরচ যোগ করতে দিন। মেসেজ এই ফোনেই থাকে।",
+    "setUp": "সেট আপ করুন"
+  }
+}

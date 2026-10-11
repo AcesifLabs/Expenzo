@@ -1,0 +1,8 @@
+{
+  "@@i18n-review": "Machine-drafted Bangla. Needs native review before release.",
+  "recordType": { "income": "আয়", "expense": "খরচ" },
+  "period": { "weekly": "সাপ্তাহিক", "monthly": "মাসিক", "yearly": "বার্ষিক" },
+  "frequency": { "daily": "দৈনিক", "weekly": "সাপ্তাহিক", "biweekly": "প্রতি দুই সপ্তাহে", "monthly": "মাসিক", "yearly": "বার্ষিক" },
+  "source": { "manual": "নিজে যোগ করা", "sms": "SMS", "email": "ইমেইল", "recurring": "পুনরাবৃত্ত", "both": "দুটোই" },
+  "theme": { "system": "ডিভাইসের মতো", "light": "লাইট", "dark": "ডার্ক" }
+}

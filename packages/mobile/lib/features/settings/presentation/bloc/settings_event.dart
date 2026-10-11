@@ -21,13 +21,14 @@ class UpdateSettingsEvent extends SettingsEvent {
   const UpdateSettingsEvent(this.settings);
 }
 
-class UpdateCurrencySymbol extends SettingsEvent {
-  final String currencySymbol;
+class UpdateCurrency extends SettingsEvent {
+  /// ISO 4217 code.
+  final String currencyCode;
 
   @override
-  List<Object?> get props => [currencySymbol];
+  List<Object?> get props => [currencyCode];
 
-  const UpdateCurrencySymbol(this.currencySymbol);
+  const UpdateCurrency(this.currencyCode);
 }
 
 class UpdateEmailFetchLimit extends SettingsEvent {
@@ -57,6 +58,20 @@ class UpdateTheme extends SettingsEvent {
   const UpdateTheme(this.theme);
 }
 
+class UpdateLanguage extends SettingsEvent {
+  /// 'system' or a locale code ('en', 'bn').
+  final String languageCode;
+
+  @override
+  List<Object?> get props => [languageCode];
+
+  const UpdateLanguage(this.languageCode);
+}
+
 class DeleteAccountEvent extends SettingsEvent {
   const DeleteAccountEvent();
+}
+
+class DismissAutoImportPrompt extends SettingsEvent {
+  const DismissAutoImportPrompt();
 }

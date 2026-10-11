@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:picons/picons.dart';
 import 'package:uuid/uuid.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
+import 'package:expense_tracker/shared/presentation/widgets/app_back_button.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_page_header.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 import '../../domain/entities/category.dart';
 import '../../domain/repositories/category_repository.dart';
 import '../bloc/category_bloc.dart';
@@ -12,6 +17,8 @@ import '../bloc/category_event.dart';
 import '../widgets/category_type_toggle.dart';
 import '../widgets/icon_grid_picker.dart';
 import '../widgets/color_picker_row.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
+import 'package:expense_tracker/features/categories/presentation/helpers/category_display_name.dart';
 
 class CategoryFormPage extends StatefulWidget {
   final Category? category;
@@ -30,7 +37,11 @@ class CategoryFormPage extends StatefulWidget {
 }
 
 class _CategoryFormPageState extends State<CategoryFormPage> {
+  AppPalette get _palette => context.palette;
   final _nameController = TextEditingController();
+
+  /// The category being edited, as stored.
+  Category? _original;
   String _selectedIcon = 'shoppingCart';
   String _selectedColor = '#D1C4E9';
   RecordType _type = RecordType.expense;
@@ -77,7 +88,8 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
 
   void _initFromCategory(Category? category) {
     if (category == null) return;
-    _nameController.text = category.name;
+    _original = category;
+    _nameController.text = category.displayName;
     _selectedIcon = category.emoji;
     _selectedColor = category.color;
     _type = category.type;
@@ -88,16 +100,23 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
     if (name.isEmpty) {
       ScaffoldMessenger.of(context)
         ..clearSnackBars()
-        ..showSnackBar(const SnackBar(content: Text('Please enter a name')));
+        ..showSnackBar(SnackBar(content: Text(t.categories.form.nameRequired)));
 
       return;
     }
 
     final now = DateTime.now().toUtc();
     final id = widget.category?.id ?? widget.categoryId ?? const Uuid().v4();
+    final existing = _original ?? widget.category;
+    // An untouched default shows its translated name; saving it unchanged
+    // must keep the English seed name so it stays translatable.
+    final storedName = existing != null && name == existing.displayName
+        ? existing.name
+        : name;
     final category = Category(
       id: id,
-      name: name,
+      name: storedName,
+      isDefault: existing?.isDefault ?? false,
       emoji: _selectedIcon,
       color: _selectedColor,
       type: _type,
@@ -113,70 +132,49 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
     context.pop(category);
   }
 
-  Widget _buildTopBar() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => context.pop(),
-            child: const Icon(
-              PiconsRegular.x,
-              size: 24,
-              color: _DesignTokens.textPrimary,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            _isEditing ? 'Edit Category' : 'Add New Category',
-            style: const TextStyle(
-              fontFamily: 'Work Sans',
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: _DesignTokens.textPrimary,
-            ),
-          ),
-        ],
-      ),
+  PreferredSizeWidget _buildTopBar() {
+    final formT = t.categories.form;
+
+    return AppPageHeader(
+      leading: const AppBackButton(icon: PiconsRegular.x),
+      title: _isEditing ? formT.edit : formT.add,
     );
   }
 
   Widget _buildNameField() {
+    final formT = t.categories.form;
+
     return Padding(
-      padding: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.only(top: AppSpacing.smd),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Name',
-            style: TextStyle(
-              fontFamily: 'Work Sans',
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: _DesignTokens.mutedColor,
+          Text(
+            formT.name,
+            style: AppTypography.bodySmall.copyWith(
+              color: _palette.textSecondary,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: AppSpacing.sm),
           Container(
             height: 48,
             decoration: BoxDecoration(
-              color: _DesignTokens.inputFill,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: _DesignTokens.inputBorder, width: 1),
+              color: _palette.inputFill,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
+              border: Border.all(color: _palette.inputStroke, width: 1),
             ),
             child: TextField(
               controller: _nameController,
-              style: const TextStyle(
-                fontFamily: 'Work Sans',
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: _DesignTokens.textPrimary,
+              style: AppTypography.bodyLarge.copyWith(
+                color: _palette.textPrimary,
               ),
-              decoration: const InputDecoration(
-                hintText: 'Groceries',
-                hintStyle: TextStyle(color: _DesignTokens.mutedColor),
+              decoration: InputDecoration(
+                hintText: formT.nameHint,
+                hintStyle: TextStyle(color: _palette.textSecondary),
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                ),
               ),
             ),
           ),
@@ -187,28 +185,26 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
 
   Widget _buildSaveButton() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.md,
+        AppSpacing.lg,
+        AppSpacing.lg,
+      ),
       child: SizedBox(
         width: double.infinity,
         height: 52,
         child: ElevatedButton(
           onPressed: _saveCategory,
           style: ElevatedButton.styleFrom(
-            backgroundColor: _DesignTokens.primary,
-            foregroundColor: _DesignTokens.background,
+            backgroundColor: _palette.brandFill,
+            foregroundColor: _palette.onBrandFill,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
             ),
             elevation: 0,
           ),
-          child: const Text(
-            'Save Category',
-            style: TextStyle(
-              fontFamily: 'Work Sans',
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
+          child: Text(t.common.save, style: AppTypography.titleMedium),
         ),
       ),
     );
@@ -223,23 +219,21 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
-        backgroundColor: _DesignTokens.background,
-        body: Center(
-          child: CircularProgressIndicator(color: _DesignTokens.primary),
-        ),
+      return Scaffold(
+        backgroundColor: _palette.bg,
+        body: Center(child: CircularProgressIndicator(color: _palette.brand)),
       );
     }
 
     return Scaffold(
-      backgroundColor: _DesignTokens.background,
+      backgroundColor: _palette.bg,
+      appBar: _buildTopBar(),
       body: SafeArea(
         child: Column(
           children: [
-            _buildTopBar(),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -268,15 +262,4 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
       ),
     );
   }
-}
-
-class _DesignTokens {
-  static const Color background = Color(0xFF141315);
-  static const Color primary = Color(0xFFD1C4E9);
-  static const Color textPrimary = Color(0xFFF5F7FA);
-  static const Color mutedColor = Color(0xFF8E8E93);
-  static const Color inputFill = Color(0xFF201F21);
-  static const Color inputBorder = Color(0x208E8E93);
-
-  _DesignTokens._();
 }

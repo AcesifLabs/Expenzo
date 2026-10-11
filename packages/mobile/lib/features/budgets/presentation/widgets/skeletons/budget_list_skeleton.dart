@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 import '../../../../../shared/presentation/widgets/shimmer_box.dart';
 
 class BudgetListSkeleton extends StatelessWidget {
@@ -11,13 +12,13 @@ class BudgetListSkeleton extends StatelessWidget {
     return ShimmerBox(
       child: ListView.builder(
         physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.md),
         itemCount: itemCount,
         itemBuilder: (context, index) {
           return Card(
-            margin: const EdgeInsets.only(bottom: 12),
+            margin: const EdgeInsets.only(bottom: AppSpacing.smd),
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(AppSpacing.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -28,17 +29,17 @@ class BudgetListSkeleton extends StatelessWidget {
                       ShimmerBox.circle(size: 24),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
 
                   ShimmerBox.textLine(width: 120, height: 14),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.smd),
 
                   ShimmerBox.rectangle(
                     width: double.infinity,
                     height: 8,
-                    borderRadius: 4,
+                    borderRadius: AppSpacing.radiusPill,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: AppSpacing.xs),
 
                   ShimmerBox.textLine(width: 150, height: 12),
                 ],

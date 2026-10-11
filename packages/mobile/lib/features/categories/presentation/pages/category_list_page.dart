@@ -7,11 +7,14 @@ import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_empty_state.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 import '../bloc/category_bloc.dart';
 import '../bloc/category_event.dart';
 import '../bloc/category_state.dart';
 import '../widgets/category_card.dart';
 import '../widgets/delete_category_dialog.dart';
+import 'package:expense_tracker/features/categories/presentation/helpers/category_display_name.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class CategoryListPage extends StatelessWidget {
   const CategoryListPage({super.key});
@@ -22,7 +25,12 @@ class CategoryListPage extends StatelessWidget {
 
   Widget _buildCategoryGrid(CategoryLoaded state) {
     return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 120),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.lg,
+        120,
+      ),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         crossAxisSpacing: 16,
@@ -62,7 +70,7 @@ class CategoryListPage extends StatelessWidget {
       ScaffoldMessenger.of(context)
         ..clearSnackBars()
         ..showSnackBar(
-          const SnackBar(content: Text('Default categories cannot be deleted')),
+          SnackBar(content: Text(t.categories.defaultCannotDelete)),
         );
 
       return;
@@ -83,7 +91,7 @@ class CategoryListPage extends StatelessWidget {
 
     final confirmed = await DeleteCategoryDialog.show(
       context: context,
-      categoryName: category.name,
+      categoryName: category.displayName,
       transactionCount: transactionCount,
     );
 
@@ -95,7 +103,7 @@ class CategoryListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      title: 'Categories',
+      title: t.categories.title,
       onRefresh: () async => _refreshCategories(context),
       child: BlocBuilder<CategoryBloc, CategoryState>(
         builder: (context, state) {
@@ -108,7 +116,7 @@ class CategoryListPage extends StatelessWidget {
               categories.isEmpty
                   ? AppEmptyState(
                       icon: PiconsRegular.tag,
-                      message: 'No categories created',
+                      message: t.categories.empty,
                     )
                   : _buildCategoryGrid(state),
             _ => const SizedBox.shrink(),

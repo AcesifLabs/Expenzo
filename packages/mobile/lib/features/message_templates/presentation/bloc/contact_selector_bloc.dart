@@ -5,6 +5,7 @@ import 'package:expense_tracker/core/constants/source_types.dart';
 import '../../../sms_parser/data/datasources/sms_local_datasource.dart';
 import 'contact_selector_event.dart';
 import 'contact_selector_state.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class ContactSelectorBloc
     extends Bloc<ContactSelectorEvent, ContactSelectorState> {
@@ -49,7 +50,7 @@ class ContactSelectorBloc
       _currentOffset += messages.length;
     } catch (e, s) {
       addError(e, s);
-      emit(ContactSelectorError(message: e.toString()));
+      emit(ContactSelectorError(message: t.common.errors.generic));
     }
   }
 
@@ -91,7 +92,7 @@ class ContactSelectorBloc
       _currentOffset += messages.length;
     } catch (e, s) {
       addError(e, s);
-      emit(ContactSelectorError(message: e.toString()));
+      emit(ContactSelectorError(message: t.common.errors.generic));
     }
   }
 

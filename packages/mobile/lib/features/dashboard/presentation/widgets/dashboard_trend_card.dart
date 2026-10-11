@@ -3,11 +3,20 @@ import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/features/reports/domain/entities/date_amount.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class DashboardTrendCard extends StatelessWidget {
   final String title;
   final double totalSpent;
-  final double percentChange;
+
+  /// Null when the previous period had no spending to compare with.
+  final double? percentChange;
+
+  /// What the previous period is called, for example "last month".
+  final String previousPeriodLabel;
   final List<DateAmount> trend;
 
   const DashboardTrendCard({
@@ -15,30 +24,42 @@ class DashboardTrendCard extends StatelessWidget {
     required this.title,
     required this.totalSpent,
     required this.percentChange,
+    required this.previousPeriodLabel,
     required this.trend,
   });
 
-  Color _changeColor(ColorScheme colors) {
-    if (percentChange > 0) return colors.error;
-    if (percentChange < 0) return colors.secondary;
+  // More spending reads as expense, less as a gain.
+  Color _changeColor(AppPalette palette) {
+    final change = percentChange ?? 0;
+    if (change > 0) return palette.expense;
+    if (change < 0) return palette.income;
 
-    return colors.onSurface.withAlpha(140);
+    return palette.textSecondary;
   }
 
   IconData _trendIcon() {
-    if (percentChange < 0) return PiconsRegular.trendDown;
+    final change = percentChange;
+    if (change == null || change == 0) return PiconsRegular.minus;
+    if (change < 0) return PiconsRegular.trendDown;
 
     return PiconsRegular.trendUp;
   }
 
   String _changeText() {
-    if (percentChange == 0) return 'No change vs last month';
+    final change = percentChange;
+    if (change == null) {
+      return t.dashboard.trend.noPrevious(period: previousPeriodLabel);
+    }
+    if (change == 0) return t.dashboard.trend.same(period: previousPeriodLabel);
+    final percent = change.abs().toStringAsFixed(0);
 
-    return '${percentChange >= 0 ? '+' : '-'}${percentChange.abs().toStringAsFixed(0)}% vs last month';
+    return change > 0
+        ? t.dashboard.trend.up(percent: percent, period: previousPeriodLabel)
+        : t.dashboard.trend.down(percent: percent, period: previousPeriodLabel);
   }
 
   List<double> _normalizedBars() {
-    if (trend.isEmpty) return const [];
+    if (trend.isEmpty) return [];
 
     final amounts = trend.map((item) => item.amount.abs()).toList();
     final maxAmount = amounts.reduce((a, b) => a > b ? a : b);
@@ -46,16 +67,24 @@ class DashboardTrendCard extends StatelessWidget {
       return List<double>.filled(amounts.length, 0.2);
     }
 
+    // Empty days keep a hairline so the timeline still reads.
     return amounts
-        .map((amount) => (amount / maxAmount).clamp(0.14, 1.0))
+        .map(
+          (amount) => amount == 0 ? 0.0 : (amount / maxAmount).clamp(0.14, 1.0),
+        )
         .toList();
   }
 
-  Color _barColor(ColorScheme colors, int index, int length, double height) {
-    if (height >= 0.92) return colors.error;
-    if (index == length - 1 || index % 5 == 0) return colors.primary;
+  // Today's bar is highlighted; the rest stay quiet so one big day doesn't
+  // read as an alarm.
+  /// An empty day keeps a 2px stub so its slot stays visible.
+  double _barHeight(double fraction) => fraction == 0 ? 2 : 48 * fraction;
 
-    return colors.onSurface.withAlpha(40);
+  Color _barColor(ColorScheme colors, int index, int length, double height) {
+    if (index == length - 1) return colors.primary;
+    if (height == 0) return colors.onSurface.withAlpha(20);
+
+    return colors.onSurface.withAlpha(60);
   }
 
   Widget _buildHeader(ColorScheme colors) {
@@ -64,19 +93,15 @@ class DashboardTrendCard extends StatelessWidget {
       children: [
         Text(
           title,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: colors.onSurface,
-          ),
+          style: AppTypography.bodyMedium.copyWith(color: colors.onSurface),
         ),
         Text(
-          '${CurrencyFormatter.getFormatter(decimalDigits: 0).format(totalSpent)} spent',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: colors.error,
+          t.dashboard.trend.spent(
+            amount: CurrencyFormatter.getFormatter(
+              decimalDigits: 0,
+            ).format(totalSpent),
           ),
+          style: AppTypography.labelLarge.copyWith(color: colors.error),
         ),
       ],
     );
@@ -88,9 +113,8 @@ class DashboardTrendCard extends StatelessWidget {
       child: bars.isEmpty
           ? Center(
               child: Text(
-                'No trend data yet',
-                style: TextStyle(
-                  fontSize: 12,
+                t.dashboard.trend.noData,
+                style: AppTypography.bodySmall.copyWith(
                   color: colors.onSurface.withAlpha(140),
                 ),
               ),
@@ -103,17 +127,19 @@ class DashboardTrendCard extends StatelessWidget {
                     child: Align(
                       alignment: Alignment.bottomCenter,
                       child: Container(
-                        height: 48 * bars[i],
+                        constraints: const BoxConstraints(maxWidth: 16),
+                        height: _barHeight(bars[i]),
                         decoration: BoxDecoration(
                           color: _barColor(colors, i, bars.length, bars[i]),
                           borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(2),
+                            top: Radius.circular(AppSpacing.radiusPill),
                           ),
                         ),
                       ),
                     ),
                   ),
-                  if (i != bars.length - 1) const SizedBox(width: 3),
+                  if (i != bars.length - 1)
+                    const SizedBox(width: AppSpacing.xs),
                 ],
               ],
             ),
@@ -124,8 +150,13 @@ class DashboardTrendCard extends StatelessWidget {
     return Row(
       children: [
         Icon(_trendIcon(), size: 14, color: changeColor),
-        const SizedBox(width: 4),
-        Text(_changeText(), style: TextStyle(fontSize: 12, color: changeColor)),
+        const SizedBox(width: AppSpacing.xs),
+        Flexible(
+          child: Text(
+            _changeText(),
+            style: AppTypography.bodySmall.copyWith(color: changeColor),
+          ),
+        ),
       ],
     );
   }
@@ -134,18 +165,18 @@ class DashboardTrendCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final bars = _normalizedBars();
-    final changeColor = _changeColor(colors);
+    final changeColor = _changeColor(context.palette);
 
     return AppCard(
-      borderRadius: 16,
-      padding: const EdgeInsets.all(16),
+      borderRadius: AppSpacing.radiusControl,
+      padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildHeader(colors),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.smd),
           _buildBarChart(colors, bars),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           _buildTrendChange(changeColor),
         ],
       ),

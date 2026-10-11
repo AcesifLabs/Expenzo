@@ -6,6 +6,7 @@ import '../../domain/usecases/get_category_breakdown.dart';
 import '../../domain/usecases/get_spending_insights.dart';
 import 'reports_event.dart';
 import 'reports_state.dart';
+import 'package:expense_tracker/core/error/failure_message.dart';
 
 class ReportsBloc extends Bloc<ReportsEvent, ReportsState> {
   final GetSpendingTrend getSpendingTrend;
@@ -30,6 +31,7 @@ class ReportsBloc extends Bloc<ReportsEvent, ReportsState> {
     on<LoadReports>(_onLoadReports, transformer: restartable());
     on<ChangeDateRange>(_onChangeDateRange, transformer: restartable());
     on<ChangeGranularity>(_onChangeGranularity, transformer: restartable());
+    on<RefreshReports>(_onRefreshReports, transformer: restartable());
 
     add(
       LoadReports(
@@ -49,6 +51,17 @@ class ReportsBloc extends Bloc<ReportsEvent, ReportsState> {
     _startDate = event.startDate;
     _endDate = event.endDate;
     _granularity = event.granularity;
+
+    await _loadReportsData(emit);
+  }
+
+  Future<void> _onRefreshReports(
+    RefreshReports event,
+    Emitter<ReportsState> emit,
+  ) async {
+    final span = _endDate.difference(_startDate);
+    _endDate = DateTime.now();
+    _startDate = _endDate.subtract(span);
 
     await _loadReportsData(emit);
   }
@@ -94,13 +107,13 @@ class ReportsBloc extends Bloc<ReportsEvent, ReportsState> {
     );
 
     trendResult.fold(
-      (failure) => emit(ReportsError(message: failure.message)),
+      (failure) => emit(ReportsError(message: failureText(failure))),
       (trend) {
         breakdownResult.fold(
-          (failure) => emit(ReportsError(message: failure.message)),
+          (failure) => emit(ReportsError(message: failureText(failure))),
           (breakdown) {
             insightsResult.fold(
-              (failure) => emit(ReportsError(message: failure.message)),
+              (failure) => emit(ReportsError(message: failureText(failure))),
               (insights) => emit(
                 ReportsLoaded(
                   spendingTrend: trend,

@@ -1,53 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:picons/picons.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_back_button.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_page_header.dart';
 
+/// The Reports header: the shared page header plus a labelled date-range
+/// button.
 class ReportsTopBar extends StatelessWidget {
   final String title;
-  final VoidCallback? onBack;
-  final VoidCallback? onCalendar;
+
+  /// The current range, shown on the date-range button ("Last 30 days").
+  final String rangeLabel;
+
+  /// Gets the button's own context, so a menu can open under it.
+  final ValueChanged<BuildContext>? onCalendar;
+  final bool showBackButton;
 
   const ReportsTopBar({
     super.key,
     required this.title,
-    this.onBack,
+    required this.rangeLabel,
     this.onCalendar,
+    this.showBackButton = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: onBack ?? () => Navigator.of(context).pop(),
-            child: const Icon(
-              PiconsRegular.caretLeft,
-              size: 24,
-              color: Color(0xFFF5F7FA),
-            ),
+    final onCalendar = this.onCalendar;
+
+    return AppPageHeader(
+      title: title,
+      leading: showBackButton ? const AppBackButton() : null,
+      actions: [
+        Builder(
+          builder: (buttonContext) => TextButton.icon(
+            onPressed: onCalendar == null
+                ? null
+                : () => onCalendar(buttonContext),
+            icon: const Icon(PiconsRegular.calendar, size: 20),
+            label: Text(rangeLabel),
+            style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
           ),
-          const SizedBox(width: 12),
-          Text(
-            title,
-            style: const TextStyle(
-              fontFamily: 'Work Sans',
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFFF5F7FA),
-            ),
-          ),
-          const Spacer(),
-          GestureDetector(
-            onTap: onCalendar,
-            child: const Icon(
-              PiconsRegular.calendar,
-              size: 22,
-              color: Color(0xFFD1C4E9),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

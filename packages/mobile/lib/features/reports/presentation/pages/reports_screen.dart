@@ -1,9 +1,14 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:expense_tracker/core/di/injection_container.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
+import 'package:expense_tracker/shared/presentation/widgets/nav_bar_metrics.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 import '../bloc/reports_bloc.dart';
 import '../bloc/reports_event.dart';
 import '../bloc/reports_state.dart';
@@ -16,19 +21,29 @@ import '../widgets/category_legend.dart';
 import '../widgets/insight_card.dart';
 import '../widgets/ai_chat_fab.dart';
 import '../../domain/usecases/get_insights.dart';
+import 'package:expense_tracker/core/error/failure_message.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 /// Single parent screen for Trend / Categories / Insights.
 ///
 /// Uses a [TabController] to swap content in-place — tab changes
 /// never push a new route.
 class ReportsScreen extends StatelessWidget {
-  const ReportsScreen({super.key});
+  /// True when shown as a tab in the app shell: no back button, and the
+  /// content stops above the floating navigation bar.
+  final bool isTab;
+
+  /// Bumped by the app shell when the Reports tab is shown again, so the
+  /// figures include records added in the meantime.
+  final ValueListenable<int>? refreshTick;
+
+  const ReportsScreen({super.key, this.isTab = false, this.refreshTick});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => getIt<ReportsBloc>(),
-      child: const _ReportsScreenContent(),
+      child: _ReportsScreenContent(isTab: isTab, refreshTick: refreshTick),
     );
   }
 }
@@ -50,6 +65,14 @@ void _handleReportsDateRangeSelected(BuildContext context, String value) {
   context.read<ReportsBloc>().add(
     ChangeDateRange(startDate: startDate, endDate: endDate),
   );
+}
+
+String _rangeLabel(DateTime? start, DateTime? end) {
+  if (start != null && end != null && end.difference(start).inDays <= 7) {
+    return t.reports.last7Days;
+  }
+
+  return t.reports.last30Days;
 }
 
 void _showReportsDateRangeMenu(BuildContext context) {
@@ -76,9 +99,9 @@ void _showReportsDateRangeMenu(BuildContext context) {
   showMenu<String>(
     context: context,
     position: position,
-    items: const [
-      PopupMenuItem(value: 'week', child: Text('Last 7 Days')),
-      PopupMenuItem(value: 'month', child: Text('Last 30 Days')),
+    items: [
+      PopupMenuItem(value: 'week', child: Text(t.reports.last7Days)),
+      PopupMenuItem(value: 'month', child: Text(t.reports.last30Days)),
     ],
   ).then((value) {
     if (value != null && context.mounted) {
@@ -88,67 +111,65 @@ void _showReportsDateRangeMenu(BuildContext context) {
 }
 
 Widget _buildReportsTrendContent(
+  AppPalette palette,
   ReportsLoaded state,
   double reportsContentInnerInset,
 ) {
   final wholeNumberFmt = CurrencyFormatter.getFormatter(decimalDigits: 0);
   final decimalFmt = CurrencyFormatter.getFormatter(decimalDigits: 2);
+  final metrics = t.reports.metrics;
 
   final start = DateFormat('MMM d').format(state.startDate);
   final end = DateFormat('MMM d').format(state.endDate);
   final total = state.insights.totalSpent;
   final compareText = total == 0
-      ? 'No spending data yet'
-      : 'Total spent: ${wholeNumberFmt.format(total)} in this period';
+      ? t.reports.noSpending
+      : t.reports.totalSpentInPeriod(amount: wholeNumberFmt.format(total));
 
   return SingleChildScrollView(
     padding: EdgeInsets.only(
-      top: 20,
+      top: AppSpacing.lg,
       left: reportsContentInnerInset,
       right: reportsContentInnerInset,
+      // Room for the AI button floating over the bottom of the list.
+      bottom: 96,
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           '$start – $end',
-          style: const TextStyle(
-            fontFamily: 'Work Sans',
-            fontSize: 13,
-            color: Color(0xFF8E8E93),
+          style: AppTypography.bodyMedium.copyWith(
+            color: palette.textSecondary,
           ),
         ),
         TrendBarChart(data: state.spendingTrend),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
         Column(
           children: [
             MetricBox(
               value: wholeNumberFmt.format(state.insights.totalSpent),
-              label: 'Total Spent',
-              valueColor: const Color(0xFFF48FB1),
+              label: metrics.totalSpent,
+              valueColor: palette.expense,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.smd),
             MetricBox(
               value: decimalFmt.format(state.insights.avgDailySpending),
-              label: 'Avg Daily',
-              valueColor: const Color(0xFFF5F7FA),
+              label: metrics.dailyAverage,
+              valueColor: palette.textPrimary,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.smd),
             MetricBox(
               value: wholeNumberFmt.format(state.insights.highestDayAmount),
-              label: 'Highest Day',
-              valueColor: const Color(0xFFD1C4E9),
+              label: metrics.highestDay,
+              valueColor: palette.accent,
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
         Text(
           compareText,
-          style: const TextStyle(
-            fontFamily: 'Work Sans',
-            fontSize: 13,
-            color: Color(0xFFF48FB1),
-          ),
+          style: AppTypography.bodyMedium.copyWith(color: palette.expense),
         ),
       ],
     ),
@@ -156,40 +177,40 @@ Widget _buildReportsTrendContent(
 }
 
 Widget _buildReportsCategoriesContent(
+  AppPalette palette,
   ReportsLoaded state,
   double reportsContentInnerInset,
 ) {
   return SingleChildScrollView(
     padding: EdgeInsets.only(
-      top: 20,
+      top: AppSpacing.lg,
       left: reportsContentInnerInset,
       right: reportsContentInnerInset,
+      // Room for the AI button floating over the bottom of the list.
+      bottom: 96,
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           decoration: BoxDecoration(
-            color: const Color(0xFF1C1B1D),
-            borderRadius: BorderRadius.circular(16),
+            color: palette.surface,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
           ),
           child: Column(
             children: [
-              const Align(
+              Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Spending by Category',
-                  style: TextStyle(
-                    fontFamily: 'Work Sans',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFFF5F7FA),
+                  t.reports.spendingByCategory,
+                  style: AppTypography.titleMedium.copyWith(
+                    color: palette.textPrimary,
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               CategoryDonutChart(data: state.categoryBreakdown),
             ],
           ),
@@ -201,6 +222,7 @@ Widget _buildReportsCategoriesContent(
 }
 
 Widget _buildReportsInsightsContent(
+  AppPalette palette,
   ReportsLoaded state,
   double reportsContentInnerInset,
 ) {
@@ -214,32 +236,31 @@ Widget _buildReportsInsightsContent(
   return result.fold(
     (failure) => Center(
       child: Text(
-        failure.message,
-        style: const TextStyle(color: Color(0xFFF48FB1)),
+        failureText(failure),
+        style: TextStyle(color: palette.expense),
       ),
     ),
     (items) => ListView(
       padding: EdgeInsets.only(
-        top: 20,
+        top: AppSpacing.lg,
         left: reportsContentInnerInset,
         right: reportsContentInnerInset,
+        bottom: 96,
       ),
       children: [
-        const Padding(
-          padding: EdgeInsets.only(left: 4),
+        Padding(
+          padding: const EdgeInsets.only(left: AppSpacing.xs),
           child: Text(
-            'Key observations from your spending this month',
-            style: TextStyle(
-              fontFamily: 'Work Sans',
-              fontSize: 14,
-              color: Color(0xFF8E8E93),
+            t.reports.observations,
+            style: AppTypography.bodyMedium.copyWith(
+              color: palette.textSecondary,
             ),
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
         ...items.map(
           (item) => Padding(
-            padding: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.only(bottom: AppSpacing.smd),
             child: InsightCard(item: item),
           ),
         ),
@@ -249,6 +270,7 @@ Widget _buildReportsInsightsContent(
 }
 
 Widget _buildReportsTabContent(
+  AppPalette palette,
   ReportsLoaded state,
   TabController controller,
   double reportsContentInnerInset,
@@ -256,9 +278,9 @@ Widget _buildReportsTabContent(
   return TabBarView(
     controller: controller,
     children: [
-      _buildReportsTrendContent(state, reportsContentInnerInset),
-      _buildReportsCategoriesContent(state, reportsContentInnerInset),
-      _buildReportsInsightsContent(state, reportsContentInnerInset),
+      _buildReportsTrendContent(palette, state, reportsContentInnerInset),
+      _buildReportsCategoriesContent(palette, state, reportsContentInnerInset),
+      _buildReportsInsightsContent(palette, state, reportsContentInnerInset),
     ],
   );
 }
@@ -280,6 +302,7 @@ class _ReportsBodyArgs {
   final TabController controller;
   final double reportsSideInset;
   final double reportsContentInnerInset;
+  final bool isTab;
 
   const _ReportsBodyArgs({
     required this.context,
@@ -287,74 +310,110 @@ class _ReportsBodyArgs {
     required this.controller,
     required this.reportsSideInset,
     required this.reportsContentInnerInset,
+    required this.isTab,
   });
 }
 
-Widget _buildReportsBody({required _ReportsBodyArgs args}) {
-  final state = args.state;
+Widget _buildReportsStateContent(
+  ReportsState state,
+  AppPalette palette,
+  _ReportsBodyArgs args,
+) {
+  if (state is ReportsLoaded) {
+    return Expanded(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: args.reportsSideInset),
+        child: _buildReportsTabContent(
+          palette,
+          state,
+          args.controller,
+          args.reportsContentInnerInset,
+        ),
+      ),
+    );
+  }
+  if (state is ReportsLoading) {
+    return const Expanded(child: Center(child: CircularProgressIndicator()));
+  }
+  if (state is ReportsError) {
+    return Expanded(
+      child: Center(
+        child: Text(state.message, style: TextStyle(color: palette.expense)),
+      ),
+    );
+  }
 
-  return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ReportsTopBar(
-          title: 'Reports',
-          onCalendar: () => _showReportsDateRangeMenu(args.context),
-        ),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: args.reportsSideInset),
-          child: ReportsTabBar(
-            controller: args.controller,
-            onTabChanged: (tab) => _handleReportsTabSelection(
-              args.controller,
-              _ReportsScreenContentState._tabs,
-              tab,
-            ),
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: args.reportsSideInset),
-          child: Container(height: 1, color: const Color(0x208E8E93)),
-        ),
-        if (state is ReportsLoaded)
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: args.reportsSideInset),
-              child: _buildReportsTabContent(
-                state,
-                args.controller,
-                args.reportsContentInnerInset,
-              ),
-            ),
-          )
-        else if (state is ReportsLoading)
-          const Expanded(child: Center(child: CircularProgressIndicator()))
-        else if (state is ReportsError)
-          Expanded(
-            child: Center(
-              child: Text(
-                state.message,
-                style: const TextStyle(color: Color(0xFFF48FB1)),
-              ),
-            ),
-          )
-        else
-          const Expanded(
-            child: Center(
-              child: Text(
-                'No data',
-                style: TextStyle(color: Color(0xFF8E8E93)),
-              ),
-            ),
-          ),
-      ],
+  return Expanded(
+    child: Center(
+      child: Text(
+        t.reports.noData,
+        style: TextStyle(color: palette.textSecondary),
+      ),
     ),
   );
 }
 
+Widget _buildReportsBody({required _ReportsBodyArgs args}) {
+  final state = args.state;
+  final palette = args.context.palette;
+
+  final rangeLabel = state is ReportsLoaded
+      ? _rangeLabel(state.startDate, state.endDate)
+      : _rangeLabel(null, null);
+
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      ReportsTopBar(
+        title: t.reports.title,
+        rangeLabel: rangeLabel,
+        showBackButton: !args.isTab,
+        onCalendar: _showReportsDateRangeMenu,
+      ),
+      Expanded(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.sm,
+            AppSpacing.lg,
+            AppSpacing.md,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: args.reportsSideInset,
+                ),
+                child: ReportsTabBar(
+                  controller: args.controller,
+                  onTabChanged: (tab) => _handleReportsTabSelection(
+                    args.controller,
+                    _ReportsScreenContentState._tabs,
+                    tab,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: args.reportsSideInset,
+                ),
+                child: Container(height: 1, color: palette.divider),
+              ),
+              _buildReportsStateContent(state, palette, args),
+            ],
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
 class _ReportsScreenContent extends StatefulWidget {
-  const _ReportsScreenContent();
+  final bool isTab;
+  final ValueListenable<int>? refreshTick;
+
+  const _ReportsScreenContent({required this.isTab, this.refreshTick});
 
   @override
   State<_ReportsScreenContent> createState() => _ReportsScreenContentState();
@@ -381,10 +440,15 @@ class _ReportsScreenContentState extends State<_ReportsScreenContent>
   void initState() {
     super.initState();
     _tabController = TabController(length: _tabs.length, vsync: this);
+    widget.refreshTick?.addListener(_onRefreshTick);
   }
+
+  void _onRefreshTick() =>
+      context.read<ReportsBloc>().add(const RefreshReports());
 
   @override
   void dispose() {
+    widget.refreshTick?.removeListener(_onRefreshTick);
     _tabController?.dispose();
     super.dispose();
   }
@@ -392,27 +456,36 @@ class _ReportsScreenContentState extends State<_ReportsScreenContent>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF141315),
-      body: SafeArea(
-        child: Stack(
-          children: [
-            BlocBuilder<ReportsBloc, ReportsState>(
-              builder: (context, state) => _buildReportsBody(
-                args: _ReportsBodyArgs(
-                  context: context,
-                  state: state,
-                  controller: _controller,
-                  reportsSideInset: _reportsSideInset,
-                  reportsContentInnerInset: _reportsContentInnerInset,
+      backgroundColor: context.palette.bg,
+      body: Padding(
+        padding: EdgeInsets.only(
+          bottom: widget.isTab ? NavBarMetrics.clearance(context) : 0,
+        ),
+        child: SafeArea(
+          bottom: !widget.isTab,
+          child: Stack(
+            children: [
+              BlocBuilder<ReportsBloc, ReportsState>(
+                builder: (context, state) => _buildReportsBody(
+                  args: _ReportsBodyArgs(
+                    context: context,
+                    state: state,
+                    controller: _controller,
+                    reportsSideInset: _reportsSideInset,
+                    reportsContentInnerInset: _reportsContentInnerInset,
+                    isTab: widget.isTab,
+                  ),
                 ),
               ),
-            ),
-            Positioned(
-              right: 16,
-              bottom: 16,
-              child: AIChatFAB(onPressed: () => context.push('/ai-assistant')),
-            ),
-          ],
+              Positioned(
+                right: 16,
+                bottom: 16,
+                child: AIChatFAB(
+                  onPressed: () => context.push('/ai-assistant'),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

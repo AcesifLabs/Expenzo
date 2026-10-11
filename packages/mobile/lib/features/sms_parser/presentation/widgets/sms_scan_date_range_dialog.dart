@@ -1,11 +1,14 @@
 import 'dart:async';
+import 'package:intl/intl.dart';
 
 import 'package:flutter/material.dart';
 import 'package:picons/picons.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 
 import '../helpers/sms_scan_range_presets.dart';
 import '../models/sms_scan_range_preset.dart';
 import '../models/sms_scan_range_selection.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 typedef SmsScanDatePicker =
     Future<DateTime?> Function(BuildContext context, DateTime initialDate);
@@ -83,36 +86,19 @@ class _SmsScanDateRangeDialogState extends State<SmsScanDateRangeDialog> {
         preset: SmsScanRangePreset.custom,
         startDate: _startDate,
         endDate: _endDate,
-        label: 'Custom Range',
       ),
     );
   }
 
   String _formatDate(DateTime? value) {
-    if (value == null) {
-      return 'Select date';
-    }
+    if (value == null) return t.smsParser.range.selectDate;
 
-    const months = <String>[
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-
-    return '${months[value.month - 1]} ${value.day}, ${value.year}';
+    return DateFormat.yMMMd().format(value);
   }
 
   @override
   Widget build(BuildContext context) {
+    final strings = t.smsParser.customRange;
     final colors = Theme.of(context).colorScheme;
     final validRange = isValidCustomScanRange(
       startDate: _startDate,
@@ -121,33 +107,33 @@ class _SmsScanDateRangeDialogState extends State<SmsScanDateRangeDialog> {
 
     return AlertDialog(
       backgroundColor: colors.surface,
-      title: const Text('Select custom range'),
+      title: Text(strings.title),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Choose a start and end date before scanning past SMS for records.',
+            strings.body,
             style: TextStyle(color: colors.onSurface.withAlpha(180)),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           _DateField(
             key: const Key('scan_range_start_field'),
-            label: 'Start date',
+            label: strings.start,
             value: _formatDate(_startDate),
             onTap: () => unawaited(_pickStartDate()),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: AppSpacing.smd),
           _DateField(
             key: const Key('scan_range_end_field'),
-            label: 'End date',
+            label: strings.end,
             value: _formatDate(_endDate),
             onTap: () => unawaited(_pickEndDate()),
           ),
           if (!validRange) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.smd),
             Text(
-              'Pick a valid start and end date.',
+              strings.invalid,
               key: const Key('scan_range_validation_message'),
               style: TextStyle(color: colors.error),
             ),
@@ -157,12 +143,12 @@ class _SmsScanDateRangeDialogState extends State<SmsScanDateRangeDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(t.common.cancel),
         ),
         FilledButton(
           key: const Key('scan_range_apply_button'),
           onPressed: validRange ? _apply : null,
-          child: const Text('Apply Range'),
+          child: Text(strings.apply),
         ),
       ],
     );
@@ -187,13 +173,16 @@ class _DateField extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.smd,
+        ),
         decoration: BoxDecoration(
           color: colors.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
         ),
         child: Row(
           children: [
@@ -205,12 +194,12 @@ class _DateField extends StatelessWidget {
                     label,
                     style: TextStyle(color: colors.onSurface.withAlpha(160)),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: AppSpacing.xs),
                   Text(value),
                 ],
               ),
             ),
-            Icon(PiconsRegular.calendar),
+            const Icon(PiconsRegular.calendar),
           ],
         ),
       ),

@@ -1,0 +1,69 @@
+{
+  "@@i18n-review": "Machine-drafted Bangla. Needs native review before release.",
+  "uncategorized": "ক্যাটাগরি নেই",
+  "defaults": {
+    "default_in_salary": "বেতন",
+    "default_in_freelance": "ফ্রিল্যান্স",
+    "default_in_investment": "বিনিয়োগ",
+    "default_in_refund": "ফেরত",
+    "default_in_gift": "উপহার",
+    "default_in_general": "সাধারণ",
+    "default_out_food": "খাবার ও রেস্তোরাঁ",
+    "default_out_shopping": "কেনাকাটা",
+    "default_out_transport": "যাতায়াত",
+    "default_out_home": "বাসা",
+    "default_out_health": "স্বাস্থ্য",
+    "default_out_entertainment": "বিনোদন",
+    "default_out_bills": "বিল ও ইউটিলিটি",
+    "default_out_travel": "ভ্রমণ",
+    "default_out_education": "শিক্ষা",
+    "default_out_investment": "বিনিয়োগ",
+    "default_out_gifts": "উপহার",
+    "default_out_general": "সাধারণ"
+  },
+  "title": "ক্যাটাগরি",
+  "empty": "কোনো ক্যাটাগরি তৈরি করা হয়নি",
+  "defaultCannotDelete": "ডিফল্ট ক্যাটাগরি মোছা যায় না",
+  "form": {
+    "add": "ক্যাটাগরি যোগ করুন",
+    "edit": "ক্যাটাগরি সম্পাদনা",
+    "name": "নাম",
+    "nameHint": "বাজার-সদাই",
+    "nameRequired": "একটি নাম লিখুন",
+    "icon": "আইকন",
+    "color": "রং বেছে নিন"
+  },
+  "delete": {
+    "title": "ক্যাটাগরি মুছবেন?",
+    "confirm": "আপনি কি নিশ্চিত যে \"{name}\" মুছতে চান?",
+    "withRecords": {
+      "one": "আপনি কি নিশ্চিত যে \"{name}\" মুছতে চান? এই ক্যাটাগরির {n}টি লেনদেন ক্যাটাগরি ছাড়া থাকবে।",
+      "other": "আপনি কি নিশ্চিত যে \"{name}\" মুছতে চান? এই ক্যাটাগরির {n}টি লেনদেন ক্যাটাগরি ছাড়া থাকবে।"
+    }
+  },
+  "iconLabel": "{name} আইকন",
+  "icons": {
+    "shoppingCart": "শপিং কার্ট",
+    "forkKnife": "কাঁটাচামচ ও ছুরি",
+    "car": "গাড়ি",
+    "bag": "ব্যাগ",
+    "heart": "হৃদয়",
+    "bookOpen": "বই",
+    "filmStrip": "সিনেমা",
+    "lightning": "বিদ্যুৎ",
+    "coffee": "কফি",
+    "gift": "উপহার",
+    "dog": "কুকুর",
+    "airplane": "বিমান"
+  },
+  "colors": {
+    "Lavender": "ল্যাভেন্ডার",
+    "Rose": "গোলাপি",
+    "Mint": "পুদিনা সবুজ",
+    "Sky": "আকাশি",
+    "Amber": "অ্যাম্বার",
+    "Teal": "টিল",
+    "Peach": "পীচ",
+    "Slate": "স্লেট"
+  }
+}

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 import '../../../../../shared/presentation/widgets/shimmer_box.dart';
 
 class PieChartSkeleton extends StatelessWidget {
@@ -9,7 +10,7 @@ class PieChartSkeleton extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         ShimmerBox.circle(size: 12),
-        const SizedBox(width: 4),
+        const SizedBox(width: AppSpacing.xs),
         ShimmerBox.textLine(width: 60, height: 12),
       ],
     );
@@ -19,11 +20,11 @@ class PieChartSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ShimmerBox(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           children: [
             Expanded(child: Center(child: ShimmerBox.circle(size: 200))),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
             Wrap(
               spacing: 16,
               runSpacing: 8,

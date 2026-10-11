@@ -1,0 +1,34 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:expense_tracker/core/router/app_routes.dart';
+import 'package:expense_tracker/features/auth/domain/entities/user.dart';
+import 'package:expense_tracker/features/auth/presentation/bloc/auth_state.dart';
+
+void main() {
+  const user = User(uid: 'u1');
+
+  test('waits while auth is still loading', () {
+    expect(authRedirectFor(const AuthLoading(), '/sync-conflict'), isNull);
+  });
+
+  test('sends a pending conflict to the conflict page', () {
+    expect(
+      authRedirectFor(const AuthSyncConflictPending(user), '/'),
+      '/sync-conflict',
+    );
+    expect(
+      authRedirectFor(const AuthSyncConflictPending(user), '/sync-conflict'),
+      isNull,
+    );
+  });
+
+  test('leaves the conflict page once the conflict is resolved', () {
+    expect(authRedirectFor(const Authenticated(user), '/sync-conflict'), '/');
+    expect(authRedirectFor(const Unauthenticated(), '/sync-conflict'), '/');
+  });
+
+  test('sign-in is left to the login page, not redirected', () {
+    // LoginPage pops itself on success; a redirect here would race it.
+    expect(authRedirectFor(const Authenticated(user), '/login'), isNull);
+    expect(authRedirectFor(const Unauthenticated(), '/login'), isNull);
+  });
+}

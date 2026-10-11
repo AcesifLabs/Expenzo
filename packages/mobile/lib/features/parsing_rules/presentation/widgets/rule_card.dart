@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
+import 'package:picons/picons.dart';
 import '../../domain/entities/parsing_rule.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class RuleCard extends StatelessWidget {
   final ParsingRule rule;
@@ -17,19 +20,13 @@ class RuleCard extends StatelessWidget {
 
   IconData _getSourceIcon() {
     return switch (rule.sourceType) {
-      SourceType.sms => Icons.sms,
-      SourceType.email => Icons.email,
-      SourceType.both => Icons.sync,
+      SourceType.sms => PiconsRegular.chatText,
+      SourceType.email => PiconsRegular.envelope,
+      SourceType.both => PiconsRegular.arrowsClockwise,
     };
   }
 
-  String _getSourceLabel() {
-    return switch (rule.sourceType) {
-      SourceType.sms => 'SMS',
-      SourceType.email => 'Email',
-      SourceType.both => 'Both',
-    };
-  }
+  String _getSourceLabel() => rule.sourceType.displayName;
 
   String _getTriggerWordsPreview() {
     final words = rule.triggerWords.join(', ');
@@ -41,24 +38,26 @@ class RuleCard extends StatelessWidget {
   Container _buildDismissBackground(ThemeData theme) {
     return Container(
       alignment: Alignment.centerRight,
-      padding: const EdgeInsets.only(right: 16),
+      padding: const EdgeInsets.only(right: AppSpacing.md),
       color: theme.colorScheme.error,
-      child: Icon(Icons.delete, color: theme.colorScheme.onError),
+      child: Icon(PiconsRegular.trash, color: theme.colorScheme.onError),
     );
   }
 
   AlertDialog _buildDeleteDialog(BuildContext context) {
+    final strings = t.parsingRules.delete;
+
     return AlertDialog(
-      title: const Text('Delete Rule'),
-      content: Text('Are you sure you want to delete "${rule.name}"?'),
+      title: Text(strings.title),
+      content: Text(strings.confirm(name: rule.name)),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('Cancel'),
+          child: Text(t.common.cancel),
         ),
         TextButton(
           onPressed: () => Navigator.of(context).pop(true),
-          child: const Text('Delete'),
+          child: Text(t.common.delete),
         ),
       ],
     );
@@ -66,7 +65,10 @@ class RuleCard extends StatelessWidget {
 
   Card _buildCard(ThemeData theme) {
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      margin: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.xs,
+      ),
       child: ListTile(
         onTap: onTap,
         leading: CircleAvatar(child: Icon(_getSourceIcon())),

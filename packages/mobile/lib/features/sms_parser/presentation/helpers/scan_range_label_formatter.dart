@@ -1,11 +1,10 @@
+import 'package:intl/intl.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
+
 String formatScanRangeLabel({
   required DateTime? startDate,
   required DateTime? endDate,
 }) {
-  if (startDate == null && endDate == null) {
-    return 'All Time';
-  }
-
   if (startDate != null && endDate != null) {
     if (_isSameDay(startDate, endDate)) {
       return _formatDate(startDate);
@@ -15,35 +14,17 @@ String formatScanRangeLabel({
   }
 
   if (startDate != null) {
-    return 'From ${_formatDate(startDate)}';
+    return t.smsParser.range.from(date: _formatDate(startDate));
   }
 
-  final safeEndDate = endDate;
-  if (safeEndDate != null) {
-    return 'Until ${_formatDate(safeEndDate)}';
+  if (endDate != null) {
+    return t.smsParser.range.until(date: _formatDate(endDate));
   }
 
-  return 'All Time';
+  return t.smsParser.range.allTime;
 }
 
-String _formatDate(DateTime date) {
-  const monthNames = <String>[
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-
-  return '${monthNames[date.month - 1]} ${date.day}';
-}
+String _formatDate(DateTime date) => DateFormat.MMMd().format(date);
 
 bool _isSameDay(DateTime first, DateTime second) {
   return first.year == second.year &&

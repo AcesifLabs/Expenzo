@@ -1,0 +1,44 @@
+{
+  "language": {
+    "title": "Language"
+  },
+  "title": "Settings",
+  "currency": "Currency",
+  "appearance": "Appearance",
+  "notificationsBlocked": "Allow notifications for Expenzo in system settings to get budget alerts.",
+  "sections": {
+    "preferences": "Preferences",
+    "automation": "Automation",
+    "support": "Support",
+    "account": "Account"
+  },
+  "budgetAlerts": {
+    "title": "Budget alerts",
+    "subtitle": "Notify me at 80% and when over budget"
+  },
+  "autoImportSubtitle": "Turn bank and payment messages into records",
+  "matchingRulesSubtitle": "Patterns for messages auto-import can't read yet",
+  "recurring": {
+    "title": "Recurring",
+    "subtitle": "Bills and income that repeat every month"
+  },
+  "feedbackSubtitle": "Report a problem or suggest an idea",
+  "signOut": "Sign out",
+  "deleteAccount": "Delete account",
+  "signIn": {
+    "title": "Sign in",
+    "subtitle": "Back up and sync your records"
+  },
+  "deleteDialog": {
+    "title": "Delete account",
+    "question": "Are you sure you want to delete your account?",
+    "listTitle": "This permanently deletes:",
+    "expenses": "• All your expenses",
+    "categories": "• All your categories",
+    "budgets": "• All your budgets",
+    "recurring": "• All your recurring transactions",
+    "rules": "• All your matching rules",
+    "cannotUndo": "This cannot be undone.",
+    "confirm": "I understand and want to delete my account"
+  }
+}

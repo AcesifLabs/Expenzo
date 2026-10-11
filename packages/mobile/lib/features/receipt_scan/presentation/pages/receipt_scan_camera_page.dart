@@ -9,8 +9,12 @@ import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/core/theme/app_colors.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/features/receipt_scan/domain/entities/receipt_extraction.dart';
 import 'package:expense_tracker/features/receipt_scan/domain/usecases/extract_receipt.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class ReceiptScanCameraPage extends StatefulWidget {
   final ExtractReceipt? extractReceipt;
@@ -55,7 +59,7 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
       if (!mounted) return;
       setState(() {
         _initializing = false;
-        _error = 'Camera permission is required to scan receipts.';
+        _error = t.receiptScan.permissionRequired;
       });
 
       return;
@@ -67,7 +71,7 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
         if (!mounted) return;
         setState(() {
           _initializing = false;
-          _error = 'No camera available on this device.';
+          _error = t.receiptScan.noCamera;
         });
 
         return;
@@ -101,7 +105,7 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
       if (!mounted) return;
       setState(() {
         _initializing = false;
-        _error = 'Could not open camera.';
+        _error = t.receiptScan.cameraFailed;
       });
     }
   }
@@ -137,9 +141,7 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
       if (!mounted) return;
       ScaffoldMessenger.of(context)
         ..clearSnackBars()
-        ..showSnackBar(
-          const SnackBar(content: Text('Failed to capture photo.')),
-        );
+        ..showSnackBar(SnackBar(content: Text(t.receiptScan.captureFailed)));
     }
   }
 
@@ -172,11 +174,7 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
     if (!mounted) return;
     ScaffoldMessenger.of(context)
       ..clearSnackBars()
-      ..showSnackBar(
-        const SnackBar(
-          content: Text('Could not read receipt. Check logs for details.'),
-        ),
-      );
+      ..showSnackBar(SnackBar(content: Text(t.receiptScan.readFailed)));
     setState(() {
       _processing = false;
       _previewImage = null;
@@ -222,23 +220,23 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
     if (error != null) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.all(32),
+          padding: const EdgeInsets.all(AppSpacing.xl),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 error,
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.white, fontSize: 16),
+                style: AppTypography.bodyLarge.copyWith(color: Colors.white),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Close'),
+                child: Text(t.common.close),
               ),
               TextButton(
                 onPressed: _onChooseFromGallery,
-                child: const Text('Choose from gallery'),
+                child: Text(t.receiptScan.chooseFromGallery),
               ),
             ],
           ),
@@ -279,8 +277,8 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
           width: mediaSize.width * 0.84,
           height: mediaSize.height * 0.5,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.primary, width: 2),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
+            border: Border.all(color: AppColors.brandMint, width: 2),
           ),
           child: Stack(
             children: [
@@ -292,8 +290,8 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
                 alignment: const Alignment(0, 0.05),
                 child: Container(
                   height: 2,
-                  margin: const EdgeInsets.symmetric(horizontal: 8),
-                  color: AppColors.primary.withAlpha(128),
+                  margin: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                  color: AppColors.brandMint.withAlpha(128),
                 ),
               ),
             ],
@@ -310,13 +308,13 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
     return Align(
       alignment: alignment,
       child: Padding(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(AppSpacing.smd),
         child: SizedBox(
           width: 24,
           height: 24,
           child: CustomPaint(
             painter: _CornerPainter(
-              color: AppColors.primary,
+              color: AppColors.brandMint,
               isLeft: isLeft,
               isTop: isTop,
             ),
@@ -331,7 +329,8 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
       top: MediaQuery.paddingOf(context).top + 16,
       right: 20,
       child: _RoundIconButton(
-        icon: _flashOn ? PiconsRegular.lightning : PiconsLight.lightningSlash,
+        icon: _flashOn ? PiconsRegular.lightning : PiconsRegular.lightningSlash,
+        label: _flashOn ? t.receiptScan.flashOff : t.receiptScan.flashOn,
         onTap: _processing
             ? null
             : () {
@@ -346,10 +345,12 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
       left: 0,
       right: 0,
       bottom: 120 + MediaQuery.paddingOf(context).bottom,
-      child: const Text(
-        'Align receipt with the frame',
+      child: Text(
+        t.receiptScan.align,
         textAlign: TextAlign.center,
-        style: TextStyle(color: AppColors.textPrimaryDark, fontSize: 15),
+        style: AppTypography.bodyLarge.copyWith(
+          color: AppColors.textPrimaryDark,
+        ),
       ),
     );
   }
@@ -366,12 +367,14 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
           24,
           16 + MediaQuery.paddingOf(context).bottom,
         ),
-        color: AppColors.surfaceDark,
+        // The viewfinder stays dark; the toolbar follows the app theme.
+        color: context.palette.surface,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             _RoundIconButton(
               icon: PiconsRegular.image,
+              label: t.receiptScan.chooseFromGallery,
               onTap: _processing
                   ? null
                   : () {
@@ -387,6 +390,7 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
             ),
             _RoundIconButton(
               icon: PiconsRegular.x,
+              label: t.common.close,
               onTap: _processing ? null : () => Navigator.of(context).pop(),
             ),
           ],
@@ -412,22 +416,20 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
                 child: const Icon(
                   PiconsRegular.sparkle,
                   size: 28,
-                  color: AppColors.primary,
+                  color: AppColors.brandMint,
                 ),
               )
             else
               const Icon(
                 PiconsRegular.sparkle,
                 size: 28,
-                color: AppColors.primary,
+                color: AppColors.brandMint,
               ),
-            const SizedBox(width: 12),
-            const Text(
-              'Analyzing Expense',
-              style: TextStyle(
+            const SizedBox(width: AppSpacing.smd),
+            Text(
+              t.receiptScan.reading,
+              style: AppTypography.titleLarge.copyWith(
                 color: AppColors.textPrimaryDark,
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
               ),
             ),
           ],
@@ -466,22 +468,27 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
 
 class _RoundIconButton extends StatelessWidget {
   final IconData icon;
+  final String label;
   final VoidCallback? onTap;
 
-  const _RoundIconButton({required this.icon, this.onTap});
+  const _RoundIconButton({required this.icon, required this.label, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: const Color(0xFF2B292C),
-      borderRadius: BorderRadius.circular(14),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: SizedBox(
-          width: 48,
-          height: 48,
-          child: Icon(icon, size: 22, color: AppColors.textPrimaryDark),
+    // The tooltip also serves as the screen-reader label.
+    return Tooltip(
+      message: label,
+      child: Material(
+        color: context.palette.surfaceHigh,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
+          child: SizedBox(
+            width: 48,
+            height: 48,
+            child: Icon(icon, size: 22, color: context.palette.textPrimary),
+          ),
         ),
       ),
     );
@@ -493,27 +500,31 @@ class _CaptureButton extends StatelessWidget {
 
   const _CaptureButton({this.onTap});
 
+  Widget _ring(BuildContext context) {
+    final ringColor = context.palette.textPrimary;
+
+    return Container(
+      width: 64,
+      height: 64,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: ringColor, width: 4),
+      ),
+      alignment: Alignment.center,
+      child: Container(
+        width: 54,
+        height: 54,
+        decoration: BoxDecoration(color: ringColor, shape: BoxShape.circle),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 64,
-        height: 64,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: AppColors.textPrimaryDark, width: 4),
-        ),
-        alignment: Alignment.center,
-        child: Container(
-          width: 54,
-          height: 54,
-          decoration: const BoxDecoration(
-            color: AppColors.textPrimaryDark,
-            shape: BoxShape.circle,
-          ),
-        ),
-      ),
+    return Semantics(
+      button: true,
+      label: t.receiptScan.takePhoto,
+      child: GestureDetector(onTap: onTap, child: _ring(context)),
     );
   }
 }

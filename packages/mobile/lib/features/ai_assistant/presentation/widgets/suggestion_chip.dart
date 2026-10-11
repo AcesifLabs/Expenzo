@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 
 class SuggestionChip extends StatelessWidget {
   final String label;
@@ -6,24 +9,37 @@ class SuggestionChip extends StatelessWidget {
 
   const SuggestionChip({super.key, required this.label, this.onTap});
 
+  Widget _chip(AppPalette palette) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: palette.inputFill,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
+        border: Border.all(color: palette.accent.withAlpha(0x50), width: 1),
+      ),
+      child: Text(
+        label,
+        style: AppTypography.bodyMedium.copyWith(color: palette.accent),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: const Color(0xFF201F21),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0x50D1C4E9), width: 1),
-        ),
-        child: Text(
-          label,
-          style: const TextStyle(
-            fontFamily: 'Work Sans',
-            fontSize: 13,
-            color: Color(0xFFD1C4E9),
-          ),
+    final palette = context.palette;
+
+    // The chip looks compact, but its touch area is the full 48dp.
+    return Semantics(
+      button: true,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: AppSpacing.minTapTarget),
+          child: Center(widthFactor: 1, child: _chip(palette)),
         ),
       ),
     );

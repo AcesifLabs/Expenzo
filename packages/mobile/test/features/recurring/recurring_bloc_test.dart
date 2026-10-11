@@ -18,6 +18,7 @@ import 'package:expense_tracker/features/recurring/domain/usecases/process_recur
 import 'package:expense_tracker/features/recurring/presentation/bloc/recurring_bloc.dart';
 import 'package:expense_tracker/features/recurring/presentation/bloc/recurring_event.dart';
 import 'package:expense_tracker/features/recurring/presentation/bloc/recurring_state.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class MockGetRecurringList extends Mock implements GetRecurringList {}
 
@@ -113,7 +114,7 @@ void main() {
         isA<RecurringError>().having(
           (s) => s.message,
           'message',
-          'Failed to load',
+          t.common.errors.server,
         ),
       ];
 
@@ -152,7 +153,7 @@ void main() {
         isA<RecurringError>().having(
           (s) => s.message,
           'message',
-          'Create failed',
+          t.common.errors.server,
         ),
       ];
 

@@ -8,6 +8,7 @@ import '../../domain/usecases/get_records.dart';
 import '../../domain/usecases/update_record.dart';
 import 'record_event.dart';
 import 'record_state.dart';
+import 'package:expense_tracker/core/error/failure_message.dart';
 
 const _pageSize = 50;
 
@@ -72,7 +73,7 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
 
     final result = await getRecords(const GetRecordsParams(limit: _pageSize));
     result.fold(
-      (failure) => emit(RecordError(failure.message)),
+      (failure) => emit(RecordError(failureText(failure))),
       (records) => emit(
         RecordLoaded(
           records: records,
@@ -138,7 +139,9 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
       ),
     );
 
-    result.fold((failure) => emit(RecordError(failure.message)), (newRecords) {
+    result.fold((failure) => emit(RecordError(failureText(failure))), (
+      newRecords,
+    ) {
       final allRecords = [...currentState.records, ...newRecords];
 
       emit(
@@ -159,7 +162,9 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
       GetRecordsParams(limit: _pageSize, offset: currentState.records.length),
     );
 
-    result.fold((failure) => emit(RecordError(failure.message)), (newRecords) {
+    result.fold((failure) => emit(RecordError(failureText(failure))), (
+      newRecords,
+    ) {
       final allRecords = [...currentState.records, ...newRecords];
 
       emit(
@@ -178,7 +183,10 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
   ) async {
     final result = await addRecord(event.record);
 
-    result.fold((failure) => emit(RecordError(failure.message)), (_) => null);
+    result.fold(
+      (failure) => emit(RecordError(failureText(failure))),
+      (_) => null,
+    );
   }
 
   Future<void> _onUpdateRecord(
@@ -187,7 +195,10 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
   ) async {
     final result = await updateRecord(event.record);
 
-    result.fold((failure) => emit(RecordError(failure.message)), (_) => null);
+    result.fold(
+      (failure) => emit(RecordError(failureText(failure))),
+      (_) => null,
+    );
   }
 
   Future<void> _onDeleteRecord(
@@ -196,7 +207,10 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
   ) async {
     final result = await deleteRecord(event.id);
 
-    result.fold((failure) => emit(RecordError(failure.message)), (_) => null);
+    result.fold(
+      (failure) => emit(RecordError(failureText(failure))),
+      (_) => null,
+    );
   }
 
   void _onRefreshRecords(RefreshRecords event, Emitter<RecordState> emit) {
@@ -231,7 +245,9 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
       ),
     );
 
-    result.fold((failure) => emit(RecordError(failure.message)), (records) {
+    result.fold((failure) => emit(RecordError(failureText(failure))), (
+      records,
+    ) {
       emit(
         RecordLoaded(
           records: records,

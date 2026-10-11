@@ -1,5 +1,3 @@
-import 'package:expense_tracker/core/theme/currency_config.dart';
-
 class AppConstants {
   static const String appName = 'Expenzo';
   static const String displayDateFormat = 'MMM dd, yyyy';
@@ -9,7 +7,6 @@ class AppConstants {
   static const Duration undoSnackbarDuration = Duration(seconds: 10);
   static const Duration briefSnackbarDuration = Duration(seconds: 1);
   static const int? maxDescriptionLength = null;
-  static const String defaultCurrencySymbol = CurrencyConfig.defaultSymbol;
   static const Duration animationDurationStandard = Duration(milliseconds: 300);
   static const Duration animationDurationShort = Duration(milliseconds: 200);
   static const Duration animationDurationLong = Duration(milliseconds: 500);

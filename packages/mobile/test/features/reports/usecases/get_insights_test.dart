@@ -1,5 +1,8 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 import 'package:expense_tracker/features/reports/domain/entities/category_amount.dart';
 import 'package:expense_tracker/features/reports/domain/entities/date_amount.dart';
 import 'package:expense_tracker/features/reports/domain/entities/insight_item.dart';
@@ -65,8 +68,8 @@ void main() {
 
       final titles = unwrap(result).map((item) => item.title).toList();
 
-      expect(titles, contains('Recurring Expenses'));
-      expect(titles, contains('Budget Status'));
+      expect(titles, contains('Recurring expenses'));
+      expect(titles, contains('Budget status'));
     });
 
     test('adds highest spending day insight when date is present', () {
@@ -81,11 +84,35 @@ void main() {
       );
 
       final highest = unwrap(result).firstWhere(
-        (item) => item.title == 'Highest Spending Day',
+        (item) => item.title == 'Highest spending day',
         orElse: () => throw StateError('Missing highest day insight'),
       );
 
       expect(highest.description, contains('Monday'));
+      expect(highest.description, contains('200%'));
+    });
+
+    test('insight text follows the app language with Latin digits', () async {
+      await initializeDateFormatting();
+      DateFormat.useNativeDigitsByDefaultFor('bn', false);
+      LocaleSettings.setLocaleSync(AppLocale.bn);
+      Intl.defaultLocale = 'bn';
+      addTearDown(() {
+        LocaleSettings.setLocaleSync(AppLocale.en);
+        Intl.defaultLocale = null;
+      });
+
+      final result = getInsights(
+        insights: buildSpendingInsights(highestDayDate: DateTime(2026, 1, 5)),
+        spendingTrend: const [],
+        categoryBreakdown: const [],
+      );
+      final highest = unwrap(
+        result,
+      ).firstWhere((item) => item.kind == InsightKind.highestSpendingDay);
+
+      expect(highest.title, t.reports.insights.highestDay.title);
+      expect(highest.description, contains('সোমবার'));
       expect(highest.description, contains('200%'));
     });
 
@@ -98,7 +125,7 @@ void main() {
 
       final titles = unwrap(result).map((item) => item.title).toList();
 
-      expect(titles, isNot(contains('Highest Spending Day')));
+      expect(titles, isNot(contains('Highest spending day')));
     });
 
     test('adds most frequent category insight from top category', () {
@@ -111,7 +138,7 @@ void main() {
       );
 
       final category = unwrap(result).firstWhere(
-        (item) => item.title == 'Most Frequent Category',
+        (item) => item.title == 'Most frequent category',
         orElse: () => throw StateError('Missing category insight'),
       );
 
@@ -133,12 +160,30 @@ void main() {
 
       expect(
         unwrap(withoutWeek).map((item) => item.title),
-        isNot(contains('Best Savings Week')),
+        isNot(contains('Best savings week')),
       );
       expect(
         unwrap(withWeek).map((item) => item.title),
-        contains('Best Savings Week'),
+        contains('Best savings week'),
       );
+    });
+
+    test('assigns a semantic tone to each insight', () {
+      final result = getInsights(
+        insights: buildSpendingInsights(highestDayDate: DateTime(2026, 1, 5)),
+        spendingTrend: buildTrend(7),
+        categoryBreakdown: [buildCategoryAmount()],
+      );
+
+      final tones = {for (final item in unwrap(result)) item.title: item.tone};
+
+      expect(tones, {
+        'Highest spending day': InsightTone.warning,
+        'Most frequent category': InsightTone.info,
+        'Best savings week': InsightTone.positive,
+        'Recurring expenses': InsightTone.investment,
+        'Budget status': InsightTone.info,
+      });
     });
   });
 }

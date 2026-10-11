@@ -24,6 +24,7 @@ import 'package:expense_tracker/features/budgets/presentation/bloc/budget_bloc.d
 import 'package:expense_tracker/features/budgets/presentation/bloc/budget_event.dart';
 import 'package:expense_tracker/features/budgets/presentation/bloc/budget_state.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budget_progress.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class MockGetBudgets extends Mock implements GetBudgets {}
 
@@ -130,7 +131,7 @@ void main() {
         isA<BudgetError>().having(
           (s) => s.message,
           'message',
-          'Failed to load',
+          t.common.errors.server,
         ),
       ];
 

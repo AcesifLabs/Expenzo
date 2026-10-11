@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:expense_tracker/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 void main() {
   group('mapExceptionToMessage', () {
@@ -62,7 +63,7 @@ void main() {
     test('PlatformException unknown code → generic auth message', () {
       final e = PlatformException(code: 'unknown_code');
       final msg = AuthRepositoryImpl.mapExceptionToMessage(e);
-      expect(msg, contains('Authentication failed'));
+      expect(msg, t.auth.errors.failed);
     });
 
     test('TimeoutException → timeout message', () {

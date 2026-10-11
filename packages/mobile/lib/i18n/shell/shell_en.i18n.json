@@ -1,0 +1,4 @@
+{
+  "tabs": { "home": "Home", "activity": "Activity", "budgets": "Budgets", "reports": "Reports" },
+  "reportsTabs": { "trend": "Trend", "categories": "Categories", "insights": "Insights" }
+}

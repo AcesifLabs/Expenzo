@@ -1,0 +1,75 @@
+{
+  "filter": {
+    "title": "Filter",
+    "dateRange": "Date range",
+    "type": "Type",
+    "all": "All",
+    "categories": "Categories",
+    "clear": "Clear",
+    "apply": "Apply",
+    "noCategories": "No categories",
+    "allCategories": "All categories",
+    "allCount": "All ({n})",
+    "selectedCount": "{n} selected",
+    "selectDateRange": "Select date range",
+    "range": "{start} - {end}"
+  },
+  "list": {
+    "title": "Activity",
+    "subtitle": "Transaction history",
+    "filter": "Filter",
+    "search": "Search transactions",
+    "noMatches": "No transactions match your search or filters.",
+    "empty": "No transactions yet",
+    "scrollForMore": "Scroll for more",
+    "deleted": "Record deleted"
+  },
+  "picker": {
+    "title": "Choose category",
+    "search": "Search categories",
+    "noneFound": "No categories found",
+    "addCategory": "Add category"
+  },
+  "sheet": {
+    "placeholders": {
+      "expense": [
+        "Groceries",
+        "Uber to office",
+        "Lunch with colleague",
+        "Netflix subscription",
+        "Electricity bill",
+        "Gas station"
+      ],
+      "income": [
+        "Salary",
+        "Freelance payment",
+        "Side hustle",
+        "Refund",
+        "Bonus",
+        "Investment dividend"
+      ]
+    },
+    "enterAmount": "Enter an amount",
+    "nameHintExpense": "Name, e.g. Lunch",
+    "nameHintIncome": "Name, e.g. Salary",
+    "nameRequired": "Add a name",
+    "scanReceipt": "Scan a receipt",
+    "noBudget": "No budget",
+    "budgetOption": "{name} · {period}",
+    "previousBudget": "Previous budget (no longer active)",
+    "loadingBudgets": "Loading budgets…",
+    "noCategories": "No categories available",
+    "selectCategory": "Select a category",
+    "showAllCategories": "Show all categories",
+    "repeatMonthly": "Repeat monthly",
+    "addIncome": "Add income",
+    "deleteExpense": "Delete expense",
+    "deleteIncome": "Delete income",
+    "deleteExpenseTitle": "Delete this expense?",
+    "deleteIncomeTitle": "Delete this income?",
+    "cannotUndo": "This can't be undone.",
+    "repeatFailed": "Saved, but it couldn't be set to repeat. Set it up in Settings → Recurring.",
+    "typeToggle": "Transaction type",
+    "backspace": "Backspace"
+  }
+}

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:expense_tracker/core/theme/app_colors.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
 
 class BudgetProgressIndicator extends StatelessWidget {
   final double percentage;
@@ -15,10 +15,10 @@ class BudgetProgressIndicator extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
     if (percentage > 100) return colors.error;
     if (percentage >= 80) {
-      return AppColors.warning;
+      return context.palette.warning;
     }
 
-    return colors.secondary;
+    return context.palette.income;
   }
 
   @override

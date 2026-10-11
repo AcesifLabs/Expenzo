@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
-import 'package:expense_tracker/core/theme/app_colors.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/core/utils/navigation_utils.dart';
 import '../bloc/contact_selector_bloc.dart';
 import '../bloc/contact_selector_event.dart';
@@ -13,7 +13,13 @@ import '../bloc/message_sources_state.dart';
 import '../../domain/entities/message_source.dart';
 import 'sample_analyzer_page.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
+import 'package:expense_tracker/shared/presentation/widgets/app_back_button.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_page_header.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_empty_state.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 import '../../../parsing_rules/presentation/widgets/transaction_list_skeleton.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 /// Returns true only when the keyboard transitioned from open to closed,
 /// i.e. the previous bottom view inset was positive and the current one is
@@ -110,35 +116,15 @@ class _ContactSelectorViewState extends State<ContactSelectorView>
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [_buildHeaderTitle(colors), _buildSearchField(colors)],
+      children: [_buildHeaderTitle(), _buildSearchField(colors)],
     );
   }
 
-  Widget _buildHeaderTitle(ColorScheme colors) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 48, 24, 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Scan SMS',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w600,
-              color: colors.onSurface,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Monitor SMS for expenses',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.normal,
-              color: colors.onSurface.withAlpha(140),
-            ),
-          ),
-        ],
-      ),
+  Widget _buildHeaderTitle() {
+    return AppPageHeader(
+      leading: AppBackButton(),
+      title: t.common.autoImport,
+      subtitle: t.messageTemplates.contacts.subtitle,
     );
   }
 
@@ -146,11 +132,11 @@ class _ContactSelectorViewState extends State<ContactSelectorView>
     final surfaceDimAlpha = colors.onSurface.withAlpha(100);
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
+      padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, 0),
       child: TextField(
         focusNode: _searchFocusNode,
         decoration: InputDecoration(
-          hintText: 'Search contacts...',
+          hintText: t.messageTemplates.contacts.search,
           hintStyle: TextStyle(color: surfaceDimAlpha),
           prefixIcon: Icon(
             PiconsRegular.magnifyingGlass,
@@ -160,15 +146,15 @@ class _ContactSelectorViewState extends State<ContactSelectorView>
           filled: true,
           fillColor: colors.surface,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
             borderSide: BorderSide.none,
           ),
           contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 12,
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.smd,
           ),
         ),
-        style: TextStyle(fontSize: 15, color: colors.onSurface),
+        style: AppTypography.bodyLarge.copyWith(color: colors.onSurface),
         onChanged: _onSearchChanged,
       ),
     );
@@ -187,28 +173,36 @@ class _ContactSelectorViewState extends State<ContactSelectorView>
     final isMonitored = existingSource != null;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.sm,
+      ),
       child: Container(
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
         ),
         child: InkWell(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
           onTap: () => _onContactTap(contact, existingSource),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.md,
+              AppSpacing.smd,
+              AppSpacing.md,
+              AppSpacing.smd,
+            ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildIconTile(contact, colors),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppSpacing.smd),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildNameRow(contact, isMonitored, colors),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: AppSpacing.xs),
                       _buildPreviewText(contact, colors),
                     ],
                   ),
@@ -226,14 +220,14 @@ class _ContactSelectorViewState extends State<ContactSelectorView>
       width: 40,
       height: 40,
       decoration: BoxDecoration(
-        color: AppColors.surfaceDark,
-        borderRadius: BorderRadius.circular(12),
+        color: context.palette.surfaceHigh,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
       ),
       child: Icon(
         contact.sourceType == ExpenseSource.sms
             ? PiconsRegular.chatCircle
             : PiconsRegular.envelope,
-        color: colors.secondary,
+        color: colors.primary,
         size: 20,
       ),
     );
@@ -251,11 +245,7 @@ class _ContactSelectorViewState extends State<ContactSelectorView>
             contact.displayName,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: colors.onSurface,
-            ),
+            style: AppTypography.bodyLarge.copyWith(color: colors.onSurface),
           ),
         ),
         if (isMonitored) _buildActiveBadge(colors),
@@ -265,20 +255,19 @@ class _ContactSelectorViewState extends State<ContactSelectorView>
 
   Widget _buildActiveBadge(ColorScheme colors) {
     return Padding(
-      padding: const EdgeInsets.only(left: 8),
+      padding: const EdgeInsets.only(left: AppSpacing.sm),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: AppSpacing.xs,
+        ),
         decoration: BoxDecoration(
           color: colors.primary.withValues(alpha: 0.13),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
         ),
         child: Text(
-          'Active',
-          style: TextStyle(
-            color: colors.primary,
-            fontSize: 10,
-            fontWeight: FontWeight.w600,
-          ),
+          t.messageTemplates.contacts.active,
+          style: AppTypography.labelMedium.copyWith(color: colors.primary),
         ),
       ),
     );
@@ -289,9 +278,7 @@ class _ContactSelectorViewState extends State<ContactSelectorView>
       contact.lastMessage,
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
-      style: TextStyle(
-        fontSize: 13,
-        fontWeight: FontWeight.normal,
+      style: AppTypography.bodyMedium.copyWith(
         color: colors.onSurface.withAlpha(120),
       ),
     );
@@ -300,8 +287,9 @@ class _ContactSelectorViewState extends State<ContactSelectorView>
   Widget _buildContactList(
     List<DeviceContact> contacts,
     List<MessageSource> monitoredSources,
-    ThemeData theme,
-  ) {
+    ThemeData theme, {
+    required bool isLoadingMore,
+  }) {
     final filteredContacts = contacts
         .where(
           (c) =>
@@ -311,19 +299,29 @@ class _ContactSelectorViewState extends State<ContactSelectorView>
         .toList();
 
     if (filteredContacts.isEmpty) {
-      return const Center(child: Text('No contacts found'));
+      final contactsT = t.messageTemplates.contacts;
+
+      return AppEmptyState(
+        icon: PiconsRegular.chatText,
+        message: _searchQuery.isEmpty
+            ? contactsT.empty
+            : contactsT.noMatch(query: _searchQuery),
+      );
     }
 
     return ListView.builder(
       controller: _scrollController,
-      itemCount: contacts.length >= 100
-          ? filteredContacts.length
-          : filteredContacts.length + 1,
+      // Without an explicit padding the list re-applies the status-bar inset,
+      // which the header above already accounts for. Keep the bottom inset so
+      // the last contact scrolls clear of the floating nav bar.
+      padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
+      // The trailing spinner row only exists while a next page is loading.
+      itemCount: filteredContacts.length + (isLoadingMore ? 1 : 0),
       itemBuilder: (context, index) {
         if (index >= filteredContacts.length) {
           return const Center(
             child: Padding(
-              padding: EdgeInsets.all(16.0),
+              padding: EdgeInsets.all(AppSpacing.md),
               child: CircularProgressIndicator(),
             ),
           );
@@ -377,7 +375,7 @@ class _ContactSelectorViewState extends State<ContactSelectorView>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildHeader(theme),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           Expanded(
             child: BlocBuilder<MessageSourcesBloc, MessageSourcesState>(
               builder: (context, sourcesState) {
@@ -394,8 +392,16 @@ class _ContactSelectorViewState extends State<ContactSelectorView>
                       ContactSelectorError(:final message) => Center(
                         child: Text(message),
                       ),
-                      ContactSelectorLoaded(:final contacts) =>
-                        _buildContactList(contacts, monitoredSources, theme),
+                      ContactSelectorLoaded(
+                        :final contacts,
+                        :final isLoadingMore,
+                      ) =>
+                        _buildContactList(
+                          contacts,
+                          monitoredSources,
+                          theme,
+                          isLoadingMore: isLoadingMore,
+                        ),
                       _ => const SizedBox.shrink(),
                     };
                   },

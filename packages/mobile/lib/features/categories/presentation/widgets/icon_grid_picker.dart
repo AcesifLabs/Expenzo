@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_icons.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class IconGridPicker extends StatelessWidget {
   static const List<String> iconNames = [
@@ -28,23 +32,22 @@ class IconGridPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.only(top: 16),
+        Padding(
+          padding: const EdgeInsets.only(top: AppSpacing.md),
           child: Text(
-            'Choose Icon',
-            style: TextStyle(
-              fontFamily: 'Work Sans',
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: _DesignTokens.mutedColor,
+            t.categories.form.icon,
+            style: AppTypography.bodySmall.copyWith(
+              color: palette.textSecondary,
             ),
           ),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
           child: Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -75,44 +78,38 @@ class _IconCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          color: isSelected
-              ? _DesignTokens.selectedFill
-              : _DesignTokens.unselectedFill,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
+    final palette = context.palette;
+
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: t.categories.iconLabel(
+        name: t.categories.icons[iconName] ?? iconName,
+      ),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: AppSpacing.minTapTarget,
+          height: AppSpacing.minTapTarget,
+          decoration: BoxDecoration(
             color: isSelected
-                ? _DesignTokens.selectedStroke
-                : Colors.transparent,
-            width: 1,
+                ? palette.brand.withAlpha(0x20)
+                : palette.surfaceHigh,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
+            border: Border.all(
+              color: isSelected ? palette.brand : Colors.transparent,
+              width: 1,
+            ),
           ),
-        ),
-        child: Center(
-          child: Icon(
-            AppIcons.getCategoryIcon(iconName),
-            size: 22,
-            color: isSelected
-                ? _DesignTokens.selectedIconColor
-                : _DesignTokens.unselectedIconColor,
+          child: Center(
+            child: Icon(
+              AppIcons.getCategoryIcon(iconName),
+              size: 22,
+              color: isSelected ? palette.brand : palette.textSecondary,
+            ),
           ),
         ),
       ),
     );
   }
-}
-
-class _DesignTokens {
-  static const Color selectedFill = Color(0x20D1C4E9);
-  static const Color selectedStroke = Color(0xFFD1C4E9);
-  static const Color unselectedFill = Color(0xFF2B292C);
-  static const Color selectedIconColor = Color(0xFFD1C4E9);
-  static const Color unselectedIconColor = Color(0xFF8E8E93);
-  static const Color mutedColor = Color(0xFF8E8E93);
-
-  _DesignTokens._();
 }

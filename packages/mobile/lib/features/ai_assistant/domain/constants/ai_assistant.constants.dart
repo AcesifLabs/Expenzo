@@ -1,22 +1,10 @@
+import 'package:expense_tracker/i18n/strings.g.dart';
+
 class AiAssistantConstants {
   static const maxUserPromptLength = 280;
   static const cooldownDuration = Duration(seconds: 4);
 
-  static const outOfScopeRefusal =
-      'I can only help with your Expenzo finances — spending, budgets, categories, income, balance, savings, transactions, reports, and recurring bills. Please ask a finance question related to your data.';
-
-  static const promptInjectionRefusal =
-      'I can\'t help with hidden instructions, internal context, secrets, or requests to override my rules. Please ask about your finances in Expenzo.';
-
-  static const tooLongRefusal =
-      'That message is too long. Please ask a shorter question about your Expenzo finances.';
-
-  static const emptyPromptRefusal =
-      'Please type a question about your Expenzo finances.';
-
-  static const cooldownRefusal =
-      'Please wait a few seconds before sending another finance question.';
-
+  /// Sent to the model only; stays English in every app language.
   static const systemGuardrails = '''
 You are Expenzo AI, a strict in-app personal finance assistant.
 
@@ -81,6 +69,25 @@ Keep answers concise and practical. Mention currency when discussing amounts.
     'transport',
     'shopping',
     'utilities',
+    // Bangla. Matched after normalizing nukta letters (see ValidateAiPrompt).
+    'বাজেট',
+    'খরচ',
+    'ব্যয়',
+    'আয়',
+    'ব্যালেন্স',
+    'সঞ্চয়',
+    'জমা',
+    'লেনদেন',
+    'ক্যাটাগরি',
+    'বিভাগ',
+    'রিপোর্ট',
+    'বিল',
+    'বেতন',
+    'টাকা',
+    'হিসাব',
+    'কেনাকাটা',
+    'যাতায়াত',
+    'খাবার',
   };
 
   static const blockedPatterns = <String>[
@@ -91,7 +98,23 @@ Keep answers concise and practical. Mention currency when discussing amounts.
     r'\b(api key|token|password|secret|dotenv|env file|environment variable|private key)\b',
     r'\b(act as|pretend to be|roleplay as|jailbreak)\b',
     r'\b(source code|internal code|implementation details)\b',
+    // Bangla. No \b: Dart's word boundary doesn't treat Bangla letters as
+    // word characters. Matched after nukta normalization.
+    r'(উপেক্ষা|ভুলে যা|বাদ দা|বাদ দি|মানবে না|মেনো না|অমান্য).{0,30}(নির্দেশ|নিয়ম|প্রম্পট|পলিসি)',
+    r'(নির্দেশ|নিয়ম|প্রম্পট|পলিসি).{0,30}(উপেক্ষা|ভুলে যা|বাদ দা|বাদ দি|অমান্য|মানবে না|মেনো না)',
+    r'(সিস্টেম প্রম্পট|গোপন নির্দেশ|ভেতরের নির্দেশ|লুকানো নির্দেশ|ডেভেলপার মেসেজ)',
+    r'(প্রম্পট|নির্দেশ|কনটেক্সট|গোপন|পাসওয়ার্ড|টোকেন).{0,30}(দেখাও|দেখান|প্রকাশ|ফাঁস|প্রিন্ট|বলে দাও|বলে দিন|লিখে দাও)',
+    r'(এপিআই কী|গোপন কী|পাসওয়ার্ড|টোকেন|সোর্স কোড)',
+    r'(ভান কর|অভিনয় কর|হিসেবে আচরণ কর|জেলব্রেক)',
   ];
+
+  // User-facing refusals, in the current app language.
+  static String get outOfScopeRefusal => t.aiAssistant.refusals.outOfScope;
+  static String get promptInjectionRefusal =>
+      t.aiAssistant.refusals.promptInjection;
+  static String get tooLongRefusal => t.aiAssistant.refusals.tooLong;
+  static String get emptyPromptRefusal => t.aiAssistant.refusals.empty;
+  static String get cooldownRefusal => t.aiAssistant.refusals.cooldown;
 
   const AiAssistantConstants._();
 }

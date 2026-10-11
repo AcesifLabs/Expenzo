@@ -10,6 +10,7 @@ import '../../../../core/api/api_constants.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
 import '../../../../core/api/token_storage.dart';
 import '../../domain/entities/user.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 abstract class AuthRemoteDatasource {
   /// Throws: [ServerException] if the API request fails.
@@ -40,7 +41,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
     final googleUser = await googleSignIn.signIn();
 
     if (googleUser == null) {
-      throw AuthException(message: 'Google sign in was cancelled');
+      throw AuthException(message: t.auth.errors.cancelled);
     }
 
     final googleAuth = await googleUser.authentication;
@@ -53,7 +54,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
     final firebaseUser = userCredential.user;
 
     if (firebaseUser == null) {
-      throw AuthException(message: 'Firebase sign in failed');
+      throw AuthException(message: t.auth.errors.failed);
     }
 
     final user = _mapFirebaseUserToEntity(firebaseUser);

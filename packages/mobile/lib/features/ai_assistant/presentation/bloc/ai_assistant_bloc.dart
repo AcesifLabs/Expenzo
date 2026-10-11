@@ -7,6 +7,8 @@ import '../../domain/usecases/send_ai_message.dart';
 import '../../domain/usecases/validate_ai_prompt.dart';
 import 'ai_assistant_event.dart';
 import 'ai_assistant_state.dart';
+import 'package:expense_tracker/core/error/failure_message.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class AiAssistantBloc extends Bloc<AiAssistantEvent, AiAssistantState> {
   final BuildFinancialContext buildFinancialContext;
@@ -49,7 +51,7 @@ class AiAssistantBloc extends Bloc<AiAssistantEvent, AiAssistantState> {
       (failure) => emit(
         state.copyWith(
           isLoadingContext: false,
-          error: 'Could not load financial context: ${failure.message}',
+          error: t.aiAssistant.errors.contextFailed,
         ),
       ),
       (context) => emit(
@@ -75,8 +77,7 @@ class AiAssistantBloc extends Bloc<AiAssistantEvent, AiAssistantState> {
 
     if (!validation.isAllowed) {
       final refusal = ChatMessage.assistant(
-        validation.refusalMessage ??
-            'I can only help with your Expenzo finances.',
+        validation.refusalMessage ?? AiAssistantConstants.outOfScopeRefusal,
       );
 
       emit(
@@ -98,7 +99,7 @@ class AiAssistantBloc extends Bloc<AiAssistantEvent, AiAssistantState> {
       final contextResult = await buildFinancialContext();
       final contextValue = contextResult.fold<String?>((failure) {
         final refusal = ChatMessage.assistant(
-          'I can\'t access your finance context right now. Please try again shortly.',
+          t.aiAssistant.refusals.contextUnavailable,
         );
         emit(
           state.copyWith(
@@ -142,7 +143,7 @@ class AiAssistantBloc extends Bloc<AiAssistantEvent, AiAssistantState> {
       context: financialContext,
     ).listen(
       (either) => either.fold(
-        (failure) => add(StreamError(failure.message)),
+        (failure) => add(StreamError(failureText(failure))),
         (token) => add(StreamTokenReceived(token)),
       ),
       onDone: () => add(const StreamCompleted()),

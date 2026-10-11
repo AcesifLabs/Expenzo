@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/di/injection_container.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_back_button.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_page_header.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 import '../bloc/ai_assistant_bloc.dart';
 import '../bloc/ai_assistant_event.dart';
 import '../bloc/ai_assistant_state.dart';
@@ -9,6 +13,7 @@ import '../widgets/chat_bubble.dart';
 import '../widgets/chat_input.dart';
 import '../widgets/suggestion_chip.dart';
 import '../widgets/typing_indicator.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class AiAssistantPage extends StatelessWidget {
   const AiAssistantPage({super.key});
@@ -30,7 +35,10 @@ class _AiAssistantContent extends StatefulWidget {
 }
 
 class _AiAssistantContentState extends State<_AiAssistantContent> {
-  static const _suggestions = ['Top expenses', "How's my budget?"];
+  static List<String> get _suggestions => [
+    t.aiAssistant.suggestions.topExpenses,
+    t.aiAssistant.suggestions.budget,
+  ];
 
   final _controller = TextEditingController();
   final _scrollController = ScrollController();
@@ -60,35 +68,16 @@ class _AiAssistantContentState extends State<_AiAssistantContent> {
         ..showSnackBar(
           SnackBar(
             content: Text(error),
-            backgroundColor: const Color(0xFFF48FB1),
+            backgroundColor: context.palette.expense,
           ),
         );
     }
   }
 
-  Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Row(
-        children: [
-          const Icon(PiconsRegular.robot, size: 28, color: Color(0xFFD1C4E9)),
-          const SizedBox(width: 10),
-          const Text(
-            'AI Assistant',
-            style: TextStyle(
-              fontFamily: 'Work Sans',
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFFF5F7FA),
-            ),
-          ),
-          const Spacer(),
-          GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
-            child: const Icon(Icons.close, size: 24, color: Color(0xFFF5F7FA)),
-          ),
-        ],
-      ),
+  PreferredSizeWidget _buildHeader() {
+    return AppPageHeader(
+      leading: const AppBackButton(),
+      title: t.aiAssistant.title,
     );
   }
 
@@ -101,13 +90,13 @@ class _AiAssistantContentState extends State<_AiAssistantContent> {
         itemBuilder: (context, index) {
           if (index == state.messages.length) {
             return const Padding(
-              padding: EdgeInsets.symmetric(vertical: 8),
+              padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
               child: TypingIndicator(),
             );
           }
 
           return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.only(bottom: AppSpacing.smd),
             child: ChatBubble(message: state.messages[index]),
           );
         },
@@ -117,13 +106,13 @@ class _AiAssistantContentState extends State<_AiAssistantContent> {
 
   Widget _buildSuggestionRow() {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: _suggestions
             .map(
               (label) => Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
                 child: SuggestionChip(
                   label: label,
                   onTap: () => _sendMessage(label),
@@ -139,14 +128,12 @@ class _AiAssistantContentState extends State<_AiAssistantContent> {
     final bottomInset = MediaQuery.of(context).viewPadding.bottom;
 
     return Padding(
-      padding: EdgeInsets.only(bottom: 8 + bottomInset),
-      child: const Text(
-        'Expenzo AI provides suggestions based on your data. It is not a licensed financial advisor.',
+      padding: EdgeInsets.only(bottom: AppSpacing.sm + bottomInset),
+      child: Text(
+        t.aiAssistant.disclaimer,
         textAlign: TextAlign.center,
-        style: TextStyle(
-          fontFamily: 'Work Sans',
-          fontSize: 11,
-          color: Color(0x608E8E93),
+        style: AppTypography.bodySmall.copyWith(
+          color: context.palette.textSecondary.withAlpha(0x60),
         ),
       ),
     );
@@ -170,17 +157,22 @@ class _AiAssistantContentState extends State<_AiAssistantContent> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF141315),
+      backgroundColor: context.palette.bg,
+      appBar: _buildHeader(),
       body: SafeArea(
         child: BlocConsumer<AiAssistantBloc, AiAssistantState>(
           listener: _listenForErrors,
           builder: (context, state) {
             return Padding(
-              padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.md,
+                AppSpacing.lg,
+                0,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildHeader(),
                   _buildChatArea(state),
                   _buildSuggestionRow(),
                   ChatInput(

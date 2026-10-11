@@ -1,0 +1,61 @@
+{
+  "title": "Budgets",
+  "subtitle": "Track your monthly limits",
+  "empty": {
+    "title": "No budgets yet",
+    "body": "Set a monthly limit to see how much you have left."
+  },
+  "saved": "Budget saved",
+  "loadPrompt": "Load budgets to see data",
+  "edit": "Edit",
+  "delete": {
+    "title": "Delete budget",
+    "confirm": "Delete \"{name}\" budget?"
+  },
+  "card": {
+    "overBy": "Over by {amount}",
+    "left": "{amount} left",
+    "spentOf": "{spent} of {total} spent",
+    "a11y": "{name}, {headline}, {daysLeft}. Long press for options."
+  },
+  "days": {
+    "ended": "Period ended",
+    "lastDay": "Last day",
+    "left": {
+      "one": "{n} day left",
+      "other": "{n} days left"
+    }
+  },
+  "form": {
+    "add": "Add budget",
+    "edit": "Edit budget",
+    "amount": "Amount",
+    "name": "Name",
+    "nameHint": "e.g. Food & Drinks",
+    "period": "Period",
+    "rollover": "Roll over unspent money",
+    "rolloverDetail": "Carry forward unspent amount",
+    "amountRequired": "Enter an amount",
+    "amountInvalid": "Enter a valid number",
+    "nameRequired": "Enter a name"
+  },
+  "details": {
+    "title": "Budget details",
+    "loadFailed": "Couldn't load budget details. Try again.",
+    "notFound": "Budget not found.",
+    "ofTotal": " / {total}",
+    "periodBudget": {
+      "weekly": "Weekly budget",
+      "monthly": "Monthly budget",
+      "yearly": "Yearly budget"
+    },
+    "used": "{percent}% used",
+    "over": "Over budget",
+    "transactionsFailed": "Couldn't load transactions",
+    "noExpenses": "No expenses in this budget yet",
+    "noExpensesBody": "Expenses you link to this budget show up here.",
+    "transactions": "Transactions",
+    "unableToLoad": "Couldn't load budget",
+    "unableToLoadBody": "Budget details could not be loaded."
+  }
+}

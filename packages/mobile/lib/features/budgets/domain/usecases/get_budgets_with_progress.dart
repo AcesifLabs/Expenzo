@@ -19,25 +19,34 @@ class GetBudgetsWithProgress {
 
   Future<Either<Failure, List<BudgetProgress>>> call({int? limit}) async {
     final budgetsResult = await budgetRepository.getBudgets();
-    final budgets = budgetsResult.getOrElse(() => <Budget>[]);
+    final budgets = budgetsResult
+        .getOrElse(() => <Budget>[])
+        .where((budget) => budget.isEnabled)
+        .toList();
+    if (budgets.isEmpty) return const Right([]);
+
+    final periods = {
+      for (final budget in budgets)
+        budget.id ?? '': BudgetPeriodUtils.calculateCurrentPeriod(
+          budget.startDate,
+          budget.period,
+        ),
+    };
+    // One query for every budget's spend, not one per budget: this runs
+    // after every save (budget alerts) and on every budget screen load.
+    final spendingResult = await recordRepository.getSpendingForBudgets({
+      for (final entry in periods.entries)
+        entry.key: (start: entry.value.start, end: entry.value.end),
+    });
+    final spentById = spendingResult.fold(
+      (_) => const <String, double>{},
+      (spent) => spent,
+    );
 
     final results = <BudgetProgress>[];
-
     for (final budget in budgets) {
-      if (!budget.isEnabled) continue;
-
-      final periodRange = BudgetPeriodUtils.calculateCurrentPeriod(
-        budget.startDate,
-        budget.period,
-      );
-
-      final spendingResult = await recordRepository.getBudgetSpending(
-        budget.id ?? '',
-        periodRange.start,
-        periodRange.end,
-      );
-      final spentAmount = spendingResult.fold((_) => 0.0, (spent) => spent);
-
+      final id = budget.id ?? '';
+      final spentAmount = spentById[id] ?? 0.0;
       final effectiveBudget =
           budget.amount + (budget.rolloverEnabled ? budget.rolloverAmount : 0);
       final percentage = effectiveBudget > 0
@@ -46,7 +55,7 @@ class GetBudgetsWithProgress {
 
       results.add(
         BudgetProgress(
-          budgetId: budget.id ?? '',
+          budgetId: id,
           budgetAmount: budget.amount,
           effectiveAmount: effectiveBudget,
           spentAmount: spentAmount,
@@ -54,7 +63,7 @@ class GetBudgetsWithProgress {
           percentage: percentage,
           isOverBudget: spentAmount > effectiveBudget,
           name: budget.name,
-          periodRange: periodRange,
+          periodRange: periods[id]!,
           period: budget.period,
         ),
       );

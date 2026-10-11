@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:picons/picons.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
+import 'package:expense_tracker/core/theme/app_spacing.dart';
 import '../../domain/entities/expense_template.dart';
 import '../../domain/entities/message_source.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 
 class RetroactiveScanDialog extends StatefulWidget {
   final MessageSource source;
@@ -50,41 +53,38 @@ class _RetroactiveScanDialogState extends State<RetroactiveScanDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = t.messageTemplates.retro;
+
     return AlertDialog(
-      title: const Text('Scanning Past Messages'),
+      title: Text(strings.title),
       content: _isScanning
-          ? const Column(
+          ? Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text('Looking for past expenses matching your new template...'),
+                SizedBox(height: AppSpacing.md),
+                Text(strings.scanning),
               ],
             )
           : Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  PiconsFill.checkCircle,
-                  color: Theme.of(context).colorScheme.secondary,
+                  PiconsRegular.checkCircle,
+                  color: context.palette.income,
                   size: 48,
                 ),
-                SizedBox(height: 16),
-                Text(
-                  'Template active! Future messages will be parsed automatically.',
-                ),
-                SizedBox(height: 8),
-                Text(
-                  'Go to the Scan tab to review and create any past expenses we found.',
-                  textAlign: TextAlign.center,
-                ),
+                const SizedBox(height: AppSpacing.md),
+                Text(strings.saved),
+                const SizedBox(height: AppSpacing.sm),
+                Text(strings.review, textAlign: TextAlign.center),
               ],
             ),
       actions: [
         if (!_isScanning)
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Done'),
+            child: Text(t.common.done),
           ),
       ],
     );
