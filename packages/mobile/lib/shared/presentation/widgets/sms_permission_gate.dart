@@ -92,6 +92,8 @@ class _SmsPermissionGateState extends State<SmsPermissionGate> {
       return widget.child;
     }
 
+    final strings = t.common.smsGate;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -105,13 +107,13 @@ class _SmsPermissionGateState extends State<SmsPermissionGate> {
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(
-              t.common.smsGate.title,
+              strings.title,
               style: AppTypography.headlineSmall,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
-              t.common.smsGate.body,
+              strings.body,
               style: AppTypography.bodyLarge,
               textAlign: TextAlign.center,
             ),
@@ -119,7 +121,7 @@ class _SmsPermissionGateState extends State<SmsPermissionGate> {
             ElevatedButton.icon(
               icon: const Icon(PiconsRegular.check),
               label: Text(
-                t.common.smsGate.allow,
+                strings.allow,
                 style: AppTypography.titleLarge.copyWith(
                   fontWeight: FontWeight.w400,
                 ),
@@ -148,9 +150,11 @@ class _PermissionRequiredDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = t.common.smsGate;
+
     return AlertDialog(
-      title: Text(t.common.smsGate.deniedTitle),
-      content: Text(t.common.smsGate.deniedBody),
+      title: Text(strings.deniedTitle),
+      content: Text(strings.deniedBody),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),

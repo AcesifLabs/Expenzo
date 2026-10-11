@@ -16,6 +16,9 @@ abstract final class CurrencyFormatter {
   /// Amounts use Latin digits and Western grouping in every app language.
   static const _numberLocale = 'en';
 
+  /// Amounts are stored with up to two decimals, whatever the currency.
+  static const _storedDecimalDigits = 2;
+
   /// [decimalDigits] can only lower the currency's own precision (a summary
   /// may drop decimals; yen never gains them).
   static NumberFormat getFormatter({int? decimalDigits}) {
@@ -41,15 +44,11 @@ abstract final class CurrencyFormatter {
       decimalDigits: currency.decimalDigits,
     ).format(amount.abs());
 
+    final a11y = t.common.a11y;
+
     return isExpense
-        ? t.common.a11y.expenseAmount(
-            amount: number,
-            currency: currency.displayName,
-          )
-        : t.common.a11y.incomeAmount(
-            amount: number,
-            currency: currency.displayName,
-          );
+        ? a11y.expenseAmount(amount: number, currency: currency.displayName)
+        : a11y.incomeAmount(amount: number, currency: currency.displayName);
   }
 
   /// Always prefixes a sign: "+৳42.50" / "-৳42.50".
@@ -83,9 +82,6 @@ abstract final class CurrencyFormatter {
 
     return fixed.replaceFirst(RegExp(r'\.?0+$'), '');
   }
-
-  /// Amounts are stored with up to two decimals, whatever the currency.
-  static const _storedDecimalDigits = 2;
 
   static int _digits(CurrencyInfo currency, int? requested) {
     if (requested == null) return currency.decimalDigits;

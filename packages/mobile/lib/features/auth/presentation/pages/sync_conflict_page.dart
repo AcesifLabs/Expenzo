@@ -33,6 +33,7 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
     final colors = theme.colorScheme;
 
     final palette = context.palette;
+    final strings = t.auth.syncConflict;
 
     return Column(
       children: [
@@ -40,33 +41,33 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
         Icon(PiconsRegular.arrowsClockwise, size: 64, color: palette.brand),
         const SizedBox(height: AppSpacing.md),
         Text(
-          t.auth.syncConflict.title,
+          strings.title,
           style: AppTypography.headlineLarge.copyWith(color: palette.brand),
         ),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          t.auth.syncConflict.body,
+          strings.body,
           textAlign: TextAlign.center,
           style: AppTypography.bodyLarge.copyWith(color: palette.textSecondary),
         ),
         const SizedBox(height: AppSpacing.xl),
         _decisionButton(
-          t.auth.syncConflict.merge,
-          t.auth.syncConflict.mergeDetail,
+          strings.merge,
+          strings.mergeDetail,
           palette.brand,
           _onMergePressed,
         ),
         const SizedBox(height: AppSpacing.smd),
         _decisionButton(
-          t.auth.syncConflict.useAccount,
-          t.auth.syncConflict.useAccountDetail,
+          strings.useAccount,
+          strings.useAccountDetail,
           colors.error,
           _onReplacePressed,
         ),
         const SizedBox(height: AppSpacing.smd),
         _decisionButton(
-          t.auth.syncConflict.keepPhone,
-          t.auth.syncConflict.keepPhoneDetail,
+          strings.keepPhone,
+          strings.keepPhoneDetail,
           colors.tertiary,
           _onOverwritePressed,
         ),
@@ -151,12 +152,14 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
   }
 
   void _showReplaceConfirm() {
+    final strings = t.auth.syncConflict;
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (_) => AlertDialog(
-        title: Text(t.auth.syncConflict.replaceTitle),
-        content: Text(t.auth.syncConflict.replaceBody),
+        title: Text(strings.replaceTitle),
+        content: Text(strings.replaceBody),
         actions: [
           TextButton(
             onPressed: Navigator.of(context).pop,
@@ -165,7 +168,7 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
           TextButton(
             onPressed: _onConfirmReplace,
             child: Text(
-              t.auth.syncConflict.replace,
+              strings.replace,
               style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           ),

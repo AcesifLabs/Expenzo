@@ -29,9 +29,8 @@ class SmsScanSenderSection extends StatelessWidget {
         .where((item) => selectedIds.contains(item.sourceId))
         .length;
     final allSelected = selectedCount == section.items.length;
-    final actionLabel = allSelected
-        ? t.smsParser.section.clear
-        : t.smsParser.section.selectAll;
+    final sectionT = t.smsParser.section;
+    final actionLabel = allSelected ? sectionT.clear : sectionT.selectAll;
     final actionColor = allSelected ? colors.primary : colors.onSurface;
 
     return Column(
@@ -50,7 +49,7 @@ class SmsScanSenderSection extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  t.smsParser.section.counts(
+                  sectionT.counts(
                     n: section.items.length,
                     selected: selectedCount,
                   ),

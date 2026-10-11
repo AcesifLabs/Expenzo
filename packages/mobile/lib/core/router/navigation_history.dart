@@ -11,14 +11,14 @@ class NavigationHistory extends NavigatorObserver {
   final List<Route<dynamic>> _routes = [];
   GoRouter? _router;
 
-  void bindRouter(GoRouter router) => _router = router;
-
   /// Whether there is a page below the current one to return to.
   bool get canGoBack => _routes.length > 1;
 
   /// Router locations from bottom to top. Pages pushed directly with
   /// [Navigator] (outside go_router) have a null location.
   List<String?> get locations => _routes.map(_locationOf).toList();
+
+  void bindRouter(GoRouter router) => _router = router;
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {

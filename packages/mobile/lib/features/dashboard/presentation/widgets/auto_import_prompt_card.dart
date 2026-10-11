@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -41,26 +43,10 @@ class _AutoImportPromptCardState extends State<AutoImportPromptCard> {
     if (mounted) await _checkAccess();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<SettingsBloc, SettingsState>(
-      bloc: di.getIt<SettingsBloc>(),
-      builder: (context, state) {
-        final dismissed = state is SettingsLoaded
-            ? state.settings.autoImportPromptDismissed
-            : true;
-        if (dismissed || _hasSmsAccess != false) {
-          return const SizedBox.shrink();
-        }
-
-        return _buildCard(context);
-      },
-    );
-  }
-
   Widget _buildCard(BuildContext context) {
     final palette = context.palette;
     final textTheme = Theme.of(context).textTheme;
+    final strings = t.dashboard.autoImport;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -80,13 +66,10 @@ class _AutoImportPromptCardState extends State<AutoImportPromptCard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    t.dashboard.autoImport.title,
-                    style: textTheme.titleSmall,
-                  ),
+                  Text(strings.title, style: textTheme.titleSmall),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    t.dashboard.autoImport.body,
+                    strings.body,
                     style: textTheme.bodySmall?.copyWith(
                       color: palette.textSecondary,
                     ),
@@ -95,8 +78,8 @@ class _AutoImportPromptCardState extends State<AutoImportPromptCard> {
                   Row(
                     children: [
                       ElevatedButton(
-                        onPressed: _openAutoImport,
-                        child: Text(t.dashboard.autoImport.setUp),
+                        onPressed: () => unawaited(_openAutoImport()),
+                        child: Text(strings.setUp),
                       ),
                       const SizedBox(width: AppSpacing.sm),
                       TextButton(
@@ -113,6 +96,23 @@ class _AutoImportPromptCardState extends State<AutoImportPromptCard> {
           ],
         ),
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<SettingsBloc, SettingsState>(
+      bloc: di.getIt<SettingsBloc>(),
+      builder: (context, state) {
+        final dismissed = state is SettingsLoaded
+            ? state.settings.autoImportPromptDismissed
+            : true;
+        if (dismissed || _hasSmsAccess != false) {
+          return const SizedBox.shrink();
+        }
+
+        return _buildCard(context);
+      },
     );
   }
 }

@@ -86,6 +86,8 @@ class RulesListPage extends StatelessWidget {
   }
 
   Widget _buildEmptyState(BuildContext context) {
+    final strings = t.parsingRules.empty;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xl),
@@ -98,13 +100,13 @@ class RulesListPage extends StatelessWidget {
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             const SizedBox(height: AppSpacing.md),
-            Text(t.parsingRules.empty.title, style: AppTypography.titleLarge),
+            Text(strings.title, style: AppTypography.titleLarge),
             const SizedBox(height: AppSpacing.sm),
-            Text(t.parsingRules.empty.body, textAlign: TextAlign.center),
+            Text(strings.body, textAlign: TextAlign.center),
             const SizedBox(height: AppSpacing.lg),
             ElevatedButton.icon(
               icon: const Icon(PiconsRegular.plus),
-              label: Text(t.parsingRules.empty.add),
+              label: Text(strings.add),
               onPressed: () => _navigateToEditor(context),
             ),
           ],
@@ -300,11 +302,13 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
   }
 
   TextFormField _buildNameField() {
+    final form = t.parsingRules.form;
+
     return TextFormField(
       controller: _nameController,
       decoration: InputDecoration(
-        labelText: t.parsingRules.form.name,
-        hintText: t.parsingRules.form.nameHint,
+        labelText: form.name,
+        hintText: form.nameHint,
         border: OutlineInputBorder(),
       ),
       validator: _validateName,
@@ -312,24 +316,28 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
   }
 
   TextFormField _buildTriggerWordsField() {
+    final form = t.parsingRules.form;
+
     return TextFormField(
       controller: _triggerWordsController,
       decoration: InputDecoration(
-        labelText: t.parsingRules.form.keyWords,
-        hintText: t.parsingRules.form.keyWordsHint,
+        labelText: form.keyWords,
+        hintText: form.keyWordsHint,
         border: OutlineInputBorder(),
-        helperText: t.parsingRules.form.keyWordsHelper,
+        helperText: form.keyWordsHelper,
       ),
       validator: _validateTriggerWords,
     );
   }
 
   Column _buildAmountPatternSection() {
+    final form = t.parsingRules.form;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          t.parsingRules.form.amountPattern,
+          form.amountPattern,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: AppSpacing.sm),
@@ -338,7 +346,7 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
         TextFormField(
           controller: _amountPatternController,
           decoration: InputDecoration(
-            labelText: t.parsingRules.form.amountRegex,
+            labelText: form.amountRegex,
             hintText: r'Rs\.?\s*([\d,]+\.?\d*)',
             border: OutlineInputBorder(),
             helperText:
@@ -356,21 +364,23 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
   }
 
   Column _buildDatePatternSection() {
+    final form = t.parsingRules.form;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          t.parsingRules.form.datePattern,
+          form.datePattern,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: AppSpacing.sm),
         TextFormField(
           controller: _datePatternController,
           decoration: InputDecoration(
-            labelText: t.parsingRules.form.dateRegex,
+            labelText: form.dateRegex,
             hintText: r'(\d{2}/\d{2}/\d{4})',
             border: OutlineInputBorder(),
-            helperText: t.parsingRules.form.dateHelper,
+            helperText: form.dateHelper,
           ),
         ),
       ],
@@ -412,22 +422,26 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
   }
 
   TextFormField _buildPriorityField() {
+    final form = t.parsingRules.form;
+
     return TextFormField(
       controller: _priorityController,
       decoration: InputDecoration(
-        labelText: t.parsingRules.form.priority,
+        labelText: form.priority,
         hintText: '0',
         border: OutlineInputBorder(),
-        helperText: t.parsingRules.form.priorityHelper,
+        helperText: form.priorityHelper,
       ),
       keyboardType: TextInputType.number,
     );
   }
 
   SwitchListTile _buildEnabledSwitch() {
+    final form = t.parsingRules.form;
+
     return SwitchListTile(
-      title: Text(t.parsingRules.form.enabled),
-      subtitle: Text(t.parsingRules.form.enabledDetail),
+      title: Text(form.enabled),
+      subtitle: Text(form.enabledDetail),
       value: _isEnabled,
       onChanged: _onEnabledChanged,
     );

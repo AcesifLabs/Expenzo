@@ -29,6 +29,10 @@ class CheckBudgetAlerts {
   final NotificationService notificationService;
   final BudgetAlertLog alertLog;
 
+  /// The previous check, so overlapping calls (a save while an SMS is being
+  /// imported) run one after another instead of both sending the same alert.
+  Future<void> _previous = Future.value();
+
   CheckBudgetAlerts({
     required this.getBudgetsWithProgress,
     required this.getSettings,
@@ -36,16 +40,32 @@ class CheckBudgetAlerts {
     required this.alertLog,
   });
 
-  /// The previous check, so overlapping calls (a save while an SMS is being
-  /// imported) run one after another instead of both sending the same alert.
-  Future<void> _previous = Future.value();
-
   /// Returns [Right(unit)] even when nothing was sent.
   Future<Either<Failure, Unit>> call() {
     final result = _previous.then((_) => _check());
-    _previous = result.then((_) {}, onError: (_) {});
+    // Only the ordering matters here; the result and any error reach the
+    // caller through [result].
+    _previous = result.then(_ignore, onError: _ignore);
 
     return result;
+  }
+
+  static BudgetAlertLevel? levelFor(BudgetProgress budget) {
+    if (budget.isOverBudget || budget.percentage > 100) {
+      return BudgetAlertLevel.over;
+    }
+    if (budget.percentage >= nearLimitPercent) {
+      return BudgetAlertLevel.nearLimit;
+    }
+
+    return null;
+  }
+
+  /// One key per budget, period and level, so a new period alerts again.
+  static String alertKey(BudgetProgress budget, BudgetAlertLevel level) {
+    final period = budget.periodRange.start.toIso8601String();
+
+    return '${budget.budgetId}|$period|${level.name}';
   }
 
   Future<Either<Failure, Unit>> _check() async {
@@ -99,21 +119,5 @@ class CheckBudgetAlerts {
     ]);
   }
 
-  static BudgetAlertLevel? levelFor(BudgetProgress budget) {
-    if (budget.isOverBudget || budget.percentage > 100) {
-      return BudgetAlertLevel.over;
-    }
-    if (budget.percentage >= nearLimitPercent) {
-      return BudgetAlertLevel.nearLimit;
-    }
-
-    return null;
-  }
-
-  /// One key per budget, period and level, so a new period alerts again.
-  static String alertKey(BudgetProgress budget, BudgetAlertLevel level) {
-    final period = budget.periodRange.start.toIso8601String();
-
-    return '${budget.budgetId}|$period|${level.name}';
-  }
+  static Object? _ignore([Object? _]) => null;
 }

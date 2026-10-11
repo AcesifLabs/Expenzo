@@ -361,16 +361,17 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     final record = widget.initialRecord;
     final id = record?.id;
     if (record == null || id == null) return;
+    final sheetT = t.records.sheet;
 
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(
           record.recordType == RecordType.expense
-              ? t.records.sheet.deleteExpenseTitle
-              : t.records.sheet.deleteIncomeTitle,
+              ? sheetT.deleteExpenseTitle
+              : sheetT.deleteIncomeTitle,
         ),
-        content: Text(t.records.sheet.cannotUndo),
+        content: Text(sheetT.cannotUndo),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
@@ -428,6 +429,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
           dayOfMonth: _selectedDate.day,
         ),
       );
+
       // A failure comes back as a value, not an exception.
       return result.fold((failure) {
         throw StateError(failure.message);
@@ -460,9 +462,11 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       return typewriterDisplayText;
     }
 
+    final sheetT = t.records.sheet;
+
     return _type == RecordType.expense
-        ? t.records.sheet.nameHintExpense
-        : t.records.sheet.nameHintIncome;
+        ? sheetT.nameHintExpense
+        : sheetT.nameHintIncome;
   }
 
   String _formatAmount(double amount) {
@@ -577,13 +581,6 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   }
 
   Widget _buildNoteField(ColorScheme colors) {
-    final typeColor = _typeAccentColor;
-
-    final borderColor = _labelError
-        ? colors.error
-        : colors.onSurface.withAlpha(12);
-    final borderWidth = _labelError ? 1.5 : 1.0;
-
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
@@ -596,85 +593,78 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
         children: [
           Row(
             children: [
-              Expanded(
-                child: TextField(
-                  controller: _noteCtrl,
-                  cursorColor: _labelError ? colors.error : typeColor,
-                  decoration: InputDecoration(
-                    hintText: _getHintText(),
-                    errorText: _labelError
-                        ? t.records.sheet.nameRequired
-                        : null,
-                    hintStyle: TextStyle(color: colors.onSurface.withAlpha(80)),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(
-                        AppSpacing.radiusControl,
-                      ),
-                      borderSide: BorderSide(
-                        color: borderColor,
-                        width: borderWidth,
-                      ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(
-                        AppSpacing.radiusControl,
-                      ),
-                      borderSide: BorderSide(
-                        color: borderColor,
-                        width: borderWidth,
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(
-                        AppSpacing.radiusControl,
-                      ),
-                      borderSide: BorderSide(
-                        color: _labelError ? colors.error : typeColor,
-                        width: 2.0,
-                      ),
-                    ),
-                    filled: true,
-                    fillColor: colors.surfaceContainerLow,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
-                      vertical: AppSpacing.md,
-                    ),
-                  ),
-                  style: AppTypography.bodyLarge.copyWith(
-                    color: colors.onSurface,
-                  ),
-                ),
-              ),
+              _buildNoteInput(colors),
               const SizedBox(width: AppSpacing.sm),
-              Tooltip(
-                message: t.records.sheet.scanReceipt,
-                child: Material(
-                  color: colors.primary.withAlpha(32),
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
-                  child: InkWell(
-                    onTap: _isSubmitting
-                        ? null
-                        : () {
-                            unawaited(_openReceiptScan());
-                          },
-                    borderRadius: BorderRadius.circular(
-                      AppSpacing.radiusControl,
-                    ),
-                    child: SizedBox(
-                      width: 48,
-                      height: 48,
-                      child: Icon(
-                        PiconsRegular.receipt,
-                        size: 22,
-                        color: colors.primary,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              _buildScanReceiptButton(colors),
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildNoteInput(ColorScheme colors) {
+    final typeColor = _typeAccentColor;
+
+    final borderColor = _labelError
+        ? colors.error
+        : colors.onSurface.withAlpha(12);
+    final borderWidth = _labelError ? 1.5 : 1.0;
+
+    return Expanded(
+      child: TextField(
+        controller: _noteCtrl,
+        cursorColor: _labelError ? colors.error : typeColor,
+        decoration: InputDecoration(
+          hintText: _getHintText(),
+          errorText: _labelError ? t.records.sheet.nameRequired : null,
+          hintStyle: TextStyle(color: colors.onSurface.withAlpha(80)),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
+            borderSide: BorderSide(color: borderColor, width: borderWidth),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
+            borderSide: BorderSide(color: borderColor, width: borderWidth),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
+            borderSide: BorderSide(
+              color: _labelError ? colors.error : typeColor,
+              width: 2.0,
+            ),
+          ),
+          filled: true,
+          fillColor: colors.surfaceContainerLow,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.md,
+          ),
+        ),
+        style: AppTypography.bodyLarge.copyWith(color: colors.onSurface),
+      ),
+    );
+  }
+
+  Widget _buildScanReceiptButton(ColorScheme colors) {
+    return Tooltip(
+      message: t.records.sheet.scanReceipt,
+      child: Material(
+        color: colors.primary.withAlpha(32),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
+        child: InkWell(
+          onTap: _isSubmitting
+              ? null
+              : () {
+                  unawaited(_openReceiptScan());
+                },
+          borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
+          child: SizedBox(
+            width: 48,
+            height: 48,
+            child: Icon(PiconsRegular.receipt, size: 22, color: colors.primary),
+          ),
+        ),
       ),
     );
   }
@@ -781,6 +771,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     // hand the dropdown a value it has an item for.
     final showInactiveLink =
         selectedId != null && !isListed && !_budgetsLoading;
+    final sheetT = t.records.sheet;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -805,16 +796,13 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
             items: [
               DropdownMenuItem<String?>(
                 value: null,
-                child: Text(
-                  t.records.sheet.noBudget,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                child: Text(sheetT.noBudget, overflow: TextOverflow.ellipsis),
               ),
               for (final budget in _budgets)
                 DropdownMenuItem<String?>(
                   value: budget.id,
                   child: Text(
-                    t.records.sheet.budgetOption(
+                    sheetT.budgetOption(
                       name: budget.name,
                       period: budget.period.displayName,
                     ),
@@ -825,7 +813,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                 DropdownMenuItem<String?>(
                   value: selectedId,
                   child: Text(
-                    t.records.sheet.previousBudget,
+                    sheetT.previousBudget,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -867,9 +855,8 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
 
   Widget _buildBudgetHint(ColorScheme colors) {
     final hintColor = colors.onSurface.withAlpha(120);
-    final text = _budgetsLoading
-        ? t.records.sheet.loadingBudgets
-        : t.records.sheet.noBudget;
+    final sheetT = t.records.sheet;
+    final text = _budgetsLoading ? sheetT.loadingBudgets : sheetT.noBudget;
 
     return Text(text, style: TextStyle(color: hintColor));
   }
@@ -1046,16 +1033,22 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     );
   }
 
+  String _submitLabel() {
+    if (_isEditing) return t.common.save;
+
+    return _type == RecordType.expense
+        ? t.common.addExpense
+        : t.records.sheet.addIncome;
+  }
+
   Widget _buildSubmitButton(ColorScheme colors) {
+    final sheetT = t.records.sheet;
+
     return Column(
       children: [
         _SubmitButton(
           isSubmitting: _isSubmitting,
-          label: _isEditing
-              ? t.common.save
-              : _type == RecordType.expense
-              ? t.common.addExpense
-              : t.records.sheet.addIncome,
+          label: _submitLabel(),
           onSubmit: _submit,
         ),
         if (_isEditing)
@@ -1063,12 +1056,14 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
             padding: const EdgeInsets.only(bottom: AppSpacing.md),
             child: TextButton.icon(
               style: TextButton.styleFrom(foregroundColor: colors.error),
-              onPressed: _isSubmitting ? null : _confirmDelete,
+              onPressed: _isSubmitting
+                  ? null
+                  : () => unawaited(_confirmDelete()),
               icon: const Icon(PiconsRegular.trash, size: 18),
               label: Text(
                 _type == RecordType.expense
-                    ? t.records.sheet.deleteExpense
-                    : t.records.sheet.deleteIncome,
+                    ? sheetT.deleteExpense
+                    : sheetT.deleteIncome,
               ),
             ),
           ),
@@ -1195,11 +1190,13 @@ class _AllCategoriesButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final label = t.records.sheet.showAllCategories;
+
     return Semantics(
       button: true,
-      label: t.records.sheet.showAllCategories,
+      label: label,
       child: Tooltip(
-        message: t.records.sheet.showAllCategories,
+        message: label,
         child: Material(
           color: Colors.transparent,
           child: InkWell(

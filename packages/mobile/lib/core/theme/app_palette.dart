@@ -41,34 +41,6 @@ class AppPalette extends ThemeExtension<AppPalette> {
   final Color toggleTrack;
   final Color toggleKnob;
 
-  const AppPalette({
-    required this.bg,
-    required this.surface,
-    required this.surfaceHigh,
-    required this.inputFill,
-    required this.inputStroke,
-    required this.divider,
-    required this.textPrimary,
-    required this.textSecondary,
-    required this.textTertiary,
-    required this.brand,
-    required this.brandFill,
-    required this.onBrandFill,
-    required this.accent,
-    required this.accentFill,
-    required this.onAccentFill,
-    required this.expense,
-    required this.income,
-    required this.warning,
-    required this.info,
-    required this.progressTrack,
-    required this.toggleTrack,
-    required this.toggleKnob,
-  });
-
-  /// Error text and icons share the expense rose.
-  Color get error => expense;
-
   static const AppPalette dark = AppPalette(
     bg: AppColors.backgroundDark,
     surface: AppColors.surfaceDark,
@@ -119,6 +91,34 @@ class AppPalette extends ThemeExtension<AppPalette> {
     toggleTrack: Color(0xFFE5E5EA),
     toggleKnob: Color(0xFF8E8E93),
   );
+
+  /// Error text and icons share the expense rose.
+  Color get error => expense;
+
+  const AppPalette({
+    required this.bg,
+    required this.surface,
+    required this.surfaceHigh,
+    required this.inputFill,
+    required this.inputStroke,
+    required this.divider,
+    required this.textPrimary,
+    required this.textSecondary,
+    required this.textTertiary,
+    required this.brand,
+    required this.brandFill,
+    required this.onBrandFill,
+    required this.accent,
+    required this.accentFill,
+    required this.onAccentFill,
+    required this.expense,
+    required this.income,
+    required this.warning,
+    required this.info,
+    required this.progressTrack,
+    required this.toggleTrack,
+    required this.toggleKnob,
+  });
 
   @override
   AppPalette copyWith({

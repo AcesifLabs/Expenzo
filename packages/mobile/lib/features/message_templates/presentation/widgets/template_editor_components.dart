@@ -164,25 +164,6 @@ class TriggerWordChip extends StatelessWidget {
     onTap();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.palette;
-
-    // Compact chip, full 48dp touch area.
-    return Semantics(
-      button: true,
-      selected: isSelected,
-      child: GestureDetector(
-        onTap: _handleTap,
-        behavior: HitTestBehavior.opaque,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: AppSpacing.minTapTarget),
-          child: Center(widthFactor: 1, child: _chip(palette)),
-        ),
-      ),
-    );
-  }
-
   Widget _chip(AppPalette palette) {
     return AnimatedScale(
       scale: isSelected ? 1.0 : 0.98,
@@ -211,6 +192,25 @@ class TriggerWordChip extends StatelessWidget {
             color: isSelected ? palette.brand : palette.textPrimary,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
           ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+
+    // Compact chip, full 48dp touch area.
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      child: GestureDetector(
+        onTap: _handleTap,
+        behavior: HitTestBehavior.opaque,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: AppSpacing.minTapTarget),
+          child: Center(widthFactor: 1, child: _chip(palette)),
         ),
       ),
     );

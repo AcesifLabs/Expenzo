@@ -67,6 +67,7 @@ class _RecurringListViewState extends State<RecurringListView> {
   }
 
   Widget _buildEmptyState() {
+    final emptyT = t.recurring.empty;
     final colorScheme = Theme.of(context).colorScheme;
 
     return Center(
@@ -80,17 +81,14 @@ class _RecurringListViewState extends State<RecurringListView> {
           ),
           const SizedBox(height: AppSpacing.md),
           Text(
-            t.recurring.empty.title,
+            emptyT.title,
             style: AppTypography.titleLarge.copyWith(
               color: colorScheme.onSurfaceVariant,
               fontWeight: FontWeight.w400,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
-          Text(
-            t.recurring.empty.body,
-            style: TextStyle(color: colorScheme.outline),
-          ),
+          Text(emptyT.body, style: TextStyle(color: colorScheme.outline)),
         ],
       ),
     );
@@ -181,11 +179,13 @@ class _RecurringListViewState extends State<RecurringListView> {
   }
 
   void _showDeleteDialog(BuildContext context, RecurringTransaction recurring) {
+    final deleteT = t.recurring.delete;
+
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(t.recurring.delete.title),
-        content: Text(t.recurring.delete.confirm(name: recurring.description)),
+        title: Text(deleteT.title),
+        content: Text(deleteT.confirm(name: recurring.description)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),

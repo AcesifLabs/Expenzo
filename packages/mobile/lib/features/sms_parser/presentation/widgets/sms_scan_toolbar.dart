@@ -22,6 +22,7 @@ class SmsScanToolbar extends StatelessWidget {
 
   Widget _buildSenderChip(ColorScheme colors, bool isGrouped) {
     final chipFg = isGrouped ? colors.primary : colors.onSurface.withAlpha(170);
+    final toolbarStrings = t.smsParser.toolbar;
 
     return InkWell(
       key: const Key('sender_mode_chip'),
@@ -42,9 +43,7 @@ class SmsScanToolbar extends StatelessWidget {
             Icon(PiconsRegular.buildings, size: 14, color: chipFg),
             const SizedBox(width: AppSpacing.xs),
             Text(
-              isGrouped
-                  ? t.smsParser.toolbar.sender
-                  : t.smsParser.toolbar.flatList,
+              isGrouped ? toolbarStrings.sender : toolbarStrings.flatList,
               style: AppTypography.bodySmall.copyWith(
                 color: chipFg,
                 fontWeight: isGrouped ? FontWeight.w600 : FontWeight.w500,

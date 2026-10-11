@@ -50,6 +50,7 @@ class SmsScanSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final strings = t.smsParser.summary;
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.smd),
@@ -59,13 +60,13 @@ class SmsScanSummaryCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _buildStat(context, t.smsParser.summary.range, rangeLabel),
+          _buildStat(context, strings.range, rangeLabel),
           const SizedBox(width: AppSpacing.sm),
-          _buildStat(context, t.smsParser.summary.matches, '$matchCount'),
+          _buildStat(context, strings.matches, '$matchCount'),
           const SizedBox(width: AppSpacing.sm),
           _buildStat(
             context,
-            t.smsParser.summary.selected,
+            strings.selected,
             '$selectedCount',
             valueColor: colors.primary,
           ),

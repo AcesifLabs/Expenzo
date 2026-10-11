@@ -7,6 +7,15 @@ import 'package:expense_tracker/core/theme/app_typography.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 
 class SourceBadge extends StatelessWidget {
+  static Color _sourceColor(ExpenseSource source, AppPalette palette) {
+    return switch (source) {
+      ExpenseSource.manual => palette.textSecondary,
+      ExpenseSource.sms => palette.accent,
+      ExpenseSource.email => palette.income,
+      ExpenseSource.recurring => palette.warning,
+    };
+  }
+
   final ExpenseSource source;
   final String? categoryName;
   final String? categoryIconName;
@@ -19,15 +28,6 @@ class SourceBadge extends StatelessWidget {
     this.categoryIconName,
     this.categoryColor,
   });
-
-  static Color _sourceColor(ExpenseSource source, AppPalette palette) {
-    return switch (source) {
-      ExpenseSource.manual => palette.textSecondary,
-      ExpenseSource.sms => palette.accent,
-      ExpenseSource.email => palette.income,
-      ExpenseSource.recurring => palette.warning,
-    };
-  }
 
   @override
   Widget build(BuildContext context) {

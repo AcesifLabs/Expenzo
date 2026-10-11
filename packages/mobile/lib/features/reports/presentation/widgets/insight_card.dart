@@ -5,10 +5,6 @@ import 'package:expense_tracker/core/theme/app_spacing.dart';
 import '../../domain/entities/insight_item.dart';
 
 class InsightCard extends StatelessWidget {
-  final InsightItem item;
-
-  const InsightCard({super.key, required this.item});
-
   static Color _toneColor(AppPalette palette, InsightTone tone) {
     return switch (tone) {
       InsightTone.warning => palette.expense,
@@ -17,6 +13,10 @@ class InsightCard extends StatelessWidget {
       InsightTone.investment => palette.info,
     };
   }
+
+  final InsightItem item;
+
+  const InsightCard({super.key, required this.item});
 
   @override
   Widget build(BuildContext context) {

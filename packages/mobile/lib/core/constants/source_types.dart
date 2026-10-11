@@ -7,11 +7,13 @@ enum ExpenseSource {
   recurring;
 
   String get displayName {
+    final strings = t.enums.source;
+
     return switch (this) {
-      ExpenseSource.manual => t.enums.source.manual,
-      ExpenseSource.sms => t.enums.source.sms,
-      ExpenseSource.email => t.enums.source.email,
-      ExpenseSource.recurring => t.enums.source.recurring,
+      ExpenseSource.manual => strings.manual,
+      ExpenseSource.sms => strings.sms,
+      ExpenseSource.email => strings.email,
+      ExpenseSource.recurring => strings.recurring,
     };
   }
 

@@ -4,14 +4,6 @@ class AiAssistantConstants {
   static const maxUserPromptLength = 280;
   static const cooldownDuration = Duration(seconds: 4);
 
-  // User-facing refusals, in the current app language.
-  static String get outOfScopeRefusal => t.aiAssistant.refusals.outOfScope;
-  static String get promptInjectionRefusal =>
-      t.aiAssistant.refusals.promptInjection;
-  static String get tooLongRefusal => t.aiAssistant.refusals.tooLong;
-  static String get emptyPromptRefusal => t.aiAssistant.refusals.empty;
-  static String get cooldownRefusal => t.aiAssistant.refusals.cooldown;
-
   /// Sent to the model only; stays English in every app language.
   static const systemGuardrails = '''
 You are Expenzo AI, a strict in-app personal finance assistant.
@@ -115,6 +107,14 @@ Keep answers concise and practical. Mention currency when discussing amounts.
     r'(এপিআই কী|গোপন কী|পাসওয়ার্ড|টোকেন|সোর্স কোড)',
     r'(ভান কর|অভিনয় কর|হিসেবে আচরণ কর|জেলব্রেক)',
   ];
+
+  // User-facing refusals, in the current app language.
+  static String get outOfScopeRefusal => t.aiAssistant.refusals.outOfScope;
+  static String get promptInjectionRefusal =>
+      t.aiAssistant.refusals.promptInjection;
+  static String get tooLongRefusal => t.aiAssistant.refusals.tooLong;
+  static String get emptyPromptRefusal => t.aiAssistant.refusals.empty;
+  static String get cooldownRefusal => t.aiAssistant.refusals.cooldown;
 
   const AiAssistantConstants._();
 }

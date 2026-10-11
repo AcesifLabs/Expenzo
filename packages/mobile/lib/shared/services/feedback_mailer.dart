@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -39,22 +40,19 @@ Future<void> sendFeedback(
   // The start-up error screen sits above the navigator; nothing to show on.
   if (opened || !context.mounted || Navigator.maybeOf(context) == null) return;
 
+  final feedbackStrings = t.common.feedback;
+
   await showDialog<void>(
     context: context,
     builder: (dialogContext) => AlertDialog(
       title: Text(t.common.sendFeedback),
       content: SelectableText(
-        t.common.feedback.noMailApp(email: AppConfig.feedbackEmail),
+        feedbackStrings.noMailApp(email: AppConfig.feedbackEmail),
       ),
       actions: [
         TextButton(
-          onPressed: () async {
-            await Clipboard.setData(
-              const ClipboardData(text: AppConfig.feedbackEmail),
-            );
-            if (dialogContext.mounted) Navigator.pop(dialogContext);
-          },
-          child: Text(t.common.feedback.copyAddress),
+          onPressed: () => unawaited(_copyFeedbackAddress(dialogContext)),
+          child: Text(feedbackStrings.copyAddress),
         ),
         TextButton(
           onPressed: () => Navigator.pop(dialogContext),
@@ -63,4 +61,9 @@ Future<void> sendFeedback(
       ],
     ),
   );
+}
+
+Future<void> _copyFeedbackAddress(BuildContext dialogContext) async {
+  await Clipboard.setData(const ClipboardData(text: AppConfig.feedbackEmail));
+  if (dialogContext.mounted) Navigator.pop(dialogContext);
 }

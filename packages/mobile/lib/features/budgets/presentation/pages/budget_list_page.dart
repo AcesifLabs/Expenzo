@@ -94,6 +94,9 @@ class _BudgetListViewState extends State<BudgetListView> {
   }
 
   Widget _buildLoadedState(BuildContext context, BudgetLoaded state) {
+    final textTheme = Theme.of(context).textTheme;
+    final emptyStrings = t.budgets.empty;
+
     return Scaffold(
       backgroundColor: _palette.bg,
       body: SafeArea(
@@ -111,16 +114,14 @@ class _BudgetListViewState extends State<BudgetListView> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
-                          t.budgets.empty.title,
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
+                        Text(emptyStrings.title, style: textTheme.titleMedium),
                         const SizedBox(height: AppSpacing.sm),
                         Text(
-                          t.budgets.empty.body,
+                          emptyStrings.body,
                           textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(color: _palette.textSecondary),
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: _palette.textSecondary,
+                          ),
                         ),
                         const SizedBox(height: AppSpacing.md),
                         ElevatedButton.icon(
@@ -207,11 +208,12 @@ class _BudgetListViewState extends State<BudgetListView> {
   }
 
   void _confirmDelete(BuildContext context, Budget budget) {
+    final strings = t.budgets.delete;
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(t.budgets.delete.title),
-        content: Text(t.budgets.delete.confirm(name: budget.name)),
+        title: Text(strings.title),
+        content: Text(strings.confirm(name: budget.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),

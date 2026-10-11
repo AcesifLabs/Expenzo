@@ -41,8 +41,7 @@ class ReportsRepositoryImpl implements ReportsRepository {
       return Right(
         zeroFillTrend(
           totals: totals,
-          start: startDate,
-          end: endDate,
+          range: (start: startDate, end: endDate),
           granularity: granularity,
         ),
       );

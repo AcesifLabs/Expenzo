@@ -105,6 +105,8 @@ class _SmsScanResultsPageState extends State<SmsScanResultsPage> {
   }
 
   Widget _buildEmptyResults() {
+    final strings = t.smsParser.results;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -112,13 +114,13 @@ class _SmsScanResultsPageState extends State<SmsScanResultsPage> {
           const Icon(PiconsRegular.checkCircle, size: 64, color: Colors.green),
           const SizedBox(height: AppSpacing.md),
           Text(
-            t.smsParser.results.empty,
+            strings.empty,
             style: AppTypography.titleLarge.copyWith(
               fontWeight: FontWeight.w400,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
-          Text(t.smsParser.results.emptyBody, textAlign: TextAlign.center),
+          Text(strings.emptyBody, textAlign: TextAlign.center),
         ],
       ),
     );

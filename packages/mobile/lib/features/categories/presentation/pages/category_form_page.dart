@@ -133,20 +133,24 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
   }
 
   PreferredSizeWidget _buildTopBar() {
+    final formT = t.categories.form;
+
     return AppPageHeader(
       leading: const AppBackButton(icon: PiconsRegular.x),
-      title: _isEditing ? t.categories.form.edit : t.categories.form.add,
+      title: _isEditing ? formT.edit : formT.add,
     );
   }
 
   Widget _buildNameField() {
+    final formT = t.categories.form;
+
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.smd),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            t.categories.form.name,
+            formT.name,
             style: AppTypography.bodySmall.copyWith(
               color: _palette.textSecondary,
             ),
@@ -165,7 +169,7 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
                 color: _palette.textPrimary,
               ),
               decoration: InputDecoration(
-                hintText: t.categories.form.nameHint,
+                hintText: formT.nameHint,
                 hintStyle: TextStyle(color: _palette.textSecondary),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(

@@ -500,32 +500,31 @@ class _CaptureButton extends StatelessWidget {
 
   const _CaptureButton({this.onTap});
 
+  Widget _ring(BuildContext context) {
+    final ringColor = context.palette.textPrimary;
+
+    return Container(
+      width: 64,
+      height: 64,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: ringColor, width: 4),
+      ),
+      alignment: Alignment.center,
+      child: Container(
+        width: 54,
+        height: 54,
+        decoration: BoxDecoration(color: ringColor, shape: BoxShape.circle),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
       label: t.receiptScan.takePhoto,
       child: GestureDetector(onTap: onTap, child: _ring(context)),
-    );
-  }
-
-  Widget _ring(BuildContext context) {
-    return Container(
-      width: 64,
-      height: 64,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: context.palette.textPrimary, width: 4),
-      ),
-      alignment: Alignment.center,
-      child: Container(
-        width: 54,
-        height: 54,
-        decoration: BoxDecoration(
-          color: context.palette.textPrimary,
-          shape: BoxShape.circle,
-        ),
-      ),
     );
   }
 }

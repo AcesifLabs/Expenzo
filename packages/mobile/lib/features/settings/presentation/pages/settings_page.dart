@@ -17,6 +17,7 @@ import 'package:expense_tracker/shared/presentation/widgets/app_back_button.dart
 import 'package:expense_tracker/shared/services/feedback_mailer.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 
+import '../../domain/entities/user_settings.dart';
 import '../bloc/settings_bloc.dart';
 import '../bloc/settings_event.dart';
 import '../bloc/settings_state.dart';
@@ -45,13 +46,46 @@ Future<bool> _requestNotificationPermission() async =>
     (await Permission.notification.request()).isGranted;
 
 class SettingsView extends StatelessWidget {
-  /// Asks Android for permission to post notifications; replaceable in tests.
-  final Future<bool> Function() requestNotificationPermission;
-
   const SettingsView({
     super.key,
     this.requestNotificationPermission = _requestNotificationPermission,
   });
+
+  static List<(String, String)> get _themeOptions {
+    final themeT = t.enums.theme;
+
+    return [
+      ('system', themeT.system),
+      ('light', themeT.light),
+      ('dark', themeT.dark),
+    ];
+  }
+
+  // Language names are shown in their own script, never translated.
+  static List<(String, String)> get _languageOptions => [
+    ('system', t.enums.theme.system),
+    ('en', 'English'),
+    ('bn', 'বাংলা'),
+  ];
+
+  static String _languageLabel(String languageCode) {
+    for (final (value, label) in _languageOptions) {
+      if (value == languageCode) return label;
+    }
+
+    return t.enums.theme.system;
+  }
+
+  static String _themeLabel(String theme) {
+    for (final (value, label) in _themeOptions) {
+      if (value == theme) return label;
+    }
+
+    return t.enums.theme.system;
+  }
+
+  /// Asks Android for permission to post notifications; replaceable in tests.
+  final Future<bool> Function() requestNotificationPermission;
 
   void _handleCurrencyTap(BuildContext context) {
     final state = context.read<SettingsBloc>().state;
@@ -119,12 +153,6 @@ class SettingsView extends StatelessWidget {
     }
   }
 
-  static List<(String, String)> get _themeOptions => [
-    ('system', t.enums.theme.system),
-    ('light', t.enums.theme.light),
-    ('dark', t.enums.theme.dark),
-  ];
-
   Future<void> _handleLanguageTap(BuildContext context, String current) async {
     final picked = await showDialog<String>(
       context: context,
@@ -146,29 +174,6 @@ class SettingsView extends StatelessWidget {
     if (picked != null && context.mounted) {
       context.read<SettingsBloc>().add(UpdateLanguage(picked));
     }
-  }
-
-  // Language names are shown in their own script, never translated.
-  static List<(String, String)> get _languageOptions => [
-    ('system', t.enums.theme.system),
-    ('en', 'English'),
-    ('bn', 'বাংলা'),
-  ];
-
-  static String _languageLabel(String languageCode) {
-    for (final (value, label) in _languageOptions) {
-      if (value == languageCode) return label;
-    }
-
-    return t.enums.theme.system;
-  }
-
-  static String _themeLabel(String theme) {
-    for (final (value, label) in _themeOptions) {
-      if (value == theme) return label;
-    }
-
-    return t.enums.theme.system;
   }
 
   void _handleDeleteAccountTap(BuildContext context) {
@@ -195,6 +200,121 @@ class SettingsView extends StatelessWidget {
     );
   }
 
+  List<Widget> _preferencesSection(
+    BuildContext context,
+    UserSettings? settings,
+  ) {
+    final settingsT = t.settings;
+    final budgetAlertsT = settingsT.budgetAlerts;
+    final currency = CurrencyConfig.byCode(
+      settings?.currencyCode ?? CurrencyConfig.defaultCode,
+    );
+    final theme = settings?.theme ?? 'system';
+    final languageCode = settings?.languageCode ?? 'system';
+
+    return [
+      _SectionHeader(settingsT.sections.preferences),
+      _SettingTile(
+        icon: PiconsRegular.currencyCircleDollar,
+        title: settingsT.currency,
+        subtitle: '${currency.displayName} (${currency.symbol.trim()})',
+        onTap: () => _handleCurrencyTap(context),
+      ),
+      _SettingTile(
+        icon: PiconsRegular.sun,
+        title: settingsT.appearance,
+        subtitle: _themeLabel(theme),
+        onTap: () => _handleAppearanceTap(context, theme),
+      ),
+      _SettingTile(
+        icon: PiconsRegular.translate,
+        title: settingsT.language.title,
+        subtitle: _languageLabel(languageCode),
+        onTap: () => _handleLanguageTap(context, languageCode),
+      ),
+      SwitchListTile(
+        secondary: const Icon(PiconsRegular.bell),
+        title: Text(budgetAlertsT.title),
+        subtitle: Text(budgetAlertsT.subtitle),
+        value: settings?.notificationsEnabled ?? false,
+        onChanged: settings == null
+            ? null
+            : (enabled) => _onNotificationsChanged(context, enabled),
+      ),
+    ];
+  }
+
+  List<Widget> _automationSection(BuildContext context) {
+    final settingsT = t.settings;
+    final commonT = t.common;
+    final recurringT = settingsT.recurring;
+
+    return [
+      _SectionHeader(settingsT.sections.automation),
+      _SettingTile(
+        icon: PiconsRegular.chatText,
+        title: commonT.autoImport,
+        subtitle: settingsT.autoImportSubtitle,
+        onTap: () => context.push('/settings/auto-import'),
+      ),
+      _SettingTile(
+        icon: PiconsRegular.funnel,
+        title: commonT.matchingRules,
+        subtitle: settingsT.matchingRulesSubtitle,
+        onTap: () => context.push('/settings/matching-rules'),
+      ),
+      _SettingTile(
+        icon: PiconsRegular.repeat,
+        title: recurringT.title,
+        subtitle: recurringT.subtitle,
+        onTap: () => context.push('/settings/recurring'),
+      ),
+    ];
+  }
+
+  List<Widget> _supportSection(BuildContext context) {
+    final settingsT = t.settings;
+
+    return [
+      _SectionHeader(settingsT.sections.support),
+      _SettingTile(
+        icon: PiconsRegular.envelopeSimple,
+        title: t.common.sendFeedback,
+        subtitle: settingsT.feedbackSubtitle,
+        onTap: () => sendFeedback(context),
+      ),
+    ];
+  }
+
+  List<Widget> _accountSection(BuildContext context) {
+    final settingsT = t.settings;
+    final signInT = settingsT.signIn;
+    final isSignedIn = context.watch<AuthBloc>().state is Authenticated;
+
+    return [
+      _SectionHeader(settingsT.sections.account),
+      if (isSignedIn) ...[
+        _SettingTile(
+          icon: PiconsRegular.signOut,
+          title: settingsT.signOut,
+          onTap: () => context.read<AuthBloc>().add(const SignOutRequested()),
+        ),
+        _SettingTile(
+          icon: PiconsRegular.trash,
+          title: settingsT.deleteAccount,
+          titleColor: Theme.of(context).colorScheme.error,
+          onTap: () => _handleDeleteAccountTap(context),
+        ),
+      ] else
+        _SettingTile(
+          icon: PiconsRegular.signIn,
+          title: signInT.title,
+          subtitle: signInT.subtitle,
+          onTap: () => context.push('/login'),
+        ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
@@ -205,12 +325,6 @@ class SettingsView extends StatelessWidget {
           final settings = settingsState is SettingsLoaded
               ? settingsState.settings
               : null;
-          final currency = CurrencyConfig.byCode(
-            settings?.currencyCode ?? CurrencyConfig.defaultCode,
-          );
-          final theme = settings?.theme ?? 'system';
-          final languageCode = settings?.languageCode ?? 'system';
-          final isSignedIn = context.watch<AuthBloc>().state is Authenticated;
 
           return ListView(
             padding: const EdgeInsets.symmetric(
@@ -218,81 +332,10 @@ class SettingsView extends StatelessWidget {
               vertical: AppSpacing.sm,
             ),
             children: [
-              _SectionHeader(t.settings.sections.preferences),
-              _SettingTile(
-                icon: PiconsRegular.currencyCircleDollar,
-                title: t.settings.currency,
-                subtitle: '${currency.displayName} (${currency.symbol.trim()})',
-                onTap: () => _handleCurrencyTap(context),
-              ),
-              _SettingTile(
-                icon: PiconsRegular.sun,
-                title: t.settings.appearance,
-                subtitle: _themeLabel(theme),
-                onTap: () => _handleAppearanceTap(context, theme),
-              ),
-              _SettingTile(
-                icon: PiconsRegular.translate,
-                title: t.settings.language.title,
-                subtitle: _languageLabel(languageCode),
-                onTap: () => _handleLanguageTap(context, languageCode),
-              ),
-              SwitchListTile(
-                secondary: const Icon(PiconsRegular.bell),
-                title: Text(t.settings.budgetAlerts.title),
-                subtitle: Text(t.settings.budgetAlerts.subtitle),
-                value: settings?.notificationsEnabled ?? false,
-                onChanged: settings == null
-                    ? null
-                    : (enabled) => _onNotificationsChanged(context, enabled),
-              ),
-              _SectionHeader(t.settings.sections.automation),
-              _SettingTile(
-                icon: PiconsRegular.chatText,
-                title: t.common.autoImport,
-                subtitle: t.settings.autoImportSubtitle,
-                onTap: () => context.push('/settings/auto-import'),
-              ),
-              _SettingTile(
-                icon: PiconsRegular.funnel,
-                title: t.common.matchingRules,
-                subtitle: t.settings.matchingRulesSubtitle,
-                onTap: () => context.push('/settings/matching-rules'),
-              ),
-              _SettingTile(
-                icon: PiconsRegular.repeat,
-                title: t.settings.recurring.title,
-                subtitle: t.settings.recurring.subtitle,
-                onTap: () => context.push('/settings/recurring'),
-              ),
-              _SectionHeader(t.settings.sections.support),
-              _SettingTile(
-                icon: PiconsRegular.envelopeSimple,
-                title: t.common.sendFeedback,
-                subtitle: t.settings.feedbackSubtitle,
-                onTap: () => sendFeedback(context),
-              ),
-              _SectionHeader(t.settings.sections.account),
-              if (isSignedIn) ...[
-                _SettingTile(
-                  icon: PiconsRegular.signOut,
-                  title: t.settings.signOut,
-                  onTap: () =>
-                      context.read<AuthBloc>().add(const SignOutRequested()),
-                ),
-                _SettingTile(
-                  icon: PiconsRegular.trash,
-                  title: t.settings.deleteAccount,
-                  titleColor: Theme.of(context).colorScheme.error,
-                  onTap: () => _handleDeleteAccountTap(context),
-                ),
-              ] else
-                _SettingTile(
-                  icon: PiconsRegular.signIn,
-                  title: t.settings.signIn.title,
-                  subtitle: t.settings.signIn.subtitle,
-                  onTap: () => context.push('/login'),
-                ),
+              ..._preferencesSection(context, settings),
+              ..._automationSection(context),
+              ..._supportSection(context),
+              ..._accountSection(context),
               if (kDebugMode) ...[
                 const _SectionHeader('Developer'),
                 _SettingTile(

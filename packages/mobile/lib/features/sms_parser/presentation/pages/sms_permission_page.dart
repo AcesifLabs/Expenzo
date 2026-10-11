@@ -84,18 +84,20 @@ class SmsPermissionPage extends StatelessWidget {
   }
 
   Widget _buildPermanentlyDeniedSection(BuildContext context) {
+    final palette = context.palette;
+
     return Column(
       children: [
         const SizedBox(height: AppSpacing.md),
         Container(
           padding: const EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
-            color: context.palette.warning.withAlpha(51),
+            color: palette.warning.withAlpha(51),
             borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
           ),
           child: Column(
             children: [
-              Icon(PiconsRegular.warning, color: context.palette.warning),
+              Icon(PiconsRegular.warning, color: palette.warning),
               const SizedBox(height: AppSpacing.sm),
               Text(t.smsParser.permission.denied, textAlign: TextAlign.center),
             ],
@@ -118,18 +120,20 @@ class SmsPermissionPage extends StatelessWidget {
   }
 
   Widget _buildTimeoutSection(BuildContext context) {
+    final palette = context.palette;
+
     return Column(
       children: [
         const SizedBox(height: AppSpacing.md),
         Container(
           padding: const EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
-            color: context.palette.error.withAlpha(51),
+            color: palette.error.withAlpha(51),
             borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
           ),
           child: Column(
             children: [
-              Icon(PiconsRegular.warningCircle, color: context.palette.error),
+              Icon(PiconsRegular.warningCircle, color: palette.error),
               const SizedBox(height: AppSpacing.sm),
               Text(
                 t.smsParser.permission.timedOut,
@@ -145,27 +149,29 @@ class SmsPermissionPage extends StatelessWidget {
   }
 
   Widget _buildInfoSection(BuildContext context) {
+    final strings = t.smsParser.permission;
+
     return Column(
       children: [
         _buildInfoCard(
           context,
           icon: PiconsRegular.lock,
-          title: t.smsParser.permission.privacyTitle,
-          description: t.smsParser.permission.privacyBody,
+          title: strings.privacyTitle,
+          description: strings.privacyBody,
         ),
         const SizedBox(height: AppSpacing.smd),
         _buildInfoCard(
           context,
           icon: PiconsRegular.database,
-          title: t.smsParser.permission.localTitle,
-          description: t.smsParser.permission.localBody,
+          title: strings.localTitle,
+          description: strings.localBody,
         ),
         const SizedBox(height: AppSpacing.smd),
         _buildInfoCard(
           context,
           icon: PiconsRegular.slidersHorizontal,
-          title: t.smsParser.permission.controlTitle,
-          description: t.smsParser.permission.controlBody,
+          title: strings.controlTitle,
+          description: strings.controlBody,
         ),
       ],
     );
@@ -183,9 +189,11 @@ class SmsPermissionPage extends StatelessWidget {
 
   Widget _buildPageContent(BuildContext context, SmsPermissionState state) {
     final theme = Theme.of(context);
+    final palette = context.palette;
+    final strings = t.smsParser.permission;
 
     return Scaffold(
-      backgroundColor: context.palette.bg,
+      backgroundColor: palette.bg,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.lg),
@@ -193,19 +201,16 @@ class SmsPermissionPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Spacer(),
-              Icon(PiconsRegular.chat, size: 80, color: context.palette.brand),
+              Icon(PiconsRegular.chat, size: 80, color: palette.brand),
               const SizedBox(height: AppSpacing.lg),
               Text(
-                t.smsParser.permission.title,
+                strings.title,
                 style: theme.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: AppSpacing.md),
-              Text(
-                t.smsParser.permission.body,
-                style: theme.textTheme.bodyLarge,
-              ),
+              Text(strings.body, style: theme.textTheme.bodyLarge),
               const SizedBox(height: AppSpacing.lg),
               _buildInfoSection(context),
               if (state is SmsPermissionLoading)

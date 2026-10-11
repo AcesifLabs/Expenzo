@@ -286,12 +286,14 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
 
   // -- Name Field --
   Widget _buildNameField() {
+    final strings = t.budgets.form;
+
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.smd),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildLabel(t.budgets.form.name),
+          _buildLabel(strings.name),
           const SizedBox(height: AppSpacing.sm),
           Container(
             height: 52,
@@ -314,7 +316,7 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
                 color: _palette.textPrimary,
               ),
               decoration: InputDecoration(
-                hintText: t.budgets.form.nameHint,
+                hintText: strings.nameHint,
                 hintStyle: TextStyle(color: _palette.textSecondary),
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,
@@ -398,6 +400,8 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
 
   // -- Rollover Row --
   Widget _buildRolloverRow() {
+    final strings = t.budgets.form;
+
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.smd),
       child: Container(
@@ -418,14 +422,14 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    t.budgets.form.rollover,
+                    strings.rollover,
                     style: AppTypography.bodyMedium.copyWith(
                       color: _palette.textPrimary,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    t.budgets.form.rolloverDetail,
+                    strings.rolloverDetail,
                     style: AppTypography.bodySmall.copyWith(
                       color: _palette.textSecondary,
                     ),
@@ -488,7 +492,8 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
 
   // -- Form --
   Widget _buildForm(BudgetState state) {
-    final title = isEditing ? t.budgets.form.edit : t.budgets.form.add;
+    final strings = t.budgets.form;
+    final title = isEditing ? strings.edit : strings.add;
 
     return Scaffold(
       backgroundColor: _palette.bg,
@@ -544,7 +549,8 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
 
   @override
   Widget build(BuildContext context) {
-    final title = isEditing ? t.budgets.form.edit : t.budgets.form.add;
+    final strings = t.budgets.form;
+    final title = isEditing ? strings.edit : strings.add;
 
     if (_isLoading) {
       return Scaffold(
@@ -561,9 +567,9 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildFieldShimmer(t.budgets.form.amount),
-                _buildFieldShimmer(t.budgets.form.name),
-                _buildFieldShimmer(t.budgets.form.period),
+                _buildFieldShimmer(strings.amount),
+                _buildFieldShimmer(strings.name),
+                _buildFieldShimmer(strings.period),
               ],
             ),
           ),

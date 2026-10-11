@@ -267,30 +267,26 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
 
   Row _buildHeaderRow(ParsedTestResult result) {
     final colors = Theme.of(context).colorScheme;
+    final testerT = t.parsingRules.tester;
+    final income = context.palette.income;
 
     return Row(
       children: [
         Icon(
           result.matchFound ? PiconsRegular.checkCircle : PiconsRegular.xCircle,
-          color: result.matchFound
-              ? context.palette.income
-              : colors.onSurfaceVariant,
+          color: result.matchFound ? income : colors.onSurfaceVariant,
         ),
         const SizedBox(width: AppSpacing.sm),
         Text(
-          result.matchFound
-              ? t.parsingRules.tester.match
-              : t.parsingRules.tester.noMatch,
+          result.matchFound ? testerT.match : testerT.noMatch,
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: result.matchFound
-                ? context.palette.income
-                : colors.onSurfaceVariant,
+            color: result.matchFound ? income : colors.onSurfaceVariant,
           ),
         ),
         const Spacer(),
         Text(
-          t.parsingRules.tester.elapsed(ms: result.elapsedMs),
+          testerT.elapsed(ms: result.elapsedMs),
           style: AppTypography.bodySmall.copyWith(
             color: result.elapsedMs > 1000
                 ? colors.tertiary
@@ -302,20 +298,15 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
   }
 
   Row _buildDetailsRow(ParsedTestResult result) {
+    final testerT = t.parsingRules.tester;
+
     return Row(
       children: [
-        _buildFieldResult(
-          t.parsingRules.tester.amount,
-          result.amount?.toString(),
-        ),
+        _buildFieldResult(testerT.amount, result.amount?.toString()),
         const SizedBox(width: AppSpacing.md),
-        _buildFieldResult(t.parsingRules.tester.date, result.date?.toString()),
+        _buildFieldResult(testerT.date, result.date?.toString()),
         const Spacer(),
-        Text(
-          t.parsingRules.tester.confidence(
-            percent: (result.confidence * 100).toInt(),
-          ),
-        ),
+        Text(testerT.confidence(percent: (result.confidence * 100).toInt())),
       ],
     );
   }
@@ -354,14 +345,16 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final testerT = t.parsingRules.tester;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         TextField(
           controller: _sampleController,
           decoration: InputDecoration(
-            labelText: t.parsingRules.tester.sample,
-            hintText: t.parsingRules.tester.sampleHint,
+            labelText: testerT.sample,
+            hintText: testerT.sampleHint,
             border: OutlineInputBorder(),
           ),
           maxLines: 3,
@@ -375,7 +368,7 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
             child: Padding(
               padding: AppSpacing.paddingMd,
               child: Text(
-                t.parsingRules.tester.enterSample,
+                testerT.enterSample,
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),

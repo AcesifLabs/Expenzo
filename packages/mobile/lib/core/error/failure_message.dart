@@ -16,22 +16,24 @@ abstract final class FailureCodes {
 /// `Failure.message` is diagnostic text for logs and is never shown, unless
 /// the code is [FailureCodes.userMessage].
 String failureText(Failure failure) {
+  final errors = t.common.errors;
+
   switch (failure.errorCode) {
     case FailureCodes.notFound:
-      return t.common.errors.notFound;
+      return errors.notFound;
     case FailureCodes.smsScan:
-      return t.common.errors.smsScan;
+      return errors.smsScan;
     case FailureCodes.userMessage:
       return failure.message;
   }
 
   return switch (failure) {
-    NetworkFailure() => t.common.errors.network,
-    ServerFailure() => t.common.errors.server,
-    AuthFailure() => t.common.errors.auth,
-    PermissionFailure() => t.common.errors.permission,
-    CacheFailure() => t.common.errors.storage,
-    _ when failure.errorCode == 'DB_ERROR' => t.common.errors.storage,
-    _ => t.common.errors.generic,
+    NetworkFailure() => errors.network,
+    ServerFailure() => errors.server,
+    AuthFailure() => errors.auth,
+    PermissionFailure() => errors.permission,
+    CacheFailure() => errors.storage,
+    _ when failure.errorCode == 'DB_ERROR' => errors.storage,
+    _ => errors.generic,
   };
 }

@@ -2,6 +2,9 @@ import 'package:expense_tracker/features/ai_assistant/domain/constants/ai_assist
 import 'package:expense_tracker/features/ai_assistant/domain/entities/prompt_validation_result.dart';
 
 class ValidateAiPrompt {
+  static final _bangla = RegExp('[\u0980-\u09FF]');
+  static final _wordSeparator = RegExp('[\\s,.?!।;:()\'"]+');
+
   const ValidateAiPrompt();
 
   PromptValidationResult call(String rawPrompt) {
@@ -70,9 +73,6 @@ class ValidateAiPrompt {
 
     return false;
   }
-
-  static final _bangla = RegExp('[\u0980-\u09FF]');
-  static final _wordSeparator = RegExp('[\\s,.?!।;:()\'"]+');
 
   /// Keyboards type য়, ড় and ঢ় either as one letter or as a letter plus
   /// nukta (়); compare them in one form.

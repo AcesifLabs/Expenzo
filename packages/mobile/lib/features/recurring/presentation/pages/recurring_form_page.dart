@@ -195,8 +195,9 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
   }
 
   String? _validateAmount(String? value) {
-    if (value == null || value.isEmpty) return t.recurring.form.amountRequired;
-    if (double.tryParse(value) == null) return t.recurring.form.amountInvalid;
+    final form = t.recurring.form;
+    if (value == null || value.isEmpty) return form.amountRequired;
+    if (double.tryParse(value) == null) return form.amountInvalid;
 
     return null;
   }
@@ -227,11 +228,13 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
   }
 
   Widget _buildDescriptionField() {
+    final form = t.recurring.form;
+
     return TextFormField(
       controller: _descriptionController,
       decoration: InputDecoration(
-        labelText: t.recurring.form.name,
-        hintText: t.recurring.form.nameHint,
+        labelText: form.name,
+        hintText: form.nameHint,
       ),
       maxLines: 2,
       validator: _validateDescription,
@@ -264,15 +267,14 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
   }
 
   Widget _buildEndDateTile(DateFormat dateFormat) {
+    final form = t.recurring.form;
     final endDate = _endDate;
 
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      title: Text(t.recurring.form.endDate),
+      title: Text(form.endDate),
       subtitle: Text(
-        endDate != null
-            ? dateFormat.format(endDate)
-            : t.recurring.form.noEndDate,
+        endDate != null ? dateFormat.format(endDate) : form.noEndDate,
       ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
@@ -280,7 +282,7 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
           if (endDate != null)
             IconButton(
               icon: const Icon(PiconsRegular.x),
-              tooltip: t.recurring.form.clearEndDate,
+              tooltip: form.clearEndDate,
               onPressed: _clearEndDate,
             ),
           const Icon(PiconsRegular.calendar),
@@ -291,18 +293,22 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
   }
 
   Widget _buildAutoCreateSwitch() {
+    final form = t.recurring.form;
+
     return SwitchListTile(
-      title: Text(t.recurring.form.autoCreate),
-      subtitle: Text(t.recurring.form.autoCreateDetail),
+      title: Text(form.autoCreate),
+      subtitle: Text(form.autoCreateDetail),
       value: _autoCreateExpense,
       onChanged: _onAutoCreateChanged,
     );
   }
 
   Widget _buildActiveSwitch() {
+    final form = t.recurring.form;
+
     return SwitchListTile(
-      title: Text(t.recurring.form.active),
-      subtitle: Text(t.recurring.form.activeDetail),
+      title: Text(form.active),
+      subtitle: Text(form.activeDetail),
       value: _isActive,
       onChanged: _onIsActiveChanged,
     );
@@ -324,13 +330,14 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
 
   @override
   Widget build(BuildContext context) {
+    final form = t.recurring.form;
     final dateFormat = DateFormat('MMM dd, yyyy');
 
     if (_isLoading) {
       return Scaffold(
         appBar: AppPageHeader(
           leading: const AppBackButton(),
-          title: _isEditing ? t.recurring.form.edit : t.recurring.form.create,
+          title: _isEditing ? form.edit : form.create,
         ),
         body: const Center(child: CircularProgressIndicator()),
       );
@@ -339,7 +346,7 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
     return Scaffold(
       appBar: AppPageHeader(
         leading: const AppBackButton(),
-        title: _isEditing ? t.recurring.form.edit : t.recurring.form.create,
+        title: _isEditing ? form.edit : form.create,
       ),
       body: BlocConsumer<RecurringBloc, RecurringState>(
         listener: _onRecurringListener,

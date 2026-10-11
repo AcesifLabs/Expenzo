@@ -45,9 +45,11 @@ class RuleCard extends StatelessWidget {
   }
 
   AlertDialog _buildDeleteDialog(BuildContext context) {
+    final strings = t.parsingRules.delete;
+
     return AlertDialog(
-      title: Text(t.parsingRules.delete.title),
-      content: Text(t.parsingRules.delete.confirm(name: rule.name)),
+      title: Text(strings.title),
+      content: Text(strings.confirm(name: rule.name)),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),

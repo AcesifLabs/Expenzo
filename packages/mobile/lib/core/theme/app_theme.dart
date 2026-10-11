@@ -221,12 +221,13 @@ class AppTheme {
   AppTheme._();
 
   static ThemeData _buildTheme(_ThemeColors c) {
-    final primaryWithAlpha40 = c.colorScheme.primary.withAlpha(40);
+    final scheme = c.colorScheme;
+    final primaryWithAlpha40 = scheme.primary.withAlpha(40);
 
     return ThemeData(
       useMaterial3: true,
       brightness: c.brightness,
-      colorScheme: c.colorScheme,
+      colorScheme: scheme,
       scaffoldBackgroundColor: c.scaffoldBg,
       fontFamily: AppTypography.fontFamily,
       fontFamilyFallback: AppTypography.fontFamilyFallback,
@@ -247,18 +248,18 @@ class AppTheme {
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return c.colorScheme.primary;
+            return scheme.primary;
           }
 
           return null;
         }),
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
-        color: c.colorScheme.primary,
+        color: scheme.primary,
         linearTrackColor: primaryWithAlpha40,
       ),
       popupMenuTheme: PopupMenuThemeData(
-        color: c.colorScheme.surface,
+        color: scheme.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
         ),
@@ -267,9 +268,9 @@ class AppTheme {
       bottomNavigationBarTheme: _bottomNavTheme(c),
       navigationBarTheme: _navBarTheme(c),
       bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: c.colorScheme.surface,
-        modalBackgroundColor: c.colorScheme.surface,
-        dragHandleColor: c.colorScheme.onSurface.withAlpha(60),
+        backgroundColor: scheme.surface,
+        modalBackgroundColor: scheme.surface,
+        dragHandleColor: scheme.onSurface.withAlpha(60),
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
             top: Radius.circular(AppSpacing.radiusCard),
@@ -277,8 +278,8 @@ class AppTheme {
         ),
       ),
       listTileTheme: ListTileThemeData(
-        iconColor: c.colorScheme.onSurface,
-        textColor: c.colorScheme.onSurface,
+        iconColor: scheme.onSurface,
+        textColor: scheme.onSurface,
       ),
       extensions: [c.palette],
     );

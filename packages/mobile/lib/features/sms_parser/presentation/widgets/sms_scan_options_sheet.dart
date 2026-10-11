@@ -51,6 +51,7 @@ class SmsScanOptionsSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final rangeT = t.smsParser.range;
 
     return SafeArea(
       child: Material(
@@ -89,34 +90,34 @@ class SmsScanOptionsSheet extends StatelessWidget {
                 ),
               ),
               _ScanOptionTile(
-                label: t.smsParser.range.last7Days,
+                label: rangeT.last7Days,
                 icon: PiconsRegular.clockCounterClockwise,
                 onTap: () =>
                     _selectPreset(context, SmsScanRangePreset.last7Days),
               ),
               const Divider(height: 1),
               _ScanOptionTile(
-                label: t.smsParser.range.last30Days,
+                label: rangeT.last30Days,
                 icon: PiconsRegular.calendar,
                 onTap: () =>
                     _selectPreset(context, SmsScanRangePreset.last30Days),
               ),
               const Divider(height: 1),
               _ScanOptionTile(
-                label: t.smsParser.range.last3Months,
+                label: rangeT.last3Months,
                 icon: PiconsRegular.calendarBlank,
                 onTap: () =>
                     _selectPreset(context, SmsScanRangePreset.last3Months),
               ),
               const Divider(height: 1),
               _ScanOptionTile(
-                label: t.smsParser.range.allTime,
+                label: rangeT.allTime,
                 icon: PiconsRegular.infinity,
                 onTap: () => _selectPreset(context, SmsScanRangePreset.allTime),
               ),
               const Divider(height: 1),
               _ScanOptionTile(
-                label: t.smsParser.range.custom,
+                label: rangeT.custom,
                 icon: PiconsRegular.calendarPlus,
                 trailing: const Icon(PiconsRegular.caretRight),
                 onTap: () => _selectPreset(context, SmsScanRangePreset.custom),

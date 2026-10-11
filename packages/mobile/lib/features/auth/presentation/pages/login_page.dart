@@ -15,19 +15,21 @@ import 'package:expense_tracker/i18n/strings.g.dart';
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
+  /// Back to the screen that opened sign-in; Home if opened directly.
+  void _onAuthenticated(BuildContext context, AuthState _) {
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go('/');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Uses the app-wide AuthBloc so signing in updates every screen.
     return BlocListener<AuthBloc, AuthState>(
       listenWhen: (previous, current) => current is Authenticated,
-      listener: (context, _) {
-        // Back to the screen that opened sign-in; Home if opened directly.
-        if (context.canPop()) {
-          context.pop();
-        } else {
-          context.go('/');
-        }
-      },
+      listener: _onAuthenticated,
       child: const LoginView(),
     );
   }
@@ -95,6 +97,7 @@ class LoginView extends StatelessWidget {
     final state = context.watch<AuthBloc>().state;
     final palette = context.palette;
     final primaryColor = palette.brand;
+    final strings = t.auth.login;
 
     return Scaffold(
       backgroundColor: palette.bg,
@@ -120,7 +123,7 @@ class LoginView extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
-                  t.auth.login.pitch,
+                  strings.pitch,
                   textAlign: TextAlign.center,
                   style: AppTypography.bodyLarge.copyWith(
                     color: palette.textSecondary,
@@ -132,7 +135,7 @@ class LoginView extends StatelessWidget {
                     children: [
                       CircularProgressIndicator(),
                       SizedBox(height: AppSpacing.md),
-                      Text(t.auth.login.signingIn),
+                      Text(strings.signingIn),
                     ],
                   )
                 else

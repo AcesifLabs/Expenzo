@@ -8,12 +8,14 @@ enum TransactionFrequency {
   yearly;
 
   String get displayName {
+    final labels = t.enums.frequency;
+
     return switch (this) {
-      TransactionFrequency.daily => t.enums.frequency.daily,
-      TransactionFrequency.weekly => t.enums.frequency.weekly,
-      TransactionFrequency.biweekly => t.enums.frequency.biweekly,
-      TransactionFrequency.monthly => t.enums.frequency.monthly,
-      TransactionFrequency.yearly => t.enums.frequency.yearly,
+      TransactionFrequency.daily => labels.daily,
+      TransactionFrequency.weekly => labels.weekly,
+      TransactionFrequency.biweekly => labels.biweekly,
+      TransactionFrequency.monthly => labels.monthly,
+      TransactionFrequency.yearly => labels.yearly,
     };
   }
 }

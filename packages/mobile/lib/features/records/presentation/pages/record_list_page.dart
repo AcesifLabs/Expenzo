@@ -110,15 +110,16 @@ class _RecordListViewState extends State<RecordListView> {
 
         if (records.isEmpty) {
           final filtered = _searchCtrl.text.isNotEmpty || _hasFilters(state);
+          final listT = t.records.list;
 
           return filtered
               ? AppEmptyState(
                   icon: PiconsRegular.funnel,
-                  message: t.records.list.noMatches,
+                  message: listT.noMatches,
                 )
               : AppEmptyState(
                   icon: PiconsRegular.receipt,
-                  message: t.records.list.empty,
+                  message: listT.empty,
                   actionLabel: t.common.addExpense,
                   onAction: () => _navigateToForm(context, null),
                 );
@@ -334,14 +335,16 @@ class _RecordListViewState extends State<RecordListView> {
 
   @override
   Widget build(BuildContext context) {
+    final listT = t.records.list;
+
     return AppScaffold(
-      title: t.records.list.title,
-      subtitle: t.records.list.subtitle,
+      title: listT.title,
+      subtitle: listT.subtitle,
       actions: [
         TextButton.icon(
           onPressed: () => _showFilterModal(context),
           icon: const Icon(PiconsRegular.funnel, size: 20),
-          label: Text(t.records.list.filter),
+          label: Text(listT.filter),
           style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
         ),
       ],
@@ -354,7 +357,7 @@ class _RecordListViewState extends State<RecordListView> {
             ),
             child: AppSearchBar(
               controller: _searchCtrl,
-              hintText: t.records.list.search,
+              hintText: listT.search,
               onChanged: (v) =>
                   context.read<RecordBloc>().add(SearchRecords(v)),
             ),
@@ -379,17 +382,17 @@ class _RecordListViewState extends State<RecordListView> {
 
 /// A pinned date heading ("Today", "Mon, 6 Oct") above each day's records.
 class _DayHeaderDelegate extends SliverPersistentHeaderDelegate {
-  static const _height = 40.0;
-
   final String label;
 
-  const _DayHeaderDelegate(this.label);
+  static const _height = 40.0;
 
   @override
   double get minExtent => _height;
 
   @override
   double get maxExtent => _height;
+
+  const _DayHeaderDelegate(this.label);
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlaps) {

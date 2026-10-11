@@ -6,16 +6,18 @@ import 'package:expense_tracker/i18n/strings.g.dart';
 
 class NotificationService {
   static const String _channelId = 'app_notifications';
-  // Shown in Android's notification settings, in the language of the moment
-  // the channel was created or a notification was posted.
-  static String get _channelName => t.notifications.channel.name;
-  static String get _channelDescription => t.notifications.channel.description;
 
   final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
   bool _isInitialized = false;
 
   static final NotificationService _instance = NotificationService._internal();
+
+  // Shown in Android's notification settings, in the language of the moment
+  // the channel was created or a notification was posted.
+  static String get _channelName => t.notifications.channel.name;
+  static String get _channelDescription => t.notifications.channel.description;
+
   factory NotificationService() => _instance;
   NotificationService._internal();
 
@@ -113,15 +115,16 @@ class NotificationService {
 
     // isOver comes from CheckBudgetAlerts so the text matches the rule that
     // fired: exactly at the limit is "used 100%", not "went over".
+    final strings = t.notifications.budget;
     final body = isOver
-        ? t.notifications.budget.over(budget: budgetName)
-        : t.notifications.budget.used(
+        ? strings.over(budget: budgetName)
+        : strings.used(
             budget: budgetName,
             percent: percentage.toStringAsFixed(0),
           );
 
     await showNotification(
-      title: t.notifications.budget.title,
+      title: strings.title,
       body: body,
       type: NotificationType.budgetAlert,
       deepLink: deepLink,
@@ -146,15 +149,13 @@ class NotificationService {
     required int foundCount,
     required String sourceType,
   }) async {
-    final deepLink = sourceType == ExpenseSource.sms.name
-        ? 'expenso://scan/sms'
-        : 'expenso://scan/email';
+    final isSms = sourceType == ExpenseSource.sms.name;
+    final deepLink = isSms ? 'expenso://scan/sms' : 'expenso://scan/email';
+    final strings = t.notifications.scan;
 
     await showNotification(
-      title: sourceType == ExpenseSource.sms.name
-          ? t.notifications.scan.smsTitle
-          : t.notifications.scan.emailTitle,
-      body: t.notifications.scan.found(n: foundCount),
+      title: isSms ? strings.smsTitle : strings.emailTitle,
+      body: strings.found(n: foundCount),
       type: NotificationType.scanComplete,
       deepLink: deepLink,
     );

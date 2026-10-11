@@ -44,6 +44,7 @@ class _AppCriticalErrorState extends State<AppCriticalError> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final fallbackT = t.common.fallback;
 
     return GestureDetector(
       onTap: () => SystemNavigator.pop(),
@@ -64,7 +65,7 @@ class _AppCriticalErrorState extends State<AppCriticalError> {
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   Text(
-                    t.common.fallback.criticalTitle,
+                    fallbackT.criticalTitle,
                     textAlign: TextAlign.center,
                     style: AppTypography.headlineSmall.copyWith(
                       color: scheme.onSurface,
@@ -72,7 +73,7 @@ class _AppCriticalErrorState extends State<AppCriticalError> {
                   ),
                   const SizedBox(height: AppSpacing.smd),
                   Text(
-                    t.common.fallback.criticalBody,
+                    fallbackT.criticalBody,
                     textAlign: TextAlign.center,
                     style: AppTypography.bodyMedium.copyWith(
                       height: 1.5,

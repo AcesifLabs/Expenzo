@@ -50,6 +50,38 @@ class InsightItem extends Equatable {
     weekEnd,
   ];
 
+  String get title {
+    final insights = t.reports.insights;
+
+    return switch (kind) {
+      InsightKind.highestSpendingDay => insights.highestDay.title,
+      InsightKind.topCategory => insights.topCategory.title,
+      InsightKind.bestSavingsWeek => insights.bestWeek.title,
+      InsightKind.recurringReminder => insights.recurring.title,
+      InsightKind.budgetReminder => insights.budgets.title,
+    };
+  }
+
+  String get description {
+    final insights = t.reports.insights;
+
+    return switch (kind) {
+      InsightKind.highestSpendingDay => insights.highestDay.description(
+        day: _orEmpty(day, DateFormat.EEEE().format),
+        percent: percent ?? 0,
+      ),
+      InsightKind.topCategory => insights.topCategory.description(
+        category: categoryDisplayName(id: categoryId, name: categoryName ?? ''),
+        percent: percent ?? 0,
+      ),
+      InsightKind.bestSavingsWeek => insights.bestWeek.description(
+        range: _weekRange(),
+      ),
+      InsightKind.recurringReminder => insights.recurring.description,
+      InsightKind.budgetReminder => insights.budgets.description,
+    };
+  }
+
   const InsightItem({
     required this.icon,
     required this.tone,
@@ -61,35 +93,6 @@ class InsightItem extends Equatable {
     this.weekStart,
     this.weekEnd,
   });
-
-  String get title {
-    return switch (kind) {
-      InsightKind.highestSpendingDay => t.reports.insights.highestDay.title,
-      InsightKind.topCategory => t.reports.insights.topCategory.title,
-      InsightKind.bestSavingsWeek => t.reports.insights.bestWeek.title,
-      InsightKind.recurringReminder => t.reports.insights.recurring.title,
-      InsightKind.budgetReminder => t.reports.insights.budgets.title,
-    };
-  }
-
-  String get description {
-    return switch (kind) {
-      InsightKind.highestSpendingDay =>
-        t.reports.insights.highestDay.description(
-          day: _orEmpty(day, DateFormat.EEEE().format),
-          percent: percent ?? 0,
-        ),
-      InsightKind.topCategory => t.reports.insights.topCategory.description(
-        category: categoryDisplayName(id: categoryId, name: categoryName ?? ''),
-        percent: percent ?? 0,
-      ),
-      InsightKind.bestSavingsWeek => t.reports.insights.bestWeek.description(
-        range: _weekRange(),
-      ),
-      InsightKind.recurringReminder => t.reports.insights.recurring.description,
-      InsightKind.budgetReminder => t.reports.insights.budgets.description,
-    };
-  }
 
   String _weekRange() {
     final start = weekStart;

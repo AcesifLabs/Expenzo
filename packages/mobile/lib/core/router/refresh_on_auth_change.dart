@@ -41,12 +41,6 @@ class _RefreshOnAuthChangeState extends State<RefreshOnAuthChange> {
     _subscribeIfEnabled();
   }
 
-  @override
-  void didUpdateWidget(RefreshOnAuthChange oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _subscribeIfEnabled();
-  }
-
   void _subscribeIfEnabled() {
     if (!widget.enabled || _subscription != null) return;
     final authBloc = context.read<AuthBloc>();
@@ -61,6 +55,12 @@ class _RefreshOnAuthChangeState extends State<RefreshOnAuthChange> {
       conflictPending = pending;
       widget.onAuthChanged();
     });
+  }
+
+  @override
+  void didUpdateWidget(RefreshOnAuthChange oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _subscribeIfEnabled();
   }
 
   @override

@@ -9,24 +9,6 @@ class SuggestionChip extends StatelessWidget {
 
   const SuggestionChip({super.key, required this.label, this.onTap});
 
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.palette;
-
-    // The chip looks compact, but its touch area is the full 48dp.
-    return Semantics(
-      button: true,
-      child: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: AppSpacing.minTapTarget),
-          child: Center(widthFactor: 1, child: _chip(palette)),
-        ),
-      ),
-    );
-  }
-
   Widget _chip(AppPalette palette) {
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -41,6 +23,24 @@ class SuggestionChip extends StatelessWidget {
       child: Text(
         label,
         style: AppTypography.bodyMedium.copyWith(color: palette.accent),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+
+    // The chip looks compact, but its touch area is the full 48dp.
+    return Semantics(
+      button: true,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: AppSpacing.minTapTarget),
+          child: Center(widthFactor: 1, child: _chip(palette)),
+        ),
       ),
     );
   }

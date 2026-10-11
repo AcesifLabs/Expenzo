@@ -1,23 +1,23 @@
 import '../entities/date_amount.dart';
 import '../entities/granularity.dart';
 
-/// Turns sparse spending totals into one bar per period from [start] to
-/// [end], so a single spending day draws as one bar among empty ones rather
-/// than a chart-wide block. Periods after [now] are left out.
+/// Turns sparse spending totals into one bar per period across [range], so
+/// a single spending day draws as one bar among empty ones rather than a
+/// chart-wide block. Periods after [now] are left out.
 ///
 /// [totals] keys must already be period starts for [granularity].
 List<DateAmount> zeroFillTrend({
   required Map<DateTime, double> totals,
-  required DateTime start,
-  required DateTime end,
+  required ({DateTime start, DateTime end}) range,
   required Granularity granularity,
   DateTime? now,
 }) {
   final today = now ?? DateTime.now();
+  final end = range.end;
   final last = periodStart(end.isAfter(today) ? today : end, granularity);
   final filled = <DateAmount>[];
   for (
-    var cursor = periodStart(start, granularity);
+    var cursor = periodStart(range.start, granularity);
     !cursor.isAfter(last);
     cursor = _nextPeriod(cursor, granularity)
   ) {

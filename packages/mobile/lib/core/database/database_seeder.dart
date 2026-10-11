@@ -4,6 +4,13 @@ import '../theme/category_palette.dart';
 import 'app_database.dart';
 
 class DatabaseSeeder {
+  /// Seeded English name per default category id. A default category whose
+  /// stored name still matches is shown translated (`categoryDisplayName`).
+  static final Map<String, String> seedNames = {
+    for (final (id, name, _) in [..._incomeCategories, ..._expenseCategories])
+      id: name,
+  };
+
   static const _incomeCategories = [
     ('default_in_salary', 'Salary', 'currencyDollar'),
     ('default_in_freelance', 'Freelance', 'briefcase'),
@@ -27,13 +34,6 @@ class DatabaseSeeder {
     ('default_out_gifts', 'Gifts', 'gift'),
     ('default_out_general', 'General', 'tag'),
   ];
-
-  /// Seeded English name per default category id. A default category whose
-  /// stored name still matches is shown translated (`categoryDisplayName`).
-  static final Map<String, String> seedNames = {
-    for (final (id, name, _) in [..._incomeCategories, ..._expenseCategories])
-      id: name,
-  };
 
   static Future<void> seedInitialCategories(AppDatabase db) async {
     final existingCategories = await db.select(db.categories).get();

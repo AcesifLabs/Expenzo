@@ -78,19 +78,6 @@ abstract final class CurrencyConfig {
     CurrencyInfo(code: 'ZAR', symbol: 'R ', name: 'South African rand'),
   ];
 
-  static CurrencyInfo byCode(String code) {
-    for (final currency in supported) {
-      if (currency.code == code) return currency;
-    }
-
-    return supported.first;
-  }
-
-  /// Maps a symbol saved by older app versions to a currency code.
-  static String codeForLegacySymbol(String symbol) {
-    return _legacySymbolCodes[symbol.trim()] ?? defaultCode;
-  }
-
   // Symbols the old free-text picker offered, plus the old default.
   static const _legacySymbolCodes = {
     '৳': 'BDT',
@@ -114,4 +101,17 @@ abstract final class CurrencyConfig {
     '₱': 'PHP',
     '฿': 'THB',
   };
+
+  static CurrencyInfo byCode(String code) {
+    for (final currency in supported) {
+      if (currency.code == code) return currency;
+    }
+
+    return supported.first;
+  }
+
+  /// Maps a symbol saved by older app versions to a currency code.
+  static String codeForLegacySymbol(String symbol) {
+    return _legacySymbolCodes[symbol.trim()] ?? defaultCode;
+  }
 }

@@ -261,11 +261,9 @@ class _DashboardViewState extends State<DashboardView> {
   }
 
   Widget _buildHeader(
-    BuildContext context,
-    AuthState authState,
-    String displayName,
-    String? photoUrl, {
+    BuildContext context, {
     required String greeting,
+    required Widget avatar,
   }) {
     final colors = Theme.of(context).colorScheme;
 
@@ -298,7 +296,7 @@ class _DashboardViewState extends State<DashboardView> {
             onSelected: (value) => _handleMenuAction(context, value),
             itemBuilder: (context) => _buildMenuItems(context),
             padding: EdgeInsets.zero,
-            icon: _buildAvatarWidget(context, authState, displayName, photoUrl),
+            icon: avatar,
           ),
         ],
       ),
@@ -368,6 +366,7 @@ class _DashboardViewState extends State<DashboardView> {
   List<Widget> _buildLoadingContent(BuildContext context, DateRange dateRange) {
     _ensureSupplementaryFuture();
     _ensureTrendFuture(dateRange);
+    final sections = t.dashboard.sections;
 
     return [
       SliverToBoxAdapter(child: _buildBalanceSkeleton(context)),
@@ -376,7 +375,7 @@ class _DashboardViewState extends State<DashboardView> {
         padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
         sliver: SliverToBoxAdapter(
           child: DashboardSectionHeader(
-            title: t.dashboard.sections.budgets,
+            title: sections.budgets,
             onTrailingTap: () =>
                 widget.onNavigateToTab?.call(AppRootTab.budgets),
           ),
@@ -388,7 +387,7 @@ class _DashboardViewState extends State<DashboardView> {
         padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
         sliver: SliverToBoxAdapter(
           child: DashboardSectionHeader(
-            title: t.dashboard.sections.recentActivity,
+            title: sections.recentActivity,
             onTrailingTap: () =>
                 widget.onNavigateToTab?.call(AppRootTab.activity),
           ),
@@ -400,7 +399,7 @@ class _DashboardViewState extends State<DashboardView> {
         padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
         sliver: SliverToBoxAdapter(
           child: DashboardSectionHeader(
-            title: t.dashboard.sections.spendingPatterns,
+            title: sections.spendingPatterns,
             onTrailingTap: () =>
                 widget.onNavigateToTab?.call(AppRootTab.reports),
           ),
@@ -449,6 +448,8 @@ class _DashboardViewState extends State<DashboardView> {
     BuildContext context,
     DashboardLoaded state,
   ) {
+    final sections = t.dashboard.sections;
+
     return [
       SliverToBoxAdapter(child: _buildBalanceCard(context, state)),
       const SliverToBoxAdapter(child: AutoImportPromptCard()),
@@ -457,7 +458,7 @@ class _DashboardViewState extends State<DashboardView> {
         padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
         sliver: SliverToBoxAdapter(
           child: DashboardSectionHeader(
-            title: t.dashboard.sections.budgets,
+            title: sections.budgets,
             onTrailingTap: () =>
                 widget.onNavigateToTab?.call(AppRootTab.budgets),
           ),
@@ -469,7 +470,7 @@ class _DashboardViewState extends State<DashboardView> {
         padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
         sliver: SliverToBoxAdapter(
           child: DashboardSectionHeader(
-            title: t.dashboard.sections.recentActivity,
+            title: sections.recentActivity,
             onTrailingTap: () =>
                 widget.onNavigateToTab?.call(AppRootTab.activity),
           ),
@@ -481,7 +482,7 @@ class _DashboardViewState extends State<DashboardView> {
         padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
         sliver: SliverToBoxAdapter(
           child: DashboardSectionHeader(
-            title: t.dashboard.sections.spendingPatterns,
+            title: sections.spendingPatterns,
             onTrailingTap: () =>
                 widget.onNavigateToTab?.call(AppRootTab.reports),
           ),
@@ -574,7 +575,7 @@ class _DashboardViewState extends State<DashboardView> {
                   icon: PiconsRegular.receipt,
                   message: t.dashboard.noTransactions,
                   actionLabel: t.common.addExpense,
-                  onAction: _addRecord,
+                  onAction: () => unawaited(_addRecord()),
                 ),
               ),
             );
@@ -810,39 +811,28 @@ class _DashboardViewState extends State<DashboardView> {
   // Theme and everything else live in Settings (docs/adr/0006).
   List<PopupMenuEntry<String>> _buildMenuItems(BuildContext context) {
     final isAuth = context.read<AuthBloc>().state is Authenticated;
+    final menu = t.dashboard.menu;
 
     return [
       if (isAuth)
         PopupMenuItem(
           value: 'settings',
-          child: MenuRow(
-            icon: PiconsRegular.user,
-            text: t.dashboard.menu.profile,
-          ),
+          child: MenuRow(icon: PiconsRegular.user, text: menu.profile),
         )
       else
         PopupMenuItem(
           value: 'sign_in',
-          child: MenuRow(
-            icon: PiconsRegular.signIn,
-            text: t.dashboard.menu.signIn,
-          ),
+          child: MenuRow(icon: PiconsRegular.signIn, text: menu.signIn),
         ),
       PopupMenuItem(
         value: 'settings',
-        child: MenuRow(
-          icon: PiconsRegular.gear,
-          text: t.dashboard.menu.settings,
-        ),
+        child: MenuRow(icon: PiconsRegular.gear, text: menu.settings),
       ),
       if (isAuth) ...[
         const PopupMenuDivider(),
         PopupMenuItem(
           value: 'sign_out',
-          child: MenuRow(
-            icon: PiconsRegular.signOut,
-            text: t.dashboard.menu.signOut,
-          ),
+          child: MenuRow(icon: PiconsRegular.signOut, text: menu.signOut),
         ),
       ],
     ];
@@ -903,10 +893,13 @@ class _DashboardViewState extends State<DashboardView> {
                     SliverToBoxAdapter(
                       child: _buildHeader(
                         context,
-                        authState,
-                        displayName,
-                        photoUrl,
                         greeting: _greeting(firstName),
+                        avatar: _buildAvatarWidget(
+                          context,
+                          authState,
+                          displayName,
+                          photoUrl,
+                        ),
                       ),
                     ),
                     ..._buildContent(context, state, dateRange),

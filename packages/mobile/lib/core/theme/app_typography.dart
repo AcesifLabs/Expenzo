@@ -21,17 +21,6 @@ abstract final class AppTypography {
   /// Digits of equal width so amounts line up in lists and columns.
   static const tabularFigures = [FontFeature.tabularFigures()];
 
-  static const _regular = TextStyle(
-    fontFamily: fontFamily,
-    fontFamilyFallback: fontFamilyFallback,
-    fontWeight: FontWeight.w400,
-  );
-  static const _bold = TextStyle(
-    fontFamily: fontFamily,
-    fontFamilyFallback: fontFamilyFallback,
-    fontWeight: FontWeight.w700,
-  );
-
   static final TextStyle displayLarge = _bold.copyWith(
     fontSize: 32,
     height: 1.2,
@@ -73,5 +62,16 @@ abstract final class AppTypography {
   static final TextStyle currency = _bold.copyWith(
     fontSize: 18,
     fontFeatures: tabularFigures,
+  );
+
+  static const _regular = TextStyle(
+    fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
+    fontWeight: FontWeight.w400,
+  );
+  static const _bold = TextStyle(
+    fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
+    fontWeight: FontWeight.w700,
   );
 }

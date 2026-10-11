@@ -118,7 +118,8 @@ class _InteractiveTemplateBuilderState
   @override
   void initState() {
     super.initState();
-    _words = triggerWordCandidates(widget.sampleMessage.body);
+    final body = widget.sampleMessage.body;
+    _words = triggerWordCandidates(body);
 
     // Matches optional currency prefix (Tk, Rs, USD, etc.) followed by a
     // number with optional thousands-separator commas and decimal part.
@@ -126,10 +127,7 @@ class _InteractiveTemplateBuilderState
       r'(?:[A-Z]{2,4}[\s.]*|[$€£৳₹]\s*)?([\d][\d,]*\.\d+|[\d]+)',
       caseSensitive: false,
     );
-    _numbers = numRegex
-        .allMatches(widget.sampleMessage.body)
-        .map((m) => m.group(0) ?? '')
-        .toList();
+    _numbers = numRegex.allMatches(body).map((m) => m.group(0) ?? '').toList();
 
     _applyExistingTemplatePrefill();
   }
@@ -325,21 +323,24 @@ class _InteractiveTemplateBuilderState
   // ---------------------------------------------------------------------------
 
   Widget _buildStep1() {
+    final editorT = t.messageTemplates.editor;
+    final palette = context.palette;
+
     return _buildStepScaffold(
       stepKey: 'step1',
       content: [
         Text(
-          t.messageTemplates.editor.step1,
+          editorT.step1,
           style: AppTypography.titleLarge.copyWith(
-            color: context.palette.textPrimary,
+            color: palette.textPrimary,
             fontWeight: FontWeight.w700,
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          t.messageTemplates.editor.step1Body,
+          editorT.step1Body,
           style: AppTypography.bodyMedium.copyWith(
-            color: context.palette.textSecondary,
+            color: palette.textSecondary,
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -349,9 +350,9 @@ class _InteractiveTemplateBuilderState
         ),
         const SizedBox(height: AppSpacing.lg),
         Text(
-          t.messageTemplates.editor.wordsInMessage,
+          editorT.wordsInMessage,
           style: AppTypography.labelLarge.copyWith(
-            color: context.palette.textSecondary,
+            color: palette.textSecondary,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -359,9 +360,7 @@ class _InteractiveTemplateBuilderState
         _buildTriggerChipList(),
       ],
       actions: _withHint(
-        hint: _selectedTrigger == null
-            ? t.messageTemplates.editor.step1Hint
-            : null,
+        hint: _selectedTrigger == null ? editorT.step1Hint : null,
         child: SizedBox(
           width: double.infinity,
           child: ElevatedButton(
@@ -378,21 +377,25 @@ class _InteractiveTemplateBuilderState
   // ---------------------------------------------------------------------------
 
   Widget _buildStep2() {
+    final editorT = t.messageTemplates.editor;
+    final palette = context.palette;
+    final commonT = t.common;
+
     return _buildStepScaffold(
       stepKey: 'step2',
       content: [
         Text(
-          t.messageTemplates.editor.step2,
+          editorT.step2,
           style: AppTypography.titleLarge.copyWith(
-            color: context.palette.textPrimary,
+            color: palette.textPrimary,
             fontWeight: FontWeight.w700,
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          t.messageTemplates.editor.step2Body,
+          editorT.step2Body,
           style: AppTypography.bodyMedium.copyWith(
-            color: context.palette.textSecondary,
+            color: palette.textSecondary,
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -404,19 +407,17 @@ class _InteractiveTemplateBuilderState
         _buildAmountList(),
       ],
       actions: _withHint(
-        hint: _selectedAmount == null
-            ? t.messageTemplates.editor.step2Hint
-            : null,
+        hint: _selectedAmount == null ? editorT.step2Hint : null,
         child: Row(
           children: [
             TextButton(
               onPressed: () => _onNextStep(1),
-              child: Text(t.common.back),
+              child: Text(commonT.back),
             ),
             const Spacer(),
             ElevatedButton(
               onPressed: _selectedAmount != null ? () => _onNextStep(3) : null,
-              child: Text(t.common.next),
+              child: Text(commonT.next),
             ),
           ],
         ),
@@ -429,13 +430,17 @@ class _InteractiveTemplateBuilderState
   // ---------------------------------------------------------------------------
 
   Widget _buildStep3() {
+    final editorT = t.messageTemplates.editor;
+    final palette = context.palette;
+    final commonT = t.common;
+
     return _buildStepScaffold(
       stepKey: 'step3',
       content: [
         Text(
-          t.messageTemplates.editor.step3,
+          editorT.step3,
           style: AppTypography.titleLarge.copyWith(
-            color: context.palette.textPrimary,
+            color: palette.textPrimary,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -443,10 +448,10 @@ class _InteractiveTemplateBuilderState
         _buildReviewCard(),
         const SizedBox(height: AppSpacing.md),
         Text(
-          t.messageTemplates.editor.step3Body,
+          editorT.step3Body,
           textAlign: TextAlign.center,
           style: AppTypography.bodyMedium.copyWith(
-            color: context.palette.textSecondary,
+            color: palette.textSecondary,
           ),
         ),
       ],
@@ -454,7 +459,7 @@ class _InteractiveTemplateBuilderState
         children: [
           TextButton(
             onPressed: () => _onNextStep(2),
-            child: Text(t.common.back),
+            child: Text(commonT.back),
           ),
           const Spacer(),
           BlocConsumer<TemplateEditorBloc, TemplateEditorState>(
@@ -466,7 +471,7 @@ class _InteractiveTemplateBuilderState
 
               return ElevatedButton(
                 onPressed: _onSaveTemplate,
-                child: Text(t.common.save),
+                child: Text(commonT.save),
               );
             },
           ),
@@ -491,34 +496,35 @@ class _InteractiveTemplateBuilderState
   }
 
   Widget _buildReviewCard() {
+    final editorT = t.messageTemplates.editor;
+    final palette = context.palette;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: context.palette.surface,
+        color: palette.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildReviewField(
-            t.messageTemplates.editor.sender,
+            editorT.sender,
             widget.source.contactName,
-            AppTypography.titleMedium.copyWith(
-              color: context.palette.textPrimary,
-            ),
+            AppTypography.titleMedium.copyWith(color: palette.textPrimary),
           ),
           const SizedBox(height: AppSpacing.md),
           _buildReviewField(
-            t.messageTemplates.editor.keyWord,
+            editorT.keyWord,
             _selectedTrigger ?? '',
-            AppTypography.titleMedium.copyWith(color: context.palette.brand),
+            AppTypography.titleMedium.copyWith(color: palette.brand),
           ),
           const SizedBox(height: AppSpacing.md),
           _buildReviewField(
-            t.messageTemplates.editor.amountInMessage,
+            editorT.amountInMessage,
             _stripCurrencyPrefix(_selectedAmount ?? ''),
-            AppTypography.titleMedium.copyWith(color: context.palette.income),
+            AppTypography.titleMedium.copyWith(color: palette.income),
           ),
         ],
       ),

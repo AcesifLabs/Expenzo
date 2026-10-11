@@ -53,15 +53,17 @@ class _RetroactiveScanDialogState extends State<RetroactiveScanDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = t.messageTemplates.retro;
+
     return AlertDialog(
-      title: Text(t.messageTemplates.retro.title),
+      title: Text(strings.title),
       content: _isScanning
           ? Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 CircularProgressIndicator(),
                 SizedBox(height: AppSpacing.md),
-                Text(t.messageTemplates.retro.scanning),
+                Text(strings.scanning),
               ],
             )
           : Column(
@@ -73,12 +75,9 @@ class _RetroactiveScanDialogState extends State<RetroactiveScanDialog> {
                   size: 48,
                 ),
                 const SizedBox(height: AppSpacing.md),
-                Text(t.messageTemplates.retro.saved),
+                Text(strings.saved),
                 const SizedBox(height: AppSpacing.sm),
-                Text(
-                  t.messageTemplates.retro.review,
-                  textAlign: TextAlign.center,
-                ),
+                Text(strings.review, textAlign: TextAlign.center),
               ],
             ),
       actions: [

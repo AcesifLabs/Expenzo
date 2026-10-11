@@ -156,6 +156,8 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
 
   Widget _buildAmountRow(BudgetProgress progress) {
     final fmt = CurrencyFormatter.getFormatter(decimalDigits: 0);
+    final strings = t.budgets.details;
+    final periodBudget = strings.periodBudget;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -168,7 +170,7 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
             ),
             children: [
               TextSpan(
-                text: t.budgets.details.ofTotal(
+                text: strings.ofTotal(
                   total: fmt.format(progress.effectiveAmount),
                 ),
                 style: AppTypography.headlineSmall.copyWith(
@@ -181,9 +183,9 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
         const SizedBox(height: AppSpacing.xs),
         Text(
           switch (progress.period) {
-            BudgetPeriod.weekly => t.budgets.details.periodBudget.weekly,
-            BudgetPeriod.monthly => t.budgets.details.periodBudget.monthly,
-            BudgetPeriod.yearly => t.budgets.details.periodBudget.yearly,
+            BudgetPeriod.weekly => periodBudget.weekly,
+            BudgetPeriod.monthly => periodBudget.monthly,
+            BudgetPeriod.yearly => periodBudget.yearly,
           },
           style: AppTypography.bodyMedium.copyWith(
             color: _palette.textSecondary,
@@ -208,20 +210,20 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
   }
 
   Widget _buildStatusRow(BudgetProgress progress) {
+    final strings = t.budgets.details;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          t.budgets.details.used(
-            percent: progress.percentage.toStringAsFixed(0),
-          ),
+          strings.used(percent: progress.percentage.toStringAsFixed(0)),
           style: AppTypography.bodyMedium.copyWith(
             color: _palette.textSecondary,
           ),
         ),
         if (progress.isOverBudget)
           Text(
-            t.budgets.details.over,
+            strings.over,
             style: AppTypography.labelLarge.copyWith(color: _palette.error),
           ),
       ],
@@ -292,15 +294,16 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
 
   Widget _buildNoTransactions() {
     final textTheme = Theme.of(context).textTheme;
+    final strings = t.budgets.details;
 
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(t.budgets.details.noExpenses, style: textTheme.titleSmall),
+          Text(strings.noExpenses, style: textTheme.titleSmall),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            t.budgets.details.noExpensesBody,
+            strings.noExpensesBody,
             textAlign: TextAlign.center,
             style: textTheme.bodyMedium?.copyWith(
               color: _palette.textSecondary,
@@ -310,7 +313,7 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
           ElevatedButton.icon(
             icon: const Icon(PiconsRegular.plus, size: 18),
             label: Text(t.common.addExpense),
-            onPressed: _addExpense,
+            onPressed: () => unawaited(_addExpense()),
           ),
         ],
       ),
@@ -373,6 +376,7 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
 
   Widget _buildErrorState() {
     final budgetId = widget.budgetId ?? '';
+    final strings = t.budgets.details;
 
     return Scaffold(
       backgroundColor: _palette.bg,
@@ -400,14 +404,14 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
                     ),
                     const SizedBox(height: AppSpacing.md),
                     Text(
-                      _errorMessage ?? t.budgets.details.unableToLoad,
+                      _errorMessage ?? strings.unableToLoad,
                       style: AppTypography.titleLarge.copyWith(
                         color: _palette.textPrimary,
                       ),
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     Text(
-                      t.budgets.details.unableToLoadBody,
+                      strings.unableToLoadBody,
                       textAlign: TextAlign.center,
                       style: AppTypography.bodyMedium.copyWith(
                         color: _palette.textSecondary,

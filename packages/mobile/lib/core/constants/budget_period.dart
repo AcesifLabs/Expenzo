@@ -6,10 +6,12 @@ enum BudgetPeriod {
   yearly;
 
   String get displayName {
+    final period = t.enums.period;
+
     return switch (this) {
-      BudgetPeriod.weekly => t.enums.period.weekly,
-      BudgetPeriod.monthly => t.enums.period.monthly,
-      BudgetPeriod.yearly => t.enums.period.yearly,
+      BudgetPeriod.weekly => period.weekly,
+      BudgetPeriod.monthly => period.monthly,
+      BudgetPeriod.yearly => period.yearly,
     };
   }
 }

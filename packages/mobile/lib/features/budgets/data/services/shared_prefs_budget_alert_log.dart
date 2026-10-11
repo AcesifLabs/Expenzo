@@ -3,12 +3,12 @@ import 'package:expense_tracker/features/budgets/domain/usecases/check_budget_al
 
 /// Stores sent budget alert keys on the device.
 class SharedPrefsBudgetAlertLog implements BudgetAlertLog {
+  final SharedPreferences prefs;
+
   static const _key = 'budget_alerts_sent';
 
   /// Old keys only matter for their own budget period; keep the log small.
   static const _maxEntries = 200;
-
-  final SharedPreferences prefs;
 
   SharedPrefsBudgetAlertLog(this.prefs);
 

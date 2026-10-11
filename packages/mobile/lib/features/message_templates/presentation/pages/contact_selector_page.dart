@@ -299,11 +299,13 @@ class _ContactSelectorViewState extends State<ContactSelectorView>
         .toList();
 
     if (filteredContacts.isEmpty) {
+      final contactsT = t.messageTemplates.contacts;
+
       return AppEmptyState(
         icon: PiconsRegular.chatText,
         message: _searchQuery.isEmpty
-            ? t.messageTemplates.contacts.empty
-            : t.messageTemplates.contacts.noMatch(query: _searchQuery),
+            ? contactsT.empty
+            : contactsT.noMatch(query: _searchQuery),
       );
     }
 

@@ -138,19 +138,15 @@ class _RegexValidatorIndicatorState extends State<RegexValidatorIndicator> {
       );
     }
 
+    final validColor = context.palette.income;
+
     return Row(
       children: [
-        Icon(
-          PiconsRegular.checkCircle,
-          color: context.palette.income,
-          size: 16,
-        ),
+        Icon(PiconsRegular.checkCircle, color: validColor, size: 16),
         const SizedBox(width: AppSpacing.xs),
         Text(
           t.parsingRules.validation.valid,
-          style: AppTypography.bodySmall.copyWith(
-            color: context.palette.income,
-          ),
+          style: AppTypography.bodySmall.copyWith(color: validColor),
         ),
       ],
     );

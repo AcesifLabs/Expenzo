@@ -29,34 +29,34 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final dialogT = t.settings.deleteDialog;
+    final errorColor = Theme.of(context).colorScheme.error;
+
     return AlertDialog(
-      title: Text(t.settings.deleteDialog.title),
+      title: Text(dialogT.title),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(t.settings.deleteDialog.question),
+          Text(dialogT.question),
           const SizedBox(height: AppSpacing.md),
           Text(
-            t.settings.deleteDialog.listTitle,
+            dialogT.listTitle,
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: AppSpacing.sm),
-          Text(t.settings.deleteDialog.expenses),
-          Text(t.settings.deleteDialog.categories),
-          Text(t.settings.deleteDialog.budgets),
-          Text(t.settings.deleteDialog.recurring),
-          Text(t.settings.deleteDialog.rules),
+          Text(dialogT.expenses),
+          Text(dialogT.categories),
+          Text(dialogT.budgets),
+          Text(dialogT.recurring),
+          Text(dialogT.rules),
           const SizedBox(height: AppSpacing.md),
-          Text(
-            t.settings.deleteDialog.cannotUndo,
-            style: TextStyle(color: Theme.of(context).colorScheme.error),
-          ),
+          Text(dialogT.cannotUndo, style: TextStyle(color: errorColor)),
           const SizedBox(height: AppSpacing.md),
           Row(
             children: [
               Checkbox(value: _confirmed, onChanged: _onCheckboxChanged),
-              Expanded(child: Text(t.settings.deleteDialog.confirm)),
+              Expanded(child: Text(dialogT.confirm)),
             ],
           ),
         ],
@@ -65,9 +65,7 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
         TextButton(onPressed: _onCancel, child: Text(t.common.cancel)),
         TextButton(
           onPressed: _confirmed ? _onDelete : null,
-          style: TextButton.styleFrom(
-            foregroundColor: Theme.of(context).colorScheme.error,
-          ),
+          style: TextButton.styleFrom(foregroundColor: errorColor),
           child: Text(t.common.delete),
         ),
       ],

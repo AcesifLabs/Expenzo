@@ -76,20 +76,37 @@ class BudgetProgressCard extends StatelessWidget {
     );
   }
 
+  Widget _buildProgressBar(AppPalette palette) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+      child: SizedBox(
+        height: 12,
+        child: LinearProgressIndicator(
+          value: (progress.percentage / 100).clamp(0.0, 1.0),
+          backgroundColor: palette.progressTrack,
+          color: budgetProgressColor(palette, progress.percentage),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
     final textTheme = Theme.of(context).textTheme;
     final summary = BudgetSummary.of(progress);
-    final progressColor = budgetProgressColor(palette, progress.percentage);
     final whole = CurrencyFormatter.getFormatter(decimalDigits: 0);
+    final card = t.budgets.card;
+    final secondaryStyle = textTheme.bodySmall?.copyWith(
+      color: palette.textSecondary,
+    );
     final headline = summary.isOver
-        ? t.budgets.card.overBy(amount: whole.format(-summary.remaining))
-        : t.budgets.card.left(amount: whole.format(summary.remaining));
+        ? card.overBy(amount: whole.format(-summary.remaining))
+        : card.left(amount: whole.format(summary.remaining));
 
     return Semantics(
       button: true,
-      label: t.budgets.card.a11y(
+      label: card.a11y(
         name: progress.name,
         headline: headline,
         daysLeft: summary.daysLeftLabel,
@@ -117,12 +134,7 @@ class BudgetProgressCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: AppSpacing.sm),
-                    Text(
-                      summary.daysLeftLabel,
-                      style: textTheme.bodySmall?.copyWith(
-                        color: palette.textSecondary,
-                      ),
-                    ),
+                    Text(summary.daysLeftLabel, style: secondaryStyle),
                   ],
                 ),
                 const SizedBox(height: AppSpacing.sm),
@@ -135,26 +147,14 @@ class BudgetProgressCard extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  t.budgets.card.spentOf(
+                  card.spentOf(
                     spent: whole.format(progress.spentAmount),
                     total: whole.format(progress.effectiveAmount),
                   ),
-                  style: textTheme.bodySmall?.copyWith(
-                    color: palette.textSecondary,
-                  ),
+                  style: secondaryStyle,
                 ),
                 const SizedBox(height: AppSpacing.smd),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-                  child: SizedBox(
-                    height: 12,
-                    child: LinearProgressIndicator(
-                      value: (progress.percentage / 100).clamp(0.0, 1.0),
-                      backgroundColor: palette.progressTrack,
-                      color: progressColor,
-                    ),
-                  ),
-                ),
+                _buildProgressBar(palette),
               ],
             ),
           ),

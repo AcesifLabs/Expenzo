@@ -93,6 +93,10 @@ class ChatBubble extends StatelessWidget {
   }
 
   MarkdownStyleSheet _assistantMarkdownStyleSheet(AppPalette palette) {
+    final emphasis = AppTypography.labelLarge.copyWith(
+      color: palette.textPrimary,
+    );
+
     return MarkdownStyleSheet(
       p: AppTypography.bodyMedium.copyWith(
         color: palette.textPrimary,
@@ -100,8 +104,8 @@ class ChatBubble extends StatelessWidget {
       ),
       h1: AppTypography.titleLarge.copyWith(color: palette.textPrimary),
       h2: AppTypography.titleMedium.copyWith(color: palette.textPrimary),
-      h3: AppTypography.labelLarge.copyWith(color: palette.textPrimary),
-      strong: AppTypography.labelLarge.copyWith(color: palette.textPrimary),
+      h3: emphasis,
+      strong: emphasis,
       em: AppTypography.bodyMedium.copyWith(
         fontStyle: FontStyle.italic,
         color: palette.textPrimary,

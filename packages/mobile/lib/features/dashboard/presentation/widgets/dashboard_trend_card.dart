@@ -77,6 +77,9 @@ class DashboardTrendCard extends StatelessWidget {
 
   // Today's bar is highlighted; the rest stay quiet so one big day doesn't
   // read as an alarm.
+  /// An empty day keeps a 2px stub so its slot stays visible.
+  double _barHeight(double fraction) => fraction == 0 ? 2 : 48 * fraction;
+
   Color _barColor(ColorScheme colors, int index, int length, double height) {
     if (index == length - 1) return colors.primary;
     if (height == 0) return colors.onSurface.withAlpha(20);
@@ -125,7 +128,7 @@ class DashboardTrendCard extends StatelessWidget {
                       alignment: Alignment.bottomCenter,
                       child: Container(
                         constraints: const BoxConstraints(maxWidth: 16),
-                        height: 48 * bars[i] + (bars[i] == 0 ? 2 : 0),
+                        height: _barHeight(bars[i]),
                         decoration: BoxDecoration(
                           color: _barColor(colors, i, bars.length, bars[i]),
                           borderRadius: const BorderRadius.vertical(

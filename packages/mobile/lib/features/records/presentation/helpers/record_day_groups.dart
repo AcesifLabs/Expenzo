@@ -36,8 +36,9 @@ String dayHeaderLabel(DateTime day, {DateTime? now}) {
     today.month,
     today.day,
   ).difference(DateTime.utc(day.year, day.month, day.day)).inDays;
-  if (difference == 0) return t.common.dates.today;
-  if (difference == 1) return t.common.dates.yesterday;
+  final dates = t.common.dates;
+  if (difference == 0) return dates.today;
+  if (difference == 1) return dates.yesterday;
   final pattern = day.year == today.year ? 'EEE, d MMM' : 'EEE, d MMM y';
 
   return DateFormat(pattern).format(day);

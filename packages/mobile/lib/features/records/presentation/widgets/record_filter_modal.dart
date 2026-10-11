@@ -116,12 +116,13 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
   }
 
   String _categoryLabel(int selectedCount, int totalCount) {
-    if (selectedCount == 0) return t.records.filter.allCategories;
+    final strings = t.records.filter;
+    if (selectedCount == 0) return strings.allCategories;
     if (selectedCount == totalCount) {
-      return t.records.filter.allCount(n: selectedCount);
+      return strings.allCount(n: selectedCount);
     }
 
-    return t.records.filter.selectedCount(n: selectedCount);
+    return strings.selectedCount(n: selectedCount);
   }
 
   String _formatDate(DateTime dt) {
@@ -161,16 +162,18 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
   }
 
   Widget _buildTypeSection(ThemeData theme) {
+    final strings = t.records.filter;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(t.records.filter.type, style: theme.textTheme.titleSmall),
+        Text(strings.type, style: theme.textTheme.titleSmall),
         const SizedBox(height: AppSpacing.sm),
         Wrap(
           spacing: 8,
           runSpacing: 8,
           children: [
-            _buildTypeChip(t.records.filter.all, null, theme),
+            _buildTypeChip(strings.all, null, theme),
             _buildTypeChip(
               RecordType.income.displayName,
               RecordType.income,
@@ -199,19 +202,21 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
   }
 
   Widget _buildActions() {
+    final strings = t.records.filter;
+
     return Row(
       children: [
         Expanded(
           child: OutlinedButton(
             onPressed: _handleClear,
-            child: Text(t.records.filter.clear),
+            child: Text(strings.clear),
           ),
         ),
         const SizedBox(width: AppSpacing.md),
         Expanded(
           child: ElevatedButton(
             onPressed: _handleApply,
-            child: Text(t.records.filter.apply),
+            child: Text(strings.apply),
           ),
         ),
       ],
@@ -261,7 +266,7 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
     final label = _categoryLabel(selectedCount, categories.length);
 
     return InkWell(
-      onTap: () => _showCategoryDialog(context, categories, theme),
+      onTap: () => _showCategoryDialog(context, categories),
       borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
       child: Container(
         width: double.infinity,
@@ -307,11 +312,7 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
     );
   }
 
-  void _showCategoryDialog(
-    BuildContext context,
-    List<Category> categories,
-    ThemeData theme,
-  ) {
+  void _showCategoryDialog(BuildContext context, List<Category> categories) {
     showDialog(
       context: context,
       builder: (dialogCtx) {
@@ -478,6 +479,7 @@ class _DateRangeBox extends StatelessWidget {
     final onSurface120 = onSurface.withAlpha(120);
     final onSurface160 = onSurface.withAlpha(160);
     final outline60 = colorScheme.outline.withAlpha(60);
+    final strings = t.records.filter;
 
     return InkWell(
       onTap: onTap,
@@ -500,11 +502,8 @@ class _DateRangeBox extends StatelessWidget {
             Expanded(
               child: Text(
                 sd != null && ed != null
-                    ? t.records.filter.range(
-                        start: formatDate(sd),
-                        end: formatDate(ed),
-                      )
-                    : t.records.filter.selectDateRange,
+                    ? strings.range(start: formatDate(sd), end: formatDate(ed))
+                    : strings.selectDateRange,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: sd != null ? colorScheme.onSurface : onSurface120,
                 ),

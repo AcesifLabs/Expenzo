@@ -98,6 +98,7 @@ class _SmsScanDateRangeDialogState extends State<SmsScanDateRangeDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = t.smsParser.customRange;
     final colors = Theme.of(context).colorScheme;
     final validRange = isValidCustomScanRange(
       startDate: _startDate,
@@ -106,33 +107,33 @@ class _SmsScanDateRangeDialogState extends State<SmsScanDateRangeDialog> {
 
     return AlertDialog(
       backgroundColor: colors.surface,
-      title: Text(t.smsParser.customRange.title),
+      title: Text(strings.title),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            t.smsParser.customRange.body,
+            strings.body,
             style: TextStyle(color: colors.onSurface.withAlpha(180)),
           ),
           const SizedBox(height: AppSpacing.md),
           _DateField(
             key: const Key('scan_range_start_field'),
-            label: t.smsParser.customRange.start,
+            label: strings.start,
             value: _formatDate(_startDate),
             onTap: () => unawaited(_pickStartDate()),
           ),
           const SizedBox(height: AppSpacing.smd),
           _DateField(
             key: const Key('scan_range_end_field'),
-            label: t.smsParser.customRange.end,
+            label: strings.end,
             value: _formatDate(_endDate),
             onTap: () => unawaited(_pickEndDate()),
           ),
           if (!validRange) ...[
             const SizedBox(height: AppSpacing.smd),
             Text(
-              t.smsParser.customRange.invalid,
+              strings.invalid,
               key: const Key('scan_range_validation_message'),
               style: TextStyle(color: colors.error),
             ),
@@ -147,7 +148,7 @@ class _SmsScanDateRangeDialogState extends State<SmsScanDateRangeDialog> {
         FilledButton(
           key: const Key('scan_range_apply_button'),
           onPressed: validRange ? _apply : null,
-          child: Text(t.smsParser.customRange.apply),
+          child: Text(strings.apply),
         ),
       ],
     );

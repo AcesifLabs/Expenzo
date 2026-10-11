@@ -6,8 +6,7 @@ void main() {
   test('one spending day becomes one bar among zero days', () {
     final trend = zeroFillTrend(
       totals: {DateTime(2026, 10, 3): 122},
-      start: DateTime(2026, 10, 1),
-      end: DateTime(2026, 10, 5, 23, 59),
+      range: (start: DateTime(2026, 10, 1), end: DateTime(2026, 10, 5, 23, 59)),
       granularity: Granularity.daily,
       now: DateTime(2026, 10, 20),
     );
@@ -19,8 +18,10 @@ void main() {
   test('stops at today instead of drawing empty future days', () {
     final trend = zeroFillTrend(
       totals: const {},
-      start: DateTime(2026, 10, 1),
-      end: DateTime(2026, 10, 31, 23, 59),
+      range: (
+        start: DateTime(2026, 10, 1),
+        end: DateTime(2026, 10, 31, 23, 59),
+      ),
       granularity: Granularity.daily,
       now: DateTime(2026, 10, 11, 15),
     );
@@ -32,8 +33,7 @@ void main() {
   test('monthly and weekly periods step by calendar', () {
     final months = zeroFillTrend(
       totals: {DateTime(2026, 2): 5},
-      start: DateTime(2026, 1, 15),
-      end: DateTime(2026, 3, 2),
+      range: (start: DateTime(2026, 1, 15), end: DateTime(2026, 3, 2)),
       granularity: Granularity.monthly,
       now: DateTime(2026, 12, 1),
     );
@@ -43,8 +43,7 @@ void main() {
     // 2026-10-07 is a Wednesday; weeks start on Monday 2026-10-05.
     final weeks = zeroFillTrend(
       totals: const {},
-      start: DateTime(2026, 10, 7),
-      end: DateTime(2026, 10, 20),
+      range: (start: DateTime(2026, 10, 7), end: DateTime(2026, 10, 20)),
       granularity: Granularity.weekly,
       now: DateTime(2026, 12, 1),
     );

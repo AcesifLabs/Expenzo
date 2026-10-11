@@ -117,6 +117,7 @@ Widget _buildReportsTrendContent(
 ) {
   final wholeNumberFmt = CurrencyFormatter.getFormatter(decimalDigits: 0);
   final decimalFmt = CurrencyFormatter.getFormatter(decimalDigits: 2);
+  final metrics = t.reports.metrics;
 
   final start = DateFormat('MMM d').format(state.startDate);
   final end = DateFormat('MMM d').format(state.endDate);
@@ -148,19 +149,19 @@ Widget _buildReportsTrendContent(
           children: [
             MetricBox(
               value: wholeNumberFmt.format(state.insights.totalSpent),
-              label: t.reports.metrics.totalSpent,
+              label: metrics.totalSpent,
               valueColor: palette.expense,
             ),
             const SizedBox(height: AppSpacing.smd),
             MetricBox(
               value: decimalFmt.format(state.insights.avgDailySpending),
-              label: t.reports.metrics.dailyAverage,
+              label: metrics.dailyAverage,
               valueColor: palette.textPrimary,
             ),
             const SizedBox(height: AppSpacing.smd),
             MetricBox(
               value: wholeNumberFmt.format(state.insights.highestDayAmount),
-              label: t.reports.metrics.highestDay,
+              label: metrics.highestDay,
               valueColor: palette.accent,
             ),
           ],
@@ -313,6 +314,45 @@ class _ReportsBodyArgs {
   });
 }
 
+Widget _buildReportsStateContent(
+  ReportsState state,
+  AppPalette palette,
+  _ReportsBodyArgs args,
+) {
+  if (state is ReportsLoaded) {
+    return Expanded(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: args.reportsSideInset),
+        child: _buildReportsTabContent(
+          palette,
+          state,
+          args.controller,
+          args.reportsContentInnerInset,
+        ),
+      ),
+    );
+  }
+  if (state is ReportsLoading) {
+    return const Expanded(child: Center(child: CircularProgressIndicator()));
+  }
+  if (state is ReportsError) {
+    return Expanded(
+      child: Center(
+        child: Text(state.message, style: TextStyle(color: palette.expense)),
+      ),
+    );
+  }
+
+  return Expanded(
+    child: Center(
+      child: Text(
+        t.reports.noData,
+        style: TextStyle(color: palette.textSecondary),
+      ),
+    ),
+  );
+}
+
 Widget _buildReportsBody({required _ReportsBodyArgs args}) {
   final state = args.state;
   final palette = args.context.palette;
@@ -360,42 +400,7 @@ Widget _buildReportsBody({required _ReportsBodyArgs args}) {
                 ),
                 child: Container(height: 1, color: palette.divider),
               ),
-              if (state is ReportsLoaded)
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: args.reportsSideInset,
-                    ),
-                    child: _buildReportsTabContent(
-                      palette,
-                      state,
-                      args.controller,
-                      args.reportsContentInnerInset,
-                    ),
-                  ),
-                )
-              else if (state is ReportsLoading)
-                const Expanded(
-                  child: Center(child: CircularProgressIndicator()),
-                )
-              else if (state is ReportsError)
-                Expanded(
-                  child: Center(
-                    child: Text(
-                      state.message,
-                      style: TextStyle(color: palette.expense),
-                    ),
-                  ),
-                )
-              else
-                Expanded(
-                  child: Center(
-                    child: Text(
-                      t.reports.noData,
-                      style: TextStyle(color: palette.textSecondary),
-                    ),
-                  ),
-                ),
+              _buildReportsStateContent(state, palette, args),
             ],
           ),
         ),

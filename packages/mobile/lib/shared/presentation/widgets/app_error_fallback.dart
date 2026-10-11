@@ -39,18 +39,22 @@ class AppErrorFallback extends StatelessWidget {
   });
 
   String get _title {
+    final fallback = t.common.fallback;
+
     return switch (fallbackContext) {
-      AppFallbackContext.init => t.common.fallback.initTitle,
-      AppFallbackContext.build => t.common.fallback.errorTitle,
-      AppFallbackContext.framework => t.common.fallback.errorTitle,
-      AppFallbackContext.async => t.common.fallback.errorTitle,
+      AppFallbackContext.init => fallback.initTitle,
+      AppFallbackContext.build => fallback.errorTitle,
+      AppFallbackContext.framework => fallback.errorTitle,
+      AppFallbackContext.async => fallback.errorTitle,
     };
   }
 
   String get _body {
+    final fallback = t.common.fallback;
+
     return switch (fallbackContext) {
-      AppFallbackContext.init => t.common.fallback.initBody,
-      _ => t.common.fallback.errorBody,
+      AppFallbackContext.init => fallback.initBody,
+      _ => fallback.errorBody,
     };
   }
 
