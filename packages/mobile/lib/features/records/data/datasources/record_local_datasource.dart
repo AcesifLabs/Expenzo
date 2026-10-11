@@ -62,6 +62,10 @@ abstract class RecordLocalDatasource {
   /// Returns the number of records that reference [categoryId].
   /// Throws: [CacheException] if a database error occurs.
   Future<int> getRecordCountByCategory(String categoryId);
+
+  /// Returns the number of records per category id.
+  /// Throws: [CacheException] if a database error occurs.
+  Future<Map<String, int>> getCategoryRecordCounts();
 }
 
 class RecordLocalDatasourceImpl implements RecordLocalDatasource {
@@ -364,6 +368,17 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
   Future<int> getRecordCountByCategory(String categoryId) async {
     try {
       return await recordDao.getRecordCountByCategory(categoryId);
+    } catch (e, s) {
+      appLogger.error('Record local datasource error', e, s);
+      throw CacheException(message: e.toString());
+    }
+  }
+
+  /// Throws: [CacheException] if a database error occurs.
+  @override
+  Future<Map<String, int>> getCategoryRecordCounts() async {
+    try {
+      return await recordDao.getCategoryRecordCounts();
     } catch (e, s) {
       appLogger.error('Record local datasource error', e, s);
       throw CacheException(message: e.toString());

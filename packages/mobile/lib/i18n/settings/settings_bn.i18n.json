@@ -68,5 +68,8 @@
   "currencyScreen": {
     "searchHint": "মুদ্রা খুঁজুন",
     "noResults": "\"{query}\"-এর সাথে মেলে এমন কোনো মুদ্রা নেই"
+  },
+  "categories": {
+    "rowSubtitle": "ক্যাটাগরি যোগ, সম্পাদনা ও মুছে ফেলুন"
   }
 }

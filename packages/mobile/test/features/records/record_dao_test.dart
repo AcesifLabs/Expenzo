@@ -203,4 +203,50 @@ void main() {
       expect(rows.first.read(dao.records.amount.sum()), 25);
     });
   });
+
+  group('RecordDao.getCategoryRecordCounts', () {
+    Future<void> insertRecord({required String id, String? categoryId}) async {
+      await db
+          .into(db.records)
+          .insert(
+            RecordsCompanion.insert(
+              id: id,
+              amount: 10,
+              description: 'Test $id',
+              date: DateTime(2026, 8, 1),
+              categoryId: Value(categoryId),
+              recordType: 'OUT',
+            ),
+          );
+    }
+
+    test('empty table returns an empty map', () async {
+      expect(await dao.getCategoryRecordCounts(), isEmpty);
+    });
+
+    test('counts records per category', () async {
+      await insertRecord(id: '1', categoryId: 'cat-1');
+      await insertRecord(id: '2', categoryId: 'cat-1');
+      await insertRecord(id: '3', categoryId: 'cat-1');
+      await insertRecord(id: '4', categoryId: 'cat-2');
+
+      expect(await dao.getCategoryRecordCounts(), {'cat-1': 3, 'cat-2': 1});
+    });
+
+    test('ignores records without a category', () async {
+      await insertRecord(id: '1', categoryId: 'cat-1');
+      await insertRecord(id: '2');
+
+      expect(await dao.getCategoryRecordCounts(), {'cat-1': 1});
+    });
+
+    test('deleting a record lowers its category count', () async {
+      await insertRecord(id: '1', categoryId: 'cat-1');
+      await insertRecord(id: '2', categoryId: 'cat-1');
+
+      await dao.deleteRecord('1');
+
+      expect(await dao.getCategoryRecordCounts(), {'cat-1': 1});
+    });
+  });
 }

@@ -110,6 +110,10 @@ class SettingsView extends StatelessWidget {
     context.push('/settings/language');
   }
 
+  void _openCategories(BuildContext context) {
+    context.push('/settings/categories');
+  }
+
   void _handleDeleteAccountTap(BuildContext context) {
     showDialog(
       context: context,
@@ -258,6 +262,12 @@ class SettingsView extends StatelessWidget {
           title: settingsT.language.title,
           subtitle: LanguageView.labelFor(languageCode),
           onTap: () => _openLanguage(context),
+        ),
+        SettingsTile(
+          icon: PiconsRegular.tag,
+          title: t.categories.settings.title,
+          subtitle: t.settings.categories.rowSubtitle,
+          onTap: () => _openCategories(context),
         ),
       ],
     );

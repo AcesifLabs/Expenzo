@@ -74,6 +74,25 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
     return result.read(count) ?? 0;
   }
 
+  /// Number of records per category id; categories with no records are absent.
+  Future<Map<String, int>> getCategoryRecordCounts() async {
+    final count = records.id.count();
+    final query = selectOnly(records)
+      ..addColumns([records.categoryId, count])
+      ..where(records.categoryId.isNotNull())
+      ..groupBy([records.categoryId]);
+    final rows = await query.get();
+
+    final counts = <String, int>{};
+    for (final row in rows) {
+      final categoryId = row.read(records.categoryId);
+      if (categoryId == null) continue;
+      counts[categoryId] = row.read(count) ?? 0;
+    }
+
+    return counts;
+  }
+
   Future<bool> existsBySourceId(String sourceId) async {
     final count = countAll();
     final query = selectOnly(records)

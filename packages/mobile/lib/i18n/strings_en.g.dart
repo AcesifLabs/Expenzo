@@ -166,11 +166,10 @@ class Translations$categories$en {
 		'default_out_general': 'General',
 	};
 
-	/// en: 'Categories'
-	String get title => 'Categories';
-
 	/// en: 'No categories created'
 	String get empty => 'No categories created';
+
+	late final Translations$categories$settings$en settings = Translations$categories$settings$en.internal(_root);
 
 	/// en: 'Default categories cannot be deleted'
 	String get defaultCannotDelete => 'Default categories cannot be deleted';
@@ -659,6 +658,7 @@ class Translations$settings$en {
 
 	late final Translations$settings$appearanceScreen$en appearanceScreen = Translations$settings$appearanceScreen$en.internal(_root);
 	late final Translations$settings$currencyScreen$en currencyScreen = Translations$settings$currencyScreen$en.internal(_root);
+	late final Translations$settings$categories$en categories = Translations$settings$categories$en.internal(_root);
 }
 
 // Path: shell
@@ -688,7 +688,6 @@ class Translations$smsParser$en {
 	late final Translations$smsParser$customRange$en customRange = Translations$smsParser$customRange$en.internal(_root);
 	late final Translations$smsParser$results$en results = Translations$smsParser$results$en.internal(_root);
 	late final Translations$smsParser$autoImport$en autoImport = Translations$smsParser$autoImport$en.internal(_root);
-	late final Translations$smsParser$permission$en permission = Translations$smsParser$permission$en.internal(_root);
 }
 
 // Path: aiAssistant.suggestions
@@ -1054,6 +1053,29 @@ class Translations$budgets$picker$en {
 
 	/// en: 'No active budgets'
 	String get empty => 'No active budgets';
+}
+
+// Path: categories.settings
+class Translations$categories$settings$en {
+	Translations$categories$settings$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Category settings'
+	String get title => 'Category settings';
+
+	late final Translations$categories$settings$sections$en sections = Translations$categories$settings$sections$en.internal(_root);
+
+	/// en: '(one) {{n} transaction} (other) {{n} transactions}'
+	String recordCount({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: '${n} transaction',
+		other: '${n} transactions',
+	);
+
+	/// en: 'Couldn't delete the category. Try again.'
+	String get deleteFailed => 'Couldn\'t delete the category. Try again.';
 }
 
 // Path: categories.form
@@ -2318,6 +2340,18 @@ class Translations$settings$currencyScreen$en {
 	String noResults({required Object query}) => 'No currency matches "${query}"';
 }
 
+// Path: settings.categories
+class Translations$settings$categories$en {
+	Translations$settings$categories$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Add, edit and remove categories'
+	String get rowSubtitle => 'Add, edit and remove categories';
+}
+
 // Path: shell.tabs
 class Translations$shell$tabs$en {
 	Translations$shell$tabs$en.internal(this._root);
@@ -2534,48 +2568,6 @@ class Translations$smsParser$autoImport$en {
 	String get scanPast => 'Scan past SMS';
 }
 
-// Path: smsParser.permission
-class Translations$smsParser$permission$en {
-	Translations$smsParser$permission$en.internal(this._root);
-
-	final Translations _root; // ignore: unused_field
-
-	// Translations
-
-	/// en: 'SMS permission was permanently denied. Enable it in app settings.'
-	String get denied => 'SMS permission was permanently denied. Enable it in app settings.';
-
-	/// en: 'Permission request timed out. Try again.'
-	String get timedOut => 'Permission request timed out. Try again.';
-
-	/// en: 'Your privacy is protected'
-	String get privacyTitle => 'Your privacy is protected';
-
-	/// en: 'All SMS data is processed on your device. We never upload your messages to any server.'
-	String get privacyBody => 'All SMS data is processed on your device. We never upload your messages to any server.';
-
-	/// en: 'Stored only on this phone'
-	String get localTitle => 'Stored only on this phone';
-
-	/// en: 'Detected expenses are stored on this phone. No personal messages are saved.'
-	String get localBody => 'Detected expenses are stored on this phone. No personal messages are saved.';
-
-	/// en: 'You're in control'
-	String get controlTitle => 'You\'re in control';
-
-	/// en: 'Choose which SMS to turn into expenses. You can always edit or delete them.'
-	String get controlBody => 'Choose which SMS to turn into expenses. You can always edit or delete them.';
-
-	/// en: 'Turn on SMS scanning'
-	String get title => 'Turn on SMS scanning';
-
-	/// en: 'We scan your SMS to detect expenses from banks and payment apps automatically.'
-	String get body => 'We scan your SMS to detect expenses from banks and payment apps automatically.';
-
-	/// en: 'Continue'
-	String get next => 'Continue';
-}
-
 // Path: budgets.details.periodBudget
 class Translations$budgets$details$periodBudget$en {
 	Translations$budgets$details$periodBudget$en.internal(this._root);
@@ -2592,6 +2584,21 @@ class Translations$budgets$details$periodBudget$en {
 
 	/// en: 'Yearly budget'
 	String get yearly => 'Yearly budget';
+}
+
+// Path: categories.settings.sections
+class Translations$categories$settings$sections$en {
+	Translations$categories$settings$sections$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Expense categories'
+	String get expense => 'Expense categories';
+
+	/// en: 'Income categories'
+	String get income => 'Income categories';
 }
 
 // Path: dashboard.range.net
@@ -2893,8 +2900,12 @@ extension on Translations {
 			'categories.defaults.default_out_investment' => 'Investment',
 			'categories.defaults.default_out_gifts' => 'Gifts',
 			'categories.defaults.default_out_general' => 'General',
-			'categories.title' => 'Categories',
 			'categories.empty' => 'No categories created',
+			'categories.settings.title' => 'Category settings',
+			'categories.settings.sections.expense' => 'Expense categories',
+			'categories.settings.sections.income' => 'Income categories',
+			'categories.settings.recordCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} transaction', other: '${n} transactions', ), 
+			'categories.settings.deleteFailed' => 'Couldn\'t delete the category. Try again.',
 			'categories.defaultCannotDelete' => 'Default categories cannot be deleted',
 			'categories.form.add' => 'Add category',
 			'categories.form.edit' => 'Edit category',
@@ -3288,12 +3299,12 @@ extension on Translations {
 			'settings.language.matchDeviceSubtitle' => 'Use your phone\'s language',
 			'settings.language.names.en' => 'English',
 			'settings.language.names.bn' => 'Bengali',
+			_ => null,
+		} ?? switch (path) {
 			'settings.title' => 'Settings',
 			'settings.currency' => 'Default currency',
 			'settings.appearance' => 'Appearance',
 			'settings.notificationsBlocked' => 'Allow notifications for Expenzo in system settings to get budget alerts.',
-			_ => null,
-		} ?? switch (path) {
 			'settings.sections.preferences' => 'Preferences',
 			'settings.sections.automation' => 'Automation',
 			'settings.sections.support' => 'Support',
@@ -3331,6 +3342,7 @@ extension on Translations {
 			'settings.appearanceScreen.darkBody' => 'A deep charcoal background with lavender accents for a calm, focused look.',
 			'settings.currencyScreen.searchHint' => 'Search currencies',
 			'settings.currencyScreen.noResults' => ({required Object query}) => 'No currency matches "${query}"',
+			'settings.categories.rowSubtitle' => 'Add, edit and remove categories',
 			'shell.tabs.home' => 'Home',
 			'shell.tabs.activity' => 'Activity',
 			'shell.tabs.budgets' => 'Budgets',
@@ -3368,17 +3380,6 @@ extension on Translations {
 			'smsParser.results.emptyBody' => 'Try scanning again or add more matching rules',
 			'smsParser.results.create' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: 'Add ${n} selected record', other: 'Add ${n} selected records', ), 
 			'smsParser.autoImport.scanPast' => 'Scan past SMS',
-			'smsParser.permission.denied' => 'SMS permission was permanently denied. Enable it in app settings.',
-			'smsParser.permission.timedOut' => 'Permission request timed out. Try again.',
-			'smsParser.permission.privacyTitle' => 'Your privacy is protected',
-			'smsParser.permission.privacyBody' => 'All SMS data is processed on your device. We never upload your messages to any server.',
-			'smsParser.permission.localTitle' => 'Stored only on this phone',
-			'smsParser.permission.localBody' => 'Detected expenses are stored on this phone. No personal messages are saved.',
-			'smsParser.permission.controlTitle' => 'You\'re in control',
-			'smsParser.permission.controlBody' => 'Choose which SMS to turn into expenses. You can always edit or delete them.',
-			'smsParser.permission.title' => 'Turn on SMS scanning',
-			'smsParser.permission.body' => 'We scan your SMS to detect expenses from banks and payment apps automatically.',
-			'smsParser.permission.next' => 'Continue',
 			_ => null,
 		};
 	}

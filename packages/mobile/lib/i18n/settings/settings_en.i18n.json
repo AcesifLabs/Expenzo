@@ -67,5 +67,8 @@
   "currencyScreen": {
     "searchHint": "Search currencies",
     "noResults": "No currency matches \"{query}\""
+  },
+  "categories": {
+    "rowSubtitle": "Add, edit and remove categories"
   }
 }

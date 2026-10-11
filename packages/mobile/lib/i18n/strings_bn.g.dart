@@ -137,8 +137,8 @@ class _Translations$categories$bn extends Translations$categories$en {
 		'default_out_gifts': 'উপহার',
 		'default_out_general': 'সাধারণ',
 	};
-	@override String get title => 'ক্যাটাগরি';
 	@override String get empty => 'কোনো ক্যাটাগরি তৈরি করা হয়নি';
+	@override late final _Translations$categories$settings$bn settings = _Translations$categories$settings$bn._(_root);
 	@override String get defaultCannotDelete => 'ডিফল্ট ক্যাটাগরি মোছা যায় না';
 	@override late final _Translations$categories$form$bn form = _Translations$categories$form$bn._(_root);
 	@override late final _Translations$categories$delete$bn delete = _Translations$categories$delete$bn._(_root);
@@ -446,6 +446,7 @@ class _Translations$settings$bn extends Translations$settings$en {
 	@override String get loadFailed => 'আপনার সেটিংস লোড করা যায়নি।';
 	@override late final _Translations$settings$appearanceScreen$bn appearanceScreen = _Translations$settings$appearanceScreen$bn._(_root);
 	@override late final _Translations$settings$currencyScreen$bn currencyScreen = _Translations$settings$currencyScreen$bn._(_root);
+	@override late final _Translations$settings$categories$bn categories = _Translations$settings$categories$bn._(_root);
 }
 
 // Path: shell
@@ -475,7 +476,6 @@ class _Translations$smsParser$bn extends Translations$smsParser$en {
 	@override late final _Translations$smsParser$customRange$bn customRange = _Translations$smsParser$customRange$bn._(_root);
 	@override late final _Translations$smsParser$results$bn results = _Translations$smsParser$results$bn._(_root);
 	@override late final _Translations$smsParser$autoImport$bn autoImport = _Translations$smsParser$autoImport$bn._(_root);
-	@override late final _Translations$smsParser$permission$bn permission = _Translations$smsParser$permission$bn._(_root);
 }
 
 // Path: aiAssistant.suggestions
@@ -678,6 +678,22 @@ class _Translations$budgets$picker$bn extends Translations$budgets$picker$en {
 	@override String get previousBudgetHint => 'বর্তমান সংযোগ রাখুন';
 	@override String progress({required Object period, required Object spent, required Object limit}) => '${period} · ${spent} / ${limit}';
 	@override String get empty => 'কোনো সক্রিয় বাজেট নেই';
+}
+
+// Path: categories.settings
+class _Translations$categories$settings$bn extends Translations$categories$settings$en {
+	_Translations$categories$settings$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'ক্যাটাগরি সেটিংস';
+	@override late final _Translations$categories$settings$sections$bn sections = _Translations$categories$settings$sections$bn._(_root);
+	@override String recordCount({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n,
+		one: '${n}টি লেনদেন',
+		other: '${n}টি লেনদেন',
+	);
+	@override String get deleteFailed => 'ক্যাটাগরি মোছা যায়নি। আবার চেষ্টা করুন।';
 }
 
 // Path: categories.form
@@ -1417,6 +1433,16 @@ class _Translations$settings$currencyScreen$bn extends Translations$settings$cur
 	@override String noResults({required Object query}) => '"${query}"-এর সাথে মেলে এমন কোনো মুদ্রা নেই';
 }
 
+// Path: settings.categories
+class _Translations$settings$categories$bn extends Translations$settings$categories$en {
+	_Translations$settings$categories$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get rowSubtitle => 'ক্যাটাগরি যোগ, সম্পাদনা ও মুছে ফেলুন';
+}
+
 // Path: shell.tabs
 class _Translations$shell$tabs$bn extends Translations$shell$tabs$en {
 	_Translations$shell$tabs$bn._(TranslationsBn root) : this._root = root, super.internal(root);
@@ -1559,26 +1585,6 @@ class _Translations$smsParser$autoImport$bn extends Translations$smsParser$autoI
 	@override String get scanPast => 'পুরোনো SMS স্ক্যান করুন';
 }
 
-// Path: smsParser.permission
-class _Translations$smsParser$permission$bn extends Translations$smsParser$permission$en {
-	_Translations$smsParser$permission$bn._(TranslationsBn root) : this._root = root, super.internal(root);
-
-	final TranslationsBn _root; // ignore: unused_field
-
-	// Translations
-	@override String get denied => 'SMS পড়ার অনুমতি স্থায়ীভাবে বন্ধ করা আছে। অ্যাপ সেটিংসে এটি চালু করুন।';
-	@override String get timedOut => 'অনুমতির অনুরোধের সময় শেষ হয়ে গেছে। আবার চেষ্টা করুন।';
-	@override String get privacyTitle => 'আপনার গোপনীয়তা সুরক্ষিত';
-	@override String get privacyBody => 'সব SMS ডেটা আপনার ফোনেই প্রসেস হয়। আমরা কখনো আপনার মেসেজ কোনো সার্ভারে পাঠাই না।';
-	@override String get localTitle => 'শুধু এই ফোনে সংরক্ষিত';
-	@override String get localBody => 'শনাক্ত করা খরচ এই ফোনে সংরক্ষিত থাকে। কোনো ব্যক্তিগত মেসেজ সংরক্ষণ করা হয় না।';
-	@override String get controlTitle => 'নিয়ন্ত্রণ আপনার হাতে';
-	@override String get controlBody => 'কোন SMS খরচে বদলাবেন তা আপনি বেছে নিন। পরে সবসময় সম্পাদনা বা মুছতে পারবেন।';
-	@override String get title => 'SMS স্ক্যান চালু করুন';
-	@override String get body => 'ব্যাংক ও পেমেন্ট অ্যাপের খরচ স্বয়ংক্রিয়ভাবে শনাক্ত করতে আমরা আপনার SMS স্ক্যান করি।';
-	@override String get next => 'চালিয়ে যান';
-}
-
 // Path: budgets.details.periodBudget
 class _Translations$budgets$details$periodBudget$bn extends Translations$budgets$details$periodBudget$en {
 	_Translations$budgets$details$periodBudget$bn._(TranslationsBn root) : this._root = root, super.internal(root);
@@ -1589,6 +1595,17 @@ class _Translations$budgets$details$periodBudget$bn extends Translations$budgets
 	@override String get weekly => 'সাপ্তাহিক বাজেট';
 	@override String get monthly => 'মাসিক বাজেট';
 	@override String get yearly => 'বার্ষিক বাজেট';
+}
+
+// Path: categories.settings.sections
+class _Translations$categories$settings$sections$bn extends Translations$categories$settings$sections$en {
+	_Translations$categories$settings$sections$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get expense => 'খরচের ক্যাটাগরি';
+	@override String get income => 'আয়ের ক্যাটাগরি';
 }
 
 // Path: dashboard.range.net
@@ -1848,8 +1865,12 @@ extension on TranslationsBn {
 			'categories.defaults.default_out_investment' => 'বিনিয়োগ',
 			'categories.defaults.default_out_gifts' => 'উপহার',
 			'categories.defaults.default_out_general' => 'সাধারণ',
-			'categories.title' => 'ক্যাটাগরি',
 			'categories.empty' => 'কোনো ক্যাটাগরি তৈরি করা হয়নি',
+			'categories.settings.title' => 'ক্যাটাগরি সেটিংস',
+			'categories.settings.sections.expense' => 'খরচের ক্যাটাগরি',
+			'categories.settings.sections.income' => 'আয়ের ক্যাটাগরি',
+			'categories.settings.recordCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n, one: '${n}টি লেনদেন', other: '${n}টি লেনদেন', ), 
+			'categories.settings.deleteFailed' => 'ক্যাটাগরি মোছা যায়নি। আবার চেষ্টা করুন।',
 			'categories.defaultCannotDelete' => 'ডিফল্ট ক্যাটাগরি মোছা যায় না',
 			'categories.form.add' => 'ক্যাটাগরি যোগ করুন',
 			'categories.form.edit' => 'ক্যাটাগরি সম্পাদনা',
@@ -2243,12 +2264,12 @@ extension on TranslationsBn {
 			'settings.language.matchDeviceSubtitle' => 'ফোনের ভাষা ব্যবহার করুন',
 			'settings.language.names.en' => 'ইংরেজি',
 			'settings.language.names.bn' => 'বাংলা',
+			_ => null,
+		} ?? switch (path) {
 			'settings.title' => 'সেটিংস',
 			'settings.currency' => 'ডিফল্ট মুদ্রা',
 			'settings.appearance' => 'থিম',
 			'settings.notificationsBlocked' => 'বাজেট সতর্কতা পেতে সিস্টেম সেটিংসে Expenzo-র নোটিফিকেশন চালু করুন।',
-			_ => null,
-		} ?? switch (path) {
 			'settings.sections.preferences' => 'পছন্দ',
 			'settings.sections.automation' => 'স্বয়ংক্রিয়',
 			'settings.sections.support' => 'সহায়তা',
@@ -2286,6 +2307,7 @@ extension on TranslationsBn {
 			'settings.appearanceScreen.darkBody' => 'শান্ত, মনোযোগী অভিজ্ঞতার জন্য গাঢ় চারকোল পটভূমি আর ল্যাভেন্ডার রং।',
 			'settings.currencyScreen.searchHint' => 'মুদ্রা খুঁজুন',
 			'settings.currencyScreen.noResults' => ({required Object query}) => '"${query}"-এর সাথে মেলে এমন কোনো মুদ্রা নেই',
+			'settings.categories.rowSubtitle' => 'ক্যাটাগরি যোগ, সম্পাদনা ও মুছে ফেলুন',
 			'shell.tabs.home' => 'হোম',
 			'shell.tabs.activity' => 'লেনদেন',
 			'shell.tabs.budgets' => 'বাজেট',
@@ -2323,17 +2345,6 @@ extension on TranslationsBn {
 			'smsParser.results.emptyBody' => 'আবার স্ক্যান করুন অথবা আরও মিলানোর নিয়ম যোগ করুন',
 			'smsParser.results.create' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n, one: 'বাছাই করা ${n}টি রেকর্ড যোগ করুন', other: 'বাছাই করা ${n}টি রেকর্ড যোগ করুন', ), 
 			'smsParser.autoImport.scanPast' => 'পুরোনো SMS স্ক্যান করুন',
-			'smsParser.permission.denied' => 'SMS পড়ার অনুমতি স্থায়ীভাবে বন্ধ করা আছে। অ্যাপ সেটিংসে এটি চালু করুন।',
-			'smsParser.permission.timedOut' => 'অনুমতির অনুরোধের সময় শেষ হয়ে গেছে। আবার চেষ্টা করুন।',
-			'smsParser.permission.privacyTitle' => 'আপনার গোপনীয়তা সুরক্ষিত',
-			'smsParser.permission.privacyBody' => 'সব SMS ডেটা আপনার ফোনেই প্রসেস হয়। আমরা কখনো আপনার মেসেজ কোনো সার্ভারে পাঠাই না।',
-			'smsParser.permission.localTitle' => 'শুধু এই ফোনে সংরক্ষিত',
-			'smsParser.permission.localBody' => 'শনাক্ত করা খরচ এই ফোনে সংরক্ষিত থাকে। কোনো ব্যক্তিগত মেসেজ সংরক্ষণ করা হয় না।',
-			'smsParser.permission.controlTitle' => 'নিয়ন্ত্রণ আপনার হাতে',
-			'smsParser.permission.controlBody' => 'কোন SMS খরচে বদলাবেন তা আপনি বেছে নিন। পরে সবসময় সম্পাদনা বা মুছতে পারবেন।',
-			'smsParser.permission.title' => 'SMS স্ক্যান চালু করুন',
-			'smsParser.permission.body' => 'ব্যাংক ও পেমেন্ট অ্যাপের খরচ স্বয়ংক্রিয়ভাবে শনাক্ত করতে আমরা আপনার SMS স্ক্যান করি।',
-			'smsParser.permission.next' => 'চালিয়ে যান',
 			_ => null,
 		};
 	}

@@ -176,4 +176,48 @@ void main() {
     await tester.tap(find.text('JPY'));
     expect(taps, 0);
   });
+
+  testWidgets('a section header upper-cases its title and is a header', (
+    tester,
+  ) async {
+    await pump(tester, const SettingsSectionHeader(title: 'General'));
+
+    expect(find.text('GENERAL'), findsOneWidget);
+    expect(
+      tester.getSemantics(find.text('GENERAL')),
+      matchesSemantics(label: 'GENERAL', isHeader: true),
+    );
+  });
+
+  testWidgets('section slots divide rows and round only the outer corners', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      const Column(
+        children: [
+          SettingsSectionSlot(isFirst: true, isLast: false, child: Text('a')),
+          SettingsSectionSlot(isFirst: false, isLast: false, child: Text('b')),
+          SettingsSectionSlot(isFirst: false, isLast: true, child: Text('c')),
+        ],
+      ),
+    );
+
+    BorderRadius radiusOf(String text) {
+      final box = tester.widget<Container>(
+        find
+            .ancestor(of: find.text(text), matching: find.byType(Container))
+            .first,
+      );
+
+      return (box.decoration! as BoxDecoration).borderRadius! as BorderRadius;
+    }
+
+    expect(find.byType(Divider), findsNWidgets(2));
+    expect(radiusOf('a').topLeft, isNot(Radius.zero));
+    expect(radiusOf('a').bottomLeft, Radius.zero);
+    expect(radiusOf('b'), BorderRadius.zero);
+    expect(radiusOf('c').topLeft, Radius.zero);
+    expect(radiusOf('c').bottomLeft, isNot(Radius.zero));
+  });
 }

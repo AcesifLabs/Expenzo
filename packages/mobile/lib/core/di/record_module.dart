@@ -12,6 +12,7 @@ import 'package:expense_tracker/features/records/domain/usecases/add_record.dart
 import 'package:expense_tracker/features/records/domain/usecases/create_record_from_parsed.dart';
 import 'package:expense_tracker/features/records/domain/usecases/create_records_from_parsed_list.dart';
 import 'package:expense_tracker/features/records/domain/usecases/delete_record.dart';
+import 'package:expense_tracker/features/records/domain/usecases/get_category_record_counts.dart';
 import 'package:expense_tracker/features/records/domain/usecases/get_records.dart';
 import 'package:expense_tracker/features/records/domain/usecases/update_record.dart';
 import 'package:expense_tracker/features/records/presentation/bloc/record_bloc.dart';
@@ -37,6 +38,9 @@ void initRecordModule(GetIt getIt) {
   );
   getIt.registerLazySingleton(() => UpdateRecord(getIt<RecordRepository>()));
   getIt.registerLazySingleton(() => DeleteRecord(getIt<RecordRepository>()));
+  getIt.registerLazySingleton(
+    () => GetCategoryRecordCounts(getIt<RecordRepository>()),
+  );
   getIt.registerLazySingleton(
     () => CreateRecordFromParsed(getIt<RecordRepository>()),
   );

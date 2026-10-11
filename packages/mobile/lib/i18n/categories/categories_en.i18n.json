@@ -20,8 +20,19 @@
     "default_out_gifts": "Gifts",
     "default_out_general": "General"
   },
-  "title": "Categories",
   "empty": "No categories created",
+  "settings": {
+    "title": "Category settings",
+    "sections": {
+      "expense": "Expense categories",
+      "income": "Income categories"
+    },
+    "recordCount": {
+      "one": "{n} transaction",
+      "other": "{n} transactions"
+    },
+    "deleteFailed": "Couldn't delete the category. Try again."
+  },
   "defaultCannotDelete": "Default categories cannot be deleted",
   "form": {
     "add": "Add category",
