@@ -40,6 +40,7 @@ import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 import 'package:expense_tracker/core/error/failure_message.dart';
 import 'package:expense_tracker/features/categories/presentation/helpers/category_display_name.dart';
+import 'package:expense_tracker/features/budgets/presentation/helpers/budget_display_name.dart';
 
 /// Opens the transaction sheet to add a record, or to edit [record].
 ///
@@ -838,7 +839,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                 value: budget.id,
                 child: Text(
                   sheetT.budgetOption(
-                    name: budget.name,
+                    name: budgetDisplayName(budget.name),
                     period: budget.period.displayName,
                   ),
                   overflow: TextOverflow.ellipsis,

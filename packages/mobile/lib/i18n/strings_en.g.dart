@@ -112,6 +112,9 @@ class Translations$budgets$en {
 	/// en: 'Track your monthly limits'
 	String get subtitle => 'Track your monthly limits';
 
+	/// en: 'Unnamed budget'
+	String get unnamed => 'Unnamed budget';
+
 	late final Translations$budgets$empty$en empty = Translations$budgets$empty$en.internal(_root);
 
 	/// en: 'Budget saved'
@@ -810,6 +813,9 @@ class Translations$auth$syncConflict$en {
 	/// en: 'Replace'
 	String get replace => 'Replace';
 
+	/// en: 'Couldn't upload your budget names. Check your connection and try again.'
+	String get namesUploadFailed => 'Couldn\'t upload your budget names. Check your connection and try again.';
+
 	/// en: 'Preparing…'
 	String get preparing => 'Preparing…';
 
@@ -956,6 +962,9 @@ class Translations$budgets$form$en {
 
 	/// en: 'Enter a name'
 	String get nameRequired => 'Enter a name';
+
+	/// en: 'Pick a different name'
+	String get nameReserved => 'Pick a different name';
 }
 
 // Path: budgets.details
@@ -2699,6 +2708,7 @@ extension on Translations {
 			'auth.syncConflict.replaceTitle' => 'Replace data on this phone?',
 			'auth.syncConflict.replaceBody' => 'This permanently deletes the records on this phone and replaces them with your account copy.',
 			'auth.syncConflict.replace' => 'Replace',
+			'auth.syncConflict.namesUploadFailed' => 'Couldn\'t upload your budget names. Check your connection and try again.',
 			'auth.syncConflict.preparing' => 'Preparing…',
 			'auth.syncConflict.clearing' => 'Clearing this phone…',
 			'auth.syncConflict.done' => 'Done',
@@ -2709,6 +2719,7 @@ extension on Translations {
 			'auth.login.signingIn' => 'Signing in…',
 			'budgets.title' => 'Budgets',
 			'budgets.subtitle' => 'Track your monthly limits',
+			'budgets.unnamed' => 'Unnamed budget',
 			'budgets.empty.title' => 'No budgets yet',
 			'budgets.empty.body' => 'Set a monthly limit to see how much you have left.',
 			'budgets.saved' => 'Budget saved',
@@ -2734,6 +2745,7 @@ extension on Translations {
 			'budgets.form.amountRequired' => 'Enter an amount',
 			'budgets.form.amountInvalid' => 'Enter a valid number',
 			'budgets.form.nameRequired' => 'Enter a name',
+			'budgets.form.nameReserved' => 'Pick a different name',
 			'budgets.details.title' => 'Budget details',
 			'budgets.details.loadFailed' => 'Couldn\'t load budget details. Try again.',
 			'budgets.details.notFound' => 'Budget not found.',
@@ -3176,11 +3188,11 @@ extension on Translations {
 			'settings.sections.support' => 'Support',
 			'settings.sections.account' => 'Account',
 			'settings.budgetAlerts.title' => 'Budget alerts',
+			_ => null,
+		} ?? switch (path) {
 			'settings.budgetAlerts.subtitle' => 'Notify me at 80% and when over budget',
 			'settings.autoImportSubtitle' => 'Turn bank and payment messages into records',
 			'settings.matchingRulesSubtitle' => 'Patterns for messages auto-import can\'t read yet',
-			_ => null,
-		} ?? switch (path) {
 			'settings.recurring.title' => 'Recurring',
 			'settings.recurring.subtitle' => 'Bills and income that repeat every month',
 			'settings.feedbackSubtitle' => 'Report a problem or suggest an idea',

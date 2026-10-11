@@ -20,6 +20,7 @@ import 'package:expense_tracker/core/sync/connectivity_service.dart';
 import 'package:expense_tracker/core/sync/sync_engine.dart';
 import 'package:expense_tracker/core/sync/sync_table_registry.dart';
 import 'package:expense_tracker/core/sync/default_sync_registry.dart';
+import 'package:expense_tracker/features/budgets/data/services/budget_name_repair.dart';
 
 import 'auth_module.dart';
 import 'category_module.dart';
@@ -102,7 +103,11 @@ Future<void> initCriticalDependencies() async {
   getIt.registerLazySingleton<ApiClient>(() => ApiClient());
   getIt.registerLazySingleton<ConnectivityService>(() => ConnectivityService());
   getIt.registerLazySingleton<SyncTableRegistry>(
-    () => createDefaultSyncRegistry(),
+    () => createDefaultSyncRegistry(
+      keepLocalBudgetNames: () =>
+          getIt.isRegistered<BudgetNameRepair>() &&
+          getIt<BudgetNameRepair>().isPending,
+    ),
   );
   getIt.registerLazySingleton<SyncEngine>(
     () => SyncEngine(
@@ -110,6 +115,16 @@ Future<void> initCriticalDependencies() async {
       apiClient: getIt<ApiClient>(),
       connectivity: getIt<ConnectivityService>(),
       registry: getIt<SyncTableRegistry>(),
+      // Registered by initBudgetModule; resolved when the task runs.
+      afterSyncTasks: [
+        () async {
+          if (getIt.isRegistered<BudgetNameRepair>()) {
+            await getIt<BudgetNameRepair>().runOnce();
+          }
+        },
+      ],
+      // No guard: if the repair cannot run, the wipe must not happen.
+      beforeLocalWipeTasks: [() => getIt<BudgetNameRepair>().runOnce()],
     ),
   );
 

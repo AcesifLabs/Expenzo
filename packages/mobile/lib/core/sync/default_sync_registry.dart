@@ -8,11 +8,14 @@ import 'handlers/parsing_rules_sync_handler.dart';
 import 'handlers/recurring_transactions_sync_handler.dart';
 import 'handlers/pending_recurring_sync_handler.dart';
 
-SyncTableRegistry createDefaultSyncRegistry() {
+/// [keepLocalBudgetNames]: see [BudgetsSyncHandler.keepLocalNames].
+SyncTableRegistry createDefaultSyncRegistry({
+  bool Function()? keepLocalBudgetNames,
+}) {
   final registry = SyncTableRegistry();
   registry.register(RecordsSyncHandler());
   registry.register(CategoriesSyncHandler());
-  registry.register(BudgetsSyncHandler());
+  registry.register(BudgetsSyncHandler(keepLocalNames: keepLocalBudgetNames));
   registry.register(MessageSourcesSyncHandler());
   registry.register(ExpenseTemplatesSyncHandler());
   registry.register(ParsingRulesSyncHandler());

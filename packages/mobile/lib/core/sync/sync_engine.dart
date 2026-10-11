@@ -15,6 +15,9 @@ import 'sync_table_registry.dart';
 
 export 'sync_mode.dart';
 
+/// A unit of work the engine runs around syncing, e.g. a one-time repair.
+typedef SyncTask = Future<void> Function();
+
 class SyncEngine {
   void Function(double)? onProgress;
 
@@ -32,6 +35,8 @@ class SyncEngine {
   final ConnectivityService _connectivity;
   final SyncQueueDao _syncQueueDao;
   final SyncTableRegistry _registry;
+  final List<SyncTask> _afterSyncTasks;
+  final List<SyncTask> _beforeLocalWipeTasks;
   StreamSubscription? _connectivitySub;
   StreamSubscription? _syncEventSub;
   bool _initialized = false;
@@ -51,10 +56,19 @@ class SyncEngine {
     required ApiClient apiClient,
     required ConnectivityService connectivity,
     required SyncTableRegistry registry,
+
+    /// Run after every sync cycle while online; failures are logged and
+    /// retried after the next cycle.
+    List<SyncTask> afterSyncTasks = const [],
+
+    /// Run by [prepareForLocalWipe] before local data is replaced.
+    List<SyncTask> beforeLocalWipeTasks = const [],
   }) : _syncQueueDao = syncQueueDao,
        _apiClient = apiClient,
        _connectivity = connectivity,
-       _registry = registry;
+       _registry = registry,
+       _afterSyncTasks = afterSyncTasks,
+       _beforeLocalWipeTasks = beforeLocalWipeTasks;
 
   Future<void> start() async {
     if (_initialized) return;
@@ -130,6 +144,16 @@ class SyncEngine {
     return SyncConflictType.none;
   }
 
+  /// Saves to the server anything that exists only on this device, before
+  /// local data is wiped (e.g. replacing it with the account copy).
+  ///
+  /// Throws when a task fails; the caller must not wipe local data then.
+  Future<void> prepareForLocalWipe() async {
+    for (final task in _beforeLocalWipeTasks) {
+      await task();
+    }
+  }
+
   Future<void> executeDecision(SyncMode mode) async {
     switch (mode) {
       case SyncMode.localWins:
@@ -177,11 +201,16 @@ class SyncEngine {
     _syncLock = Completer<void>();
 
     try {
-      // Run cycles until no more pending triggers
+      // Run cycles until no more pending triggers. After-sync tasks run once
+      // the queue is drained; a trigger that arrives while they run starts
+      // another pull/push pass instead of being dropped.
       do {
-        _hasPendingTrigger = false;
-        await _safePullChanges();
-        await _safePushChanges();
+        do {
+          _hasPendingTrigger = false;
+          await _safePullChanges();
+          await _safePushChanges();
+        } while (_hasPendingTrigger);
+        await _runAfterSyncTasks();
       } while (_hasPendingTrigger);
     } finally {
       // Release the lock
@@ -283,15 +312,52 @@ class SyncEngine {
       final serverTime = response.data['serverTime'] as String;
       final changes = response.data['changes'] as List;
       debugPrint('SyncEngine: Pulled ${changes.length} changes');
+      final pulled = changes.cast<Map<String, dynamic>>();
+      final handlers = _handlersWithIds(pulled);
       await _db.transaction(() async {
-        for (final change in changes) {
-          await _applyRemoteChange(change as Map<String, dynamic>);
+        for (final MapEntry(key: handler, value: ids) in handlers.entries) {
+          await handler.beforeApplyingPull(_db, ids);
+        }
+        try {
+          for (final change in pulled) {
+            await _applyRemoteChange(change);
+          }
+        } finally {
+          for (final handler in handlers.keys) {
+            handler.afterApplyingPull();
+          }
         }
       });
       await TokenStorage.saveLastSyncAt(serverTime);
     } catch (e, s) {
       debugPrint('Error: $e\n$s');
       debugPrint('SyncEngine pull failed: $e');
+    }
+  }
+
+  /// The pulled ids per handler, for [SyncTableHandler.beforeApplyingPull].
+  Map<SyncTableHandler, List<String>> _handlersWithIds(
+    List<Map<String, dynamic>> changes,
+  ) {
+    final result = <SyncTableHandler, List<String>>{};
+    for (final change in changes) {
+      final handler = _registry[change['table']?.toString() ?? ''];
+      final id = change['id']?.toString();
+      if (handler == null || id == null) continue;
+      result.putIfAbsent(handler, () => []).add(id);
+    }
+
+    return result;
+  }
+
+  Future<void> _runAfterSyncTasks() async {
+    if (_afterSyncTasks.isEmpty || !await _connectivity.checkNow()) return;
+    for (final task in _afterSyncTasks) {
+      try {
+        await task();
+      } catch (e) {
+        debugPrint('SyncEngine: After-sync task failed: ${e.runtimeType}');
+      }
     }
   }
 
@@ -447,7 +513,11 @@ class SyncEngine {
     }
 
     try {
-      final companion = handler.fromSyncPayload(id, data);
+      final companion = await handler.keepLocalValues(
+        _db,
+        id,
+        handler.fromSyncPayload(id, data),
+      );
       await _db.into(handler.tableRef(_db)).insertOnConflictUpdate(companion);
     } catch (e) {
       debugPrint(

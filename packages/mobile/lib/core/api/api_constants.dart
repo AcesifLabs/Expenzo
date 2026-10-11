@@ -7,6 +7,7 @@ class ApiConstants {
   static const String recordsBulk = '/records/bulk';
   static const String categories = '/categories';
   static const String budgets = '/budgets';
+  static const String budgetNames = '/budgets/names';
   static const String messageSources = '/message-sources';
   static const String expenseTemplates = '/expense-templates';
   static const String parsingRules = '/parsing-rules';

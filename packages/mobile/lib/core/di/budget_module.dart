@@ -1,7 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 import 'package:expense_tracker/core/database/daos/budget_dao.dart';
 import 'package:expense_tracker/core/database/daos/sync_queue_dao.dart';
+import 'package:expense_tracker/core/api/api_client.dart';
 import 'package:expense_tracker/features/budgets/data/datasources/budget_local_datasource.dart';
+import 'package:expense_tracker/features/budgets/data/datasources/budget_remote_datasource.dart';
+import 'package:expense_tracker/features/budgets/data/services/budget_name_repair.dart';
 import 'package:expense_tracker/features/budgets/data/repositories/budget_repository_impl.dart';
 import 'package:expense_tracker/features/budgets/domain/repositories/budget_repository.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets.dart';
@@ -21,6 +25,18 @@ import 'package:expense_tracker/shared/services/notification_service.dart';
 void initBudgetModule(GetIt getIt) {
   getIt.registerLazySingleton<BudgetLocalDatasource>(
     () => BudgetLocalDatasourceImpl(budgetDao: getIt<BudgetDao>()),
+  );
+  getIt.registerLazySingleton<BudgetRemoteDatasource>(
+    () => BudgetRemoteDatasourceImpl(apiClient: getIt<ApiClient>()),
+  );
+  // Run by SyncEngine after each sync cycle (see injection_container).
+  getIt.registerLazySingleton<BudgetNameRepair>(
+    () => BudgetNameRepair(
+      budgetDao: getIt<BudgetDao>(),
+      remote: getIt<BudgetRemoteDatasource>(),
+      prefs: getIt<SharedPreferences>(),
+      currentUserId: () => getIt<FirebaseAuth>().currentUser?.uid,
+    ),
   );
   getIt.registerLazySingleton<BudgetRepository>(
     () => BudgetRepositoryImpl(

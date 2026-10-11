@@ -2,6 +2,7 @@
   "@@i18n-review": "Machine-drafted Bangla. Needs native review before release.",
   "title": "বাজেট",
   "subtitle": "আপনার মাসিক সীমা দেখুন",
+  "unnamed": "নামহীন বাজেট",
   "empty": {
     "title": "এখনো কোনো বাজেট নেই",
     "body": "কত টাকা বাকি আছে দেখতে একটি মাসিক সীমা ঠিক করুন।"
@@ -38,7 +39,8 @@
     "rolloverDetail": "যে টাকা খরচ হয়নি তা পরের সময়ে যোগ হবে",
     "amountRequired": "একটি পরিমাণ লিখুন",
     "amountInvalid": "সঠিক সংখ্যা লিখুন",
-    "nameRequired": "একটি নাম লিখুন"
+    "nameRequired": "একটি নাম লিখুন",
+    "nameReserved": "অন্য একটি নাম দিন"
   },
   "details": {
     "title": "বাজেটের বিস্তারিত",

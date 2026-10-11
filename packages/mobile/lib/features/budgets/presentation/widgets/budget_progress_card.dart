@@ -8,6 +8,7 @@ import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:expense_tracker/core/theme/app_typography.dart';
 import 'package:expense_tracker/features/budgets/presentation/helpers/budget_summary.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
+import 'package:expense_tracker/features/budgets/presentation/helpers/budget_display_name.dart';
 
 class BudgetProgressCard extends StatelessWidget {
   final BudgetProgress progress;
@@ -107,7 +108,7 @@ class BudgetProgressCard extends StatelessWidget {
     return Semantics(
       button: true,
       label: card.a11y(
-        name: progress.name,
+        name: budgetDisplayName(progress.name),
         headline: headline,
         daysLeft: summary.daysLeftLabel,
       ),
@@ -128,7 +129,7 @@ class BudgetProgressCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        progress.name,
+                        budgetDisplayName(progress.name),
                         style: textTheme.titleSmall,
                         overflow: TextOverflow.ellipsis,
                       ),

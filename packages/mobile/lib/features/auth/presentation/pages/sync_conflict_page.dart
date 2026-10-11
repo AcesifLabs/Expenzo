@@ -206,6 +206,10 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
       final engine = di.getIt<SyncEngine>();
       engine.onProgress = _onProgress;
       if (mode == SyncMode.cloudWins) {
+        // This device may hold the only copy of budget names the server lost
+        // (ADR 0012); send them before the local data is wiped. A failure
+        // stops the replace so the names are not lost.
+        if (!await _saveLocalOnlyData()) return;
         setState(() => _status = t.auth.syncConflict.clearing);
         await di.resetDatabaseInstance();
       }
@@ -228,6 +232,26 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
           _status = t.common.errors.generic;
         });
       }
+    }
+  }
+
+  Future<bool> _saveLocalOnlyData() async {
+    try {
+      await di.getIt<SyncEngine>().prepareForLocalWipe();
+
+      return true;
+    } catch (e) {
+      debugPrint(
+        'SyncConflictPage: Local data upload failed: ${e.runtimeType}',
+      );
+      if (mounted) {
+        setState(() => _syncing = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(t.auth.syncConflict.namesUploadFailed)),
+        );
+      }
+
+      return false;
     }
   }
 

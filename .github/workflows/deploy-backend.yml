@@ -31,12 +31,16 @@ jobs:
             echo "=== Writing .env file ==="
             echo "${{ secrets.BACKEND_ENV_BASE64 }}" | base64 --decode > packages/backend/.env
 
-            echo "=== Running migrations ==="
+            echo "=== Building ==="
             cd packages/backend
+            docker compose build
+
+            # Migrations run from the freshly built image so new migration
+            # files are included before the new code starts.
+            echo "=== Running migrations ==="
             docker compose run --rm api npm run migration:run:prod
 
-            echo "=== Building and restarting ==="
-            docker compose build
+            echo "=== Restarting ==="
             docker compose up -d --force-recreate
 
             echo "=== Waiting for health check ==="

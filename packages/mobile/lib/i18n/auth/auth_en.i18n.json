@@ -21,6 +21,7 @@
     "replaceTitle": "Replace data on this phone?",
     "replaceBody": "This permanently deletes the records on this phone and replaces them with your account copy.",
     "replace": "Replace",
+    "namesUploadFailed": "Couldn't upload your budget names. Check your connection and try again.",
     "preparing": "Preparing…",
     "clearing": "Clearing this phone…",
     "done": "Done",

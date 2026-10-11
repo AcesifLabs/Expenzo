@@ -22,6 +22,7 @@ import 'package:expense_tracker/shared/presentation/widgets/app_page_header.dart
 import 'package:expense_tracker/core/theme/app_typography.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
+import 'package:expense_tracker/features/budgets/presentation/helpers/budget_display_name.dart';
 
 class BudgetDetailsPage extends StatefulWidget {
   final BudgetProgress? progress;
@@ -51,7 +52,7 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
     final existingProgress = widget.progress;
     if (existingProgress != null) {
       _progress = existingProgress;
-      _name = existingProgress.name;
+      _name = budgetDisplayName(existingProgress.name);
       _isLoading = false;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _dispatchLoadTransactions(existingProgress.budgetId);
@@ -99,7 +100,7 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
         final matchedProgress = progress;
         setState(() {
           _progress = matchedProgress;
-          _name = matchedProgress.name;
+          _name = budgetDisplayName(matchedProgress.name);
           _isLoading = false;
           _errorMessage = null;
         });

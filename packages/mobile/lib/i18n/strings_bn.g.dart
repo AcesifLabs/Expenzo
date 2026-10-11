@@ -96,6 +96,7 @@ class _Translations$budgets$bn extends Translations$budgets$en {
 	// Translations
 	@override String get title => 'বাজেট';
 	@override String get subtitle => 'আপনার মাসিক সীমা দেখুন';
+	@override String get unnamed => 'নামহীন বাজেট';
 	@override late final _Translations$budgets$empty$bn empty = _Translations$budgets$empty$bn._(_root);
 	@override String get saved => 'বাজেট সংরক্ষণ হয়েছে';
 	@override String get loadPrompt => 'ডেটা দেখতে বাজেট লোড করুন';
@@ -545,6 +546,7 @@ class _Translations$auth$syncConflict$bn extends Translations$auth$syncConflict$
 	@override String get replaceTitle => 'এই ফোনের ডেটা বদলাবেন?';
 	@override String get replaceBody => 'এতে এই ফোনের রেকর্ড স্থায়ীভাবে মুছে যাবে এবং আপনার অ্যাকাউন্টের কপি বসবে।';
 	@override String get replace => 'বদলান';
+	@override String get namesUploadFailed => 'আপনার বাজেটের নাম আপলোড করা যায়নি। সংযোগ দেখে আবার চেষ্টা করুন।';
 	@override String get preparing => 'প্রস্তুত হচ্ছে…';
 	@override String get clearing => 'এই ফোন খালি করা হচ্ছে…';
 	@override String get done => 'সম্পন্ন';
@@ -632,6 +634,7 @@ class _Translations$budgets$form$bn extends Translations$budgets$form$en {
 	@override String get amountRequired => 'একটি পরিমাণ লিখুন';
 	@override String get amountInvalid => 'সঠিক সংখ্যা লিখুন';
 	@override String get nameRequired => 'একটি নাম লিখুন';
+	@override String get nameReserved => 'অন্য একটি নাম দিন';
 }
 
 // Path: budgets.details
@@ -1697,6 +1700,7 @@ extension on TranslationsBn {
 			'auth.syncConflict.replaceTitle' => 'এই ফোনের ডেটা বদলাবেন?',
 			'auth.syncConflict.replaceBody' => 'এতে এই ফোনের রেকর্ড স্থায়ীভাবে মুছে যাবে এবং আপনার অ্যাকাউন্টের কপি বসবে।',
 			'auth.syncConflict.replace' => 'বদলান',
+			'auth.syncConflict.namesUploadFailed' => 'আপনার বাজেটের নাম আপলোড করা যায়নি। সংযোগ দেখে আবার চেষ্টা করুন।',
 			'auth.syncConflict.preparing' => 'প্রস্তুত হচ্ছে…',
 			'auth.syncConflict.clearing' => 'এই ফোন খালি করা হচ্ছে…',
 			'auth.syncConflict.done' => 'সম্পন্ন',
@@ -1707,6 +1711,7 @@ extension on TranslationsBn {
 			'auth.login.signingIn' => 'সাইন ইন হচ্ছে…',
 			'budgets.title' => 'বাজেট',
 			'budgets.subtitle' => 'আপনার মাসিক সীমা দেখুন',
+			'budgets.unnamed' => 'নামহীন বাজেট',
 			'budgets.empty.title' => 'এখনো কোনো বাজেট নেই',
 			'budgets.empty.body' => 'কত টাকা বাকি আছে দেখতে একটি মাসিক সীমা ঠিক করুন।',
 			'budgets.saved' => 'বাজেট সংরক্ষণ হয়েছে',
@@ -1732,6 +1737,7 @@ extension on TranslationsBn {
 			'budgets.form.amountRequired' => 'একটি পরিমাণ লিখুন',
 			'budgets.form.amountInvalid' => 'সঠিক সংখ্যা লিখুন',
 			'budgets.form.nameRequired' => 'একটি নাম লিখুন',
+			'budgets.form.nameReserved' => 'অন্য একটি নাম দিন',
 			'budgets.details.title' => 'বাজেটের বিস্তারিত',
 			'budgets.details.loadFailed' => 'বাজেটের বিস্তারিত লোড করা যায়নি। আবার চেষ্টা করুন।',
 			'budgets.details.notFound' => 'বাজেট পাওয়া যায়নি।',
@@ -2174,11 +2180,11 @@ extension on TranslationsBn {
 			'settings.sections.support' => 'সহায়তা',
 			'settings.sections.account' => 'অ্যাকাউন্ট',
 			'settings.budgetAlerts.title' => 'বাজেট সতর্কতা',
+			_ => null,
+		} ?? switch (path) {
 			'settings.budgetAlerts.subtitle' => '৮০% এ এবং বাজেট ছাড়ালে আমাকে জানান',
 			'settings.autoImportSubtitle' => 'ব্যাংক ও পেমেন্টের মেসেজ থেকে রেকর্ড তৈরি করুন',
 			'settings.matchingRulesSubtitle' => 'যেসব মেসেজ অটো-ইমপোর্ট এখনো পড়তে পারে না, সেগুলোর প্যাটার্ন',
-			_ => null,
-		} ?? switch (path) {
 			'settings.recurring.title' => 'পুনরাবৃত্ত',
 			'settings.recurring.subtitle' => 'প্রতি মাসে আসা বিল ও আয়',
 			'settings.feedbackSubtitle' => 'সমস্যা জানান বা কোনো আইডিয়া দিন',

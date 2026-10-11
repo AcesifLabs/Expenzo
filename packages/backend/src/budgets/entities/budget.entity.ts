@@ -1,6 +1,7 @@
 import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
 import { User } from '../../auth/entities/user.entity';
 import { BudgetPeriod } from '../../common/enums/budget-period.enum';
+import { DEFAULT_BUDGET_NAME } from '../budgets.constants';
 
 @Entity('budgets')
 @Index(['userId', 'startDate'])
@@ -18,6 +19,9 @@ export class Budget {
 
   @Column('text', { nullable: true })
   categoryId: string;
+
+  @Column({ default: DEFAULT_BUDGET_NAME })
+  name: string;
 
   @Column('decimal', { precision: 12, scale: 2 })
   amount: number;

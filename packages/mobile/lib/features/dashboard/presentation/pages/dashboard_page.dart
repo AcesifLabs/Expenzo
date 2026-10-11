@@ -45,6 +45,7 @@ import '../bloc/dashboard_event.dart';
 import '../bloc/dashboard_state.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 import 'package:expense_tracker/features/categories/presentation/helpers/category_display_name.dart';
+import 'package:expense_tracker/features/budgets/presentation/helpers/budget_display_name.dart';
 
 class DashboardPage extends StatelessWidget {
   final ValueChanged<AppRootTab>? onNavigateToTab;
@@ -143,8 +144,10 @@ class _DashboardViewState extends State<DashboardView> {
 
     return budgets
         .map(
-          (progress) =>
-              DashboardBudgetPreview(progress: progress, title: progress.name),
+          (progress) => DashboardBudgetPreview(
+            progress: progress,
+            title: budgetDisplayName(progress.name),
+          ),
         )
         .toList();
   }

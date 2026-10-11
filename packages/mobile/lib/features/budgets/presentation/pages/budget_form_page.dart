@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:picons/picons.dart';
+import 'package:expense_tracker/core/constants/app_constants.dart';
+import 'package:expense_tracker/core/utils/budget_name.dart';
 import 'package:expense_tracker/core/constants/budget_period.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/core/logger/app_logger.dart';
@@ -101,7 +103,10 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
   void _initFromBudget(Budget? budget) {
     if (budget != null) {
       _amountController.text = CurrencyFormatter.formatInput(budget.amount);
-      _nameController.text = budget.name;
+      // A placeholder is not a name to edit; the user is asked for one.
+      _nameController.text = isPlaceholderBudgetName(budget.name)
+          ? ''
+          : budget.name;
       _selectedPeriod = budget.period;
       _rolloverEnabled = budget.rolloverEnabled;
     }
@@ -138,6 +143,10 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
     final name = _nameController.text.trim();
     if (name.isEmpty) {
       nameError = t.budgets.form.nameRequired;
+      valid = false;
+    } else if (isPlaceholderBudgetName(name)) {
+      // Sync reads this text as "no name"; see ADR 0012.
+      nameError = t.budgets.form.nameReserved;
       valid = false;
     }
 
@@ -325,6 +334,11 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
                 contentPadding: EdgeInsets.zero,
                 isDense: true,
               ),
+              inputFormatters: [
+                LengthLimitingTextInputFormatter(
+                  AppConstants.budgetNameMaxLength,
+                ),
+              ],
               onChanged: _onNameChanged,
             ),
           ),
