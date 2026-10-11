@@ -6,8 +6,19 @@ import '../sync_table_registry.dart';
 import 'sync_parse_helpers.dart';
 
 class RecordsSyncHandler extends SyncTableHandler<$RecordsTable, Record> {
+  /// While true, a pulled record without a budget link does not clear the
+  /// local link. The server dropped links until SAAP-76; they are trusted
+  /// once the one-time link repair is done. Defaults to true (unlike
+  /// `BudgetsSyncHandler.keepLocalNames`): until the repair is known to be
+  /// done, dropping a link loses data the server may never have had.
+  final bool Function() keepLocalBudgetLinks;
+
   @override
   String get tableName => 'records';
+
+  RecordsSyncHandler({bool Function()? keepLocalBudgetLinks})
+    : keepLocalBudgetLinks = keepLocalBudgetLinks ?? _always;
+
   @override
   TableInfo<$RecordsTable, Record> tableRef(AppDatabase db) => db.records;
   @override
@@ -35,9 +46,7 @@ class RecordsSyncHandler extends SyncTableHandler<$RecordsTable, Record> {
     categoryId: data['categoryId'] != null
         ? Value(data['categoryId'].toString())
         : const Value.absent(),
-    budgetId: data['budgetId'] != null
-        ? Value(data['budgetId'].toString())
-        : const Value.absent(),
+    budgetId: _pulledBudgetId(data),
     source: Value(parseSyncString(data['source'], ExpenseSource.manual.name)),
     sourceId: data['sourceId'] != null
         ? Value(data['sourceId'].toString())
@@ -64,4 +73,18 @@ class RecordsSyncHandler extends SyncTableHandler<$RecordsTable, Record> {
 
   @override
   Future<List<Record>> fetchAll(AppDatabase db) => db.select(db.records).get();
+
+  static bool _always() => true;
+
+  /// A pulled link always replaces the local one. A pulled null clears it only
+  /// when [keepLocalBudgetLinks] is false; a missing key never changes it.
+  Value<String?> _pulledBudgetId(Map<String, dynamic> data) {
+    final budgetId = data['budgetId'];
+    if (budgetId != null) return Value(budgetId.toString());
+    if (data.containsKey('budgetId') && !keepLocalBudgetLinks()) {
+      return const Value(null);
+    }
+
+    return const Value.absent();
+  }
 }

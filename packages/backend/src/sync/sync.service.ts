@@ -2,7 +2,7 @@ import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan } from 'typeorm';
 import { PushSyncDto, SyncAction, SyncChangeItem, SyncTable } from './dto/push-sync.dto';
-import { SyncStatus, SyncActionResult, PullChangesResponse, SyncSummary, SyncPushResponse } from './sync.types';
+import { SyncStatus, SyncActionResult, SyncConflictResult, PullChangesResponse, SyncSummary, SyncPushResponse } from './sync.types';
 import { Record as RecordEntity } from '../records/entities/record.entity';
 import { Category } from '../categories/entities/category.entity';
 import { Budget } from '../budgets/entities/budget.entity';
@@ -81,18 +81,22 @@ export class SyncService {
   }
 
   private async handleInsert(repo: Repository<SyncableEntity>, change: SyncChangeItem, userId: string): Promise<SyncActionResult> {
-    const existing = await repo.findOne({ where: { id: change.id } });
+    const existing = await repo.findOne({ where: { id: change.id, userId } });
     if (existing) {
       return { id: change.id, status: SyncStatus.SUCCESS, serverId: existing.id, message: 'Already exists' };
     }
+    const conflict = await this.notOwner(repo, change);
+    if (conflict) return conflict;
     const entity = repo.create({ ...this.withRequiredDefaults(change), id: change.id, userId, createdAt: new Date(), updatedAt: new Date() });
     await repo.save(entity);
     return { id: change.id, status: SyncStatus.SUCCESS, serverId: entity.id };
   }
 
   private async handleUpdate(repo: Repository<SyncableEntity>, change: SyncChangeItem, userId: string): Promise<SyncActionResult> {
-    const existing = await repo.findOne({ where: { id: change.id } });
+    const existing = await repo.findOne({ where: { id: change.id, userId } });
     if (!existing) {
+      const conflict = await this.notOwner(repo, change);
+      if (conflict) return conflict;
       const entity = repo.create({ ...this.withRequiredDefaults(change), id: change.id, userId, createdAt: new Date(), updatedAt: new Date() });
       await repo.save(entity);
       return { id: change.id, status: SyncStatus.SUCCESS, serverId: entity.id };
@@ -100,7 +104,7 @@ export class SyncService {
     if (change.updatedAt && existing.updatedAt && new Date(change.updatedAt) < existing.updatedAt) {
       return { id: change.id, status: SyncStatus.CONFLICT, serverId: existing.id, message: 'Server version newer' };
     }
-    const { id: _id, createdAt: _createdAt, ...updateData } = this.withoutBlankRequiredFields(change);
+    const { id: _id, userId: _userId, createdAt: _createdAt, ...updateData } = this.withoutBlankRequiredFields(change);
     Object.assign(existing, updateData, { userId, updatedAt: new Date() });
     await repo.save(existing);
     return { id: change.id, status: SyncStatus.SUCCESS, serverId: existing.id };
@@ -128,8 +132,22 @@ export class SyncService {
   }
 
   private async handleDelete(repo: Repository<SyncableEntity>, change: SyncChangeItem, userId: string): Promise<SyncActionResult> {
-    await repo.delete({ id: change.id, userId });
+    const result = await repo.delete({ id: change.id, userId });
+    if ((result?.affected ?? 0) === 0) {
+      const conflict = await this.notOwner(repo, change);
+      if (conflict) return conflict;
+    }
     return { id: change.id, status: SyncStatus.SUCCESS };
+  }
+
+  /**
+   * Called after a lookup scoped to the caller found nothing. A row with this
+   * id that belongs to another user is never read, changed or deleted; the
+   * push gets a conflict so the device drops it instead of retrying forever.
+   */
+  private async notOwner(repo: Repository<SyncableEntity>, change: SyncChangeItem): Promise<SyncConflictResult | null> {
+    if (!(await repo.exists({ where: { id: change.id } }))) return null;
+    return { id: change.id, status: SyncStatus.CONFLICT, serverId: change.id, message: 'Not the owner' };
   }
 
   async pullChanges(userId: string, since?: string): Promise<PullChangesResponse> {

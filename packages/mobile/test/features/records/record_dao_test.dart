@@ -249,4 +249,39 @@ void main() {
       expect(await dao.getCategoryRecordCounts(), {'cat-1': 1});
     });
   });
+
+  group('RecordDao.getBudgetLinks', () {
+    Future<void> insertRecord({required String id, String? budgetId}) async {
+      await db
+          .into(db.records)
+          .insert(
+            RecordsCompanion.insert(
+              id: id,
+              amount: 10,
+              description: 'Test $id',
+              date: DateTime(2026, 8, 1),
+              budgetId: Value(budgetId),
+              recordType: 'OUT',
+            ),
+          );
+    }
+
+    test('empty table returns no links', () async {
+      expect(await dao.getBudgetLinks(), isEmpty);
+    });
+
+    test('returns only records linked to a budget', () async {
+      await insertRecord(id: '1', budgetId: 'bud-1');
+      await insertRecord(id: '2', budgetId: 'bud-2');
+      await insertRecord(id: '3');
+
+      expect(
+        await dao.getBudgetLinks(),
+        unorderedEquals([
+          (id: '1', budgetId: 'bud-1'),
+          (id: '2', budgetId: 'bud-2'),
+        ]),
+      );
+    });
+  });
 }

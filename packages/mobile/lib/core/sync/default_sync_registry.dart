@@ -9,11 +9,15 @@ import 'handlers/recurring_transactions_sync_handler.dart';
 import 'handlers/pending_recurring_sync_handler.dart';
 
 /// [keepLocalBudgetNames]: see [BudgetsSyncHandler.keepLocalNames].
+/// [keepLocalRecordBudgetLinks]: see [RecordsSyncHandler.keepLocalBudgetLinks].
 SyncTableRegistry createDefaultSyncRegistry({
   bool Function()? keepLocalBudgetNames,
+  bool Function()? keepLocalRecordBudgetLinks,
 }) {
   final registry = SyncTableRegistry();
-  registry.register(RecordsSyncHandler());
+  registry.register(
+    RecordsSyncHandler(keepLocalBudgetLinks: keepLocalRecordBudgetLinks),
+  );
   registry.register(CategoriesSyncHandler());
   registry.register(BudgetsSyncHandler(keepLocalNames: keepLocalBudgetNames));
   registry.register(MessageSourcesSyncHandler());

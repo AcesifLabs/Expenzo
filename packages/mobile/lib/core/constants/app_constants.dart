@@ -26,6 +26,11 @@ class AppConstants {
   /// Most names one `POST /budgets/names` request may carry
   /// (`FILL_BUDGET_NAMES_MAX_ITEMS`).
   static const int fillBudgetNamesBatchSize = 200;
+
+  /// Most links one `POST /records/budget-links` request may carry
+  /// (`FILL_RECORD_BUDGET_LINKS_MAX_ITEMS`).
+  static const int fillRecordBudgetLinksBatchSize = 200;
+
   static const Duration tokenRefreshThreshold = Duration(minutes: 5);
   static const List<String> googleSignInScopes = ['email', 'profile'];
 

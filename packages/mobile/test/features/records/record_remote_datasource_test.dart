@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:expense_tracker/features/records/data/datasources/record_remote_datasource.dart';
 import 'package:expense_tracker/core/api/api_client.dart';
+import 'package:expense_tracker/core/api/api_constants.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
@@ -324,6 +325,50 @@ void main() {
       final result = await datasource.getRecords(const RemoteRecordQuery());
       expect(result.nextCursor, 'cursor-123');
       expect(result.total, 100);
+    });
+  });
+
+  group('RecordRemoteDatasourceImpl.fillMissingBudgetLinks', () {
+    test('posts id and budgetId pairs to the budget-links endpoint', () async {
+      when(() => mockDio.post(any(), data: any(named: 'data'))).thenAnswer(
+        (_) async => Response(
+          requestOptions: RequestOptions(path: ApiConstants.recordBudgetLinks),
+          data: {'updated': 2},
+          statusCode: 200,
+        ),
+      );
+
+      await datasource.fillMissingBudgetLinks([
+        (id: 'rec-1', budgetId: 'bud-1'),
+        (id: 'rec-2', budgetId: 'bud-2'),
+      ]);
+
+      verify(
+        () => mockDio.post(
+          ApiConstants.recordBudgetLinks,
+          data: {
+            'links': [
+              {'id': 'rec-1', 'budgetId': 'bud-1'},
+              {'id': 'rec-2', 'budgetId': 'bud-2'},
+            ],
+          },
+        ),
+      ).called(1);
+    });
+
+    test('throws ServerException on DioException', () async {
+      when(() => mockDio.post(any(), data: any(named: 'data'))).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: ApiConstants.recordBudgetLinks),
+        ),
+      );
+
+      expect(
+        () => datasource.fillMissingBudgetLinks([
+          (id: 'rec-1', budgetId: 'bud-1'),
+        ]),
+        throwsA(isA<ServerException>()),
+      );
     });
   });
 }

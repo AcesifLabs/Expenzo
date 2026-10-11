@@ -5,9 +5,16 @@ import 'package:expense_tracker/core/constants/source_types.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import '../../domain/entities/record.dart' as entity;
 
+typedef RecordBudgetLink = ({String id, String budgetId});
+
 abstract class RecordRemoteDatasource {
   /// Throws: [ServerException] if the API request fails.
   Future<RecordRemoteResponse> getRecords(RemoteRecordQuery query);
+
+  /// Fills budget links on server records that have none.
+  ///
+  /// Throws: [ServerException] if the API request fails.
+  Future<void> fillMissingBudgetLinks(List<RecordBudgetLink> links);
 }
 
 class RecordRemoteResponse {
@@ -72,6 +79,23 @@ class RecordRemoteDatasourceImpl implements RecordRemoteDatasource {
         data: records,
         nextCursor: body['nextCursor'] as String?,
         total: body['total'] as int? ?? records.length,
+      );
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  /// Throws: [ServerException] if the API request fails.
+  @override
+  Future<void> fillMissingBudgetLinks(List<RecordBudgetLink> links) async {
+    try {
+      await apiClient.dio.post(
+        ApiConstants.recordBudgetLinks,
+        data: {
+          'links': [
+            for (final l in links) {'id': l.id, 'budgetId': l.budgetId},
+          ],
+        },
       );
     } catch (e) {
       throw ServerException(message: e.toString());

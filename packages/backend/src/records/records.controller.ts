@@ -4,6 +4,7 @@ import { CreateRecordDto } from './dto/create-record.dto';
 import { UpdateRecordDto } from './dto/update-record.dto';
 import { QueryRecordsDto } from './dto/query-records.dto';
 import { BulkCreateRecordDto } from './dto/bulk-create-record.dto';
+import { FillRecordBudgetLinksDto } from './dto/fill-record-budget-links.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 
@@ -32,6 +33,12 @@ export class RecordsController {
   @HttpCode(HttpStatus.CREATED)
   createBulk(@CurrentUser('sub') userId: string, @Body() dto: BulkCreateRecordDto) {
     return this.recordsService.createBulk(userId, dto.records);
+  }
+
+  @Post('budget-links')
+  @HttpCode(HttpStatus.OK)
+  fillMissingBudgetLinks(@CurrentUser('sub') userId: string, @Body() dto: FillRecordBudgetLinksDto) {
+    return this.recordsService.fillMissingBudgetLinks(userId, dto.links);
   }
 
   @Put(':id')
