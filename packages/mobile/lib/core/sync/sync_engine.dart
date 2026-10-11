@@ -312,26 +312,29 @@ class SyncEngine {
       final serverTime = response.data['serverTime'] as String;
       final changes = response.data['changes'] as List;
       debugPrint('SyncEngine: Pulled ${changes.length} changes');
-      final pulled = changes.cast<Map<String, dynamic>>();
-      final handlers = _handlersWithIds(pulled);
-      await _db.transaction(() async {
-        for (final MapEntry(key: handler, value: ids) in handlers.entries) {
-          await handler.beforeApplyingPull(_db, ids);
-        }
-        try {
-          for (final change in pulled) {
-            await _applyRemoteChange(change);
-          }
-        } finally {
-          for (final handler in handlers.keys) {
-            handler.afterApplyingPull();
-          }
-        }
-      });
+      await _db.transaction(
+        () => _applyPulledChanges(changes.cast<Map<String, dynamic>>()),
+      );
       await TokenStorage.saveLastSyncAt(serverTime);
     } catch (e, s) {
       debugPrint('Error: $e\n$s');
       debugPrint('SyncEngine pull failed: $e');
+    }
+  }
+
+  Future<void> _applyPulledChanges(List<Map<String, dynamic>> pulled) async {
+    final handlers = _handlersWithIds(pulled);
+    for (final MapEntry(key: handler, value: ids) in handlers.entries) {
+      await handler.beforeApplyingPull(_db, ids);
+    }
+    try {
+      for (final change in pulled) {
+        await _applyRemoteChange(change);
+      }
+    } finally {
+      for (final handler in handlers.keys) {
+        await handler.afterApplyingPull();
+      }
     }
   }
 

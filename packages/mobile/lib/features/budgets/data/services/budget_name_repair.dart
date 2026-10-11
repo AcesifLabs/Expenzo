@@ -14,8 +14,6 @@ import 'package:expense_tracker/features/budgets/data/datasources/budget_remote_
 /// field (ADR 0012). The repair counts as done for the signed-in account only
 /// after every batch is accepted.
 class BudgetNameRepair {
-  static const _doneKeyPrefix = 'budget_names_repaired_';
-
   final BudgetDao budgetDao;
   final BudgetRemoteDatasource remote;
   final SharedPreferences prefs;
@@ -23,7 +21,18 @@ class BudgetNameRepair {
   /// The signed-in account, or null when signed out.
   final String? Function() currentUserId;
 
+  static const _doneKeyPrefix = 'budget_names_repaired_';
+
   Future<void>? _running;
+
+  /// True until the signed-in account's names have been sent. Signed out it
+  /// stays true, so local names are kept until someone can send them.
+  bool get isPending {
+    final userId = currentUserId();
+
+    return userId == null ||
+        !(prefs.getBool('$_doneKeyPrefix$userId') ?? false);
+  }
 
   BudgetNameRepair({
     required this.budgetDao,
@@ -31,14 +40,6 @@ class BudgetNameRepair {
     required this.prefs,
     required this.currentUserId,
   });
-
-  /// True until the signed-in account's names have been sent. Signed out it
-  /// stays true, so local names are kept until someone can send them.
-  bool get isPending {
-    final userId = currentUserId();
-    return userId == null ||
-        !(prefs.getBool('$_doneKeyPrefix$userId') ?? false);
-  }
 
   /// Throws [ServerException] when a batch is rejected or the server cannot be
   /// reached; the repair then stays pending and runs after the next sync.

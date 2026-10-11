@@ -137,7 +137,7 @@ void main() {
                 ),
               )
               as BudgetsCompanion;
-      pending.afterApplyingPull();
+      await pending.afterApplyingPull();
 
       expect(merged.name.value, 'Groceries');
     });

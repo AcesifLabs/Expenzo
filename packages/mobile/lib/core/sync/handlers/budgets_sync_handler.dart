@@ -12,13 +12,16 @@ class BudgetsSyncHandler extends SyncTableHandler<$BudgetsTable, Budget> {
   /// rows read [AppConstants.defaultBudgetName] until the one-time name repair succeeds.
   final bool Function() keepLocalNames;
 
-  BudgetsSyncHandler({bool Function()? keepLocalNames})
-    : keepLocalNames = keepLocalNames ?? _never;
-
-  static bool _never() => false;
+  /// Local names of the budgets in the pull being applied, loaded once by
+  /// [beforeApplyingPull]; null outside a pull or once the repair is done.
+  Map<String, String>? _localNames;
 
   @override
   String get tableName => 'budgets';
+
+  BudgetsSyncHandler({bool Function()? keepLocalNames})
+    : keepLocalNames = keepLocalNames ?? _never;
+
   @override
   TableInfo<$BudgetsTable, Budget> tableRef(AppDatabase db) => db.budgets;
   @override
@@ -59,10 +62,6 @@ class BudgetsSyncHandler extends SyncTableHandler<$BudgetsTable, Budget> {
             : const Value.absent(),
       );
 
-  /// Local names of the budgets in the pull being applied, loaded once by
-  /// [beforeApplyingPull]; null outside a pull or once the repair is done.
-  Map<String, String>? _localNames;
-
   @override
   Future<void> beforeApplyingPull(AppDatabase db, List<String> ids) async {
     if (!keepLocalNames()) return;
@@ -73,7 +72,11 @@ class BudgetsSyncHandler extends SyncTableHandler<$BudgetsTable, Budget> {
   }
 
   @override
-  void afterApplyingPull() => _localNames = null;
+  Future<void> afterApplyingPull() {
+    _localNames = null;
+
+    return Future.value();
+  }
 
   @override
   Future<Insertable<Budget>> keepLocalValues(
@@ -122,4 +125,6 @@ class BudgetsSyncHandler extends SyncTableHandler<$BudgetsTable, Budget> {
 
     return name.trim().isEmpty ? AppConstants.defaultBudgetName : name;
   }
+
+  static bool _never() => false;
 }

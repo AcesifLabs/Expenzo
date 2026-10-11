@@ -12,10 +12,11 @@ abstract class SyncTableHandler<TTable extends Table, TRow extends DataClass> {
 
   /// Called once per pull before its rows are applied, with this table's
   /// pulled ids, so per-row work in [keepLocalValues] can be batched.
-  Future<void> beforeApplyingPull(AppDatabase db, List<String> ids) async {}
+  Future<void> beforeApplyingPull(AppDatabase db, List<String> ids) =>
+      Future.value();
 
   /// Called once after a pull's rows were applied, even when one failed.
-  void afterApplyingPull() {}
+  Future<void> afterApplyingPull() => Future.value();
 
   /// Lets a handler keep local values a pulled row must not overwrite.
   Future<Insertable<TRow>> keepLocalValues(
