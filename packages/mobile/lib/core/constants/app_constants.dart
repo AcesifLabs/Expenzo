@@ -15,6 +15,17 @@ class AppConstants {
   static const String defaultEmoji = '📦';
   static const String defaultColor = '#2196F3';
   static const String defaultCategoryName = 'General';
+
+  /// Name for a budget that has none; the backend uses the same text
+  /// (`DEFAULT_BUDGET_NAME` in packages/backend/src/budgets/budgets.constants.ts).
+  static const String defaultBudgetName = 'Unnamed budget';
+
+  /// Longest budget name the backend accepts (`BUDGET_NAME_MAX_LENGTH`).
+  static const int budgetNameMaxLength = 100;
+
+  /// Most names one `POST /budgets/names` request may carry
+  /// (`FILL_BUDGET_NAMES_MAX_ITEMS`).
+  static const int fillBudgetNamesBatchSize = 200;
   static const Duration tokenRefreshThreshold = Duration(minutes: 5);
   static const List<String> googleSignInScopes = ['email', 'profile'];
 

@@ -12,6 +12,7 @@ import 'package:expense_tracker/i18n/strings.g.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_back_button.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_page_header.dart';
 import 'package:expense_tracker/shared/presentation/widgets/budget_progress_indicator.dart';
+import 'package:expense_tracker/features/budgets/presentation/helpers/budget_display_name.dart';
 
 /// Full-screen budget picker (`AllBudgetsPicker` in expenzo.pen).
 ///
@@ -142,7 +143,7 @@ class _AllBudgetsPickerPageState extends State<AllBudgetsPickerPage> {
 
   Widget _buildBudgetRow(BudgetProgress budget) {
     return _BudgetPickerRow(
-      title: budget.name,
+      title: budgetDisplayName(budget.name),
       subtitle: t.budgets.picker.progress(
         period: budget.period.displayName,
         spent: CurrencyFormatter.format(budget.spentAmount, decimalDigits: 0),

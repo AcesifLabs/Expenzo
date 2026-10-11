@@ -17,6 +17,7 @@ import '../bloc/budget_state.dart';
 import '../widgets/budget_progress_card.dart';
 import '../widgets/skeletons/budget_list_skeleton.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
+import 'package:expense_tracker/features/budgets/presentation/helpers/budget_display_name.dart';
 
 class BudgetListPage extends StatelessWidget {
   const BudgetListPage({super.key});
@@ -213,7 +214,7 @@ class _BudgetListViewState extends State<BudgetListView> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(strings.title),
-        content: Text(strings.confirm(name: budget.name)),
+        content: Text(strings.confirm(name: budgetDisplayName(budget.name))),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),

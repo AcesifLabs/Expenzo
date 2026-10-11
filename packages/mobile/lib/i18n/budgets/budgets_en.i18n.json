@@ -1,6 +1,7 @@
 {
   "title": "Budgets",
   "subtitle": "Track your monthly limits",
+  "unnamed": "Unnamed budget",
   "empty": {
     "title": "No budgets yet",
     "body": "Set a monthly limit to see how much you have left."
@@ -37,7 +38,8 @@
     "rolloverDetail": "Carry forward unspent amount",
     "amountRequired": "Enter an amount",
     "amountInvalid": "Enter a valid number",
-    "nameRequired": "Enter a name"
+    "nameRequired": "Enter a name",
+    "nameReserved": "Pick a different name"
   },
   "details": {
     "title": "Budget details",

@@ -12,6 +12,17 @@ import { ParsingRule } from '../parsing-rules/entities/parsing-rule.entity';
 import { RecurringTransaction } from '../recurring-transactions/entities/recurring-transaction.entity';
 import { PendingRecurring } from '../recurring-transactions/entities/pending-recurring.entity';
 import { SyncableEntity } from '../common/interfaces/syncable-entity.interface';
+import { DEFAULT_BUDGET_NAME } from '../budgets/budgets.constants';
+
+/**
+ * Required fields a client may send without a real value: null, blank or the
+ * default itself. On create they get the default; on update they are dropped
+ * so the stored value is kept (a device that only ever saw the default must
+ * not overwrite a repaired name, ADR 0012).
+ */
+const REQUIRED_FIELD_DEFAULTS: Partial<Record<SyncTable, Record<string, unknown>>> = {
+  [SyncTable.BUDGETS]: { name: DEFAULT_BUDGET_NAME },
+};
 
 @Injectable()
 export class SyncService {
@@ -74,7 +85,7 @@ export class SyncService {
     if (existing) {
       return { id: change.id, status: SyncStatus.SUCCESS, serverId: existing.id, message: 'Already exists' };
     }
-    const entity = repo.create({ ...change.data, id: change.id, userId, createdAt: new Date(), updatedAt: new Date() });
+    const entity = repo.create({ ...this.withRequiredDefaults(change), id: change.id, userId, createdAt: new Date(), updatedAt: new Date() });
     await repo.save(entity);
     return { id: change.id, status: SyncStatus.SUCCESS, serverId: entity.id };
   }
@@ -82,17 +93,38 @@ export class SyncService {
   private async handleUpdate(repo: Repository<SyncableEntity>, change: SyncChangeItem, userId: string): Promise<SyncActionResult> {
     const existing = await repo.findOne({ where: { id: change.id } });
     if (!existing) {
-      const entity = repo.create({ ...change.data, id: change.id, userId, createdAt: new Date(), updatedAt: new Date() });
+      const entity = repo.create({ ...this.withRequiredDefaults(change), id: change.id, userId, createdAt: new Date(), updatedAt: new Date() });
       await repo.save(entity);
       return { id: change.id, status: SyncStatus.SUCCESS, serverId: entity.id };
     }
     if (change.updatedAt && existing.updatedAt && new Date(change.updatedAt) < existing.updatedAt) {
       return { id: change.id, status: SyncStatus.CONFLICT, serverId: existing.id, message: 'Server version newer' };
     }
-    const { id: _id, createdAt: _createdAt, ...updateData } = (change.data ?? {}) as Record<string, unknown>;
+    const { id: _id, createdAt: _createdAt, ...updateData } = this.withoutBlankRequiredFields(change);
     Object.assign(existing, updateData, { userId, updatedAt: new Date() });
     await repo.save(existing);
     return { id: change.id, status: SyncStatus.SUCCESS, serverId: existing.id };
+  }
+
+  private withRequiredDefaults(change: SyncChangeItem): Record<string, unknown> {
+    const data = { ...(change.data ?? {}) };
+    for (const [field, fallback] of Object.entries(REQUIRED_FIELD_DEFAULTS[change.table] ?? {})) {
+      if (this.isBlank(data, field)) data[field] = fallback;
+    }
+    return data;
+  }
+
+  private withoutBlankRequiredFields(change: SyncChangeItem): Record<string, unknown> {
+    const data = { ...(change.data ?? {}) };
+    for (const [field, fallback] of Object.entries(REQUIRED_FIELD_DEFAULTS[change.table] ?? {})) {
+      if (this.isBlank(data, field) || data[field] === fallback) delete data[field];
+    }
+    return data;
+  }
+
+  private isBlank(data: Record<string, unknown>, field: string): boolean {
+    const value = data[field];
+    return field in data && (value === null || (typeof value === 'string' && value.trim() === ''));
   }
 
   private async handleDelete(repo: Repository<SyncableEntity>, change: SyncChangeItem, userId: string): Promise<SyncActionResult> {
