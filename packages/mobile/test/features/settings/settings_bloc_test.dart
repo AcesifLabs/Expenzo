@@ -6,6 +6,7 @@ import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
 import 'package:expense_tracker/features/auth/domain/usecases/delete_account.dart';
+import 'package:expense_tracker/features/settings/domain/entities/notification_toggle.dart';
 import 'package:expense_tracker/features/settings/domain/entities/user_settings.dart';
 import 'package:expense_tracker/features/settings/domain/usecases/get_settings.dart';
 import 'package:expense_tracker/features/settings/domain/usecases/update_settings.dart';
@@ -286,6 +287,15 @@ void main() {
       },
     );
 
+    test('UpdateNotificationToggle saves only its own toggle', () async {
+      final saved = await savedAfter(
+        const UpdateNotificationToggle(NotificationToggle.weeklySummary, true),
+      );
+
+      expect(saved.weeklySummaryEnabled, isTrue);
+      expect(saved, testSettings.copyWith(weeklySummaryEnabled: true));
+    });
+
     test('a change made while a save runs keeps both changes', () async {
       when(
         () => mockGetSettings(any()),
@@ -334,7 +344,10 @@ void main() {
         ..add(const UpdateCurrency('BDT'))
         ..add(const DismissAutoImportPrompt())
         ..add(const UpdateDefaultRecurringFrequency('weekly'))
-        ..add(const UpdateRecurringAutoCreate(true));
+        ..add(const UpdateRecurringAutoCreate(true))
+        ..add(
+          const UpdateNotificationToggle(NotificationToggle.budgetOver, false),
+        );
       await Future<void>.delayed(Duration.zero);
 
       verifyNever(() => mockUpdateSettings(any()));

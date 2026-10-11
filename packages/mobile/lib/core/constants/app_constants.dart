@@ -31,6 +31,12 @@ class AppConstants {
   /// (`FILL_RECORD_BUDGET_LINKS_MAX_ITEMS`).
   static const int fillRecordBudgetLinksBatchSize = 200;
 
+  /// Local hour the weekly summary goes out, on the day before the week starts.
+  static const int weeklySummaryHour = 20;
+
+  /// Local hour recurring reminders go out, on the day before the due date.
+  static const int recurringReminderHour = 9;
+
   static const Duration tokenRefreshThreshold = Duration(minutes: 5);
   static const List<String> googleSignInScopes = ['email', 'profile'];
 

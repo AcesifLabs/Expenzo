@@ -44,6 +44,10 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       _onUpdateNotificationsEnabled,
       transformer: concurrent(),
     );
+    on<UpdateNotificationToggle>(
+      _onUpdateNotificationToggle,
+      transformer: concurrent(),
+    );
     on<UpdateTheme>(_onUpdateTheme, transformer: concurrent());
     on<UpdateLanguage>(_onUpdateLanguage, transformer: concurrent());
     on<UpdateDefaultRecurringFrequency>(
@@ -112,6 +116,13 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     Emitter<SettingsState> emit,
   ) {
     _updateFromLast((s) => s.copyWith(notificationsEnabled: event.enabled));
+  }
+
+  void _onUpdateNotificationToggle(
+    UpdateNotificationToggle event,
+    Emitter<SettingsState> emit,
+  ) {
+    _updateFromLast((s) => s.withToggle(event.toggle, event.enabled));
   }
 
   void _onUpdateTheme(UpdateTheme event, Emitter<SettingsState> emit) {

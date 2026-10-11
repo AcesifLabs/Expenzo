@@ -4,6 +4,8 @@ import 'package:expense_tracker/core/error/usecase.dart';
 import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/features/budgets/domain/entities/budget_progress.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets_with_progress.dart';
+import 'package:expense_tracker/features/settings/domain/entities/notification_toggle.dart';
+import 'package:expense_tracker/features/settings/domain/entities/user_settings.dart';
 import 'package:expense_tracker/features/settings/domain/usecases/get_settings.dart';
 import '../../../../shared/services/notification_service.dart';
 
@@ -20,7 +22,8 @@ enum BudgetAlertLevel { nearLimit, over }
 /// Sends a Budget Alert (CONTEXT.md) after records change.
 ///
 /// Each budget gets at most one alert at 80% and one when it goes over, per
-/// budget period. Nothing is sent while the Settings switch is off.
+/// budget period. Nothing is sent while the master switch is off; each level
+/// has its own toggle (Settings → Notifications).
 class CheckBudgetAlerts {
   static const nearLimitPercent = 80.0;
 
@@ -69,12 +72,13 @@ class CheckBudgetAlerts {
 
   Future<Either<Failure, Unit>> _check() async {
     try {
-      final settings = await getSettings(NoParams());
-      final enabled = settings.fold(
-        (_) => false,
-        (s) => s.notificationsEnabled,
-      );
-      if (!enabled) return const Right(unit);
+      final result = await getSettings(NoParams());
+      final settings = result.fold((_) => null, (s) => s);
+      if (settings == null ||
+          (!settings.isEnabled(NotificationToggle.budgetOver) &&
+              !settings.isEnabled(NotificationToggle.budgetNearLimit))) {
+        return const Right(unit);
+      }
       // Without permission the alert would be dropped but still logged as
       // sent; skip it so it goes out once the user allows notifications.
       if (!await notificationService.canNotify()) return const Right(unit);
@@ -85,7 +89,7 @@ class CheckBudgetAlerts {
         budgets,
       ) async {
         for (final budget in budgets) {
-          await _alertIfNeeded(budget);
+          await _alertIfNeeded(budget, settings);
         }
 
         return const Right(unit);
@@ -97,8 +101,11 @@ class CheckBudgetAlerts {
     }
   }
 
-  Future<void> _alertIfNeeded(BudgetProgress budget) async {
-    final level = levelFor(budget);
+  Future<void> _alertIfNeeded(
+    BudgetProgress budget,
+    UserSettings settings,
+  ) async {
+    final level = _levelToSend(budget, settings);
     if (level == null) return;
 
     final key = alertKey(budget, level);
@@ -116,6 +123,24 @@ class CheckBudgetAlerts {
       if (level == BudgetAlertLevel.over)
         alertKey(budget, BudgetAlertLevel.nearLimit),
     ]);
+  }
+
+  /// The level to send under the user's toggles. With the over toggle off,
+  /// an over budget still gets the 80% heads-up if that toggle is on.
+  static BudgetAlertLevel? _levelToSend(
+    BudgetProgress budget,
+    UserSettings settings,
+  ) {
+    final nearLimitOn = settings.isEnabled(NotificationToggle.budgetNearLimit);
+
+    return switch (levelFor(budget)) {
+      BudgetAlertLevel.over
+          when settings.isEnabled(NotificationToggle.budgetOver) =>
+        BudgetAlertLevel.over,
+      BudgetAlertLevel.over ||
+      BudgetAlertLevel.nearLimit when nearLimitOn => BudgetAlertLevel.nearLimit,
+      _ => null,
+    };
   }
 
   static Object? _ignore([Object? _]) => null;

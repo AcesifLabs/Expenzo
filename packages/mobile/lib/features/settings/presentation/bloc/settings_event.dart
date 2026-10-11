@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../domain/entities/notification_toggle.dart';
 import '../../domain/entities/user_settings.dart';
 
 abstract class SettingsEvent extends Equatable {
@@ -47,6 +48,17 @@ class UpdateNotificationsEnabled extends SettingsEvent {
   List<Object?> get props => [enabled];
 
   const UpdateNotificationsEnabled(this.enabled);
+}
+
+/// One of the per-kind toggles under the master switch.
+class UpdateNotificationToggle extends SettingsEvent {
+  final NotificationToggle toggle;
+  final bool enabled;
+
+  @override
+  List<Object?> get props => [toggle, enabled];
+
+  const UpdateNotificationToggle(this.toggle, this.enabled);
 }
 
 class UpdateTheme extends SettingsEvent {

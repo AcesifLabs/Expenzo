@@ -130,4 +130,34 @@ void main() {
 
     expect((await datasource.getSettings()).recurringAutoCreate, isTrue);
   });
+
+  test('settings saved before notification toggles existed load weekly off '
+      'and the other three on', () async {
+    final datasource = await datasourceWith(_storedSettings(code: 'BDT'));
+    final settings = await datasource.getSettings();
+
+    expect(settings.budgetOverAlertsEnabled, isTrue);
+    expect(settings.budgetNearLimitAlertsEnabled, isTrue);
+    expect(settings.weeklySummaryEnabled, isFalse);
+    expect(settings.recurringRemindersEnabled, isTrue);
+  });
+
+  test('each notification toggle is saved and read back', () async {
+    final datasource = await datasourceWith(_storedSettings(code: 'BDT'));
+    final settings = await datasource.getSettings();
+    await datasource.updateSettings(
+      settings.copyWith(
+        budgetOverAlertsEnabled: false,
+        budgetNearLimitAlertsEnabled: false,
+        weeklySummaryEnabled: true,
+        recurringRemindersEnabled: false,
+      ),
+    );
+    final reloaded = await datasource.getSettings();
+
+    expect(reloaded.budgetOverAlertsEnabled, isFalse);
+    expect(reloaded.budgetNearLimitAlertsEnabled, isFalse);
+    expect(reloaded.weeklySummaryEnabled, isTrue);
+    expect(reloaded.recurringRemindersEnabled, isFalse);
+  });
 }

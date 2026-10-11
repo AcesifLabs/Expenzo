@@ -62,6 +62,10 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
       'currencyCode': settings.currencyCode,
       'emailFetchLimit': settings.emailFetchLimit,
       'notificationsEnabled': settings.notificationsEnabled,
+      'budgetOverAlertsEnabled': settings.budgetOverAlertsEnabled,
+      'budgetNearLimitAlertsEnabled': settings.budgetNearLimitAlertsEnabled,
+      'weeklySummaryEnabled': settings.weeklySummaryEnabled,
+      'recurringRemindersEnabled': settings.recurringRemindersEnabled,
       'theme': settings.theme,
       'languageCode': settings.languageCode,
       'autoImportPromptDismissed': settings.autoImportPromptDismissed,
@@ -78,6 +82,12 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
       currencyCode: _currencyCodeFrom(json),
       emailFetchLimit: json['emailFetchLimit'] as int,
       notificationsEnabled: json['notificationsEnabled'] as bool,
+      budgetOverAlertsEnabled: json['budgetOverAlertsEnabled'] as bool? ?? true,
+      budgetNearLimitAlertsEnabled:
+          json['budgetNearLimitAlertsEnabled'] as bool? ?? true,
+      weeklySummaryEnabled: json['weeklySummaryEnabled'] as bool? ?? false,
+      recurringRemindersEnabled:
+          json['recurringRemindersEnabled'] as bool? ?? true,
       theme: json['theme'] as String,
       languageCode: json['languageCode'] as String? ?? 'system',
       autoImportPromptDismissed:

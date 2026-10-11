@@ -214,4 +214,70 @@ void main() {
 
     expect(alertsSent(), 2);
   });
+
+  group('per-level toggles', () {
+    void settingsWith({bool over = true, bool nearLimit = true}) {
+      when(() => getSettings(any())).thenAnswer(
+        (_) async => Right(
+          makeUserSettings(
+            budgetOverAlertsEnabled: over,
+            budgetNearLimitAlertsEnabled: nearLimit,
+          ),
+        ),
+      );
+    }
+
+    test('over-budget toggle off sends the 80% alert instead when the budget '
+        'is over', () async {
+      settingsWith(over: false);
+      spending([_progress(120)]);
+
+      await checkAlerts();
+
+      verify(
+        () => notifications.showBudgetAlert(
+          budgetId: 'b1',
+          budgetName: 'Food',
+          percentage: 120,
+          isOver: false,
+        ),
+      ).called(1);
+    });
+
+    test('80% toggle off sends nothing at 85% and logs nothing', () async {
+      settingsWith(nearLimit: false);
+      spending([_progress(85)]);
+
+      await checkAlerts();
+
+      expectNoAlert();
+      expect(log.sent, isEmpty);
+    });
+
+    test('80% toggle off still sends the over alert at 120%', () async {
+      settingsWith(nearLimit: false);
+      spending([_progress(120)]);
+
+      await checkAlerts();
+
+      verify(
+        () => notifications.showBudgetAlert(
+          budgetId: 'b1',
+          budgetName: 'Food',
+          percentage: 120,
+          isOver: true,
+        ),
+      ).called(1);
+    });
+
+    test('both toggles off skips loading budgets', () async {
+      settingsWith(over: false, nearLimit: false);
+      spending([_progress(120)]);
+
+      await checkAlerts();
+
+      verifyNever(() => getProgress());
+      expectNoAlert();
+    });
+  });
 }

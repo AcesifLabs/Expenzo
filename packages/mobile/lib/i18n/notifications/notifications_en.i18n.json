@@ -1,7 +1,7 @@
 {
   "channel": {
     "name": "App notifications",
-    "description": "Budget alerts, recurring reminders and scan results"
+    "description": "Budget alerts, weekly summary, recurring reminders and scan results"
   },
   "budget": {
     "title": "Budget alert",
@@ -9,7 +9,15 @@
     "used": "You have used {percent}% of your \"{budget}\" budget."
   },
   "recurringDue": {
-    "title": "Recurring expense due"
+    "title": "Recurring transaction tomorrow"
+  },
+  "weeklySummary": {
+    "title": "Your week in spending",
+    "up": "You spent {amount} this week, {percent}% more than last week.",
+    "down": "You spent {amount} this week, {percent}% less than last week.",
+    "same": "You spent {amount} this week, the same as last week.",
+    "noComparison": "You spent {amount} this week.",
+    "nothing": "No spending recorded this week."
   },
   "scan": {
     "smsTitle": "SMS scan complete",

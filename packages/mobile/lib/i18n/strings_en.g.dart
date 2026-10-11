@@ -426,6 +426,7 @@ class Translations$notifications$en {
 	late final Translations$notifications$channel$en channel = Translations$notifications$channel$en.internal(_root);
 	late final Translations$notifications$budget$en budget = Translations$notifications$budget$en.internal(_root);
 	late final Translations$notifications$recurringDue$en recurringDue = Translations$notifications$recurringDue$en.internal(_root);
+	late final Translations$notifications$weeklySummary$en weeklySummary = Translations$notifications$weeklySummary$en.internal(_root);
 	late final Translations$notifications$scan$en scan = Translations$notifications$scan$en.internal(_root);
 	late final Translations$notifications$syncError$en syncError = Translations$notifications$syncError$en.internal(_root);
 }
@@ -644,7 +645,7 @@ class Translations$settings$en {
 	String get notificationsBlocked => 'Allow notifications for Expenzo in system settings to get budget alerts.';
 
 	late final Translations$settings$sections$en sections = Translations$settings$sections$en.internal(_root);
-	late final Translations$settings$budgetAlerts$en budgetAlerts = Translations$settings$budgetAlerts$en.internal(_root);
+	late final Translations$settings$notifications$en notifications = Translations$settings$notifications$en.internal(_root);
 
 	/// en: 'Turn bank and payment messages into transactions'
 	String get autoImportSubtitle => 'Turn bank and payment messages into transactions';
@@ -1642,8 +1643,8 @@ class Translations$notifications$channel$en {
 	/// en: 'App notifications'
 	String get name => 'App notifications';
 
-	/// en: 'Budget alerts, recurring reminders and scan results'
-	String get description => 'Budget alerts, recurring reminders and scan results';
+	/// en: 'Budget alerts, weekly summary, recurring reminders and scan results'
+	String get description => 'Budget alerts, weekly summary, recurring reminders and scan results';
 }
 
 // Path: notifications.budget
@@ -1672,8 +1673,35 @@ class Translations$notifications$recurringDue$en {
 
 	// Translations
 
-	/// en: 'Recurring expense due'
-	String get title => 'Recurring expense due';
+	/// en: 'Recurring transaction tomorrow'
+	String get title => 'Recurring transaction tomorrow';
+}
+
+// Path: notifications.weeklySummary
+class Translations$notifications$weeklySummary$en {
+	Translations$notifications$weeklySummary$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Your week in spending'
+	String get title => 'Your week in spending';
+
+	/// en: 'You spent {amount} this week, {percent}% more than last week.'
+	String up({required Object amount, required Object percent}) => 'You spent ${amount} this week, ${percent}% more than last week.';
+
+	/// en: 'You spent {amount} this week, {percent}% less than last week.'
+	String down({required Object amount, required Object percent}) => 'You spent ${amount} this week, ${percent}% less than last week.';
+
+	/// en: 'You spent {amount} this week, the same as last week.'
+	String same({required Object amount}) => 'You spent ${amount} this week, the same as last week.';
+
+	/// en: 'You spent {amount} this week.'
+	String noComparison({required Object amount}) => 'You spent ${amount} this week.';
+
+	/// en: 'No spending recorded this week.'
+	String get nothing => 'No spending recorded this week.';
 }
 
 // Path: notifications.scan
@@ -2262,19 +2290,30 @@ class Translations$settings$sections$en {
 	String get general => 'General';
 }
 
-// Path: settings.budgetAlerts
-class Translations$settings$budgetAlerts$en {
-	Translations$settings$budgetAlerts$en.internal(this._root);
+// Path: settings.notifications
+class Translations$settings$notifications$en {
+	Translations$settings$notifications$en.internal(this._root);
 
 	final Translations _root; // ignore: unused_field
 
 	// Translations
 
-	/// en: 'Budget alerts'
-	String get title => 'Budget alerts';
+	/// en: 'Notifications'
+	String get title => 'Notifications';
 
-	/// en: 'Notify me at 80% and when over budget'
-	String get subtitle => 'Notify me at 80% and when over budget';
+	/// en: '{n} of 4 on'
+	String rowSubtitle({required Object n}) => '${n} of 4 on';
+
+	/// en: 'Off'
+	String get rowSubtitleOff => 'Off';
+
+	late final Translations$settings$notifications$sections$en sections = Translations$settings$notifications$sections$en.internal(_root);
+	late final Translations$settings$notifications$master$en master = Translations$settings$notifications$master$en.internal(_root);
+	late final Translations$settings$notifications$blocked$en blocked = Translations$settings$notifications$blocked$en.internal(_root);
+	late final Translations$settings$notifications$over$en over = Translations$settings$notifications$over$en.internal(_root);
+	late final Translations$settings$notifications$nearLimit$en nearLimit = Translations$settings$notifications$nearLimit$en.internal(_root);
+	late final Translations$settings$notifications$weekly$en weekly = Translations$settings$notifications$weekly$en.internal(_root);
+	late final Translations$settings$notifications$reminders$en reminders = Translations$settings$notifications$reminders$en.internal(_root);
 }
 
 // Path: settings.recurring
@@ -2807,6 +2846,114 @@ class Translations$settings$language$names$en {
 	String get bn => 'Bengali';
 }
 
+// Path: settings.notifications.sections
+class Translations$settings$notifications$sections$en {
+	Translations$settings$notifications$sections$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'General'
+	String get general => 'General';
+
+	/// en: 'Budget alerts'
+	String get budgetAlerts => 'Budget alerts';
+
+	/// en: 'Recurring transactions'
+	String get recurring => 'Recurring transactions';
+}
+
+// Path: settings.notifications.master
+class Translations$settings$notifications$master$en {
+	Translations$settings$notifications$master$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Allow notifications'
+	String get title => 'Allow notifications';
+
+	/// en: 'Budget alerts, weekly summary and reminders'
+	String get subtitle => 'Budget alerts, weekly summary and reminders';
+}
+
+// Path: settings.notifications.blocked
+class Translations$settings$notifications$blocked$en {
+	Translations$settings$notifications$blocked$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Notifications are blocked'
+	String get title => 'Notifications are blocked';
+
+	/// en: 'Open settings'
+	String get action => 'Open settings';
+}
+
+// Path: settings.notifications.over
+class Translations$settings$notifications$over$en {
+	Translations$settings$notifications$over$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Over budget alert'
+	String get title => 'Over budget alert';
+
+	/// en: 'When spending exceeds budget limit'
+	String get subtitle => 'When spending exceeds budget limit';
+}
+
+// Path: settings.notifications.nearLimit
+class Translations$settings$notifications$nearLimit$en {
+	Translations$settings$notifications$nearLimit$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: '80% threshold'
+	String get title => '80% threshold';
+
+	/// en: 'When 80% of budget is used'
+	String get subtitle => 'When 80% of budget is used';
+}
+
+// Path: settings.notifications.weekly
+class Translations$settings$notifications$weekly$en {
+	Translations$settings$notifications$weekly$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Weekly summary'
+	String get title => 'Weekly summary';
+
+	/// en: '{day} evening: this week's spending compared with last week'
+	String subtitle({required Object day}) => '${day} evening: this week\'s spending compared with last week';
+}
+
+// Path: settings.notifications.reminders
+class Translations$settings$notifications$reminders$en {
+	Translations$settings$notifications$reminders$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Reminder alerts'
+	String get title => 'Reminder alerts';
+
+	/// en: 'Get reminded a day before recurring transactions'
+	String get subtitle => 'Get reminded a day before recurring transactions';
+}
+
 // Path: settings.appearanceScreen.sections
 class Translations$settings$appearanceScreen$sections$en {
 	Translations$settings$appearanceScreen$sections$en.internal(this._root);
@@ -3151,11 +3298,17 @@ extension on Translations {
 			'messageTemplates.contacts.noMatch' => ({required Object query}) => 'No senders match "${query}".',
 			'messageTemplates.create' => 'New SMS format',
 			'notifications.channel.name' => 'App notifications',
-			'notifications.channel.description' => 'Budget alerts, recurring reminders and scan results',
+			'notifications.channel.description' => 'Budget alerts, weekly summary, recurring reminders and scan results',
 			'notifications.budget.title' => 'Budget alert',
 			'notifications.budget.over' => ({required Object budget}) => 'You went over your "${budget}" budget.',
 			'notifications.budget.used' => ({required Object percent, required Object budget}) => 'You have used ${percent}% of your "${budget}" budget.',
-			'notifications.recurringDue.title' => 'Recurring expense due',
+			'notifications.recurringDue.title' => 'Recurring transaction tomorrow',
+			'notifications.weeklySummary.title' => 'Your week in spending',
+			'notifications.weeklySummary.up' => ({required Object amount, required Object percent}) => 'You spent ${amount} this week, ${percent}% more than last week.',
+			'notifications.weeklySummary.down' => ({required Object amount, required Object percent}) => 'You spent ${amount} this week, ${percent}% less than last week.',
+			'notifications.weeklySummary.same' => ({required Object amount}) => 'You spent ${amount} this week, the same as last week.',
+			'notifications.weeklySummary.noComparison' => ({required Object amount}) => 'You spent ${amount} this week.',
+			'notifications.weeklySummary.nothing' => 'No spending recorded this week.',
 			'notifications.scan.smsTitle' => 'SMS scan complete',
 			'notifications.scan.emailTitle' => 'Email scan complete',
 			'notifications.scan.found' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} new expense found', other: '${n} new expenses found', ), 
@@ -3336,14 +3489,14 @@ extension on Translations {
 			'reports.askAi' => 'Ask AI',
 			'reports.last7Days' => 'Last 7 days',
 			'reports.last30Days' => 'Last 30 days',
+			_ => null,
+		} ?? switch (path) {
 			'reports.noCategoryData' => 'No category data',
 			'reports.noTrendData' => 'No trend data yet',
 			'reports.noSpending' => 'No spending data yet',
 			'reports.totalSpentInPeriod' => ({required Object amount}) => 'Total spent: ${amount} in this period',
 			'reports.metrics.totalSpent' => 'Total spent',
 			'reports.metrics.dailyAverage' => 'Daily average',
-			_ => null,
-		} ?? switch (path) {
 			'reports.metrics.highestDay' => 'Highest day',
 			'reports.spendingByCategory' => 'Spending by category',
 			'reports.observations' => 'Key observations from your spending this month',
@@ -3365,8 +3518,24 @@ extension on Translations {
 			'settings.sections.notifications' => 'Notifications',
 			'settings.sections.dataBudget' => 'Data & budget',
 			'settings.sections.general' => 'General',
-			'settings.budgetAlerts.title' => 'Budget alerts',
-			'settings.budgetAlerts.subtitle' => 'Notify me at 80% and when over budget',
+			'settings.notifications.title' => 'Notifications',
+			'settings.notifications.rowSubtitle' => ({required Object n}) => '${n} of 4 on',
+			'settings.notifications.rowSubtitleOff' => 'Off',
+			'settings.notifications.sections.general' => 'General',
+			'settings.notifications.sections.budgetAlerts' => 'Budget alerts',
+			'settings.notifications.sections.recurring' => 'Recurring transactions',
+			'settings.notifications.master.title' => 'Allow notifications',
+			'settings.notifications.master.subtitle' => 'Budget alerts, weekly summary and reminders',
+			'settings.notifications.blocked.title' => 'Notifications are blocked',
+			'settings.notifications.blocked.action' => 'Open settings',
+			'settings.notifications.over.title' => 'Over budget alert',
+			'settings.notifications.over.subtitle' => 'When spending exceeds budget limit',
+			'settings.notifications.nearLimit.title' => '80% threshold',
+			'settings.notifications.nearLimit.subtitle' => 'When 80% of budget is used',
+			'settings.notifications.weekly.title' => 'Weekly summary',
+			'settings.notifications.weekly.subtitle' => ({required Object day}) => '${day} evening: this week\'s spending compared with last week',
+			'settings.notifications.reminders.title' => 'Reminder alerts',
+			'settings.notifications.reminders.subtitle' => 'Get reminded a day before recurring transactions',
 			'settings.autoImportSubtitle' => 'Turn bank and payment messages into transactions',
 			'settings.matchingRulesSubtitle' => 'Patterns for messages auto-import can\'t read yet',
 			'settings.recurring.title' => 'Recurring transactions',

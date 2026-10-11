@@ -52,9 +52,7 @@ void main() {
   }) {
     return pumpLocalized(
       tester,
-      Scaffold(
-        body: SettingsView(requestNotificationPermission: () async => true),
-      ),
+      const Scaffold(body: SettingsView()),
       locale: locale,
       wrap: (app) => MultiBlocProvider(
         providers: [
@@ -77,9 +75,7 @@ void main() {
       routes: [
         GoRoute(
           path: '/settings',
-          builder: (_, _) => Scaffold(
-            body: SettingsView(requestNotificationPermission: () async => true),
-          ),
+          builder: (_, _) => const Scaffold(body: SettingsView()),
           routes: [
             GoRoute(path: child, builder: (_, _) => Text('$child-page')),
           ],
@@ -99,18 +95,37 @@ void main() {
     );
   }
 
-  testWidgets('budget alerts is a switch showing the stored value', (
+  testWidgets('the notifications row shows Off when the master is off', (
     tester,
   ) async {
     await pumpSettings(tester);
 
-    final alerts = find.widgetWithText(SwitchListTile, 'Budget alerts');
-    expect(tester.widget<SwitchListTile>(alerts).value, isFalse);
+    expect(find.text('Notifications'), findsOneWidget);
+    expect(find.text('Off'), findsOneWidget);
+    expect(find.byType(SwitchListTile), findsNothing);
+  });
 
-    await tester.tap(alerts);
-    verify(
-      () => settingsBloc.add(const UpdateNotificationsEnabled(true)),
-    ).called(1);
+  testWidgets('the notifications row shows 3 of 4 on with defaults', (
+    tester,
+  ) async {
+    when(
+      () => settingsBloc.state,
+    ).thenReturn(SettingsLoaded(makeUserSettings()));
+    await pumpSettings(tester);
+
+    expect(find.text('3 of 4 on'), findsOneWidget);
+  });
+
+  testWidgets('the notifications row opens /settings/notifications', (
+    tester,
+  ) async {
+    await pumpSettingsRouter(tester, child: 'notifications');
+
+    await tester.scrollUntilVisible(find.text('Notifications'), 200);
+    await tester.tap(find.text('Notifications'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('notifications-page'), findsOneWidget);
   });
 
   testWidgets('the appearance row opens /settings/appearance', (tester) async {
