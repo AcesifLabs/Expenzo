@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:expense_tracker/features/dashboard/presentation/widgets/dashboard_trend_card.dart';
 import 'package:expense_tracker/features/reports/domain/entities/date_amount.dart';
-import '../../../support/pump_localized.dart';
+import '../../../../support/pump_localized.dart';
 
 void main() {
   Future<void> pumpCard(

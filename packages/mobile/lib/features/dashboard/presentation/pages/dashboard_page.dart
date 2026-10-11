@@ -21,6 +21,7 @@ import 'package:expense_tracker/features/dashboard/presentation/widgets/balance_
 import 'package:expense_tracker/features/dashboard/presentation/widgets/dashboard_section_header.dart';
 import 'package:expense_tracker/features/dashboard/presentation/widgets/dashboard_trend_card.dart';
 import 'package:expense_tracker/features/dashboard/presentation/widgets/menu_row.dart';
+import 'package:expense_tracker/features/dashboard/presentation/widgets/receipt_scan_banner.dart';
 import 'package:expense_tracker/features/records/domain/entities/record.dart';
 import 'package:expense_tracker/features/reports/domain/entities/date_amount.dart';
 import 'package:expense_tracker/features/reports/domain/entities/granularity.dart';
@@ -83,6 +84,9 @@ class _DashboardViewState extends State<DashboardView> {
   Future<DashboardSupplementaryData>? _supplementaryFuture;
   Future<List<DateAmount>>? _trendFuture;
   DateRange? _secondaryDateRange;
+  // Disables the scan banner while its sheet is open; a notifier so only the
+  // banner rebuilds.
+  final _scanOpening = ValueNotifier<bool>(false);
 
   @override
   void initState() {
@@ -106,6 +110,19 @@ class _DashboardViewState extends State<DashboardView> {
 
   Future<void> _addRecord() async {
     if (await showTransactionSheet(context)) _onExternalRefresh();
+  }
+
+  void _onScanTapped() => unawaited(_scanReceipt());
+
+  Future<void> _scanReceipt() async {
+    _scanOpening.value = true;
+    try {
+      if (await showTransactionSheet(context, startWithReceiptScan: true)) {
+        _onExternalRefresh();
+      }
+    } finally {
+      if (mounted) _scanOpening.value = false;
+    }
   }
 
   Future<void> _editRecord(Record record) async {
@@ -282,13 +299,24 @@ class _DashboardViewState extends State<DashboardView> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
-            child: Text(
-              greeting,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppTypography.headlineSmall.copyWith(
-                color: colors.onSurface,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  greeting,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.headlineSmall.copyWith(
+                    color: colors.onSurface,
+                  ),
+                ),
+                ValueListenableBuilder<bool>(
+                  valueListenable: _scanOpening,
+                  builder: (_, opening, _) =>
+                      ReceiptScanBanner(onTap: opening ? null : _onScanTapped),
+                ),
+              ],
             ),
           ),
           PopupMenuButton<String>(
@@ -868,6 +896,7 @@ class _DashboardViewState extends State<DashboardView> {
   @override
   void dispose() {
     widget.refreshTick?.removeListener(_onExternalRefresh);
+    _scanOpening.dispose();
     super.dispose();
   }
 

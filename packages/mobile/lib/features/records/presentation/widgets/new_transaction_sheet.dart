@@ -49,6 +49,7 @@ Future<bool> showTransactionSheet(
   BuildContext context, {
   Record? record,
   String? budgetId,
+  bool startWithReceiptScan = false,
 }) async {
   final saved = await showModalBottomSheet<bool>(
     context: context,
@@ -62,6 +63,7 @@ Future<bool> showTransactionSheet(
       child: NewTransactionSheet(
         initialRecord: record,
         initialBudgetId: budgetId,
+        startWithReceiptScan: startWithReceiptScan,
         recurringRepository: di.getIt<RecurringRepository>(),
       ),
     ),
@@ -85,11 +87,16 @@ class NewTransactionSheet extends StatefulWidget {
   /// Preselects a budget when adding from a budget's page.
   final String? initialBudgetId;
 
+  /// Opens the receipt camera as soon as the sheet appears (Home banner).
+  /// Ignored when editing.
+  final bool startWithReceiptScan;
+
   const NewTransactionSheet({
     super.key,
     this.recurringRepository,
     this.initialRecord,
     this.initialBudgetId,
+    this.startWithReceiptScan = false,
   });
 
   @override
@@ -116,6 +123,8 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   var _isSubmitting = false;
   var _selectedDate = DateTime.now();
   var _isRecurring = false;
+  Animation<double>? _routeAnimation;
+  AnimationStatusListener? _routeSettledListener;
 
   double get _parsedAmount => double.tryParse(_amountText.value) ?? 0;
 
@@ -141,7 +150,9 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       pauseTypewriter();
     } else {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) startTypewriter();
+        if (!mounted) return;
+        startTypewriter();
+        if (widget.startWithReceiptScan) _openReceiptScanWhenSettled();
       });
     }
   }
@@ -505,6 +516,34 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       (categories) =>
           categories.where((c) => c.type == RecordType.expense).toList(),
     );
+  }
+
+  /// Opens the camera once the sheet has finished sliding in, so the two
+  /// route transitions do not overlap.
+  void _openReceiptScanWhenSettled() {
+    final animation = ModalRoute.of(context)?.animation;
+    if (animation == null || animation.isCompleted) {
+      unawaited(_openReceiptScan());
+
+      return;
+    }
+
+    void listener(AnimationStatus status) {
+      if (status != AnimationStatus.completed) return;
+      _removeRouteSettledListener();
+      if (mounted) unawaited(_openReceiptScan());
+    }
+
+    _routeAnimation = animation;
+    _routeSettledListener = listener;
+    animation.addStatusListener(listener);
+  }
+
+  void _removeRouteSettledListener() {
+    final listener = _routeSettledListener;
+    if (listener != null) _routeAnimation?.removeStatusListener(listener);
+    _routeAnimation = null;
+    _routeSettledListener = null;
   }
 
   Future<void> _openReceiptScan() async {
@@ -1108,6 +1147,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
 
   @override
   void dispose() {
+    _removeRouteSettledListener();
     _noteCtrl.removeListener(_onNoteChanged);
     _amountText.dispose();
     _noteCtrl.dispose();
