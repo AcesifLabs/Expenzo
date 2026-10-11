@@ -44,6 +44,7 @@ echo "   ✅"
 
 echo ""
 echo "→ 5/5  flutter test..."
+flutter pub get
 flutter test
 echo "   ✅"
 

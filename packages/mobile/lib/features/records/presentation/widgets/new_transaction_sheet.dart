@@ -203,6 +203,20 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     }
   }
 
+  Future<void> _showAllBudgets() async {
+    final picked = await context.push<String>(
+      '/budgets/picker',
+      extra: {'selectedId': _selectedBudgetId},
+    );
+    if (!mounted) return;
+
+    // An empty id means "No budget"; null means closed without choosing.
+    if (picked != null) {
+      setState(() => _selectedBudgetId = picked.isEmpty ? null : picked);
+    }
+    await _loadBudgets();
+  }
+
   void _switchType(RecordType type) {
     stopTypewriter();
     setState(() {
@@ -750,9 +764,18 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   }
 
   Widget _buildAllCategoriesButton(ColorScheme colors) {
-    return _AllCategoriesButton(
+    return _ShowAllButton(
       colors: colors,
+      label: t.records.sheet.showAllCategories,
       onTap: () => _showAllCategories(context, _type),
+    );
+  }
+
+  Widget _buildAllBudgetsButton(ColorScheme colors) {
+    return _ShowAllButton(
+      colors: colors,
+      label: t.records.sheet.showAllBudgets,
+      onTap: _budgetsLoading ? null : () => unawaited(_showAllBudgets()),
     );
   }
 
@@ -763,6 +786,25 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   }
 
   Widget _buildBudgetSelector(ColorScheme colors) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.smd,
+        AppSpacing.lg,
+        AppSpacing.sm,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(child: _buildBudgetDropdown(colors)),
+          const SizedBox(width: AppSpacing.sm),
+          _buildAllBudgetsButton(colors),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBudgetDropdown(ColorScheme colors) {
     final noneOrEmpty = _budgetsLoading || _budgets.isEmpty;
     final selectedId = _selectedBudgetId;
     final isListed = _budgets.any((b) => b.id == selectedId);
@@ -773,55 +815,47 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
         selectedId != null && !isListed && !_budgetsLoading;
     final sheetT = t.records.sheet;
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.smd,
-        AppSpacing.lg,
-        AppSpacing.sm,
-      ),
-      child: InputDecorator(
-        decoration: _buildBudgetFieldDecoration(colors),
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton<String?>(
-            value: isListed || showInactiveLink ? selectedId : null,
-            hint: _buildBudgetHint(colors),
-            isExpanded: true,
-            icon: Icon(
-              PiconsRegular.caretDown,
-              color: colors.onSurface.withAlpha(120),
-            ),
-            dropdownColor: colors.surfaceContainerLow,
-            isDense: true,
-            items: [
-              DropdownMenuItem<String?>(
-                value: null,
-                child: Text(sheetT.noBudget, overflow: TextOverflow.ellipsis),
-              ),
-              for (final budget in _budgets)
-                DropdownMenuItem<String?>(
-                  value: budget.id,
-                  child: Text(
-                    sheetT.budgetOption(
-                      name: budget.name,
-                      period: budget.period.displayName,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              if (showInactiveLink)
-                DropdownMenuItem<String?>(
-                  value: selectedId,
-                  child: Text(
-                    sheetT.previousBudget,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-            ],
-            onChanged: noneOrEmpty && !showInactiveLink
-                ? null
-                : _onBudgetSelected,
+    return InputDecorator(
+      decoration: _buildBudgetFieldDecoration(colors),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String?>(
+          value: isListed || showInactiveLink ? selectedId : null,
+          hint: _buildBudgetHint(colors),
+          isExpanded: true,
+          icon: Icon(
+            PiconsRegular.caretDown,
+            color: colors.onSurface.withAlpha(120),
           ),
+          dropdownColor: colors.surfaceContainerLow,
+          isDense: true,
+          items: [
+            DropdownMenuItem<String?>(
+              value: null,
+              child: Text(sheetT.noBudget, overflow: TextOverflow.ellipsis),
+            ),
+            for (final budget in _budgets)
+              DropdownMenuItem<String?>(
+                value: budget.id,
+                child: Text(
+                  sheetT.budgetOption(
+                    name: budget.name,
+                    period: budget.period.displayName,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            if (showInactiveLink)
+              DropdownMenuItem<String?>(
+                value: selectedId,
+                child: Text(
+                  sheetT.previousBudget,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+          ],
+          onChanged: noneOrEmpty && !showInactiveLink
+              ? null
+              : _onBudgetSelected,
         ),
       ),
     );
@@ -1182,16 +1216,19 @@ class _SubmitButton extends StatelessWidget {
   }
 }
 
-class _AllCategoriesButton extends StatelessWidget {
+class _ShowAllButton extends StatelessWidget {
   final ColorScheme colors;
-  final VoidCallback onTap;
+  final String label;
+  final VoidCallback? onTap;
 
-  const _AllCategoriesButton({required this.colors, required this.onTap});
+  const _ShowAllButton({
+    required this.colors,
+    required this.label,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final label = t.records.sheet.showAllCategories;
-
     return Semantics(
       button: true,
       label: label,

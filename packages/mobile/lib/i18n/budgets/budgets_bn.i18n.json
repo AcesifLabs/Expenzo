@@ -58,5 +58,16 @@
     "transactions": "লেনদেন",
     "unableToLoad": "বাজেট লোড করা যায়নি",
     "unableToLoadBody": "বাজেটের বিস্তারিত লোড করা যায়নি।"
+  },
+  "picker": {
+    "title": "বাজেট বেছে নিন",
+    "subtitle": "এই খরচটি কোন বাজেটে গণ্য হবে তা বেছে নিন",
+    "sectionAvailable": "উপলব্ধ বাজেট",
+    "noBudget": "কোনো বাজেট নয়",
+    "noBudgetHint": "কোনো বাজেটের সাথে যুক্ত করবেন না",
+    "previousBudget": "আগের বাজেট (আর সক্রিয় নয়)",
+    "previousBudgetHint": "বর্তমান সংযোগ রাখুন",
+    "progress": "{period} · {spent} / {limit}",
+    "empty": "কোনো সক্রিয় বাজেট নেই"
   }
 }

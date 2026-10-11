@@ -9,6 +9,7 @@ import 'package:expense_tracker/features/auth/presentation/pages/login_page.dart
 import 'package:expense_tracker/features/auth/presentation/pages/sync_conflict_page.dart';
 import 'package:expense_tracker/features/budgets/presentation/bloc/budget_bloc.dart';
 import 'package:expense_tracker/features/budgets/presentation/bloc/budget_event.dart';
+import 'package:expense_tracker/features/budgets/presentation/pages/all_budgets_picker_page.dart';
 import 'package:expense_tracker/features/budgets/presentation/pages/budget_details_page.dart';
 import 'package:expense_tracker/features/budgets/presentation/pages/budget_form_page.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
@@ -82,6 +83,16 @@ List<RouteBase> _buildNestedRoutes() {
 
 List<RouteBase> _buildBudgetRoutes() {
   return [
+    // Before 'budgets/:id', which would otherwise match "picker" as an id.
+    GoRoute(
+      path: 'budgets/picker',
+      pageBuilder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>?;
+        final selectedId = extra?['selectedId'] as String?;
+
+        return _dialogPage(state, AllBudgetsPickerPage(selectedId: selectedId));
+      },
+    ),
     GoRoute(
       path: 'budgets/new',
       builder: (_, _) => BlocProvider(

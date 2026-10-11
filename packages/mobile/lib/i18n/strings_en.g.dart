@@ -128,6 +128,7 @@ class Translations$budgets$en {
 	late final Translations$budgets$days$en days = Translations$budgets$days$en.internal(_root);
 	late final Translations$budgets$form$en form = Translations$budgets$form$en.internal(_root);
 	late final Translations$budgets$details$en details = Translations$budgets$details$en.internal(_root);
+	late final Translations$budgets$picker$en picker = Translations$budgets$picker$en.internal(_root);
 }
 
 // Path: categories
@@ -1002,6 +1003,42 @@ class Translations$budgets$details$en {
 
 	/// en: 'Budget details could not be loaded.'
 	String get unableToLoadBody => 'Budget details could not be loaded.';
+}
+
+// Path: budgets.picker
+class Translations$budgets$picker$en {
+	Translations$budgets$picker$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Choose budget'
+	String get title => 'Choose budget';
+
+	/// en: 'Pick the budget this expense counts toward'
+	String get subtitle => 'Pick the budget this expense counts toward';
+
+	/// en: 'Available budgets'
+	String get sectionAvailable => 'Available budgets';
+
+	/// en: 'No budget'
+	String get noBudget => 'No budget';
+
+	/// en: 'Don't link to a budget'
+	String get noBudgetHint => 'Don\'t link to a budget';
+
+	/// en: 'Previous budget (no longer active)'
+	String get previousBudget => 'Previous budget (no longer active)';
+
+	/// en: 'Keep the current link'
+	String get previousBudgetHint => 'Keep the current link';
+
+	/// en: '{period} · {spent} / {limit}'
+	String progress({required Object period, required Object spent, required Object limit}) => '${period} · ${spent} / ${limit}';
+
+	/// en: 'No active budgets'
+	String get empty => 'No active budgets';
 }
 
 // Path: categories.form
@@ -1925,6 +1962,9 @@ class Translations$records$sheet$en {
 	/// en: 'Show all categories'
 	String get showAllCategories => 'Show all categories';
 
+	/// en: 'Show all budgets'
+	String get showAllBudgets => 'Show all budgets';
+
 	/// en: 'Repeat monthly'
 	String get repeatMonthly => 'Repeat monthly';
 
@@ -2709,6 +2749,15 @@ extension on Translations {
 			'budgets.details.transactions' => 'Transactions',
 			'budgets.details.unableToLoad' => 'Couldn\'t load budget',
 			'budgets.details.unableToLoadBody' => 'Budget details could not be loaded.',
+			'budgets.picker.title' => 'Choose budget',
+			'budgets.picker.subtitle' => 'Pick the budget this expense counts toward',
+			'budgets.picker.sectionAvailable' => 'Available budgets',
+			'budgets.picker.noBudget' => 'No budget',
+			'budgets.picker.noBudgetHint' => 'Don\'t link to a budget',
+			'budgets.picker.previousBudget' => 'Previous budget (no longer active)',
+			'budgets.picker.previousBudgetHint' => 'Keep the current link',
+			'budgets.picker.progress' => ({required Object period, required Object spent, required Object limit}) => '${period} · ${spent} / ${limit}',
+			'budgets.picker.empty' => 'No active budgets',
 			'categories.uncategorized' => 'Uncategorized',
 			'categories.defaults.default_in_salary' => 'Salary',
 			'categories.defaults.default_in_freelance' => 'Freelance',
@@ -3054,6 +3103,7 @@ extension on Translations {
 			'records.sheet.noCategories' => 'No categories available',
 			'records.sheet.selectCategory' => 'Select a category',
 			'records.sheet.showAllCategories' => 'Show all categories',
+			'records.sheet.showAllBudgets' => 'Show all budgets',
 			'records.sheet.repeatMonthly' => 'Repeat monthly',
 			'records.sheet.addIncome' => 'Add income',
 			'records.sheet.deleteExpense' => 'Delete expense',
@@ -3129,6 +3179,8 @@ extension on Translations {
 			'settings.budgetAlerts.subtitle' => 'Notify me at 80% and when over budget',
 			'settings.autoImportSubtitle' => 'Turn bank and payment messages into records',
 			'settings.matchingRulesSubtitle' => 'Patterns for messages auto-import can\'t read yet',
+			_ => null,
+		} ?? switch (path) {
 			'settings.recurring.title' => 'Recurring',
 			'settings.recurring.subtitle' => 'Bills and income that repeat every month',
 			'settings.feedbackSubtitle' => 'Report a problem or suggest an idea',
@@ -3139,8 +3191,6 @@ extension on Translations {
 			'settings.deleteDialog.title' => 'Delete account',
 			'settings.deleteDialog.question' => 'Are you sure you want to delete your account?',
 			'settings.deleteDialog.listTitle' => 'This permanently deletes:',
-			_ => null,
-		} ?? switch (path) {
 			'settings.deleteDialog.expenses' => '• All your expenses',
 			'settings.deleteDialog.categories' => '• All your categories',
 			'settings.deleteDialog.budgets' => '• All your budgets',

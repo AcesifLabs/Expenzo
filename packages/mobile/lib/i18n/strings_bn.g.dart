@@ -105,6 +105,7 @@ class _Translations$budgets$bn extends Translations$budgets$en {
 	@override late final _Translations$budgets$days$bn days = _Translations$budgets$days$bn._(_root);
 	@override late final _Translations$budgets$form$bn form = _Translations$budgets$form$bn._(_root);
 	@override late final _Translations$budgets$details$bn details = _Translations$budgets$details$bn._(_root);
+	@override late final _Translations$budgets$picker$bn picker = _Translations$budgets$picker$bn._(_root);
 }
 
 // Path: categories
@@ -655,6 +656,24 @@ class _Translations$budgets$details$bn extends Translations$budgets$details$en {
 	@override String get unableToLoadBody => 'বাজেটের বিস্তারিত লোড করা যায়নি।';
 }
 
+// Path: budgets.picker
+class _Translations$budgets$picker$bn extends Translations$budgets$picker$en {
+	_Translations$budgets$picker$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'বাজেট বেছে নিন';
+	@override String get subtitle => 'এই খরচটি কোন বাজেটে গণ্য হবে তা বেছে নিন';
+	@override String get sectionAvailable => 'উপলব্ধ বাজেট';
+	@override String get noBudget => 'কোনো বাজেট নয়';
+	@override String get noBudgetHint => 'কোনো বাজেটের সাথে যুক্ত করবেন না';
+	@override String get previousBudget => 'আগের বাজেট (আর সক্রিয় নয়)';
+	@override String get previousBudgetHint => 'বর্তমান সংযোগ রাখুন';
+	@override String progress({required Object period, required Object spent, required Object limit}) => '${period} · ${spent} / ${limit}';
+	@override String get empty => 'কোনো সক্রিয় বাজেট নেই';
+}
+
 // Path: categories.form
 class _Translations$categories$form$bn extends Translations$categories$form$en {
 	_Translations$categories$form$bn._(TranslationsBn root) : this._root = root, super.internal(root);
@@ -1188,6 +1207,7 @@ class _Translations$records$sheet$bn extends Translations$records$sheet$en {
 	@override String get noCategories => 'কোনো ক্যাটাগরি নেই';
 	@override String get selectCategory => 'একটি ক্যাটাগরি বেছে নিন';
 	@override String get showAllCategories => 'সব ক্যাটাগরি দেখুন';
+	@override String get showAllBudgets => 'সব বাজেট দেখুন';
 	@override String get repeatMonthly => 'প্রতি মাসে পুনরাবৃত্তি';
 	@override String get addIncome => 'আয় যোগ করুন';
 	@override String get deleteExpense => 'খরচ মুছুন';
@@ -1727,6 +1747,15 @@ extension on TranslationsBn {
 			'budgets.details.transactions' => 'লেনদেন',
 			'budgets.details.unableToLoad' => 'বাজেট লোড করা যায়নি',
 			'budgets.details.unableToLoadBody' => 'বাজেটের বিস্তারিত লোড করা যায়নি।',
+			'budgets.picker.title' => 'বাজেট বেছে নিন',
+			'budgets.picker.subtitle' => 'এই খরচটি কোন বাজেটে গণ্য হবে তা বেছে নিন',
+			'budgets.picker.sectionAvailable' => 'উপলব্ধ বাজেট',
+			'budgets.picker.noBudget' => 'কোনো বাজেট নয়',
+			'budgets.picker.noBudgetHint' => 'কোনো বাজেটের সাথে যুক্ত করবেন না',
+			'budgets.picker.previousBudget' => 'আগের বাজেট (আর সক্রিয় নয়)',
+			'budgets.picker.previousBudgetHint' => 'বর্তমান সংযোগ রাখুন',
+			'budgets.picker.progress' => ({required Object period, required Object spent, required Object limit}) => '${period} · ${spent} / ${limit}',
+			'budgets.picker.empty' => 'কোনো সক্রিয় বাজেট নেই',
 			'categories.uncategorized' => 'ক্যাটাগরি নেই',
 			'categories.defaults.default_in_salary' => 'বেতন',
 			'categories.defaults.default_in_freelance' => 'ফ্রিল্যান্স',
@@ -2072,6 +2101,7 @@ extension on TranslationsBn {
 			'records.sheet.noCategories' => 'কোনো ক্যাটাগরি নেই',
 			'records.sheet.selectCategory' => 'একটি ক্যাটাগরি বেছে নিন',
 			'records.sheet.showAllCategories' => 'সব ক্যাটাগরি দেখুন',
+			'records.sheet.showAllBudgets' => 'সব বাজেট দেখুন',
 			'records.sheet.repeatMonthly' => 'প্রতি মাসে পুনরাবৃত্তি',
 			'records.sheet.addIncome' => 'আয় যোগ করুন',
 			'records.sheet.deleteExpense' => 'খরচ মুছুন',
@@ -2147,6 +2177,8 @@ extension on TranslationsBn {
 			'settings.budgetAlerts.subtitle' => '৮০% এ এবং বাজেট ছাড়ালে আমাকে জানান',
 			'settings.autoImportSubtitle' => 'ব্যাংক ও পেমেন্টের মেসেজ থেকে রেকর্ড তৈরি করুন',
 			'settings.matchingRulesSubtitle' => 'যেসব মেসেজ অটো-ইমপোর্ট এখনো পড়তে পারে না, সেগুলোর প্যাটার্ন',
+			_ => null,
+		} ?? switch (path) {
 			'settings.recurring.title' => 'পুনরাবৃত্ত',
 			'settings.recurring.subtitle' => 'প্রতি মাসে আসা বিল ও আয়',
 			'settings.feedbackSubtitle' => 'সমস্যা জানান বা কোনো আইডিয়া দিন',
@@ -2157,8 +2189,6 @@ extension on TranslationsBn {
 			'settings.deleteDialog.title' => 'অ্যাকাউন্ট মুছুন',
 			'settings.deleteDialog.question' => 'আপনি কি নিশ্চিত যে আপনার অ্যাকাউন্ট মুছে ফেলতে চান?',
 			'settings.deleteDialog.listTitle' => 'এতে স্থায়ীভাবে মুছে যাবে:',
-			_ => null,
-		} ?? switch (path) {
 			'settings.deleteDialog.expenses' => '• আপনার সব খরচ',
 			'settings.deleteDialog.categories' => '• আপনার সব ক্যাটাগরি',
 			'settings.deleteDialog.budgets' => '• আপনার সব বাজেট',

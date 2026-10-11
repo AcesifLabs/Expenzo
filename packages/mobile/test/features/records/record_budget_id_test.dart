@@ -30,6 +30,17 @@ void main() {
     expect(read!.budgetId, 'budget-42');
   });
 
+  test('updateRecord persists a changed budgetId', () async {
+    final record = makeRecord(id: 'r-update-budget', budgetId: null);
+    await datasource.addRecord(record);
+
+    final updated = record.copyWith(budgetId: 'budget-after-edit');
+    await datasource.updateRecord(updated);
+
+    final read = await datasource.getRecordById('r-update-budget');
+    expect(read!.budgetId, 'budget-after-edit');
+  });
+
   test('a record with no budget link reads back as null budgetId', () async {
     final record = makeRecord(id: 'r-no-budget', budgetId: null);
 
