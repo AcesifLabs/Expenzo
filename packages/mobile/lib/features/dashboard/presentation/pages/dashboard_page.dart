@@ -796,23 +796,15 @@ class _DashboardViewState extends State<DashboardView> {
   }
 
   GetBudgetsWithProgress? _tryGetBudgetsWithProgress() {
-    try {
-      return di.getIt<GetBudgetsWithProgress>();
-    } catch (e, s) {
-      debugPrint('Dashboard budgets error: $e\n$s');
+    if (!di.getIt.isRegistered<GetBudgetsWithProgress>()) return null;
 
-      return null;
-    }
+    return di.getIt<GetBudgetsWithProgress>();
   }
 
   GetSpendingTrend? _tryGetSpendingTrend() {
-    try {
-      return di.getIt<GetSpendingTrend>();
-    } catch (e, s) {
-      debugPrint('Dashboard trend error: $e\n$s');
+    if (!di.getIt.isRegistered<GetSpendingTrend>()) return null;
 
-      return null;
-    }
+    return di.getIt<GetSpendingTrend>();
   }
 
   // Theme and everything else live in Settings (docs/adr/0006).

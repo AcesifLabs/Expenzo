@@ -1,7 +1,9 @@
+import 'package:expense_tracker/i18n/plural_resolvers.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  setUpAll(registerPluralResolvers);
   tearDown(() => LocaleSettings.setLocaleSync(AppLocale.en));
 
   test('counts pick the right plural form in English', () {

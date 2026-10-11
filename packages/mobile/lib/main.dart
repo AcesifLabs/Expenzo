@@ -7,12 +7,14 @@ import 'package:intl/intl.dart';
 import 'core/di/injection_container.dart' as di;
 import 'core/lifecycle/bootstrap_service.dart';
 import 'expenzo_app.dart';
+import 'i18n/plural_resolvers.dart';
 import 'i18n/strings.g.dart';
 import 'shared/presentation/widgets/app_critical_error.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Device language until saved settings load (ExpenzoApp._applySettings).
+  registerPluralResolvers();
   final deviceLocale = LocaleSettings.useDeviceLocaleSync();
   await initializeDateFormatting();
   // Dates keep Latin digits in Bangla, like amounts (CurrencyFormatter).

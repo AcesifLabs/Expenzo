@@ -293,7 +293,13 @@ void main() {
       await tester.tap(find.text('1').first);
       await tester.tap(find.text('2').first);
       await tester.enterText(find.byType(TextField).first, 'Internet');
-      await tester.tap(find.text('Select a category'));
+      // The hint text sits under the dropdown's tap target; tap the dropdown.
+      await tester.tap(
+        find.ancestor(
+          of: find.text('Select a category'),
+          matching: find.byWidgetPredicate((w) => w is DropdownButton),
+        ),
+      );
       await tester.pumpAndSettle();
       await tester.tap(find.text('Shopping').last);
       await tester.pumpAndSettle();
@@ -329,8 +335,16 @@ void main() {
       when(
         () => recurring.createRecurring(any()),
       ).thenAnswer((_) async => const Left(CacheFailure(message: 'db locked')));
-      await openSheet(tester);
-      await fillAndSubmit(tester);
+      // The sheet logs the expected failure; keep the test output clean.
+      // Restored in the body: Flutter checks it before tear-downs run.
+      final originalDebugPrint = debugPrint;
+      debugPrint = (_, {wrapWidth}) {};
+      try {
+        await openSheet(tester);
+        await fillAndSubmit(tester);
+      } finally {
+        debugPrint = originalDebugPrint;
+      }
 
       verify(() => addRecord(any())).called(1);
       expect(find.byType(NewTransactionSheet), findsNothing);
