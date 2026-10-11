@@ -33,9 +33,7 @@ void main() async {
 
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
-    if (kReleaseMode) {
-      // TODO: report to crash reporting service
-    }
+    if (kReleaseMode) {}
   };
 
   PlatformDispatcher.instance.onError = (error, stack) {

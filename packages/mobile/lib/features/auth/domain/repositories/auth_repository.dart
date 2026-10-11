@@ -3,7 +3,6 @@ import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/sync/sync_engine.dart';
 import '../entities/user.dart';
 
-/// Repository for managing user authentication.
 abstract class AuthRepository {
   /// Signs in with Google and returns the authenticated [User].
   ///
@@ -25,9 +24,6 @@ abstract class AuthRepository {
   /// Returns [Right(bool)] on success, [Left(AuthFailure)] on failure.
   Future<Either<AuthFailure, bool>> isSignedIn();
 
-  /// Deletes the current user's account.
-  ///
-  /// Returns [Right(unit)] on success, [Left(AuthFailure)] on failure.
   Future<Either<AuthFailure, Unit>> deleteAccount();
 
   /// Checks if the user has granted Gmail OAuth scope.

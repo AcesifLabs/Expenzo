@@ -324,7 +324,6 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
   Future<void> _addExpense() async {
     final saved = await showTransactionSheet(context, budgetId: _budgetId);
     if (!saved || !mounted) return;
-    // Refresh the totals above and the list below.
     _onRetryBudget(_budgetId);
   }
 

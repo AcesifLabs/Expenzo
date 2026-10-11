@@ -6,9 +6,7 @@
 /// Returns empty string for empty or whitespace-only input.
 String buildFtsMatchQuery(String raw) {
   if (raw.isEmpty) return '';
-  // Escape embedded double-quotes by doubling them (FTS5 spec)
   final escaped = raw.replaceAll('"', '""');
-  // Trim whitespace to avoid empty quoted phrases
   final trimmed = escaped.trim();
   if (trimmed.isEmpty) return '';
 

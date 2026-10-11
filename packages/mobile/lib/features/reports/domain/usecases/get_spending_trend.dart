@@ -9,8 +9,6 @@ class GetSpendingTrend {
 
   GetSpendingTrend({required this.repository});
 
-  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
-
   Future<Either<Failure, List<DateAmount>>> call({
     required DateTime startDate,
     required DateTime endDate,

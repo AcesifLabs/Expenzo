@@ -18,7 +18,6 @@ class GetDashboardSummary implements UseCase<DashboardSummary, DateRange> {
     required this.categoryRepository,
   });
 
-  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, DashboardSummary>> call(DateRange dateRange) async {
     try {
@@ -91,7 +90,6 @@ class GetDashboardSummary implements UseCase<DashboardSummary, DateRange> {
   Future<List<CategoryAmount>> _calculateCategoryBreakdown(
     List<Record> records,
   ) async {
-    // Only include expenses in the category breakdown
     final expenseRecords = records
         .where((r) => r.recordType == RecordType.expense)
         .toList();
@@ -112,10 +110,8 @@ class GetDashboardSummary implements UseCase<DashboardSummary, DateRange> {
     return categoryResult.fold((failure) => [], (categories) {
       final breakdown = <CategoryAmount>[];
       for (final entry in categoryMap.entries) {
-        // Skip orphaned categories instead of throwing
         final matching = categories.where((c) => c.id == entry.key);
         if (matching.isEmpty) {
-          // Bucket as "Uncategorized"
           breakdown.add(
             CategoryAmount(
               categoryId: entry.key,

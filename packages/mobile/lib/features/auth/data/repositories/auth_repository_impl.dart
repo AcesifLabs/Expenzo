@@ -50,7 +50,6 @@ class AuthRepositoryImpl implements AuthRepository {
     return t.auth.errors.generic;
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<AuthFailure, User>> signInWithGoogle() async {
     try {
@@ -58,7 +57,6 @@ class AuthRepositoryImpl implements AuthRepository {
 
       return Right(user);
     } on AuthException catch (e) {
-      // AuthException messages are written for the user (see datasource).
       return Left(
         AuthFailure(message: e.message, errorCode: FailureCodes.userMessage),
       );
@@ -72,7 +70,6 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<AuthFailure, Unit>> signOut() async {
     try {
@@ -80,7 +77,6 @@ class AuthRepositoryImpl implements AuthRepository {
 
       return const Right(unit);
     } on AuthException catch (e) {
-      // AuthException messages are written for the user (see datasource).
       return Left(
         AuthFailure(message: e.message, errorCode: FailureCodes.userMessage),
       );
@@ -94,7 +90,6 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<AuthFailure, User?>> getCurrentUser() async {
     try {
@@ -102,7 +97,6 @@ class AuthRepositoryImpl implements AuthRepository {
 
       return Right(user);
     } on AuthException catch (e) {
-      // AuthException messages are written for the user (see datasource).
       return Left(
         AuthFailure(message: e.message, errorCode: FailureCodes.userMessage),
       );
@@ -116,7 +110,6 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<AuthFailure, bool>> isSignedIn() async {
     try {
@@ -133,7 +126,6 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<AuthFailure, Unit>> deleteAccount() async {
     try {
@@ -141,7 +133,6 @@ class AuthRepositoryImpl implements AuthRepository {
 
       return const Right(unit);
     } on AuthException catch (e) {
-      // AuthException messages are written for the user (see datasource).
       return Left(
         AuthFailure(message: e.message, errorCode: FailureCodes.userMessage),
       );
@@ -155,7 +146,6 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<AuthFailure, bool>> hasGmailScope() async {
     try {

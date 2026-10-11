@@ -11,7 +11,6 @@ class ReportsTopBar extends StatelessWidget {
   /// The current range, shown on the date-range button ("Last 30 days").
   final String rangeLabel;
 
-  /// Gets the button's own context, so a menu can open under it.
   final ValueChanged<BuildContext>? onCalendar;
   final bool showBackButton;
 

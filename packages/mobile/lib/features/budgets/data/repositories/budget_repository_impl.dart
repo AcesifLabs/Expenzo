@@ -22,7 +22,6 @@ class BudgetRepositoryImpl implements BudgetRepository {
     SyncQueueDao? syncQueueDao,
   }) : _syncQueueDao = syncQueueDao;
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, List<Budget>>> getBudgets() async {
     try {
@@ -38,7 +37,6 @@ class BudgetRepositoryImpl implements BudgetRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, Budget>> getBudgetById(String id) async {
     try {
@@ -62,11 +60,9 @@ class BudgetRepositoryImpl implements BudgetRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, Budget>> createBudget(Budget budget) async {
     try {
-      // Generate id once if not provided, so datasource and sync use the same id
       final id = budget.id ?? const Uuid().v4();
       final budgetWithId = budget.id != null ? budget : budget.copyWith(id: id);
 
@@ -91,12 +87,10 @@ class BudgetRepositoryImpl implements BudgetRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, Budget>> updateBudget(Budget budget) async {
     try {
       await localDatasource.updateBudget(budget);
-      // Update requires an existing budget with id
       final id = budget.id;
       if (id == null) {
         return Left(CacheFailure(message: 'Cannot update budget without id'));
@@ -121,7 +115,6 @@ class BudgetRepositoryImpl implements BudgetRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, Unit>> deleteBudget(String id) async {
     try {

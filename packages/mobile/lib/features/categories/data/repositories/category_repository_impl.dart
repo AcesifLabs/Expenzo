@@ -20,7 +20,6 @@ class CategoryRepositoryImpl implements CategoryRepository {
     SyncQueueDao? syncQueueDao,
   }) : _syncQueueDao = syncQueueDao;
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, List<Category>>> getCategories({
     RecordType? type,
@@ -42,7 +41,6 @@ class CategoryRepositoryImpl implements CategoryRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, Category>> getCategoryById(String id) async {
     try {
@@ -66,7 +64,6 @@ class CategoryRepositoryImpl implements CategoryRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, Category>> createCategory(
     Category category,
@@ -94,7 +91,6 @@ class CategoryRepositoryImpl implements CategoryRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, Category>> updateCategory(
     Category category,
@@ -122,7 +118,6 @@ class CategoryRepositoryImpl implements CategoryRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, Unit>> incrementUsageCount(String id) async {
     try {
@@ -139,7 +134,6 @@ class CategoryRepositoryImpl implements CategoryRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, Unit>> deleteCategory(String id) async {
     try {
@@ -167,7 +161,6 @@ class CategoryRepositoryImpl implements CategoryRepository {
     );
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, List<Category>>> searchCategories({
     required String query,

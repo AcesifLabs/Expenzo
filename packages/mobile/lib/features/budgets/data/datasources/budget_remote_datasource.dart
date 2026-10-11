@@ -16,7 +16,6 @@ class BudgetRemoteDatasourceImpl implements BudgetRemoteDatasource {
 
   BudgetRemoteDatasourceImpl({required this.apiClient});
 
-  /// Throws: [ServerException] if the API request fails.
   @override
   Future<void> fillMissingNames(List<BudgetNameEntry> names) async {
     try {

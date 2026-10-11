@@ -155,8 +155,6 @@ class GroqDataSource {
       if (content != null && content.isNotEmpty) {
         sink.add(content);
       }
-    } catch (_) {
-      // Skip malformed JSON lines
-    }
+    } catch (_) {}
   }
 }

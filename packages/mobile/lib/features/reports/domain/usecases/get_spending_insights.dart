@@ -8,8 +8,6 @@ class GetSpendingInsights {
 
   GetSpendingInsights({required this.repository});
 
-  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
-
   Future<Either<Failure, SpendingInsights>> call({
     required DateTime startDate,
     required DateTime endDate,

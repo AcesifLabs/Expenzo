@@ -40,7 +40,6 @@ class CheckBudgetAlerts {
     required this.alertLog,
   });
 
-  /// Returns [Right(unit)] even when nothing was sent.
   Future<Either<Failure, Unit>> call() {
     final result = _previous.then((_) => _check());
     // Only the ordering matters here; the result and any error reach the

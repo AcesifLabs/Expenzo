@@ -4,7 +4,6 @@ import 'package:expense_tracker/core/database/daos/recurring_dao.dart';
 import '../../domain/entities/recurring_transaction.dart' as domain;
 
 abstract class RecurringLocalDatasource {
-  /// Throws: [CacheException] if a database error occurs.
   Future<List<domain.RecurringTransaction>> getRecurringList();
   Future<domain.RecurringTransaction?> getRecurringById(String id);
   Future<void> createRecurring(domain.RecurringTransaction recurring);
@@ -13,7 +12,6 @@ abstract class RecurringLocalDatasource {
     List<domain.RecurringTransaction> transactions,
   );
 
-  /// Throws: [CacheException] if a database error occurs.
   Future<void> deleteRecurring(String id);
   Stream<List<domain.RecurringTransaction>> watchRecurringList();
   Future<List<domain.RecurringTransaction>> getDueRecurring();
@@ -24,7 +22,6 @@ class RecurringLocalDatasourceImpl implements RecurringLocalDatasource {
 
   RecurringLocalDatasourceImpl({required this.recurringDao});
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<List<domain.RecurringTransaction>> getRecurringList() async {
     final results = await recurringDao.getAllRecurring();
@@ -32,7 +29,6 @@ class RecurringLocalDatasourceImpl implements RecurringLocalDatasource {
     return results.map(_mapToEntity).toList();
   }
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<domain.RecurringTransaction?> getRecurringById(String id) async {
     final result = await recurringDao.getRecurringById(id);
@@ -40,7 +36,6 @@ class RecurringLocalDatasourceImpl implements RecurringLocalDatasource {
     return result != null ? _mapToEntity(result) : null;
   }
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<void> createRecurring(domain.RecurringTransaction recurring) async {
     final now = DateTime.now().toUtc();
@@ -65,13 +60,11 @@ class RecurringLocalDatasourceImpl implements RecurringLocalDatasource {
     );
   }
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<void> updateRecurring(domain.RecurringTransaction recurring) async {
     await recurringDao.updateRecurring(_toCompanion(recurring));
   }
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<void> updateRecurringBatch(
     List<domain.RecurringTransaction> transactions,
@@ -80,7 +73,6 @@ class RecurringLocalDatasourceImpl implements RecurringLocalDatasource {
     await recurringDao.updateRecurringBatch(companions);
   }
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<void> deleteRecurring(String id) async {
     await recurringDao.deleteRecurring(id);
@@ -93,7 +85,6 @@ class RecurringLocalDatasourceImpl implements RecurringLocalDatasource {
     );
   }
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<List<domain.RecurringTransaction>> getDueRecurring() async {
     final results = await recurringDao.getDueRecurring();

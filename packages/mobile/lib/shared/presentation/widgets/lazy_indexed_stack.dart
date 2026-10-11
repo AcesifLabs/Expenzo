@@ -39,10 +39,8 @@ class _LazyIndexedStackState extends State<LazyIndexedStack> {
   void didUpdateWidget(LazyIndexedStack oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // Resize _activated if children length changed
     if (widget.children.length != oldWidget.children.length) {
       final newActivated = List<bool>.filled(widget.children.length, false);
-      // Preserve activation state for indices that still exist
       for (var i = 0; i < _activated.length && i < newActivated.length; i++) {
         newActivated[i] = _activated[i];
       }

@@ -13,14 +13,12 @@ import '../../domain/entities/user.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
 abstract class AuthRemoteDatasource {
-  /// Throws: [ServerException] if the API request fails.
   Future<User> signInWithGoogle();
   Future<void> signOut();
   Future<User?> getCurrentUser();
   Future<bool> isSignedIn();
   Future<void> deleteAccount();
 
-  /// Throws: [ServerException] if the API request fails.
   Future<bool> hasGmailScope();
 }
 
@@ -35,7 +33,6 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
     required this.userDao,
   });
 
-  /// Throws: [ServerException] if the API request fails.
   @override
   Future<User> signInWithGoogle() async {
     final googleUser = await googleSignIn.signIn();
@@ -64,7 +61,6 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
     return user;
   }
 
-  /// Throws: [ServerException] if the API request fails.
   @override
   Future<void> signOut() async {
     await TokenStorage.clearAll();
@@ -73,7 +69,6 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
     await firebaseAuth.signOut();
   }
 
-  /// Throws: [ServerException] if the API request fails.
   @override
   Future<User?> getCurrentUser() async {
     final firebaseUser = firebaseAuth.currentUser;
@@ -84,7 +79,6 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
     return _mapFirebaseUserToEntity(firebaseUser);
   }
 
-  /// Throws: [ServerException] if the API request fails.
   @override
   Future<bool> isSignedIn() async {
     final currentUser = firebaseAuth.currentUser;
@@ -104,7 +98,6 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
       await user.delete();
     } on fb.FirebaseAuthException catch (e) {
       if (e.code == 'requires-recent-login') {
-        // Re-authenticate via Google credential and retry
         final googleAccount = await googleSignIn.signInSilently();
         if (googleAccount == null) {
           throw ServerException(
@@ -124,13 +117,11 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
       }
     }
 
-    // Cleanup: sign out of Google, clear tokens, clear local user
     await googleSignIn.signOut();
     await TokenStorage.clearAll();
     await userDao.clearUser();
   }
 
-  /// Throws: [ServerException] if the API request fails.
   @override
   Future<bool> hasGmailScope() async {
     try {
@@ -155,7 +146,6 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
     );
   }
 
-  /// Throws: [ServerException] if the API request fails.
   Future<void> _syncUserToLocalDb(fb.User firebaseUser) async {
     try {
       final now = DateTime.now().toUtc();
@@ -176,7 +166,6 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
     }
   }
 
-  /// Throws: [ServerException] if the API request fails.
   Future<void> _obtainJwtToken(fb.User firebaseUser) async {
     final firebaseToken = await firebaseUser.getIdToken(true);
     final apiClient = di.getIt<ApiClient>();

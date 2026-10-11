@@ -10,7 +10,6 @@ class ParsingRulesRepositoryImpl implements ParsingRulesRepository {
 
   ParsingRulesRepositoryImpl({required this.localDatasource});
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, List<ParsingRule>>> getRules({
     SourceType? sourceType,
@@ -30,7 +29,6 @@ class ParsingRulesRepositoryImpl implements ParsingRulesRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, ParsingRule>> getRuleById(String id) async {
     try {
@@ -47,7 +45,6 @@ class ParsingRulesRepositoryImpl implements ParsingRulesRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, ParsingRule>> createRule(ParsingRule rule) async {
     try {
@@ -61,7 +58,6 @@ class ParsingRulesRepositoryImpl implements ParsingRulesRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, ParsingRule>> updateRule(ParsingRule rule) async {
     try {
@@ -75,7 +71,6 @@ class ParsingRulesRepositoryImpl implements ParsingRulesRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, Unit>> deleteRule(String id) async {
     try {

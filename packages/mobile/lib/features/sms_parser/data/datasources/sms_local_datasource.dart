@@ -4,7 +4,6 @@ import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../../domain/entities/sms_message.dart';
 
 abstract class SmsLocalDatasource {
-  /// Throws: [CacheException] if a database error occurs.
   Future<List<SmsMessage>> getAllSms();
   Future<List<SmsMessage>> getSmsFromDateRange(DateTime start, DateTime end);
   Future<List<SmsMessage>> getSmsFromAddress(String address);
@@ -21,7 +20,6 @@ class SmsLocalDatasourceImpl implements SmsLocalDatasource {
   SmsLocalDatasourceImpl({required fsms.SmsQuery smsQuery})
     : _smsQuery = smsQuery;
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<List<SmsMessage>> getAllSms() async {
     try {
@@ -35,7 +33,6 @@ class SmsLocalDatasourceImpl implements SmsLocalDatasource {
     }
   }
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<List<SmsMessage>> getSmsFromDateRange(
     DateTime start,
@@ -44,7 +41,6 @@ class SmsLocalDatasourceImpl implements SmsLocalDatasource {
     try {
       final messages = await _smsQuery.getAllSms;
 
-      // Run filtering in a background isolate to avoid blocking the UI
       return compute(
         _filterByDateRange,
         _DateRangeFilterParams(messages, start, end),
@@ -56,7 +52,6 @@ class SmsLocalDatasourceImpl implements SmsLocalDatasource {
     }
   }
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<List<SmsMessage>> getSmsFromAddress(String address) async {
     try {
@@ -70,7 +65,6 @@ class SmsLocalDatasourceImpl implements SmsLocalDatasource {
     }
   }
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<List<SmsMessage>> getSmsBatched({
     int start = 0,

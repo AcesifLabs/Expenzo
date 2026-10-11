@@ -50,9 +50,7 @@ class ReceiptExtractionParser {
         if (decoded is Map) {
           return Map<String, Object?>.from(decoded);
         }
-      } catch (_) {
-        // Try earlier candidate.
-      }
+      } catch (_) {}
     }
 
     throw FormatException('Receipt extraction response is not JSON: $text');

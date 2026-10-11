@@ -9,7 +9,6 @@ class CreateRule implements UseCase<ParsingRule, ParsingRule> {
 
   CreateRule(this.repository);
 
-  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, ParsingRule>> call(ParsingRule rule) {
     return repository.createRule(rule);

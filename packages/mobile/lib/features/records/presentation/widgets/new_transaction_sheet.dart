@@ -209,7 +209,6 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       });
     }
 
-    // Reload categories to restore bloc state after picker changed it
     if (mounted) {
       _loadCategories();
     }

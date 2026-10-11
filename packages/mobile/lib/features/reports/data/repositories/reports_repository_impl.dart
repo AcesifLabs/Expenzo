@@ -19,7 +19,6 @@ class ReportsRepositoryImpl implements ReportsRepository {
 
   ReportsRepositoryImpl({required this.recordDao, required this.categoryDao});
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, List<DateAmount>>> getSpendingTrend({
     required DateTime startDate,
@@ -52,7 +51,6 @@ class ReportsRepositoryImpl implements ReportsRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, List<CategoryAmount>>> getCategoryBreakdown({
     required DateTime startDate,
@@ -84,14 +82,12 @@ class ReportsRepositoryImpl implements ReportsRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, SpendingInsights>> getSpendingInsights({
     required DateTime startDate,
     required DateTime endDate,
   }) async {
     try {
-      // Normalize end to end-of-day for inclusive queries
       final inclusiveEnd = DateTime(
         endDate.year,
         endDate.month,

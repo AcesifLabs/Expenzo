@@ -10,7 +10,6 @@ class AddRecord extends UseCase<Record, Record> {
 
   AddRecord(this.repository, this.categoryRepository);
 
-  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, Record>> call(Record record) async {
     final result = await repository.addRecord(record);

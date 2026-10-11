@@ -9,8 +9,6 @@ class SearchRecords {
 
   SearchRecords({required this.repository});
 
-  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
-
   Future<Either<Failure, List<SearchResult>>> call(SearchFilters filters) {
     return repository.searchRecords(filters);
   }

@@ -25,7 +25,6 @@ class RecordRepositoryImpl implements RecordRepository {
     SyncQueueDao? syncQueueDao,
   }) : _syncQueueDao = syncQueueDao;
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, List<Record>>> getRecords({
     DateTimeRange? dateRange,
@@ -51,7 +50,6 @@ class RecordRepositoryImpl implements RecordRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<Failure, List<Record>>> getFilteredRecords(
     RecordFilter filter,
@@ -86,7 +84,6 @@ class RecordRepositoryImpl implements RecordRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, Record>> getRecordById(String id) async {
     try {
@@ -110,7 +107,6 @@ class RecordRepositoryImpl implements RecordRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, Record>> addRecord(Record record) async {
     try {
@@ -138,7 +134,6 @@ class RecordRepositoryImpl implements RecordRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, Record>> updateRecord(Record record) async {
     try {
@@ -166,7 +161,6 @@ class RecordRepositoryImpl implements RecordRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, Unit>> deleteRecord(String id) async {
     try {
@@ -188,7 +182,6 @@ class RecordRepositoryImpl implements RecordRepository {
     return localDatasource.watchRecords(limit: limit, offset: offset);
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, bool>> recordExistsBySourceId(
     String sourceId,
@@ -206,7 +199,6 @@ class RecordRepositoryImpl implements RecordRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, Set<String>>> getExistingSourceIds(
     List<String> sourceIds,
@@ -224,7 +216,6 @@ class RecordRepositoryImpl implements RecordRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, List<Record>>> getRecordsByCategoryAndDateRange(
     String categoryId,
@@ -248,7 +239,6 @@ class RecordRepositoryImpl implements RecordRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, double>> getCategorySpending(
     String categoryId,
@@ -272,7 +262,6 @@ class RecordRepositoryImpl implements RecordRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, double>> getTotalSpending(
     DateTime start,
@@ -291,7 +280,6 @@ class RecordRepositoryImpl implements RecordRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, Map<String, double>>> getSpendingForBudgets(
     Map<String, ({DateTime start, DateTime end})> periods,
@@ -309,7 +297,6 @@ class RecordRepositoryImpl implements RecordRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, List<Record>>> getRecordsByDateRangeOnly(
     DateTime start,
@@ -331,7 +318,6 @@ class RecordRepositoryImpl implements RecordRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, Unit>> addRecordsBatch(
     List<Record> records,
@@ -369,7 +355,6 @@ class RecordRepositoryImpl implements RecordRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, int>> getRecordCountByCategory(
     String categoryId,
@@ -387,7 +372,6 @@ class RecordRepositoryImpl implements RecordRepository {
     }
   }
 
-  /// Returns Left(Failure) on error.
   @override
   Future<Either<CacheFailure, Map<String, int>>>
   getCategoryRecordCounts() async {

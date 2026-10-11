@@ -9,14 +9,12 @@ import '../../domain/entities/category.dart';
 import 'package:expense_tracker/core/utils/category_display_name.dart';
 
 abstract class CategoryLocalDatasource {
-  /// Throws: [CacheException] if a database error occurs.
   Future<List<Category>> getCategories({
     RecordType? type,
     bool sortByUsage = false,
   });
   Future<Category?> getCategoryById(String id);
 
-  /// Throws: [CacheException] if a database error occurs.
   Future<Category> createCategory(Category category);
   Future<Category> updateCategory(Category category);
   Future<void> deleteCategory(String id);
@@ -25,11 +23,9 @@ abstract class CategoryLocalDatasource {
     bool sortByUsage = false,
   });
 
-  /// Throws: [CacheException] if a database error occurs.
   Future<void> incrementUsageCount(String id);
 
   /// Searches categories by name.
-  /// Throws: [CacheException] if a database error occurs.
   Future<List<Category>> searchCategories({
     required String query,
     RecordType? type,
@@ -41,7 +37,6 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
 
   CategoryLocalDatasourceImpl({required this.categoryDao});
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<List<Category>> getCategories({
     RecordType? type,
@@ -60,7 +55,6 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
     }
   }
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<Category?> getCategoryById(String id) async {
     try {
@@ -73,7 +67,6 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
     }
   }
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<Category> createCategory(Category category) async {
     try {
@@ -99,7 +92,6 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
     }
   }
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<Category> updateCategory(Category category) async {
     try {
@@ -128,7 +120,6 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
     }
   }
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<void> deleteCategory(String id) async {
     try {
@@ -149,7 +140,6 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
         .map((categories) => categories.map(_mapToEntity).toList());
   }
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<void> incrementUsageCount(String id) async {
     try {
@@ -160,7 +150,6 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
     }
   }
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<List<Category>> searchCategories({
     required String query,

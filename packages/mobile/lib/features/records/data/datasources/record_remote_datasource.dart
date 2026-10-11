@@ -8,7 +8,6 @@ import '../../domain/entities/record.dart' as entity;
 typedef RecordBudgetLink = ({String id, String budgetId});
 
 abstract class RecordRemoteDatasource {
-  /// Throws: [ServerException] if the API request fails.
   Future<RecordRemoteResponse> getRecords(RemoteRecordQuery query);
 
   /// Fills budget links on server records that have none.
@@ -52,7 +51,6 @@ class RecordRemoteDatasourceImpl implements RecordRemoteDatasource {
 
   RecordRemoteDatasourceImpl({required this.apiClient});
 
-  /// Throws: [ServerException] if the API request fails.
   @override
   Future<RecordRemoteResponse> getRecords(RemoteRecordQuery query) async {
     try {
@@ -85,7 +83,6 @@ class RecordRemoteDatasourceImpl implements RecordRemoteDatasource {
     }
   }
 
-  /// Throws: [ServerException] if the API request fails.
   @override
   Future<void> fillMissingBudgetLinks(List<RecordBudgetLink> links) async {
     try {

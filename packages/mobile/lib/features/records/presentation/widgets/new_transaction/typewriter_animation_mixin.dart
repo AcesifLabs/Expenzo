@@ -72,7 +72,6 @@ mixin TypewriterAnimationMixin<T extends StatefulWidget>
         _tickTypewriter,
       );
     } else {
-      // Pause at end of phrase before erasing
       _typewriterTimer = Timer(const Duration(seconds: 2), () {
         if (!_twIsPaused && mounted) {
           _twIsErasing = true;
@@ -93,7 +92,6 @@ mixin TypewriterAnimationMixin<T extends StatefulWidget>
         _tickTypewriter,
       );
     } else {
-      // Move to next phrase after brief pause
       setState(() {
         _twIsErasing = false;
         _twPhraseIndex = (_twPhraseIndex + 1) % _twPhrases.length;

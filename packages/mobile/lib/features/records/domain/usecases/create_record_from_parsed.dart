@@ -11,7 +11,6 @@ class CreateRecordFromParsed extends UseCase<Record?, ParsedTransaction> {
 
   CreateRecordFromParsed(this.repository);
 
-  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, Record?>> call(ParsedTransaction parsed) async {
     final existsResult = await repository.recordExistsBySourceId(

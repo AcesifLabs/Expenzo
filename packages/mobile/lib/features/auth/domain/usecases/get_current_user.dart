@@ -9,7 +9,6 @@ class GetCurrentUser extends UseCase<User?, NoParams> {
 
   GetCurrentUser(this.repository);
 
-  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, User?>> call(NoParams params) {
     return repository.getCurrentUser();

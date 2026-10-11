@@ -10,7 +10,6 @@ class SearchCategories extends UseCase<List<Category>, SearchCategoriesParams> {
 
   SearchCategories(this.repository);
 
-  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, List<Category>>> call(SearchCategoriesParams params) {
     return repository.searchCategories(query: params.query, type: params.type);

@@ -9,7 +9,6 @@ import '../../domain/helpers/fts_query_helper.dart';
 import '../../../records/domain/entities/record.dart';
 
 abstract class SearchLocalDatasource {
-  /// Throws: [CacheException] if a database error occurs.
   Future<List<SearchResult>> searchRecords(SearchFilters filters);
   Future<void> indexRecord(Record record);
   Future<void> removeRecordFromIndex(String recordId);
@@ -21,7 +20,6 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
 
   SearchLocalDatasourceImpl({required this.db});
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<List<SearchResult>> searchRecords(SearchFilters filters) async {
     try {
@@ -60,7 +58,6 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
     }
   }
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<void> indexRecord(Record record) async {
     try {
@@ -74,7 +71,6 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
     }
   }
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<void> removeRecordFromIndex(String recordId) async {
     try {
@@ -87,7 +83,6 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
     }
   }
 
-  /// Throws: [CacheException] if a database error occurs.
   @override
   Future<void> rebuildIndex() async {
     try {

@@ -15,8 +15,6 @@ class GetBudgetsWithProgress {
     required this.recordRepository,
   });
 
-  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
-
   Future<Either<Failure, List<BudgetProgress>>> call({int? limit}) async {
     final budgetsResult = await budgetRepository.getBudgets();
     final budgets = budgetsResult
