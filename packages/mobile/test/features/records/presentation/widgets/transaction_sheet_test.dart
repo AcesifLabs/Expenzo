@@ -13,9 +13,11 @@ import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets.dart';
 import 'package:expense_tracker/features/categories/domain/entities/category.dart';
+import 'package:expense_tracker/features/categories/domain/usecases/get_categories.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_event.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_state.dart';
+import 'package:expense_tracker/features/receipt_scan/presentation/pages/receipt_scan_camera_page.dart';
 import 'package:expense_tracker/features/records/domain/entities/record.dart';
 import 'package:expense_tracker/features/records/domain/usecases/add_record.dart';
 import 'package:expense_tracker/features/records/domain/usecases/delete_record.dart';
@@ -28,6 +30,7 @@ import 'package:expense_tracker/features/recurring/domain/entities/recurring_tra
 import 'package:expense_tracker/features/recurring/domain/repositories/recurring_repository.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 import '../../../../support/pump_localized.dart';
+import '../../../../support/receipt_camera.dart';
 
 class _MockRecordBloc extends Mock implements RecordBloc {}
 
@@ -40,6 +43,8 @@ class _MockUpdateRecord extends Mock implements UpdateRecord {}
 class _MockDeleteRecord extends Mock implements DeleteRecord {}
 
 class _MockGetBudgets extends Mock implements GetBudgets {}
+
+class _MockGetCategories extends Mock implements GetCategories {}
 
 class _FakeRecordEvent extends Fake implements RecordEvent {}
 
@@ -95,6 +100,7 @@ void main() {
     registerFallbackValue(_FakeCategoryEvent());
     registerFallbackValue(smsRecord);
     registerFallbackValue(_FakeRecurring());
+    registerFallbackValue(const GetCategoriesParams());
   });
 
   setUp(() {
@@ -142,7 +148,11 @@ void main() {
     await di.getIt.unregister<DeleteRecord>();
   });
 
-  Future<void> pumpSheet(WidgetTester tester, {Record? record}) async {
+  Future<void> pumpSheet(
+    WidgetTester tester, {
+    Record? record,
+    bool startWithReceiptScan = false,
+  }) async {
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 2.625;
     addTearDown(tester.view.reset);
@@ -154,7 +164,12 @@ void main() {
         ],
         child: translated(
           MaterialApp(
-            home: Scaffold(body: NewTransactionSheet(initialRecord: record)),
+            home: Scaffold(
+              body: NewTransactionSheet(
+                initialRecord: record,
+                startWithReceiptScan: startWithReceiptScan,
+              ),
+            ),
           ),
         ),
       ),
@@ -442,6 +457,99 @@ void main() {
 
       verify(() => addRecord(any())).called(1);
       expect(find.byType(NewTransactionSheet), findsNothing);
+    });
+  });
+
+  group('start with receipt scan', () {
+    setUp(() {
+      final getCategories = _MockGetCategories();
+      when(
+        () => getCategories(any()),
+      ).thenAnswer((_) async => Right([shopping]));
+      di.getIt.registerSingleton<GetCategories>(getCategories);
+      mockCameraPermissionDenied();
+    });
+
+    tearDown(() async {
+      clearCameraPermissionMock();
+      await di.getIt.unregister<GetCategories>();
+    });
+
+    testWidgets('opens the camera page over the sheet', (tester) async {
+      await pumpSheet(tester, startWithReceiptScan: true);
+      await pumpPastTransitions(tester);
+
+      expect(find.byType(ReceiptScanCameraPage), findsOneWidget);
+      expect(find.text(t.receiptScan.permissionRequired), findsOneWidget);
+    });
+
+    testWidgets('does not open the camera without the flag', (tester) async {
+      await pumpSheet(tester);
+      await pumpPastTransitions(tester);
+
+      expect(find.byType(ReceiptScanCameraPage), findsNothing);
+    });
+
+    testWidgets('editing ignores the flag', (tester) async {
+      await pumpSheet(tester, record: smsRecord, startWithReceiptScan: true);
+      await pumpPastTransitions(tester);
+
+      expect(find.byType(ReceiptScanCameraPage), findsNothing);
+    });
+
+    testWidgets('closing the camera leaves an empty add sheet', (tester) async {
+      await pumpSheet(tester, startWithReceiptScan: true);
+      await pumpPastTransitions(tester);
+
+      await tester.tap(find.text(t.common.close));
+      await pumpPastTransitions(tester);
+
+      expect(find.byType(ReceiptScanCameraPage), findsNothing);
+      expect(find.byType(NewTransactionSheet), findsOneWidget);
+      expect(find.text('Add expense'), findsOneWidget);
+    });
+
+    testWidgets('waits for the sheet to finish opening', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.625;
+      addTearDown(tester.view.reset);
+      di.getIt.registerSingleton<RecurringRepository>(
+        _MockRecurringRepository(),
+      );
+      addTearDown(() => di.getIt.unregister<RecurringRepository>());
+      await tester.pumpWidget(
+        MultiBlocProvider(
+          providers: [
+            BlocProvider<RecordBloc>.value(value: recordBloc),
+            BlocProvider<CategoryBloc>.value(value: categoryBloc),
+          ],
+          child: translated(
+            MaterialApp(
+              home: Scaffold(
+                body: Builder(
+                  builder: (context) => TextButton(
+                    onPressed: () => unawaited(
+                      showTransactionSheet(context, startWithReceiptScan: true),
+                    ),
+                    child: const Text('open'),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      expect(find.byType(NewTransactionSheet), findsOneWidget);
+      expect(find.byType(ReceiptScanCameraPage), findsNothing);
+
+      await pumpPastTransitions(tester);
+
+      expect(find.byType(ReceiptScanCameraPage), findsOneWidget);
     });
   });
 }

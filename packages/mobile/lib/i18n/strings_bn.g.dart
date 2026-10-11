@@ -264,6 +264,7 @@ class _Translations$dashboard$bn extends Translations$dashboard$en {
 	@override String budgetSpentOf({required Object total, required Object spent}) => '${total}-এর মধ্যে ${spent}';
 	@override late final _Translations$dashboard$trend$bn trend = _Translations$dashboard$trend$bn._(_root);
 	@override late final _Translations$dashboard$autoImport$bn autoImport = _Translations$dashboard$autoImport$bn._(_root);
+	@override String get scanReceipt => 'রসিদ স্ক্যান করুন';
 }
 
 // Path: enums
@@ -2015,6 +2016,7 @@ extension on TranslationsBn {
 			'dashboard.autoImport.title' => 'SMS থেকে খরচ যোগ করুন',
 			'dashboard.autoImport.body' => 'Expenzo-কে ব্যাংক ও পেমেন্টের মেসেজ পড়ে আপনার হয়ে খরচ যোগ করতে দিন। মেসেজ এই ফোনেই থাকে।',
 			'dashboard.autoImport.setUp' => 'সেট আপ করুন',
+			'dashboard.scanReceipt' => 'রসিদ স্ক্যান করুন',
 			'enums.recordType.income' => 'আয়',
 			'enums.recordType.expense' => 'খরচ',
 			'enums.period.weekly' => 'সাপ্তাহিক',
@@ -2263,9 +2265,9 @@ extension on TranslationsBn {
 			'settings.language.matchDevice' => 'ডিভাইসের মতো',
 			'settings.language.matchDeviceSubtitle' => 'ফোনের ভাষা ব্যবহার করুন',
 			'settings.language.names.en' => 'ইংরেজি',
-			'settings.language.names.bn' => 'বাংলা',
 			_ => null,
 		} ?? switch (path) {
+			'settings.language.names.bn' => 'বাংলা',
 			'settings.title' => 'সেটিংস',
 			'settings.currency' => 'ডিফল্ট মুদ্রা',
 			'settings.appearance' => 'থিম',

@@ -45,5 +45,6 @@
     "title": "Add expenses from SMS",
     "body": "Let Expenzo read bank and payment messages and add them for you. Messages stay on this phone.",
     "setUp": "Set up"
-  }
+  },
+  "scanReceipt": "Scan a receipt"
 }

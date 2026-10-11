@@ -364,6 +364,9 @@ class Translations$dashboard$en {
 
 	late final Translations$dashboard$trend$en trend = Translations$dashboard$trend$en.internal(_root);
 	late final Translations$dashboard$autoImport$en autoImport = Translations$dashboard$autoImport$en.internal(_root);
+
+	/// en: 'Scan a receipt'
+	String get scanReceipt => 'Scan a receipt';
 }
 
 // Path: enums
@@ -3050,6 +3053,7 @@ extension on Translations {
 			'dashboard.autoImport.title' => 'Add expenses from SMS',
 			'dashboard.autoImport.body' => 'Let Expenzo read bank and payment messages and add them for you. Messages stay on this phone.',
 			'dashboard.autoImport.setUp' => 'Set up',
+			'dashboard.scanReceipt' => 'Scan a receipt',
 			'enums.recordType.income' => 'Income',
 			'enums.recordType.expense' => 'Expense',
 			'enums.period.weekly' => 'Weekly',
@@ -3298,9 +3302,9 @@ extension on Translations {
 			'settings.language.matchDevice' => 'Match device',
 			'settings.language.matchDeviceSubtitle' => 'Use your phone\'s language',
 			'settings.language.names.en' => 'English',
-			'settings.language.names.bn' => 'Bengali',
 			_ => null,
 		} ?? switch (path) {
+			'settings.language.names.bn' => 'Bengali',
 			'settings.title' => 'Settings',
 			'settings.currency' => 'Default currency',
 			'settings.appearance' => 'Appearance',
