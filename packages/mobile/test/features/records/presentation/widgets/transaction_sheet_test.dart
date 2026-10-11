@@ -4,6 +4,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
@@ -25,6 +26,7 @@ import 'package:expense_tracker/features/records/presentation/bloc/record_state.
 import 'package:expense_tracker/features/records/presentation/widgets/new_transaction_sheet.dart';
 import 'package:expense_tracker/features/recurring/domain/entities/recurring_transaction.dart';
 import 'package:expense_tracker/features/recurring/domain/repositories/recurring_repository.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 import '../../../../support/pump_localized.dart';
 
 class _MockRecordBloc extends Mock implements RecordBloc {}
@@ -247,6 +249,98 @@ void main() {
     await tester.pump();
 
     verify(() => deleteRecord('rec-1')).called(1);
+  });
+
+  group('show all budgets', () {
+    // The picker itself is covered in all_budgets_picker_page_test.dart; here
+    // a stand-in page pops what the real one would.
+    Future<Object?> pumpSheetWithPicker(
+      WidgetTester tester, {
+      required String? pickerResult,
+    }) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.625;
+      addTearDown(tester.view.reset);
+      Object? pickerExtra;
+      // Saving closes the sheet, so it sits on a route above a blank root.
+      final router = GoRouter(
+        initialLocation: '/sheet',
+        routes: [
+          GoRoute(
+            path: '/',
+            builder: (_, _) => const Scaffold(),
+            routes: [
+              GoRoute(
+                path: 'sheet',
+                builder: (_, _) => Scaffold(
+                  body: NewTransactionSheet(initialRecord: smsRecord),
+                ),
+              ),
+              GoRoute(
+                path: 'budgets/picker',
+                builder: (context, state) {
+                  pickerExtra = state.extra;
+
+                  return Scaffold(
+                    body: TextButton(
+                      onPressed: () => context.pop(pickerResult),
+                      child: const Text('pick'),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+      await tester.pumpWidget(
+        MultiBlocProvider(
+          providers: [
+            BlocProvider<RecordBloc>.value(value: recordBloc),
+            BlocProvider<CategoryBloc>.value(value: categoryBloc),
+          ],
+          child: translated(MaterialApp.router(routerConfig: router)),
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.byTooltip(t.records.sheet.showAllBudgets));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('pick'));
+      await tester.pumpAndSettle();
+
+      return pickerExtra;
+    }
+
+    Future<Record> saveEdit(WidgetTester tester) async {
+      await tester.ensureVisible(find.text('Save'));
+      await tester.tap(find.text('Save'));
+      await tester.pump();
+
+      return verify(() => updateRecord(captureAny())).captured.single as Record;
+    }
+
+    testWidgets('passes the current budget and applies the picked one', (
+      tester,
+    ) async {
+      final extra = await pumpSheetWithPicker(tester, pickerResult: 'budget-2');
+
+      expect(extra, {'selectedId': 'budget-1'});
+      expect((await saveEdit(tester)).budgetId, 'budget-2');
+    });
+
+    testWidgets('picking No budget clears the link', (tester) async {
+      await pumpSheetWithPicker(tester, pickerResult: '');
+
+      expect((await saveEdit(tester)).budgetId, isNull);
+    });
+
+    testWidgets('closing the picker keeps the link', (tester) async {
+      await pumpSheetWithPicker(tester, pickerResult: null);
+
+      expect((await saveEdit(tester)).budgetId, 'budget-1');
+    });
   });
 
   group('repeat monthly', () {

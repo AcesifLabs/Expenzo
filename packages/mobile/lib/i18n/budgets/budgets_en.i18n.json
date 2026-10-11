@@ -57,5 +57,16 @@
     "transactions": "Transactions",
     "unableToLoad": "Couldn't load budget",
     "unableToLoadBody": "Budget details could not be loaded."
+  },
+  "picker": {
+    "title": "Choose budget",
+    "subtitle": "Pick the budget this expense counts toward",
+    "sectionAvailable": "Available budgets",
+    "noBudget": "No budget",
+    "noBudgetHint": "Don't link to a budget",
+    "previousBudget": "Previous budget (no longer active)",
+    "previousBudgetHint": "Keep the current link",
+    "progress": "{period} · {spent} / {limit}",
+    "empty": "No active budgets"
   }
 }
