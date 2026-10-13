@@ -4,6 +4,7 @@ import 'package:expense_tracker/core/constants/digit_grouping.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/core/theme/currency_config.dart';
+import 'package:expense_tracker/core/utils/number_display_format.dart';
 import '../../domain/entities/user_settings.dart';
 
 abstract class SettingsLocalDatasource {
@@ -99,7 +100,9 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
           json['defaultRecurringFrequency'] as String? ?? 'monthly',
       recurringAutoCreate: json['recurringAutoCreate'] as bool? ?? false,
       decimalPlaces: _decimalPlacesFrom(json),
-      digitGrouping: DigitGrouping.fromName(json['digitGrouping'] as String?),
+      digitGrouping:
+          DigitGrouping.fromName(json['digitGrouping'] as String?) ??
+          NumberDisplayFormat.defaultGrouping,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
@@ -117,13 +120,15 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
     return CurrencyConfig.defaultCode;
   }
 
-  // Missing before SAAP-65; anything outside the allowed values reads as 2.
+  // Missing before SAAP-65; anything outside the allowed values reads as the
+  // default.
   int _decimalPlacesFrom(Map<String, dynamic> json) {
     final places = json['decimalPlaces'];
-    if (places is int && UserSettings.allowedDecimalPlaces.contains(places)) {
+    if (places is int &&
+        NumberDisplayFormat.allowedDecimalPlaces.contains(places)) {
       return places;
     }
 
-    return 2;
+    return NumberDisplayFormat.defaultDecimalPlaces;
   }
 }

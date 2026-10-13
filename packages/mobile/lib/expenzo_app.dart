@@ -11,6 +11,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:saropa_drift_advisor/saropa_drift_advisor.dart';
 import 'package:expense_tracker/core/theme/currency_config.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
+import 'package:expense_tracker/core/utils/number_display_format.dart';
 import 'package:expense_tracker/features/settings/domain/entities/user_settings.dart';
 import 'package:expense_tracker/shared/presentation/widgets/currency_scope.dart';
 import 'package:expense_tracker/shared/presentation/widgets/locale_scope.dart';
@@ -173,6 +174,10 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
     _themeModeNotifier.value = _themeModeFromString(settings.theme);
     CurrencyFormatter.current.value = CurrencyConfig.byCode(
       settings.currencyCode,
+    );
+    CurrencyFormatter.displayFormat.value = NumberDisplayFormat(
+      decimalPlaces: settings.decimalPlaces,
+      grouping: settings.digitGrouping,
     );
     _applyLanguage(settings.languageCode);
     unawaited(_applyBackgroundWork(settings));

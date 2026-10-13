@@ -279,6 +279,7 @@ class _Translations$enums$bn extends Translations$enums$en {
 	@override late final _Translations$enums$frequency$bn frequency = _Translations$enums$frequency$bn._(_root);
 	@override late final _Translations$enums$source$bn source = _Translations$enums$source$bn._(_root);
 	@override late final _Translations$enums$theme$bn theme = _Translations$enums$theme$bn._(_root);
+	@override late final _Translations$enums$digitGrouping$bn digitGrouping = _Translations$enums$digitGrouping$bn._(_root);
 }
 
 // Path: messageTemplates
@@ -454,6 +455,7 @@ class _Translations$settings$bn extends Translations$settings$en {
 	@override String get loadFailed => 'আপনার সেটিংস লোড করা যায়নি।';
 	@override late final _Translations$settings$appearanceScreen$bn appearanceScreen = _Translations$settings$appearanceScreen$bn._(_root);
 	@override late final _Translations$settings$currencyScreen$bn currencyScreen = _Translations$settings$currencyScreen$bn._(_root);
+	@override late final _Translations$settings$numberFormat$bn numberFormat = _Translations$settings$numberFormat$bn._(_root);
 	@override late final _Translations$settings$categories$bn categories = _Translations$settings$categories$bn._(_root);
 }
 
@@ -948,6 +950,18 @@ class _Translations$enums$theme$bn extends Translations$enums$theme$en {
 	@override String get dark => 'ডার্ক';
 }
 
+// Path: enums.digitGrouping
+class _Translations$enums$digitGrouping$bn extends Translations$enums$digitGrouping$en {
+	_Translations$enums$digitGrouping$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get comma => 'কমা দিয়ে আলাদা';
+	@override String get dot => 'ডট দিয়ে আলাদা';
+	@override String get space => 'ফাঁকা জায়গা দিয়ে আলাদা';
+}
+
 // Path: messageTemplates.errors
 class _Translations$messageTemplates$errors$bn extends Translations$messageTemplates$errors$en {
 	_Translations$messageTemplates$errors$bn._(TranslationsBn root) : this._root = root, super.internal(root);
@@ -1263,6 +1277,7 @@ class _Translations$records$sheet$bn extends Translations$records$sheet$en {
 	@override String get repeatFailed => 'সংরক্ষণ হয়েছে, কিন্তু পুনরাবৃত্তি চালু করা যায়নি। সেটিংস → পুনরাবৃত্ত থেকে সেট আপ করুন।';
 	@override String get typeToggle => 'লেনদেনের ধরন';
 	@override String get backspace => 'মুছুন';
+	@override String get decimalKey => 'দশমিক';
 }
 
 // Path: recurring.sections
@@ -1478,6 +1493,18 @@ class _Translations$settings$currencyScreen$bn extends Translations$settings$cur
 	// Translations
 	@override String get searchHint => 'মুদ্রা খুঁজুন';
 	@override String noResults({required Object query}) => '"${query}"-এর সাথে মেলে এমন কোনো মুদ্রা নেই';
+}
+
+// Path: settings.numberFormat
+class _Translations$settings$numberFormat$bn extends Translations$settings$numberFormat$en {
+	_Translations$settings$numberFormat$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'সংখ্যার ফরম্যাট';
+	@override late final _Translations$settings$numberFormat$sections$bn sections = _Translations$settings$numberFormat$sections$bn._(_root);
+	@override late final _Translations$settings$numberFormat$places$bn places = _Translations$settings$numberFormat$places$bn._(_root);
 }
 
 // Path: settings.categories
@@ -1869,6 +1896,29 @@ class _Translations$settings$appearanceScreen$sections$bn extends Translations$s
 	@override String get preview => 'প্রিভিউ';
 }
 
+// Path: settings.numberFormat.sections
+class _Translations$settings$numberFormat$sections$bn extends Translations$settings$numberFormat$sections$en {
+	_Translations$settings$numberFormat$sections$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get preview => 'প্রিভিউ';
+	@override String get decimalPlaces => 'দশমিকের পরের ঘর';
+	@override String get grouping => 'অঙ্কের গুচ্ছ';
+}
+
+// Path: settings.numberFormat.places
+class _Translations$settings$numberFormat$places$bn extends Translations$settings$numberFormat$places$en {
+	_Translations$settings$numberFormat$places$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String count({required Object n}) => '${n} ঘর';
+	@override String noMinorUnits({required Object currency}) => '${currency}-এ দশমিকের ঘর নেই';
+}
+
 /// The flat map containing all translations for locale <bn>.
 /// Only for edge cases! For simple maps, use the map function of this library.
 ///
@@ -2159,6 +2209,9 @@ extension on TranslationsBn {
 			'enums.theme.system' => 'ডিভাইসের মতো',
 			'enums.theme.light' => 'লাইট',
 			'enums.theme.dark' => 'ডার্ক',
+			'enums.digitGrouping.comma' => 'কমা দিয়ে আলাদা',
+			'enums.digitGrouping.dot' => 'ডট দিয়ে আলাদা',
+			'enums.digitGrouping.space' => 'ফাঁকা জায়গা দিয়ে আলাদা',
 			'messageTemplates.errors.deleteFailed' => 'SMS ফরম্যাট মোছা যায়নি। আবার চেষ্টা করুন।',
 			'messageTemplates.errors.restoreFailed' => 'SMS ফরম্যাট ফেরানো যায়নি। আবার চেষ্টা করুন।',
 			'messageTemplates.alreadyExists' => 'SMS ফরম্যাটটি আগে থেকেই আছে',
@@ -2338,6 +2391,7 @@ extension on TranslationsBn {
 			'records.sheet.repeatFailed' => 'সংরক্ষণ হয়েছে, কিন্তু পুনরাবৃত্তি চালু করা যায়নি। সেটিংস → পুনরাবৃত্ত থেকে সেট আপ করুন।',
 			'records.sheet.typeToggle' => 'লেনদেনের ধরন',
 			'records.sheet.backspace' => 'মুছুন',
+			'records.sheet.decimalKey' => 'দশমিক',
 			'recurring.title' => 'পুনরাবৃত্ত লেনদেন',
 			'recurring.saved' => 'পুনরাবৃত্ত লেনদেন সংরক্ষণ হয়েছে',
 			'recurring.posted' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n, one: '${n}টি লেনদেন যোগ হয়েছে', other: '${n}টি লেনদেন যোগ হয়েছে', ), 
@@ -2385,12 +2439,12 @@ extension on TranslationsBn {
 			'reports.insights.recurring.description' => 'আসন্ন খরচের জন্য আপনার পুনরাবৃত্ত লেনদেনগুলো দেখুন।',
 			'reports.insights.budgets.title' => 'বাজেটের অবস্থা',
 			'reports.insights.budgets.description' => 'এই মাসে ঠিক পথে থাকতে আপনার বাজেটগুলো দেখুন।',
+			_ => null,
+		} ?? switch (path) {
 			'reports.title' => 'রিপোর্ট',
 			'reports.askAi' => 'AI-কে জিজ্ঞেস করুন',
 			'reports.last7Days' => 'গত ৭ দিন',
 			'reports.last30Days' => 'গত ৩০ দিন',
-			_ => null,
-		} ?? switch (path) {
 			'reports.noCategoryData' => 'ক্যাটাগরির কোনো ডেটা নেই',
 			'reports.noTrendData' => 'এখনো প্রবণতার ডেটা নেই',
 			'reports.noSpending' => 'এখনো খরচের ডেটা নেই',
@@ -2464,6 +2518,12 @@ extension on TranslationsBn {
 			'settings.appearanceScreen.darkBody' => 'শান্ত, মনোযোগী অভিজ্ঞতার জন্য গাঢ় চারকোল পটভূমি আর ল্যাভেন্ডার রং।',
 			'settings.currencyScreen.searchHint' => 'মুদ্রা খুঁজুন',
 			'settings.currencyScreen.noResults' => ({required Object query}) => '"${query}"-এর সাথে মেলে এমন কোনো মুদ্রা নেই',
+			'settings.numberFormat.title' => 'সংখ্যার ফরম্যাট',
+			'settings.numberFormat.sections.preview' => 'প্রিভিউ',
+			'settings.numberFormat.sections.decimalPlaces' => 'দশমিকের পরের ঘর',
+			'settings.numberFormat.sections.grouping' => 'অঙ্কের গুচ্ছ',
+			'settings.numberFormat.places.count' => ({required Object n}) => '${n} ঘর',
+			'settings.numberFormat.places.noMinorUnits' => ({required Object currency}) => '${currency}-এ দশমিকের ঘর নেই',
 			'settings.categories.rowSubtitle' => 'ক্যাটাগরি যোগ, সম্পাদনা ও মুছে ফেলুন',
 			'shell.tabs.home' => 'হোম',
 			'shell.tabs.activity' => 'লেনদেন',

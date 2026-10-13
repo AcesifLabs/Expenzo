@@ -4,6 +4,7 @@ import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/theme/app_typography.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
+import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'keypad_button.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
@@ -82,6 +83,19 @@ class _NumericKeypadState extends State<NumericKeypad> {
     );
   }
 
+  /// Shows the user's decimal mark (',' with dot grouping) but always sends
+  /// '.', so the typed amount stays parseable.
+  KeypadButton _buildDecimalButton(TextStyle style, Color btnColor) {
+    return KeypadButton(
+      color: btnColor,
+      height: 48,
+      radius: AppSpacing.radiusControl,
+      semanticLabel: t.records.sheet.decimalKey,
+      onTap: () => widget.onDigit('.'),
+      child: Text(CurrencyFormatter.decimalSeparator, style: style),
+    );
+  }
+
   KeypadButton _buildBackspaceButton(Color btnColor, Color txtColor) {
     return KeypadButton(
       color: btnColor,
@@ -138,7 +152,7 @@ class _NumericKeypadState extends State<NumericKeypad> {
           ]),
           const SizedBox(height: AppSpacing.xs),
           _buildKeypadRow([
-            _buildDigitButton('.', style, btnColor),
+            _buildDecimalButton(style, btnColor),
             _buildDigitButton('0', style, btnColor),
             _buildBackspaceButton(backspaceColor, txtColor),
           ]),

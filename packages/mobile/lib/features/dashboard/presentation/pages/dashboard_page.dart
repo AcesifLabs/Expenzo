@@ -9,6 +9,7 @@ import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
+import 'package:expense_tracker/core/utils/money_format.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_event.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_state.dart';
@@ -949,7 +950,7 @@ class _DashboardViewState extends State<DashboardView> {
 
 class _BudgetPreviewTile extends StatelessWidget {
   final DashboardBudgetPreview preview;
-  final NumberFormat currencyFmt;
+  final MoneyFormat currencyFmt;
   final VoidCallback onTap;
 
   const _BudgetPreviewTile({
@@ -1017,7 +1018,7 @@ class _RecentTile extends StatelessWidget {
   static DateFormat get _dayFormat => DateFormat('MMM d');
 
   final Record record;
-  final NumberFormat fmt;
+  final MoneyFormat fmt;
   final String? categoryName;
   final cat.Category? category;
   final VoidCallback? onTap;

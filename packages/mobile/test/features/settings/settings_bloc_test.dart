@@ -288,6 +288,23 @@ void main() {
       },
     );
 
+    test(
+      'UpdateNumberFormat ignores decimal places outside the choices',
+      () async {
+        when(
+          () => mockGetSettings(any()),
+        ).thenAnswer((_) async => Right(testSettings));
+        bloc.add(const LoadSettings());
+        await bloc.stream.firstWhere((s) => s is SettingsLoaded);
+
+        bloc.add(const UpdateNumberFormat(decimalPlaces: 3));
+        await pumpEventQueue();
+
+        verifyNever(() => mockUpdateSettings(any()));
+        expect(bloc.latestSettings, testSettings);
+      },
+    );
+
     test('UpdateNumberFormat changes only the given field', () async {
       final saved = await savedAfter(
         const UpdateNumberFormat(digitGrouping: DigitGrouping.dot),

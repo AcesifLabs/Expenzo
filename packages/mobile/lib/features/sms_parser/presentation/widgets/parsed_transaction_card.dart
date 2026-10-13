@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
+import 'package:expense_tracker/core/utils/money_format.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_badge.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
@@ -20,7 +20,7 @@ class ParsedTransactionCard extends StatelessWidget {
     required this.onSelectionChanged,
   });
 
-  Widget _buildAmountRow(ThemeData theme, NumberFormat currencyFormat) {
+  Widget _buildAmountRow(ThemeData theme, MoneyFormat currencyFormat) {
     final amount = transaction.amount;
     final hasAmount = amount != null;
     final colors = theme.colorScheme;
@@ -74,7 +74,7 @@ class ParsedTransactionCard extends StatelessWidget {
     );
   }
 
-  Widget _buildCardContent(ThemeData theme, NumberFormat currencyFormat) {
+  Widget _buildCardContent(ThemeData theme, MoneyFormat currencyFormat) {
     final body = transaction.rawMessage;
 
     return Row(

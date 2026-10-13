@@ -1,3 +1,5 @@
+import 'package:expense_tracker/i18n/strings.g.dart';
+
 /// How amounts mark thousands and decimals (Settings > Number format).
 ///
 /// Only these three exist; apostrophe and "no separator" were cut
@@ -11,7 +13,7 @@ enum DigitGrouping {
   String get groupSeparator => switch (this) {
     DigitGrouping.comma => ',',
     DigitGrouping.dot => '.',
-    DigitGrouping.space => ' ',
+    DigitGrouping.space => '\u00A0',
   };
 
   String get decimalSeparator => switch (this) {
@@ -19,12 +21,22 @@ enum DigitGrouping {
     DigitGrouping.comma || DigitGrouping.space => '.',
   };
 
-  /// The value stored under [name], or [comma] for a missing or unknown one.
-  static DigitGrouping fromName(String? name) {
+  String get displayName {
+    final labels = t.enums.digitGrouping;
+
+    return switch (this) {
+      DigitGrouping.comma => labels.comma,
+      DigitGrouping.dot => labels.dot,
+      DigitGrouping.space => labels.space,
+    };
+  }
+
+  /// The value stored under [name], or null for a missing or unknown one.
+  static DigitGrouping? fromName(String? name) {
     for (final grouping in values) {
       if (grouping.name == name) return grouping;
     }
 
-    return comma;
+    return null;
   }
 }

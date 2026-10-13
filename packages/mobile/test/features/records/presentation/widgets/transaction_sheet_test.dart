@@ -6,7 +6,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
+import 'package:expense_tracker/core/utils/number_display_format.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:expense_tracker/core/constants/digit_grouping.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
@@ -264,6 +266,70 @@ void main() {
     await tester.pump();
 
     verify(() => deleteRecord('rec-1')).called(1);
+  });
+
+  group('number format', () {
+    void useFormat({
+      int decimalPlaces = 2,
+      DigitGrouping grouping = DigitGrouping.comma,
+    }) {
+      CurrencyFormatter.displayFormat.value = NumberDisplayFormat(
+        decimalPlaces: decimalPlaces,
+        grouping: grouping,
+      );
+    }
+
+    tearDown(
+      () =>
+          CurrencyFormatter.displayFormat.value = NumberDisplayFormat.standard,
+    );
+
+    Future<Record> saveEdit(WidgetTester tester) async {
+      await tester.ensureVisible(find.text('Save'));
+      await tester.tap(find.text('Save'));
+      await tester.pump();
+
+      return verify(() => updateRecord(captureAny())).captured.single as Record;
+    }
+
+    testWidgets('dot grouping shows a comma key and saves 1.5', (tester) async {
+      useFormat(grouping: DigitGrouping.dot);
+      await pumpSheet(tester);
+      final symbol = CurrencyFormatter.current.value.symbol;
+
+      expect(find.text('.'), findsNothing);
+      for (final key in ['1', ',', '5']) {
+        await tester.tap(find.text(key).first);
+      }
+      await tester.pump();
+
+      expect(find.text('-${symbol}1,5'), findsOneWidget);
+    });
+
+    testWidgets('edit prefill parses under dot grouping', (tester) async {
+      useFormat(grouping: DigitGrouping.dot);
+      await pumpSheet(tester, record: smsRecord);
+      final symbol = CurrencyFormatter.current.value.symbol;
+
+      await tester.tap(find.text(','));
+      await tester.tap(find.text('5').first);
+      await tester.pump();
+      expect(find.text('-${symbol}450,5'), findsOneWidget);
+
+      expect((await saveEdit(tester)).amount.abs(), 450.5);
+    });
+
+    testWidgets('zero decimal places still saves cents', (tester) async {
+      useFormat(decimalPlaces: 0);
+      await pumpSheet(tester, record: smsRecord);
+
+      for (final key in ['.', '2', '5']) {
+        await tester.tap(find.text(key).first);
+      }
+      await tester.pump();
+
+      expect((await saveEdit(tester)).amount.abs(), 450.25);
+    });
   });
 
   group('show all budgets', () {

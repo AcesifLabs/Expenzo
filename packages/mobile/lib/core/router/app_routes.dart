@@ -26,6 +26,7 @@ import 'package:expense_tracker/features/settings/presentation/pages/appearance_
 import 'package:expense_tracker/features/settings/presentation/pages/currency_page.dart';
 import 'package:expense_tracker/features/settings/presentation/pages/language_page.dart';
 import 'package:expense_tracker/features/settings/presentation/pages/notification_settings_page.dart';
+import 'package:expense_tracker/features/settings/presentation/pages/number_format_page.dart';
 import 'package:expense_tracker/features/settings/presentation/bloc/settings_bloc.dart';
 import 'package:expense_tracker/features/settings/presentation/pages/settings_page.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
@@ -62,6 +63,10 @@ List<RouteBase> _buildNestedRoutes() {
         GoRoute(path: 'appearance', builder: (_, _) => const AppearancePage()),
         GoRoute(path: 'currency', builder: (_, _) => const CurrencyPage()),
         GoRoute(path: 'language', builder: (_, _) => const LanguagePage()),
+        GoRoute(
+          path: 'number-format',
+          builder: (_, _) => const NumberFormatPage(),
+        ),
         GoRoute(
           path: 'notifications',
           builder: (_, _) => const NotificationSettingsPage(),

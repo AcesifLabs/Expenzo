@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:expense_tracker/features/auth/domain/entities/user.dart';
@@ -146,10 +147,36 @@ void main() {
     expect(find.text('currency-page'), findsOneWidget);
   });
 
+  testWidgets('number format sits right after Default currency with a live '
+      'sample', (tester) async {
+    await pumpSettings(tester);
+
+    double top(String text) => tester.getTopLeft(find.text(text)).dy;
+    final symbol = CurrencyFormatter.current.value.symbol;
+
+    expect(find.text('${symbol}1,234.56'), findsOneWidget);
+    expect(top('Number format'), greaterThan(top('Default currency')));
+    expect(top('Number format'), lessThan(top('Appearance')));
+  });
+
+  testWidgets('the number format row opens /settings/number-format', (
+    tester,
+  ) async {
+    await pumpSettingsRouter(tester, child: 'number-format');
+
+    await tester.tap(find.text('Number format'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('number-format-page'), findsOneWidget);
+  });
+
   testWidgets('the language row opens /settings/language', (tester) async {
     await pumpSettingsRouter(tester, child: 'language');
 
     await tester.scrollUntilVisible(find.text(t.settings.language.title), 200);
+    // Fully on screen: scrollUntilVisible stops once the row's edge shows.
+    await tester.ensureVisible(find.text(t.settings.language.title));
+    await tester.pumpAndSettle();
     await tester.tap(find.text(t.settings.language.title));
     await tester.pumpAndSettle();
 
@@ -191,6 +218,9 @@ void main() {
     await pumpSettingsRouter(tester, child: 'categories');
 
     await tester.scrollUntilVisible(find.text('Category settings'), 200);
+    // Fully on screen: scrollUntilVisible stops once the row's edge shows.
+    await tester.ensureVisible(find.text('Category settings'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Category settings'));
     await tester.pumpAndSettle();
 

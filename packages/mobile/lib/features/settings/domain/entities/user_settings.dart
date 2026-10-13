@@ -1,11 +1,10 @@
 import 'package:equatable/equatable.dart';
 import 'package:expense_tracker/core/constants/digit_grouping.dart';
+import 'package:expense_tracker/core/utils/number_display_format.dart';
 
 import 'notification_toggle.dart';
 
 class UserSettings extends Equatable {
-  static const allowedDecimalPlaces = [0, 2];
-
   final int? id;
 
   /// ISO 4217 code, see `CurrencyConfig`.
@@ -33,8 +32,9 @@ class UserSettings extends Equatable {
   /// When true, due recurring items become Records on app open/resume.
   final bool recurringAutoCreate;
 
-  /// Decimals shown in amounts, one of [allowedDecimalPlaces]. Display only:
-  /// stored amounts keep cents (SAAP-65 Q5).
+  /// Decimals shown in amounts, one of
+  /// [NumberDisplayFormat.allowedDecimalPlaces]. Display only: stored amounts
+  /// keep cents (SAAP-65).
   final int decimalPlaces;
   final DigitGrouping digitGrouping;
   final DateTime createdAt;
@@ -75,8 +75,8 @@ class UserSettings extends Equatable {
     this.autoImportPromptDismissed = false,
     this.defaultRecurringFrequency = 'monthly',
     this.recurringAutoCreate = false,
-    this.decimalPlaces = 2,
-    this.digitGrouping = DigitGrouping.comma,
+    this.decimalPlaces = NumberDisplayFormat.defaultDecimalPlaces,
+    this.digitGrouping = NumberDisplayFormat.defaultGrouping,
     required this.createdAt,
     required this.updatedAt,
   });

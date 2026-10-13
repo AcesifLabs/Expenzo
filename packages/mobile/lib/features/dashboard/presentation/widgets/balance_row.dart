@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:expense_tracker/core/utils/money_format.dart';
 import 'package:expense_tracker/core/theme/app_typography.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 
@@ -8,7 +8,7 @@ class BalanceRow extends StatelessWidget {
   final String label;
   final double amount;
   final Color color;
-  final NumberFormat currencyFmt;
+  final MoneyFormat currencyFmt;
 
   const BalanceRow({
     super.key,

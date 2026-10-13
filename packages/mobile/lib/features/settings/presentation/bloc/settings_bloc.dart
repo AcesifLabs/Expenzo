@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:expense_tracker/core/bloc/transformers.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
+import 'package:expense_tracker/core/utils/number_display_format.dart';
 import 'package:expense_tracker/features/auth/domain/usecases/delete_account.dart';
 import '../../domain/entities/user_settings.dart';
 import '../../domain/usecases/get_settings.dart';
@@ -154,11 +155,14 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     UpdateNumberFormat event,
     Emitter<SettingsState> emit,
   ) {
+    final places = event.decimalPlaces;
+    if (places != null &&
+        !NumberDisplayFormat.allowedDecimalPlaces.contains(places)) {
+      return;
+    }
     _updateFromLast(
-      (s) => s.copyWith(
-        decimalPlaces: event.decimalPlaces,
-        digitGrouping: event.digitGrouping,
-      ),
+      (s) =>
+          s.copyWith(decimalPlaces: places, digitGrouping: event.digitGrouping),
     );
   }
 

@@ -381,6 +381,7 @@ class Translations$enums$en {
 	late final Translations$enums$frequency$en frequency = Translations$enums$frequency$en.internal(_root);
 	late final Translations$enums$source$en source = Translations$enums$source$en.internal(_root);
 	late final Translations$enums$theme$en theme = Translations$enums$theme$en.internal(_root);
+	late final Translations$enums$digitGrouping$en digitGrouping = Translations$enums$digitGrouping$en.internal(_root);
 }
 
 // Path: messageTemplates
@@ -672,6 +673,7 @@ class Translations$settings$en {
 
 	late final Translations$settings$appearanceScreen$en appearanceScreen = Translations$settings$appearanceScreen$en.internal(_root);
 	late final Translations$settings$currencyScreen$en currencyScreen = Translations$settings$currencyScreen$en.internal(_root);
+	late final Translations$settings$numberFormat$en numberFormat = Translations$settings$numberFormat$en.internal(_root);
 	late final Translations$settings$categories$en categories = Translations$settings$categories$en.internal(_root);
 }
 
@@ -1491,6 +1493,24 @@ class Translations$enums$theme$en {
 	String get dark => 'Dark';
 }
 
+// Path: enums.digitGrouping
+class Translations$enums$digitGrouping$en {
+	Translations$enums$digitGrouping$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Comma separator'
+	String get comma => 'Comma separator';
+
+	/// en: 'Dot separator'
+	String get dot => 'Dot separator';
+
+	/// en: 'Space separator'
+	String get space => 'Space separator';
+}
+
 // Path: messageTemplates.errors
 class Translations$messageTemplates$errors$en {
 	Translations$messageTemplates$errors$en.internal(this._root);
@@ -2072,6 +2092,9 @@ class Translations$records$sheet$en {
 
 	/// en: 'Backspace'
 	String get backspace => 'Backspace';
+
+	/// en: 'Decimal point'
+	String get decimalKey => 'Decimal point';
 }
 
 // Path: recurring.sections
@@ -2420,6 +2443,21 @@ class Translations$settings$currencyScreen$en {
 
 	/// en: 'No currency matches "{query}"'
 	String noResults({required Object query}) => 'No currency matches "${query}"';
+}
+
+// Path: settings.numberFormat
+class Translations$settings$numberFormat$en {
+	Translations$settings$numberFormat$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Number format'
+	String get title => 'Number format';
+
+	late final Translations$settings$numberFormat$sections$en sections = Translations$settings$numberFormat$sections$en.internal(_root);
+	late final Translations$settings$numberFormat$places$en places = Translations$settings$numberFormat$places$en.internal(_root);
 }
 
 // Path: settings.categories
@@ -2969,6 +3007,39 @@ class Translations$settings$appearanceScreen$sections$en {
 	String get preview => 'Preview';
 }
 
+// Path: settings.numberFormat.sections
+class Translations$settings$numberFormat$sections$en {
+	Translations$settings$numberFormat$sections$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Preview'
+	String get preview => 'Preview';
+
+	/// en: 'Decimal places'
+	String get decimalPlaces => 'Decimal places';
+
+	/// en: 'Digit grouping'
+	String get grouping => 'Digit grouping';
+}
+
+// Path: settings.numberFormat.places
+class Translations$settings$numberFormat$places$en {
+	Translations$settings$numberFormat$places$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: '{n} places'
+	String count({required Object n}) => '${n} places';
+
+	/// en: '{currency} has no decimal places'
+	String noMinorUnits({required Object currency}) => '${currency} has no decimal places';
+}
+
 /// The flat map containing all translations for locale <en>.
 /// Only for edge cases! For simple maps, use the map function of this library.
 ///
@@ -3259,6 +3330,9 @@ extension on Translations {
 			'enums.theme.system' => 'Match device',
 			'enums.theme.light' => 'Light',
 			'enums.theme.dark' => 'Dark',
+			'enums.digitGrouping.comma' => 'Comma separator',
+			'enums.digitGrouping.dot' => 'Dot separator',
+			'enums.digitGrouping.space' => 'Space separator',
 			'messageTemplates.errors.deleteFailed' => 'Couldn\'t delete the SMS format. Try again.',
 			'messageTemplates.errors.restoreFailed' => 'Couldn\'t restore the SMS format. Try again.',
 			'messageTemplates.alreadyExists' => 'SMS format already exists',
@@ -3438,6 +3512,7 @@ extension on Translations {
 			'records.sheet.repeatFailed' => 'Saved, but it couldn\'t be set to repeat. Set it up in Settings → Recurring.',
 			'records.sheet.typeToggle' => 'Transaction type',
 			'records.sheet.backspace' => 'Backspace',
+			'records.sheet.decimalKey' => 'Decimal point',
 			'recurring.title' => 'Recurring transactions',
 			'recurring.saved' => 'Recurring transaction saved',
 			'recurring.posted' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} transaction added', other: '${n} transactions added', ), 
@@ -3485,12 +3560,12 @@ extension on Translations {
 			'reports.insights.recurring.description' => 'Check your recurring transactions for upcoming charges.',
 			'reports.insights.budgets.title' => 'Budget status',
 			'reports.insights.budgets.description' => 'Review your budgets to stay on track this month.',
+			_ => null,
+		} ?? switch (path) {
 			'reports.title' => 'Reports',
 			'reports.askAi' => 'Ask AI',
 			'reports.last7Days' => 'Last 7 days',
 			'reports.last30Days' => 'Last 30 days',
-			_ => null,
-		} ?? switch (path) {
 			'reports.noCategoryData' => 'No category data',
 			'reports.noTrendData' => 'No trend data yet',
 			'reports.noSpending' => 'No spending data yet',
@@ -3564,6 +3639,12 @@ extension on Translations {
 			'settings.appearanceScreen.darkBody' => 'A deep charcoal background with lavender accents for a calm, focused look.',
 			'settings.currencyScreen.searchHint' => 'Search currencies',
 			'settings.currencyScreen.noResults' => ({required Object query}) => 'No currency matches "${query}"',
+			'settings.numberFormat.title' => 'Number format',
+			'settings.numberFormat.sections.preview' => 'Preview',
+			'settings.numberFormat.sections.decimalPlaces' => 'Decimal places',
+			'settings.numberFormat.sections.grouping' => 'Digit grouping',
+			'settings.numberFormat.places.count' => ({required Object n}) => '${n} places',
+			'settings.numberFormat.places.noMinorUnits' => ({required Object currency}) => '${currency} has no decimal places',
 			'settings.categories.rowSubtitle' => 'Add, edit and remove categories',
 			'shell.tabs.home' => 'Home',
 			'shell.tabs.activity' => 'Activity',

@@ -98,6 +98,18 @@
     "searchHint": "Search currencies",
     "noResults": "No currency matches \"{query}\""
   },
+  "numberFormat": {
+    "title": "Number format",
+    "sections": {
+      "preview": "Preview",
+      "decimalPlaces": "Decimal places",
+      "grouping": "Digit grouping"
+    },
+    "places": {
+      "count": "{n} places",
+      "noMinorUnits": "{currency} has no decimal places"
+    }
+  },
   "categories": {
     "rowSubtitle": "Add, edit and remove categories"
   }

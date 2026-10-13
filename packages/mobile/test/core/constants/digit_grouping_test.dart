@@ -25,12 +25,18 @@ void main() {
       expect(DigitGrouping.fromName('space'), DigitGrouping.space);
     });
 
-    test('falls back to comma for an unknown name', () {
-      expect(DigitGrouping.fromName('apostrophe'), DigitGrouping.comma);
+    test('returns null for an unknown name', () {
+      expect(DigitGrouping.fromName('apostrophe'), isNull);
     });
 
-    test('falls back to comma for null', () {
-      expect(DigitGrouping.fromName(null), DigitGrouping.comma);
+    test('returns null for null', () {
+      expect(DigitGrouping.fromName(null), isNull);
     });
+  });
+
+  test('displayName reads the translated label', () {
+    expect(DigitGrouping.comma.displayName, 'Comma separator');
+    expect(DigitGrouping.dot.displayName, 'Dot separator');
+    expect(DigitGrouping.space.displayName, 'Space separator');
   });
 }

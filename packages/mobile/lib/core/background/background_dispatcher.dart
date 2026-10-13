@@ -7,6 +7,7 @@ import 'package:expense_tracker/core/error/usecase.dart';
 import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/core/theme/currency_config.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
+import 'package:expense_tracker/core/utils/number_display_format.dart';
 import 'package:expense_tracker/features/settings/domain/entities/user_settings.dart';
 import 'package:expense_tracker/features/settings/domain/usecases/get_settings.dart';
 import 'package:expense_tracker/i18n/plural_resolvers.dart';
@@ -21,8 +22,8 @@ void backgroundTaskDispatcher() {
   Workmanager().executeTask(_runInBackground);
 }
 
-/// Matches the app's language and currency so text and amounts read the
-/// same as in the app. SAAP-65 and SAAP-67 add their own values here.
+/// Matches the app's language, currency and number format so text and
+/// amounts read the same as in the app. SAAP-67 adds its own values here.
 void applyBackgroundSettings(UserSettings settings) {
   final languageCode = settings.languageCode;
   final locale = languageCode == 'system'
@@ -31,6 +32,10 @@ void applyBackgroundSettings(UserSettings settings) {
   Intl.defaultLocale = locale.languageTag;
   CurrencyFormatter.current.value = CurrencyConfig.byCode(
     settings.currencyCode,
+  );
+  CurrencyFormatter.displayFormat.value = NumberDisplayFormat(
+    decimalPlaces: settings.decimalPlaces,
+    grouping: settings.digitGrouping,
   );
 }
 
