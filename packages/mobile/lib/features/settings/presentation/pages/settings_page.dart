@@ -8,6 +8,7 @@ import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/database/app_database.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/core/theme/currency_config.dart';
+import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_event.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_state.dart';
@@ -28,6 +29,7 @@ import 'debug_db_inspector_page.dart';
 import 'appearance_page.dart';
 import 'delete_account_dialog.dart';
 import 'language_page.dart';
+import 'number_format_page.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -52,7 +54,7 @@ class SettingsPage extends StatelessWidget {
 /// | Section (builder) | Rows now | Rows later tickets add, in final order |
 /// |---|---|---|
 /// | Profile & account (`_accountSection`) | Sign in (signed out) / Delete account (signed in) | SAAP-72 profile card above the section, then My profile (Delete account moves into it); SAAP-75 Family group right after My profile |
-/// | Preferences (`_preferencesSection`) | Default currency, Appearance | Default currency, Number format (SAAP-65), Font size (SAAP-66), Appearance, Calendar (SAAP-67) |
+/// | Preferences (`_preferencesSection`) | Default currency, Number format, Appearance | Default currency, Number format, Font size (SAAP-66), Appearance, Calendar (SAAP-67) |
 /// | Notifications (`_notificationsSection`) | Notifications | none |
 /// | Data & budget (`_dataSection`) | Recurring transactions | Recurring transactions, Sync (SAAP-71), Export data (SAAP-69), Delete all data (SAAP-70) |
 /// | Automation (`_automationSection`) | Auto-import from SMS, Matching rules | none |
@@ -82,6 +84,10 @@ class SettingsView extends StatelessWidget {
 
   void _openCurrency(BuildContext context) {
     context.push('/settings/currency');
+  }
+
+  void _openNumberFormat(BuildContext context) {
+    context.push('/settings/number-format');
   }
 
   void _openNotifications(BuildContext context) {
@@ -165,6 +171,13 @@ class SettingsView extends StatelessWidget {
           title: settingsT.currency,
           subtitle: '${currency.displayName} (${currency.symbol.trim()})',
           onTap: () => _openCurrency(context),
+        ),
+        SettingsTile(
+          icon: PiconsRegular.hash,
+          title: settingsT.numberFormat.title,
+          // A live sample shows the current format at a glance.
+          subtitle: CurrencyFormatter.format(NumberFormatView.previewAmount),
+          onTap: () => _openNumberFormat(context),
         ),
         SettingsTile(
           icon: PiconsRegular.sun,

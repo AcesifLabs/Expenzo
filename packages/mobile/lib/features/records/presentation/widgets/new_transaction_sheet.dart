@@ -254,6 +254,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
 
   void _appendDigit(String d) {
     final current = _amountText.value;
+    // Decimal places is display-only (SAAP-65); stored amounts keep cents.
     final digits = CurrencyFormatter.current.value.decimalDigits;
     if (d == '.' && (digits == 0 || current.contains('.'))) return;
 
@@ -494,17 +495,6 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
         : sheetT.nameHintIncome;
   }
 
-  String _formatAmount(double amount) {
-    if (amount == amount.roundToDouble()) {
-      return amount.round().toString();
-    }
-
-    return amount
-        .toStringAsFixed(2)
-        .replaceFirst(RegExp(r'0+$'), '')
-        .replaceFirst(RegExp(r'\.$'), '');
-  }
-
   Future<List<Category>> _loadExpenseCategoriesForScan() async {
     final result = await di.getIt<GetCategories>()(
       const GetCategoriesParams(type: RecordType.expense, sortByUsage: true),
@@ -575,7 +565,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       _type = RecordType.expense;
       _labelError = false;
       _categoryError = false;
-      _amountText.value = _formatAmount(extraction.amount);
+      _amountText.value = CurrencyFormatter.formatInput(extraction.amount);
       _noteCtrl.text = extraction.description;
       if (extractedDate != null) {
         _selectedDate = extractedDate;
@@ -611,6 +601,8 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
         final isEmpty = val.isEmpty;
         final sign = _type == RecordType.expense ? '-' : '+';
         final symbol = CurrencyFormatter.current.value.symbol;
+        // The stored text keeps '.'; only the shown mark follows the setting.
+        final shown = val.replaceAll('.', CurrencyFormatter.decimalSeparator);
 
         return Padding(
           padding: const EdgeInsets.fromLTRB(
@@ -620,7 +612,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
             AppSpacing.xs,
           ),
           child: Text(
-            isEmpty ? '${symbol}0' : '$sign$symbol$val',
+            isEmpty ? '${symbol}0' : '$sign$symbol$shown',
             style: AppTypography.headlineLarge.copyWith(
               color: isEmpty
                   ? Theme.of(context).colorScheme.onSurface.withAlpha(90)

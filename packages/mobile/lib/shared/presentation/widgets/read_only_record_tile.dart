@@ -5,6 +5,7 @@ import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/features/records/domain/entities/record.dart';
 import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
+import 'package:expense_tracker/core/utils/money_format.dart';
 import 'package:expense_tracker/core/theme/app_typography.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 
@@ -15,7 +16,7 @@ import 'package:expense_tracker/core/theme/app_spacing.dart';
 /// dashboard recent-activity sections and other read-only contexts.
 class ReadOnlyRecordTile extends StatelessWidget {
   final Record record;
-  final NumberFormat? amountFormat;
+  final MoneyFormat? amountFormat;
   final EdgeInsetsGeometry padding;
   final double avatarRadius;
   final double iconSize;

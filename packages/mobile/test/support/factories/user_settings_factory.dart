@@ -1,3 +1,4 @@
+import 'package:expense_tracker/core/constants/digit_grouping.dart';
 import 'package:expense_tracker/features/settings/domain/entities/user_settings.dart';
 
 /// Creates a [UserSettings] for tests. All params optional with deterministic defaults.
@@ -14,6 +15,8 @@ UserSettings makeUserSettings({
   String? languageCode,
   String? defaultRecurringFrequency,
   bool? recurringAutoCreate,
+  int? decimalPlaces,
+  DigitGrouping? digitGrouping,
   DateTime? createdAt,
   DateTime? updatedAt,
 }) {
@@ -30,6 +33,8 @@ UserSettings makeUserSettings({
     languageCode: languageCode ?? 'system',
     defaultRecurringFrequency: defaultRecurringFrequency ?? 'monthly',
     recurringAutoCreate: recurringAutoCreate ?? false,
+    decimalPlaces: decimalPlaces ?? 2,
+    digitGrouping: digitGrouping ?? DigitGrouping.comma,
     createdAt: createdAt ?? DateTime(2024, 1, 1),
     updatedAt: updatedAt ?? DateTime(2024, 1, 1),
   );

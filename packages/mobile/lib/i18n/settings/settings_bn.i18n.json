@@ -99,6 +99,18 @@
     "searchHint": "মুদ্রা খুঁজুন",
     "noResults": "\"{query}\"-এর সাথে মেলে এমন কোনো মুদ্রা নেই"
   },
+  "numberFormat": {
+    "title": "সংখ্যার ফরম্যাট",
+    "sections": {
+      "preview": "প্রিভিউ",
+      "decimalPlaces": "দশমিকের পরের ঘর",
+      "grouping": "অঙ্কের গুচ্ছ"
+    },
+    "places": {
+      "count": "{n} ঘর",
+      "noMinorUnits": "{currency}-এ দশমিকের ঘর নেই"
+    }
+  },
   "categories": {
     "rowSubtitle": "ক্যাটাগরি যোগ, সম্পাদনা ও মুছে ফেলুন"
   }

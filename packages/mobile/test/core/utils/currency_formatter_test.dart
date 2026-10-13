@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:expense_tracker/core/constants/digit_grouping.dart';
 import 'package:expense_tracker/core/theme/currency_config.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
+import 'package:expense_tracker/core/utils/number_display_format.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 import 'package:intl/intl.dart';
 
@@ -9,8 +11,21 @@ void main() {
     CurrencyFormatter.current.value = CurrencyConfig.byCode(code);
   }
 
+  void useFormat({
+    int decimalPlaces = 2,
+    DigitGrouping grouping = DigitGrouping.comma,
+  }) {
+    CurrencyFormatter.displayFormat.value = NumberDisplayFormat(
+      decimalPlaces: decimalPlaces,
+      grouping: grouping,
+    );
+  }
+
   setUp(() => useCurrency(CurrencyConfig.defaultCode));
-  tearDown(() => useCurrency(CurrencyConfig.defaultCode));
+  tearDown(() {
+    useCurrency(CurrencyConfig.defaultCode);
+    CurrencyFormatter.displayFormat.value = NumberDisplayFormat.standard;
+  });
 
   group('format', () {
     test('defaults to taka with two decimals and grouping', () {
@@ -118,5 +133,69 @@ void main() {
       CurrencyFormatter.semanticsLabel(122.5, isExpense: true),
       'Expense, 122.50 Bangladeshi taka',
     );
+  });
+
+  group('number format setting', () {
+    test('zero decimal places rounds for display', () {
+      useFormat(decimalPlaces: 0);
+      expect(CurrencyFormatter.format(1234.56), '৳1,235');
+      expect(CurrencyFormatter.format(1234.56, decimalDigits: 2), '৳1,235');
+    });
+
+    test('dot grouping swaps group and decimal marks', () {
+      useFormat(grouping: DigitGrouping.dot);
+      expect(CurrencyFormatter.format(1234567.89), '৳1.234.567,89');
+      expect(CurrencyFormatter.format(-1234.56), '-৳1.234,56');
+    });
+
+    test('space grouping uses a no-break space', () {
+      useFormat(grouping: DigitGrouping.space);
+      expect(CurrencyFormatter.format(1234567.89), '৳1\u00A0234\u00A0567.89');
+    });
+
+    test('formatSigned and formatCompact follow the setting', () {
+      useFormat(grouping: DigitGrouping.dot);
+      expect(CurrencyFormatter.formatSigned(1234.5), '+৳1.234,50');
+      expect(CurrencyFormatter.formatSigned(-1234.5), '-৳1.234,50');
+
+      useCurrency('USD');
+      expect(CurrencyFormatter.formatCompact(1500), '\$1,5K');
+      expect(CurrencyFormatter.formatCompact(-1500), '-\$1,5K');
+    });
+
+    test('formatInput ignores the setting', () {
+      for (final grouping in DigitGrouping.values) {
+        useFormat(decimalPlaces: 0, grouping: grouping);
+        expect(CurrencyFormatter.formatInput(1234.5), '1234.5');
+      }
+    });
+
+    test('JPY with 2 places still shows none', () {
+      useCurrency('JPY');
+      useFormat(grouping: DigitGrouping.dot);
+      expect(CurrencyFormatter.format(1500.75), '¥1.501');
+    });
+
+    test('zero decimal places rounds the screen-reader phrase too', () {
+      useFormat(decimalPlaces: 0);
+      expect(
+        CurrencyFormatter.semanticsLabel(1234.56, isExpense: true),
+        'Expense, 1,235 Bangladeshi taka',
+      );
+    });
+
+    test('an amount that rounds to zero shows no minus', () {
+      useFormat(decimalPlaces: 0);
+      expect(CurrencyFormatter.format(-0.4), '৳0');
+      expect(CurrencyFormatter.formatSigned(-0.3), '+৳0');
+    });
+
+    test('the screen-reader phrase keeps English marks', () {
+      useFormat(grouping: DigitGrouping.dot);
+      expect(
+        CurrencyFormatter.semanticsLabel(1234.5, isExpense: true),
+        'Expense, 1,234.50 Bangladeshi taka',
+      );
+    });
   });
 }

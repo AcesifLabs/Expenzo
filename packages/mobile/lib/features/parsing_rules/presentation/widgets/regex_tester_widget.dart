@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
+import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/core/utils/regex_utils.dart';
 import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/core/theme/app_typography.dart';
@@ -302,7 +303,12 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
 
     return Row(
       children: [
-        _buildFieldResult(testerT.amount, result.amount?.toString()),
+        // Full precision, not the display format: rule authors need to see
+        // whether the pattern captured the cents.
+        _buildFieldResult(testerT.amount, switch (result.amount) {
+          final amount? => CurrencyFormatter.formatInput(amount),
+          _ => null,
+        }),
         const SizedBox(width: AppSpacing.md),
         _buildFieldResult(testerT.date, result.date?.toString()),
         const Spacer(),

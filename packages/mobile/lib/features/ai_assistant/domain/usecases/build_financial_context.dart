@@ -10,6 +10,8 @@ import 'package:expense_tracker/features/reports/domain/usecases/get_category_br
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
+// Amounts are raw numbers for the model, not user-facing, so they skip
+// CurrencyFormatter and the Number format setting (SAAP-65).
 class BuildFinancialContext {
   final GetDashboardSummary getDashboardSummary;
   final GetSpendingInsights getSpendingInsights;

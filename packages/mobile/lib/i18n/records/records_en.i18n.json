@@ -71,6 +71,7 @@
     "cannotUndo": "This can't be undone.",
     "repeatFailed": "Saved, but it couldn't be set to repeat. Set it up in Settings → Recurring.",
     "typeToggle": "Transaction type",
-    "backspace": "Backspace"
+    "backspace": "Backspace",
+    "decimalKey": "Decimal point"
   }
 }

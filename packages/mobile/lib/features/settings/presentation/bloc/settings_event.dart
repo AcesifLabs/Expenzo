@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:expense_tracker/core/constants/digit_grouping.dart';
 import '../../domain/entities/notification_toggle.dart';
 import '../../domain/entities/user_settings.dart';
 
@@ -97,6 +98,17 @@ class UpdateRecurringAutoCreate extends SettingsEvent {
   List<Object?> get props => [enabled];
 
   const UpdateRecurringAutoCreate(this.enabled);
+}
+
+/// Changes only the fields that are given.
+class UpdateNumberFormat extends SettingsEvent {
+  final int? decimalPlaces;
+  final DigitGrouping? digitGrouping;
+
+  @override
+  List<Object?> get props => [decimalPlaces, digitGrouping];
+
+  const UpdateNumberFormat({this.decimalPlaces, this.digitGrouping});
 }
 
 class DeleteAccountEvent extends SettingsEvent {

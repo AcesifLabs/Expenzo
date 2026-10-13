@@ -1,4 +1,6 @@
 import 'package:equatable/equatable.dart';
+import 'package:expense_tracker/core/constants/digit_grouping.dart';
+import 'package:expense_tracker/core/utils/number_display_format.dart';
 
 import 'notification_toggle.dart';
 
@@ -29,6 +31,12 @@ class UserSettings extends Equatable {
 
   /// When true, due recurring items become Records on app open/resume.
   final bool recurringAutoCreate;
+
+  /// Decimals shown in amounts, one of
+  /// [NumberDisplayFormat.allowedDecimalPlaces]. Display only: stored amounts
+  /// keep cents (SAAP-65).
+  final int decimalPlaces;
+  final DigitGrouping digitGrouping;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -47,6 +55,8 @@ class UserSettings extends Equatable {
     autoImportPromptDismissed,
     defaultRecurringFrequency,
     recurringAutoCreate,
+    decimalPlaces,
+    digitGrouping,
     createdAt,
     updatedAt,
   ];
@@ -65,6 +75,8 @@ class UserSettings extends Equatable {
     this.autoImportPromptDismissed = false,
     this.defaultRecurringFrequency = 'monthly',
     this.recurringAutoCreate = false,
+    this.decimalPlaces = NumberDisplayFormat.defaultDecimalPlaces,
+    this.digitGrouping = NumberDisplayFormat.defaultGrouping,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -83,6 +95,8 @@ class UserSettings extends Equatable {
     bool? autoImportPromptDismissed,
     String? defaultRecurringFrequency,
     bool? recurringAutoCreate,
+    int? decimalPlaces,
+    DigitGrouping? digitGrouping,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -105,6 +119,8 @@ class UserSettings extends Equatable {
       defaultRecurringFrequency:
           defaultRecurringFrequency ?? this.defaultRecurringFrequency,
       recurringAutoCreate: recurringAutoCreate ?? this.recurringAutoCreate,
+      decimalPlaces: decimalPlaces ?? this.decimalPlaces,
+      digitGrouping: digitGrouping ?? this.digitGrouping,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
