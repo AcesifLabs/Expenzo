@@ -9,6 +9,8 @@ import 'package:expense_tracker/core/constants/app_font_size.dart';
 import 'package:expense_tracker/core/constants/first_day_of_week.dart';
 import 'package:expense_tracker/core/database/app_database.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
+import 'package:expense_tracker/core/router/app_root_tab.dart';
+import 'package:expense_tracker/core/router/settings_route.dart';
 import 'package:expense_tracker/core/theme/currency_config.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_bloc.dart';
@@ -30,6 +32,7 @@ import '../widgets/settings_tile.dart';
 import 'debug_db_inspector_page.dart';
 import 'appearance_page.dart';
 import 'delete_account_dialog.dart';
+import 'home_page_settings_page.dart';
 import 'language_page.dart';
 import 'number_format_page.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
@@ -60,7 +63,7 @@ class SettingsPage extends StatelessWidget {
 /// | Notifications (`_notificationsSection`) | Notifications | none |
 /// | Data & budget (`_dataSection`) | Recurring transactions | Recurring transactions, Sync (SAAP-71), Export data (SAAP-69), Delete all data (SAAP-70) |
 /// | Automation (`_automationSection`) | Auto-import from SMS, Matching rules | none |
-/// | General (`_generalSection`) | Language | Language, Home page (SAAP-68), Category settings (SAAP-61) |
+/// | General (`_generalSection`) | Language, Home page, Category settings | none |
 /// | Support (`_supportSection`) | Send feedback | SAAP-73 adds Help & Support and removes Send feedback |
 /// | none (`_signOutRow`) | Sign out (signed in only), always last | none |
 /// | Developer (`kDebugMode` only) | Database inspector | none |
@@ -85,35 +88,39 @@ class SettingsView extends StatelessWidget {
   }
 
   void _openCurrency(BuildContext context) {
-    context.push('/settings/currency');
+    context.push(SettingsRoute.currency.location);
   }
 
   void _openNumberFormat(BuildContext context) {
-    context.push('/settings/number-format');
+    context.push(SettingsRoute.numberFormat.location);
   }
 
   void _openFontSize(BuildContext context) {
-    context.push('/settings/font-size');
+    context.push(SettingsRoute.fontSize.location);
   }
 
   void _openCalendar(BuildContext context) {
-    context.push('/settings/calendar');
+    context.push(SettingsRoute.calendar.location);
   }
 
   void _openNotifications(BuildContext context) {
-    context.push('/settings/notifications');
+    context.push(SettingsRoute.notifications.location);
   }
 
   void _openAppearance(BuildContext context) {
-    context.push('/settings/appearance');
+    context.push(SettingsRoute.appearance.location);
   }
 
   void _openLanguage(BuildContext context) {
-    context.push('/settings/language');
+    context.push(SettingsRoute.language.location);
+  }
+
+  void _openHomePage(BuildContext context) {
+    context.push(SettingsRoute.homePage.location);
   }
 
   void _openCategories(BuildContext context) {
-    context.push('/settings/categories');
+    context.push(SettingsRoute.categories.location);
   }
 
   void _handleDeleteAccountTap(BuildContext context) {
@@ -242,7 +249,7 @@ class SettingsView extends StatelessWidget {
           icon: PiconsRegular.repeat,
           title: recurringT.title,
           subtitle: recurringT.subtitle,
-          onTap: () => context.push('/settings/recurring'),
+          onTap: () => context.push(SettingsRoute.recurring.location),
         ),
       ],
     );
@@ -259,13 +266,13 @@ class SettingsView extends StatelessWidget {
           icon: PiconsRegular.chatText,
           title: commonT.autoImport,
           subtitle: settingsT.autoImportSubtitle,
-          onTap: () => context.push('/settings/auto-import'),
+          onTap: () => context.push(SettingsRoute.autoImport.location),
         ),
         SettingsTile(
           icon: PiconsRegular.funnel,
           title: commonT.matchingRules,
           subtitle: settingsT.matchingRulesSubtitle,
-          onTap: () => context.push('/settings/matching-rules'),
+          onTap: () => context.push(SettingsRoute.matchingRules.location),
         ),
       ],
     );
@@ -283,6 +290,14 @@ class SettingsView extends StatelessWidget {
           title: settingsT.language.title,
           subtitle: LanguageView.labelFor(languageCode),
           onTap: () => _openLanguage(context),
+        ),
+        SettingsTile(
+          icon: AppRootTab.home.icon,
+          title: settingsT.homePage.title,
+          subtitle: HomePageSettingsView.optionFor(
+            settings?.homeTab ?? AppRootTab.home,
+          ).title,
+          onTap: () => _openHomePage(context),
         ),
         SettingsTile(
           icon: PiconsRegular.tag,

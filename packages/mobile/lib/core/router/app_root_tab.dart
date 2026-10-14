@@ -1,3 +1,6 @@
+import 'package:flutter/widgets.dart';
+import 'package:picons/picons.dart';
+
 /// Root screens hosted as tabs inside the app shell at `/`.
 ///
 /// The selected tab lives in the `tab` query parameter so any screen can
@@ -12,6 +15,23 @@ enum AppRootTab {
 
   String get location => this == home ? '/' : '/?$queryKey=$name';
 
-  static AppRootTab fromUri(Uri uri) =>
-      values.asNameMap()[uri.queryParameters[queryKey]] ?? home;
+  /// The nav bar icon, also shown on the Home page settings screen.
+  IconData get icon => switch (this) {
+    home => PiconsRegular.house,
+    activity => PiconsRegular.listDashes,
+    budgets => PiconsRegular.wallet,
+    reports => PiconsRegular.chartBar,
+  };
+
+  IconData get selectedIcon => switch (this) {
+    home => PiconsFill.house,
+    activity => PiconsFill.listDashes,
+    budgets => PiconsFill.wallet,
+    reports => PiconsFill.chartBar,
+  };
+
+  /// The tab named [name], or home for a missing or unknown name.
+  static AppRootTab fromName(String? name) => values.asNameMap()[name] ?? home;
+
+  static AppRootTab fromUri(Uri uri) => fromName(uri.queryParameters[queryKey]);
 }

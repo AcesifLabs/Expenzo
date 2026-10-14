@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:expense_tracker/core/constants/app_font_size.dart';
 import 'package:expense_tracker/core/constants/digit_grouping.dart';
 import 'package:expense_tracker/core/constants/first_day_of_week.dart';
+import 'package:expense_tracker/core/router/app_root_tab.dart';
 import 'package:expense_tracker/features/settings/data/datasources/settings_local_datasource.dart';
 
 Map<String, Object?> _storedSettings({String? currencySymbol, String? code}) {
@@ -247,6 +248,31 @@ void main() {
     for (final day in FirstDayOfWeek.values) {
       await datasource.updateSettings(settings.copyWith(firstDayOfWeek: day));
       expect((await datasource.getSettings()).firstDayOfWeek, day);
+    }
+  });
+
+  test('settings saved before the home tab existed open on home', () async {
+    final datasource = await datasourceWith(_storedSettings(code: 'BDT'));
+
+    expect((await datasource.getSettings()).homeTab, AppRootTab.home);
+  });
+
+  test('an unknown stored home tab opens on home', () async {
+    final datasource = await datasourceWith({
+      ..._storedSettings(code: 'BDT'),
+      'homeTab': 'scan',
+    });
+
+    expect((await datasource.getSettings()).homeTab, AppRootTab.home);
+  });
+
+  test('each home tab is saved and read back', () async {
+    final datasource = await datasourceWith(_storedSettings(code: 'BDT'));
+    final settings = await datasource.getSettings();
+
+    for (final tab in AppRootTab.values) {
+      await datasource.updateSettings(settings.copyWith(homeTab: tab));
+      expect((await datasource.getSettings()).homeTab, tab);
     }
   });
 }

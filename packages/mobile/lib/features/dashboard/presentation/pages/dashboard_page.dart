@@ -34,6 +34,7 @@ import 'package:expense_tracker/shared/presentation/widgets/shimmer_box.dart';
 import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/shared/presentation/widgets/category_tile.dart';
 import 'package:expense_tracker/core/router/app_root_tab.dart';
+import 'package:expense_tracker/core/router/settings_route.dart';
 import 'package:expense_tracker/features/dashboard/presentation/widgets/auto_import_prompt_card.dart';
 import 'package:expense_tracker/features/records/presentation/widgets/new_transaction_sheet.dart';
 import 'package:expense_tracker/core/theme/app_typography.dart';
@@ -873,7 +874,7 @@ class _DashboardViewState extends State<DashboardView> {
   void _handleMenuAction(BuildContext context, String value) {
     switch (value) {
       case 'settings':
-        context.push('/settings');
+        context.push(SettingsRoute.rootLocation);
       case 'sign_in':
         context.push('/login');
       case 'sign_out':

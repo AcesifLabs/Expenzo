@@ -1,6 +1,7 @@
 import 'package:expense_tracker/core/constants/app_font_size.dart';
 import 'package:expense_tracker/core/constants/digit_grouping.dart';
 import 'package:expense_tracker/core/constants/first_day_of_week.dart';
+import 'package:expense_tracker/core/router/app_root_tab.dart';
 import 'package:expense_tracker/features/settings/domain/entities/user_settings.dart';
 
 /// Creates a [UserSettings] for tests. All params optional with deterministic defaults.
@@ -21,6 +22,7 @@ UserSettings makeUserSettings({
   DigitGrouping? digitGrouping,
   AppFontSize? fontSize,
   FirstDayOfWeek? firstDayOfWeek,
+  AppRootTab? homeTab,
   DateTime? createdAt,
   DateTime? updatedAt,
 }) {
@@ -41,6 +43,7 @@ UserSettings makeUserSettings({
     digitGrouping: digitGrouping ?? DigitGrouping.comma,
     fontSize: fontSize ?? AppFontSize.medium,
     firstDayOfWeek: firstDayOfWeek,
+    homeTab: homeTab ?? AppRootTab.home,
     createdAt: createdAt ?? DateTime(2024, 1, 1),
     updatedAt: updatedAt ?? DateTime(2024, 1, 1),
   );

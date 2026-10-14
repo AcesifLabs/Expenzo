@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/router/app_root_tab.dart';
 
 void main() {
@@ -38,6 +39,33 @@ void main() {
       AppRootTab.activity,
       AppRootTab.budgets,
       AppRootTab.reports,
+    ]);
+  });
+
+  test('fromName maps every tab name to its tab', () {
+    for (final tab in AppRootTab.values) {
+      expect(AppRootTab.fromName(tab.name), tab);
+    }
+  });
+
+  test('fromName falls back to home for missing or unknown names', () {
+    for (final name in [null, '', 'scan', 'HOME']) {
+      expect(AppRootTab.fromName(name), AppRootTab.home);
+    }
+  });
+
+  test('each tab has the nav bar icons', () {
+    expect(AppRootTab.values.map((tab) => tab.icon), [
+      PiconsRegular.house,
+      PiconsRegular.listDashes,
+      PiconsRegular.wallet,
+      PiconsRegular.chartBar,
+    ]);
+    expect(AppRootTab.values.map((tab) => tab.selectedIcon), [
+      PiconsFill.house,
+      PiconsFill.listDashes,
+      PiconsFill.wallet,
+      PiconsFill.chartBar,
     ]);
   });
 }

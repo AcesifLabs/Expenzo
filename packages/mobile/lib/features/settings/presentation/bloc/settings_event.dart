@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:expense_tracker/core/constants/app_font_size.dart';
 import 'package:expense_tracker/core/constants/digit_grouping.dart';
 import 'package:expense_tracker/core/constants/first_day_of_week.dart';
+import 'package:expense_tracker/core/router/app_root_tab.dart';
 import '../../domain/entities/notification_toggle.dart';
 import '../../domain/entities/user_settings.dart';
 
@@ -130,6 +131,16 @@ class UpdateFirstDayOfWeek extends SettingsEvent {
   List<Object?> get props => [firstDayOfWeek];
 
   const UpdateFirstDayOfWeek(this.firstDayOfWeek);
+}
+
+/// Takes effect at the next cold start.
+class UpdateHomeTab extends SettingsEvent {
+  final AppRootTab homeTab;
+
+  @override
+  List<Object?> get props => [homeTab];
+
+  const UpdateHomeTab(this.homeTab);
 }
 
 class DeleteAccountEvent extends SettingsEvent {

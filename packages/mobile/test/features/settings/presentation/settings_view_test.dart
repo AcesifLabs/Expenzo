@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:expense_tracker/core/constants/first_day_of_week.dart';
+import 'package:expense_tracker/core/router/app_root_tab.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
@@ -267,6 +268,36 @@ void main() {
     await tester.scrollUntilVisible(find.text('ভাষা'), 200);
     expect(find.text('ভাষা'), findsOneWidget);
     expect(find.text('সাধারণ'.toUpperCase()), findsOneWidget);
+  });
+
+  testWidgets('home page sits between Language and Category settings and '
+      'shows the chosen tab', (tester) async {
+    when(
+      () => settingsBloc.state,
+    ).thenReturn(SettingsLoaded(makeUserSettings(homeTab: AppRootTab.budgets)));
+    await tester.binding.setSurfaceSize(const Size(400, 3000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpSettings(tester);
+
+    double top(String text) => tester.getTopLeft(find.text(text)).dy;
+
+    expect(top('Home page'), greaterThan(top('Language')));
+    expect(top('Home page'), lessThan(top('Category settings')));
+    expect(top('Budgets'), greaterThan(top('Home page')));
+    expect(top('Budgets'), lessThan(top('Category settings')));
+  });
+
+  testWidgets('the home page row opens /settings/home-page', (tester) async {
+    await pumpSettingsRouter(tester, child: 'home-page');
+
+    await tester.scrollUntilVisible(find.text('Home page'), 200);
+    // Fully on screen: scrollUntilVisible stops once the row's edge shows.
+    await tester.ensureVisible(find.text('Home page'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Home page'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('home-page-page'), findsOneWidget);
   });
 
   testWidgets('category settings is the last General row, below Language', (

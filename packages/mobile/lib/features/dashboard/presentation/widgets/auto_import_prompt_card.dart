@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
+import 'package:expense_tracker/core/router/settings_route.dart';
 import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:expense_tracker/features/settings/presentation/bloc/settings_bloc.dart';
@@ -39,7 +40,7 @@ class _AutoImportPromptCardState extends State<AutoImportPromptCard> {
   }
 
   Future<void> _openAutoImport() async {
-    await context.push('/settings/auto-import');
+    await context.push(SettingsRoute.autoImport.location);
     if (mounted) await _checkAccess();
   }
 
