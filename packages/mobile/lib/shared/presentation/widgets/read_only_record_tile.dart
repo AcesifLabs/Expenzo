@@ -89,14 +89,21 @@ class ReadOnlyRecordTile extends StatelessWidget {
     );
   }
 
+  /// Stays on one line and shrinks to share the row at large text sizes.
   Widget _amountText(Color amtColor) {
-    return Text(
-      _formatAmount(),
-      semanticsLabel: CurrencyFormatter.semanticsLabel(
-        record.amount,
-        isExpense: record.recordType == RecordType.expense,
+    return Flexible(
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: AlignmentDirectional.centerEnd,
+        child: Text(
+          _formatAmount(),
+          semanticsLabel: CurrencyFormatter.semanticsLabel(
+            record.amount,
+            isExpense: record.recordType == RecordType.expense,
+          ),
+          style: AppTypography.titleMedium.copyWith(color: amtColor),
+        ),
       ),
-      style: AppTypography.titleMedium.copyWith(color: amtColor),
     );
   }
 

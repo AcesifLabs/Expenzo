@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:expense_tracker/core/constants/app_font_size.dart';
 import 'package:expense_tracker/core/constants/digit_grouping.dart';
 import 'package:expense_tracker/features/settings/data/datasources/settings_local_datasource.dart';
 
@@ -197,4 +198,29 @@ void main() {
       expect(settings.digitGrouping, DigitGrouping.comma);
     },
   );
+
+  test('settings saved before font size existed load medium', () async {
+    final datasource = await datasourceWith(_storedSettings(code: 'BDT'));
+
+    expect((await datasource.getSettings()).fontSize, AppFontSize.medium);
+  });
+
+  test('an unknown stored font size loads medium', () async {
+    final datasource = await datasourceWith({
+      ..._storedSettings(code: 'BDT'),
+      'fontSize': 'huge',
+    });
+
+    expect((await datasource.getSettings()).fontSize, AppFontSize.medium);
+  });
+
+  test('each font size is saved and read back', () async {
+    final datasource = await datasourceWith(_storedSettings(code: 'BDT'));
+    final settings = await datasource.getSettings();
+
+    for (final size in AppFontSize.values) {
+      await datasource.updateSettings(settings.copyWith(fontSize: size));
+      expect((await datasource.getSettings()).fontSize, size);
+    }
+  });
 }

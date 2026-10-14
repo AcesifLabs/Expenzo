@@ -110,6 +110,15 @@
       "noMinorUnits": "{currency} has no decimal places"
     }
   },
+  "fontSize": {
+    "title": "Font size",
+    "sampleTitle": "Sample transaction",
+    "sampleBody": "This is how your transactions will appear with the selected font size.",
+    "sections": {
+      "preview": "Preview",
+      "fontSize": "Font size"
+    }
+  },
   "categories": {
     "rowSubtitle": "Add, edit and remove categories"
   }

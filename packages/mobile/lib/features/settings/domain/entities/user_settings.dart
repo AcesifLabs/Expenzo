@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:expense_tracker/core/constants/app_font_size.dart';
 import 'package:expense_tracker/core/constants/digit_grouping.dart';
 import 'package:expense_tracker/core/utils/number_display_format.dart';
 
@@ -37,6 +38,9 @@ class UserSettings extends Equatable {
   /// keep cents (SAAP-65).
   final int decimalPlaces;
   final DigitGrouping digitGrouping;
+
+  /// Multiplies the device text scale; see [AppFontSize].
+  final AppFontSize fontSize;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -57,6 +61,7 @@ class UserSettings extends Equatable {
     recurringAutoCreate,
     decimalPlaces,
     digitGrouping,
+    fontSize,
     createdAt,
     updatedAt,
   ];
@@ -77,6 +82,7 @@ class UserSettings extends Equatable {
     this.recurringAutoCreate = false,
     this.decimalPlaces = NumberDisplayFormat.defaultDecimalPlaces,
     this.digitGrouping = NumberDisplayFormat.defaultGrouping,
+    this.fontSize = AppFontSize.defaultSize,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -97,6 +103,7 @@ class UserSettings extends Equatable {
     bool? recurringAutoCreate,
     int? decimalPlaces,
     DigitGrouping? digitGrouping,
+    AppFontSize? fontSize,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -121,6 +128,7 @@ class UserSettings extends Equatable {
       recurringAutoCreate: recurringAutoCreate ?? this.recurringAutoCreate,
       decimalPlaces: decimalPlaces ?? this.decimalPlaces,
       digitGrouping: digitGrouping ?? this.digitGrouping,
+      fontSize: fontSize ?? this.fontSize,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

@@ -771,12 +771,14 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
           // Repeating is set up when adding; editing changes one record.
           if (!_isEditing) ...[
             const SizedBox(width: AppSpacing.smd),
-            _RecurringCheckbox(
-              isRecurring: _isRecurring,
-              type: _type,
-              colors: colors,
-              mutedIconColor: mutedIconColor,
-              onChanged: (v) => setState(() => _isRecurring = v),
+            Flexible(
+              child: _RecurringCheckbox(
+                isRecurring: _isRecurring,
+                type: _type,
+                colors: colors,
+                mutedIconColor: mutedIconColor,
+                onChanged: (v) => setState(() => _isRecurring = v),
+              ),
             ),
           ],
         ],
@@ -1234,9 +1236,13 @@ class _SubmitButton extends StatelessWidget {
       child: Align(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 320),
-          child: SizedBox(
-            width: double.infinity,
-            height: 52,
+          // A minimum, not a fixed height: the label may wrap at large text
+          // sizes.
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minWidth: double.infinity,
+              minHeight: 52,
+            ),
             child: ElevatedButton(
               onPressed: isSubmitting ? null : () => unawaited(onSubmit()),
               child: Text(label),
@@ -1353,10 +1359,13 @@ class _RecurringCheckbox extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: AppSpacing.xs),
-                Text(
-                  t.records.sheet.repeatMonthly,
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: mutedIconColor,
+                // Wraps beside the date picker at large text sizes.
+                Flexible(
+                  child: Text(
+                    t.records.sheet.repeatMonthly,
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: mutedIconColor,
+                    ),
                   ),
                 ),
               ],

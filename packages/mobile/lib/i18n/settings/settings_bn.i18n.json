@@ -111,6 +111,15 @@
       "noMinorUnits": "{currency}-এ দশমিকের ঘর নেই"
     }
   },
+  "fontSize": {
+    "title": "লেখার আকার",
+    "sampleTitle": "নমুনা লেনদেন",
+    "sampleBody": "বেছে নেওয়া আকারে আপনার লেনদেন এভাবে দেখাবে।",
+    "sections": {
+      "preview": "প্রিভিউ",
+      "fontSize": "লেখার আকার"
+    }
+  },
   "categories": {
     "rowSubtitle": "ক্যাটাগরি যোগ, সম্পাদনা ও মুছে ফেলুন"
   }

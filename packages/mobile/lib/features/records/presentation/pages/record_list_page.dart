@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'dart:async';
 
 import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
@@ -16,6 +18,7 @@ import 'package:expense_tracker/shared/presentation/widgets/app_empty_state.dart
 import 'package:expense_tracker/shared/presentation/widgets/shimmer_box.dart';
 import 'package:expense_tracker/features/records/presentation/widgets/new_transaction_sheet.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
+import 'package:expense_tracker/core/theme/app_typography.dart';
 import '../../domain/entities/record.dart';
 import '../bloc/record_bloc.dart';
 import '../bloc/record_event.dart';
@@ -138,7 +141,10 @@ class _RecordListViewState extends State<RecordListView> {
                   slivers: [
                     SliverPersistentHeader(
                       pinned: true,
-                      delegate: _DayHeaderDelegate(dayHeaderLabel(group.day)),
+                      delegate: _DayHeaderDelegate.measured(
+                        dayHeaderLabel(group.day),
+                        MediaQuery.textScalerOf(context),
+                      ),
                     ),
                     SliverPadding(
                       padding: const EdgeInsets.symmetric(
@@ -384,15 +390,32 @@ class _RecordListViewState extends State<RecordListView> {
 class _DayHeaderDelegate extends SliverPersistentHeaderDelegate {
   final String label;
 
-  static const _height = 40.0;
+  /// Grows with the text size: a pinned header can't size itself.
+  final double extent;
+
+  static const _minExtent = 40.0;
 
   @override
-  double get minExtent => _height;
+  double get minExtent => extent;
 
   @override
-  double get maxExtent => _height;
+  double get maxExtent => extent;
 
-  const _DayHeaderDelegate(this.label);
+  const _DayHeaderDelegate(this.label, this.extent);
+
+  /// Sized to fit [label] on one line at [textScaler].
+  static _DayHeaderDelegate measured(String label, TextScaler textScaler) {
+    final painter = TextPainter(
+      text: TextSpan(text: label, style: AppTypography.labelLarge),
+      textScaler: textScaler,
+      maxLines: 1,
+      textDirection: TextDirection.ltr,
+    )..layout();
+    final extent = max(_minExtent, painter.height + 2 * AppSpacing.sm);
+    painter.dispose();
+
+    return _DayHeaderDelegate(label, extent);
+  }
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlaps) {
@@ -406,6 +429,8 @@ class _DayHeaderDelegate extends SliverPersistentHeaderDelegate {
         header: true,
         child: Text(
           label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: theme.textTheme.labelLarge?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
@@ -416,5 +441,5 @@ class _DayHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   bool shouldRebuild(_DayHeaderDelegate oldDelegate) =>
-      oldDelegate.label != label;
+      oldDelegate.label != label || oldDelegate.extent != extent;
 }

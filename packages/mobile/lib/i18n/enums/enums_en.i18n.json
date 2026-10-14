@@ -4,5 +4,11 @@
   "frequency": { "daily": "Daily", "weekly": "Weekly", "biweekly": "Biweekly", "monthly": "Monthly", "yearly": "Yearly" },
   "source": { "manual": "Manual", "sms": "SMS", "email": "Email", "recurring": "Recurring", "both": "Both" },
   "theme": { "system": "Match device", "light": "Light", "dark": "Dark" },
-  "digitGrouping": { "comma": "Comma separator", "dot": "Dot separator", "space": "Space separator" }
+  "digitGrouping": { "comma": "Comma separator", "dot": "Dot separator", "space": "Space separator" },
+  "fontSize": {
+    "small": { "title": "Small", "description": "Compact view, more content on screen" },
+    "medium": { "title": "Medium", "description": "Balanced size for everyday use" },
+    "large": { "title": "Large", "description": "Larger text for better readability" },
+    "extraLarge": { "title": "Extra large", "description": "Maximum size for accessibility" }
+  }
 }

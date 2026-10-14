@@ -142,13 +142,20 @@ class _AppShellState extends State<AppShell> {
                 ),
               ),
               const SizedBox(height: AppSpacing.xs),
-              AnimatedDefaultTextStyle(
-                duration: AppSpacing.durationFast,
-                style: AppTypography.bodySmall.copyWith(
-                  color: sel ? colors.primary : mutedColor,
-                  fontWeight: sel ? FontWeight.w600 : FontWeight.w400,
+              // The bar keeps its height and FAB dock; at large text sizes
+              // the label shrinks to fit.
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: AnimatedDefaultTextStyle(
+                    duration: AppSpacing.durationFast,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: sel ? colors.primary : mutedColor,
+                      fontWeight: sel ? FontWeight.w600 : FontWeight.w400,
+                    ),
+                    child: Text(_labels[i], maxLines: 1),
+                  ),
                 ),
-                child: Text(_labels[i]),
               ),
             ],
           ),

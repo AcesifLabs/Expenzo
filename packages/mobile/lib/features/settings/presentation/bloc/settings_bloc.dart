@@ -60,6 +60,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       transformer: concurrent(),
     );
     on<UpdateNumberFormat>(_onUpdateNumberFormat, transformer: concurrent());
+    on<UpdateFontSize>(_onUpdateFontSize, transformer: concurrent());
     on<DismissAutoImportPrompt>(
       _onDismissAutoImportPrompt,
       transformer: concurrent(),
@@ -164,6 +165,10 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       (s) =>
           s.copyWith(decimalPlaces: places, digitGrouping: event.digitGrouping),
     );
+  }
+
+  void _onUpdateFontSize(UpdateFontSize event, Emitter<SettingsState> emit) {
+    _updateFromLast((s) => s.copyWith(fontSize: event.fontSize));
   }
 
   Future<void> _onDeleteAccountEvent(

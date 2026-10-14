@@ -135,7 +135,15 @@ class BudgetProgressCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: AppSpacing.sm),
-                    Text(summary.daysLeftLabel, style: secondaryStyle),
+                    // Wraps rather than truncates at large text sizes, so the
+                    // number of days stays readable.
+                    Flexible(
+                      child: Text(
+                        summary.daysLeftLabel,
+                        style: secondaryStyle,
+                        textAlign: TextAlign.end,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: AppSpacing.sm),

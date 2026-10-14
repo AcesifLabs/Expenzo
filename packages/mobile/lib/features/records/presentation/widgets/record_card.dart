@@ -79,16 +79,23 @@ class RecordCard extends StatelessWidget {
     );
   }
 
+  /// Stays on one line and shrinks to share the row at large text sizes.
   Widget _buildAmount(AppPalette palette, bool isNegative) {
-    return Text(
-      CurrencyFormatter.formatSigned(record.amount),
-      semanticsLabel: CurrencyFormatter.semanticsLabel(
-        record.amount,
-        isExpense: isNegative,
-      ),
-      style: AppTypography.titleMedium.copyWith(
-        color: isNegative ? palette.expense : palette.income,
-        fontFeatures: AppTypography.tabularFigures,
+    return Flexible(
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: AlignmentDirectional.centerEnd,
+        child: Text(
+          CurrencyFormatter.formatSigned(record.amount),
+          semanticsLabel: CurrencyFormatter.semanticsLabel(
+            record.amount,
+            isExpense: isNegative,
+          ),
+          style: AppTypography.titleMedium.copyWith(
+            color: isNegative ? palette.expense : palette.income,
+            fontFeatures: AppTypography.tabularFigures,
+          ),
+        ),
       ),
     );
   }

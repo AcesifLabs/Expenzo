@@ -123,6 +123,9 @@ void main() {
     await pumpSettingsRouter(tester, child: 'notifications');
 
     await tester.scrollUntilVisible(find.text('Notifications'), 200);
+    // Fully on screen: scrollUntilVisible stops once the row's edge shows.
+    await tester.ensureVisible(find.text('Notifications'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Notifications'));
     await tester.pumpAndSettle();
 
@@ -168,6 +171,35 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('number-format-page'), findsOneWidget);
+  });
+
+  testWidgets('font size sits between Number format and Appearance and shows '
+      'the current size', (tester) async {
+    when(
+      () => settingsBloc.state,
+    ).thenReturn(SettingsLoaded(makeUserSettings()));
+    await tester.binding.setSurfaceSize(const Size(400, 3000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpSettings(tester);
+
+    double top(String text) => tester.getTopLeft(find.text(text)).dy;
+
+    expect(find.text('Medium'), findsOneWidget);
+    expect(top('Font size'), greaterThan(top('Number format')));
+    expect(top('Font size'), lessThan(top('Appearance')));
+  });
+
+  testWidgets('the font size row opens /settings/font-size', (tester) async {
+    await pumpSettingsRouter(tester, child: 'font-size');
+
+    await tester.scrollUntilVisible(find.text('Font size'), 200);
+    // Fully on screen: scrollUntilVisible stops once the row's edge shows.
+    await tester.ensureVisible(find.text('Font size'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Font size'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('font-size-page'), findsOneWidget);
   });
 
   testWidgets('the language row opens /settings/language', (tester) async {

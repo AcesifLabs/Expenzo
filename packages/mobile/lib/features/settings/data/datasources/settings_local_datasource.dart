@@ -1,5 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:expense_tracker/core/constants/app_font_size.dart';
 import 'package:expense_tracker/core/constants/digit_grouping.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/logger/app_logger.dart';
@@ -75,6 +76,7 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
       'recurringAutoCreate': settings.recurringAutoCreate,
       'decimalPlaces': settings.decimalPlaces,
       'digitGrouping': settings.digitGrouping.name,
+      'fontSize': settings.fontSize.name,
       'createdAt': settings.createdAt.toIso8601String(),
       'updatedAt': settings.updatedAt.toIso8601String(),
     };
@@ -103,6 +105,9 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
       digitGrouping:
           DigitGrouping.fromName(json['digitGrouping'] as String?) ??
           NumberDisplayFormat.defaultGrouping,
+      fontSize:
+          AppFontSize.fromName(json['fontSize'] as String?) ??
+          AppFontSize.defaultSize,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
