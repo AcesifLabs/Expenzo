@@ -461,6 +461,7 @@ class _Translations$settings$bn extends Translations$settings$en {
 	@override late final _Translations$settings$fontSize$bn fontSize = _Translations$settings$fontSize$bn._(_root);
 	@override late final _Translations$settings$calendar$bn calendar = _Translations$settings$calendar$bn._(_root);
 	@override late final _Translations$settings$homePage$bn homePage = _Translations$settings$homePage$bn._(_root);
+	@override late final _Translations$settings$export$bn export = _Translations$settings$export$bn._(_root);
 	@override late final _Translations$settings$categories$bn categories = _Translations$settings$categories$bn._(_root);
 }
 
@@ -1575,6 +1576,28 @@ class _Translations$settings$homePage$bn extends Translations$settings$homePage$
 	@override late final _Translations$settings$homePage$options$bn options = _Translations$settings$homePage$options$bn._(_root);
 }
 
+// Path: settings.export
+class _Translations$settings$export$bn extends Translations$settings$export$en {
+	_Translations$settings$export$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'ডেটা এক্সপোর্ট';
+	@override String get rowSubtitle => 'আপনার লেনদেন CSV ফাইলে সংরক্ষণ করুন';
+	@override String get infoTitle => 'আপনার আর্থিক ডেটা এক্সপোর্ট করুন';
+	@override String get infoBody => 'স্প্রেডশিট বা হিসাব সফটওয়্যারে ব্যবহারের জন্য আপনার লেনদেন, বাজেট ও ক্যাটাগরি CSV ফাইলে সংরক্ষণ করুন।';
+	@override late final _Translations$settings$export$sections$bn sections = _Translations$settings$export$sections$bn._(_root);
+	@override late final _Translations$settings$export$ranges$bn ranges = _Translations$settings$export$ranges$bn._(_root);
+	@override late final _Translations$settings$export$include$bn include = _Translations$settings$export$include$bn._(_root);
+	@override String get rangeNote => 'তারিখের সীমা শুধু লেনদেনে প্রযোজ্য। বাজেট ও ক্যাটাগরি সম্পূর্ণ এক্সপোর্ট হয়।';
+	@override String get button => 'ডেটা এক্সপোর্ট';
+	@override String get exporting => 'এক্সপোর্ট তৈরি হচ্ছে…';
+	@override String get shareSubject => 'Expenzo এক্সপোর্ট';
+	@override String get nothingSelected => 'এক্সপোর্টের জন্য অন্তত একটি বেছে নিন';
+	@override String get emptyRange => 'এই সময়সীমায় কোনো লেনদেন নেই';
+}
+
 // Path: settings.categories
 class _Translations$settings$categories$bn extends Translations$settings$categories$en {
 	_Translations$settings$categories$bn._(TranslationsBn root) : this._root = root, super.internal(root);
@@ -2073,6 +2096,47 @@ class _Translations$settings$homePage$options$bn extends Translations$settings$h
 	@override late final _Translations$settings$homePage$options$activity$bn activity = _Translations$settings$homePage$options$activity$bn._(_root);
 	@override late final _Translations$settings$homePage$options$budgets$bn budgets = _Translations$settings$homePage$options$budgets$bn._(_root);
 	@override late final _Translations$settings$homePage$options$reports$bn reports = _Translations$settings$homePage$options$reports$bn._(_root);
+}
+
+// Path: settings.export.sections
+class _Translations$settings$export$sections$bn extends Translations$settings$export$sections$en {
+	_Translations$settings$export$sections$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get dateRange => 'তারিখের সীমা';
+	@override String get include => 'অন্তর্ভুক্ত করুন';
+}
+
+// Path: settings.export.ranges
+class _Translations$settings$export$ranges$bn extends Translations$settings$export$ranges$en {
+	_Translations$settings$export$ranges$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get allTime => 'সব সময়';
+	@override String get allTimeSubtitle => 'সবকিছু এক্সপোর্ট করুন';
+	@override String get thisYear => 'এই বছর';
+	@override String get lastSixMonths => 'গত 6 মাস';
+	@override String get lastThreeMonths => 'গত 3 মাস';
+	@override String get custom => 'নিজে বেছে নিন';
+	@override String get customSubtitle => 'শুরু ও শেষের তারিখ বেছে নিন';
+	@override String untilToday({required Object start}) => '${start} – এখন পর্যন্ত';
+	@override String between({required Object start, required Object end}) => '${start} – ${end}';
+}
+
+// Path: settings.export.include
+class _Translations$settings$export$include$bn extends Translations$settings$export$include$en {
+	_Translations$settings$export$include$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get transactions => 'লেনদেন';
+	@override String get budgets => 'বাজেট';
+	@override String get categories => 'ক্যাটাগরি';
 }
 
 // Path: settings.homePage.options.home
@@ -2754,6 +2818,30 @@ extension on TranslationsBn {
 			'settings.homePage.options.budgets.subtitle' => 'বাজেটের সারসংক্ষেপ ও অগ্রগতি',
 			'settings.homePage.options.reports.title' => 'রিপোর্ট',
 			'settings.homePage.options.reports.subtitle' => 'প্রবণতা, ক্যাটাগরি ও বিশ্লেষণ',
+			'settings.export.title' => 'ডেটা এক্সপোর্ট',
+			'settings.export.rowSubtitle' => 'আপনার লেনদেন CSV ফাইলে সংরক্ষণ করুন',
+			'settings.export.infoTitle' => 'আপনার আর্থিক ডেটা এক্সপোর্ট করুন',
+			'settings.export.infoBody' => 'স্প্রেডশিট বা হিসাব সফটওয়্যারে ব্যবহারের জন্য আপনার লেনদেন, বাজেট ও ক্যাটাগরি CSV ফাইলে সংরক্ষণ করুন।',
+			'settings.export.sections.dateRange' => 'তারিখের সীমা',
+			'settings.export.sections.include' => 'অন্তর্ভুক্ত করুন',
+			'settings.export.ranges.allTime' => 'সব সময়',
+			'settings.export.ranges.allTimeSubtitle' => 'সবকিছু এক্সপোর্ট করুন',
+			'settings.export.ranges.thisYear' => 'এই বছর',
+			'settings.export.ranges.lastSixMonths' => 'গত 6 মাস',
+			'settings.export.ranges.lastThreeMonths' => 'গত 3 মাস',
+			'settings.export.ranges.custom' => 'নিজে বেছে নিন',
+			'settings.export.ranges.customSubtitle' => 'শুরু ও শেষের তারিখ বেছে নিন',
+			'settings.export.ranges.untilToday' => ({required Object start}) => '${start} – এখন পর্যন্ত',
+			'settings.export.ranges.between' => ({required Object start, required Object end}) => '${start} – ${end}',
+			'settings.export.include.transactions' => 'লেনদেন',
+			'settings.export.include.budgets' => 'বাজেট',
+			'settings.export.include.categories' => 'ক্যাটাগরি',
+			'settings.export.rangeNote' => 'তারিখের সীমা শুধু লেনদেনে প্রযোজ্য। বাজেট ও ক্যাটাগরি সম্পূর্ণ এক্সপোর্ট হয়।',
+			'settings.export.button' => 'ডেটা এক্সপোর্ট',
+			'settings.export.exporting' => 'এক্সপোর্ট তৈরি হচ্ছে…',
+			'settings.export.shareSubject' => 'Expenzo এক্সপোর্ট',
+			'settings.export.nothingSelected' => 'এক্সপোর্টের জন্য অন্তত একটি বেছে নিন',
+			'settings.export.emptyRange' => 'এই সময়সীমায় কোনো লেনদেন নেই',
 			'settings.categories.rowSubtitle' => 'ক্যাটাগরি যোগ, সম্পাদনা ও মুছে ফেলুন',
 			'shell.tabs.home' => 'হোম',
 			'shell.tabs.activity' => 'লেনদেন',

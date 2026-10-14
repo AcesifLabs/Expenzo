@@ -241,6 +241,7 @@ class SettingsView extends StatelessWidget {
   Widget _dataSection(BuildContext context) {
     final settingsT = t.settings;
     final recurringT = settingsT.recurring;
+    final exportT = settingsT.export;
 
     return SettingsSection(
       title: settingsT.sections.dataBudget,
@@ -250,6 +251,12 @@ class SettingsView extends StatelessWidget {
           title: recurringT.title,
           subtitle: recurringT.subtitle,
           onTap: () => context.push(SettingsRoute.recurring.location),
+        ),
+        SettingsTile(
+          icon: PiconsRegular.export,
+          title: exportT.title,
+          subtitle: exportT.rowSubtitle,
+          onTap: () => context.push(SettingsRoute.export.location),
         ),
       ],
     );

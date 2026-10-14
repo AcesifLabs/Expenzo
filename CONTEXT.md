@@ -77,6 +77,12 @@ The continuous two-way copy of a signed-in user's Records, Budgets, categories, 
 
 _Avoid_: backup, restore
 
+## Export
+
+A one-off CSV copy of the user's Records, Budgets and categories, handed to another app through the share sheet. Not Sync and not a backup: nothing reads it back into Expenzo.
+
+_Avoid_: backup, download
+
 ## Income / Expense
 
 The direction of money on a Record. Income is shown in teal with a "+" sign, expense in rose with a "−" sign. Color is never the only signal.

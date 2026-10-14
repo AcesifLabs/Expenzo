@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:picons/picons.dart';
+import 'package:expense_tracker/core/constants/app_constants.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/core/logger/app_logger.dart';
@@ -790,7 +791,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     final picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
-      firstDate: DateTime(2000),
+      firstDate: AppConstants.pickerFirstDate,
       lastDate: DateTime(2100),
     );
     if (picked != null) setState(() => _selectedDate = picked);

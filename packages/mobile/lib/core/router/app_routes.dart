@@ -16,6 +16,7 @@ import 'package:expense_tracker/features/budgets/presentation/pages/budget_form_
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:expense_tracker/features/categories/presentation/pages/category_form_page.dart';
 import 'package:expense_tracker/features/categories/presentation/pages/category_list_page.dart';
+import 'package:expense_tracker/features/export/presentation/pages/export_data_page.dart';
 import 'package:expense_tracker/features/records/presentation/pages/all_categories_picker_page.dart';
 import 'package:expense_tracker/features/recurring/domain/entities/recurring_frequency.dart';
 import 'package:expense_tracker/features/recurring/domain/helpers/default_frequency.dart';
@@ -123,6 +124,10 @@ List<RouteBase> _buildNestedRoutes() {
             ],
             child: const RecurringListView(),
           ),
+        ),
+        GoRoute(
+          path: SettingsRoute.export.path,
+          builder: (_, _) => const ExportDataPage(),
         ),
       ],
     ),

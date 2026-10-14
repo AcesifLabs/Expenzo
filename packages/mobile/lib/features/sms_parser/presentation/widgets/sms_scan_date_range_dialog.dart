@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 
 import 'package:flutter/material.dart';
 import 'package:picons/picons.dart';
+import 'package:expense_tracker/core/constants/app_constants.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 
 import '../helpers/sms_scan_range_presets.dart';
@@ -71,7 +72,7 @@ class _SmsScanDateRangeDialogState extends State<SmsScanDateRangeDialog> {
     return showDatePicker(
       context: context,
       initialDate: initialDate,
-      firstDate: DateTime(2000),
+      firstDate: AppConstants.pickerFirstDate,
       lastDate: DateTime.now(),
     );
   }

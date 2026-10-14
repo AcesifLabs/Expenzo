@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:picons/picons.dart';
+import 'package:expense_tracker/core/constants/app_constants.dart';
 import 'package:expense_tracker/shared/presentation/widgets/category_tile.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 
@@ -74,7 +75,7 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
     final endDate = _endDate;
     final picked = await showDateRangePicker(
       context: context,
-      firstDate: DateTime(2020),
+      firstDate: AppConstants.pickerFirstDate,
       lastDate: DateTime.now().add(const Duration(days: 365)),
       initialDateRange: startDate != null && endDate != null
           ? DateTimeRange(start: startDate, end: endDate)

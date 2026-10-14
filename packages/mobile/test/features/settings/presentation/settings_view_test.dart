@@ -300,6 +300,32 @@ void main() {
     expect(find.text('home-page-page'), findsOneWidget);
   });
 
+  testWidgets('export data sits right after Recurring transactions', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(400, 3000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpSettings(tester);
+
+    double top(String text) => tester.getTopLeft(find.text(text)).dy;
+
+    expect(find.text('Save your transactions as CSV files'), findsOneWidget);
+    expect(top('Export data'), greaterThan(top('Recurring transactions')));
+    expect(top('Export data'), lessThan(top('AUTOMATION')));
+  });
+
+  testWidgets('the export data row opens /settings/export', (tester) async {
+    await pumpSettingsRouter(tester, child: 'export');
+
+    await tester.scrollUntilVisible(find.text('Export data'), 200);
+    await tester.ensureVisible(find.text('Export data'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Export data'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('export-page'), findsOneWidget);
+  });
+
   testWidgets('category settings is the last General row, below Language', (
     tester,
   ) async {

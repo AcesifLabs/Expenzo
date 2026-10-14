@@ -152,6 +152,38 @@
       }
     }
   },
+  "export": {
+    "title": "ডেটা এক্সপোর্ট",
+    "rowSubtitle": "আপনার লেনদেন CSV ফাইলে সংরক্ষণ করুন",
+    "infoTitle": "আপনার আর্থিক ডেটা এক্সপোর্ট করুন",
+    "infoBody": "স্প্রেডশিট বা হিসাব সফটওয়্যারে ব্যবহারের জন্য আপনার লেনদেন, বাজেট ও ক্যাটাগরি CSV ফাইলে সংরক্ষণ করুন।",
+    "sections": {
+      "dateRange": "তারিখের সীমা",
+      "include": "অন্তর্ভুক্ত করুন"
+    },
+    "ranges": {
+      "allTime": "সব সময়",
+      "allTimeSubtitle": "সবকিছু এক্সপোর্ট করুন",
+      "thisYear": "এই বছর",
+      "lastSixMonths": "গত 6 মাস",
+      "lastThreeMonths": "গত 3 মাস",
+      "custom": "নিজে বেছে নিন",
+      "customSubtitle": "শুরু ও শেষের তারিখ বেছে নিন",
+      "untilToday": "{start} – এখন পর্যন্ত",
+      "between": "{start} – {end}"
+    },
+    "include": {
+      "transactions": "লেনদেন",
+      "budgets": "বাজেট",
+      "categories": "ক্যাটাগরি"
+    },
+    "rangeNote": "তারিখের সীমা শুধু লেনদেনে প্রযোজ্য। বাজেট ও ক্যাটাগরি সম্পূর্ণ এক্সপোর্ট হয়।",
+    "button": "ডেটা এক্সপোর্ট",
+    "exporting": "এক্সপোর্ট তৈরি হচ্ছে…",
+    "shareSubject": "Expenzo এক্সপোর্ট",
+    "nothingSelected": "এক্সপোর্টের জন্য অন্তত একটি বেছে নিন",
+    "emptyRange": "এই সময়সীমায় কোনো লেনদেন নেই"
+  },
   "categories": {
     "rowSubtitle": "ক্যাটাগরি যোগ, সম্পাদনা ও মুছে ফেলুন"
   }

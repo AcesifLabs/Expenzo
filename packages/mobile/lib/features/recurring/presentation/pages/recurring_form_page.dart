@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:picons/picons.dart';
+import 'package:expense_tracker/core/constants/app_constants.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/shared/presentation/widgets/app_back_button.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
@@ -182,7 +183,7 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
     final picked = await showDatePicker(
       context: context,
       initialDate: _startDate,
-      firstDate: DateTime(2000),
+      firstDate: AppConstants.pickerFirstDate,
       lastDate: DateTime(2100),
     );
     if (!mounted) return;
@@ -195,7 +196,7 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
     final picked = await showDatePicker(
       context: context,
       initialDate: _endDate ?? _startDate,
-      firstDate: DateTime(2000),
+      firstDate: AppConstants.pickerFirstDate,
       lastDate: DateTime(2100),
     );
     if (!mounted) return;
