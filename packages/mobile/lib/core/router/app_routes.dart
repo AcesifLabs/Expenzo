@@ -24,6 +24,7 @@ import 'package:expense_tracker/features/reports/presentation/pages/reports_scre
 import 'package:expense_tracker/features/ai_assistant/presentation/pages/ai_assistant_page.dart';
 import 'package:expense_tracker/features/settings/presentation/pages/appearance_page.dart';
 import 'package:expense_tracker/features/settings/presentation/pages/currency_page.dart';
+import 'package:expense_tracker/features/settings/presentation/pages/font_size_page.dart';
 import 'package:expense_tracker/features/settings/presentation/pages/language_page.dart';
 import 'package:expense_tracker/features/settings/presentation/pages/notification_settings_page.dart';
 import 'package:expense_tracker/features/settings/presentation/pages/number_format_page.dart';
@@ -67,6 +68,7 @@ List<RouteBase> _buildNestedRoutes() {
           path: 'number-format',
           builder: (_, _) => const NumberFormatPage(),
         ),
+        GoRoute(path: 'font-size', builder: (_, _) => const FontSizePage()),
         GoRoute(
           path: 'notifications',
           builder: (_, _) => const NotificationSettingsPage(),

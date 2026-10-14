@@ -92,11 +92,22 @@ class ReportsTabBar extends StatelessWidget {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text(
-                                  _label(tab),
-                                  style: AppTypography.bodyMedium.copyWith(
-                                    color: _labelColor(palette, selectedness),
-                                    fontWeight: _fontWeight(selectedness),
+                                // The bar keeps its 48 dp height; at large
+                                // text sizes the label shrinks to fit.
+                                Flexible(
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text(
+                                      _label(tab),
+                                      maxLines: 1,
+                                      style: AppTypography.bodyMedium.copyWith(
+                                        color: _labelColor(
+                                          palette,
+                                          selectedness,
+                                        ),
+                                        fontWeight: _fontWeight(selectedness),
+                                      ),
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(height: AppSpacing.sm),

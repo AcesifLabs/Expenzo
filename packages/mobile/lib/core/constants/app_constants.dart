@@ -10,6 +10,10 @@ class AppConstants {
   static const Duration animationDurationStandard = Duration(milliseconds: 300);
   static const Duration animationDurationShort = Duration(milliseconds: 200);
   static const Duration animationDurationLong = Duration(milliseconds: 500);
+
+  /// Device large text × Extra large can exceed what layouts survive; cap the
+  /// product. Overflow tests run at this value.
+  static const double maxTextScale = 2.0;
   static const int defaultPaginationLimit = 20;
   static const int maxPaginationLimit = 100;
   static const String defaultEmoji = '📦';

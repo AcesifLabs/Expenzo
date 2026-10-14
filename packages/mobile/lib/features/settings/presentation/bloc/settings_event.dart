@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:expense_tracker/core/constants/app_font_size.dart';
 import 'package:expense_tracker/core/constants/digit_grouping.dart';
 import '../../domain/entities/notification_toggle.dart';
 import '../../domain/entities/user_settings.dart';
@@ -109,6 +110,15 @@ class UpdateNumberFormat extends SettingsEvent {
   List<Object?> get props => [decimalPlaces, digitGrouping];
 
   const UpdateNumberFormat({this.decimalPlaces, this.digitGrouping});
+}
+
+class UpdateFontSize extends SettingsEvent {
+  final AppFontSize fontSize;
+
+  @override
+  List<Object?> get props => [fontSize];
+
+  const UpdateFontSize(this.fontSize);
 }
 
 class DeleteAccountEvent extends SettingsEvent {

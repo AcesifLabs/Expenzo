@@ -280,6 +280,7 @@ class _Translations$enums$bn extends Translations$enums$en {
 	@override late final _Translations$enums$source$bn source = _Translations$enums$source$bn._(_root);
 	@override late final _Translations$enums$theme$bn theme = _Translations$enums$theme$bn._(_root);
 	@override late final _Translations$enums$digitGrouping$bn digitGrouping = _Translations$enums$digitGrouping$bn._(_root);
+	@override late final _Translations$enums$fontSize$bn fontSize = _Translations$enums$fontSize$bn._(_root);
 }
 
 // Path: messageTemplates
@@ -456,6 +457,7 @@ class _Translations$settings$bn extends Translations$settings$en {
 	@override late final _Translations$settings$appearanceScreen$bn appearanceScreen = _Translations$settings$appearanceScreen$bn._(_root);
 	@override late final _Translations$settings$currencyScreen$bn currencyScreen = _Translations$settings$currencyScreen$bn._(_root);
 	@override late final _Translations$settings$numberFormat$bn numberFormat = _Translations$settings$numberFormat$bn._(_root);
+	@override late final _Translations$settings$fontSize$bn fontSize = _Translations$settings$fontSize$bn._(_root);
 	@override late final _Translations$settings$categories$bn categories = _Translations$settings$categories$bn._(_root);
 }
 
@@ -960,6 +962,19 @@ class _Translations$enums$digitGrouping$bn extends Translations$enums$digitGroup
 	@override String get comma => 'কমা দিয়ে আলাদা';
 	@override String get dot => 'ডট দিয়ে আলাদা';
 	@override String get space => 'ফাঁকা জায়গা দিয়ে আলাদা';
+}
+
+// Path: enums.fontSize
+class _Translations$enums$fontSize$bn extends Translations$enums$fontSize$en {
+	_Translations$enums$fontSize$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override late final _Translations$enums$fontSize$small$bn small = _Translations$enums$fontSize$small$bn._(_root);
+	@override late final _Translations$enums$fontSize$medium$bn medium = _Translations$enums$fontSize$medium$bn._(_root);
+	@override late final _Translations$enums$fontSize$large$bn large = _Translations$enums$fontSize$large$bn._(_root);
+	@override late final _Translations$enums$fontSize$extraLarge$bn extraLarge = _Translations$enums$fontSize$extraLarge$bn._(_root);
 }
 
 // Path: messageTemplates.errors
@@ -1507,6 +1522,19 @@ class _Translations$settings$numberFormat$bn extends Translations$settings$numbe
 	@override late final _Translations$settings$numberFormat$places$bn places = _Translations$settings$numberFormat$places$bn._(_root);
 }
 
+// Path: settings.fontSize
+class _Translations$settings$fontSize$bn extends Translations$settings$fontSize$en {
+	_Translations$settings$fontSize$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'লেখার আকার';
+	@override String get sampleTitle => 'নমুনা লেনদেন';
+	@override String get sampleBody => 'বেছে নেওয়া আকারে আপনার লেনদেন এভাবে দেখাবে।';
+	@override late final _Translations$settings$fontSize$sections$bn sections = _Translations$settings$fontSize$sections$bn._(_root);
+}
+
 // Path: settings.categories
 class _Translations$settings$categories$bn extends Translations$settings$categories$en {
 	_Translations$settings$categories$bn._(TranslationsBn root) : this._root = root, super.internal(root);
@@ -1704,6 +1732,50 @@ class _Translations$dashboard$range$previous$bn extends Translations$dashboard$r
 	@override String get thisMonth => 'গত মাস';
 	@override String get lastMonth => 'তার আগের মাস';
 	@override String get thisYear => 'গত বছর';
+}
+
+// Path: enums.fontSize.small
+class _Translations$enums$fontSize$small$bn extends Translations$enums$fontSize$small$en {
+	_Translations$enums$fontSize$small$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'ছোট';
+	@override String get description => 'ঘন সাজানো, স্ক্রিনে বেশি তথ্য';
+}
+
+// Path: enums.fontSize.medium
+class _Translations$enums$fontSize$medium$bn extends Translations$enums$fontSize$medium$en {
+	_Translations$enums$fontSize$medium$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'মাঝারি';
+	@override String get description => 'প্রতিদিনের ব্যবহারের জন্য';
+}
+
+// Path: enums.fontSize.large
+class _Translations$enums$fontSize$large$bn extends Translations$enums$fontSize$large$en {
+	_Translations$enums$fontSize$large$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'বড়';
+	@override String get description => 'পড়তে সহজ বড় লেখা';
+}
+
+// Path: enums.fontSize.extraLarge
+class _Translations$enums$fontSize$extraLarge$bn extends Translations$enums$fontSize$extraLarge$en {
+	_Translations$enums$fontSize$extraLarge$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'অনেক বড়';
+	@override String get description => 'সহজে দেখার জন্য সবচেয়ে বড়';
 }
 
 // Path: records.sheet.placeholders
@@ -1917,6 +1989,17 @@ class _Translations$settings$numberFormat$places$bn extends Translations$setting
 	// Translations
 	@override String count({required Object n}) => '${n} ঘর';
 	@override String noMinorUnits({required Object currency}) => '${currency}-এ দশমিকের ঘর নেই';
+}
+
+// Path: settings.fontSize.sections
+class _Translations$settings$fontSize$sections$bn extends Translations$settings$fontSize$sections$en {
+	_Translations$settings$fontSize$sections$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get preview => 'প্রিভিউ';
+	@override String get fontSize => 'লেখার আকার';
 }
 
 /// The flat map containing all translations for locale <bn>.
@@ -2212,6 +2295,14 @@ extension on TranslationsBn {
 			'enums.digitGrouping.comma' => 'কমা দিয়ে আলাদা',
 			'enums.digitGrouping.dot' => 'ডট দিয়ে আলাদা',
 			'enums.digitGrouping.space' => 'ফাঁকা জায়গা দিয়ে আলাদা',
+			'enums.fontSize.small.title' => 'ছোট',
+			'enums.fontSize.small.description' => 'ঘন সাজানো, স্ক্রিনে বেশি তথ্য',
+			'enums.fontSize.medium.title' => 'মাঝারি',
+			'enums.fontSize.medium.description' => 'প্রতিদিনের ব্যবহারের জন্য',
+			'enums.fontSize.large.title' => 'বড়',
+			'enums.fontSize.large.description' => 'পড়তে সহজ বড় লেখা',
+			'enums.fontSize.extraLarge.title' => 'অনেক বড়',
+			'enums.fontSize.extraLarge.description' => 'সহজে দেখার জন্য সবচেয়ে বড়',
 			'messageTemplates.errors.deleteFailed' => 'SMS ফরম্যাট মোছা যায়নি। আবার চেষ্টা করুন।',
 			'messageTemplates.errors.restoreFailed' => 'SMS ফরম্যাট ফেরানো যায়নি। আবার চেষ্টা করুন।',
 			'messageTemplates.alreadyExists' => 'SMS ফরম্যাটটি আগে থেকেই আছে',
@@ -2431,6 +2522,8 @@ extension on TranslationsBn {
 			'recurring.form.create' => 'নতুন পুনরাবৃত্ত',
 			'reports.insights.highestDay.title' => 'সবচেয়ে বেশি খরচের দিন',
 			'reports.insights.highestDay.description' => ({required Object day, required Object percent}) => '${day} আপনার সবচেয়ে বেশি খরচের দিন, দৈনিক গড়ের চেয়ে ${percent}% বেশি।',
+			_ => null,
+		} ?? switch (path) {
 			'reports.insights.topCategory.title' => 'সবচেয়ে বেশি খরচের ক্যাটাগরি',
 			'reports.insights.topCategory.description' => ({required Object percent, required Object category}) => 'আপনার খরচের ${percent}% ${category}-এ।',
 			'reports.insights.bestWeek.title' => 'সবচেয়ে সাশ্রয়ী সপ্তাহ',
@@ -2439,8 +2532,6 @@ extension on TranslationsBn {
 			'reports.insights.recurring.description' => 'আসন্ন খরচের জন্য আপনার পুনরাবৃত্ত লেনদেনগুলো দেখুন।',
 			'reports.insights.budgets.title' => 'বাজেটের অবস্থা',
 			'reports.insights.budgets.description' => 'এই মাসে ঠিক পথে থাকতে আপনার বাজেটগুলো দেখুন।',
-			_ => null,
-		} ?? switch (path) {
 			'reports.title' => 'রিপোর্ট',
 			'reports.askAi' => 'AI-কে জিজ্ঞেস করুন',
 			'reports.last7Days' => 'গত ৭ দিন',
@@ -2524,6 +2615,11 @@ extension on TranslationsBn {
 			'settings.numberFormat.sections.grouping' => 'অঙ্কের গুচ্ছ',
 			'settings.numberFormat.places.count' => ({required Object n}) => '${n} ঘর',
 			'settings.numberFormat.places.noMinorUnits' => ({required Object currency}) => '${currency}-এ দশমিকের ঘর নেই',
+			'settings.fontSize.title' => 'লেখার আকার',
+			'settings.fontSize.sampleTitle' => 'নমুনা লেনদেন',
+			'settings.fontSize.sampleBody' => 'বেছে নেওয়া আকারে আপনার লেনদেন এভাবে দেখাবে।',
+			'settings.fontSize.sections.preview' => 'প্রিভিউ',
+			'settings.fontSize.sections.fontSize' => 'লেখার আকার',
 			'settings.categories.rowSubtitle' => 'ক্যাটাগরি যোগ, সম্পাদনা ও মুছে ফেলুন',
 			'shell.tabs.home' => 'হোম',
 			'shell.tabs.activity' => 'লেনদেন',

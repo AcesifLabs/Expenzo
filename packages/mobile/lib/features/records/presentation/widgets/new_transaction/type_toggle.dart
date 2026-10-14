@@ -98,13 +98,18 @@ class _ToggleTab extends StatelessWidget {
               color: isActive ? activeColor.withAlpha(32) : Colors.transparent,
               borderRadius: borderRadius,
             ),
+            // The toggle keeps its 48 dp height; at large text sizes the
+            // label shrinks to fit.
             child: Center(
-              child: Text(
-                label,
-                overflow: TextOverflow.ellipsis,
-                style: AppTypography.bodyMedium.copyWith(
-                  color: fgColor,
-                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: fgColor,
+                    fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                  ),
                 ),
               ),
             ),

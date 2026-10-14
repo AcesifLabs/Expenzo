@@ -40,9 +40,13 @@ class KeypadButton extends StatelessWidget {
             child: InkWell(
               onTap: onTap,
               borderRadius: BorderRadius.circular(radius),
+              // Keys keep their height so Save stays on screen; at large text
+              // sizes the digit shrinks to fit instead.
               child: SizedBox(
                 height: height,
-                child: Center(child: child),
+                child: Center(
+                  child: FittedBox(fit: BoxFit.scaleDown, child: child),
+                ),
               ),
             ),
           ),

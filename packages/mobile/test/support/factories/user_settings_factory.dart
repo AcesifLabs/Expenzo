@@ -1,3 +1,4 @@
+import 'package:expense_tracker/core/constants/app_font_size.dart';
 import 'package:expense_tracker/core/constants/digit_grouping.dart';
 import 'package:expense_tracker/features/settings/domain/entities/user_settings.dart';
 
@@ -17,6 +18,7 @@ UserSettings makeUserSettings({
   bool? recurringAutoCreate,
   int? decimalPlaces,
   DigitGrouping? digitGrouping,
+  AppFontSize? fontSize,
   DateTime? createdAt,
   DateTime? updatedAt,
 }) {
@@ -35,6 +37,7 @@ UserSettings makeUserSettings({
     recurringAutoCreate: recurringAutoCreate ?? false,
     decimalPlaces: decimalPlaces ?? 2,
     digitGrouping: digitGrouping ?? DigitGrouping.comma,
+    fontSize: fontSize ?? AppFontSize.medium,
     createdAt: createdAt ?? DateTime(2024, 1, 1),
     updatedAt: updatedAt ?? DateTime(2024, 1, 1),
   );

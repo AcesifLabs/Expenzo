@@ -9,10 +9,12 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:saropa_drift_advisor/saropa_drift_advisor.dart';
+import 'package:expense_tracker/core/constants/app_font_size.dart';
 import 'package:expense_tracker/core/theme/currency_config.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/core/utils/number_display_format.dart';
 import 'package:expense_tracker/features/settings/domain/entities/user_settings.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_text_scale.dart';
 import 'package:expense_tracker/shared/presentation/widgets/currency_scope.dart';
 import 'package:expense_tracker/shared/presentation/widgets/locale_scope.dart';
 import 'package:expense_tracker/core/router/refresh_on_auth_change.dart';
@@ -61,6 +63,10 @@ class ExpenzoApp extends StatefulWidget {
 class _ExpenzoAppState extends State<ExpenzoApp> {
   final _navigatorKey = GlobalKey<NavigatorState>();
   final _themeModeNotifier = ValueNotifier<ThemeMode>(ThemeMode.system);
+  // Keeps the last value while settings reload, so text doesn't jump.
+  final _fontScaleNotifier = ValueNotifier<double>(
+    AppFontSize.defaultSize.scale,
+  );
 
   // Keeps DateFormat in step with `t`, including when slang follows an OS
   // language change on its own in "Match device" mode.
@@ -172,6 +178,7 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
 
   void _applySettings(UserSettings settings) {
     _themeModeNotifier.value = _themeModeFromString(settings.theme);
+    _fontScaleNotifier.value = settings.fontSize.scale;
     CurrencyFormatter.current.value = CurrencyConfig.byCode(
       settings.currencyCode,
     );
@@ -248,10 +255,49 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
     }
   }
 
+  Widget _buildAppTree(BuildContext _, Widget? child) {
+    return ValueListenableBuilder<double>(
+      valueListenable: _fontScaleNotifier,
+      builder: (context, factor, _) => AppTextScale(
+        factor: factor,
+        child: LocaleScope(
+          child: CurrencyScope(
+            child: MultiBlocProvider(
+              providers: [
+                BlocProvider<AuthBloc>(create: (_) => di.getIt<AuthBloc>()),
+                BlocProvider<CategoryBloc>(
+                  create: (_) => di.getIt<CategoryBloc>(),
+                ),
+                BlocProvider<RecordBloc>(create: (_) => di.getIt<RecordBloc>()),
+                BlocProvider<SmsScannerBloc>(
+                  create: (_) => di.getIt<SmsScannerBloc>(),
+                ),
+              ],
+              // Re-run router redirects (sync conflict, login) when the
+              // signed-in state changes; AuthBloc exists only after init.
+              child: RefreshOnAuthChange(
+                enabled: _initialized,
+                onAuthChanged: () => _appRouter?.config.refresh(),
+                child: _AppContent(
+                  initialized: _initialized,
+                  error: _error,
+                  errorRefId: _errorRefId,
+                  onInitLoads: _dispatchInitialLoads,
+                  child: child ?? const SizedBox.shrink(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _localeSubscription?.cancel();
     _themeModeNotifier.dispose();
+    _fontScaleNotifier.dispose();
     super.dispose();
   }
 
@@ -271,41 +317,7 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
             themeMode: themeMode,
             routerConfig: _appRouter?.config,
             debugShowCheckedModeBanner: false,
-            builder: (context, child) {
-              return LocaleScope(
-                child: CurrencyScope(
-                  child: MultiBlocProvider(
-                    providers: [
-                      BlocProvider<AuthBloc>(
-                        create: (_) => di.getIt<AuthBloc>(),
-                      ),
-                      BlocProvider<CategoryBloc>(
-                        create: (_) => di.getIt<CategoryBloc>(),
-                      ),
-                      BlocProvider<RecordBloc>(
-                        create: (_) => di.getIt<RecordBloc>(),
-                      ),
-                      BlocProvider<SmsScannerBloc>(
-                        create: (_) => di.getIt<SmsScannerBloc>(),
-                      ),
-                    ],
-                    // Re-run router redirects (sync conflict, login) when the
-                    // signed-in state changes; AuthBloc exists only after init.
-                    child: RefreshOnAuthChange(
-                      enabled: _initialized,
-                      onAuthChanged: () => _appRouter?.config.refresh(),
-                      child: _AppContent(
-                        initialized: _initialized,
-                        error: _error,
-                        errorRefId: _errorRefId,
-                        onInitLoads: _dispatchInitialLoads,
-                        child: child ?? const SizedBox.shrink(),
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            },
+            builder: _buildAppTree,
           );
         },
       ),

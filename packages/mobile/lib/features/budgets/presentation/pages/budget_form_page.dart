@@ -362,6 +362,9 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
             alignment: Alignment.centerLeft,
             child: DropdownButtonFormField<BudgetPeriod>(
               initialValue: _selectedPeriod,
+              // Fill the field so a long label ends in an ellipsis instead of
+              // pushing the caret out at large text sizes.
+              isExpanded: true,
               icon: Icon(
                 PiconsRegular.caretDown,
                 size: 16,
@@ -395,7 +398,11 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
                 for (final period in BudgetPeriod.values)
                   DropdownMenuItem(
                     value: period,
-                    child: Text(period.displayName),
+                    child: Text(
+                      period.displayName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
               ],
               onChanged: _onPeriodChanged,

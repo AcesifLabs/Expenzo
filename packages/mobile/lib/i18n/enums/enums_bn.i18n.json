@@ -5,5 +5,11 @@
   "frequency": { "daily": "দৈনিক", "weekly": "সাপ্তাহিক", "biweekly": "প্রতি দুই সপ্তাহে", "monthly": "মাসিক", "yearly": "বার্ষিক" },
   "source": { "manual": "নিজে যোগ করা", "sms": "SMS", "email": "ইমেইল", "recurring": "পুনরাবৃত্ত", "both": "দুটোই" },
   "theme": { "system": "ডিভাইসের মতো", "light": "লাইট", "dark": "ডার্ক" },
-  "digitGrouping": { "comma": "কমা দিয়ে আলাদা", "dot": "ডট দিয়ে আলাদা", "space": "ফাঁকা জায়গা দিয়ে আলাদা" }
+  "digitGrouping": { "comma": "কমা দিয়ে আলাদা", "dot": "ডট দিয়ে আলাদা", "space": "ফাঁকা জায়গা দিয়ে আলাদা" },
+  "fontSize": {
+    "small": { "title": "ছোট", "description": "ঘন সাজানো, স্ক্রিনে বেশি তথ্য" },
+    "medium": { "title": "মাঝারি", "description": "প্রতিদিনের ব্যবহারের জন্য" },
+    "large": { "title": "বড়", "description": "পড়তে সহজ বড় লেখা" },
+    "extraLarge": { "title": "অনেক বড়", "description": "সহজে দেখার জন্য সবচেয়ে বড়" }
+  }
 }

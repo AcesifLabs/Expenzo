@@ -43,12 +43,24 @@ class CategorySettingsRow extends StatelessWidget {
           category.displayName,
           style: textTheme.bodyMedium?.copyWith(color: palette.textPrimary),
         ),
+        // One line, at most a third of the row, shrinking at large text
+        // sizes: the tile's trailing slot can't grow taller than the row.
         trailing: count == null
             ? null
-            : Text(
-                t.categories.settings.recordCount(n: count),
-                style: textTheme.bodySmall?.copyWith(
-                  color: palette.textSecondary,
+            : ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.sizeOf(context).width / 3,
+                ),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: Text(
+                    t.categories.settings.recordCount(n: count),
+                    maxLines: 1,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: palette.textSecondary,
+                    ),
+                  ),
                 ),
               ),
       ),

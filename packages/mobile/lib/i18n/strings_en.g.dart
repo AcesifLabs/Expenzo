@@ -382,6 +382,7 @@ class Translations$enums$en {
 	late final Translations$enums$source$en source = Translations$enums$source$en.internal(_root);
 	late final Translations$enums$theme$en theme = Translations$enums$theme$en.internal(_root);
 	late final Translations$enums$digitGrouping$en digitGrouping = Translations$enums$digitGrouping$en.internal(_root);
+	late final Translations$enums$fontSize$en fontSize = Translations$enums$fontSize$en.internal(_root);
 }
 
 // Path: messageTemplates
@@ -674,6 +675,7 @@ class Translations$settings$en {
 	late final Translations$settings$appearanceScreen$en appearanceScreen = Translations$settings$appearanceScreen$en.internal(_root);
 	late final Translations$settings$currencyScreen$en currencyScreen = Translations$settings$currencyScreen$en.internal(_root);
 	late final Translations$settings$numberFormat$en numberFormat = Translations$settings$numberFormat$en.internal(_root);
+	late final Translations$settings$fontSize$en fontSize = Translations$settings$fontSize$en.internal(_root);
 	late final Translations$settings$categories$en categories = Translations$settings$categories$en.internal(_root);
 }
 
@@ -1509,6 +1511,19 @@ class Translations$enums$digitGrouping$en {
 
 	/// en: 'Space separator'
 	String get space => 'Space separator';
+}
+
+// Path: enums.fontSize
+class Translations$enums$fontSize$en {
+	Translations$enums$fontSize$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	late final Translations$enums$fontSize$small$en small = Translations$enums$fontSize$small$en.internal(_root);
+	late final Translations$enums$fontSize$medium$en medium = Translations$enums$fontSize$medium$en.internal(_root);
+	late final Translations$enums$fontSize$large$en large = Translations$enums$fontSize$large$en.internal(_root);
+	late final Translations$enums$fontSize$extraLarge$en extraLarge = Translations$enums$fontSize$extraLarge$en.internal(_root);
 }
 
 // Path: messageTemplates.errors
@@ -2460,6 +2475,26 @@ class Translations$settings$numberFormat$en {
 	late final Translations$settings$numberFormat$places$en places = Translations$settings$numberFormat$places$en.internal(_root);
 }
 
+// Path: settings.fontSize
+class Translations$settings$fontSize$en {
+	Translations$settings$fontSize$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Font size'
+	String get title => 'Font size';
+
+	/// en: 'Sample transaction'
+	String get sampleTitle => 'Sample transaction';
+
+	/// en: 'This is how your transactions will appear with the selected font size.'
+	String get sampleBody => 'This is how your transactions will appear with the selected font size.';
+
+	late final Translations$settings$fontSize$sections$en sections = Translations$settings$fontSize$sections$en.internal(_root);
+}
+
 // Path: settings.categories
 class Translations$settings$categories$en {
 	Translations$settings$categories$en.internal(this._root);
@@ -2757,6 +2792,66 @@ class Translations$dashboard$range$previous$en {
 	String get thisYear => 'last year';
 }
 
+// Path: enums.fontSize.small
+class Translations$enums$fontSize$small$en {
+	Translations$enums$fontSize$small$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Small'
+	String get title => 'Small';
+
+	/// en: 'Compact view, more content on screen'
+	String get description => 'Compact view, more content on screen';
+}
+
+// Path: enums.fontSize.medium
+class Translations$enums$fontSize$medium$en {
+	Translations$enums$fontSize$medium$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Medium'
+	String get title => 'Medium';
+
+	/// en: 'Balanced size for everyday use'
+	String get description => 'Balanced size for everyday use';
+}
+
+// Path: enums.fontSize.large
+class Translations$enums$fontSize$large$en {
+	Translations$enums$fontSize$large$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Large'
+	String get title => 'Large';
+
+	/// en: 'Larger text for better readability'
+	String get description => 'Larger text for better readability';
+}
+
+// Path: enums.fontSize.extraLarge
+class Translations$enums$fontSize$extraLarge$en {
+	Translations$enums$fontSize$extraLarge$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Extra large'
+	String get title => 'Extra large';
+
+	/// en: 'Maximum size for accessibility'
+	String get description => 'Maximum size for accessibility';
+}
+
 // Path: records.sheet.placeholders
 class Translations$records$sheet$placeholders$en {
 	Translations$records$sheet$placeholders$en.internal(this._root);
@@ -3038,6 +3133,21 @@ class Translations$settings$numberFormat$places$en {
 
 	/// en: '{currency} has no decimal places'
 	String noMinorUnits({required Object currency}) => '${currency} has no decimal places';
+}
+
+// Path: settings.fontSize.sections
+class Translations$settings$fontSize$sections$en {
+	Translations$settings$fontSize$sections$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Preview'
+	String get preview => 'Preview';
+
+	/// en: 'Font size'
+	String get fontSize => 'Font size';
 }
 
 /// The flat map containing all translations for locale <en>.
@@ -3333,6 +3443,14 @@ extension on Translations {
 			'enums.digitGrouping.comma' => 'Comma separator',
 			'enums.digitGrouping.dot' => 'Dot separator',
 			'enums.digitGrouping.space' => 'Space separator',
+			'enums.fontSize.small.title' => 'Small',
+			'enums.fontSize.small.description' => 'Compact view, more content on screen',
+			'enums.fontSize.medium.title' => 'Medium',
+			'enums.fontSize.medium.description' => 'Balanced size for everyday use',
+			'enums.fontSize.large.title' => 'Large',
+			'enums.fontSize.large.description' => 'Larger text for better readability',
+			'enums.fontSize.extraLarge.title' => 'Extra large',
+			'enums.fontSize.extraLarge.description' => 'Maximum size for accessibility',
 			'messageTemplates.errors.deleteFailed' => 'Couldn\'t delete the SMS format. Try again.',
 			'messageTemplates.errors.restoreFailed' => 'Couldn\'t restore the SMS format. Try again.',
 			'messageTemplates.alreadyExists' => 'SMS format already exists',
@@ -3552,6 +3670,8 @@ extension on Translations {
 			'recurring.form.create' => 'New recurring',
 			'reports.insights.highestDay.title' => 'Highest spending day',
 			'reports.insights.highestDay.description' => ({required Object day, required Object percent}) => '${day} is your biggest spending day, ${percent}% above your daily average.',
+			_ => null,
+		} ?? switch (path) {
 			'reports.insights.topCategory.title' => 'Most frequent category',
 			'reports.insights.topCategory.description' => ({required Object category, required Object percent}) => '${category} accounts for ${percent}% of your spending.',
 			'reports.insights.bestWeek.title' => 'Best savings week',
@@ -3560,8 +3680,6 @@ extension on Translations {
 			'reports.insights.recurring.description' => 'Check your recurring transactions for upcoming charges.',
 			'reports.insights.budgets.title' => 'Budget status',
 			'reports.insights.budgets.description' => 'Review your budgets to stay on track this month.',
-			_ => null,
-		} ?? switch (path) {
 			'reports.title' => 'Reports',
 			'reports.askAi' => 'Ask AI',
 			'reports.last7Days' => 'Last 7 days',
@@ -3645,6 +3763,11 @@ extension on Translations {
 			'settings.numberFormat.sections.grouping' => 'Digit grouping',
 			'settings.numberFormat.places.count' => ({required Object n}) => '${n} places',
 			'settings.numberFormat.places.noMinorUnits' => ({required Object currency}) => '${currency} has no decimal places',
+			'settings.fontSize.title' => 'Font size',
+			'settings.fontSize.sampleTitle' => 'Sample transaction',
+			'settings.fontSize.sampleBody' => 'This is how your transactions will appear with the selected font size.',
+			'settings.fontSize.sections.preview' => 'Preview',
+			'settings.fontSize.sections.fontSize' => 'Font size',
 			'settings.categories.rowSubtitle' => 'Add, edit and remove categories',
 			'shell.tabs.home' => 'Home',
 			'shell.tabs.activity' => 'Activity',
