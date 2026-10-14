@@ -61,6 +61,9 @@ dependencies:
   slang_flutter: ^4.19.0
   flutter_localizations:
     sdk: flutter
+  share_plus: ^10.0.0
+  csv: ^8.0.0
+  archive: ^3.6.1
 
 dev_dependencies:
   flutter_test:

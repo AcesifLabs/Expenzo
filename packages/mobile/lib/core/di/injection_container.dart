@@ -34,6 +34,7 @@ import 'budget_module.dart';
 import 'recurring_module.dart';
 import 'background_module.dart';
 import 'settings_module.dart';
+import 'export_module.dart';
 import 'dashboard_module.dart';
 import 'ai_assistant_module.dart';
 import 'receipt_scan_module.dart';
@@ -171,6 +172,7 @@ Future<void> initCriticalDependencies() async {
   final prefs = await SharedPreferences.getInstance();
   getIt.registerLazySingleton<SharedPreferences>(() => prefs);
   initSettingsModule(getIt);
+  initExportModule(getIt);
 
   initAuthModule(getIt);
   initCategoryModule(getIt);

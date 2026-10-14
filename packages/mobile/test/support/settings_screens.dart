@@ -9,6 +9,9 @@ import 'package:expense_tracker/features/auth/presentation/bloc/auth_state.dart'
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_state.dart';
 import 'package:expense_tracker/features/categories/presentation/pages/category_list_page.dart';
+import 'package:expense_tracker/features/export/presentation/bloc/export_bloc.dart';
+import 'package:expense_tracker/features/export/presentation/bloc/export_state.dart';
+import 'package:expense_tracker/features/export/presentation/pages/export_data_page.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/entities/parsing_rule.dart';
 import 'package:expense_tracker/features/parsing_rules/presentation/bloc/parsing_rules_bloc.dart';
 import 'package:expense_tracker/features/parsing_rules/presentation/bloc/parsing_rules_state.dart';
@@ -48,6 +51,8 @@ class MockGetCategoryRecordCounts extends Mock
 
 class MockParsingRulesBloc extends Mock implements ParsingRulesBloc {}
 
+class MockExportBloc extends Mock implements ExportBloc {}
+
 SettingsBloc _loadedSettingsBloc() {
   return mockBloc<MockSettingsBloc, SettingsState>(
     MockSettingsBloc(),
@@ -74,10 +79,21 @@ Map<String, Widget Function()> get settingsScreens => {
   'Home page': () => _withSettings(const HomePageSettingsView()),
   'Notifications': _notificationsScreen,
   'Recurring transactions': _recurringScreen,
+  'Export data': _exportScreen,
   'Matching rules': _matchingRulesScreen,
   'Language': () => _withSettings(const LanguageView()),
   'Categories': _categoriesScreen,
 };
+
+Widget _exportScreen() {
+  return BlocProvider<ExportBloc>.value(
+    value: mockBloc<MockExportBloc, ExportState>(
+      MockExportBloc(),
+      const ExportState(),
+    ),
+    child: const ExportDataView(),
+  );
+}
 
 Widget _settingsListScreen() {
   return MultiBlocProvider(

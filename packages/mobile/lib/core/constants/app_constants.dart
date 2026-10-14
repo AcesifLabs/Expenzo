@@ -1,5 +1,8 @@
 class AppConstants {
   static const String appName = 'Expenzo';
+
+  /// The earliest day a date picker offers.
+  static final DateTime pickerFirstDate = DateTime(2000);
   static const String displayDateFormat = 'MMM dd, yyyy';
   static const String displayDateTimeFormat = 'MMM dd, yyyy HH:mm';
   static const String dbDateFormat = 'yyyy-MM-dd';

@@ -12,3 +12,4 @@ export 'widgets/settings_choice_tile.dart';
 export 'widgets/settings_state_view.dart';
 export 'widgets/theme_preview_card.dart';
 export 'widgets/settings_icon_tile.dart';
+export 'widgets/settings_switch_tile.dart';

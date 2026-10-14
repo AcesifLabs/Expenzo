@@ -23,6 +23,7 @@ import '../bloc/settings_event.dart';
 import '../widgets/settings_icon_tile.dart';
 import '../widgets/settings_section.dart';
 import '../widgets/settings_state_view.dart';
+import '../widgets/settings_switch_tile.dart';
 
 class NotificationSettingsPage extends StatelessWidget {
   const NotificationSettingsPage({super.key});
@@ -155,7 +156,7 @@ class _NotificationSettingsViewState extends State<NotificationSettingsView> {
       title: notificationsT.sections.general,
       children: [
         if (showBlocked) _BlockedRow(onOpenSettings: _openSettings),
-        _ToggleRow(
+        SettingsSwitchTile(
           icon: PiconsRegular.bell,
           title: masterT.title,
           subtitle: masterT.subtitle,
@@ -175,14 +176,14 @@ class _NotificationSettingsViewState extends State<NotificationSettingsView> {
     return SettingsSection(
       title: notificationsT.sections.budgetAlerts,
       children: [
-        _ToggleRow(
+        SettingsSwitchTile(
           icon: PiconsRegular.warningCircle,
           title: overT.title,
           subtitle: overT.subtitle,
           value: settings.budgetOverAlertsEnabled,
           onChanged: _toggleHandler(settings, NotificationToggle.budgetOver),
         ),
-        _ToggleRow(
+        SettingsSwitchTile(
           icon: PiconsRegular.bell,
           title: nearLimitT.title,
           subtitle: nearLimitT.subtitle,
@@ -192,7 +193,7 @@ class _NotificationSettingsViewState extends State<NotificationSettingsView> {
             NotificationToggle.budgetNearLimit,
           ),
         ),
-        _ToggleRow(
+        SettingsSwitchTile(
           icon: PiconsRegular.chartBar,
           title: weeklyT.title,
           subtitle: weeklyT.subtitle(day: _summaryDayName(settings)),
@@ -210,7 +211,7 @@ class _NotificationSettingsViewState extends State<NotificationSettingsView> {
     return SettingsSection(
       title: notificationsT.sections.recurring,
       children: [
-        _ToggleRow(
+        SettingsSwitchTile(
           icon: PiconsRegular.clock,
           title: remindersT.title,
           subtitle: remindersT.subtitle,
@@ -247,47 +248,6 @@ class _NotificationSettingsViewState extends State<NotificationSettingsView> {
       title: t.settings.notifications.title,
       leading: const AppBackButton(),
       child: SettingsStateView(builder: _buildBody),
-    );
-  }
-}
-
-/// A notification switch row with its icon tile, as in the frame.
-class _ToggleRow extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final bool value;
-
-  /// Null disables the switch; it still shows [value].
-  final ValueChanged<bool>? onChanged;
-
-  const _ToggleRow({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.value,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.palette;
-    final textTheme = Theme.of(context).textTheme;
-
-    return ListTile(
-      leading: SettingsIconTile(
-        idleForeground: palette.accent,
-        child: Icon(icon),
-      ),
-      title: Text(
-        title,
-        style: textTheme.bodyMedium?.copyWith(color: palette.textPrimary),
-      ),
-      subtitle: Text(
-        subtitle,
-        style: textTheme.bodySmall?.copyWith(color: palette.textSecondary),
-      ),
-      trailing: Switch(value: value, onChanged: onChanged),
     );
   }
 }

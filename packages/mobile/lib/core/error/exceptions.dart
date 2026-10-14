@@ -57,3 +57,9 @@ class NetworkException implements Exception {
 
   NetworkFailure toFailure() => NetworkFailure(message: message);
 }
+
+/// An export asked for transactions but none fall in the range, so nothing
+/// was written.
+class EmptyExportException implements Exception {
+  const EmptyExportException();
+}

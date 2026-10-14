@@ -151,6 +151,38 @@
       }
     }
   },
+  "export": {
+    "title": "Export data",
+    "rowSubtitle": "Save your transactions as CSV files",
+    "infoTitle": "Export your financial data",
+    "infoBody": "Save your transactions, budgets and categories as CSV files for spreadsheets or accounting software.",
+    "sections": {
+      "dateRange": "Date range",
+      "include": "Include"
+    },
+    "ranges": {
+      "allTime": "All time",
+      "allTimeSubtitle": "Export everything",
+      "thisYear": "This year",
+      "lastSixMonths": "Last 6 months",
+      "lastThreeMonths": "Last 3 months",
+      "custom": "Custom range",
+      "customSubtitle": "Select start and end dates",
+      "untilToday": "{start} – Present",
+      "between": "{start} – {end}"
+    },
+    "include": {
+      "transactions": "Transactions",
+      "budgets": "Budgets",
+      "categories": "Categories"
+    },
+    "rangeNote": "The date range applies to transactions. Budgets and categories are exported in full.",
+    "button": "Export data",
+    "exporting": "Preparing export…",
+    "shareSubject": "Expenzo export",
+    "nothingSelected": "Choose at least one thing to export",
+    "emptyRange": "No transactions in this range"
+  },
   "categories": {
     "rowSubtitle": "Add, edit and remove categories"
   }

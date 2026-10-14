@@ -679,6 +679,7 @@ class Translations$settings$en {
 	late final Translations$settings$fontSize$en fontSize = Translations$settings$fontSize$en.internal(_root);
 	late final Translations$settings$calendar$en calendar = Translations$settings$calendar$en.internal(_root);
 	late final Translations$settings$homePage$en homePage = Translations$settings$homePage$en.internal(_root);
+	late final Translations$settings$export$en export = Translations$settings$export$en.internal(_root);
 	late final Translations$settings$categories$en categories = Translations$settings$categories$en.internal(_root);
 }
 
@@ -2551,6 +2552,49 @@ class Translations$settings$homePage$en {
 	late final Translations$settings$homePage$options$en options = Translations$settings$homePage$options$en.internal(_root);
 }
 
+// Path: settings.export
+class Translations$settings$export$en {
+	Translations$settings$export$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Export data'
+	String get title => 'Export data';
+
+	/// en: 'Save your transactions as CSV files'
+	String get rowSubtitle => 'Save your transactions as CSV files';
+
+	/// en: 'Export your financial data'
+	String get infoTitle => 'Export your financial data';
+
+	/// en: 'Save your transactions, budgets and categories as CSV files for spreadsheets or accounting software.'
+	String get infoBody => 'Save your transactions, budgets and categories as CSV files for spreadsheets or accounting software.';
+
+	late final Translations$settings$export$sections$en sections = Translations$settings$export$sections$en.internal(_root);
+	late final Translations$settings$export$ranges$en ranges = Translations$settings$export$ranges$en.internal(_root);
+	late final Translations$settings$export$include$en include = Translations$settings$export$include$en.internal(_root);
+
+	/// en: 'The date range applies to transactions. Budgets and categories are exported in full.'
+	String get rangeNote => 'The date range applies to transactions. Budgets and categories are exported in full.';
+
+	/// en: 'Export data'
+	String get button => 'Export data';
+
+	/// en: 'Preparing export…'
+	String get exporting => 'Preparing export…';
+
+	/// en: 'Expenzo export'
+	String get shareSubject => 'Expenzo export';
+
+	/// en: 'Choose at least one thing to export'
+	String get nothingSelected => 'Choose at least one thing to export';
+
+	/// en: 'No transactions in this range'
+	String get emptyRange => 'No transactions in this range';
+}
+
 // Path: settings.categories
 class Translations$settings$categories$en {
 	Translations$settings$categories$en.internal(this._root);
@@ -3241,6 +3285,75 @@ class Translations$settings$homePage$options$en {
 	late final Translations$settings$homePage$options$activity$en activity = Translations$settings$homePage$options$activity$en.internal(_root);
 	late final Translations$settings$homePage$options$budgets$en budgets = Translations$settings$homePage$options$budgets$en.internal(_root);
 	late final Translations$settings$homePage$options$reports$en reports = Translations$settings$homePage$options$reports$en.internal(_root);
+}
+
+// Path: settings.export.sections
+class Translations$settings$export$sections$en {
+	Translations$settings$export$sections$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Date range'
+	String get dateRange => 'Date range';
+
+	/// en: 'Include'
+	String get include => 'Include';
+}
+
+// Path: settings.export.ranges
+class Translations$settings$export$ranges$en {
+	Translations$settings$export$ranges$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'All time'
+	String get allTime => 'All time';
+
+	/// en: 'Export everything'
+	String get allTimeSubtitle => 'Export everything';
+
+	/// en: 'This year'
+	String get thisYear => 'This year';
+
+	/// en: 'Last 6 months'
+	String get lastSixMonths => 'Last 6 months';
+
+	/// en: 'Last 3 months'
+	String get lastThreeMonths => 'Last 3 months';
+
+	/// en: 'Custom range'
+	String get custom => 'Custom range';
+
+	/// en: 'Select start and end dates'
+	String get customSubtitle => 'Select start and end dates';
+
+	/// en: '{start} – Present'
+	String untilToday({required Object start}) => '${start} – Present';
+
+	/// en: '{start} – {end}'
+	String between({required Object start, required Object end}) => '${start} – ${end}';
+}
+
+// Path: settings.export.include
+class Translations$settings$export$include$en {
+	Translations$settings$export$include$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Transactions'
+	String get transactions => 'Transactions';
+
+	/// en: 'Budgets'
+	String get budgets => 'Budgets';
+
+	/// en: 'Categories'
+	String get categories => 'Categories';
 }
 
 // Path: settings.homePage.options.home
@@ -3938,6 +4051,30 @@ extension on Translations {
 			'settings.homePage.options.budgets.subtitle' => 'Budget overview and progress tracking',
 			'settings.homePage.options.reports.title' => 'Reports',
 			'settings.homePage.options.reports.subtitle' => 'Trends, categories and insights',
+			'settings.export.title' => 'Export data',
+			'settings.export.rowSubtitle' => 'Save your transactions as CSV files',
+			'settings.export.infoTitle' => 'Export your financial data',
+			'settings.export.infoBody' => 'Save your transactions, budgets and categories as CSV files for spreadsheets or accounting software.',
+			'settings.export.sections.dateRange' => 'Date range',
+			'settings.export.sections.include' => 'Include',
+			'settings.export.ranges.allTime' => 'All time',
+			'settings.export.ranges.allTimeSubtitle' => 'Export everything',
+			'settings.export.ranges.thisYear' => 'This year',
+			'settings.export.ranges.lastSixMonths' => 'Last 6 months',
+			'settings.export.ranges.lastThreeMonths' => 'Last 3 months',
+			'settings.export.ranges.custom' => 'Custom range',
+			'settings.export.ranges.customSubtitle' => 'Select start and end dates',
+			'settings.export.ranges.untilToday' => ({required Object start}) => '${start} – Present',
+			'settings.export.ranges.between' => ({required Object start, required Object end}) => '${start} – ${end}',
+			'settings.export.include.transactions' => 'Transactions',
+			'settings.export.include.budgets' => 'Budgets',
+			'settings.export.include.categories' => 'Categories',
+			'settings.export.rangeNote' => 'The date range applies to transactions. Budgets and categories are exported in full.',
+			'settings.export.button' => 'Export data',
+			'settings.export.exporting' => 'Preparing export…',
+			'settings.export.shareSubject' => 'Expenzo export',
+			'settings.export.nothingSelected' => 'Choose at least one thing to export',
+			'settings.export.emptyRange' => 'No transactions in this range',
 			'settings.categories.rowSubtitle' => 'Add, edit and remove categories',
 			'shell.tabs.home' => 'Home',
 			'shell.tabs.activity' => 'Activity',

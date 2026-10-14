@@ -5,6 +5,7 @@ import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/features/settings/presentation/widgets/settings_choice_tile.dart';
 import 'package:expense_tracker/features/settings/presentation/widgets/settings_icon_tile.dart';
 import 'package:expense_tracker/features/settings/presentation/widgets/settings_section.dart';
+import 'package:expense_tracker/features/settings/presentation/widgets/settings_switch_tile.dart';
 import 'package:expense_tracker/features/settings/presentation/widgets/settings_tile.dart';
 import '../../../../support/pump_localized.dart';
 
@@ -219,5 +220,39 @@ void main() {
     expect(radiusOf('b'), BorderRadius.zero);
     expect(radiusOf('c').topLeft, Radius.zero);
     expect(radiusOf('c').bottomLeft, isNot(Radius.zero));
+  });
+
+  testWidgets('a switch tile reports the new value', (tester) async {
+    bool? changed;
+    await pump(
+      tester,
+      SettingsSwitchTile(
+        icon: PiconsRegular.wallet,
+        title: 'Budgets',
+        value: false,
+        onChanged: (value) => changed = value,
+      ),
+    );
+
+    await tester.tap(find.byType(Switch));
+
+    expect(changed, isTrue);
+    expect(find.text('Budgets'), findsOneWidget);
+  });
+
+  testWidgets('a switch tile without onChanged is disabled', (tester) async {
+    await pump(
+      tester,
+      const SettingsSwitchTile(
+        icon: PiconsRegular.wallet,
+        title: 'Budgets',
+        subtitle: 'Monthly limits',
+        value: true,
+        onChanged: null,
+      ),
+    );
+
+    expect(tester.widget<Switch>(find.byType(Switch)).onChanged, isNull);
+    expect(find.text('Monthly limits'), findsOneWidget);
   });
 }
