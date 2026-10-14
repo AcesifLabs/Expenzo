@@ -119,6 +119,13 @@
       "fontSize": "Font size"
     }
   },
+  "calendar": {
+    "title": "Calendar",
+    "rowSubtitle": "Week starts on {day}",
+    "sections": {
+      "firstDayOfWeek": "First day of week"
+    }
+  },
   "categories": {
     "rowSubtitle": "Add, edit and remove categories"
   }

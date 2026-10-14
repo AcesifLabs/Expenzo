@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/constants/app_font_size.dart';
+import 'package:expense_tracker/core/constants/first_day_of_week.dart';
 import 'package:expense_tracker/core/constants/digit_grouping.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
@@ -310,6 +311,17 @@ void main() {
       final saved = await savedAfter(const UpdateFontSize(AppFontSize.large));
 
       expect(saved, testSettings.copyWith(fontSize: AppFontSize.large));
+    });
+
+    test('UpdateFirstDayOfWeek saves only the first day of week', () async {
+      final saved = await savedAfter(
+        const UpdateFirstDayOfWeek(FirstDayOfWeek.sunday),
+      );
+
+      expect(
+        saved,
+        testSettings.copyWith(firstDayOfWeek: FirstDayOfWeek.sunday),
+      );
     });
 
     test('UpdateNumberFormat changes only the given field', () async {

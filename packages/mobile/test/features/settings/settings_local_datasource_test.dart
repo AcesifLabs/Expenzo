@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:expense_tracker/core/constants/app_font_size.dart';
 import 'package:expense_tracker/core/constants/digit_grouping.dart';
+import 'package:expense_tracker/core/constants/first_day_of_week.dart';
 import 'package:expense_tracker/features/settings/data/datasources/settings_local_datasource.dart';
 
 Map<String, Object?> _storedSettings({String? currencySymbol, String? code}) {
@@ -221,6 +222,31 @@ void main() {
     for (final size in AppFontSize.values) {
       await datasource.updateSettings(settings.copyWith(fontSize: size));
       expect((await datasource.getSettings()).fontSize, size);
+    }
+  });
+
+  test('settings saved before first day of week existed load unset', () async {
+    final datasource = await datasourceWith(_storedSettings(code: 'BDT'));
+
+    expect((await datasource.getSettings()).firstDayOfWeek, isNull);
+  });
+
+  test('an unknown stored first day of week loads unset', () async {
+    final datasource = await datasourceWith({
+      ..._storedSettings(code: 'BDT'),
+      'firstDayOfWeek': 'friday',
+    });
+
+    expect((await datasource.getSettings()).firstDayOfWeek, isNull);
+  });
+
+  test('each first day of week is saved and read back', () async {
+    final datasource = await datasourceWith(_storedSettings(code: 'BDT'));
+    final settings = await datasource.getSettings();
+
+    for (final day in FirstDayOfWeek.values) {
+      await datasource.updateSettings(settings.copyWith(firstDayOfWeek: day));
+      expect((await datasource.getSettings()).firstDayOfWeek, day);
     }
   });
 }

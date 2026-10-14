@@ -10,5 +10,6 @@
     "medium": { "title": "Medium", "description": "Balanced size for everyday use" },
     "large": { "title": "Large", "description": "Larger text for better readability" },
     "extraLarge": { "title": "Extra large", "description": "Maximum size for accessibility" }
-  }
+  },
+  "firstDayOfWeek": { "sunday": "Sunday", "monday": "Monday", "saturday": "Saturday" }
 }

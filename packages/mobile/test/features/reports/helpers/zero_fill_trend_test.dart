@@ -1,4 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:expense_tracker/core/constants/first_day_of_week.dart';
+import 'package:expense_tracker/core/utils/week_utils.dart';
 import 'package:expense_tracker/features/reports/domain/entities/granularity.dart';
 import 'package:expense_tracker/features/reports/domain/helpers/zero_fill_trend.dart';
 
@@ -48,5 +50,40 @@ void main() {
       now: DateTime(2026, 12, 1),
     );
     expect(weeks.map((d) => d.date.day), [5, 12, 19]);
+  });
+
+  group('weekly buckets start on the first day of week', () {
+    // 2026-10-07 is a Wednesday.
+    tearDown(() => WeekStart.current.value = FirstDayOfWeek.monday);
+
+    List<int> weekStarts(FirstDayOfWeek day) {
+      WeekStart.current.value = day;
+
+      return zeroFillTrend(
+        totals: const {},
+        range: (start: DateTime(2026, 10, 7), end: DateTime(2026, 10, 20)),
+        granularity: Granularity.weekly,
+        now: DateTime(2026, 12, 1),
+      ).map((d) => d.date.day).toList();
+    }
+
+    test('Sunday', () {
+      expect(weekStarts(FirstDayOfWeek.sunday), [4, 11, 18]);
+    });
+
+    test('Saturday', () {
+      expect(weekStarts(FirstDayOfWeek.saturday), [3, 10, 17]);
+    });
+
+    test('periodStart takes an explicit first day', () {
+      expect(
+        periodStart(
+          DateTime(2026, 10, 7),
+          Granularity.weekly,
+          firstWeekday: DateTime.saturday,
+        ),
+        DateTime(2026, 10, 3),
+      );
+    });
   });
 }

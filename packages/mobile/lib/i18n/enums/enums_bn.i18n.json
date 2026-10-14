@@ -11,5 +11,6 @@
     "medium": { "title": "মাঝারি", "description": "প্রতিদিনের ব্যবহারের জন্য" },
     "large": { "title": "বড়", "description": "পড়তে সহজ বড় লেখা" },
     "extraLarge": { "title": "অনেক বড়", "description": "সহজে দেখার জন্য সবচেয়ে বড়" }
-  }
+  },
+  "firstDayOfWeek": { "sunday": "রবিবার", "monday": "সোমবার", "saturday": "শনিবার" }
 }

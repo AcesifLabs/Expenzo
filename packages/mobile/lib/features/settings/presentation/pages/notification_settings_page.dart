@@ -64,14 +64,19 @@ class NotificationSettingsView extends StatefulWidget {
 }
 
 class _NotificationSettingsViewState extends State<NotificationSettingsView> {
-  /// The day the weekly summary goes out, in the app language.
-  static String _summaryDayName() {
+  /// The day the weekly summary goes out (the day before the first day of
+  /// week), in the app language.
+  static String _summaryDayName(UserSettings settings) {
+    final locale = LocaleSettings.currentLocale;
+    final firstDay = settings.effectiveFirstDayOfWeek(locale.languageCode);
     // Jan 1, 2024 is a Monday, so day n of that month has weekday n.
-    final sample = DateTime(2024, 1, summaryWeekday());
+    final sample = DateTime(
+      2024,
+      1,
+      summaryWeekday(firstWeekday: firstDay.weekday),
+    );
 
-    return DateFormat.EEEE(
-      LocaleSettings.currentLocale.languageTag,
-    ).format(sample);
+    return DateFormat.EEEE(locale.languageTag).format(sample);
   }
 
   AppLifecycleListener? _lifecycle;
@@ -190,7 +195,7 @@ class _NotificationSettingsViewState extends State<NotificationSettingsView> {
         _ToggleRow(
           icon: PiconsRegular.chartBar,
           title: weeklyT.title,
-          subtitle: weeklyT.subtitle(day: _summaryDayName()),
+          subtitle: weeklyT.subtitle(day: _summaryDayName(settings)),
           value: settings.weeklySummaryEnabled,
           onChanged: _toggleHandler(settings, NotificationToggle.weeklySummary),
         ),

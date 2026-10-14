@@ -13,7 +13,7 @@ class GetWeeklySummary {
 
   Future<Either<Failure, WeeklySummary>> call({
     required DateTime now,
-    int firstWeekday = defaultFirstWeekday,
+    int? firstWeekday,
   }) async {
     final weekStart = startOfWeek(now, firstWeekday: firstWeekday);
     final thisWeek = await repository.getTotalSpending(weekStart, now);

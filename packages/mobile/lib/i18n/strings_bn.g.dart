@@ -281,6 +281,7 @@ class _Translations$enums$bn extends Translations$enums$en {
 	@override late final _Translations$enums$theme$bn theme = _Translations$enums$theme$bn._(_root);
 	@override late final _Translations$enums$digitGrouping$bn digitGrouping = _Translations$enums$digitGrouping$bn._(_root);
 	@override late final _Translations$enums$fontSize$bn fontSize = _Translations$enums$fontSize$bn._(_root);
+	@override late final _Translations$enums$firstDayOfWeek$bn firstDayOfWeek = _Translations$enums$firstDayOfWeek$bn._(_root);
 }
 
 // Path: messageTemplates
@@ -458,6 +459,7 @@ class _Translations$settings$bn extends Translations$settings$en {
 	@override late final _Translations$settings$currencyScreen$bn currencyScreen = _Translations$settings$currencyScreen$bn._(_root);
 	@override late final _Translations$settings$numberFormat$bn numberFormat = _Translations$settings$numberFormat$bn._(_root);
 	@override late final _Translations$settings$fontSize$bn fontSize = _Translations$settings$fontSize$bn._(_root);
+	@override late final _Translations$settings$calendar$bn calendar = _Translations$settings$calendar$bn._(_root);
 	@override late final _Translations$settings$categories$bn categories = _Translations$settings$categories$bn._(_root);
 }
 
@@ -975,6 +977,18 @@ class _Translations$enums$fontSize$bn extends Translations$enums$fontSize$en {
 	@override late final _Translations$enums$fontSize$medium$bn medium = _Translations$enums$fontSize$medium$bn._(_root);
 	@override late final _Translations$enums$fontSize$large$bn large = _Translations$enums$fontSize$large$bn._(_root);
 	@override late final _Translations$enums$fontSize$extraLarge$bn extraLarge = _Translations$enums$fontSize$extraLarge$bn._(_root);
+}
+
+// Path: enums.firstDayOfWeek
+class _Translations$enums$firstDayOfWeek$bn extends Translations$enums$firstDayOfWeek$en {
+	_Translations$enums$firstDayOfWeek$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get sunday => 'রবিবার';
+	@override String get monday => 'সোমবার';
+	@override String get saturday => 'শনিবার';
 }
 
 // Path: messageTemplates.errors
@@ -1535,6 +1549,18 @@ class _Translations$settings$fontSize$bn extends Translations$settings$fontSize$
 	@override late final _Translations$settings$fontSize$sections$bn sections = _Translations$settings$fontSize$sections$bn._(_root);
 }
 
+// Path: settings.calendar
+class _Translations$settings$calendar$bn extends Translations$settings$calendar$en {
+	_Translations$settings$calendar$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'ক্যালেন্ডার';
+	@override String rowSubtitle({required Object day}) => 'সপ্তাহ শুরু ${day}';
+	@override late final _Translations$settings$calendar$sections$bn sections = _Translations$settings$calendar$sections$bn._(_root);
+}
+
 // Path: settings.categories
 class _Translations$settings$categories$bn extends Translations$settings$categories$en {
 	_Translations$settings$categories$bn._(TranslationsBn root) : this._root = root, super.internal(root);
@@ -2002,6 +2028,16 @@ class _Translations$settings$fontSize$sections$bn extends Translations$settings$
 	@override String get fontSize => 'লেখার আকার';
 }
 
+// Path: settings.calendar.sections
+class _Translations$settings$calendar$sections$bn extends Translations$settings$calendar$sections$en {
+	_Translations$settings$calendar$sections$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get firstDayOfWeek => 'সপ্তাহের প্রথম দিন';
+}
+
 /// The flat map containing all translations for locale <bn>.
 /// Only for edge cases! For simple maps, use the map function of this library.
 ///
@@ -2303,6 +2339,9 @@ extension on TranslationsBn {
 			'enums.fontSize.large.description' => 'পড়তে সহজ বড় লেখা',
 			'enums.fontSize.extraLarge.title' => 'অনেক বড়',
 			'enums.fontSize.extraLarge.description' => 'সহজে দেখার জন্য সবচেয়ে বড়',
+			'enums.firstDayOfWeek.sunday' => 'রবিবার',
+			'enums.firstDayOfWeek.monday' => 'সোমবার',
+			'enums.firstDayOfWeek.saturday' => 'শনিবার',
 			'messageTemplates.errors.deleteFailed' => 'SMS ফরম্যাট মোছা যায়নি। আবার চেষ্টা করুন।',
 			'messageTemplates.errors.restoreFailed' => 'SMS ফরম্যাট ফেরানো যায়নি। আবার চেষ্টা করুন।',
 			'messageTemplates.alreadyExists' => 'SMS ফরম্যাটটি আগে থেকেই আছে',
@@ -2519,11 +2558,11 @@ extension on TranslationsBn {
 			'recurring.form.amountRequired' => 'একটি পরিমাণ লিখুন',
 			'recurring.form.amountInvalid' => 'সঠিক সংখ্যা লিখুন',
 			'recurring.form.nameRequired' => 'একটি নাম লিখুন',
+			_ => null,
+		} ?? switch (path) {
 			'recurring.form.create' => 'নতুন পুনরাবৃত্ত',
 			'reports.insights.highestDay.title' => 'সবচেয়ে বেশি খরচের দিন',
 			'reports.insights.highestDay.description' => ({required Object day, required Object percent}) => '${day} আপনার সবচেয়ে বেশি খরচের দিন, দৈনিক গড়ের চেয়ে ${percent}% বেশি।',
-			_ => null,
-		} ?? switch (path) {
 			'reports.insights.topCategory.title' => 'সবচেয়ে বেশি খরচের ক্যাটাগরি',
 			'reports.insights.topCategory.description' => ({required Object percent, required Object category}) => 'আপনার খরচের ${percent}% ${category}-এ।',
 			'reports.insights.bestWeek.title' => 'সবচেয়ে সাশ্রয়ী সপ্তাহ',
@@ -2620,6 +2659,9 @@ extension on TranslationsBn {
 			'settings.fontSize.sampleBody' => 'বেছে নেওয়া আকারে আপনার লেনদেন এভাবে দেখাবে।',
 			'settings.fontSize.sections.preview' => 'প্রিভিউ',
 			'settings.fontSize.sections.fontSize' => 'লেখার আকার',
+			'settings.calendar.title' => 'ক্যালেন্ডার',
+			'settings.calendar.rowSubtitle' => ({required Object day}) => 'সপ্তাহ শুরু ${day}',
+			'settings.calendar.sections.firstDayOfWeek' => 'সপ্তাহের প্রথম দিন',
 			'settings.categories.rowSubtitle' => 'ক্যাটাগরি যোগ, সম্পাদনা ও মুছে ফেলুন',
 			'shell.tabs.home' => 'হোম',
 			'shell.tabs.activity' => 'লেনদেন',

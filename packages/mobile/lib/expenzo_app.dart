@@ -10,9 +10,12 @@ import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:saropa_drift_advisor/saropa_drift_advisor.dart';
 import 'package:expense_tracker/core/constants/app_font_size.dart';
+import 'package:expense_tracker/core/constants/first_day_of_week.dart';
 import 'package:expense_tracker/core/theme/currency_config.dart';
+import 'package:expense_tracker/core/theme/first_day_material_localizations.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/core/utils/number_display_format.dart';
+import 'package:expense_tracker/core/utils/week_utils.dart';
 import 'package:expense_tracker/features/settings/domain/entities/user_settings.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_text_scale.dart';
 import 'package:expense_tracker/shared/presentation/widgets/currency_scope.dart';
@@ -68,8 +71,9 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
     AppFontSize.defaultSize.scale,
   );
 
-  // Keeps DateFormat in step with `t`, including when slang follows an OS
-  // language change on its own in "Match device" mode.
+  // Keeps DateFormat and the language-default first day of week in step
+  // with `t`, including when slang follows an OS language change on its own
+  // in "Match device" mode.
   StreamSubscription<AppLocale>? _localeSubscription;
 
   @override
@@ -77,7 +81,7 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
     super.initState();
     _appRouter = AppRouter(navigatorKey: _navigatorKey);
     _localeSubscription = LocaleSettings.getLocaleStream().listen(
-      (locale) => Intl.defaultLocale = locale.languageTag,
+      _onLocaleChanged,
     );
     _startInitialization();
   }
@@ -90,6 +94,10 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
   /// False until the first settings after a cold start re-arm background
   /// work with fresh delays.
   bool _backgroundArmed = false;
+
+  /// The last settings applied, so a language change can recompute the
+  /// first day of week while it is unset.
+  UserSettings? _lastSettings;
 
   Future<void> _startInitialization() async {
     try {
@@ -177,6 +185,7 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
   }
 
   void _applySettings(UserSettings settings) {
+    _lastSettings = settings;
     _themeModeNotifier.value = _themeModeFromString(settings.theme);
     _fontScaleNotifier.value = settings.fontSize.scale;
     CurrencyFormatter.current.value = CurrencyConfig.byCode(
@@ -187,7 +196,30 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
       grouping: settings.digitGrouping,
     );
     _applyLanguage(settings.languageCode);
+    _applyWeekStart();
     unawaited(_applyBackgroundWork(settings));
+  }
+
+  /// Sets [WeekStart] from the last settings and the current app language.
+  /// Returns true when the day changed.
+  bool _applyWeekStart() {
+    final settings = _lastSettings;
+    if (settings == null) return false;
+
+    return WeekStart.apply(
+      settings.effectiveFirstDayOfWeek(
+        LocaleSettings.currentLocale.languageCode,
+      ),
+    );
+  }
+
+  void _onLocaleChanged(AppLocale locale) {
+    Intl.defaultLocale = locale.languageTag;
+    final settings = _lastSettings;
+    // The weekly summary day follows the first day of week.
+    if (_applyWeekStart() && settings != null) {
+      unawaited(_applyBackgroundWork(settings));
+    }
   }
 
   Future<void> _applyBackgroundWork(UserSettings settings) async {
@@ -293,6 +325,32 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
     );
   }
 
+  Widget _buildMaterialApp(
+    BuildContext context,
+    ThemeMode themeMode,
+    FirstDayOfWeek firstDay,
+  ) {
+    return MaterialApp.router(
+      onGenerateTitle: (context) => t.common.appName,
+      locale: TranslationProvider.of(context).flutterLocale,
+      supportedLocales: AppLocaleUtils.supportedLocales,
+      // Date pickers start their weeks on the first day of week. Set at the
+      // root on purpose: showDatePicker reads the navigator's localizations,
+      // so a narrower override wouldn't reach it. A change reloads them app
+      // wide, which is fine for a rarely changed setting.
+      localizationsDelegates: [
+        FirstDayMaterialLocalizationsDelegate(firstDay),
+        ...GlobalMaterialLocalizations.delegates,
+      ],
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeMode,
+      routerConfig: _appRouter?.config,
+      debugShowCheckedModeBanner: false,
+      builder: _buildAppTree,
+    );
+  }
+
   @override
   void dispose() {
     _localeSubscription?.cancel();
@@ -307,17 +365,10 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
       child: ValueListenableBuilder<ThemeMode>(
         valueListenable: _themeModeNotifier,
         builder: (context, themeMode, _) {
-          return MaterialApp.router(
-            onGenerateTitle: (context) => t.common.appName,
-            locale: TranslationProvider.of(context).flutterLocale,
-            supportedLocales: AppLocaleUtils.supportedLocales,
-            localizationsDelegates: GlobalMaterialLocalizations.delegates,
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
-            themeMode: themeMode,
-            routerConfig: _appRouter?.config,
-            debugShowCheckedModeBanner: false,
-            builder: _buildAppTree,
+          return ValueListenableBuilder<FirstDayOfWeek>(
+            valueListenable: WeekStart.current,
+            builder: (context, firstDay, _) =>
+                _buildMaterialApp(context, themeMode, firstDay),
           );
         },
       ),

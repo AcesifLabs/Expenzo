@@ -5,6 +5,7 @@ import 'package:talker/talker.dart';
 import 'package:expense_tracker/core/background/background_task_names.dart';
 import 'package:expense_tracker/core/background/background_task_runner.dart';
 import 'package:expense_tracker/core/background/background_task_scheduler.dart';
+import 'package:expense_tracker/core/constants/first_day_of_week.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
 import 'package:expense_tracker/core/logger/app_logger.dart';
@@ -13,6 +14,7 @@ import 'package:expense_tracker/features/reports/domain/entities/weekly_summary.
 import 'package:expense_tracker/features/reports/domain/usecases/get_weekly_summary.dart';
 import 'package:expense_tracker/features/settings/domain/entities/user_settings.dart';
 import 'package:expense_tracker/features/settings/domain/usecases/get_settings.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 import 'package:expense_tracker/shared/services/notification_service.dart';
 
 import '../../support/factories/user_settings_factory.dart';
@@ -68,7 +70,10 @@ void main() {
     );
     when(() => scheduler.rearm(any(), any())).thenAnswer((_) async {});
     when(
-      () => getWeeklySummary(now: any(named: 'now')),
+      () => getWeeklySummary(
+        now: any(named: 'now'),
+        firstWeekday: any(named: 'firstWeekday'),
+      ),
     ).thenAnswer((_) async => Right(summary));
     when(() => notifications.showWeeklySummary(any())).thenAnswer((_) async {});
     when(
@@ -86,7 +91,12 @@ void main() {
 
     expect(await runner.run(BackgroundTaskNames.weeklySummary), isTrue);
 
-    verify(() => getWeeklySummary(now: DateTime(2026, 10, 18, 20))).called(1);
+    verify(
+      () => getWeeklySummary(
+        now: DateTime(2026, 10, 18, 20),
+        firstWeekday: DateTime.monday,
+      ),
+    ).called(1);
     verify(() => notifications.showWeeklySummary(summary)).called(1);
     verify(
       () => scheduler.rearm(BackgroundTaskNames.weeklySummary, value),
@@ -137,14 +147,22 @@ void main() {
 
       await runner.run(BackgroundTaskNames.weeklySummary);
 
-      verify(() => getWeeklySummary(now: DateTime(2026, 10, 18, 20))).called(1);
+      verify(
+        () => getWeeklySummary(
+          now: DateTime(2026, 10, 18, 20),
+          firstWeekday: DateTime.monday,
+        ),
+      ).called(1);
     },
   );
 
   test('a failed summary returns false so Workmanager retries', () async {
     settings(makeUserSettings(weeklySummaryEnabled: true));
     when(
-      () => getWeeklySummary(now: any(named: 'now')),
+      () => getWeeklySummary(
+        now: any(named: 'now'),
+        firstWeekday: any(named: 'firstWeekday'),
+      ),
     ).thenAnswer((_) async => const Left(CacheFailure(message: 'db')));
 
     expect(await runner.run(BackgroundTaskNames.weeklySummary), isFalse);
@@ -172,5 +190,62 @@ void main() {
     when(() => getSettings(any())).thenThrow(StateError('boom'));
 
     expect(await runner.run(BackgroundTaskNames.weeklySummary), isFalse);
+  });
+
+  test('weekly task uses the effective first day of week', () async {
+    // Sunday start: the summary is due Saturday 20:00 and covers the week
+    // from Sunday 2026-10-11. The clock is Saturday 21:00.
+    runner = BackgroundTaskRunner(
+      deps: BackgroundTaskDeps(
+        getSettings: getSettings,
+        getWeeklySummary: getWeeklySummary,
+        sendRecurringReminders: sendReminders,
+        notificationService: notifications,
+      ),
+      scheduler: scheduler,
+      clock: () => DateTime(2026, 10, 17, 21),
+    );
+    settings(
+      makeUserSettings(
+        weeklySummaryEnabled: true,
+        firstDayOfWeek: FirstDayOfWeek.sunday,
+      ),
+    );
+
+    expect(await runner.run(BackgroundTaskNames.weeklySummary), isTrue);
+
+    verify(
+      () => getWeeklySummary(
+        now: DateTime(2026, 10, 17, 20),
+        firstWeekday: DateTime.sunday,
+      ),
+    ).called(1);
+  });
+
+  test('weekly task with the day unset follows the Bangla default', () async {
+    LocaleSettings.setLocaleSync(AppLocale.bn);
+    addTearDown(() => LocaleSettings.setLocaleSync(AppLocale.en));
+    // Saturday start: the summary is due Friday 20:00. The clock is Friday
+    // 21:00.
+    runner = BackgroundTaskRunner(
+      deps: BackgroundTaskDeps(
+        getSettings: getSettings,
+        getWeeklySummary: getWeeklySummary,
+        sendRecurringReminders: sendReminders,
+        notificationService: notifications,
+      ),
+      scheduler: scheduler,
+      clock: () => DateTime(2026, 10, 16, 21),
+    );
+    settings(makeUserSettings(weeklySummaryEnabled: true));
+
+    expect(await runner.run(BackgroundTaskNames.weeklySummary), isTrue);
+
+    verify(
+      () => getWeeklySummary(
+        now: DateTime(2026, 10, 16, 20),
+        firstWeekday: DateTime.saturday,
+      ),
+    ).called(1);
   });
 }

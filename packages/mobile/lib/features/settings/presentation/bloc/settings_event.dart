@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:expense_tracker/core/constants/app_font_size.dart';
 import 'package:expense_tracker/core/constants/digit_grouping.dart';
+import 'package:expense_tracker/core/constants/first_day_of_week.dart';
 import '../../domain/entities/notification_toggle.dart';
 import '../../domain/entities/user_settings.dart';
 
@@ -119,6 +120,16 @@ class UpdateFontSize extends SettingsEvent {
   List<Object?> get props => [fontSize];
 
   const UpdateFontSize(this.fontSize);
+}
+
+/// Stores the choice, so it no longer follows the app language.
+class UpdateFirstDayOfWeek extends SettingsEvent {
+  final FirstDayOfWeek firstDayOfWeek;
+
+  @override
+  List<Object?> get props => [firstDayOfWeek];
+
+  const UpdateFirstDayOfWeek(this.firstDayOfWeek);
 }
 
 class DeleteAccountEvent extends SettingsEvent {

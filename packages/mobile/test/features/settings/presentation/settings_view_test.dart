@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:expense_tracker/core/constants/first_day_of_week.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
@@ -99,6 +100,9 @@ void main() {
   testWidgets('the notifications row shows Off when the master is off', (
     tester,
   ) async {
+    // Tall enough that the list builds the Notifications row.
+    await tester.binding.setSurfaceSize(const Size(400, 3000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     await pumpSettings(tester);
 
     expect(find.text('Notifications'), findsOneWidget);
@@ -112,6 +116,8 @@ void main() {
     when(
       () => settingsBloc.state,
     ).thenReturn(SettingsLoaded(makeUserSettings()));
+    await tester.binding.setSurfaceSize(const Size(400, 3000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     await pumpSettings(tester);
 
     expect(find.text('3 of 4 on'), findsOneWidget);
@@ -200,6 +206,46 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('font-size-page'), findsOneWidget);
+  });
+
+  testWidgets('calendar is the last Preferences row and shows the effective '
+      'first day', (tester) async {
+    when(
+      () => settingsBloc.state,
+    ).thenReturn(SettingsLoaded(makeUserSettings()));
+    await tester.binding.setSurfaceSize(const Size(400, 3000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpSettings(tester);
+
+    double top(String text) => tester.getTopLeft(find.text(text)).dy;
+
+    expect(find.text('Week starts on Monday'), findsOneWidget);
+    expect(top('Calendar'), greaterThan(top('Appearance')));
+    expect(top('Calendar'), lessThan(top('NOTIFICATIONS')));
+  });
+
+  testWidgets('a stored first day shows on the calendar row', (tester) async {
+    when(() => settingsBloc.state).thenReturn(
+      SettingsLoaded(makeUserSettings(firstDayOfWeek: FirstDayOfWeek.saturday)),
+    );
+    await tester.binding.setSurfaceSize(const Size(400, 3000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpSettings(tester);
+
+    expect(find.text('Week starts on Saturday'), findsOneWidget);
+  });
+
+  testWidgets('the calendar row opens /settings/calendar', (tester) async {
+    await pumpSettingsRouter(tester, child: 'calendar');
+
+    await tester.scrollUntilVisible(find.text('Calendar'), 200);
+    // Fully on screen: scrollUntilVisible stops once the row's edge shows.
+    await tester.ensureVisible(find.text('Calendar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Calendar'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('calendar-page'), findsOneWidget);
   });
 
   testWidgets('the language row opens /settings/language', (tester) async {

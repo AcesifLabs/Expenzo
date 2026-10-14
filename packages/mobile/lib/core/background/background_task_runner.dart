@@ -6,6 +6,7 @@ import 'package:expense_tracker/features/reports/domain/usecases/get_weekly_summ
 import 'package:expense_tracker/features/settings/domain/entities/notification_toggle.dart';
 import 'package:expense_tracker/features/settings/domain/entities/user_settings.dart';
 import 'package:expense_tracker/features/settings/domain/usecases/get_settings.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 import 'package:expense_tracker/shared/services/notification_service.dart';
 import 'background_task_names.dart';
 import 'background_task_scheduler.dart';
@@ -59,8 +60,13 @@ class BackgroundTaskRunner {
   Future<void> _runWeeklySummary() async {
     final settings = await _loadSettings();
     if (settings.isEnabled(NotificationToggle.weeklySummary)) {
+      // applyBackgroundSettings has set the app language by now.
+      final firstWeekday = settings
+          .effectiveFirstDayOfWeek(LocaleSettings.currentLocale.languageCode)
+          .weekday;
       final summary = await deps.getWeeklySummary(
-        now: lastWeeklySummaryAt(clock()),
+        now: lastWeeklySummaryAt(clock(), firstWeekday: firstWeekday),
+        firstWeekday: firstWeekday,
       );
       await summary.fold(
         (failure) => throw StateError(failure.message),
