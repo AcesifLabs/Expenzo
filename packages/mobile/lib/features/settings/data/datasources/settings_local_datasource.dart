@@ -2,6 +2,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:expense_tracker/core/constants/app_font_size.dart';
 import 'package:expense_tracker/core/constants/digit_grouping.dart';
+import 'package:expense_tracker/core/constants/first_day_of_week.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/core/theme/currency_config.dart';
@@ -77,6 +78,7 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
       'decimalPlaces': settings.decimalPlaces,
       'digitGrouping': settings.digitGrouping.name,
       'fontSize': settings.fontSize.name,
+      'firstDayOfWeek': settings.firstDayOfWeek?.name,
       'createdAt': settings.createdAt.toIso8601String(),
       'updatedAt': settings.updatedAt.toIso8601String(),
     };
@@ -108,6 +110,9 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
       fontSize:
           AppFontSize.fromName(json['fontSize'] as String?) ??
           AppFontSize.defaultSize,
+      firstDayOfWeek: FirstDayOfWeek.fromName(
+        json['firstDayOfWeek'] as String?,
+      ),
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );

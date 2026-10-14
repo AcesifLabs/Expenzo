@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:expense_tracker/core/constants/first_day_of_week.dart';
 import 'package:expense_tracker/features/settings/domain/entities/notification_toggle.dart';
 import 'package:expense_tracker/features/settings/domain/entities/user_settings.dart';
 
@@ -59,5 +60,20 @@ void main() {
       base.withToggle(NotificationToggle.recurringReminders, false),
       base.copyWith(recurringRemindersEnabled: false),
     );
+  });
+
+  group('effectiveFirstDayOfWeek', () {
+    test('while unset, follows the app language', () {
+      expect(base.firstDayOfWeek, isNull);
+      expect(base.effectiveFirstDayOfWeek('bn'), FirstDayOfWeek.saturday);
+      expect(base.effectiveFirstDayOfWeek('en'), FirstDayOfWeek.monday);
+    });
+
+    test('a stored day wins over the language', () {
+      final sunday = base.copyWith(firstDayOfWeek: FirstDayOfWeek.sunday);
+
+      expect(sunday.effectiveFirstDayOfWeek('bn'), FirstDayOfWeek.sunday);
+      expect(sunday.effectiveFirstDayOfWeek('en'), FirstDayOfWeek.sunday);
+    });
   });
 }

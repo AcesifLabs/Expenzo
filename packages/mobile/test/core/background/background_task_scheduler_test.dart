@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:expense_tracker/core/background/background_task_names.dart';
 import 'package:expense_tracker/core/background/background_task_scheduler.dart';
 import 'package:expense_tracker/core/background/background_work.dart';
+import 'package:expense_tracker/core/constants/first_day_of_week.dart';
 
 import '../../support/factories/user_settings_factory.dart';
 
@@ -39,7 +40,11 @@ void main() {
 
   setUp(() {
     work = _FakeBackgroundWork();
-    scheduler = BackgroundTaskScheduler(work: work, clock: () => now);
+    scheduler = BackgroundTaskScheduler(
+      work: work,
+      clock: () => now,
+      appLanguageCode: () => 'en',
+    );
   });
 
   test('weekly on schedules once with the delay to the next summary', () async {
@@ -110,6 +115,7 @@ void main() {
       work: work,
       clock: () => now,
       fixedDelay: const Duration(minutes: 1),
+      appLanguageCode: () => 'en',
     );
 
     await scheduler.apply(makeUserSettings(weeklySummaryEnabled: true));
@@ -145,6 +151,106 @@ void main() {
       work.isReady = false;
 
       await scheduler.rearm(recurring, makeUserSettings());
+
+      expect(work.calls, 0);
+    });
+  });
+
+  group('first day of week', () {
+    final weeklyOn = makeUserSettings(weeklySummaryEnabled: true);
+
+    test('a Saturday start schedules Friday 20:00', () async {
+      await scheduler.apply(
+        makeUserSettings(
+          weeklySummaryEnabled: true,
+          firstDayOfWeek: FirstDayOfWeek.saturday,
+        ),
+      );
+
+      expect(
+        work.scheduled[weekly],
+        DateTime(2026, 10, 16, 20).difference(now),
+      );
+    });
+
+    test('unset with Bangla schedules Friday 20:00', () async {
+      scheduler = BackgroundTaskScheduler(
+        work: work,
+        clock: () => now,
+        appLanguageCode: () => 'bn',
+      );
+
+      await scheduler.apply(weeklyOn);
+
+      expect(
+        work.scheduled[weekly],
+        DateTime(2026, 10, 16, 20).difference(now),
+      );
+    });
+
+    test('changing it re-schedules with the new delay', () async {
+      await scheduler.apply(weeklyOn);
+      work.reset();
+
+      await scheduler.apply(
+        weeklyOn.copyWith(firstDayOfWeek: FirstDayOfWeek.sunday),
+      );
+
+      expect(
+        work.scheduled[weekly],
+        DateTime(2026, 10, 17, 20).difference(now),
+      );
+    });
+
+    test('rearm uses the setting', () async {
+      await scheduler.rearm(
+        weekly,
+        weeklyOn.copyWith(firstDayOfWeek: FirstDayOfWeek.sunday),
+      );
+
+      expect(
+        work.scheduled[weekly],
+        DateTime(2026, 10, 17, 20).difference(now),
+      );
+    });
+  });
+
+  group('app language change', () {
+    var language = 'en';
+
+    setUp(() {
+      language = 'en';
+      scheduler = BackgroundTaskScheduler(
+        work: work,
+        clock: () => now,
+        appLanguageCode: () => language,
+      );
+    });
+
+    test('re-arms an unset first day to the new default', () async {
+      final settings = makeUserSettings(weeklySummaryEnabled: true);
+      await scheduler.apply(settings);
+      work.reset();
+
+      language = 'bn';
+      await scheduler.apply(settings);
+
+      expect(
+        work.scheduled[weekly],
+        DateTime(2026, 10, 16, 20).difference(now),
+      );
+    });
+
+    test('does nothing when the first day is stored', () async {
+      final settings = makeUserSettings(
+        weeklySummaryEnabled: true,
+        firstDayOfWeek: FirstDayOfWeek.monday,
+      );
+      await scheduler.apply(settings);
+      work.reset();
+
+      language = 'bn';
+      await scheduler.apply(settings);
 
       expect(work.calls, 0);
     });

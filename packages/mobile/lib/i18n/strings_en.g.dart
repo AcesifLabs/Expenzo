@@ -383,6 +383,7 @@ class Translations$enums$en {
 	late final Translations$enums$theme$en theme = Translations$enums$theme$en.internal(_root);
 	late final Translations$enums$digitGrouping$en digitGrouping = Translations$enums$digitGrouping$en.internal(_root);
 	late final Translations$enums$fontSize$en fontSize = Translations$enums$fontSize$en.internal(_root);
+	late final Translations$enums$firstDayOfWeek$en firstDayOfWeek = Translations$enums$firstDayOfWeek$en.internal(_root);
 }
 
 // Path: messageTemplates
@@ -676,6 +677,7 @@ class Translations$settings$en {
 	late final Translations$settings$currencyScreen$en currencyScreen = Translations$settings$currencyScreen$en.internal(_root);
 	late final Translations$settings$numberFormat$en numberFormat = Translations$settings$numberFormat$en.internal(_root);
 	late final Translations$settings$fontSize$en fontSize = Translations$settings$fontSize$en.internal(_root);
+	late final Translations$settings$calendar$en calendar = Translations$settings$calendar$en.internal(_root);
 	late final Translations$settings$categories$en categories = Translations$settings$categories$en.internal(_root);
 }
 
@@ -1524,6 +1526,24 @@ class Translations$enums$fontSize$en {
 	late final Translations$enums$fontSize$medium$en medium = Translations$enums$fontSize$medium$en.internal(_root);
 	late final Translations$enums$fontSize$large$en large = Translations$enums$fontSize$large$en.internal(_root);
 	late final Translations$enums$fontSize$extraLarge$en extraLarge = Translations$enums$fontSize$extraLarge$en.internal(_root);
+}
+
+// Path: enums.firstDayOfWeek
+class Translations$enums$firstDayOfWeek$en {
+	Translations$enums$firstDayOfWeek$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Sunday'
+	String get sunday => 'Sunday';
+
+	/// en: 'Monday'
+	String get monday => 'Monday';
+
+	/// en: 'Saturday'
+	String get saturday => 'Saturday';
 }
 
 // Path: messageTemplates.errors
@@ -2495,6 +2515,23 @@ class Translations$settings$fontSize$en {
 	late final Translations$settings$fontSize$sections$en sections = Translations$settings$fontSize$sections$en.internal(_root);
 }
 
+// Path: settings.calendar
+class Translations$settings$calendar$en {
+	Translations$settings$calendar$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Calendar'
+	String get title => 'Calendar';
+
+	/// en: 'Week starts on {day}'
+	String rowSubtitle({required Object day}) => 'Week starts on ${day}';
+
+	late final Translations$settings$calendar$sections$en sections = Translations$settings$calendar$sections$en.internal(_root);
+}
+
 // Path: settings.categories
 class Translations$settings$categories$en {
 	Translations$settings$categories$en.internal(this._root);
@@ -3150,6 +3187,18 @@ class Translations$settings$fontSize$sections$en {
 	String get fontSize => 'Font size';
 }
 
+// Path: settings.calendar.sections
+class Translations$settings$calendar$sections$en {
+	Translations$settings$calendar$sections$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'First day of week'
+	String get firstDayOfWeek => 'First day of week';
+}
+
 /// The flat map containing all translations for locale <en>.
 /// Only for edge cases! For simple maps, use the map function of this library.
 ///
@@ -3451,6 +3500,9 @@ extension on Translations {
 			'enums.fontSize.large.description' => 'Larger text for better readability',
 			'enums.fontSize.extraLarge.title' => 'Extra large',
 			'enums.fontSize.extraLarge.description' => 'Maximum size for accessibility',
+			'enums.firstDayOfWeek.sunday' => 'Sunday',
+			'enums.firstDayOfWeek.monday' => 'Monday',
+			'enums.firstDayOfWeek.saturday' => 'Saturday',
 			'messageTemplates.errors.deleteFailed' => 'Couldn\'t delete the SMS format. Try again.',
 			'messageTemplates.errors.restoreFailed' => 'Couldn\'t restore the SMS format. Try again.',
 			'messageTemplates.alreadyExists' => 'SMS format already exists',
@@ -3667,11 +3719,11 @@ extension on Translations {
 			'recurring.form.amountRequired' => 'Enter an amount',
 			'recurring.form.amountInvalid' => 'Enter a valid number',
 			'recurring.form.nameRequired' => 'Enter a name',
+			_ => null,
+		} ?? switch (path) {
 			'recurring.form.create' => 'New recurring',
 			'reports.insights.highestDay.title' => 'Highest spending day',
 			'reports.insights.highestDay.description' => ({required Object day, required Object percent}) => '${day} is your biggest spending day, ${percent}% above your daily average.',
-			_ => null,
-		} ?? switch (path) {
 			'reports.insights.topCategory.title' => 'Most frequent category',
 			'reports.insights.topCategory.description' => ({required Object category, required Object percent}) => '${category} accounts for ${percent}% of your spending.',
 			'reports.insights.bestWeek.title' => 'Best savings week',
@@ -3768,6 +3820,9 @@ extension on Translations {
 			'settings.fontSize.sampleBody' => 'This is how your transactions will appear with the selected font size.',
 			'settings.fontSize.sections.preview' => 'Preview',
 			'settings.fontSize.sections.fontSize' => 'Font size',
+			'settings.calendar.title' => 'Calendar',
+			'settings.calendar.rowSubtitle' => ({required Object day}) => 'Week starts on ${day}',
+			'settings.calendar.sections.firstDayOfWeek' => 'First day of week',
 			'settings.categories.rowSubtitle' => 'Add, edit and remove categories',
 			'shell.tabs.home' => 'Home',
 			'shell.tabs.activity' => 'Activity',

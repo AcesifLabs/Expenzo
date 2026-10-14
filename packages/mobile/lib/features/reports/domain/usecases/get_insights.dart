@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/error/failures.dart';
+import 'package:expense_tracker/core/utils/week_utils.dart';
 import '../entities/insight_item.dart';
 import '../entities/date_amount.dart';
 import '../entities/spending_insights.dart';
@@ -13,6 +14,7 @@ class GetInsights {
     required SpendingInsights insights,
     required List<DateAmount> spendingTrend,
     required List<CategoryAmount> categoryBreakdown,
+    int? firstWeekday,
   }) {
     try {
       final items = <InsightItem>[];
@@ -52,7 +54,10 @@ class GetInsights {
       }
 
       if (spendingTrend.length >= 7) {
-        final lowestWeek = _findLowestWeek(spendingTrend);
+        final lowestWeek = _findLowestWeek(
+          spendingTrend,
+          firstWeekday ?? WeekStart.weekday,
+        );
         if (lowestWeek != null) {
           items.add(
             InsightItem(
@@ -88,13 +93,16 @@ class GetInsights {
     }
   }
 
-  _WeekRange? _findLowestWeek(List<DateAmount> trend) {
+  /// The cheapest full calendar week (7 daily points from [firstWeekday]),
+  /// or null when [trend] holds none.
+  _WeekRange? _findLowestWeek(List<DateAmount> trend, int firstWeekday) {
     if (trend.length < 7) return null;
 
     double minSum = double.infinity;
     _WeekRange? best;
 
     for (var i = 0; i <= trend.length - 7; i++) {
+      if (trend[i].date.weekday != firstWeekday) continue;
       final week = trend.sublist(i, i + 7);
       final sum = week.fold<double>(0, (s, d) => s + d.amount);
 

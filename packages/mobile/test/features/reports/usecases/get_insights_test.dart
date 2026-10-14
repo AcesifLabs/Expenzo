@@ -2,6 +2,8 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+import 'package:expense_tracker/core/constants/first_day_of_week.dart';
+import 'package:expense_tracker/core/utils/week_utils.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 import 'package:expense_tracker/features/reports/domain/entities/category_amount.dart';
 import 'package:expense_tracker/features/reports/domain/entities/date_amount.dart';
@@ -41,11 +43,20 @@ SpendingInsights buildSpendingInsights({
   );
 }
 
-List<DateAmount> buildTrend(int days) {
+/// Daily points from Monday 2026-01-05 (Monday is the default first day).
+List<DateAmount> buildTrend(int days, {int startDay = 5}) {
   return List.generate(
     days,
-    (i) => DateAmount(date: DateTime(2026, 1, i + 1), amount: 50),
+    (i) => DateAmount(date: DateTime(2026, 1, startDay + i), amount: 50),
   );
+}
+
+InsightItem? savingsWeek(List<InsightItem> items) {
+  for (final item in items) {
+    if (item.kind == InsightKind.bestSavingsWeek) return item;
+  }
+
+  return null;
 }
 
 List<InsightItem> unwrap(Either<Object, List<InsightItem>> result) {
@@ -183,6 +194,68 @@ void main() {
         'Best savings week': InsightTone.positive,
         'Recurring expenses': InsightTone.investment,
         'Budget status': InsightTone.info,
+      });
+    });
+
+    group('best savings week follows the first day of week', () {
+      // Jan 2026: the 4th is a Sunday, the 10th a Saturday. Twenty days
+      // from the 3rd, with the 11th-17th the cheapest Sunday week.
+      final trend = [
+        for (var day = 3; day <= 22; day++)
+          DateAmount(
+            date: DateTime(2026, 1, day),
+            amount: day >= 11 && day <= 17 ? 1 : 50,
+          ),
+      ];
+
+      InsightItem? weekFor(int firstWeekday, List<DateAmount> points) =>
+          savingsWeek(
+            unwrap(
+              getInsights(
+                insights: buildSpendingInsights(),
+                spendingTrend: points,
+                categoryBreakdown: const [],
+                firstWeekday: firstWeekday,
+              ),
+            ),
+          );
+
+      test('Sunday start names a Sunday to Saturday week', () {
+        final week = weekFor(DateTime.sunday, trend);
+
+        expect(week?.weekStart, DateTime(2026, 1, 11));
+        expect(week?.weekEnd, DateTime(2026, 1, 17));
+      });
+
+      test('Saturday start names a Saturday to Friday week', () {
+        final week = weekFor(DateTime.saturday, trend);
+
+        expect(week?.weekStart?.weekday, DateTime.saturday);
+        expect(week?.weekEnd?.weekday, DateTime.friday);
+        expect(week?.weekStart, DateTime(2026, 1, 10));
+      });
+
+      test('without firstWeekday, WeekStart decides', () {
+        WeekStart.current.value = FirstDayOfWeek.saturday;
+        addTearDown(() => WeekStart.current.value = FirstDayOfWeek.monday);
+
+        final week = savingsWeek(
+          unwrap(
+            getInsights(
+              insights: buildSpendingInsights(),
+              spendingTrend: trend,
+              categoryBreakdown: const [],
+            ),
+          ),
+        );
+
+        expect(week?.weekStart, DateTime(2026, 1, 10));
+        expect(week?.weekEnd, DateTime(2026, 1, 16));
+      });
+
+      test('no full week from the first day gives no insight', () {
+        // Seven days from a Monday hold no full Sunday-start week.
+        expect(weekFor(DateTime.sunday, buildTrend(7)), isNull);
       });
     });
   });

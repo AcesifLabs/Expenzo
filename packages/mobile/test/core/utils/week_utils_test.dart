@@ -1,7 +1,49 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:expense_tracker/core/constants/first_day_of_week.dart';
 import 'package:expense_tracker/core/utils/week_utils.dart';
 
+import '../../support/factories/user_settings_factory.dart';
+
 void main() {
+  tearDown(() => WeekStart.current.value = FirstDayOfWeek.monday);
+
+  group('WeekStart', () {
+    test('startOfWeek without an argument follows WeekStart.current', () {
+      WeekStart.current.value = FirstDayOfWeek.sunday;
+
+      // 2026-10-14 is a Wednesday; its Sunday-start week began Oct 11.
+      expect(startOfWeek(DateTime(2026, 10, 14, 10)), DateTime(2026, 10, 11));
+    });
+
+    test('a Saturday start on a Friday returns the previous Saturday', () {
+      WeekStart.current.value = FirstDayOfWeek.saturday;
+
+      expect(startOfWeek(DateTime(2026, 10, 16, 21)), DateTime(2026, 10, 10));
+      expect(summaryWeekday(), DateTime.friday);
+    });
+
+    test('apply reports whether the day changed', () {
+      expect(WeekStart.apply(FirstDayOfWeek.monday), isFalse);
+      expect(WeekStart.apply(FirstDayOfWeek.saturday), isTrue);
+      expect(WeekStart.current.value, FirstDayOfWeek.saturday);
+      expect(WeekStart.apply(FirstDayOfWeek.saturday), isFalse);
+    });
+
+    test('a language switch moves an unset day; a stored day stays', () {
+      final unset = makeUserSettings();
+      final sunday = makeUserSettings(firstDayOfWeek: FirstDayOfWeek.sunday);
+
+      // What ExpenzoApp does when the app language changes.
+      expect(WeekStart.apply(unset.effectiveFirstDayOfWeek('en')), isFalse);
+      expect(WeekStart.apply(unset.effectiveFirstDayOfWeek('bn')), isTrue);
+      expect(WeekStart.current.value, FirstDayOfWeek.saturday);
+
+      expect(WeekStart.apply(sunday.effectiveFirstDayOfWeek('bn')), isTrue);
+      expect(WeekStart.apply(sunday.effectiveFirstDayOfWeek('en')), isFalse);
+      expect(WeekStart.current.value, FirstDayOfWeek.sunday);
+    });
+  });
+
   group('startOfWeek', () {
     test('Monday start: every day Mon–Sun maps to Monday midnight', () {
       // 2026-10-12 is a Monday.

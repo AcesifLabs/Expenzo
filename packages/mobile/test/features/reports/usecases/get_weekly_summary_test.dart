@@ -84,4 +84,28 @@ void main() {
 
     expect(result.isLeft(), isTrue);
   });
+
+  test('a Saturday start sums from the last Saturday', () async {
+    // Friday evening, the summary time for a Saturday start.
+    final friday = DateTime(2026, 10, 16, 20);
+    when(
+      () => repository.getTotalSpending(DateTime(2026, 10, 10), friday),
+    ).thenAnswer((_) async => const Right(300));
+    when(
+      () => repository.getTotalSpending(
+        DateTime(2026, 10, 3),
+        DateTime(2026, 10, 9, 20),
+      ),
+    ).thenAnswer((_) async => const Right(200));
+
+    final result = await getWeeklySummary(
+      now: friday,
+      firstWeekday: DateTime.saturday,
+    );
+    final summary = result.getOrElse(() => throw StateError('Left'));
+
+    expect(summary.weekStart, DateTime(2026, 10, 10));
+    expect(summary.thisWeekTotal, 300);
+    expect(summary.lastWeekTotal, 200);
+  });
 }

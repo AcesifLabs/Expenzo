@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:expense_tracker/core/constants/first_day_of_week.dart';
 import 'package:expense_tracker/features/settings/domain/entities/notification_toggle.dart';
 import 'package:expense_tracker/features/settings/domain/entities/user_settings.dart';
 import 'package:expense_tracker/features/settings/presentation/bloc/settings_bloc.dart';
@@ -195,7 +196,22 @@ void main() {
 
     expect(find.text('নোটিফিকেশন চালু রাখুন'), findsOneWidget);
     expect(find.text('80% সীমা'), findsOneWidget);
-    expect(find.textContaining('রবিবার সন্ধ্যায়'), findsOneWidget);
+    // Unset first day in Bangla is Saturday, so the summary is Friday.
+    expect(find.textContaining('শুক্রবার সন্ধ্যায়'), findsOneWidget);
+  });
+
+  testWidgets('the weekly subtitle names the day before the first day', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      settings: makeUserSettings(firstDayOfWeek: FirstDayOfWeek.saturday),
+    );
+
+    expect(
+      find.text("Friday evening: this week's spending compared with last week"),
+      findsOneWidget,
+    );
   });
 
   testWidgets('no overflow at the 2.0x text scale cap', (tester) async {

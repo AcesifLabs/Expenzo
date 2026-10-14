@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:expense_tracker/core/constants/app_font_size.dart';
 import 'package:expense_tracker/core/constants/digit_grouping.dart';
+import 'package:expense_tracker/core/constants/first_day_of_week.dart';
 import 'package:expense_tracker/core/utils/number_display_format.dart';
 
 import 'notification_toggle.dart';
@@ -41,6 +42,9 @@ class UserSettings extends Equatable {
 
   /// Multiplies the device text scale; see [AppFontSize].
   final AppFontSize fontSize;
+
+  /// Null until the user picks; read [effectiveFirstDayOfWeek] instead.
+  final FirstDayOfWeek? firstDayOfWeek;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -62,6 +66,7 @@ class UserSettings extends Equatable {
     decimalPlaces,
     digitGrouping,
     fontSize,
+    firstDayOfWeek,
     createdAt,
     updatedAt,
   ];
@@ -83,6 +88,7 @@ class UserSettings extends Equatable {
     this.decimalPlaces = NumberDisplayFormat.defaultDecimalPlaces,
     this.digitGrouping = NumberDisplayFormat.defaultGrouping,
     this.fontSize = AppFontSize.defaultSize,
+    this.firstDayOfWeek,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -104,6 +110,7 @@ class UserSettings extends Equatable {
     int? decimalPlaces,
     DigitGrouping? digitGrouping,
     AppFontSize? fontSize,
+    FirstDayOfWeek? firstDayOfWeek,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -129,10 +136,16 @@ class UserSettings extends Equatable {
       decimalPlaces: decimalPlaces ?? this.decimalPlaces,
       digitGrouping: digitGrouping ?? this.digitGrouping,
       fontSize: fontSize ?? this.fontSize,
+      firstDayOfWeek: firstDayOfWeek ?? this.firstDayOfWeek,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
+
+  /// The stored choice, else the default for [appLanguageCode] (the
+  /// resolved app language, never 'system').
+  FirstDayOfWeek effectiveFirstDayOfWeek(String appLanguageCode) =>
+      firstDayOfWeek ?? FirstDayOfWeek.defaultFor(appLanguageCode);
 
   /// True when [toggle] is on and so is the master switch.
   bool isEnabled(NotificationToggle toggle) {

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:picons/picons.dart';
 
 import 'package:expense_tracker/core/constants/app_font_size.dart';
+import 'package:expense_tracker/core/constants/first_day_of_week.dart';
 import 'package:expense_tracker/core/database/app_database.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/core/theme/currency_config.dart';
@@ -55,7 +56,7 @@ class SettingsPage extends StatelessWidget {
 /// | Section (builder) | Rows now | Rows later tickets add, in final order |
 /// |---|---|---|
 /// | Profile & account (`_accountSection`) | Sign in (signed out) / Delete account (signed in) | SAAP-72 profile card above the section, then My profile (Delete account moves into it); SAAP-75 Family group right after My profile |
-/// | Preferences (`_preferencesSection`) | Default currency, Number format, Font size, Appearance | Default currency, Number format, Font size, Appearance, Calendar (SAAP-67) |
+/// | Preferences (`_preferencesSection`) | Default currency, Number format, Font size, Appearance, Calendar | none |
 /// | Notifications (`_notificationsSection`) | Notifications | none |
 /// | Data & budget (`_dataSection`) | Recurring transactions | Recurring transactions, Sync (SAAP-71), Export data (SAAP-69), Delete all data (SAAP-70) |
 /// | Automation (`_automationSection`) | Auto-import from SMS, Matching rules | none |
@@ -93,6 +94,10 @@ class SettingsView extends StatelessWidget {
 
   void _openFontSize(BuildContext context) {
     context.push('/settings/font-size');
+  }
+
+  void _openCalendar(BuildContext context) {
+    context.push('/settings/calendar');
   }
 
   void _openNotifications(BuildContext context) {
@@ -167,6 +172,10 @@ class SettingsView extends StatelessWidget {
       settings?.currencyCode ?? CurrencyConfig.defaultCode,
     );
     final theme = settings?.theme ?? 'system';
+    final languageCode = LocaleSettings.currentLocale.languageCode;
+    final firstDay =
+        settings?.effectiveFirstDayOfWeek(languageCode) ??
+        FirstDayOfWeek.defaultFor(languageCode);
 
     return SettingsSection(
       title: settingsT.sections.preferences,
@@ -195,6 +204,12 @@ class SettingsView extends StatelessWidget {
           title: settingsT.appearance,
           subtitle: AppearanceView.labelFor(theme),
           onTap: () => _openAppearance(context),
+        ),
+        SettingsTile(
+          icon: PiconsRegular.calendarBlank,
+          title: settingsT.calendar.title,
+          subtitle: settingsT.calendar.rowSubtitle(day: firstDay.displayName),
+          onTap: () => _openCalendar(context),
         ),
       ],
     );
