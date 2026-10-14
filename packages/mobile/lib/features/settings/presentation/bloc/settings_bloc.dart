@@ -65,6 +65,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       _onUpdateFirstDayOfWeek,
       transformer: concurrent(),
     );
+    on<UpdateHomeTab>(_onUpdateHomeTab, transformer: concurrent());
     on<DismissAutoImportPrompt>(
       _onDismissAutoImportPrompt,
       transformer: concurrent(),
@@ -180,6 +181,10 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     Emitter<SettingsState> emit,
   ) {
     _updateFromLast((s) => s.copyWith(firstDayOfWeek: event.firstDayOfWeek));
+  }
+
+  void _onUpdateHomeTab(UpdateHomeTab event, Emitter<SettingsState> emit) {
+    _updateFromLast((s) => s.copyWith(homeTab: event.homeTab));
   }
 
   Future<void> _onDeleteAccountEvent(

@@ -3,8 +3,12 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Icon rule from DESIGN.md: Phosphor Regular everywhere, Fill only for the
-/// selected tab in the app shell.
-const _fillAllowlist = {'shared/presentation/widgets/app_shell.dart'};
+/// selected tab in the app shell. `AppRootTab.selectedIcon` holds those Fill
+/// icons, and only the shell reads it.
+const _fillAllowlist = {
+  'shared/presentation/widgets/app_shell.dart',
+  'core/router/app_root_tab.dart',
+};
 
 Iterable<(String, String)> _libFiles() sync* {
   for (final entity in Directory('lib').listSync(recursive: true)) {

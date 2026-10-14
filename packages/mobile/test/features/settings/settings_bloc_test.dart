@@ -8,6 +8,7 @@ import 'package:expense_tracker/core/constants/first_day_of_week.dart';
 import 'package:expense_tracker/core/constants/digit_grouping.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
+import 'package:expense_tracker/core/router/app_root_tab.dart';
 import 'package:expense_tracker/features/auth/domain/usecases/delete_account.dart';
 import 'package:expense_tracker/features/settings/domain/entities/notification_toggle.dart';
 import 'package:expense_tracker/features/settings/domain/entities/user_settings.dart';
@@ -324,6 +325,12 @@ void main() {
       );
     });
 
+    test('UpdateHomeTab saves the tab and keeps other settings', () async {
+      final saved = await savedAfter(const UpdateHomeTab(AppRootTab.activity));
+
+      expect(saved, testSettings.copyWith(homeTab: AppRootTab.activity));
+    });
+
     test('UpdateNumberFormat changes only the given field', () async {
       final saved = await savedAfter(
         const UpdateNumberFormat(digitGrouping: DigitGrouping.dot),
@@ -390,6 +397,7 @@ void main() {
         ..add(const DismissAutoImportPrompt())
         ..add(const UpdateDefaultRecurringFrequency('weekly'))
         ..add(const UpdateRecurringAutoCreate(true))
+        ..add(const UpdateHomeTab(AppRootTab.budgets))
         ..add(
           const UpdateNotificationToggle(NotificationToggle.budgetOver, false),
         );

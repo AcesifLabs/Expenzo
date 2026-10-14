@@ -460,6 +460,7 @@ class _Translations$settings$bn extends Translations$settings$en {
 	@override late final _Translations$settings$numberFormat$bn numberFormat = _Translations$settings$numberFormat$bn._(_root);
 	@override late final _Translations$settings$fontSize$bn fontSize = _Translations$settings$fontSize$bn._(_root);
 	@override late final _Translations$settings$calendar$bn calendar = _Translations$settings$calendar$bn._(_root);
+	@override late final _Translations$settings$homePage$bn homePage = _Translations$settings$homePage$bn._(_root);
 	@override late final _Translations$settings$categories$bn categories = _Translations$settings$categories$bn._(_root);
 }
 
@@ -1561,6 +1562,19 @@ class _Translations$settings$calendar$bn extends Translations$settings$calendar$
 	@override late final _Translations$settings$calendar$sections$bn sections = _Translations$settings$calendar$sections$bn._(_root);
 }
 
+// Path: settings.homePage
+class _Translations$settings$homePage$bn extends Translations$settings$homePage$en {
+	_Translations$settings$homePage$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'হোম পেজ';
+	@override String get intro => 'অ্যাপ খুললে কোন স্ক্রিন দেখাবে তা বেছে নিন';
+	@override late final _Translations$settings$homePage$sections$bn sections = _Translations$settings$homePage$sections$bn._(_root);
+	@override late final _Translations$settings$homePage$options$bn options = _Translations$settings$homePage$options$bn._(_root);
+}
+
 // Path: settings.categories
 class _Translations$settings$categories$bn extends Translations$settings$categories$en {
 	_Translations$settings$categories$bn._(TranslationsBn root) : this._root = root, super.internal(root);
@@ -2036,6 +2050,73 @@ class _Translations$settings$calendar$sections$bn extends Translations$settings$
 
 	// Translations
 	@override String get firstDayOfWeek => 'সপ্তাহের প্রথম দিন';
+}
+
+// Path: settings.homePage.sections
+class _Translations$settings$homePage$sections$bn extends Translations$settings$homePage$sections$en {
+	_Translations$settings$homePage$sections$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get defaultHomePage => 'ডিফল্ট হোম পেজ';
+}
+
+// Path: settings.homePage.options
+class _Translations$settings$homePage$options$bn extends Translations$settings$homePage$options$en {
+	_Translations$settings$homePage$options$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override late final _Translations$settings$homePage$options$home$bn home = _Translations$settings$homePage$options$home$bn._(_root);
+	@override late final _Translations$settings$homePage$options$activity$bn activity = _Translations$settings$homePage$options$activity$bn._(_root);
+	@override late final _Translations$settings$homePage$options$budgets$bn budgets = _Translations$settings$homePage$options$budgets$bn._(_root);
+	@override late final _Translations$settings$homePage$options$reports$bn reports = _Translations$settings$homePage$options$reports$bn._(_root);
+}
+
+// Path: settings.homePage.options.home
+class _Translations$settings$homePage$options$home$bn extends Translations$settings$homePage$options$home$en {
+	_Translations$settings$homePage$options$home$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'হোম';
+	@override String get subtitle => 'নিট, বাজেট ও সাম্প্রতিক লেনদেনের সারসংক্ষেপ';
+}
+
+// Path: settings.homePage.options.activity
+class _Translations$settings$homePage$options$activity$bn extends Translations$settings$homePage$options$activity$en {
+	_Translations$settings$homePage$options$activity$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'লেনদেন';
+	@override String get subtitle => 'সব লেনদেনের পূর্ণ তালিকা';
+}
+
+// Path: settings.homePage.options.budgets
+class _Translations$settings$homePage$options$budgets$bn extends Translations$settings$homePage$options$budgets$en {
+	_Translations$settings$homePage$options$budgets$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'বাজেট';
+	@override String get subtitle => 'বাজেটের সারসংক্ষেপ ও অগ্রগতি';
+}
+
+// Path: settings.homePage.options.reports
+class _Translations$settings$homePage$options$reports$bn extends Translations$settings$homePage$options$reports$en {
+	_Translations$settings$homePage$options$reports$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'রিপোর্ট';
+	@override String get subtitle => 'প্রবণতা, ক্যাটাগরি ও বিশ্লেষণ';
 }
 
 /// The flat map containing all translations for locale <bn>.
@@ -2662,6 +2743,17 @@ extension on TranslationsBn {
 			'settings.calendar.title' => 'ক্যালেন্ডার',
 			'settings.calendar.rowSubtitle' => ({required Object day}) => 'সপ্তাহ শুরু ${day}',
 			'settings.calendar.sections.firstDayOfWeek' => 'সপ্তাহের প্রথম দিন',
+			'settings.homePage.title' => 'হোম পেজ',
+			'settings.homePage.intro' => 'অ্যাপ খুললে কোন স্ক্রিন দেখাবে তা বেছে নিন',
+			'settings.homePage.sections.defaultHomePage' => 'ডিফল্ট হোম পেজ',
+			'settings.homePage.options.home.title' => 'হোম',
+			'settings.homePage.options.home.subtitle' => 'নিট, বাজেট ও সাম্প্রতিক লেনদেনের সারসংক্ষেপ',
+			'settings.homePage.options.activity.title' => 'লেনদেন',
+			'settings.homePage.options.activity.subtitle' => 'সব লেনদেনের পূর্ণ তালিকা',
+			'settings.homePage.options.budgets.title' => 'বাজেট',
+			'settings.homePage.options.budgets.subtitle' => 'বাজেটের সারসংক্ষেপ ও অগ্রগতি',
+			'settings.homePage.options.reports.title' => 'রিপোর্ট',
+			'settings.homePage.options.reports.subtitle' => 'প্রবণতা, ক্যাটাগরি ও বিশ্লেষণ',
 			'settings.categories.rowSubtitle' => 'ক্যাটাগরি যোগ, সম্পাদনা ও মুছে ফেলুন',
 			'shell.tabs.home' => 'হোম',
 			'shell.tabs.activity' => 'লেনদেন',

@@ -126,6 +126,31 @@
       "firstDayOfWeek": "First day of week"
     }
   },
+  "homePage": {
+    "title": "Home page",
+    "intro": "Choose which screen to show when you open the app",
+    "sections": {
+      "defaultHomePage": "Default home page"
+    },
+    "options": {
+      "home": {
+        "title": "Home",
+        "subtitle": "Overview with net, budgets and recent activity"
+      },
+      "activity": {
+        "title": "Activity",
+        "subtitle": "Full transaction history list"
+      },
+      "budgets": {
+        "title": "Budgets",
+        "subtitle": "Budget overview and progress tracking"
+      },
+      "reports": {
+        "title": "Reports",
+        "subtitle": "Trends, categories and insights"
+      }
+    }
+  },
   "categories": {
     "rowSubtitle": "Add, edit and remove categories"
   }

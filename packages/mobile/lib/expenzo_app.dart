@@ -20,6 +20,7 @@ import 'package:expense_tracker/features/settings/domain/entities/user_settings.
 import 'package:expense_tracker/shared/presentation/widgets/app_text_scale.dart';
 import 'package:expense_tracker/shared/presentation/widgets/currency_scope.dart';
 import 'package:expense_tracker/shared/presentation/widgets/locale_scope.dart';
+import 'package:expense_tracker/core/router/cold_start_location.dart';
 import 'package:expense_tracker/core/router/refresh_on_auth_change.dart';
 import 'package:expense_tracker/shared/services/feedback_mailer.dart';
 
@@ -41,6 +42,7 @@ import 'features/records/presentation/bloc/record_event.dart';
 import 'features/settings/presentation/bloc/settings_bloc.dart';
 import 'features/settings/presentation/bloc/settings_event.dart';
 import 'features/settings/presentation/bloc/settings_state.dart';
+import 'features/settings/presentation/helpers/first_settings.dart';
 import 'features/sms_parser/application/realtime_sms_processor.dart';
 import 'features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
 import 'shared/presentation/widgets/app_error_fallback.dart';
@@ -109,8 +111,12 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
         await _startDriftDebugServer();
       }
 
+      // Settings live in SharedPreferences, so they load while the
+      // database seeds. The splash stays up until both finish, so the home
+      // tab is the first screen shown.
+      final firstLoaded = _initSettingsWhenReady();
       await di.getIt<BootstrapService>().seedInitialData();
-      _initSettingsWhenReady();
+      _applyHomeTab(await firstLoaded);
 
       if (mounted) {
         setState(() {
@@ -171,9 +177,11 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
     }
   }
 
-  Future<void> _initSettingsWhenReady() async {
+  /// Loads settings and keeps applying them. Returns the first loaded
+  /// settings, or null if they failed or took too long.
+  Future<UserSettings?> _initSettingsWhenReady() async {
     await di.criticalDependenciesReady;
-    if (!mounted) return;
+    if (!mounted) return null;
     final bloc = di.getIt<SettingsBloc>()..add(const LoadSettings());
     bloc.stream.listen((state) {
       if (state is SettingsLoaded) {
@@ -182,6 +190,23 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
         _applySettings(state.settings);
       }
     });
+
+    return firstSettings(bloc.stream);
+  }
+
+  /// Opens the chosen home tab. Called once per start, before the splash
+  /// ends; the settings listener above never navigates, so later changes
+  /// don't move the user. The router isn't mounted yet, so this reads and
+  /// sets the location it will open on (a deep link if the app was opened
+  /// from one).
+  void _applyHomeTab(UserSettings? settings) {
+    final router = _appRouter?.config;
+    if (settings == null || router == null) return;
+    final location = coldStartLocation(
+      current: router.routeInformationProvider.value.uri,
+      homeTab: settings.homeTab,
+    );
+    if (location != null) router.go(location);
   }
 
   void _applySettings(UserSettings settings) {

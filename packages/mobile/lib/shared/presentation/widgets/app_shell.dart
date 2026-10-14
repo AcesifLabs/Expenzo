@@ -32,35 +32,6 @@ class _AppShellState extends State<AppShell> {
   final ValueNotifier<int> _homeRefreshTick = ValueNotifier(0);
   final ValueNotifier<int> _reportsRefreshTick = ValueNotifier(0);
 
-  IconData _navIcon(int i, {bool fill = false}) {
-    if (fill) {
-      switch (i) {
-        case 0:
-          return PiconsFill.house;
-        case 1:
-          return PiconsFill.listDashes;
-        case 2:
-          return PiconsFill.wallet;
-        case 3:
-          return PiconsFill.chartBar;
-        default:
-          return PiconsFill.circle;
-      }
-    }
-    switch (i) {
-      case 0:
-        return PiconsRegular.house;
-      case 1:
-        return PiconsRegular.listDashes;
-      case 2:
-        return PiconsRegular.wallet;
-      case 3:
-        return PiconsRegular.chartBar;
-      default:
-        return PiconsRegular.circle;
-    }
-  }
-
   Widget _navIconTransition(Widget child, Animation<double> animation) {
     return ScaleTransition(scale: animation, child: child);
   }
@@ -135,7 +106,9 @@ class _AppShellState extends State<AppShell> {
                 duration: AppSpacing.durationFast,
                 transitionBuilder: _navIconTransition,
                 child: Icon(
-                  _navIcon(i, fill: sel),
+                  sel
+                      ? AppRootTab.values[i].selectedIcon
+                      : AppRootTab.values[i].icon,
                   key: ValueKey('nav_icon_${i}_$sel'),
                   color: sel ? colors.primary : mutedColor,
                   size: 24,

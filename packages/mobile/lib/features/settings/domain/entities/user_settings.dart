@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:expense_tracker/core/constants/app_font_size.dart';
 import 'package:expense_tracker/core/constants/digit_grouping.dart';
 import 'package:expense_tracker/core/constants/first_day_of_week.dart';
+import 'package:expense_tracker/core/router/app_root_tab.dart';
 import 'package:expense_tracker/core/utils/number_display_format.dart';
 
 import 'notification_toggle.dart';
@@ -45,6 +46,9 @@ class UserSettings extends Equatable {
 
   /// Null until the user picks; read [effectiveFirstDayOfWeek] instead.
   final FirstDayOfWeek? firstDayOfWeek;
+
+  /// Root tab opened on cold start (SAAP-68).
+  final AppRootTab homeTab;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -67,6 +71,7 @@ class UserSettings extends Equatable {
     digitGrouping,
     fontSize,
     firstDayOfWeek,
+    homeTab,
     createdAt,
     updatedAt,
   ];
@@ -89,6 +94,7 @@ class UserSettings extends Equatable {
     this.digitGrouping = NumberDisplayFormat.defaultGrouping,
     this.fontSize = AppFontSize.defaultSize,
     this.firstDayOfWeek,
+    this.homeTab = AppRootTab.home,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -111,6 +117,7 @@ class UserSettings extends Equatable {
     DigitGrouping? digitGrouping,
     AppFontSize? fontSize,
     FirstDayOfWeek? firstDayOfWeek,
+    AppRootTab? homeTab,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -137,6 +144,7 @@ class UserSettings extends Equatable {
       digitGrouping: digitGrouping ?? this.digitGrouping,
       fontSize: fontSize ?? this.fontSize,
       firstDayOfWeek: firstDayOfWeek ?? this.firstDayOfWeek,
+      homeTab: homeTab ?? this.homeTab,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

@@ -24,6 +24,7 @@ import 'package:expense_tracker/features/settings/presentation/pages/appearance_
 import 'package:expense_tracker/features/settings/presentation/pages/calendar_page.dart';
 import 'package:expense_tracker/features/settings/presentation/pages/currency_page.dart';
 import 'package:expense_tracker/features/settings/presentation/pages/font_size_page.dart';
+import 'package:expense_tracker/features/settings/presentation/pages/home_page_settings_page.dart';
 import 'package:expense_tracker/features/settings/presentation/pages/language_page.dart';
 import 'package:expense_tracker/features/settings/presentation/pages/notification_settings_page.dart';
 import 'package:expense_tracker/features/settings/presentation/pages/number_format_page.dart';
@@ -70,6 +71,7 @@ Map<String, Widget Function()> get settingsScreens => {
   'Font size': () => _withSettings(const FontSizeView()),
   'Appearance': () => _withSettings(const AppearanceView()),
   'Calendar': () => _withSettings(const CalendarView()),
+  'Home page': () => _withSettings(const HomePageSettingsView()),
   'Notifications': _notificationsScreen,
   'Recurring transactions': _recurringScreen,
   'Matching rules': _matchingRulesScreen,

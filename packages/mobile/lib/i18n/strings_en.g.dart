@@ -678,6 +678,7 @@ class Translations$settings$en {
 	late final Translations$settings$numberFormat$en numberFormat = Translations$settings$numberFormat$en.internal(_root);
 	late final Translations$settings$fontSize$en fontSize = Translations$settings$fontSize$en.internal(_root);
 	late final Translations$settings$calendar$en calendar = Translations$settings$calendar$en.internal(_root);
+	late final Translations$settings$homePage$en homePage = Translations$settings$homePage$en.internal(_root);
 	late final Translations$settings$categories$en categories = Translations$settings$categories$en.internal(_root);
 }
 
@@ -2532,6 +2533,24 @@ class Translations$settings$calendar$en {
 	late final Translations$settings$calendar$sections$en sections = Translations$settings$calendar$sections$en.internal(_root);
 }
 
+// Path: settings.homePage
+class Translations$settings$homePage$en {
+	Translations$settings$homePage$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Home page'
+	String get title => 'Home page';
+
+	/// en: 'Choose which screen to show when you open the app'
+	String get intro => 'Choose which screen to show when you open the app';
+
+	late final Translations$settings$homePage$sections$en sections = Translations$settings$homePage$sections$en.internal(_root);
+	late final Translations$settings$homePage$options$en options = Translations$settings$homePage$options$en.internal(_root);
+}
+
 // Path: settings.categories
 class Translations$settings$categories$en {
 	Translations$settings$categories$en.internal(this._root);
@@ -3199,6 +3218,91 @@ class Translations$settings$calendar$sections$en {
 	String get firstDayOfWeek => 'First day of week';
 }
 
+// Path: settings.homePage.sections
+class Translations$settings$homePage$sections$en {
+	Translations$settings$homePage$sections$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Default home page'
+	String get defaultHomePage => 'Default home page';
+}
+
+// Path: settings.homePage.options
+class Translations$settings$homePage$options$en {
+	Translations$settings$homePage$options$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	late final Translations$settings$homePage$options$home$en home = Translations$settings$homePage$options$home$en.internal(_root);
+	late final Translations$settings$homePage$options$activity$en activity = Translations$settings$homePage$options$activity$en.internal(_root);
+	late final Translations$settings$homePage$options$budgets$en budgets = Translations$settings$homePage$options$budgets$en.internal(_root);
+	late final Translations$settings$homePage$options$reports$en reports = Translations$settings$homePage$options$reports$en.internal(_root);
+}
+
+// Path: settings.homePage.options.home
+class Translations$settings$homePage$options$home$en {
+	Translations$settings$homePage$options$home$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Home'
+	String get title => 'Home';
+
+	/// en: 'Overview with net, budgets and recent activity'
+	String get subtitle => 'Overview with net, budgets and recent activity';
+}
+
+// Path: settings.homePage.options.activity
+class Translations$settings$homePage$options$activity$en {
+	Translations$settings$homePage$options$activity$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Activity'
+	String get title => 'Activity';
+
+	/// en: 'Full transaction history list'
+	String get subtitle => 'Full transaction history list';
+}
+
+// Path: settings.homePage.options.budgets
+class Translations$settings$homePage$options$budgets$en {
+	Translations$settings$homePage$options$budgets$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Budgets'
+	String get title => 'Budgets';
+
+	/// en: 'Budget overview and progress tracking'
+	String get subtitle => 'Budget overview and progress tracking';
+}
+
+// Path: settings.homePage.options.reports
+class Translations$settings$homePage$options$reports$en {
+	Translations$settings$homePage$options$reports$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Reports'
+	String get title => 'Reports';
+
+	/// en: 'Trends, categories and insights'
+	String get subtitle => 'Trends, categories and insights';
+}
+
 /// The flat map containing all translations for locale <en>.
 /// Only for edge cases! For simple maps, use the map function of this library.
 ///
@@ -3823,6 +3927,17 @@ extension on Translations {
 			'settings.calendar.title' => 'Calendar',
 			'settings.calendar.rowSubtitle' => ({required Object day}) => 'Week starts on ${day}',
 			'settings.calendar.sections.firstDayOfWeek' => 'First day of week',
+			'settings.homePage.title' => 'Home page',
+			'settings.homePage.intro' => 'Choose which screen to show when you open the app',
+			'settings.homePage.sections.defaultHomePage' => 'Default home page',
+			'settings.homePage.options.home.title' => 'Home',
+			'settings.homePage.options.home.subtitle' => 'Overview with net, budgets and recent activity',
+			'settings.homePage.options.activity.title' => 'Activity',
+			'settings.homePage.options.activity.subtitle' => 'Full transaction history list',
+			'settings.homePage.options.budgets.title' => 'Budgets',
+			'settings.homePage.options.budgets.subtitle' => 'Budget overview and progress tracking',
+			'settings.homePage.options.reports.title' => 'Reports',
+			'settings.homePage.options.reports.subtitle' => 'Trends, categories and insights',
 			'settings.categories.rowSubtitle' => 'Add, edit and remove categories',
 			'shell.tabs.home' => 'Home',
 			'shell.tabs.activity' => 'Activity',

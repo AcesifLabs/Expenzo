@@ -5,6 +5,7 @@ import 'package:expense_tracker/core/constants/digit_grouping.dart';
 import 'package:expense_tracker/core/constants/first_day_of_week.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/logger/app_logger.dart';
+import 'package:expense_tracker/core/router/app_root_tab.dart';
 import 'package:expense_tracker/core/theme/currency_config.dart';
 import 'package:expense_tracker/core/utils/number_display_format.dart';
 import '../../domain/entities/user_settings.dart';
@@ -79,6 +80,7 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
       'digitGrouping': settings.digitGrouping.name,
       'fontSize': settings.fontSize.name,
       'firstDayOfWeek': settings.firstDayOfWeek?.name,
+      'homeTab': settings.homeTab.name,
       'createdAt': settings.createdAt.toIso8601String(),
       'updatedAt': settings.updatedAt.toIso8601String(),
     };
@@ -113,6 +115,7 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
       firstDayOfWeek: FirstDayOfWeek.fromName(
         json['firstDayOfWeek'] as String?,
       ),
+      homeTab: AppRootTab.fromName(json['homeTab'] as String?),
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );

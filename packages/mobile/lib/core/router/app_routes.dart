@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
+import 'package:expense_tracker/core/router/settings_route.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:expense_tracker/features/auth/presentation/pages/login_page.dart';
 import 'package:expense_tracker/features/auth/presentation/pages/sync_conflict_page.dart';
@@ -26,6 +27,7 @@ import 'package:expense_tracker/features/settings/presentation/pages/appearance_
 import 'package:expense_tracker/features/settings/presentation/pages/calendar_page.dart';
 import 'package:expense_tracker/features/settings/presentation/pages/currency_page.dart';
 import 'package:expense_tracker/features/settings/presentation/pages/font_size_page.dart';
+import 'package:expense_tracker/features/settings/presentation/pages/home_page_settings_page.dart';
 import 'package:expense_tracker/features/settings/presentation/pages/language_page.dart';
 import 'package:expense_tracker/features/settings/presentation/pages/notification_settings_page.dart';
 import 'package:expense_tracker/features/settings/presentation/pages/number_format_page.dart';
@@ -59,36 +61,58 @@ List<RouteBase> buildAppRoutes() {
 List<RouteBase> _buildNestedRoutes() {
   return [
     GoRoute(
-      path: 'settings',
+      path: SettingsRoute.rootPath,
       builder: (_, _) => const SettingsPage(),
       routes: [
-        GoRoute(path: 'appearance', builder: (_, _) => const AppearancePage()),
-        GoRoute(path: 'currency', builder: (_, _) => const CurrencyPage()),
-        GoRoute(path: 'language', builder: (_, _) => const LanguagePage()),
         GoRoute(
-          path: 'number-format',
+          path: SettingsRoute.appearance.path,
+          builder: (_, _) => const AppearancePage(),
+        ),
+        GoRoute(
+          path: SettingsRoute.currency.path,
+          builder: (_, _) => const CurrencyPage(),
+        ),
+        GoRoute(
+          path: SettingsRoute.language.path,
+          builder: (_, _) => const LanguagePage(),
+        ),
+        GoRoute(
+          path: SettingsRoute.numberFormat.path,
           builder: (_, _) => const NumberFormatPage(),
         ),
-        GoRoute(path: 'font-size', builder: (_, _) => const FontSizePage()),
-        GoRoute(path: 'calendar', builder: (_, _) => const CalendarPage()),
         GoRoute(
-          path: 'notifications',
+          path: SettingsRoute.fontSize.path,
+          builder: (_, _) => const FontSizePage(),
+        ),
+        GoRoute(
+          path: SettingsRoute.calendar.path,
+          builder: (_, _) => const CalendarPage(),
+        ),
+        GoRoute(
+          path: SettingsRoute.homePage.path,
+          builder: (_, _) => const HomePageSettingsPage(),
+        ),
+        GoRoute(
+          path: SettingsRoute.notifications.path,
           builder: (_, _) => const NotificationSettingsPage(),
         ),
         GoRoute(
-          path: 'categories',
+          path: SettingsRoute.categories.path,
           builder: (_, _) => const CategoryListPage(),
         ),
-        GoRoute(path: 'auto-import', builder: (_, _) => const AutoImportPage()),
         GoRoute(
-          path: 'matching-rules',
+          path: SettingsRoute.autoImport.path,
+          builder: (_, _) => const AutoImportPage(),
+        ),
+        GoRoute(
+          path: SettingsRoute.matchingRules.path,
           builder: (_, _) => BlocProvider(
             create: (_) => di.getIt<ParsingRulesBloc>()..add(LoadRules()),
             child: const RulesListPage(),
           ),
         ),
         GoRoute(
-          path: 'recurring',
+          path: SettingsRoute.recurring.path,
           // create:, not a bloc built in the builder: go_router rebuilds
           // this route when pages are pushed on top of it.
           builder: (_, _) => MultiBlocProvider(
