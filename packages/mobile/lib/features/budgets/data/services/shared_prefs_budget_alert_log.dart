@@ -5,7 +5,8 @@ import 'package:expense_tracker/features/budgets/domain/usecases/check_budget_al
 class SharedPrefsBudgetAlertLog implements BudgetAlertLog {
   final SharedPreferences prefs;
 
-  static const _key = 'budget_alerts_sent';
+  /// Cleared by `LocalDataPrefs` when local data is wiped.
+  static const storageKey = 'budget_alerts_sent';
 
   /// Old keys only matter for their own budget period; keep the log small.
   static const _maxEntries = 200;
@@ -14,12 +15,12 @@ class SharedPrefsBudgetAlertLog implements BudgetAlertLog {
 
   @override
   Future<bool> wasSent(String key) async {
-    return (prefs.getStringList(_key) ?? const []).contains(key);
+    return (prefs.getStringList(storageKey) ?? const []).contains(key);
   }
 
   @override
   Future<void> markSent(Iterable<String> keys) async {
-    final sent = [...?prefs.getStringList(_key)];
+    final sent = [...?prefs.getStringList(storageKey)];
     final known = sent.toSet();
     final added = keys.where(known.add).toList();
     if (added.isEmpty) return;
@@ -27,6 +28,6 @@ class SharedPrefsBudgetAlertLog implements BudgetAlertLog {
     final trimmed = sent.length > _maxEntries
         ? sent.sublist(sent.length - _maxEntries)
         : sent;
-    await prefs.setStringList(_key, trimmed);
+    await prefs.setStringList(storageKey, trimmed);
   }
 }

@@ -95,6 +95,9 @@ class AppPalette extends ThemeExtension<AppPalette> {
   /// Error text and icons share the expense rose.
   Color get error => expense;
 
+  /// A faint expense rose behind destructive warnings.
+  Color get expenseTint => expense.withValues(alpha: 0.12);
+
   const AppPalette({
     required this.bg,
     required this.surface,

@@ -15,7 +15,8 @@ enum SettingsRoute {
   autoImport('auto-import'),
   matchingRules('matching-rules'),
   recurring('recurring'),
-  export('export');
+  export('export'),
+  deleteData('delete-data');
 
   /// The child segment under [rootPath].
   final String path;

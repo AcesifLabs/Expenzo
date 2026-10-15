@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:drift/native.dart';
 import 'package:expense_tracker/core/api/api_client.dart';
@@ -10,6 +12,7 @@ import 'package:expense_tracker/core/sync/connectivity_service.dart';
 import 'package:expense_tracker/core/sync/handlers/budgets_sync_handler.dart';
 import 'package:expense_tracker/core/sync/handlers/records_sync_handler.dart';
 import 'package:expense_tracker/core/sync/sync_engine.dart';
+import 'package:expense_tracker/core/sync/sync_event.dart';
 import 'package:expense_tracker/core/sync/sync_table_registry.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -237,6 +240,85 @@ void main() {
       await engine(afterSyncTasks: [() async => ran = true]).start();
 
       expect(ran, isFalse);
+    });
+  });
+
+  group('stop', () {
+    test('waits for a running cycle and skips its after-sync tasks', () async {
+      final pull = Completer<Response<dynamic>>();
+      when(
+        () => dio.get<dynamic>(
+          ApiConstants.syncPull,
+          queryParameters: any(named: 'queryParameters'),
+        ),
+      ).thenAnswer((_) => pull.future);
+      var ran = false;
+      final sync = engine(afterSyncTasks: [() async => ran = true]);
+
+      final started = sync.start();
+      await pumpEventQueue();
+      var stopped = false;
+      final stopping = sync.stop().then((_) => stopped = true);
+      await pumpEventQueue();
+
+      expect(stopped, isFalse, reason: 'stop must wait for the pull');
+
+      pull.complete(
+        Response(
+          requestOptions: RequestOptions(path: ApiConstants.syncPull),
+          data: {'changes': [], 'serverTime': '2026-10-11T00:00:00.000Z'},
+        ),
+      );
+      await stopping;
+      await started;
+
+      expect(ran, isFalse);
+      verifyNever(() => dio.post<dynamic>(any(), data: any(named: 'data')));
+      // The interrupted start gave up instead of listening for triggers.
+      verifyNever(() => connectivity.onlineStream);
+    });
+
+    test('a sync trigger already in flight does nothing after stop', () async {
+      final sync = engine();
+      await sync.start();
+      final online = Completer<bool>();
+      when(() => connectivity.checkNow()).thenAnswer((_) => online.future);
+
+      SyncEventBus().trigger();
+      await pumpEventQueue();
+      await sync.stop();
+      online.complete(true);
+      await pumpEventQueue();
+
+      verify(
+        () => dio.get<dynamic>(
+          ApiConstants.syncPull,
+          queryParameters: any(named: 'queryParameters'),
+        ),
+      ).called(1);
+    });
+  });
+
+  group('pause', () {
+    test('start does nothing until resume', () async {
+      final sync = engine();
+      await sync.pause();
+
+      await sync.start();
+      verifyNever(
+        () => dio.get<dynamic>(
+          ApiConstants.syncPull,
+          queryParameters: any(named: 'queryParameters'),
+        ),
+      );
+
+      await sync.resume();
+      verify(
+        () => dio.get<dynamic>(
+          ApiConstants.syncPull,
+          queryParameters: any(named: 'queryParameters'),
+        ),
+      ).called(1);
     });
   });
 

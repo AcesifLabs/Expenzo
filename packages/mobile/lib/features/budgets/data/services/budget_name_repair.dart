@@ -21,7 +21,9 @@ class BudgetNameRepair {
   /// The signed-in account, or null when signed out.
   final String? Function() currentUserId;
 
-  static const _doneKeyPrefix = 'budget_names_repaired_';
+  /// Followed by the user id; `LocalDataPrefs` wipes every account's
+  /// flag.
+  static const doneKeyPrefix = 'budget_names_repaired_';
 
   Future<void>? _running;
 
@@ -30,8 +32,7 @@ class BudgetNameRepair {
   bool get isPending {
     final userId = currentUserId();
 
-    return userId == null ||
-        !(prefs.getBool('$_doneKeyPrefix$userId') ?? false);
+    return userId == null || !(prefs.getBool('$doneKeyPrefix$userId') ?? false);
   }
 
   BudgetNameRepair({
@@ -70,6 +71,6 @@ class BudgetNameRepair {
           : names.length;
       await remote.fillMissingNames(names.sublist(i, end));
     }
-    await prefs.setBool('$_doneKeyPrefix$userId', true);
+    await prefs.setBool('$doneKeyPrefix$userId', true);
   }
 }

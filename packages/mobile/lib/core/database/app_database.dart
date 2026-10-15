@@ -83,14 +83,24 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
   AppDatabase.forTesting(super.e);
 
-  Future<void> clearAllTables() async {
+  /// Empties every table and the search index. [keepUsers] keeps the
+  /// signed-in user row, so the user stays signed in. [refill] runs in the
+  /// same transaction, so no one sees the tables empty in between.
+  Future<void> clearAllTables({
+    bool keepUsers = false,
+    Future<void> Function()? refill,
+  }) async {
     await customStatement('PRAGMA foreign_keys = OFF');
     try {
       await transaction(() async {
+        // First: the per-record delete trigger then finds an empty index
+        // instead of scanning it once per record.
+        await customStatement('DELETE FROM expense_fts');
         for (final table in allTables) {
+          if (keepUsers && table == users) continue;
           await delete(table).go();
         }
-        await customStatement('DELETE FROM expense_fts');
+        await refill?.call();
       });
     } finally {
       await customStatement('PRAGMA foreign_keys = ON');

@@ -15,6 +15,7 @@ import 'package:expense_tracker/core/database/daos/message_template_dao.dart';
 import 'package:expense_tracker/core/database/daos/user_dao.dart';
 import 'package:expense_tracker/core/database/daos/budget_dao.dart';
 import 'package:expense_tracker/core/database/daos/sync_queue_dao.dart';
+import 'package:expense_tracker/core/lifecycle/local_data_epoch.dart';
 import 'package:expense_tracker/core/api/api_client.dart';
 import 'package:expense_tracker/core/api/token_storage.dart';
 import 'package:expense_tracker/core/sync/connectivity_service.dart';
@@ -35,6 +36,7 @@ import 'recurring_module.dart';
 import 'background_module.dart';
 import 'settings_module.dart';
 import 'export_module.dart';
+import 'data_wipe_module.dart';
 import 'dashboard_module.dart';
 import 'ai_assistant_module.dart';
 import 'receipt_scan_module.dart';
@@ -123,6 +125,7 @@ Future<void> initCriticalDependencies() async {
   getIt.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
   getIt.registerLazySingleton<http.Client>(() => http.Client());
   getIt.registerLazySingleton<AppDatabase>(() => AppDatabase());
+  getIt.registerLazySingleton<LocalDataEpoch>(LocalDataEpoch.new);
 
   _registerDaoFactories();
 
@@ -173,6 +176,7 @@ Future<void> initCriticalDependencies() async {
   getIt.registerLazySingleton<SharedPreferences>(() => prefs);
   initSettingsModule(getIt);
   initExportModule(getIt);
+  initDataWipeModule(getIt);
 
   initAuthModule(getIt);
   initCategoryModule(getIt);

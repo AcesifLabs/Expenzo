@@ -5,7 +5,8 @@ import 'package:expense_tracker/features/recurring/domain/usecases/send_recurrin
 class SharedPrefsRecurringReminderLog implements RecurringReminderLog {
   final SharedPreferences prefs;
 
-  static const _key = 'recurring_reminders_sent';
+  /// Cleared by `LocalDataPrefs` when local data is wiped.
+  static const storageKey = 'recurring_reminders_sent';
 
   /// Old keys only matter until their occurrence passes; keep the log small.
   static const _maxEntries = 200;
@@ -18,18 +19,18 @@ class SharedPrefsRecurringReminderLog implements RecurringReminderLog {
   Future<bool> wasSent(String key) async {
     await prefs.reload();
 
-    return (prefs.getStringList(_key) ?? const []).contains(key);
+    return (prefs.getStringList(storageKey) ?? const []).contains(key);
   }
 
   @override
   Future<void> markSent(String key) async {
     await prefs.reload();
-    final sent = [...?prefs.getStringList(_key)];
+    final sent = [...?prefs.getStringList(storageKey)];
     if (sent.contains(key)) return;
     sent.add(key);
     final trimmed = sent.length > _maxEntries
         ? sent.sublist(sent.length - _maxEntries)
         : sent;
-    await prefs.setStringList(_key, trimmed);
+    await prefs.setStringList(storageKey, trimmed);
   }
 }
