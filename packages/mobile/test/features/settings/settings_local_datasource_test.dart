@@ -275,4 +275,30 @@ void main() {
       expect((await datasource.getSettings()).homeTab, tab);
     }
   });
+
+  test('reset replaces customised settings with the defaults', () async {
+    final datasource = await datasourceWith(_storedSettings(code: 'USD'));
+    final custom = await datasource.getSettings();
+    await datasource.updateSettings(
+      custom.copyWith(
+        theme: 'dark',
+        languageCode: 'bn',
+        fontSize: AppFontSize.large,
+        digitGrouping: DigitGrouping.space,
+        firstDayOfWeek: FirstDayOfWeek.saturday,
+        homeTab: AppRootTab.reports,
+      ),
+    );
+
+    final reset = await datasource.resetSettings();
+
+    expect(reset.currencyCode, 'BDT');
+    expect(reset.theme, 'system');
+    expect(reset.languageCode, 'system');
+    expect(reset.fontSize, AppFontSize.defaultSize);
+    expect(reset.firstDayOfWeek, isNull);
+    expect(reset.homeTab, AppRootTab.home);
+    expect(reset.createdAt.isAfter(custom.createdAt), isTrue);
+    expect(await datasource.getSettings(), reset);
+  });
 }

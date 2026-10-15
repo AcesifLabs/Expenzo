@@ -8,4 +8,7 @@ abstract class SettingsRepository {
   Future<Either<CacheFailure, UserSettings>> updateSettings(
     UserSettings settings,
   );
+
+  /// Puts every setting back to its first-run default.
+  Future<Either<CacheFailure, UserSettings>> resetSettings();
 }

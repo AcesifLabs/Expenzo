@@ -462,6 +462,7 @@ class _Translations$settings$bn extends Translations$settings$en {
 	@override late final _Translations$settings$calendar$bn calendar = _Translations$settings$calendar$bn._(_root);
 	@override late final _Translations$settings$homePage$bn homePage = _Translations$settings$homePage$bn._(_root);
 	@override late final _Translations$settings$export$bn export = _Translations$settings$export$bn._(_root);
+	@override late final _Translations$settings$deleteData$bn deleteData = _Translations$settings$deleteData$bn._(_root);
 	@override late final _Translations$settings$categories$bn categories = _Translations$settings$categories$bn._(_root);
 }
 
@@ -1598,6 +1599,60 @@ class _Translations$settings$export$bn extends Translations$settings$export$en {
 	@override String get emptyRange => 'এই সময়সীমায় কোনো লেনদেন নেই';
 }
 
+// Path: settings.deleteData
+class _Translations$settings$deleteData$bn extends Translations$settings$deleteData$en {
+	_Translations$settings$deleteData$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'সব ডেটা মুছুন';
+	@override String get rowSubtitle => 'লেনদেন, বাজেট ও সেটিংস মুছে ফেলুন';
+	@override String get warningTitle => 'এই কাজ আর ফেরানো যাবে না';
+	@override String get warningBody => 'লেনদেন, বাজেট, ক্যাটাগরি ও সেটিংসসহ আপনার সব আর্থিক ডেটা মুছে যাবে। এই ডিভাইস থেকে সবকিছু স্থায়ীভাবে মুছে যাবে।';
+	@override String get warningBodySignedIn => 'লেনদেন, বাজেট, ক্যাটাগরি ও সেটিংসসহ আপনার সব আর্থিক ডেটা এই ডিভাইস ও আপনার অ্যাকাউন্ট থেকে মুছে যাবে।';
+	@override String get otherDevicesNote => 'আপনার অন্য ডিভাইসগুলোতে সেখানে না মোছা পর্যন্ত ডেটা থেকে যাবে।';
+	@override late final _Translations$settings$deleteData$sections$bn sections = _Translations$settings$deleteData$sections$bn._(_root);
+	@override String get transactions => 'লেনদেন';
+	@override String transactionsCount({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n,
+		one: '${n}টি লেনদেন',
+		other: '${n}টি লেনদেন',
+	);
+	@override String get budgets => 'বাজেট';
+	@override String budgetsCount({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n,
+		one: '${n}টি বাজেট',
+		other: '${n}টি বাজেট',
+	);
+	@override String get categories => 'ক্যাটাগরি';
+	@override String categoriesCount({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n,
+		one: '${n}টি ক্যাটাগরি',
+		other: '${n}টি ক্যাটাগরি',
+	);
+	@override String get recurring => 'পুনরাবৃত্ত লেনদেন';
+	@override String recurringCount({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n,
+		one: '${n}টি পুনরাবৃত্ত',
+		other: '${n}টি পুনরাবৃত্ত',
+	);
+	@override String get smsRules => 'SMS নিয়ম';
+	@override String smsRulesCount({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n,
+		one: '${n}টি নিয়ম',
+		other: '${n}টি নিয়ম',
+	);
+	@override String get goals => 'লক্ষ্য';
+	@override String goalsCount({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n,
+		one: '${n}টি লক্ষ্য',
+		other: '${n}টি লক্ষ্য',
+	);
+	@override String get settings => 'সেটিংস';
+	@override String get settingsValue => 'সব পছন্দ';
+	@override String get categoriesNote => 'ডিফল্ট ক্যাটাগরিগুলো আবার যোগ হবে।';
+	@override String get confirmHint => 'নিশ্চিত করতে DELETE লিখুন';
+	@override String get button => 'সব ডেটা মুছুন';
+	@override String get deleting => 'মুছে ফেলা হচ্ছে…';
+	@override String get done => 'সব ডেটা মুছে ফেলা হয়েছে';
+	@override String get serverFailed => 'আপনার অ্যাকাউন্টের ডেটা মুছতে পারা যায়নি। কিছুই মোছা হয়নি। সংযোগ দেখে আবার চেষ্টা করুন।';
+}
+
 // Path: settings.categories
 class _Translations$settings$categories$bn extends Translations$settings$categories$en {
 	_Translations$settings$categories$bn._(TranslationsBn root) : this._root = root, super.internal(root);
@@ -2137,6 +2192,17 @@ class _Translations$settings$export$include$bn extends Translations$settings$exp
 	@override String get transactions => 'লেনদেন';
 	@override String get budgets => 'বাজেট';
 	@override String get categories => 'ক্যাটাগরি';
+}
+
+// Path: settings.deleteData.sections
+class _Translations$settings$deleteData$sections$bn extends Translations$settings$deleteData$sections$en {
+	_Translations$settings$deleteData$sections$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get summary => 'যে ডেটা মুছে যাবে';
+	@override String get confirmation => 'নিশ্চিতকরণ';
 }
 
 // Path: settings.homePage.options.home
@@ -2842,6 +2908,34 @@ extension on TranslationsBn {
 			'settings.export.shareSubject' => 'Expenzo এক্সপোর্ট',
 			'settings.export.nothingSelected' => 'এক্সপোর্টের জন্য অন্তত একটি বেছে নিন',
 			'settings.export.emptyRange' => 'এই সময়সীমায় কোনো লেনদেন নেই',
+			'settings.deleteData.title' => 'সব ডেটা মুছুন',
+			'settings.deleteData.rowSubtitle' => 'লেনদেন, বাজেট ও সেটিংস মুছে ফেলুন',
+			'settings.deleteData.warningTitle' => 'এই কাজ আর ফেরানো যাবে না',
+			'settings.deleteData.warningBody' => 'লেনদেন, বাজেট, ক্যাটাগরি ও সেটিংসসহ আপনার সব আর্থিক ডেটা মুছে যাবে। এই ডিভাইস থেকে সবকিছু স্থায়ীভাবে মুছে যাবে।',
+			'settings.deleteData.warningBodySignedIn' => 'লেনদেন, বাজেট, ক্যাটাগরি ও সেটিংসসহ আপনার সব আর্থিক ডেটা এই ডিভাইস ও আপনার অ্যাকাউন্ট থেকে মুছে যাবে।',
+			'settings.deleteData.otherDevicesNote' => 'আপনার অন্য ডিভাইসগুলোতে সেখানে না মোছা পর্যন্ত ডেটা থেকে যাবে।',
+			'settings.deleteData.sections.summary' => 'যে ডেটা মুছে যাবে',
+			'settings.deleteData.sections.confirmation' => 'নিশ্চিতকরণ',
+			'settings.deleteData.transactions' => 'লেনদেন',
+			'settings.deleteData.transactionsCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n, one: '${n}টি লেনদেন', other: '${n}টি লেনদেন', ), 
+			'settings.deleteData.budgets' => 'বাজেট',
+			'settings.deleteData.budgetsCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n, one: '${n}টি বাজেট', other: '${n}টি বাজেট', ), 
+			'settings.deleteData.categories' => 'ক্যাটাগরি',
+			'settings.deleteData.categoriesCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n, one: '${n}টি ক্যাটাগরি', other: '${n}টি ক্যাটাগরি', ), 
+			'settings.deleteData.recurring' => 'পুনরাবৃত্ত লেনদেন',
+			'settings.deleteData.recurringCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n, one: '${n}টি পুনরাবৃত্ত', other: '${n}টি পুনরাবৃত্ত', ), 
+			'settings.deleteData.smsRules' => 'SMS নিয়ম',
+			'settings.deleteData.smsRulesCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n, one: '${n}টি নিয়ম', other: '${n}টি নিয়ম', ), 
+			'settings.deleteData.goals' => 'লক্ষ্য',
+			'settings.deleteData.goalsCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n, one: '${n}টি লক্ষ্য', other: '${n}টি লক্ষ্য', ), 
+			'settings.deleteData.settings' => 'সেটিংস',
+			'settings.deleteData.settingsValue' => 'সব পছন্দ',
+			'settings.deleteData.categoriesNote' => 'ডিফল্ট ক্যাটাগরিগুলো আবার যোগ হবে।',
+			'settings.deleteData.confirmHint' => 'নিশ্চিত করতে DELETE লিখুন',
+			'settings.deleteData.button' => 'সব ডেটা মুছুন',
+			'settings.deleteData.deleting' => 'মুছে ফেলা হচ্ছে…',
+			'settings.deleteData.done' => 'সব ডেটা মুছে ফেলা হয়েছে',
+			'settings.deleteData.serverFailed' => 'আপনার অ্যাকাউন্টের ডেটা মুছতে পারা যায়নি। কিছুই মোছা হয়নি। সংযোগ দেখে আবার চেষ্টা করুন।',
 			'settings.categories.rowSubtitle' => 'ক্যাটাগরি যোগ, সম্পাদনা ও মুছে ফেলুন',
 			'shell.tabs.home' => 'হোম',
 			'shell.tabs.activity' => 'লেনদেন',

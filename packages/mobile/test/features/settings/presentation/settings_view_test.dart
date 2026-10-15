@@ -326,6 +326,35 @@ void main() {
     expect(find.text('export-page'), findsOneWidget);
   });
 
+  testWidgets('delete all data is the last Data & budget row', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(400, 3000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpSettings(tester);
+
+    double top(String text) => tester.getTopLeft(find.text(text)).dy;
+
+    expect(
+      find.text('Erase transactions, budgets and settings'),
+      findsOneWidget,
+    );
+    expect(top('Delete all data'), greaterThan(top('Export data')));
+    expect(top('Delete all data'), lessThan(top('AUTOMATION')));
+  });
+
+  testWidgets('the delete all data row opens /settings/delete-data', (
+    tester,
+  ) async {
+    await pumpSettingsRouter(tester, child: 'delete-data');
+
+    await tester.scrollUntilVisible(find.text('Delete all data'), 200);
+    await tester.ensureVisible(find.text('Delete all data'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Delete all data'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('delete-data-page'), findsOneWidget);
+  });
+
   testWidgets('category settings is the last General row, below Language', (
     tester,
   ) async {

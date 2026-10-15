@@ -10,6 +10,7 @@ import 'package:expense_tracker/features/auth/presentation/bloc/auth_event.dart'
 import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
+import 'package:expense_tracker/core/lifecycle/local_data_epoch.dart';
 
 class SyncConflictPage extends StatefulWidget {
   const SyncConflictPage({super.key});
@@ -214,6 +215,8 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
         await di.resetDatabaseInstance();
       }
       await engine.executeDecision(mode);
+      // The kept-alive tabs still show the replaced data.
+      if (mode == SyncMode.cloudWins) di.getIt<LocalDataEpoch>().bump();
 
       if (!mounted) return;
       setState(() {

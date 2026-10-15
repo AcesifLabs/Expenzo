@@ -680,6 +680,7 @@ class Translations$settings$en {
 	late final Translations$settings$calendar$en calendar = Translations$settings$calendar$en.internal(_root);
 	late final Translations$settings$homePage$en homePage = Translations$settings$homePage$en.internal(_root);
 	late final Translations$settings$export$en export = Translations$settings$export$en.internal(_root);
+	late final Translations$settings$deleteData$en deleteData = Translations$settings$deleteData$en.internal(_root);
 	late final Translations$settings$categories$en categories = Translations$settings$categories$en.internal(_root);
 }
 
@@ -2595,6 +2596,113 @@ class Translations$settings$export$en {
 	String get emptyRange => 'No transactions in this range';
 }
 
+// Path: settings.deleteData
+class Translations$settings$deleteData$en {
+	Translations$settings$deleteData$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Delete all data'
+	String get title => 'Delete all data';
+
+	/// en: 'Erase transactions, budgets and settings'
+	String get rowSubtitle => 'Erase transactions, budgets and settings';
+
+	/// en: 'This action cannot be undone'
+	String get warningTitle => 'This action cannot be undone';
+
+	/// en: 'Delete all your financial data including transactions, budgets, categories, and settings. This will permanently erase everything from this device.'
+	String get warningBody => 'Delete all your financial data including transactions, budgets, categories, and settings. This will permanently erase everything from this device.';
+
+	/// en: 'Delete all your financial data including transactions, budgets, categories, and settings, from this device and from your account.'
+	String get warningBodySignedIn => 'Delete all your financial data including transactions, budgets, categories, and settings, from this device and from your account.';
+
+	/// en: 'Your other devices keep their copy until you delete it there too.'
+	String get otherDevicesNote => 'Your other devices keep their copy until you delete it there too.';
+
+	late final Translations$settings$deleteData$sections$en sections = Translations$settings$deleteData$sections$en.internal(_root);
+
+	/// en: 'Transactions'
+	String get transactions => 'Transactions';
+
+	/// en: '(one) {{n} transaction} (other) {{n} transactions}'
+	String transactionsCount({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: '${n} transaction',
+		other: '${n} transactions',
+	);
+
+	/// en: 'Budgets'
+	String get budgets => 'Budgets';
+
+	/// en: '(one) {{n} budget} (other) {{n} budgets}'
+	String budgetsCount({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: '${n} budget',
+		other: '${n} budgets',
+	);
+
+	/// en: 'Categories'
+	String get categories => 'Categories';
+
+	/// en: '(one) {{n} category} (other) {{n} categories}'
+	String categoriesCount({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: '${n} category',
+		other: '${n} categories',
+	);
+
+	/// en: 'Recurring transactions'
+	String get recurring => 'Recurring transactions';
+
+	/// en: '(one) {{n} recurring} (other) {{n} recurring}'
+	String recurringCount({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: '${n} recurring',
+		other: '${n} recurring',
+	);
+
+	/// en: 'SMS rules'
+	String get smsRules => 'SMS rules';
+
+	/// en: '(one) {{n} rule} (other) {{n} rules}'
+	String smsRulesCount({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: '${n} rule',
+		other: '${n} rules',
+	);
+
+	/// en: 'Goals'
+	String get goals => 'Goals';
+
+	/// en: '(one) {{n} goal} (other) {{n} goals}'
+	String goalsCount({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: '${n} goal',
+		other: '${n} goals',
+	);
+
+	/// en: 'Settings'
+	String get settings => 'Settings';
+
+	/// en: 'All preferences'
+	String get settingsValue => 'All preferences';
+
+	/// en: 'Default categories are added back.'
+	String get categoriesNote => 'Default categories are added back.';
+
+	/// en: 'Type DELETE to confirm'
+	String get confirmHint => 'Type DELETE to confirm';
+
+	/// en: 'Delete all data'
+	String get button => 'Delete all data';
+
+	/// en: 'Deleting…'
+	String get deleting => 'Deleting…';
+
+	/// en: 'All data deleted'
+	String get done => 'All data deleted';
+
+	/// en: 'Couldn't delete the data in your account. Nothing was deleted. Check your connection and try again.'
+	String get serverFailed => 'Couldn\'t delete the data in your account. Nothing was deleted. Check your connection and try again.';
+}
+
 // Path: settings.categories
 class Translations$settings$categories$en {
 	Translations$settings$categories$en.internal(this._root);
@@ -3356,6 +3464,21 @@ class Translations$settings$export$include$en {
 	String get categories => 'Categories';
 }
 
+// Path: settings.deleteData.sections
+class Translations$settings$deleteData$sections$en {
+	Translations$settings$deleteData$sections$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Data that will be deleted'
+	String get summary => 'Data that will be deleted';
+
+	/// en: 'Confirmation'
+	String get confirmation => 'Confirmation';
+}
+
 // Path: settings.homePage.options.home
 class Translations$settings$homePage$options$home$en {
 	Translations$settings$homePage$options$home$en.internal(this._root);
@@ -4075,6 +4198,34 @@ extension on Translations {
 			'settings.export.shareSubject' => 'Expenzo export',
 			'settings.export.nothingSelected' => 'Choose at least one thing to export',
 			'settings.export.emptyRange' => 'No transactions in this range',
+			'settings.deleteData.title' => 'Delete all data',
+			'settings.deleteData.rowSubtitle' => 'Erase transactions, budgets and settings',
+			'settings.deleteData.warningTitle' => 'This action cannot be undone',
+			'settings.deleteData.warningBody' => 'Delete all your financial data including transactions, budgets, categories, and settings. This will permanently erase everything from this device.',
+			'settings.deleteData.warningBodySignedIn' => 'Delete all your financial data including transactions, budgets, categories, and settings, from this device and from your account.',
+			'settings.deleteData.otherDevicesNote' => 'Your other devices keep their copy until you delete it there too.',
+			'settings.deleteData.sections.summary' => 'Data that will be deleted',
+			'settings.deleteData.sections.confirmation' => 'Confirmation',
+			'settings.deleteData.transactions' => 'Transactions',
+			'settings.deleteData.transactionsCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} transaction', other: '${n} transactions', ), 
+			'settings.deleteData.budgets' => 'Budgets',
+			'settings.deleteData.budgetsCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} budget', other: '${n} budgets', ), 
+			'settings.deleteData.categories' => 'Categories',
+			'settings.deleteData.categoriesCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} category', other: '${n} categories', ), 
+			'settings.deleteData.recurring' => 'Recurring transactions',
+			'settings.deleteData.recurringCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} recurring', other: '${n} recurring', ), 
+			'settings.deleteData.smsRules' => 'SMS rules',
+			'settings.deleteData.smsRulesCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} rule', other: '${n} rules', ), 
+			'settings.deleteData.goals' => 'Goals',
+			'settings.deleteData.goalsCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} goal', other: '${n} goals', ), 
+			'settings.deleteData.settings' => 'Settings',
+			'settings.deleteData.settingsValue' => 'All preferences',
+			'settings.deleteData.categoriesNote' => 'Default categories are added back.',
+			'settings.deleteData.confirmHint' => 'Type DELETE to confirm',
+			'settings.deleteData.button' => 'Delete all data',
+			'settings.deleteData.deleting' => 'Deleting…',
+			'settings.deleteData.done' => 'All data deleted',
+			'settings.deleteData.serverFailed' => 'Couldn\'t delete the data in your account. Nothing was deleted. Check your connection and try again.',
 			'settings.categories.rowSubtitle' => 'Add, edit and remove categories',
 			'shell.tabs.home' => 'Home',
 			'shell.tabs.activity' => 'Activity',

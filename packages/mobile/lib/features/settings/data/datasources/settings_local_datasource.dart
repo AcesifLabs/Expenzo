@@ -13,6 +13,11 @@ import '../../domain/entities/user_settings.dart';
 abstract class SettingsLocalDatasource {
   Future<UserSettings> getSettings();
   Future<UserSettings> updateSettings(UserSettings settings);
+
+  /// Replaces the stored settings with the first-run defaults.
+  ///
+  /// Throws: [CacheException]
+  Future<UserSettings> resetSettings();
 }
 
 class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
@@ -46,6 +51,19 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
       appLogger.error('Settings local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
+  }
+
+  @override
+  Future<UserSettings> resetSettings() async {
+    try {
+      await sharedPreferences.remove(_settingsKey);
+    } catch (e, s) {
+      appLogger.error('Settings local datasource error', e, s);
+      throw CacheException(message: e.toString());
+    }
+
+    // With no stored settings, getSettings writes and returns the defaults.
+    return getSettings();
   }
 
   @override

@@ -183,6 +183,56 @@
     "nothingSelected": "Choose at least one thing to export",
     "emptyRange": "No transactions in this range"
   },
+  "deleteData": {
+    "title": "Delete all data",
+    "rowSubtitle": "Erase transactions, budgets and settings",
+    "warningTitle": "This action cannot be undone",
+    "warningBody": "Delete all your financial data including transactions, budgets, categories, and settings. This will permanently erase everything from this device.",
+    "warningBodySignedIn": "Delete all your financial data including transactions, budgets, categories, and settings, from this device and from your account.",
+    "otherDevicesNote": "Your other devices keep their copy until you delete it there too.",
+    "sections": {
+      "summary": "Data that will be deleted",
+      "confirmation": "Confirmation"
+    },
+    "transactions": "Transactions",
+    "transactionsCount": {
+      "one": "{n} transaction",
+      "other": "{n} transactions"
+    },
+    "budgets": "Budgets",
+    "budgetsCount": {
+      "one": "{n} budget",
+      "other": "{n} budgets"
+    },
+    "categories": "Categories",
+    "categoriesCount": {
+      "one": "{n} category",
+      "other": "{n} categories"
+    },
+    "recurring": "Recurring transactions",
+    "recurringCount": {
+      "one": "{n} recurring",
+      "other": "{n} recurring"
+    },
+    "smsRules": "SMS rules",
+    "smsRulesCount": {
+      "one": "{n} rule",
+      "other": "{n} rules"
+    },
+    "goals": "Goals",
+    "goalsCount": {
+      "one": "{n} goal",
+      "other": "{n} goals"
+    },
+    "settings": "Settings",
+    "settingsValue": "All preferences",
+    "categoriesNote": "Default categories are added back.",
+    "confirmHint": "Type DELETE to confirm",
+    "button": "Delete all data",
+    "deleting": "Deleting…",
+    "done": "All data deleted",
+    "serverFailed": "Couldn't delete the data in your account. Nothing was deleted. Check your connection and try again."
+  },
   "categories": {
     "rowSubtitle": "Add, edit and remove categories"
   }

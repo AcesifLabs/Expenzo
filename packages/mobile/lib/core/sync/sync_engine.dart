@@ -51,6 +51,22 @@ class SyncEngine {
   Completer<void>? _syncLock;
   bool _hasPendingTrigger = false;
 
+  /// True from [start] until [stop]. A cycle only runs while active, so an
+  /// event handler or retry that fires after [stop] does nothing, and a
+  /// running cycle ends after its current pull or push chunk.
+  bool _active = false;
+
+  /// Bumped by [stop], so a [start] still in its first cycle gives up and
+  /// push or migration loops end after their current chunk.
+  int _stopCount = 0;
+
+  /// The first-sync migration [start] runs outside the cycle lock; [stop]
+  /// waits for it too.
+  Future<void>? _migrationRun;
+
+  /// Set by [pause]: [start] does nothing until [resume].
+  bool _paused = false;
+
   /// True when the latest pull reached the server and was applied. After-sync
   /// tasks run even when it failed, so tasks that need fresh data check this.
   bool get lastPullSucceeded => _lastPullSucceeded;
@@ -81,7 +97,9 @@ class SyncEngine {
        _stopTasks = stopTasks;
 
   Future<void> start() async {
-    if (_initialized) return;
+    if (_initialized || _paused) return;
+    _active = true;
+    final stopCount = _stopCount;
     await _connectivitySub?.cancel();
     await _syncEventSub?.cancel();
     debugPrint('SyncEngine: Starting');
@@ -92,10 +110,15 @@ class SyncEngine {
 
         return;
       }
+      if (stopCount != _stopCount) return;
       await _runSyncCycle();
+      if (stopCount != _stopCount) return;
       if (await TokenStorage.isFirstSync()) {
-        await _migrateExistingData();
+        final migration = _migrationRun = _migrateExistingData();
+        await migration;
+        _migrationRun = null;
       }
+      if (stopCount != _stopCount) return;
       _connectivitySub = _connectivity.onlineStream.listen(
         (online) {
           unawaited(_onConnectivityChange(online));
@@ -120,7 +143,29 @@ class SyncEngine {
     }
   }
 
+  /// Stops sync and keeps it off, even if something calls [start], until
+  /// [resume]. Delete all data holds it across the server clear and the local
+  /// wipe.
+  Future<void> pause() async {
+    _paused = true;
+    await stop();
+  }
+
+  /// Lifts [pause] and starts again; without a token [start] does nothing.
+  Future<void> resume() {
+    _paused = false;
+
+    return start();
+  }
+
+  /// Stops syncing and waits for a running cycle or first-sync migration to
+  /// reach its next checkpoint (at most one push chunk), so nothing it pulls
+  /// or pushes lands after this returns: Delete all data clears the server
+  /// and the database next. Never call it from inside a cycle or an
+  /// after-sync task: it would wait for itself.
   Future<void> stop() async {
+    _active = false;
+    _stopCount++;
     _retryTimer?.cancel();
     _retryTimer = null;
     _retryCount = 0;
@@ -128,6 +173,9 @@ class SyncEngine {
     _connectivitySub = null;
     await _syncEventSub?.cancel();
     _syncEventSub = null;
+    _hasPendingTrigger = false;
+    await _syncLock?.future;
+    await _migrationRun;
     _initialized = false;
     _lastPullSucceeded = false;
     for (final task in _stopTasks) {
@@ -208,6 +256,7 @@ class SyncEngine {
   /// Concurrent triggers are coalesced: if a cycle is already running,
   /// exactly one more cycle will run after it completes.
   Future<void> _runSyncCycle() async {
+    if (!_active) return;
     if (_syncLock != null) {
       _hasPendingTrigger = true;
 
@@ -224,10 +273,12 @@ class SyncEngine {
         do {
           _hasPendingTrigger = false;
           await _safePullChanges();
+          if (!_active) return;
           await _safePushChanges();
-        } while (_hasPendingTrigger);
+        } while (_hasPendingTrigger && _active);
+        if (!_active) return;
         await _runAfterSyncTasks();
-      } while (_hasPendingTrigger);
+      } while (_hasPendingTrigger && _active);
     } finally {
       final lock = _syncLock;
       if (lock != null) {
@@ -254,8 +305,10 @@ class SyncEngine {
   Future<void> _processPushQueue(List<SyncQueueData> queue) async {
     int processed = 0;
     final total = queue.length;
+    final stopCount = _stopCount;
 
-    while (processed < total) {
+    // A stop ends the push after the current chunk; the rest stays queued.
+    while (processed < total && stopCount == _stopCount) {
       final end = processed + chunkSize > total ? total : processed + chunkSize;
       final batch = queue.sublist(processed, end);
       debugPrint(
@@ -427,7 +480,10 @@ class SyncEngine {
 
   Future<bool> _pushMigrationChunks(List<Map<String, dynamic>> changes) async {
     var allSucceeded = true;
+    final stopCount = _stopCount;
     for (var i = 0; i < changes.length; i += chunkSize) {
+      // Stopped: unfinished, so the next start migrates again.
+      if (stopCount != _stopCount) return false;
       final end = i + chunkSize > changes.length
           ? changes.length
           : i + chunkSize;
@@ -478,6 +534,7 @@ class SyncEngine {
   }
 
   void _scheduleRetry() {
+    if (!_active) return;
     if (_retryCount >= _backoffDelays.length) {
       _retryCount = 0;
 

@@ -16,6 +16,7 @@ import 'package:expense_tracker/features/budgets/presentation/pages/budget_form_
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:expense_tracker/features/categories/presentation/pages/category_form_page.dart';
 import 'package:expense_tracker/features/categories/presentation/pages/category_list_page.dart';
+import 'package:expense_tracker/features/data_wipe/presentation/pages/delete_all_data_page.dart';
 import 'package:expense_tracker/features/export/presentation/pages/export_data_page.dart';
 import 'package:expense_tracker/features/records/presentation/pages/all_categories_picker_page.dart';
 import 'package:expense_tracker/features/recurring/domain/entities/recurring_frequency.dart';
@@ -61,76 +62,7 @@ List<RouteBase> buildAppRoutes() {
 
 List<RouteBase> _buildNestedRoutes() {
   return [
-    GoRoute(
-      path: SettingsRoute.rootPath,
-      builder: (_, _) => const SettingsPage(),
-      routes: [
-        GoRoute(
-          path: SettingsRoute.appearance.path,
-          builder: (_, _) => const AppearancePage(),
-        ),
-        GoRoute(
-          path: SettingsRoute.currency.path,
-          builder: (_, _) => const CurrencyPage(),
-        ),
-        GoRoute(
-          path: SettingsRoute.language.path,
-          builder: (_, _) => const LanguagePage(),
-        ),
-        GoRoute(
-          path: SettingsRoute.numberFormat.path,
-          builder: (_, _) => const NumberFormatPage(),
-        ),
-        GoRoute(
-          path: SettingsRoute.fontSize.path,
-          builder: (_, _) => const FontSizePage(),
-        ),
-        GoRoute(
-          path: SettingsRoute.calendar.path,
-          builder: (_, _) => const CalendarPage(),
-        ),
-        GoRoute(
-          path: SettingsRoute.homePage.path,
-          builder: (_, _) => const HomePageSettingsPage(),
-        ),
-        GoRoute(
-          path: SettingsRoute.notifications.path,
-          builder: (_, _) => const NotificationSettingsPage(),
-        ),
-        GoRoute(
-          path: SettingsRoute.categories.path,
-          builder: (_, _) => const CategoryListPage(),
-        ),
-        GoRoute(
-          path: SettingsRoute.autoImport.path,
-          builder: (_, _) => const AutoImportPage(),
-        ),
-        GoRoute(
-          path: SettingsRoute.matchingRules.path,
-          builder: (_, _) => BlocProvider(
-            create: (_) => di.getIt<ParsingRulesBloc>()..add(LoadRules()),
-            child: const RulesListPage(),
-          ),
-        ),
-        GoRoute(
-          path: SettingsRoute.recurring.path,
-          // create:, not a bloc built in the builder: go_router rebuilds
-          // this route when pages are pushed on top of it.
-          builder: (_, _) => MultiBlocProvider(
-            providers: [
-              BlocProvider(create: (_) => di.getIt<RecurringBloc>()),
-              // The app-wide singleton; `create` would close it on pop.
-              BlocProvider.value(value: di.getIt<SettingsBloc>()),
-            ],
-            child: const RecurringListView(),
-          ),
-        ),
-        GoRoute(
-          path: SettingsRoute.export.path,
-          builder: (_, _) => const ExportDataPage(),
-        ),
-      ],
-    ),
+    _buildSettingsRoute(),
     ..._buildBudgetRoutes(),
     ..._buildRecurringRoutes(),
     ..._buildCategoryRoutes(),
@@ -140,6 +72,84 @@ List<RouteBase> _buildNestedRoutes() {
     GoRoute(path: 'reports', builder: (_, _) => const ReportsScreen()),
     GoRoute(path: 'ai-assistant', builder: (_, _) => const AiAssistantPage()),
   ];
+}
+
+/// Settings and every screen it opens, at `/settings/<SettingsRoute.path>`.
+GoRoute _buildSettingsRoute() {
+  return GoRoute(
+    path: SettingsRoute.rootPath,
+    builder: (_, _) => const SettingsPage(),
+    routes: [
+      GoRoute(
+        path: SettingsRoute.appearance.path,
+        builder: (_, _) => const AppearancePage(),
+      ),
+      GoRoute(
+        path: SettingsRoute.currency.path,
+        builder: (_, _) => const CurrencyPage(),
+      ),
+      GoRoute(
+        path: SettingsRoute.language.path,
+        builder: (_, _) => const LanguagePage(),
+      ),
+      GoRoute(
+        path: SettingsRoute.numberFormat.path,
+        builder: (_, _) => const NumberFormatPage(),
+      ),
+      GoRoute(
+        path: SettingsRoute.fontSize.path,
+        builder: (_, _) => const FontSizePage(),
+      ),
+      GoRoute(
+        path: SettingsRoute.calendar.path,
+        builder: (_, _) => const CalendarPage(),
+      ),
+      GoRoute(
+        path: SettingsRoute.homePage.path,
+        builder: (_, _) => const HomePageSettingsPage(),
+      ),
+      GoRoute(
+        path: SettingsRoute.notifications.path,
+        builder: (_, _) => const NotificationSettingsPage(),
+      ),
+      GoRoute(
+        path: SettingsRoute.categories.path,
+        builder: (_, _) => const CategoryListPage(),
+      ),
+      GoRoute(
+        path: SettingsRoute.autoImport.path,
+        builder: (_, _) => const AutoImportPage(),
+      ),
+      GoRoute(
+        path: SettingsRoute.matchingRules.path,
+        builder: (_, _) => BlocProvider(
+          create: (_) => di.getIt<ParsingRulesBloc>()..add(LoadRules()),
+          child: const RulesListPage(),
+        ),
+      ),
+      GoRoute(
+        path: SettingsRoute.recurring.path,
+        // create:, not a bloc built in the builder: go_router rebuilds
+        // this route when pages are pushed on top of it.
+        builder: (_, _) => MultiBlocProvider(
+          providers: [
+            BlocProvider(create: (_) => di.getIt<RecurringBloc>()),
+            // The app-wide singleton; `create` would close it on pop.
+            BlocProvider.value(value: di.getIt<SettingsBloc>()),
+          ],
+          child: const RecurringListView(),
+        ),
+      ),
+      GoRoute(
+        path: SettingsRoute.export.path,
+        builder: (_, _) => const ExportDataPage(),
+      ),
+      GoRoute(
+        path: SettingsRoute.deleteData.path,
+        builder: (_, _) => const DeleteAllDataPage(),
+      ),
+    ],
+  );
 }
 
 List<RouteBase> _buildBudgetRoutes() {

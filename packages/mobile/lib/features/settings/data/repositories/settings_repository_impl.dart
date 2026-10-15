@@ -42,4 +42,19 @@ class SettingsRepositoryImpl implements SettingsRepository {
       return Left(CacheFailure(message: e.toString()));
     }
   }
+
+  @override
+  Future<Either<CacheFailure, UserSettings>> resetSettings() async {
+    try {
+      final settings = await localDatasource.resetSettings();
+
+      return Right(settings);
+    } on CacheException catch (e) {
+      return Left(e.toFailure());
+    } catch (e, s) {
+      appLogger.error('Settings repository error', e, s);
+
+      return Left(CacheFailure(message: e.toString()));
+    }
+  }
 }
