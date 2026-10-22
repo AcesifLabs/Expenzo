@@ -38,6 +38,7 @@ import 'package:expense_tracker/features/settings/presentation/pages/settings_pa
 import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/pages/sms_scan_results_page.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/pages/auto_import_page.dart';
+import 'package:expense_tracker/features/sync/presentation/pages/sync_settings_page.dart';
 import 'package:expense_tracker/features/recurring/presentation/pages/recurring_list_page.dart';
 import 'package:expense_tracker/features/parsing_rules/presentation/bloc/parsing_rules_bloc.dart';
 import 'package:expense_tracker/features/parsing_rules/presentation/bloc/parsing_rules_event.dart';
@@ -139,6 +140,10 @@ GoRoute _buildSettingsRoute() {
           ],
           child: const RecurringListView(),
         ),
+      ),
+      GoRoute(
+        path: SettingsRoute.sync.path,
+        builder: (_, _) => const SyncSettingsPage(),
       ),
       GoRoute(
         path: SettingsRoute.export.path,

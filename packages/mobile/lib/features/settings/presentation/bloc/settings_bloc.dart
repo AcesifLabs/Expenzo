@@ -66,6 +66,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       transformer: concurrent(),
     );
     on<UpdateHomeTab>(_onUpdateHomeTab, transformer: concurrent());
+    on<UpdateSyncEnabled>(_onUpdateSyncEnabled, transformer: concurrent());
     on<DismissAutoImportPrompt>(
       _onDismissAutoImportPrompt,
       transformer: concurrent(),
@@ -185,6 +186,13 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
 
   void _onUpdateHomeTab(UpdateHomeTab event, Emitter<SettingsState> emit) {
     _updateFromLast((s) => s.copyWith(homeTab: event.homeTab));
+  }
+
+  void _onUpdateSyncEnabled(
+    UpdateSyncEnabled event,
+    Emitter<SettingsState> emit,
+  ) {
+    _updateFromLast((s) => s.copyWith(syncEnabled: event.enabled));
   }
 
   Future<void> _onDeleteAccountEvent(

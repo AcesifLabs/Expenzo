@@ -300,6 +300,33 @@ void main() {
     expect(find.text('home-page-page'), findsOneWidget);
   });
 
+  testWidgets('sync sits between Recurring transactions and Export data', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(400, 3000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpSettings(tester);
+
+    double top(String text) => tester.getTopLeft(find.text(text)).dy;
+
+    // Signed out, the Sign in row shares this subtitle.
+    expect(find.text('Keep your data on all your devices'), findsNWidgets(2));
+    expect(top('Sync'), greaterThan(top('Recurring transactions')));
+    expect(top('Sync'), lessThan(top('Export data')));
+  });
+
+  testWidgets('the sync row opens /settings/sync', (tester) async {
+    await pumpSettingsRouter(tester, child: 'sync');
+
+    await tester.scrollUntilVisible(find.text('Sync'), 200);
+    await tester.ensureVisible(find.text('Sync'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Sync'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('sync-page'), findsOneWidget);
+  });
+
   testWidgets('export data sits right after Recurring transactions', (
     tester,
   ) async {

@@ -461,6 +461,7 @@ class _Translations$settings$bn extends Translations$settings$en {
 	@override late final _Translations$settings$fontSize$bn fontSize = _Translations$settings$fontSize$bn._(_root);
 	@override late final _Translations$settings$calendar$bn calendar = _Translations$settings$calendar$bn._(_root);
 	@override late final _Translations$settings$homePage$bn homePage = _Translations$settings$homePage$bn._(_root);
+	@override late final _Translations$settings$sync$bn sync = _Translations$settings$sync$bn._(_root);
 	@override late final _Translations$settings$export$bn export = _Translations$settings$export$bn._(_root);
 	@override late final _Translations$settings$deleteData$bn deleteData = _Translations$settings$deleteData$bn._(_root);
 	@override late final _Translations$settings$categories$bn categories = _Translations$settings$categories$bn._(_root);
@@ -1577,6 +1578,42 @@ class _Translations$settings$homePage$bn extends Translations$settings$homePage$
 	@override late final _Translations$settings$homePage$options$bn options = _Translations$settings$homePage$options$bn._(_root);
 }
 
+// Path: settings.sync
+class _Translations$settings$sync$bn extends Translations$settings$sync$en {
+	_Translations$settings$sync$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'সিঙ্ক';
+	@override String get rowSubtitle => 'আপনার সব ডিভাইসে ডেটা রাখুন';
+	@override String get onTitle => 'সিঙ্ক চালু আছে';
+	@override String get onBody => 'আপনার লেনদেন, বাজেট ও ক্যাটাগরি সাথে সাথে আপনার অ্যাকাউন্টে কপি হয়, তাই অন্য ডিভাইসেও পাবেন।';
+	@override String get offTitle => 'সিঙ্ক বন্ধ';
+	@override String get offBody => 'এই ডিভাইস কোনো পরিবর্তন পাঠাচ্ছে না বা পাচ্ছে না। পরিবর্তনগুলো এই ফোনে থাকবে এবং সিঙ্ক আবার চালু করলে পাঠানো হবে।';
+	@override String get signedOutTitle => 'আপনার ডেটা সিঙ্ক করুন';
+	@override String get signedOutBody => 'সব ডিভাইসে আপনার লেনদেন রাখতে Google দিয়ে সাইন ইন করুন।';
+	@override String get lastSynced => 'শেষ সিঙ্ক';
+	@override String get never => 'এখনও হয়নি';
+	@override String today({required Object time}) => 'আজ, ${time}';
+	@override String yesterday({required Object time}) => 'গতকাল, ${time}';
+	@override String lastFailed({required Object time}) => 'শেষ সিঙ্ক ব্যর্থ · ${time}';
+	@override String get retry => 'আবার চেষ্টা করুন';
+	@override String get failureBannerTitle => 'সিঙ্ক এখন কাজ করছে না';
+	@override String get failureBannerBody => 'আপনার পরিবর্তনগুলো এই ফোনে নিরাপদ আছে এবং সিঙ্ক আবার কাজ করলে পাঠানো হবে।';
+	@override String pending({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n,
+		one: '${n}টি পরিবর্তন পাঠানোর অপেক্ষায়',
+		other: '${n}টি পরিবর্তন পাঠানোর অপেক্ষায়',
+	);
+	@override String get allSent => 'সব পরিবর্তন পাঠানো হয়েছে';
+	@override late final _Translations$settings$sync$sections$bn sections = _Translations$settings$sync$sections$bn._(_root);
+	@override String get enable => 'এই ডিভাইসে সিঙ্ক';
+	@override String get syncNow => 'এখনই সিঙ্ক করুন';
+	@override String get syncing => 'সিঙ্ক হচ্ছে…';
+	@override String get loadFailed => 'সিঙ্কের অবস্থা দেখানো যায়নি';
+	@override late final _Translations$settings$sync$result$bn result = _Translations$settings$sync$result$bn._(_root);
+}
+
 // Path: settings.export
 class _Translations$settings$export$bn extends Translations$settings$export$en {
 	_Translations$settings$export$bn._(TranslationsBn root) : this._root = root, super.internal(root);
@@ -2151,6 +2188,31 @@ class _Translations$settings$homePage$options$bn extends Translations$settings$h
 	@override late final _Translations$settings$homePage$options$activity$bn activity = _Translations$settings$homePage$options$activity$bn._(_root);
 	@override late final _Translations$settings$homePage$options$budgets$bn budgets = _Translations$settings$homePage$options$budgets$bn._(_root);
 	@override late final _Translations$settings$homePage$options$reports$bn reports = _Translations$settings$homePage$options$reports$bn._(_root);
+}
+
+// Path: settings.sync.sections
+class _Translations$settings$sync$sections$bn extends Translations$settings$sync$sections$en {
+	_Translations$settings$sync$sections$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get device => 'এই ডিভাইস';
+}
+
+// Path: settings.sync.result
+class _Translations$settings$sync$result$bn extends Translations$settings$sync$result$en {
+	_Translations$settings$sync$result$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get success => 'সিঙ্ক সম্পন্ন';
+	@override String get offline => 'আপনি অফলাইনে আছেন। অনলাইনে ফিরলে পরিবর্তন পাঠানো হবে।';
+	@override String get failed => 'সিঙ্ক শেষ হয়নি। এটি নিজে থেকে আবার চেষ্টা করবে।';
+	@override String get disabled => 'আগে সিঙ্ক চালু করুন';
+	@override String get signedOut => 'সিঙ্কের জন্য সাইন ইন করুন';
+	@override String get firstSyncPending => 'সাইন ইন শেষ হচ্ছে। একটু পরে আবার চেষ্টা করুন।';
 }
 
 // Path: settings.export.sections
@@ -2884,6 +2946,35 @@ extension on TranslationsBn {
 			'settings.homePage.options.budgets.subtitle' => 'বাজেটের সারসংক্ষেপ ও অগ্রগতি',
 			'settings.homePage.options.reports.title' => 'রিপোর্ট',
 			'settings.homePage.options.reports.subtitle' => 'প্রবণতা, ক্যাটাগরি ও বিশ্লেষণ',
+			'settings.sync.title' => 'সিঙ্ক',
+			'settings.sync.rowSubtitle' => 'আপনার সব ডিভাইসে ডেটা রাখুন',
+			'settings.sync.onTitle' => 'সিঙ্ক চালু আছে',
+			'settings.sync.onBody' => 'আপনার লেনদেন, বাজেট ও ক্যাটাগরি সাথে সাথে আপনার অ্যাকাউন্টে কপি হয়, তাই অন্য ডিভাইসেও পাবেন।',
+			'settings.sync.offTitle' => 'সিঙ্ক বন্ধ',
+			'settings.sync.offBody' => 'এই ডিভাইস কোনো পরিবর্তন পাঠাচ্ছে না বা পাচ্ছে না। পরিবর্তনগুলো এই ফোনে থাকবে এবং সিঙ্ক আবার চালু করলে পাঠানো হবে।',
+			'settings.sync.signedOutTitle' => 'আপনার ডেটা সিঙ্ক করুন',
+			'settings.sync.signedOutBody' => 'সব ডিভাইসে আপনার লেনদেন রাখতে Google দিয়ে সাইন ইন করুন।',
+			'settings.sync.lastSynced' => 'শেষ সিঙ্ক',
+			'settings.sync.never' => 'এখনও হয়নি',
+			'settings.sync.today' => ({required Object time}) => 'আজ, ${time}',
+			'settings.sync.yesterday' => ({required Object time}) => 'গতকাল, ${time}',
+			'settings.sync.lastFailed' => ({required Object time}) => 'শেষ সিঙ্ক ব্যর্থ · ${time}',
+			'settings.sync.retry' => 'আবার চেষ্টা করুন',
+			'settings.sync.failureBannerTitle' => 'সিঙ্ক এখন কাজ করছে না',
+			'settings.sync.failureBannerBody' => 'আপনার পরিবর্তনগুলো এই ফোনে নিরাপদ আছে এবং সিঙ্ক আবার কাজ করলে পাঠানো হবে।',
+			'settings.sync.pending' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n, one: '${n}টি পরিবর্তন পাঠানোর অপেক্ষায়', other: '${n}টি পরিবর্তন পাঠানোর অপেক্ষায়', ), 
+			'settings.sync.allSent' => 'সব পরিবর্তন পাঠানো হয়েছে',
+			'settings.sync.sections.device' => 'এই ডিভাইস',
+			'settings.sync.enable' => 'এই ডিভাইসে সিঙ্ক',
+			'settings.sync.syncNow' => 'এখনই সিঙ্ক করুন',
+			'settings.sync.syncing' => 'সিঙ্ক হচ্ছে…',
+			'settings.sync.loadFailed' => 'সিঙ্কের অবস্থা দেখানো যায়নি',
+			'settings.sync.result.success' => 'সিঙ্ক সম্পন্ন',
+			'settings.sync.result.offline' => 'আপনি অফলাইনে আছেন। অনলাইনে ফিরলে পরিবর্তন পাঠানো হবে।',
+			'settings.sync.result.failed' => 'সিঙ্ক শেষ হয়নি। এটি নিজে থেকে আবার চেষ্টা করবে।',
+			'settings.sync.result.disabled' => 'আগে সিঙ্ক চালু করুন',
+			'settings.sync.result.signedOut' => 'সিঙ্কের জন্য সাইন ইন করুন',
+			'settings.sync.result.firstSyncPending' => 'সাইন ইন শেষ হচ্ছে। একটু পরে আবার চেষ্টা করুন।',
 			'settings.export.title' => 'ডেটা এক্সপোর্ট',
 			'settings.export.rowSubtitle' => 'আপনার লেনদেন CSV ফাইলে সংরক্ষণ করুন',
 			'settings.export.infoTitle' => 'আপনার আর্থিক ডেটা এক্সপোর্ট করুন',

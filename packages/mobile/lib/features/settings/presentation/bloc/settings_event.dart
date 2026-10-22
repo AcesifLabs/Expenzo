@@ -143,6 +143,16 @@ class UpdateHomeTab extends SettingsEvent {
   const UpdateHomeTab(this.homeTab);
 }
 
+/// Applied to the sync engine by `ExpenzoApp` when the setting changes.
+class UpdateSyncEnabled extends SettingsEvent {
+  final bool enabled;
+
+  @override
+  List<Object?> get props => [enabled];
+
+  const UpdateSyncEnabled({required this.enabled});
+}
+
 class DeleteAccountEvent extends SettingsEvent {
   const DeleteAccountEvent();
 }

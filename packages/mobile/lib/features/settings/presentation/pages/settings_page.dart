@@ -61,7 +61,7 @@ class SettingsPage extends StatelessWidget {
 /// | Profile & account (`_accountSection`) | Sign in (signed out) / Delete account (signed in) | SAAP-72 profile card above the section, then My profile (Delete account moves into it); SAAP-75 Family group right after My profile |
 /// | Preferences (`_preferencesSection`) | Default currency, Number format, Font size, Appearance, Calendar | none |
 /// | Notifications (`_notificationsSection`) | Notifications | none |
-/// | Data & budget (`_dataSection`) | Recurring transactions, Export data, Delete all data | Recurring transactions, Sync (SAAP-71), Export data (SAAP-69), Delete all data (SAAP-70) |
+/// | Data & budget (`_dataSection`) | Recurring transactions, Sync, Export data, Delete all data | Recurring transactions, Sync (SAAP-71), Export data (SAAP-69), Delete all data (SAAP-70) |
 /// | Automation (`_automationSection`) | Auto-import from SMS, Matching rules | none |
 /// | General (`_generalSection`) | Language, Home page, Category settings | none |
 /// | Support (`_supportSection`) | Send feedback | SAAP-73 adds Help & Support and removes Send feedback |
@@ -241,6 +241,7 @@ class SettingsView extends StatelessWidget {
   Widget _dataSection(BuildContext context) {
     final settingsT = t.settings;
     final recurringT = settingsT.recurring;
+    final syncT = settingsT.sync;
     final exportT = settingsT.export;
     final deleteDataT = settingsT.deleteData;
 
@@ -252,6 +253,12 @@ class SettingsView extends StatelessWidget {
           title: recurringT.title,
           subtitle: recurringT.subtitle,
           onTap: () => context.push(SettingsRoute.recurring.location),
+        ),
+        SettingsTile(
+          icon: PiconsRegular.cloudArrowUp,
+          title: syncT.title,
+          subtitle: syncT.rowSubtitle,
+          onTap: () => context.push(SettingsRoute.sync.location),
         ),
         SettingsTile(
           icon: PiconsRegular.export,

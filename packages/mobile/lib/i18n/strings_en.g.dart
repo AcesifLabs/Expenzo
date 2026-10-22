@@ -679,6 +679,7 @@ class Translations$settings$en {
 	late final Translations$settings$fontSize$en fontSize = Translations$settings$fontSize$en.internal(_root);
 	late final Translations$settings$calendar$en calendar = Translations$settings$calendar$en.internal(_root);
 	late final Translations$settings$homePage$en homePage = Translations$settings$homePage$en.internal(_root);
+	late final Translations$settings$sync$en sync = Translations$settings$sync$en.internal(_root);
 	late final Translations$settings$export$en export = Translations$settings$export$en.internal(_root);
 	late final Translations$settings$deleteData$en deleteData = Translations$settings$deleteData$en.internal(_root);
 	late final Translations$settings$categories$en categories = Translations$settings$categories$en.internal(_root);
@@ -2553,6 +2554,88 @@ class Translations$settings$homePage$en {
 	late final Translations$settings$homePage$options$en options = Translations$settings$homePage$options$en.internal(_root);
 }
 
+// Path: settings.sync
+class Translations$settings$sync$en {
+	Translations$settings$sync$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Sync'
+	String get title => 'Sync';
+
+	/// en: 'Keep your data on all your devices'
+	String get rowSubtitle => 'Keep your data on all your devices';
+
+	/// en: 'Sync is on'
+	String get onTitle => 'Sync is on';
+
+	/// en: 'Your transactions, budgets and categories are copied to your account as you go, so your other devices get them too.'
+	String get onBody => 'Your transactions, budgets and categories are copied to your account as you go, so your other devices get them too.';
+
+	/// en: 'Sync is off'
+	String get offTitle => 'Sync is off';
+
+	/// en: 'This device isn't sending or receiving changes. Your changes stay on this phone and are sent when you turn Sync back on.'
+	String get offBody => 'This device isn\'t sending or receiving changes. Your changes stay on this phone and are sent when you turn Sync back on.';
+
+	/// en: 'Sync your data'
+	String get signedOutTitle => 'Sync your data';
+
+	/// en: 'Sign in with Google to keep your transactions on all your devices.'
+	String get signedOutBody => 'Sign in with Google to keep your transactions on all your devices.';
+
+	/// en: 'Last synced'
+	String get lastSynced => 'Last synced';
+
+	/// en: 'Not yet'
+	String get never => 'Not yet';
+
+	/// en: 'Today, {time}'
+	String today({required Object time}) => 'Today, ${time}';
+
+	/// en: 'Yesterday, {time}'
+	String yesterday({required Object time}) => 'Yesterday, ${time}';
+
+	/// en: 'Last sync failed · {time}'
+	String lastFailed({required Object time}) => 'Last sync failed · ${time}';
+
+	/// en: 'Retry'
+	String get retry => 'Retry';
+
+	/// en: 'Sync isn't working right now'
+	String get failureBannerTitle => 'Sync isn\'t working right now';
+
+	/// en: 'Your changes are safe on this phone and will be sent when Sync works again.'
+	String get failureBannerBody => 'Your changes are safe on this phone and will be sent when Sync works again.';
+
+	/// en: '(one) {{n} change waiting to send} (other) {{n} changes waiting to send}'
+	String pending({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: '${n} change waiting to send',
+		other: '${n} changes waiting to send',
+	);
+
+	/// en: 'All changes sent'
+	String get allSent => 'All changes sent';
+
+	late final Translations$settings$sync$sections$en sections = Translations$settings$sync$sections$en.internal(_root);
+
+	/// en: 'Sync on this device'
+	String get enable => 'Sync on this device';
+
+	/// en: 'Sync now'
+	String get syncNow => 'Sync now';
+
+	/// en: 'Syncing…'
+	String get syncing => 'Syncing…';
+
+	/// en: 'Couldn't load sync status'
+	String get loadFailed => 'Couldn\'t load sync status';
+
+	late final Translations$settings$sync$result$en result = Translations$settings$sync$result$en.internal(_root);
+}
+
 // Path: settings.export
 class Translations$settings$export$en {
 	Translations$settings$export$en.internal(this._root);
@@ -3395,6 +3478,45 @@ class Translations$settings$homePage$options$en {
 	late final Translations$settings$homePage$options$reports$en reports = Translations$settings$homePage$options$reports$en.internal(_root);
 }
 
+// Path: settings.sync.sections
+class Translations$settings$sync$sections$en {
+	Translations$settings$sync$sections$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'This device'
+	String get device => 'This device';
+}
+
+// Path: settings.sync.result
+class Translations$settings$sync$result$en {
+	Translations$settings$sync$result$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Sync complete'
+	String get success => 'Sync complete';
+
+	/// en: 'You're offline. Changes will be sent when you're back online.'
+	String get offline => 'You\'re offline. Changes will be sent when you\'re back online.';
+
+	/// en: 'Sync didn't finish. It will try again on its own.'
+	String get failed => 'Sync didn\'t finish. It will try again on its own.';
+
+	/// en: 'Turn on Sync first'
+	String get disabled => 'Turn on Sync first';
+
+	/// en: 'Sign in to sync'
+	String get signedOut => 'Sign in to sync';
+
+	/// en: 'Finishing sign-in. Try again in a moment.'
+	String get firstSyncPending => 'Finishing sign-in. Try again in a moment.';
+}
+
 // Path: settings.export.sections
 class Translations$settings$export$sections$en {
 	Translations$settings$export$sections$en.internal(this._root);
@@ -4174,6 +4296,35 @@ extension on Translations {
 			'settings.homePage.options.budgets.subtitle' => 'Budget overview and progress tracking',
 			'settings.homePage.options.reports.title' => 'Reports',
 			'settings.homePage.options.reports.subtitle' => 'Trends, categories and insights',
+			'settings.sync.title' => 'Sync',
+			'settings.sync.rowSubtitle' => 'Keep your data on all your devices',
+			'settings.sync.onTitle' => 'Sync is on',
+			'settings.sync.onBody' => 'Your transactions, budgets and categories are copied to your account as you go, so your other devices get them too.',
+			'settings.sync.offTitle' => 'Sync is off',
+			'settings.sync.offBody' => 'This device isn\'t sending or receiving changes. Your changes stay on this phone and are sent when you turn Sync back on.',
+			'settings.sync.signedOutTitle' => 'Sync your data',
+			'settings.sync.signedOutBody' => 'Sign in with Google to keep your transactions on all your devices.',
+			'settings.sync.lastSynced' => 'Last synced',
+			'settings.sync.never' => 'Not yet',
+			'settings.sync.today' => ({required Object time}) => 'Today, ${time}',
+			'settings.sync.yesterday' => ({required Object time}) => 'Yesterday, ${time}',
+			'settings.sync.lastFailed' => ({required Object time}) => 'Last sync failed · ${time}',
+			'settings.sync.retry' => 'Retry',
+			'settings.sync.failureBannerTitle' => 'Sync isn\'t working right now',
+			'settings.sync.failureBannerBody' => 'Your changes are safe on this phone and will be sent when Sync works again.',
+			'settings.sync.pending' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} change waiting to send', other: '${n} changes waiting to send', ), 
+			'settings.sync.allSent' => 'All changes sent',
+			'settings.sync.sections.device' => 'This device',
+			'settings.sync.enable' => 'Sync on this device',
+			'settings.sync.syncNow' => 'Sync now',
+			'settings.sync.syncing' => 'Syncing…',
+			'settings.sync.loadFailed' => 'Couldn\'t load sync status',
+			'settings.sync.result.success' => 'Sync complete',
+			'settings.sync.result.offline' => 'You\'re offline. Changes will be sent when you\'re back online.',
+			'settings.sync.result.failed' => 'Sync didn\'t finish. It will try again on its own.',
+			'settings.sync.result.disabled' => 'Turn on Sync first',
+			'settings.sync.result.signedOut' => 'Sign in to sync',
+			'settings.sync.result.firstSyncPending' => 'Finishing sign-in. Try again in a moment.',
 			'settings.export.title' => 'Export data',
 			'settings.export.rowSubtitle' => 'Save your transactions as CSV files',
 			'settings.export.infoTitle' => 'Export your financial data',

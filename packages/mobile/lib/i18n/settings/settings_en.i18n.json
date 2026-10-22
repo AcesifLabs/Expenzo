@@ -151,6 +151,44 @@
       }
     }
   },
+  "sync": {
+    "title": "Sync",
+    "rowSubtitle": "Keep your data on all your devices",
+    "onTitle": "Sync is on",
+    "onBody": "Your transactions, budgets and categories are copied to your account as you go, so your other devices get them too.",
+    "offTitle": "Sync is off",
+    "offBody": "This device isn't sending or receiving changes. Your changes stay on this phone and are sent when you turn Sync back on.",
+    "signedOutTitle": "Sync your data",
+    "signedOutBody": "Sign in with Google to keep your transactions on all your devices.",
+    "lastSynced": "Last synced",
+    "never": "Not yet",
+    "today": "Today, {time}",
+    "yesterday": "Yesterday, {time}",
+    "lastFailed": "Last sync failed · {time}",
+    "retry": "Retry",
+    "failureBannerTitle": "Sync isn't working right now",
+    "failureBannerBody": "Your changes are safe on this phone and will be sent when Sync works again.",
+    "pending": {
+      "one": "{n} change waiting to send",
+      "other": "{n} changes waiting to send"
+    },
+    "allSent": "All changes sent",
+    "sections": {
+      "device": "This device"
+    },
+    "enable": "Sync on this device",
+    "syncNow": "Sync now",
+    "syncing": "Syncing…",
+    "loadFailed": "Couldn't load sync status",
+    "result": {
+      "success": "Sync complete",
+      "offline": "You're offline. Changes will be sent when you're back online.",
+      "failed": "Sync didn't finish. It will try again on its own.",
+      "disabled": "Turn on Sync first",
+      "signedOut": "Sign in to sync",
+      "firstSyncPending": "Finishing sign-in. Try again in a moment."
+    }
+  },
   "export": {
     "title": "Export data",
     "rowSubtitle": "Save your transactions as CSV files",

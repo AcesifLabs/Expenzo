@@ -99,6 +99,7 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
       'fontSize': settings.fontSize.name,
       'firstDayOfWeek': settings.firstDayOfWeek?.name,
       'homeTab': settings.homeTab.name,
+      'syncEnabled': settings.syncEnabled,
       'createdAt': settings.createdAt.toIso8601String(),
       'updatedAt': settings.updatedAt.toIso8601String(),
     };
@@ -134,6 +135,7 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
         json['firstDayOfWeek'] as String?,
       ),
       homeTab: AppRootTab.fromName(json['homeTab'] as String?),
+      syncEnabled: json['syncEnabled'] as bool? ?? true,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );

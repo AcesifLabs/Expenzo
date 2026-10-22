@@ -4,6 +4,9 @@ import 'package:expense_tracker/core/sync/sync_engine.dart';
 import '../entities/user.dart';
 
 abstract class AuthRepository {
+  /// Fires when Sync is switched on before the first sync ran.
+  Stream<void> get firstSyncNeeded;
+
   /// Signs in with Google and returns the authenticated [User].
   ///
   /// Returns [Right(User)] on success, [Left(AuthFailure)] on failure.
@@ -39,4 +42,7 @@ abstract class AuthRepository {
 
   /// Checks for sync conflicts with the remote server.
   Future<SyncConflictType> checkConflict();
+
+  /// Whether Sync is switched on for this device.
+  Future<bool> isSyncEnabled();
 }

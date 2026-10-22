@@ -49,6 +49,10 @@ class UserSettings extends Equatable {
 
   /// Root tab opened on cold start (SAAP-68).
   final AppRootTab homeTab;
+
+  /// Sync with the account on this device. Off stops sending and receiving;
+  /// changes still queue.
+  final bool syncEnabled;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -72,6 +76,7 @@ class UserSettings extends Equatable {
     fontSize,
     firstDayOfWeek,
     homeTab,
+    syncEnabled,
     createdAt,
     updatedAt,
   ];
@@ -95,6 +100,7 @@ class UserSettings extends Equatable {
     this.fontSize = AppFontSize.defaultSize,
     this.firstDayOfWeek,
     this.homeTab = AppRootTab.home,
+    this.syncEnabled = true,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -118,6 +124,7 @@ class UserSettings extends Equatable {
     AppFontSize? fontSize,
     FirstDayOfWeek? firstDayOfWeek,
     AppRootTab? homeTab,
+    bool? syncEnabled,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -145,6 +152,7 @@ class UserSettings extends Equatable {
       fontSize: fontSize ?? this.fontSize,
       firstDayOfWeek: firstDayOfWeek ?? this.firstDayOfWeek,
       homeTab: homeTab ?? this.homeTab,
+      syncEnabled: syncEnabled ?? this.syncEnabled,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
