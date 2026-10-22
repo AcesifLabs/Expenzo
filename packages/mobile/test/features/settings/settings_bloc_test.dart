@@ -331,6 +331,15 @@ void main() {
       expect(saved, testSettings.copyWith(homeTab: AppRootTab.activity));
     });
 
+    test(
+      'UpdateSyncEnabled saves the switch and keeps other settings',
+      () async {
+        final saved = await savedAfter(const UpdateSyncEnabled(enabled: false));
+
+        expect(saved, testSettings.copyWith(syncEnabled: false));
+      },
+    );
+
     test('UpdateNumberFormat changes only the given field', () async {
       final saved = await savedAfter(
         const UpdateNumberFormat(digitGrouping: DigitGrouping.dot),

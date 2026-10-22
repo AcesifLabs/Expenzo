@@ -7,6 +7,7 @@ void main() {
     expect(SettingsRoute.homePage.location, '/settings/home-page');
     expect(SettingsRoute.numberFormat.location, '/settings/number-format');
     expect(SettingsRoute.export.location, '/settings/export');
+    expect(SettingsRoute.sync.location, '/settings/sync');
     expect(SettingsRoute.deleteData.location, '/settings/delete-data');
     for (final route in SettingsRoute.values) {
       expect(route.location, '/settings/${route.path}');

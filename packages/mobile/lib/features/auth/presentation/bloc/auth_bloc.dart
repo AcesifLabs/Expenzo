@@ -21,6 +21,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final SignOut signOut;
   final GetCurrentUser getCurrentUser;
   final AuthRepository _authRepository;
+  StreamSubscription<void>? _firstSyncSub;
 
   AuthBloc({
     required this.signInWithGoogle,
@@ -35,6 +36,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       transformer: concurrent(),
     );
     on<SignOutRequested>(_onSignOutRequested, transformer: concurrent());
+    on<FirstSyncRequested>(_onFirstSyncRequested, transformer: droppable());
+    _firstSyncSub = _authRepository.firstSyncNeeded.listen(
+      (_) => add(const FirstSyncRequested()),
+    );
+  }
+
+  @override
+  Future<void> close() async {
+    await _firstSyncSub?.cancel();
+
+    return super.close();
   }
 
   Future<void> _onAuthCheckRequested(
@@ -90,8 +102,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
   }
 
+  Future<void> _onFirstSyncRequested(
+    FirstSyncRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    final current = state;
+    if (current is! Authenticated) return;
+    await _onAuthSuccess(current.user, emit);
+  }
+
+  /// With Sync off the conflict check is skipped: it talks to the server.
+  /// The engine stays idle. Turning Sync on later runs this path
+  /// ([FirstSyncRequested] from [SyncEngine.firstSyncNeeded]).
   Future<void> _onAuthSuccess(User user, Emitter<AuthState> emit) async {
-    if (await TokenStorage.isFirstSync()) {
+    if (await TokenStorage.isFirstSync() &&
+        await _authRepository.isSyncEnabled()) {
       try {
         final conflict = await _authRepository.checkConflict();
         if (conflict == SyncConflictType.conflict) {

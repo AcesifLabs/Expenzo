@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -52,6 +54,12 @@ void main() {
     mockSignInWithGoogle = MockSignInWithGoogle();
     mockSignOut = MockSignOut();
     mockAuthRepository = MockAuthRepository();
+    when(
+      () => mockAuthRepository.firstSyncNeeded,
+    ).thenAnswer((_) => const Stream.empty());
+    when(
+      () => mockAuthRepository.isSyncEnabled(),
+    ).thenAnswer((_) async => true);
     bloc = AuthBloc(
       signInWithGoogle: mockSignInWithGoogle,
       signOut: mockSignOut,
@@ -104,6 +112,86 @@ void main() {
 
       expectLater(bloc.stream, emitsInOrder(expected));
       bloc.add(const SignOutRequested());
+    });
+  });
+
+  group('Sync switch', () {
+    void signedIn({required bool syncEnabled}) {
+      when(
+        () => mockGetCurrentUser(any()),
+      ).thenAnswer((_) async => Right(testUser));
+      when(
+        () => mockAuthRepository.isSyncEnabled(),
+      ).thenAnswer((_) async => syncEnabled);
+      when(() => mockAuthRepository.startSyncEngine()).thenAnswer((_) async {});
+    }
+
+    test('signing in with Sync off skips the conflict check', () async {
+      signedIn(syncEnabled: false);
+
+      final states = expectLater(
+        bloc.stream,
+        emitsInOrder([const AuthLoading(), Authenticated(testUser)]),
+      );
+      bloc.add(const AuthCheckRequested());
+      await states;
+
+      verifyNever(() => mockAuthRepository.checkConflict());
+    });
+
+    test('turning Sync on runs the conflict check', () async {
+      signedIn(syncEnabled: false);
+      bloc.add(const AuthCheckRequested());
+      await pumpEventQueue();
+      when(
+        () => mockAuthRepository.isSyncEnabled(),
+      ).thenAnswer((_) async => true);
+      when(
+        () => mockAuthRepository.checkConflict(),
+      ).thenAnswer((_) async => SyncConflictType.conflict);
+
+      bloc.add(const FirstSyncRequested());
+      await pumpEventQueue();
+
+      expect(bloc.state, AuthSyncConflictPending(testUser));
+    });
+
+    test('FirstSyncRequested does nothing when signed out', () async {
+      bloc.add(const FirstSyncRequested());
+      await pumpEventQueue();
+
+      expect(bloc.state, const AuthInitial());
+      verifyNever(() => mockAuthRepository.checkConflict());
+    });
+
+    test('the engine signal starts the first sync', () async {
+      final signal = StreamController<void>.broadcast();
+      addTearDown(signal.close);
+      when(
+        () => mockAuthRepository.firstSyncNeeded,
+      ).thenAnswer((_) => signal.stream);
+      final listening = AuthBloc(
+        signInWithGoogle: mockSignInWithGoogle,
+        signOut: mockSignOut,
+        getCurrentUser: mockGetCurrentUser,
+        authRepository: mockAuthRepository,
+      );
+      addTearDown(listening.close);
+      signedIn(syncEnabled: false);
+      listening.add(const AuthCheckRequested());
+      await pumpEventQueue();
+      when(
+        () => mockAuthRepository.isSyncEnabled(),
+      ).thenAnswer((_) async => true);
+      when(
+        () => mockAuthRepository.checkConflict(),
+      ).thenAnswer((_) async => SyncConflictType.none);
+
+      signal.add(null);
+      await pumpEventQueue();
+
+      verify(() => mockAuthRepository.checkConflict()).called(1);
+      verify(() => mockAuthRepository.startSyncEngine()).called(2);
     });
   });
 }

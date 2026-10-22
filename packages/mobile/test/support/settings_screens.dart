@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
+import 'package:expense_tracker/features/auth/domain/entities/user.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_state.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
@@ -36,6 +37,10 @@ import 'package:expense_tracker/features/settings/presentation/pages/language_pa
 import 'package:expense_tracker/features/settings/presentation/pages/notification_settings_page.dart';
 import 'package:expense_tracker/features/settings/presentation/pages/number_format_page.dart';
 import 'package:expense_tracker/features/settings/presentation/pages/settings_page.dart';
+import 'package:expense_tracker/features/sync/domain/entities/sync_overview.dart';
+import 'package:expense_tracker/features/sync/presentation/bloc/sync_screen_bloc.dart';
+import 'package:expense_tracker/features/sync/presentation/bloc/sync_screen_state.dart';
+import 'package:expense_tracker/features/sync/presentation/pages/sync_settings_page.dart';
 
 import 'core_screens.dart';
 import 'factories/category_factory.dart';
@@ -56,6 +61,8 @@ class MockGetCategoryRecordCounts extends Mock
 class MockParsingRulesBloc extends Mock implements ParsingRulesBloc {}
 
 class MockExportBloc extends Mock implements ExportBloc {}
+
+class MockSyncScreenBloc extends Mock implements SyncScreenBloc {}
 
 class MockDeleteAllDataBloc extends Mock implements DeleteAllDataBloc {}
 
@@ -85,12 +92,43 @@ Map<String, Widget Function()> get settingsScreens => {
   'Home page': () => _withSettings(const HomePageSettingsView()),
   'Notifications': _notificationsScreen,
   'Recurring transactions': _recurringScreen,
+  'Sync': _syncScreen,
   'Export data': _exportScreen,
   'Delete all data': _deleteDataScreen,
   'Matching rules': _matchingRulesScreen,
   'Language': () => _withSettings(const LanguageView()),
   'Categories': _categoriesScreen,
 };
+
+/// The busiest state: signed in, the last sync failed, banner showing.
+Widget _syncScreen() {
+  return MultiBlocProvider(
+    providers: [
+      BlocProvider<SettingsBloc>.value(value: _loadedSettingsBloc()),
+      BlocProvider<AuthBloc>.value(
+        value: mockBloc<MockAuthBloc, AuthState>(
+          MockAuthBloc(),
+          const Authenticated(User(uid: 'u1', displayName: 'Sam')),
+        ),
+      ),
+      BlocProvider<SyncScreenBloc>.value(
+        value: mockBloc<MockSyncScreenBloc, SyncScreenState>(
+          MockSyncScreenBloc(),
+          SyncScreenState(
+            loadStatus: SyncScreenLoadStatus.loaded,
+            overview: SyncOverview(
+              isSignedIn: true,
+              lastFailedSyncAt: DateTime(2026, 9, 30, 21, 45),
+              consecutiveFailures: 3,
+              pendingCount: 128,
+            ),
+          ),
+        ),
+      ),
+    ],
+    child: const SyncSettingsView(),
+  );
+}
 
 Widget _exportScreen() {
   return BlocProvider<ExportBloc>.value(

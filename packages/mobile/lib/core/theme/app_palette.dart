@@ -98,6 +98,9 @@ class AppPalette extends ThemeExtension<AppPalette> {
   /// A faint expense rose behind destructive warnings.
   Color get expenseTint => expense.withValues(alpha: 0.12);
 
+  /// A faint warning amber behind warning banners.
+  Color get warningTint => warning.withValues(alpha: 0.12);
+
   const AppPalette({
     required this.bg,
     required this.surface,

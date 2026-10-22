@@ -19,6 +19,9 @@ import 'package:expense_tracker/core/error/failure_message.dart';
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDatasource remoteDatasource;
 
+  @override
+  Stream<void> get firstSyncNeeded => di.getIt<SyncEngine>().firstSyncNeeded;
+
   AuthRepositoryImpl({required this.remoteDatasource});
 
   @visibleForTesting
@@ -166,6 +169,9 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<SyncConflictType> checkConflict() async {
     return di.getIt<SyncEngine>().checkConflict();
   }
+
+  @override
+  Future<bool> isSyncEnabled() => di.getIt<SyncEngine>().isEnabled();
 
   @override
   Future<void> stopSyncEngine() async {

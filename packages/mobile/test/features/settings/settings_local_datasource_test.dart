@@ -301,4 +301,27 @@ void main() {
     expect(reset.createdAt.isAfter(custom.createdAt), isTrue);
     expect(await datasource.getSettings(), reset);
   });
+
+  test('settings saved before the sync switch existed have sync on', () async {
+    final datasource = await datasourceWith(_storedSettings(code: 'BDT'));
+
+    expect((await datasource.getSettings()).syncEnabled, isTrue);
+  });
+
+  test('the sync switch is saved and read back', () async {
+    final datasource = await datasourceWith(_storedSettings(code: 'BDT'));
+    final settings = await datasource.getSettings();
+
+    await datasource.updateSettings(settings.copyWith(syncEnabled: false));
+
+    expect((await datasource.getSettings()).syncEnabled, isFalse);
+  });
+
+  test('a reset turns sync back on', () async {
+    final datasource = await datasourceWith(_storedSettings(code: 'BDT'));
+    final settings = await datasource.getSettings();
+    await datasource.updateSettings(settings.copyWith(syncEnabled: false));
+
+    expect((await datasource.resetSettings()).syncEnabled, isTrue);
+  });
 }

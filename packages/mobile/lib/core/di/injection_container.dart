@@ -25,6 +25,7 @@ import 'package:expense_tracker/core/sync/default_sync_registry.dart';
 import 'package:expense_tracker/features/budgets/data/services/budget_name_repair.dart';
 import 'package:expense_tracker/features/records/data/services/record_budget_link_repair.dart';
 import 'package:expense_tracker/features/recurring/application/recurring_auto_poster.dart';
+import 'package:expense_tracker/features/settings/data/datasources/settings_local_datasource.dart';
 
 import 'auth_module.dart';
 import 'category_module.dart';
@@ -37,6 +38,7 @@ import 'background_module.dart';
 import 'settings_module.dart';
 import 'export_module.dart';
 import 'data_wipe_module.dart';
+import 'sync_module.dart';
 import 'dashboard_module.dart';
 import 'ai_assistant_module.dart';
 import 'receipt_scan_module.dart';
@@ -169,6 +171,10 @@ Future<void> initCriticalDependencies() async {
         () => getIt<RecordBudgetLinkRepair>().runOnce(),
       ],
       stopTasks: [_resetRecurringAutoPost],
+      // Registered later in this function; resolved when sync starts.
+      isEnabled: () async =>
+          !getIt.isRegistered<SettingsLocalDatasource>() ||
+          (await getIt<SettingsLocalDatasource>().getSettings()).syncEnabled,
     ),
   );
 
@@ -177,6 +183,7 @@ Future<void> initCriticalDependencies() async {
   initSettingsModule(getIt);
   initExportModule(getIt);
   initDataWipeModule(getIt);
+  initSyncModule(getIt);
 
   initAuthModule(getIt);
   initCategoryModule(getIt);

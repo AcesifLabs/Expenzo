@@ -43,10 +43,20 @@ class SyncQueueDao extends DatabaseAccessor<AppDatabase>
 
   Future<int> getUnsyncedCount() async {
     final c = countAll();
-    final query = selectOnly(syncQueue)
+
+    return (await _unsyncedCountQuery(c).getSingle()).read(c) ?? 0;
+  }
+
+  /// [getUnsyncedCount], updated on every queue change.
+  Stream<int> watchUnsyncedCount() {
+    final c = countAll();
+
+    return _unsyncedCountQuery(c).watchSingle().map((row) => row.read(c) ?? 0);
+  }
+
+  JoinedSelectStatement _unsyncedCountQuery(Expression<int> c) {
+    return selectOnly(syncQueue)
       ..addColumns([c])
       ..where(syncQueue.syncedAt.isNull());
-
-    return (await query.getSingle()).read(c) ?? 0;
   }
 }

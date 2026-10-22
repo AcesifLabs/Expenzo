@@ -15,6 +15,7 @@ enum SettingsRoute {
   autoImport('auto-import'),
   matchingRules('matching-rules'),
   recurring('recurring'),
+  sync('sync'),
   export('export'),
   deleteData('delete-data');
 

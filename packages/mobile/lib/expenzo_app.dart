@@ -22,6 +22,8 @@ import 'package:expense_tracker/shared/presentation/widgets/currency_scope.dart'
 import 'package:expense_tracker/shared/presentation/widgets/locale_scope.dart';
 import 'package:expense_tracker/core/router/cold_start_location.dart';
 import 'package:expense_tracker/core/router/refresh_on_auth_change.dart';
+import 'package:expense_tracker/core/sync/sync_engine.dart';
+import 'package:expense_tracker/core/sync/sync_switch_watcher.dart';
 import 'package:expense_tracker/shared/services/feedback_mailer.dart';
 
 import 'core/background/background_task_scheduler.dart';
@@ -71,6 +73,11 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
   // Keeps the last value while settings reload, so text doesn't jump.
   final _fontScaleNotifier = ValueNotifier<double>(
     AppFontSize.defaultSize.scale,
+  );
+
+  final _syncSwitch = SyncSwitchWatcher(
+    ({required enabled}) =>
+        di.getIt<SyncEngine>().applyEnabled(enabled: enabled),
   );
 
   // Keeps DateFormat and the language-default first day of week in step
@@ -223,6 +230,7 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
     _applyLanguage(settings.languageCode);
     _applyWeekStart();
     unawaited(_applyBackgroundWork(settings));
+    _syncSwitch.update(enabled: settings.syncEnabled);
   }
 
   /// Sets [WeekStart] from the last settings and the current app language.

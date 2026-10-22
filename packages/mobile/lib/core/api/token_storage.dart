@@ -1,4 +1,5 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../sync/sync_outcome_store.dart';
 
 class TokenStorage {
   static const _tokenKey = 'jwt_access_token';
@@ -42,9 +43,11 @@ class TokenStorage {
     await _storage.write(key: _isFirstSyncKey, value: 'false');
   }
 
+  /// Also forgets the sync history: a reset sync state has none.
   static Future<void> clearSyncState() async {
     await _storage.delete(key: _lastSyncKey);
     await _storage.delete(key: _isFirstSyncKey);
+    await SyncOutcomeStore.clear();
   }
 
   static Future<void> clearAll() async {
