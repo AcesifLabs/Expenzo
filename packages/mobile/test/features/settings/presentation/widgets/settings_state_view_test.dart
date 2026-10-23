@@ -67,15 +67,6 @@ void main() {
     verify(() => bloc.add(const LoadSettings())).called(1);
   });
 
-  testWidgets('after the account is deleted it offers Try again instead '
-      'of spinning', (tester) async {
-    await pump(tester, const AccountDeleted());
-
-    expect(find.byType(CircularProgressIndicator), findsNothing);
-    await tester.tap(find.text('Try again'));
-    verify(() => bloc.add(const LoadSettings())).called(1);
-  });
-
   testWidgets('keeps the content on screen while a save runs', (tester) async {
     await pump(tester, SettingsLoaded(makeUserSettings(theme: 'dark')));
     await emit(tester, const SettingsLoading());

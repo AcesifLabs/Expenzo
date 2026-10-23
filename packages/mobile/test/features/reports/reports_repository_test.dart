@@ -1,9 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:talker/talker.dart';
 import 'package:expense_tracker/core/database/daos/record_dao.dart';
 import 'package:expense_tracker/core/database/daos/category_dao.dart';
-import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/features/reports/data/repositories/reports_repository_impl.dart';
 import 'package:expense_tracker/features/reports/domain/entities/granularity.dart';
 
@@ -15,10 +13,6 @@ void main() {
   late MockRecordDao mockRecordDao;
   late MockCategoryDao mockCategoryDao;
   late ReportsRepositoryImpl repository;
-
-  setUpAll(() {
-    appLogger.configure(settings: TalkerSettings(useConsoleLogs: false));
-  });
 
   setUp(() {
     mockRecordDao = MockRecordDao();

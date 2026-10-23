@@ -668,6 +668,7 @@ class Translations$settings$en {
 	String get deleteAccount => 'Delete account';
 
 	late final Translations$settings$signIn$en signIn = Translations$settings$signIn$en.internal(_root);
+	late final Translations$settings$profile$en profile = Translations$settings$profile$en.internal(_root);
 	late final Translations$settings$deleteDialog$en deleteDialog = Translations$settings$deleteDialog$en.internal(_root);
 
 	/// en: 'Couldn't load your settings.'
@@ -1184,6 +1185,9 @@ class Translations$common$errors$en {
 
 	/// en: 'Couldn't read your messages. Try again.'
 	String get smsScan => 'Couldn\'t read your messages. Try again.';
+
+	/// en: 'For your security, sign in again, then delete your account.'
+	String get requiresRecentLogin => 'For your security, sign in again, then delete your account.';
 }
 
 // Path: common.dates
@@ -2408,6 +2412,54 @@ class Translations$settings$signIn$en {
 	String get subtitle => 'Keep your data on all your devices';
 }
 
+// Path: settings.profile
+class Translations$settings$profile$en {
+	Translations$settings$profile$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'My profile'
+	String get title => 'My profile';
+
+	/// en: 'Your Google account'
+	String get rowSubtitle => 'Your Google account';
+
+	/// en: 'Name'
+	String get nameLabel => 'Name';
+
+	/// en: 'Email'
+	String get emailLabel => 'Email';
+
+	/// en: 'No name on this Google account'
+	String get noName => 'No name on this Google account';
+
+	/// en: 'Signed in with Google'
+	String get signedInWith => 'Signed in with Google';
+
+	/// en: 'Your name and photo come from your Google account. Change them there.'
+	String get googleNote => 'Your name and photo come from your Google account. Change them there.';
+
+	/// en: 'Deleting your account…'
+	String get deletingAccount => 'Deleting your account…';
+
+	/// en: 'Your account was deleted'
+	String get accountDeleted => 'Your account was deleted';
+
+	/// en: 'You're not signed in'
+	String get signedOutTitle => 'You\'re not signed in';
+
+	/// en: 'Sign in with Google to keep your transactions on all your devices.'
+	String get signedOutBody => 'Sign in with Google to keep your transactions on all your devices.';
+
+	/// en: 'Guest'
+	String get guestName => 'Guest';
+
+	/// en: 'Sign in to sync your data'
+	String get guestSubtitle => 'Sign in to sync your data';
+}
+
 // Path: settings.deleteDialog
 class Translations$settings$deleteDialog$en {
 	Translations$settings$deleteDialog$en.internal(this._root);
@@ -2422,11 +2474,11 @@ class Translations$settings$deleteDialog$en {
 	/// en: 'Are you sure you want to delete your account?'
 	String get question => 'Are you sure you want to delete your account?';
 
-	/// en: 'This permanently deletes:'
-	String get listTitle => 'This permanently deletes:';
+	/// en: 'This permanently deletes, from your account and this phone:'
+	String get listTitle => 'This permanently deletes, from your account and this phone:';
 
-	/// en: '• All your expenses'
-	String get expenses => '• All your expenses';
+	/// en: '• All your transactions'
+	String get transactions => '• All your transactions';
 
 	/// en: '• All your categories'
 	String get categories => '• All your categories';
@@ -3846,6 +3898,7 @@ extension on Translations {
 			'common.errors.permission' => 'Expenzo doesn\'t have permission to do this. Allow it in system settings.',
 			'common.errors.notFound' => 'This item no longer exists.',
 			'common.errors.smsScan' => 'Couldn\'t read your messages. Try again.',
+			'common.errors.requiresRecentLogin' => 'For your security, sign in again, then delete your account.',
 			'common.dates.today' => 'Today',
 			'common.dates.yesterday' => 'Yesterday',
 			'common.a11y.expenseAmount' => ({required Object amount, required Object currency}) => 'Expense, ${amount} ${currency}',
@@ -4180,9 +4233,9 @@ extension on Translations {
 			'recurring.form.activeDetail' => 'Process this recurring transaction',
 			'recurring.form.amountRequired' => 'Enter an amount',
 			'recurring.form.amountInvalid' => 'Enter a valid number',
-			'recurring.form.nameRequired' => 'Enter a name',
 			_ => null,
 		} ?? switch (path) {
+			'recurring.form.nameRequired' => 'Enter a name',
 			'recurring.form.create' => 'New recurring',
 			'reports.insights.highestDay.title' => 'Highest spending day',
 			'reports.insights.highestDay.description' => ({required Object day, required Object percent}) => '${day} is your biggest spending day, ${percent}% above your daily average.',
@@ -4252,10 +4305,23 @@ extension on Translations {
 			'settings.deleteAccount' => 'Delete account',
 			'settings.signIn.title' => 'Sign in',
 			'settings.signIn.subtitle' => 'Keep your data on all your devices',
+			'settings.profile.title' => 'My profile',
+			'settings.profile.rowSubtitle' => 'Your Google account',
+			'settings.profile.nameLabel' => 'Name',
+			'settings.profile.emailLabel' => 'Email',
+			'settings.profile.noName' => 'No name on this Google account',
+			'settings.profile.signedInWith' => 'Signed in with Google',
+			'settings.profile.googleNote' => 'Your name and photo come from your Google account. Change them there.',
+			'settings.profile.deletingAccount' => 'Deleting your account…',
+			'settings.profile.accountDeleted' => 'Your account was deleted',
+			'settings.profile.signedOutTitle' => 'You\'re not signed in',
+			'settings.profile.signedOutBody' => 'Sign in with Google to keep your transactions on all your devices.',
+			'settings.profile.guestName' => 'Guest',
+			'settings.profile.guestSubtitle' => 'Sign in to sync your data',
 			'settings.deleteDialog.title' => 'Delete account',
 			'settings.deleteDialog.question' => 'Are you sure you want to delete your account?',
-			'settings.deleteDialog.listTitle' => 'This permanently deletes:',
-			'settings.deleteDialog.expenses' => '• All your expenses',
+			'settings.deleteDialog.listTitle' => 'This permanently deletes, from your account and this phone:',
+			'settings.deleteDialog.transactions' => '• All your transactions',
 			'settings.deleteDialog.categories' => '• All your categories',
 			'settings.deleteDialog.budgets' => '• All your budgets',
 			'settings.deleteDialog.recurring' => '• All your recurring transactions',

@@ -1,13 +1,11 @@
 import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
-import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/features/recurring/application/recurring_auto_poster.dart';
 import 'package:expense_tracker/features/recurring/domain/usecases/post_due_recurring.dart';
 import 'package:expense_tracker/features/settings/domain/usecases/get_settings.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:talker/talker.dart';
 
 import '../../../support/factories/user_settings_factory.dart';
 
@@ -23,8 +21,6 @@ void main() {
   late RecurringAutoPoster poster;
 
   setUpAll(() {
-    // The poster logs the failures these tests provoke.
-    appLogger.configure(settings: TalkerSettings(useConsoleLogs: false));
     registerFallbackValue(NoParams());
   });
 

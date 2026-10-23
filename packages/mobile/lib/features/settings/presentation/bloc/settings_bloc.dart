@@ -2,7 +2,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:expense_tracker/core/bloc/transformers.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
 import 'package:expense_tracker/core/utils/number_display_format.dart';
-import 'package:expense_tracker/features/auth/domain/usecases/delete_account.dart';
 import '../../domain/entities/user_settings.dart';
 import '../../domain/usecases/get_settings.dart';
 import '../../domain/usecases/update_settings.dart';
@@ -13,7 +12,6 @@ import 'package:expense_tracker/core/error/failure_message.dart';
 class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   final GetSettings getSettings;
   final UpdateSettings updateSettings;
-  final DeleteAccount deleteAccount;
 
   /// The newest settings: the last loaded ones plus any change still being
   /// saved. Derived events build on this, not on `state is SettingsLoaded`,
@@ -29,11 +27,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   /// the newest values while a save runs.
   UserSettings? get latestSettings => _lastLoaded;
 
-  SettingsBloc({
-    required this.getSettings,
-    required this.updateSettings,
-    required this.deleteAccount,
-  }) : super(const SettingsInitial()) {
+  SettingsBloc({required this.getSettings, required this.updateSettings})
+    : super(const SettingsInitial()) {
     on<LoadSettings>(_onLoadSettings, transformer: concurrent());
     on<UpdateSettingsEvent>(_onUpdateSettings, transformer: concurrent());
     on<UpdateCurrency>(_onUpdateCurrency, transformer: concurrent());
@@ -71,7 +66,6 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       _onDismissAutoImportPrompt,
       transformer: concurrent(),
     );
-    on<DeleteAccountEvent>(_onDeleteAccountEvent, transformer: concurrent());
   }
 
   Future<void> _onLoadSettings(
@@ -193,18 +187,6 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     Emitter<SettingsState> emit,
   ) {
     _updateFromLast((s) => s.copyWith(syncEnabled: event.enabled));
-  }
-
-  Future<void> _onDeleteAccountEvent(
-    DeleteAccountEvent event,
-    Emitter<SettingsState> emit,
-  ) async {
-    emit(const SettingsLoading());
-    final result = await deleteAccount(NoParams());
-    result.fold(
-      (failure) => emit(SettingsError(failureText(failure))),
-      (_) => emit(const AccountDeleted()),
-    );
   }
 
   /// Emits [settings] once no newer save is pending, so the UI never steps

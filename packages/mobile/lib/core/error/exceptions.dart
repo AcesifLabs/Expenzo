@@ -1,3 +1,4 @@
+import 'failure_message.dart';
 import 'failures.dart';
 
 class ServerException implements Exception {
@@ -34,6 +35,22 @@ class AuthException implements Exception {
   String toString() => 'AuthException: $message';
 
   AuthFailure toFailure() => AuthFailure(message: message);
+}
+
+/// Firebase needs a fresh sign-in before a sensitive step (account delete)
+/// and Google couldn't provide one silently.
+class RequiresRecentLoginException implements Exception {
+  final String message;
+
+  const RequiresRecentLoginException({required this.message});
+
+  @override
+  String toString() => 'RequiresRecentLoginException: $message';
+
+  AuthFailure toFailure() => AuthFailure(
+    message: message,
+    errorCode: FailureCodes.requiresRecentLogin,
+  );
 }
 
 class PermissionException implements Exception {

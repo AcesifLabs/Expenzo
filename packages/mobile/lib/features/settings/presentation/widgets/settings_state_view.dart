@@ -63,7 +63,7 @@ class _SettingsStateViewState extends State<SettingsStateView> {
       builder: (context, state) {
         final settings = state is SettingsLoaded ? state.settings : _lastLoaded;
         if (settings != null) return widget.builder(context, settings);
-        // Error, or AccountDeleted with nothing loaded: offer a reload.
+        // Error with nothing loaded: offer a reload.
         if (state is! SettingsInitial && state is! SettingsLoading) {
           return AppEmptyState(
             icon: PiconsRegular.warningCircle,

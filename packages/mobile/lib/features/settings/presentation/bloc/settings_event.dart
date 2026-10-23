@@ -153,10 +153,6 @@ class UpdateSyncEnabled extends SettingsEvent {
   const UpdateSyncEnabled({required this.enabled});
 }
 
-class DeleteAccountEvent extends SettingsEvent {
-  const DeleteAccountEvent();
-}
-
 class DismissAutoImportPrompt extends SettingsEvent {
   const DismissAutoImportPrompt();
 }

@@ -1,14 +1,12 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:talker/talker.dart';
 import 'package:expense_tracker/core/background/background_task_names.dart';
 import 'package:expense_tracker/core/background/background_task_runner.dart';
 import 'package:expense_tracker/core/background/background_task_scheduler.dart';
 import 'package:expense_tracker/core/constants/first_day_of_week.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
-import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/features/recurring/domain/usecases/send_recurring_reminders.dart';
 import 'package:expense_tracker/features/reports/domain/entities/weekly_summary.dart';
 import 'package:expense_tracker/features/reports/domain/usecases/get_weekly_summary.dart';
@@ -46,7 +44,6 @@ void main() {
   late BackgroundTaskRunner runner;
 
   setUpAll(() {
-    appLogger.configure(settings: TalkerSettings(useConsoleLogs: false));
     registerFallbackValue(NoParams());
     registerFallbackValue(makeUserSettings());
     registerFallbackValue(summary);

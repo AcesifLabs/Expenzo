@@ -24,14 +24,13 @@ import 'package:expense_tracker/core/theme/app_spacing.dart';
 import '../../domain/entities/notification_toggle.dart';
 import '../../domain/entities/user_settings.dart';
 import '../bloc/settings_bloc.dart';
-import '../bloc/settings_event.dart';
 import '../bloc/settings_state.dart';
+import '../widgets/settings_profile_card.dart';
 import '../widgets/settings_section.dart';
 import '../widgets/settings_state_view.dart';
 import '../widgets/settings_tile.dart';
 import 'debug_db_inspector_page.dart';
 import 'appearance_page.dart';
-import 'delete_account_dialog.dart';
 import 'home_page_settings_page.dart';
 import 'language_page.dart';
 import 'number_format_page.dart';
@@ -58,7 +57,8 @@ class SettingsPage extends StatelessWidget {
 ///
 /// | Section (builder) | Rows now | Rows later tickets add, in final order |
 /// |---|---|---|
-/// | Profile & account (`_accountSection`) | Sign in (signed out) / Delete account (signed in) | SAAP-72 profile card above the section, then My profile (Delete account moves into it); SAAP-75 Family group right after My profile |
+/// | none (`SettingsProfileCard`) | Profile card: My profile (signed in) / Sign in (signed out) | none |
+/// | Profile & account (`_accountSection`) | Sign in (signed out) / My profile (signed in) | SAAP-75 Family group right after My profile |
 /// | Preferences (`_preferencesSection`) | Default currency, Number format, Font size, Appearance, Calendar | none |
 /// | Notifications (`_notificationsSection`) | Notifications | none |
 /// | Data & budget (`_dataSection`) | Recurring transactions, Sync, Export data, Delete all data | Recurring transactions, Sync (SAAP-71), Export data (SAAP-69), Delete all data (SAAP-70) |
@@ -123,19 +123,6 @@ class SettingsView extends StatelessWidget {
     context.push(SettingsRoute.categories.location);
   }
 
-  void _handleDeleteAccountTap(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (_) => DeleteAccountDialog(
-        onConfirm: () => _onDeleteAccountConfirmed(context),
-      ),
-    );
-  }
-
-  void _onDeleteAccountConfirmed(BuildContext context) {
-    context.read<SettingsBloc>().add(const DeleteAccountEvent());
-  }
-
   void _openDbInspector(BuildContext context) {
     assert(kDebugMode, 'Database Inspector must only be opened in debug mode');
     if (!kDebugMode) return;
@@ -150,6 +137,7 @@ class SettingsView extends StatelessWidget {
   Widget _accountSection(BuildContext context) {
     final settingsT = t.settings;
     final signInT = settingsT.signIn;
+    final profileT = settingsT.profile;
     final isSignedIn = context.watch<AuthBloc>().state is Authenticated;
 
     return SettingsSection(
@@ -157,10 +145,10 @@ class SettingsView extends StatelessWidget {
       children: [
         if (isSignedIn)
           SettingsTile(
-            icon: PiconsRegular.trash,
-            title: settingsT.deleteAccount,
-            titleColor: Theme.of(context).colorScheme.error,
-            onTap: () => _handleDeleteAccountTap(context),
+            icon: PiconsRegular.userCircle,
+            title: profileT.title,
+            subtitle: profileT.rowSubtitle,
+            onTap: () => context.push(SettingsRoute.profile.location),
           )
         else
           SettingsTile(
@@ -401,6 +389,7 @@ class SettingsView extends StatelessWidget {
                 vertical: AppSpacing.sm,
               ),
               children: [
+                const SettingsProfileCard(),
                 _accountSection(context),
                 _preferencesSection(context, settings),
                 _notificationsSection(context, settings),

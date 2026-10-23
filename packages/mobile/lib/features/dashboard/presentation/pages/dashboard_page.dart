@@ -13,6 +13,8 @@ import 'package:expense_tracker/core/utils/money_format.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_event.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_state.dart';
+import 'package:expense_tracker/features/auth/presentation/helpers/user_display.dart';
+import 'package:expense_tracker/features/auth/presentation/widgets/user_avatar.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budget_progress.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets_with_progress.dart';
 
@@ -223,38 +225,13 @@ class _DashboardViewState extends State<DashboardView> {
     return Future<void>.value();
   }
 
-  /// The first name, or null when signed out or the account has no name.
-  String? _firstName(AuthState authState) {
-    if (authState is! Authenticated) return null;
-    final first = (authState.user.displayName ?? '').trim().split(' ').first;
-
-    return first.isEmpty ? null : first;
-  }
-
   /// "Hi, Sam" when we know the name, otherwise today's date.
   String _greeting(String? firstName) => firstName == null
       ? DateFormat('EEEE, d MMMM').format(DateTime.now())
       : t.dashboard.greeting(name: firstName);
 
-  Widget _buildAvatarWidget(
-    BuildContext context,
-    AuthState authState,
-    String name,
-    String? photoUrl,
-  ) {
+  Widget _buildAvatarWidget(BuildContext context, AuthState authState) {
     final colors = Theme.of(context).colorScheme;
-    final Widget? avatarChild;
-
-    if (photoUrl != null) {
-      avatarChild = null;
-    } else if (authState is Authenticated) {
-      avatarChild = Text(
-        name.isNotEmpty ? name[0].toUpperCase() : '?',
-        style: AppTypography.titleMedium.copyWith(color: colors.onPrimary),
-      );
-    } else {
-      avatarChild = Icon(PiconsRegular.user, color: colors.onPrimary, size: 20);
-    }
 
     return SizedBox(
       width: 44,
@@ -262,12 +239,7 @@ class _DashboardViewState extends State<DashboardView> {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          CircleAvatar(
-            radius: 20,
-            backgroundColor: colors.primary,
-            backgroundImage: photoUrl != null ? NetworkImage(photoUrl) : null,
-            child: avatarChild,
-          ),
+          UserAvatar(user: authState is Authenticated ? authState.user : null),
           if (authState is AuthLoading)
             SizedBox(
               width: 44,
@@ -849,7 +821,7 @@ class _DashboardViewState extends State<DashboardView> {
     return [
       if (isAuth)
         PopupMenuItem(
-          value: 'settings',
+          value: 'profile',
           child: MenuRow(icon: PiconsRegular.user, text: menu.profile),
         )
       else
@@ -873,6 +845,8 @@ class _DashboardViewState extends State<DashboardView> {
 
   void _handleMenuAction(BuildContext context, String value) {
     switch (value) {
+      case 'profile':
+        context.push(SettingsRoute.profile.location);
       case 'settings':
         context.push(SettingsRoute.rootLocation);
       case 'sign_in':
@@ -906,10 +880,8 @@ class _DashboardViewState extends State<DashboardView> {
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, authState) {
-        final firstName = _firstName(authState);
-        final displayName = firstName ?? t.dashboard.userFallback;
-        final photoUrl = authState is Authenticated
-            ? authState.user.photoUrl
+        final firstName = authState is Authenticated
+            ? userFirstName(authState.user)
             : null;
 
         return BlocBuilder<DashboardBloc, DashboardState>(
@@ -928,12 +900,7 @@ class _DashboardViewState extends State<DashboardView> {
                       child: _buildHeader(
                         context,
                         greeting: _greeting(firstName),
-                        avatar: _buildAvatarWidget(
-                          context,
-                          authState,
-                          displayName,
-                          photoUrl,
-                        ),
+                        avatar: _buildAvatarWidget(context, authState),
                       ),
                     ),
                     ..._buildContent(context, state, dateRange),

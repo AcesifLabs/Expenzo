@@ -1,11 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:dartz/dartz.dart';
-import 'package:talker/talker.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/database/app_database.dart' as db;
 import 'package:expense_tracker/core/database/daos/sync_queue_dao.dart';
-import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/features/budgets/data/datasources/budget_local_datasource.dart';
 import 'package:expense_tracker/features/budgets/data/repositories/budget_repository_impl.dart';
 import 'package:expense_tracker/features/budgets/domain/entities/budget.dart';
@@ -40,7 +38,6 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(_BudgetFake());
-    appLogger.configure(settings: TalkerSettings(useConsoleLogs: false));
   });
 
   setUp(() {

@@ -33,6 +33,7 @@ import 'package:expense_tracker/features/settings/presentation/pages/home_page_s
 import 'package:expense_tracker/features/settings/presentation/pages/language_page.dart';
 import 'package:expense_tracker/features/settings/presentation/pages/notification_settings_page.dart';
 import 'package:expense_tracker/features/settings/presentation/pages/number_format_page.dart';
+import 'package:expense_tracker/features/settings/presentation/pages/profile_page.dart';
 import 'package:expense_tracker/features/settings/presentation/bloc/settings_bloc.dart';
 import 'package:expense_tracker/features/settings/presentation/pages/settings_page.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
@@ -81,6 +82,10 @@ GoRoute _buildSettingsRoute() {
     path: SettingsRoute.rootPath,
     builder: (_, _) => const SettingsPage(),
     routes: [
+      GoRoute(
+        path: SettingsRoute.profile.path,
+        builder: (_, _) => const ProfilePage(),
+      ),
       GoRoute(
         path: SettingsRoute.appearance.path,
         builder: (_, _) => const AppearancePage(),

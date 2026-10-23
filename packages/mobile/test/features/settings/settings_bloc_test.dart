@@ -9,7 +9,6 @@ import 'package:expense_tracker/core/constants/digit_grouping.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
 import 'package:expense_tracker/core/router/app_root_tab.dart';
-import 'package:expense_tracker/features/auth/domain/usecases/delete_account.dart';
 import 'package:expense_tracker/features/settings/domain/entities/notification_toggle.dart';
 import 'package:expense_tracker/features/settings/domain/entities/user_settings.dart';
 import 'package:expense_tracker/features/settings/domain/usecases/get_settings.dart';
@@ -23,8 +22,6 @@ class MockGetSettings extends Mock implements GetSettings {}
 
 class MockUpdateSettings extends Mock implements UpdateSettings {}
 
-class MockDeleteAccount extends Mock implements DeleteAccount {}
-
 class _NoParamsFake extends Fake implements NoParams {}
 
 class _UserSettingsFake extends Fake implements UserSettings {}
@@ -36,7 +33,6 @@ void main() {
   });
   late MockGetSettings mockGetSettings;
   late MockUpdateSettings mockUpdateSettings;
-  late MockDeleteAccount mockDeleteAccount;
   late SettingsBloc bloc;
 
   final testSettings = UserSettings(
@@ -51,11 +47,9 @@ void main() {
   setUp(() {
     mockGetSettings = MockGetSettings();
     mockUpdateSettings = MockUpdateSettings();
-    mockDeleteAccount = MockDeleteAccount();
     bloc = SettingsBloc(
       getSettings: mockGetSettings,
       updateSettings: mockUpdateSettings,
-      deleteAccount: mockDeleteAccount,
     );
   });
 
@@ -194,35 +188,6 @@ void main() {
       await Future<void>.delayed(Duration.zero);
 
       verifyNever(() => mockUpdateSettings(any()));
-    });
-  });
-
-  group('DeleteAccountEvent', () {
-    test('emits [SettingsLoading, AccountDeleted] on success', () async {
-      when(() => mockDeleteAccount(any())).thenAnswer((_) async => Right(unit));
-
-      final expected = [isA<SettingsLoading>(), isA<AccountDeleted>()];
-
-      expectLater(bloc.stream, emitsInOrder(expected));
-      bloc.add(const DeleteAccountEvent());
-    });
-
-    test('emits [SettingsLoading, SettingsError] on failure', () async {
-      when(
-        () => mockDeleteAccount(any()),
-      ).thenAnswer((_) async => Left(AuthFailure(message: 'Delete failed')));
-
-      final expected = [
-        isA<SettingsLoading>(),
-        isA<SettingsError>().having(
-          (s) => s.message,
-          'message',
-          t.common.errors.auth,
-        ),
-      ];
-
-      expectLater(bloc.stream, emitsInOrder(expected));
-      bloc.add(const DeleteAccountEvent());
     });
   });
 

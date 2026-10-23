@@ -7,6 +7,15 @@ import 'token_storage.dart';
 import '../sync/connectivity_service.dart';
 import '../di/injection_container.dart' as di;
 
+/// Whether [response] is the 401 for a JWT whose server account was deleted.
+bool isDeletedUserResponse(Response<dynamic>? response) {
+  final data = response?.data;
+
+  return response?.statusCode == 401 &&
+      data is Map &&
+      data['message'] == ApiConstants.deletedUserMessage;
+}
+
 class ApiClient {
   Dio dio;
   static final ApiClient _instance = ApiClient._internal();
@@ -67,6 +76,23 @@ class _AuthInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
+    if (isDeletedUserResponse(err.response)) {
+      // The account was deleted (here or on another device). Logging in
+      // again would re-create it empty. Drop the JWT and the Firebase
+      // session too: a later JWT-less request gets a plain 401, and the
+      // refresh below can only log in while Firebase is signed in. The user
+      // stays signed out until they sign in themselves.
+      for (final step in [TokenStorage.clearAll, _signOutFirebase]) {
+        try {
+          await step();
+        } catch (e) {
+          debugPrint('AuthInterceptor: sign-out step failed: ${e.runtimeType}');
+        }
+      }
+      handler.next(err);
+
+      return;
+    }
     if (err.response?.statusCode == 401) {
       try {
         final connectivity = di.getIt<ConnectivityService>();
@@ -93,6 +119,8 @@ class _AuthInterceptor extends Interceptor {
     }
     handler.next(err);
   }
+
+  static Future<void> _signOutFirebase() => FirebaseAuth.instance.signOut();
 
   /// Performs a single-flight token refresh.
   /// Returns the new JWT string, or null if refresh fails.

@@ -7,6 +7,9 @@ abstract final class FailureCodes {
   static const notFound = 'NOT_FOUND';
   static const smsScan = 'SMS_SCAN_ERROR';
 
+  /// Firebase wants a fresh sign-in before deleting the account.
+  static const requiresRecentLogin = 'REQUIRES_RECENT_LOGIN';
+
   /// [Failure.message] is already user-facing text in the app language.
   static const userMessage = 'USER_MESSAGE';
 }
@@ -23,6 +26,8 @@ String failureText(Failure failure) {
       return errors.notFound;
     case FailureCodes.smsScan:
       return errors.smsScan;
+    case FailureCodes.requiresRecentLogin:
+      return errors.requiresRecentLogin;
     case FailureCodes.userMessage:
       return failure.message;
   }
