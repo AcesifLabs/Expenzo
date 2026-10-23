@@ -64,6 +64,8 @@ dependencies:
   share_plus: ^10.0.0
   csv: ^8.0.0
   archive: ^3.6.1
+  in_app_review: ^2.0.12
+  package_info_plus: ^9.0.1
 
 dev_dependencies:
   flutter_test:

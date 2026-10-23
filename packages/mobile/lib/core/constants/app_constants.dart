@@ -17,6 +17,10 @@ class AppConstants {
   /// Device large text × Extra large can exceed what layouts survive; cap the
   /// product. Overflow tests run at this value.
   static const double maxTextScale = 2.0;
+
+  /// Rate the app: this many stars or more go to the store review; fewer
+  /// open the feedback email instead.
+  static const int minStoreStars = 4;
   static const int defaultPaginationLimit = 20;
   static const int maxPaginationLimit = 100;
   static const String defaultEmoji = '📦';

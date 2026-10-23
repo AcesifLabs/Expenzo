@@ -2,12 +2,13 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
-/// Icon rule from DESIGN.md: Phosphor Regular everywhere, Fill only for the
-/// selected tab in the app shell. `AppRootTab.selectedIcon` holds those Fill
-/// icons, and only the shell reads it.
+/// Icon rule from DESIGN.md: Phosphor Regular everywhere, Fill only for a
+/// selected state. `AppRootTab.selectedIcon` holds the selected tab's Fill
+/// icons, and only the shell reads it; Rate the app fills the chosen stars.
 const _fillAllowlist = {
   'shared/presentation/widgets/app_shell.dart',
   'core/router/app_root_tab.dart',
+  'features/support/presentation/pages/rate_app_page.dart',
 };
 
 Iterable<(String, String)> _libFiles() sync* {
@@ -33,7 +34,7 @@ void main() {
     );
   });
 
-  test('only the Regular Phosphor weight, Fill only for the selected tab', () {
+  test('only the Regular Phosphor weight, Fill only for a selected state', () {
     expect(
       _offenders(RegExp(r'Picons(Light|Bold|Thin|Duotone)\.')),
       isEmpty,
@@ -42,7 +43,7 @@ void main() {
     expect(
       _offenders(RegExp(r'PiconsFill\.'), allow: _fillAllowlist),
       isEmpty,
-      reason: 'PiconsFill is only for the selected tab.',
+      reason: 'PiconsFill is only for a selected state (tab, rating stars).',
     );
   });
 }

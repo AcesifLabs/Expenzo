@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/core/router/settings_route.dart';
+import 'package:expense_tracker/core/router/help_route.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:expense_tracker/features/auth/presentation/pages/login_page.dart';
 import 'package:expense_tracker/features/auth/presentation/pages/sync_conflict_page.dart';
@@ -36,6 +37,10 @@ import 'package:expense_tracker/features/settings/presentation/pages/number_form
 import 'package:expense_tracker/features/settings/presentation/pages/profile_page.dart';
 import 'package:expense_tracker/features/settings/presentation/bloc/settings_bloc.dart';
 import 'package:expense_tracker/features/settings/presentation/pages/settings_page.dart';
+import 'package:expense_tracker/features/support/presentation/pages/about_page.dart';
+import 'package:expense_tracker/features/support/presentation/pages/faq_page.dart';
+import 'package:expense_tracker/features/support/presentation/pages/help_page.dart';
+import 'package:expense_tracker/features/support/presentation/pages/rate_app_page.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/pages/sms_scan_results_page.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/pages/auto_import_page.dart';
@@ -158,6 +163,23 @@ GoRoute _buildSettingsRoute() {
         path: SettingsRoute.deleteData.path,
         builder: (_, _) => const DeleteAllDataPage(),
       ),
+      _buildHelpRoute(),
+    ],
+  );
+}
+
+/// Help & Support and its screens, at `/settings/help/<HelpRoute.path>`.
+GoRoute _buildHelpRoute() {
+  return GoRoute(
+    path: SettingsRoute.help.path,
+    builder: (_, _) => const HelpPage(),
+    routes: [
+      GoRoute(path: HelpRoute.faq.path, builder: (_, _) => const FaqPage()),
+      GoRoute(
+        path: HelpRoute.rate.path,
+        builder: (_, _) => const RateAppPage(),
+      ),
+      GoRoute(path: HelpRoute.about.path, builder: (_, _) => const AboutPage()),
     ],
   );
 }
