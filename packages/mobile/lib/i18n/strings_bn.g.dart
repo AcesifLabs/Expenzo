@@ -57,6 +57,7 @@ class TranslationsBn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$settings$bn settings = _Translations$settings$bn._(_root);
 	@override late final _Translations$shell$bn shell = _Translations$shell$bn._(_root);
 	@override late final _Translations$smsParser$bn smsParser = _Translations$smsParser$bn._(_root);
+	@override late final _Translations$support$bn support = _Translations$support$bn._(_root);
 }
 
 // Path: aiAssistant
@@ -449,7 +450,7 @@ class _Translations$settings$bn extends Translations$settings$en {
 	@override String get autoImportSubtitle => 'ব্যাংক ও পেমেন্টের মেসেজ থেকে লেনদেন তৈরি করুন';
 	@override String get matchingRulesSubtitle => 'যেসব মেসেজ অটো-ইমপোর্ট এখনো পড়তে পারে না, সেগুলোর প্যাটার্ন';
 	@override late final _Translations$settings$recurring$bn recurring = _Translations$settings$recurring$bn._(_root);
-	@override String get feedbackSubtitle => 'সমস্যা জানান বা কোনো আইডিয়া দিন';
+	@override late final _Translations$settings$help$bn help = _Translations$settings$help$bn._(_root);
 	@override String get signOut => 'সাইন আউট';
 	@override String get deleteAccount => 'অ্যাকাউন্ট মুছুন';
 	@override late final _Translations$settings$signIn$bn signIn = _Translations$settings$signIn$bn._(_root);
@@ -495,6 +496,19 @@ class _Translations$smsParser$bn extends Translations$smsParser$en {
 	@override late final _Translations$smsParser$customRange$bn customRange = _Translations$smsParser$customRange$bn._(_root);
 	@override late final _Translations$smsParser$results$bn results = _Translations$smsParser$results$bn._(_root);
 	@override late final _Translations$smsParser$autoImport$bn autoImport = _Translations$smsParser$autoImport$bn._(_root);
+}
+
+// Path: support
+class _Translations$support$bn extends Translations$support$en {
+	_Translations$support$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override late final _Translations$support$help$bn help = _Translations$support$help$bn._(_root);
+	@override late final _Translations$support$about$bn about = _Translations$support$about$bn._(_root);
+	@override late final _Translations$support$faq$bn faq = _Translations$support$faq$bn._(_root);
+	@override late final _Translations$support$rate$bn rate = _Translations$support$rate$bn._(_root);
 }
 
 // Path: aiAssistant.suggestions
@@ -1475,6 +1489,17 @@ class _Translations$settings$recurring$bn extends Translations$settings$recurrin
 	@override String get subtitle => 'নিয়মিত আসা বিল ও আয়';
 }
 
+// Path: settings.help
+class _Translations$settings$help$bn extends Translations$settings$help$en {
+	_Translations$settings$help$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'সাহায্য ও সহায়তা';
+	@override String get rowSubtitle => 'প্রশ্নোত্তর, যোগাযোগ, রেটিং, আইনি তথ্য';
+}
+
 // Path: settings.signIn
 class _Translations$settings$signIn$bn extends Translations$settings$signIn$en {
 	_Translations$settings$signIn$bn._(TranslationsBn root) : this._root = root, super.internal(root);
@@ -1864,6 +1889,73 @@ class _Translations$smsParser$autoImport$bn extends Translations$smsParser$autoI
 
 	// Translations
 	@override String get scanPast => 'পুরোনো SMS স্ক্যান করুন';
+}
+
+// Path: support.help
+class _Translations$support$help$bn extends Translations$support$help$en {
+	_Translations$support$help$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'সাহায্য ও সহায়তা';
+	@override String get faq => 'সাধারণ প্রশ্ন';
+	@override String get contactSupport => 'সহায়তার জন্য যোগাযোগ';
+	@override String get rateApp => 'অ্যাপটি রেট করুন';
+	@override String get privacyPolicy => 'গোপনীয়তা নীতি';
+	@override String get termsOfService => 'পরিষেবার শর্তাবলি';
+	@override String get about => 'সম্পর্কে';
+	@override String get linkFailed => 'পেজটি খোলা যায়নি। পরে আবার চেষ্টা করুন।';
+}
+
+// Path: support.about
+class _Translations$support$about$bn extends Translations$support$about$en {
+	_Translations$support$about$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Expenzo সম্পর্কে';
+	@override String version({required Object version, required Object build}) => 'সংস্করণ ${version} (${build})';
+	@override String get description => 'Expenzo আপনার খরচ, বাজেট ও নিয়মিত বিল ট্র্যাক করে, এবং ব্যাংকের SMS পড়ে আপনার হয়ে লেনদেন লিখে রাখতে পারে।';
+	@override String get madeBy => 'তৈরি করেছে Acesif Labs';
+}
+
+// Path: support.faq
+class _Translations$support$faq$bn extends Translations$support$faq$en {
+	_Translations$support$faq$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'সাধারণ প্রশ্ন';
+	@override String get searchHint => 'প্রশ্ন খুঁজুন...';
+	@override String noResults({required Object query}) => '"${query}"-এর সাথে কোনো প্রশ্ন মেলেনি।';
+	@override late final _Translations$support$faq$addTransaction$bn addTransaction = _Translations$support$faq$addTransaction$bn._(_root);
+	@override late final _Translations$support$faq$autoImport$bn autoImport = _Translations$support$faq$autoImport$bn._(_root);
+	@override late final _Translations$support$faq$budget$bn budget = _Translations$support$faq$budget$bn._(_root);
+	@override late final _Translations$support$faq$recurring$bn recurring = _Translations$support$faq$recurring$bn._(_root);
+	@override late final _Translations$support$faq$export$bn export = _Translations$support$faq$export$bn._(_root);
+	@override late final _Translations$support$faq$sync$bn sync = _Translations$support$faq$sync$bn._(_root);
+	@override late final _Translations$support$faq$aiAssistant$bn aiAssistant = _Translations$support$faq$aiAssistant$bn._(_root);
+	@override late final _Translations$support$faq$currency$bn currency = _Translations$support$faq$currency$bn._(_root);
+}
+
+// Path: support.rate
+class _Translations$support$rate$bn extends Translations$support$rate$en {
+	_Translations$support$rate$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Expenzo ভালো লাগছে?';
+	@override String get heading => 'Expenzo উপভোগ করছেন?';
+	@override String get subtitle => 'আপনার মতামত আমাদের আরও ভালো করতে সাহায্য করে। অ্যাপটি রেট করতে একটি তারায় ট্যাপ করুন।';
+	@override String get writeReview => 'রিভিউ লিখুন';
+	@override String get tellUs => 'কী ভালো করা দরকার জানান';
+	@override String get maybeLater => 'পরে দেখব';
+	@override String get noThanks => 'না, ধন্যবাদ';
+	@override String starLabel({required Object n}) => '5টির মধ্যে ${n}টি তারা';
 }
 
 // Path: budgets.details.periodBudget
@@ -2289,6 +2381,94 @@ class _Translations$settings$deleteData$sections$bn extends Translations$setting
 	// Translations
 	@override String get summary => 'যে ডেটা মুছে যাবে';
 	@override String get confirmation => 'নিশ্চিতকরণ';
+}
+
+// Path: support.faq.addTransaction
+class _Translations$support$faq$addTransaction$bn extends Translations$support$faq$addTransaction$en {
+	_Translations$support$faq$addTransaction$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get q => 'কীভাবে লেনদেন যোগ করব?';
+	@override String get a => 'যেকোনো ট্যাবের নিচের + বোতামে ট্যাপ করুন। খরচ বা আয় বেছে নিন, পরিমাণ লিখুন, একটি ক্যাটাগরি বাছুন, তারপর খরচ যোগ করুন বা আয় যোগ করুন-এ ট্যাপ করুন।';
+}
+
+// Path: support.faq.autoImport
+class _Translations$support$faq$autoImport$bn extends Translations$support$faq$autoImport$en {
+	_Translations$support$faq$autoImport$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get q => 'স্বয়ংক্রিয় ইমপোর্ট কীভাবে কাজ করে?';
+	@override String get a => 'সেটিংস → SMS থেকে স্বয়ংক্রিয় ইমপোর্ট-এ গিয়ে SMS পড়ার অনুমতি দিন। Expenzo আপনার ফোনের ব্যাংক ও পেমেন্ট মেসেজ পড়ে সেগুলোকে লেনদেনে রূপান্তর করে। মেসেজের লেখা ফোনেই থাকে; এ থেকে তৈরি লেনদেন অন্য লেনদেনের মতোই সিঙ্ক হয়। পুরোনো মেসেজ আনতে ওই পেজে পুরোনো SMS স্ক্যান করুন-এ ট্যাপ করুন।';
+}
+
+// Path: support.faq.budget
+class _Translations$support$faq$budget$bn extends Translations$support$faq$budget$en {
+	_Translations$support$faq$budget$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get q => 'কীভাবে বাজেট তৈরি করব?';
+	@override String get a => 'বাজেট ট্যাব খুলে নতুন বাজেট-এ ট্যাপ করুন। একটি নাম, পরিমাণ ও সময়কাল (সাপ্তাহিক, মাসিক বা বার্ষিক) দিন। খরচ যোগ করার সময় সেটি কোন বাজেটে গণ্য হবে তা বেছে নিন, আর বাজেটে দেখাবে কত বাকি আছে। আয় কোনো বাজেটে গণ্য হয় না।';
+}
+
+// Path: support.faq.recurring
+class _Translations$support$faq$recurring$bn extends Translations$support$faq$recurring$en {
+	_Translations$support$faq$recurring$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get q => 'পুনরাবৃত্ত লেনদেন কীভাবে কাজ করে?';
+	@override String get a => 'সেটিংস → পুনরাবৃত্ত লেনদেন-এ গিয়ে একটি বিল বা আয় এবং কত দিন পরপর হয় তা যোগ করুন। নিজে থেকে লেনদেন তৈরি চালু করলে অ্যাপ খুললেই Expenzo বকেয়া লেনদেন যোগ করে দেয়। বন্ধ থাকলে পুনরাবৃত্ত লেনদেন খুলে ওপরের বাকিগুলো প্রসেস করুন বোতামে (গোল তীর চিহ্ন) ট্যাপ করুন।';
+}
+
+// Path: support.faq.export
+class _Translations$support$faq$export$bn extends Translations$support$faq$export$en {
+	_Translations$support$faq$export$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get q => 'আমি কি আমার ডেটা এক্সপোর্ট করতে পারি?';
+	@override String get a => 'হ্যাঁ। সেটিংস → ডেটা এক্সপোর্ট-এ গিয়ে তারিখের পরিসর এবং কী কী রাখবেন (লেনদেন, বাজেট, ক্যাটাগরি) বেছে নিন। একটি ধরন হলে CSV ফাইল হিসেবে, একাধিক হলে CSV ফাইলের একটি ZIP হিসেবে শেয়ার হয়।';
+}
+
+// Path: support.faq.sync
+class _Translations$support$faq$sync$bn extends Translations$support$faq$sync$en {
+	_Translations$support$faq$sync$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get q => 'ফোন হারালে কি আমার ডেটা নিরাপদ থাকবে?';
+	@override String get a => 'Google দিয়ে সাইন ইন করা থাকলে এবং সিঙ্ক চালু থাকলে (এটি ডিফল্টভাবে চালু), আপনার লেনদেন, বাজেট, ক্যাটাগরি, পুনরাবৃত্ত লেনদেন এবং স্বয়ংক্রিয় ইমপোর্টের প্রেরক ও নিয়ম আপনার অ্যাকাউন্টে থাকে। নতুন ফোনে সাইন ইন করলে সেগুলো ফিরে পাবেন। অ্যাপের সেটিংস প্রতিটি ফোনে আলাদা থাকে। সাইন ইন না করলে ডেটা শুধু এই ফোনেই থাকে।';
+}
+
+// Path: support.faq.aiAssistant
+class _Translations$support$faq$aiAssistant$bn extends Translations$support$faq$aiAssistant$en {
+	_Translations$support$faq$aiAssistant$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get q => 'AI সহকারী কীভাবে কাজ করে?';
+	@override String get a => 'রিপোর্ট ট্যাবে AI-কে জিজ্ঞেস করুন-এ ট্যাপ করে আপনার খরচ, বাজেট বা আয় নিয়ে প্রশ্ন করুন। সহকারী এই মাসের ডেটার একটি সারাংশ থেকে উত্তর দেয়; ইমেইল ও ফোন নম্বরের মতো ব্যক্তিগত তথ্য বাদ দিয়ে সারাংশটি আমাদের AI প্রদানকারী Groq-এ পাঠানো হয়। এটি পরামর্শ দেয়, আর্থিক উপদেশ নয়।';
+}
+
+// Path: support.faq.currency
+class _Translations$support$faq$currency$bn extends Translations$support$faq$currency$en {
+	_Translations$support$faq$currency$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get q => 'কীভাবে মুদ্রা বদলাব?';
+	@override String get a => 'সেটিংস → ডিফল্ট মুদ্রা-তে যান। পরিমাণ রূপান্তর হয় না; শুধু চিহ্ন ও ফরম্যাট বদলায়।';
 }
 
 // Path: settings.homePage.options.home
@@ -2922,7 +3102,8 @@ extension on TranslationsBn {
 			'settings.matchingRulesSubtitle' => 'যেসব মেসেজ অটো-ইমপোর্ট এখনো পড়তে পারে না, সেগুলোর প্যাটার্ন',
 			'settings.recurring.title' => 'পুনরাবৃত্ত লেনদেন',
 			'settings.recurring.subtitle' => 'নিয়মিত আসা বিল ও আয়',
-			'settings.feedbackSubtitle' => 'সমস্যা জানান বা কোনো আইডিয়া দিন',
+			'settings.help.title' => 'সাহায্য ও সহায়তা',
+			'settings.help.rowSubtitle' => 'প্রশ্নোত্তর, যোগাযোগ, রেটিং, আইনি তথ্য',
 			'settings.signOut' => 'সাইন আউট',
 			'settings.deleteAccount' => 'অ্যাকাউন্ট মুছুন',
 			'settings.signIn.title' => 'সাইন ইন',
@@ -3103,6 +3284,45 @@ extension on TranslationsBn {
 			'smsParser.results.emptyBody' => 'আবার স্ক্যান করুন অথবা আরও মিলানোর নিয়ম যোগ করুন',
 			'smsParser.results.create' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n, one: 'বাছাই করা ${n}টি রেকর্ড যোগ করুন', other: 'বাছাই করা ${n}টি রেকর্ড যোগ করুন', ), 
 			'smsParser.autoImport.scanPast' => 'পুরোনো SMS স্ক্যান করুন',
+			'support.help.title' => 'সাহায্য ও সহায়তা',
+			'support.help.faq' => 'সাধারণ প্রশ্ন',
+			'support.help.contactSupport' => 'সহায়তার জন্য যোগাযোগ',
+			'support.help.rateApp' => 'অ্যাপটি রেট করুন',
+			'support.help.privacyPolicy' => 'গোপনীয়তা নীতি',
+			'support.help.termsOfService' => 'পরিষেবার শর্তাবলি',
+			'support.help.about' => 'সম্পর্কে',
+			'support.help.linkFailed' => 'পেজটি খোলা যায়নি। পরে আবার চেষ্টা করুন।',
+			'support.about.title' => 'Expenzo সম্পর্কে',
+			'support.about.version' => ({required Object version, required Object build}) => 'সংস্করণ ${version} (${build})',
+			'support.about.description' => 'Expenzo আপনার খরচ, বাজেট ও নিয়মিত বিল ট্র্যাক করে, এবং ব্যাংকের SMS পড়ে আপনার হয়ে লেনদেন লিখে রাখতে পারে।',
+			'support.about.madeBy' => 'তৈরি করেছে Acesif Labs',
+			'support.faq.title' => 'সাধারণ প্রশ্ন',
+			'support.faq.searchHint' => 'প্রশ্ন খুঁজুন...',
+			'support.faq.noResults' => ({required Object query}) => '"${query}"-এর সাথে কোনো প্রশ্ন মেলেনি।',
+			'support.faq.addTransaction.q' => 'কীভাবে লেনদেন যোগ করব?',
+			'support.faq.addTransaction.a' => 'যেকোনো ট্যাবের নিচের + বোতামে ট্যাপ করুন। খরচ বা আয় বেছে নিন, পরিমাণ লিখুন, একটি ক্যাটাগরি বাছুন, তারপর খরচ যোগ করুন বা আয় যোগ করুন-এ ট্যাপ করুন।',
+			'support.faq.autoImport.q' => 'স্বয়ংক্রিয় ইমপোর্ট কীভাবে কাজ করে?',
+			'support.faq.autoImport.a' => 'সেটিংস → SMS থেকে স্বয়ংক্রিয় ইমপোর্ট-এ গিয়ে SMS পড়ার অনুমতি দিন। Expenzo আপনার ফোনের ব্যাংক ও পেমেন্ট মেসেজ পড়ে সেগুলোকে লেনদেনে রূপান্তর করে। মেসেজের লেখা ফোনেই থাকে; এ থেকে তৈরি লেনদেন অন্য লেনদেনের মতোই সিঙ্ক হয়। পুরোনো মেসেজ আনতে ওই পেজে পুরোনো SMS স্ক্যান করুন-এ ট্যাপ করুন।',
+			'support.faq.budget.q' => 'কীভাবে বাজেট তৈরি করব?',
+			'support.faq.budget.a' => 'বাজেট ট্যাব খুলে নতুন বাজেট-এ ট্যাপ করুন। একটি নাম, পরিমাণ ও সময়কাল (সাপ্তাহিক, মাসিক বা বার্ষিক) দিন। খরচ যোগ করার সময় সেটি কোন বাজেটে গণ্য হবে তা বেছে নিন, আর বাজেটে দেখাবে কত বাকি আছে। আয় কোনো বাজেটে গণ্য হয় না।',
+			'support.faq.recurring.q' => 'পুনরাবৃত্ত লেনদেন কীভাবে কাজ করে?',
+			'support.faq.recurring.a' => 'সেটিংস → পুনরাবৃত্ত লেনদেন-এ গিয়ে একটি বিল বা আয় এবং কত দিন পরপর হয় তা যোগ করুন। নিজে থেকে লেনদেন তৈরি চালু করলে অ্যাপ খুললেই Expenzo বকেয়া লেনদেন যোগ করে দেয়। বন্ধ থাকলে পুনরাবৃত্ত লেনদেন খুলে ওপরের বাকিগুলো প্রসেস করুন বোতামে (গোল তীর চিহ্ন) ট্যাপ করুন।',
+			'support.faq.export.q' => 'আমি কি আমার ডেটা এক্সপোর্ট করতে পারি?',
+			'support.faq.export.a' => 'হ্যাঁ। সেটিংস → ডেটা এক্সপোর্ট-এ গিয়ে তারিখের পরিসর এবং কী কী রাখবেন (লেনদেন, বাজেট, ক্যাটাগরি) বেছে নিন। একটি ধরন হলে CSV ফাইল হিসেবে, একাধিক হলে CSV ফাইলের একটি ZIP হিসেবে শেয়ার হয়।',
+			'support.faq.sync.q' => 'ফোন হারালে কি আমার ডেটা নিরাপদ থাকবে?',
+			'support.faq.sync.a' => 'Google দিয়ে সাইন ইন করা থাকলে এবং সিঙ্ক চালু থাকলে (এটি ডিফল্টভাবে চালু), আপনার লেনদেন, বাজেট, ক্যাটাগরি, পুনরাবৃত্ত লেনদেন এবং স্বয়ংক্রিয় ইমপোর্টের প্রেরক ও নিয়ম আপনার অ্যাকাউন্টে থাকে। নতুন ফোনে সাইন ইন করলে সেগুলো ফিরে পাবেন। অ্যাপের সেটিংস প্রতিটি ফোনে আলাদা থাকে। সাইন ইন না করলে ডেটা শুধু এই ফোনেই থাকে।',
+			'support.faq.aiAssistant.q' => 'AI সহকারী কীভাবে কাজ করে?',
+			'support.faq.aiAssistant.a' => 'রিপোর্ট ট্যাবে AI-কে জিজ্ঞেস করুন-এ ট্যাপ করে আপনার খরচ, বাজেট বা আয় নিয়ে প্রশ্ন করুন। সহকারী এই মাসের ডেটার একটি সারাংশ থেকে উত্তর দেয়; ইমেইল ও ফোন নম্বরের মতো ব্যক্তিগত তথ্য বাদ দিয়ে সারাংশটি আমাদের AI প্রদানকারী Groq-এ পাঠানো হয়। এটি পরামর্শ দেয়, আর্থিক উপদেশ নয়।',
+			'support.faq.currency.q' => 'কীভাবে মুদ্রা বদলাব?',
+			'support.faq.currency.a' => 'সেটিংস → ডিফল্ট মুদ্রা-তে যান। পরিমাণ রূপান্তর হয় না; শুধু চিহ্ন ও ফরম্যাট বদলায়।',
+			'support.rate.title' => 'Expenzo ভালো লাগছে?',
+			'support.rate.heading' => 'Expenzo উপভোগ করছেন?',
+			'support.rate.subtitle' => 'আপনার মতামত আমাদের আরও ভালো করতে সাহায্য করে। অ্যাপটি রেট করতে একটি তারায় ট্যাপ করুন।',
+			'support.rate.writeReview' => 'রিভিউ লিখুন',
+			'support.rate.tellUs' => 'কী ভালো করা দরকার জানান',
+			'support.rate.maybeLater' => 'পরে দেখব',
+			'support.rate.noThanks' => 'না, ধন্যবাদ',
+			'support.rate.starLabel' => ({required Object n}) => '5টির মধ্যে ${n}টি তারা',
 			_ => null,
 		};
 	}

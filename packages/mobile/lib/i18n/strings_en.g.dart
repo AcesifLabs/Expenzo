@@ -59,6 +59,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$settings$en settings = Translations$settings$en.internal(_root);
 	late final Translations$shell$en shell = Translations$shell$en.internal(_root);
 	late final Translations$smsParser$en smsParser = Translations$smsParser$en.internal(_root);
+	late final Translations$support$en support = Translations$support$en.internal(_root);
 }
 
 // Path: aiAssistant
@@ -657,9 +658,7 @@ class Translations$settings$en {
 	String get matchingRulesSubtitle => 'Patterns for messages auto-import can\'t read yet';
 
 	late final Translations$settings$recurring$en recurring = Translations$settings$recurring$en.internal(_root);
-
-	/// en: 'Report a problem or suggest an idea'
-	String get feedbackSubtitle => 'Report a problem or suggest an idea';
+	late final Translations$settings$help$en help = Translations$settings$help$en.internal(_root);
 
 	/// en: 'Sign out'
 	String get signOut => 'Sign out';
@@ -713,6 +712,19 @@ class Translations$smsParser$en {
 	late final Translations$smsParser$customRange$en customRange = Translations$smsParser$customRange$en.internal(_root);
 	late final Translations$smsParser$results$en results = Translations$smsParser$results$en.internal(_root);
 	late final Translations$smsParser$autoImport$en autoImport = Translations$smsParser$autoImport$en.internal(_root);
+}
+
+// Path: support
+class Translations$support$en {
+	Translations$support$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	late final Translations$support$help$en help = Translations$support$help$en.internal(_root);
+	late final Translations$support$about$en about = Translations$support$about$en.internal(_root);
+	late final Translations$support$faq$en faq = Translations$support$faq$en.internal(_root);
+	late final Translations$support$rate$en rate = Translations$support$rate$en.internal(_root);
 }
 
 // Path: aiAssistant.suggestions
@@ -2397,6 +2409,21 @@ class Translations$settings$recurring$en {
 	String get subtitle => 'Bills and income that repeat';
 }
 
+// Path: settings.help
+class Translations$settings$help$en {
+	Translations$settings$help$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Help & Support'
+	String get title => 'Help & Support';
+
+	/// en: 'FAQ, contact us, rate the app, legal'
+	String get rowSubtitle => 'FAQ, contact us, rate the app, legal';
+}
+
 // Path: settings.signIn
 class Translations$settings$signIn$en {
 	Translations$settings$signIn$en.internal(this._root);
@@ -3066,6 +3093,120 @@ class Translations$smsParser$autoImport$en {
 	String get scanPast => 'Scan past SMS';
 }
 
+// Path: support.help
+class Translations$support$help$en {
+	Translations$support$help$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Help & Support'
+	String get title => 'Help & Support';
+
+	/// en: 'FAQ'
+	String get faq => 'FAQ';
+
+	/// en: 'Contact support'
+	String get contactSupport => 'Contact support';
+
+	/// en: 'Rate the app'
+	String get rateApp => 'Rate the app';
+
+	/// en: 'Privacy policy'
+	String get privacyPolicy => 'Privacy policy';
+
+	/// en: 'Terms of service'
+	String get termsOfService => 'Terms of service';
+
+	/// en: 'About'
+	String get about => 'About';
+
+	/// en: 'Couldn't open the page. Try again later.'
+	String get linkFailed => 'Couldn\'t open the page. Try again later.';
+}
+
+// Path: support.about
+class Translations$support$about$en {
+	Translations$support$about$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'About Expenzo'
+	String get title => 'About Expenzo';
+
+	/// en: 'Version {version} ({build})'
+	String version({required Object version, required Object build}) => 'Version ${version} (${build})';
+
+	/// en: 'Expenzo tracks your spending, budgets and recurring bills, and can read bank SMS to log transactions for you.'
+	String get description => 'Expenzo tracks your spending, budgets and recurring bills, and can read bank SMS to log transactions for you.';
+
+	/// en: 'Made by Acesif Labs'
+	String get madeBy => 'Made by Acesif Labs';
+}
+
+// Path: support.faq
+class Translations$support$faq$en {
+	Translations$support$faq$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'FAQ'
+	String get title => 'FAQ';
+
+	/// en: 'Search FAQs...'
+	String get searchHint => 'Search FAQs...';
+
+	/// en: 'No questions match "{query}".'
+	String noResults({required Object query}) => 'No questions match "${query}".';
+
+	late final Translations$support$faq$addTransaction$en addTransaction = Translations$support$faq$addTransaction$en.internal(_root);
+	late final Translations$support$faq$autoImport$en autoImport = Translations$support$faq$autoImport$en.internal(_root);
+	late final Translations$support$faq$budget$en budget = Translations$support$faq$budget$en.internal(_root);
+	late final Translations$support$faq$recurring$en recurring = Translations$support$faq$recurring$en.internal(_root);
+	late final Translations$support$faq$export$en export = Translations$support$faq$export$en.internal(_root);
+	late final Translations$support$faq$sync$en sync = Translations$support$faq$sync$en.internal(_root);
+	late final Translations$support$faq$aiAssistant$en aiAssistant = Translations$support$faq$aiAssistant$en.internal(_root);
+	late final Translations$support$faq$currency$en currency = Translations$support$faq$currency$en.internal(_root);
+}
+
+// Path: support.rate
+class Translations$support$rate$en {
+	Translations$support$rate$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Love Expenzo?'
+	String get title => 'Love Expenzo?';
+
+	/// en: 'Enjoying Expenzo?'
+	String get heading => 'Enjoying Expenzo?';
+
+	/// en: 'Your feedback helps us improve. Tap a star to rate the app.'
+	String get subtitle => 'Your feedback helps us improve. Tap a star to rate the app.';
+
+	/// en: 'Write a review'
+	String get writeReview => 'Write a review';
+
+	/// en: 'Tell us what to improve'
+	String get tellUs => 'Tell us what to improve';
+
+	/// en: 'Maybe later'
+	String get maybeLater => 'Maybe later';
+
+	/// en: 'No thanks'
+	String get noThanks => 'No thanks';
+
+	/// en: '{n} of 5 stars'
+	String starLabel({required Object n}) => '${n} of 5 stars';
+}
+
 // Path: budgets.details.periodBudget
 class Translations$budgets$details$periodBudget$en {
 	Translations$budgets$details$periodBudget$en.internal(this._root);
@@ -3651,6 +3792,126 @@ class Translations$settings$deleteData$sections$en {
 
 	/// en: 'Confirmation'
 	String get confirmation => 'Confirmation';
+}
+
+// Path: support.faq.addTransaction
+class Translations$support$faq$addTransaction$en {
+	Translations$support$faq$addTransaction$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'How do I add a transaction?'
+	String get q => 'How do I add a transaction?';
+
+	/// en: 'Tap the + button at the bottom of any tab. Choose expense or income, enter the amount, pick a category and tap Add expense or Add income.'
+	String get a => 'Tap the + button at the bottom of any tab. Choose expense or income, enter the amount, pick a category and tap Add expense or Add income.';
+}
+
+// Path: support.faq.autoImport
+class Translations$support$faq$autoImport$en {
+	Translations$support$faq$autoImport$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'How does Auto-import work?'
+	String get q => 'How does Auto-import work?';
+
+	/// en: 'Go to Settings → Auto-import from SMS and allow SMS access. Expenzo reads bank and payment messages on your phone and turns them into transactions. The message text stays on your phone; the transactions it creates sync like any other. Tap Scan past SMS on that page to import older messages.'
+	String get a => 'Go to Settings → Auto-import from SMS and allow SMS access. Expenzo reads bank and payment messages on your phone and turns them into transactions. The message text stays on your phone; the transactions it creates sync like any other. Tap Scan past SMS on that page to import older messages.';
+}
+
+// Path: support.faq.budget
+class Translations$support$faq$budget$en {
+	Translations$support$faq$budget$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'How do I set up a budget?'
+	String get q => 'How do I set up a budget?';
+
+	/// en: 'Open the Budgets tab and tap New budget. Give it a name, an amount and a period (weekly, monthly or yearly). When you add an expense, choose the budget it counts toward, and the budget shows how much is left. Income does not count toward budgets.'
+	String get a => 'Open the Budgets tab and tap New budget. Give it a name, an amount and a period (weekly, monthly or yearly). When you add an expense, choose the budget it counts toward, and the budget shows how much is left. Income does not count toward budgets.';
+}
+
+// Path: support.faq.recurring
+class Translations$support$faq$recurring$en {
+	Translations$support$faq$recurring$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'How do recurring transactions work?'
+	String get q => 'How do recurring transactions work?';
+
+	/// en: 'Go to Settings → Recurring transactions and add a bill or income with how often it repeats. Turn on Auto-create transactions and Expenzo adds due transactions when you open the app. If it is off, open Recurring transactions and tap Process pending (the circular arrows at the top).'
+	String get a => 'Go to Settings → Recurring transactions and add a bill or income with how often it repeats. Turn on Auto-create transactions and Expenzo adds due transactions when you open the app. If it is off, open Recurring transactions and tap Process pending (the circular arrows at the top).';
+}
+
+// Path: support.faq.export
+class Translations$support$faq$export$en {
+	Translations$support$faq$export$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Can I export my data?'
+	String get q => 'Can I export my data?';
+
+	/// en: 'Yes. Go to Settings → Export data, pick a date range and what to include (transactions, budgets, categories). One type is shared as a CSV file; several come as a ZIP of CSV files.'
+	String get a => 'Yes. Go to Settings → Export data, pick a date range and what to include (transactions, budgets, categories). One type is shared as a CSV file; several come as a ZIP of CSV files.';
+}
+
+// Path: support.faq.sync
+class Translations$support$faq$sync$en {
+	Translations$support$faq$sync$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Is my data safe if I lose my phone?'
+	String get q => 'Is my data safe if I lose my phone?';
+
+	/// en: 'If you sign in with Google and Sync is on (it is on by default), your transactions, budgets, categories, recurring transactions, and auto-import senders and rules are kept in your account. Sign in on your new phone to get them back. App settings stay on each phone. Without signing in, your data stays only on this phone.'
+	String get a => 'If you sign in with Google and Sync is on (it is on by default), your transactions, budgets, categories, recurring transactions, and auto-import senders and rules are kept in your account. Sign in on your new phone to get them back. App settings stay on each phone. Without signing in, your data stays only on this phone.';
+}
+
+// Path: support.faq.aiAssistant
+class Translations$support$faq$aiAssistant$en {
+	Translations$support$faq$aiAssistant$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'How does the AI assistant work?'
+	String get q => 'How does the AI assistant work?';
+
+	/// en: 'Tap Ask AI on the Reports tab and ask about your spending, budgets or income. The assistant answers from a summary of this month's data, with personal details such as emails and phone numbers removed, sent to our AI provider, Groq. It gives suggestions, not financial advice.'
+	String get a => 'Tap Ask AI on the Reports tab and ask about your spending, budgets or income. The assistant answers from a summary of this month\'s data, with personal details such as emails and phone numbers removed, sent to our AI provider, Groq. It gives suggestions, not financial advice.';
+}
+
+// Path: support.faq.currency
+class Translations$support$faq$currency$en {
+	Translations$support$faq$currency$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'How do I change the currency?'
+	String get q => 'How do I change the currency?';
+
+	/// en: 'Go to Settings → Default currency. Amounts are not converted; only the symbol and format change.'
+	String get a => 'Go to Settings → Default currency. Amounts are not converted; only the symbol and format change.';
 }
 
 // Path: settings.homePage.options.home
@@ -4300,7 +4561,8 @@ extension on Translations {
 			'settings.matchingRulesSubtitle' => 'Patterns for messages auto-import can\'t read yet',
 			'settings.recurring.title' => 'Recurring transactions',
 			'settings.recurring.subtitle' => 'Bills and income that repeat',
-			'settings.feedbackSubtitle' => 'Report a problem or suggest an idea',
+			'settings.help.title' => 'Help & Support',
+			'settings.help.rowSubtitle' => 'FAQ, contact us, rate the app, legal',
 			'settings.signOut' => 'Sign out',
 			'settings.deleteAccount' => 'Delete account',
 			'settings.signIn.title' => 'Sign in',
@@ -4481,6 +4743,45 @@ extension on Translations {
 			'smsParser.results.emptyBody' => 'Try scanning again or add more matching rules',
 			'smsParser.results.create' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: 'Add ${n} selected record', other: 'Add ${n} selected records', ), 
 			'smsParser.autoImport.scanPast' => 'Scan past SMS',
+			'support.help.title' => 'Help & Support',
+			'support.help.faq' => 'FAQ',
+			'support.help.contactSupport' => 'Contact support',
+			'support.help.rateApp' => 'Rate the app',
+			'support.help.privacyPolicy' => 'Privacy policy',
+			'support.help.termsOfService' => 'Terms of service',
+			'support.help.about' => 'About',
+			'support.help.linkFailed' => 'Couldn\'t open the page. Try again later.',
+			'support.about.title' => 'About Expenzo',
+			'support.about.version' => ({required Object version, required Object build}) => 'Version ${version} (${build})',
+			'support.about.description' => 'Expenzo tracks your spending, budgets and recurring bills, and can read bank SMS to log transactions for you.',
+			'support.about.madeBy' => 'Made by Acesif Labs',
+			'support.faq.title' => 'FAQ',
+			'support.faq.searchHint' => 'Search FAQs...',
+			'support.faq.noResults' => ({required Object query}) => 'No questions match "${query}".',
+			'support.faq.addTransaction.q' => 'How do I add a transaction?',
+			'support.faq.addTransaction.a' => 'Tap the + button at the bottom of any tab. Choose expense or income, enter the amount, pick a category and tap Add expense or Add income.',
+			'support.faq.autoImport.q' => 'How does Auto-import work?',
+			'support.faq.autoImport.a' => 'Go to Settings → Auto-import from SMS and allow SMS access. Expenzo reads bank and payment messages on your phone and turns them into transactions. The message text stays on your phone; the transactions it creates sync like any other. Tap Scan past SMS on that page to import older messages.',
+			'support.faq.budget.q' => 'How do I set up a budget?',
+			'support.faq.budget.a' => 'Open the Budgets tab and tap New budget. Give it a name, an amount and a period (weekly, monthly or yearly). When you add an expense, choose the budget it counts toward, and the budget shows how much is left. Income does not count toward budgets.',
+			'support.faq.recurring.q' => 'How do recurring transactions work?',
+			'support.faq.recurring.a' => 'Go to Settings → Recurring transactions and add a bill or income with how often it repeats. Turn on Auto-create transactions and Expenzo adds due transactions when you open the app. If it is off, open Recurring transactions and tap Process pending (the circular arrows at the top).',
+			'support.faq.export.q' => 'Can I export my data?',
+			'support.faq.export.a' => 'Yes. Go to Settings → Export data, pick a date range and what to include (transactions, budgets, categories). One type is shared as a CSV file; several come as a ZIP of CSV files.',
+			'support.faq.sync.q' => 'Is my data safe if I lose my phone?',
+			'support.faq.sync.a' => 'If you sign in with Google and Sync is on (it is on by default), your transactions, budgets, categories, recurring transactions, and auto-import senders and rules are kept in your account. Sign in on your new phone to get them back. App settings stay on each phone. Without signing in, your data stays only on this phone.',
+			'support.faq.aiAssistant.q' => 'How does the AI assistant work?',
+			'support.faq.aiAssistant.a' => 'Tap Ask AI on the Reports tab and ask about your spending, budgets or income. The assistant answers from a summary of this month\'s data, with personal details such as emails and phone numbers removed, sent to our AI provider, Groq. It gives suggestions, not financial advice.',
+			'support.faq.currency.q' => 'How do I change the currency?',
+			'support.faq.currency.a' => 'Go to Settings → Default currency. Amounts are not converted; only the symbol and format change.',
+			'support.rate.title' => 'Love Expenzo?',
+			'support.rate.heading' => 'Enjoying Expenzo?',
+			'support.rate.subtitle' => 'Your feedback helps us improve. Tap a star to rate the app.',
+			'support.rate.writeReview' => 'Write a review',
+			'support.rate.tellUs' => 'Tell us what to improve',
+			'support.rate.maybeLater' => 'Maybe later',
+			'support.rate.noThanks' => 'No thanks',
+			'support.rate.starLabel' => ({required Object n}) => '${n} of 5 stars',
 			_ => null,
 		};
 	}

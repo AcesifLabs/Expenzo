@@ -467,7 +467,8 @@ void main() {
     expect(top('sam@example.com'), lessThan(top('PROFILE & ACCOUNT')));
     expect(top('My profile'), lessThan(top('PREFERENCES')));
     expect(find.text('Delete account'), findsNothing);
-    expect(top('Sign out'), greaterThan(top('Send feedback')));
+    expect(top('Sign out'), greaterThan(top('Help & Support')));
+    expect(find.text('Send feedback'), findsNothing);
     expect(top('Sign out'), lessThan(top('DEVELOPER')));
     expect(find.text('Sign in'), findsNothing);
   });

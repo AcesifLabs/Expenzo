@@ -160,7 +160,7 @@ Hierarchy comes from tone, not shadow. Cards are one step lighter than the page 
 
 ## Icons
 
-Phosphor icons through the `picons` package. Regular weight everywhere; Fill only for the selected tab. No Material icons. Icon-only buttons always have a tooltip or semantic label.
+Phosphor icons through the `picons` package. Regular weight everywhere; Fill only for a selected state: the selected tab and the chosen stars on Rate the app. No Material icons. Icon-only buttons always have a tooltip or semantic label.
 
 ## Money
 

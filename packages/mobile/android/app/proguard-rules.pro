@@ -24,3 +24,10 @@
 # Drift / SQLite
 -keep class * extends com.github.drift.** { *; }
 -dontwarn com.squareup.moshi.**
+
+# Play Core: the Flutter engine references the deferred-components classes
+# (com.google.android.play.core.splitinstall/splitcompat/tasks), which this app
+# never uses. The old all-in-one com.google.android.play:core is deprecated and
+# clashes with in_app_review's com.google.android.play:review, so don't add it
+# back; let R8 skip the unused references instead.
+-dontwarn com.google.android.play.core.**

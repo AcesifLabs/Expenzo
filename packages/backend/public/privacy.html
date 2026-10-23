@@ -1,0 +1,158 @@
+<!-- Source: PRIVACY_POLICY.md at the repo root. Update both together. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>Privacy Policy — Expenzo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #333; line-height: 1.6; background: #f5f5f5; }
+    .container { max-width: 640px; margin: 0 auto; padding: 32px 20px; }
+    h1 { font-size: 1.75rem; margin-bottom: 8px; color: #1a1a1a; }
+    h2 { font-size: 1.15rem; margin: 24px 0 12px; color: #1a1a1a; }
+    h3 { font-size: 1rem; margin: 16px 0 8px; color: #1a1a1a; }
+    p { margin-bottom: 12px; }
+    ol, ul { padding-left: 24px; margin-bottom: 12px; }
+    li { margin-bottom: 8px; }
+    .card { background: #fff; border-radius: 8px; padding: 24px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); overflow-wrap: anywhere; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 0.9rem; }
+    th, td { text-align: left; padding: 8px; border-bottom: 1px solid #e0e0e0; vertical-align: top; }
+    hr { border: 0; border-top: 1px solid #e0e0e0; margin: 24px 0 12px; }
+    a { color: #1565c0; }
+    @media (prefers-color-scheme: dark) {
+      body { color: #e0e0e0; background: #121212; }
+      h1, h2, h3 { color: #f5f5f5; }
+      .card { background: #1e1e1e; box-shadow: none; }
+      th, td, hr { border-color: #333; }
+      a { color: #90caf9; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>Privacy Policy for Expenzo</h1>
+      <p><strong>Last updated: October 24, 2026</strong></p>
+      <h2>Introduction</h2>
+      <p>This Privacy Policy describes how <strong>Acesif Labs</strong> (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) collects, uses, and protects your information when you use the <strong>Expenzo</strong> mobile application (the &quot;App&quot;).</p>
+      <h2>Information We Collect</h2>
+      <h3>Information You Provide</h3>
+      <ul>
+      <li><strong>Account Information</strong>: When you sign in using Google Sign-In, we collect your name and email address via Firebase Authentication.</li>
+      <li><strong>Financial Records</strong>: Expense and income records, categories, budgets, and recurring transactions you create within the App.</li>
+      <li><strong>Message Templates &amp; Parsing Rules</strong>: Custom templates and rules you configure for SMS-based expense parsing.</li>
+      <li><strong>Receipt Photos</strong>: If you use Receipt Scan, the photo of the receipt you take or choose is sent to our AI provider (Groq) to read the amount and details.</li>
+      <li><strong>AI Assistant Questions</strong>: If you use the AI assistant, your question and a summary of the current month&#39;s data are sent to our AI provider (Groq) to produce an answer (see &quot;AI Features&quot; below).</li>
+      </ul>
+      <h3>Information Collected Automatically</h3>
+      <ul>
+      <li><strong>SMS Messages</strong>: With your explicit permission, the App reads SMS messages on your device to automatically detect and parse transaction-related messages. SMS data is processed <strong>locally on your device</strong> and is not transmitted to our servers.</li>
+      <li><strong>Device Storage</strong>: Financial data is stored locally on your device using encrypted local storage (flutter_secure_storage) and a local SQLite database (Drift). It stays on your device unless you sign in with Google and Sync is on (Sync is on by default after you sign in). Then your transactions, categories, budgets, recurring transactions and pending recurring items, SMS senders, matching rules and expense templates are stored on our server so you can restore them on your other devices. App settings and preferences stay on each device.</li>
+      </ul>
+      <h3>Information We Do NOT Collect</h3>
+      <ul>
+      <li>We do <strong>not</strong> collect location data.</li>
+      <li>We do <strong>not</strong> collect analytics or tracking data.</li>
+      <li>We do <strong>not</strong> use advertising SDKs.</li>
+      <li>We do <strong>not</strong> collect contacts or media files. Photos are only sent when you use Receipt Scan (see above).</li>
+      </ul>
+      <h2>How We Use Your Information</h2>
+      <p>We use the information solely to:</p>
+      <ul>
+      <li>Provide and operate the App&#39;s core features (expense tracking, budgeting, reporting)</li>
+      <li>Authenticate your identity via Google Sign-In</li>
+      <li>Parse SMS messages for transaction detection (processed locally)</li>
+      <li>Sync your financial records with your account via our backend server (only when you are signed in and Sync is on)</li>
+      <li>Answer AI assistant questions and read scanned receipts (only when you use those features)</li>
+      </ul>
+      <h2>Data Storage and Security</h2>
+      <ul>
+      <li><strong>Local Storage</strong>: Your financial data is stored locally on your device in an encrypted SQLite database.</li>
+      <li><strong>Firebase Authentication</strong>: Authentication tokens are managed securely through Firebase Auth.</li>
+      <li><strong>Cloud Sync</strong>: When you are signed in and Sync is on, data is transmitted over HTTPS and stored on our servers. You can turn Sync off in Settings → Sync.</li>
+      <li>We implement industry-standard security measures to protect your data, but no method of electronic storage is 100% secure.</li>
+      </ul>
+      <h2>Third-Party Services</h2>
+      <p>The App uses the following third-party services:</p>
+      <table>
+      <thead>
+      <tr>
+      <th>Service</th>
+      <th>Purpose</th>
+      <th>Privacy Policy</th>
+      </tr>
+      </thead>
+      <tbody><tr>
+      <td>Google Sign-In (Firebase Auth)</td>
+      <td>User authentication</td>
+      <td><a href="https://policies.google.com/privacy">Google Privacy Policy</a></td>
+      </tr>
+      <tr>
+      <td>Firebase (Google)</td>
+      <td>Authentication infrastructure</td>
+      <td><a href="https://firebase.google.com/policies/analytics">Firebase Privacy</a></td>
+      </tr>
+      <tr>
+      <td>Expenzo server (Acesif Labs)</td>
+      <td>Sync, if you sign in and Sync is on</td>
+      <td>This policy</td>
+      </tr>
+      <tr>
+      <td>Groq</td>
+      <td>AI assistant answers and Receipt Scan</td>
+      <td><a href="https://groq.com/privacy-policy">Groq Privacy Policy</a></td>
+      </tr>
+      </tbody></table>
+      <p>These services may collect information as described in their respective privacy policies. We do not share your personal data with any other third parties.</p>
+      <h2>AI Features</h2>
+      <p>The AI assistant and Receipt Scan are optional and only run when you use them.</p>
+      <ul>
+      <li><strong>AI assistant</strong>: sends your question and a summary of the current month only: total income, total expense and net, your top 5 spending categories, and your 5 most recent transactions (amount, description and date), with the currency. Email addresses, phone numbers and long digit strings are removed before anything is sent. Your full transaction history is never sent.</li>
+      <li><strong>Receipt Scan</strong>: sends the receipt photo you take or choose so the amount and details can be read.</li>
+      </ul>
+      <h2>SMS Permissions</h2>
+      <p>The App requests permission to read SMS messages for the sole purpose of automatically detecting and parsing bank/transaction SMS messages to create expense records. This feature:</p>
+      <ul>
+      <li>Is <strong>optional</strong> and requires your explicit permission</li>
+      <li>Processes SMS data <strong>entirely on-device</strong></li>
+      <li>Does <strong>not</strong> send SMS contents to any external server</li>
+      <li>Creates transactions that, like any other transaction, sync to your account if you are signed in and Sync is on</li>
+      <li>Can be disabled at any time by revoking SMS permission in your device settings</li>
+      </ul>
+      <h2>Data Sharing</h2>
+      <p>We do <strong>not</strong> sell, trade, or rent your personal information to third parties. We only share data as described in this policy (authentication via Firebase, cloud sync to our backend, and the AI features via Groq).</p>
+      <h2>Data Retention</h2>
+      <ul>
+      <li><strong>Local Data</strong>: Remains on your device until you delete it or uninstall the App.</li>
+      <li><strong>Cloud Data</strong>: Retained as long as your account is active. Settings → Delete all data removes your synced data, and Delete account (in Settings → My profile) removes your account and all its data. You can also request deletion by contacting us.</li>
+      <li><strong>Authentication Data</strong>: Managed according to Google/Firebase&#39;s data retention policies.</li>
+      </ul>
+      <h2>Your Rights</h2>
+      <p>You have the right to:</p>
+      <ul>
+      <li><strong>Access</strong> your personal data</li>
+      <li><strong>Correct</strong> inaccurate data</li>
+      <li><strong>Delete</strong> your data in the App (Delete all data, Delete account), by contacting us, or by uninstalling the App (local data only)</li>
+      <li><strong>Revoke permissions</strong> (SMS, etc.) at any time through your device settings</li>
+      <li><strong>Export</strong> your data as CSV files (Settings → Export data)</li>
+      </ul>
+      <h2>Children&#39;s Privacy</h2>
+      <p>The App is not intended for children under the age of 13. We do not knowingly collect personal information from children under 13.</p>
+      <h2>Changes to This Policy</h2>
+      <p>We may update this Privacy Policy from time to time. We will notify you of any changes by updating the &quot;Last updated&quot; date at the top of this page.</p>
+      <h2>Contact Us</h2>
+      <p>If you have any questions about this Privacy Policy, please contact us at:</p>
+      <p><strong>Acesif Labs</strong></p>
+      <ul>
+      <li><strong>App</strong>: Expenzo</li>
+      <li><strong>Package</strong>: com.acesiflabs.expenzo</li>
+      <li><strong>Email</strong>: <a href="mailto:asifzubayerpalak@gmail.com">asifzubayerpalak@gmail.com</a></li>
+      </ul>
+      <hr>
+      <p><em>This privacy policy is effective as of the date listed above and applies to all users of the Expenzo application.</em></p>
+    </div>
+  </div>
+</body>
+</html>

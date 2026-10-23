@@ -1,0 +1,65 @@
+{
+  "help": {
+    "title": "Help & Support",
+    "faq": "FAQ",
+    "contactSupport": "Contact support",
+    "rateApp": "Rate the app",
+    "privacyPolicy": "Privacy policy",
+    "termsOfService": "Terms of service",
+    "about": "About",
+    "linkFailed": "Couldn't open the page. Try again later."
+  },
+  "about": {
+    "title": "About Expenzo",
+    "version": "Version {version} ({build})",
+    "description": "Expenzo tracks your spending, budgets and recurring bills, and can read bank SMS to log transactions for you.",
+    "madeBy": "Made by Acesif Labs"
+  },
+  "faq": {
+    "title": "FAQ",
+    "searchHint": "Search FAQs...",
+    "noResults": "No questions match \"{query}\".",
+    "addTransaction": {
+      "q": "How do I add a transaction?",
+      "a": "Tap the + button at the bottom of any tab. Choose expense or income, enter the amount, pick a category and tap Add expense or Add income."
+    },
+    "autoImport": {
+      "q": "How does Auto-import work?",
+      "a": "Go to Settings → Auto-import from SMS and allow SMS access. Expenzo reads bank and payment messages on your phone and turns them into transactions. The message text stays on your phone; the transactions it creates sync like any other. Tap Scan past SMS on that page to import older messages."
+    },
+    "budget": {
+      "q": "How do I set up a budget?",
+      "a": "Open the Budgets tab and tap New budget. Give it a name, an amount and a period (weekly, monthly or yearly). When you add an expense, choose the budget it counts toward, and the budget shows how much is left. Income does not count toward budgets."
+    },
+    "recurring": {
+      "q": "How do recurring transactions work?",
+      "a": "Go to Settings → Recurring transactions and add a bill or income with how often it repeats. Turn on Auto-create transactions and Expenzo adds due transactions when you open the app. If it is off, open Recurring transactions and tap Process pending (the circular arrows at the top)."
+    },
+    "export": {
+      "q": "Can I export my data?",
+      "a": "Yes. Go to Settings → Export data, pick a date range and what to include (transactions, budgets, categories). One type is shared as a CSV file; several come as a ZIP of CSV files."
+    },
+    "sync": {
+      "q": "Is my data safe if I lose my phone?",
+      "a": "If you sign in with Google and Sync is on (it is on by default), your transactions, budgets, categories, recurring transactions, and auto-import senders and rules are kept in your account. Sign in on your new phone to get them back. App settings stay on each phone. Without signing in, your data stays only on this phone."
+    },
+    "aiAssistant": {
+      "q": "How does the AI assistant work?",
+      "a": "Tap Ask AI on the Reports tab and ask about your spending, budgets or income. The assistant answers from a summary of this month's data, with personal details such as emails and phone numbers removed, sent to our AI provider, Groq. It gives suggestions, not financial advice."
+    },
+    "currency": {
+      "q": "How do I change the currency?",
+      "a": "Go to Settings → Default currency. Amounts are not converted; only the symbol and format change."
+    }
+  },
+  "rate": {
+    "title": "Love Expenzo?",
+    "heading": "Enjoying Expenzo?",
+    "subtitle": "Your feedback helps us improve. Tap a star to rate the app.",
+    "writeReview": "Write a review",
+    "tellUs": "Tell us what to improve",
+    "maybeLater": "Maybe later",
+    "noThanks": "No thanks",
+    "starLabel": "{n} of 5 stars"
+  }
+}

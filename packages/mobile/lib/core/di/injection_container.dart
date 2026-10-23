@@ -42,6 +42,7 @@ import 'sync_module.dart';
 import 'dashboard_module.dart';
 import 'ai_assistant_module.dart';
 import 'receipt_scan_module.dart';
+import 'support_module.dart';
 
 final getIt = GetIt.instance;
 
@@ -238,6 +239,7 @@ Future<void> initFeatureDependencies() async {
   try {
     initBudgetModule(getIt);
     initRecurringModule(getIt);
+    initSupportModule(getIt);
     initBackgroundModule(getIt);
     completer.complete();
   } catch (e, s) {
