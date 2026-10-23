@@ -3,6 +3,12 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiConstants {
   static const String login = '/auth/login';
+  static const String deleteAccount = '/auth/account';
+
+  /// The 401 message the backend's `JwtStrategy.validate` gives a JWT whose
+  /// user was deleted (packages/backend/src/auth/strategies/jwt.strategy.ts).
+  static const String deletedUserMessage = 'User no longer exists';
+
   static const String records = '/records';
   static const String recordsBulk = '/records/bulk';
   static const String recordBudgetLinks = '/records/budget-links';

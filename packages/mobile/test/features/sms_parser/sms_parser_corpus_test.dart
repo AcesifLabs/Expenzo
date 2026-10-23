@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/features/message_templates/domain/repositories/message_template_repository.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/entities/evaluate_rules_params.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/entities/parsing_context.dart';
@@ -8,7 +7,6 @@ import 'package:expense_tracker/features/parsing_rules/domain/repositories/parsi
 import 'package:expense_tracker/features/parsing_rules/domain/usecases/evaluate_rules_use_case.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:talker/talker.dart';
 
 import 'sms_corpus_loader.dart';
 
@@ -17,10 +15,6 @@ class MockRulesRepo extends Mock implements ParsingRulesRepository {}
 class MockTemplatesRepo extends Mock implements MessageTemplateRepository {}
 
 void main() {
-  setUpAll(() {
-    appLogger.configure(settings: TalkerSettings(useConsoleLogs: false));
-  });
-
   group('UAE bank SMS corpus', () {
     late List<CorpusWorkbook> corpus;
     late MockRulesRepo rulesRepo;

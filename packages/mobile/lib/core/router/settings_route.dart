@@ -3,6 +3,7 @@
 /// Both the route tree (`app_routes.dart`) and `context.push` read paths
 /// from here, so a rename can't leave a stale link.
 enum SettingsRoute {
+  profile('profile'),
   appearance('appearance'),
   currency('currency'),
   language('language'),

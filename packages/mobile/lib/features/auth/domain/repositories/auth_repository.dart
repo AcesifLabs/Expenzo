@@ -27,6 +27,22 @@ abstract class AuthRepository {
   /// Returns [Right(bool)] on success, [Left(AuthFailure)] on failure.
   Future<Either<AuthFailure, bool>> isSignedIn();
 
+  /// Refreshes the sign-in silently before an account delete.
+  ///
+  /// Returns [Left(AuthFailure)] with `FailureCodes.requiresRecentLogin`
+  /// when the user has to sign in again first.
+  Future<Either<AuthFailure, Unit>> reauthenticate();
+
+  /// Deletes the account and its synced data on the server.
+  ///
+  /// Returns [Left] with a [NetworkFailure], [ServerFailure] or
+  /// [AuthFailure] when the server didn't delete it.
+  Future<Either<Failure, Unit>> deleteServerAccount();
+
+  /// Deletes the Firebase user and signs out locally, even when the delete
+  /// fails.
+  ///
+  /// Returns [Right(unit)] on success, [Left(AuthFailure)] on failure.
   Future<Either<AuthFailure, Unit>> deleteAccount();
 
   /// Checks if the user has granted Gmail OAuth scope.
@@ -39,6 +55,13 @@ abstract class AuthRepository {
 
   /// Starts the background sync engine.
   Future<void> startSyncEngine();
+
+  /// Stops sync and keeps it off, even if something calls start, until
+  /// [resumeSyncEngine].
+  Future<void> pauseSyncEngine();
+
+  /// Lifts [pauseSyncEngine] and starts sync; signed out it stays idle.
+  Future<void> resumeSyncEngine();
 
   /// Checks for sync conflicts with the remote server.
   Future<SyncConflictType> checkConflict();

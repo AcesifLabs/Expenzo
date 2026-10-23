@@ -71,11 +71,26 @@
     "title": "Sign in",
     "subtitle": "Keep your data on all your devices"
   },
+  "profile": {
+    "title": "My profile",
+    "rowSubtitle": "Your Google account",
+    "nameLabel": "Name",
+    "emailLabel": "Email",
+    "noName": "No name on this Google account",
+    "signedInWith": "Signed in with Google",
+    "googleNote": "Your name and photo come from your Google account. Change them there.",
+    "deletingAccount": "Deleting your account…",
+    "accountDeleted": "Your account was deleted",
+    "signedOutTitle": "You're not signed in",
+    "signedOutBody": "Sign in with Google to keep your transactions on all your devices.",
+    "guestName": "Guest",
+    "guestSubtitle": "Sign in to sync your data"
+  },
   "deleteDialog": {
     "title": "Delete account",
     "question": "Are you sure you want to delete your account?",
-    "listTitle": "This permanently deletes:",
-    "expenses": "• All your expenses",
+    "listTitle": "This permanently deletes, from your account and this phone:",
+    "transactions": "• All your transactions",
     "categories": "• All your categories",
     "budgets": "• All your budgets",
     "recurring": "• All your recurring transactions",

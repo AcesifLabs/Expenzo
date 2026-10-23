@@ -4,7 +4,6 @@ import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
-import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/features/categories/domain/entities/category.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_event.dart';
@@ -16,7 +15,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:talker/talker.dart';
 
 import '../../../../support/pump_localized.dart';
 
@@ -51,8 +49,6 @@ void main() {
   final salary = _category('default_in_salary', 'Salary', RecordType.income);
 
   setUpAll(() {
-    // The page logs the failures these tests provoke.
-    appLogger.configure(settings: TalkerSettings(useConsoleLogs: false));
     registerFallbackValue(_FakeCategoryEvent());
     registerFallbackValue(NoParams());
   });

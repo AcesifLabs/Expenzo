@@ -25,7 +25,8 @@
     "auth": "There was a problem with your sign-in. Sign in again and retry.",
     "permission": "Expenzo doesn't have permission to do this. Allow it in system settings.",
     "notFound": "This item no longer exists.",
-    "smsScan": "Couldn't read your messages. Try again."
+    "smsScan": "Couldn't read your messages. Try again.",
+    "requiresRecentLogin": "For your security, sign in again, then delete your account."
   },
   "dates": {
     "today": "Today",

@@ -2,10 +2,8 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:talker/talker.dart';
 import 'package:expense_tracker/core/constants/budget_period.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
-import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/features/budgets/domain/entities/budget_progress.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/check_budget_alerts.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets_with_progress.dart';
@@ -59,7 +57,6 @@ void main() {
   late CheckBudgetAlerts checkAlerts;
 
   setUpAll(() {
-    appLogger.configure(settings: TalkerSettings(useConsoleLogs: false));
     registerFallbackValue(NoParams());
   });
 

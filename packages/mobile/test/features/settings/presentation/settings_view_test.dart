@@ -452,28 +452,53 @@ void main() {
     expect(order, [...order]..sort());
   });
 
-  testWidgets('signed in: delete account is in the account section and '
-      'sign out is the last row before Developer', (tester) async {
+  testWidgets('signed in: the card and My profile come first, no Delete '
+      'account, and sign out is the last row before Developer', (tester) async {
     await tester.binding.setSurfaceSize(const Size(400, 3000));
     addTearDown(() => tester.binding.setSurfaceSize(null));
-    when(
-      () => authBloc.state,
-    ).thenReturn(const Authenticated(User(uid: 'u1', displayName: 'Sam')));
+    when(() => authBloc.state).thenReturn(
+      const Authenticated(
+        User(uid: 'u1', displayName: 'Sam', email: 'sam@example.com'),
+      ),
+    );
     await pumpSettings(tester);
 
     double top(String text) => tester.getTopLeft(find.text(text)).dy;
-    expect(top('Delete account'), lessThan(top('PREFERENCES')));
+    expect(top('sam@example.com'), lessThan(top('PROFILE & ACCOUNT')));
+    expect(top('My profile'), lessThan(top('PREFERENCES')));
+    expect(find.text('Delete account'), findsNothing);
     expect(top('Sign out'), greaterThan(top('Send feedback')));
     expect(top('Sign out'), lessThan(top('DEVELOPER')));
     expect(find.text('Sign in'), findsNothing);
   });
 
-  testWidgets('signed out: no sign out row', (tester) async {
+  testWidgets('signed out: guest card, Sign in row, no sign out row', (
+    tester,
+  ) async {
     await tester.binding.setSurfaceSize(const Size(400, 3000));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await pumpSettings(tester);
 
+    expect(find.text('Guest'), findsOneWidget);
+    expect(find.text('Sign in to sync your data'), findsOneWidget);
     expect(find.text('Sign in'), findsOneWidget);
     expect(find.text('Sign out'), findsNothing);
+    expect(find.text('Delete account'), findsNothing);
   });
+
+  for (final target in ['Sam', 'My profile']) {
+    testWidgets('signed in: tapping "$target" opens /settings/profile', (
+      tester,
+    ) async {
+      when(
+        () => authBloc.state,
+      ).thenReturn(const Authenticated(User(uid: 'u1', displayName: 'Sam')));
+      await pumpSettingsRouter(tester, child: 'profile');
+
+      await tester.tap(find.text(target));
+      await tester.pumpAndSettle();
+
+      expect(find.text('profile-page'), findsOneWidget);
+    });
+  }
 }

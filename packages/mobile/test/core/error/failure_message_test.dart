@@ -31,6 +31,15 @@ void main() {
     expect(failureText(failure), t.common.errors.notFound);
   });
 
+  test('the requires-recent-login code has its own text', () {
+    const failure = AuthFailure(
+      message: 'no silent account',
+      errorCode: FailureCodes.requiresRecentLogin,
+    );
+
+    expect(failureText(failure), t.common.errors.requiresRecentLogin);
+  });
+
   test('text follows the active language', () {
     LocaleSettings.setLocaleSync(AppLocale.bn);
 

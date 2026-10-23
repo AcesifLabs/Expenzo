@@ -50,7 +50,3 @@ class SettingsUpdateSuccess extends SettingsState {
     return SettingsUpdateSuccess(settings ?? this.settings);
   }
 }
-
-class AccountDeleted extends SettingsState {
-  const AccountDeleted();
-}

@@ -453,6 +453,7 @@ class _Translations$settings$bn extends Translations$settings$en {
 	@override String get signOut => 'সাইন আউট';
 	@override String get deleteAccount => 'অ্যাকাউন্ট মুছুন';
 	@override late final _Translations$settings$signIn$bn signIn = _Translations$settings$signIn$bn._(_root);
+	@override late final _Translations$settings$profile$bn profile = _Translations$settings$profile$bn._(_root);
 	@override late final _Translations$settings$deleteDialog$bn deleteDialog = _Translations$settings$deleteDialog$bn._(_root);
 	@override String get loadFailed => 'আপনার সেটিংস লোড করা যায়নি।';
 	@override late final _Translations$settings$appearanceScreen$bn appearanceScreen = _Translations$settings$appearanceScreen$bn._(_root);
@@ -760,6 +761,7 @@ class _Translations$common$errors$bn extends Translations$common$errors$en {
 	@override String get permission => 'এই কাজের অনুমতি Expenzo-র নেই। সিস্টেম সেটিংসে অনুমতি দিন।';
 	@override String get notFound => 'এই আইটেমটি আর নেই।';
 	@override String get smsScan => 'আপনার মেসেজ পড়া যায়নি। আবার চেষ্টা করুন।';
+	@override String get requiresRecentLogin => 'নিরাপত্তার জন্য আবার সাইন ইন করুন, তারপর অ্যাকাউন্ট মুছুন।';
 }
 
 // Path: common.dates
@@ -1484,6 +1486,28 @@ class _Translations$settings$signIn$bn extends Translations$settings$signIn$en {
 	@override String get subtitle => 'আপনার সব ডিভাইসে ডেটা রাখুন';
 }
 
+// Path: settings.profile
+class _Translations$settings$profile$bn extends Translations$settings$profile$en {
+	_Translations$settings$profile$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'আমার প্রোফাইল';
+	@override String get rowSubtitle => 'আপনার Google অ্যাকাউন্ট';
+	@override String get nameLabel => 'নাম';
+	@override String get emailLabel => 'ইমেইল';
+	@override String get noName => 'এই Google অ্যাকাউন্টে কোনো নাম নেই';
+	@override String get signedInWith => 'Google দিয়ে সাইন ইন করা';
+	@override String get googleNote => 'আপনার নাম ও ছবি Google অ্যাকাউন্ট থেকে আসে। সেখানে পরিবর্তন করুন।';
+	@override String get deletingAccount => 'আপনার অ্যাকাউন্ট মুছে ফেলা হচ্ছে…';
+	@override String get accountDeleted => 'আপনার অ্যাকাউন্ট মুছে ফেলা হয়েছে';
+	@override String get signedOutTitle => 'আপনি সাইন ইন করেননি';
+	@override String get signedOutBody => 'সব ডিভাইসে আপনার লেনদেন রাখতে Google দিয়ে সাইন ইন করুন।';
+	@override String get guestName => 'অতিথি';
+	@override String get guestSubtitle => 'ডেটা সিঙ্ক করতে সাইন ইন করুন';
+}
+
 // Path: settings.deleteDialog
 class _Translations$settings$deleteDialog$bn extends Translations$settings$deleteDialog$en {
 	_Translations$settings$deleteDialog$bn._(TranslationsBn root) : this._root = root, super.internal(root);
@@ -1493,8 +1517,8 @@ class _Translations$settings$deleteDialog$bn extends Translations$settings$delet
 	// Translations
 	@override String get title => 'অ্যাকাউন্ট মুছুন';
 	@override String get question => 'আপনি কি নিশ্চিত যে আপনার অ্যাকাউন্ট মুছে ফেলতে চান?';
-	@override String get listTitle => 'এতে স্থায়ীভাবে মুছে যাবে:';
-	@override String get expenses => '• আপনার সব খরচ';
+	@override String get listTitle => 'আপনার অ্যাকাউন্ট ও এই ফোন থেকে স্থায়ীভাবে মুছে যাবে:';
+	@override String get transactions => '• আপনার সব লেনদেন';
 	@override String get categories => '• আপনার সব ক্যাটাগরি';
 	@override String get budgets => '• আপনার সব বাজেট';
 	@override String get recurring => '• আপনার সব পুনরাবৃত্ত লেনদেন';
@@ -2496,6 +2520,7 @@ extension on TranslationsBn {
 			'common.errors.permission' => 'এই কাজের অনুমতি Expenzo-র নেই। সিস্টেম সেটিংসে অনুমতি দিন।',
 			'common.errors.notFound' => 'এই আইটেমটি আর নেই।',
 			'common.errors.smsScan' => 'আপনার মেসেজ পড়া যায়নি। আবার চেষ্টা করুন।',
+			'common.errors.requiresRecentLogin' => 'নিরাপত্তার জন্য আবার সাইন ইন করুন, তারপর অ্যাকাউন্ট মুছুন।',
 			'common.dates.today' => 'আজ',
 			'common.dates.yesterday' => 'গতকাল',
 			'common.a11y.expenseAmount' => ({required Object amount, required Object currency}) => 'খরচ, ${amount} ${currency}',
@@ -2830,9 +2855,9 @@ extension on TranslationsBn {
 			'recurring.form.activeDetail' => 'এই পুনরাবৃত্ত লেনদেনটি প্রসেস করুন',
 			'recurring.form.amountRequired' => 'একটি পরিমাণ লিখুন',
 			'recurring.form.amountInvalid' => 'সঠিক সংখ্যা লিখুন',
-			'recurring.form.nameRequired' => 'একটি নাম লিখুন',
 			_ => null,
 		} ?? switch (path) {
+			'recurring.form.nameRequired' => 'একটি নাম লিখুন',
 			'recurring.form.create' => 'নতুন পুনরাবৃত্ত',
 			'reports.insights.highestDay.title' => 'সবচেয়ে বেশি খরচের দিন',
 			'reports.insights.highestDay.description' => ({required Object day, required Object percent}) => '${day} আপনার সবচেয়ে বেশি খরচের দিন, দৈনিক গড়ের চেয়ে ${percent}% বেশি।',
@@ -2902,10 +2927,23 @@ extension on TranslationsBn {
 			'settings.deleteAccount' => 'অ্যাকাউন্ট মুছুন',
 			'settings.signIn.title' => 'সাইন ইন',
 			'settings.signIn.subtitle' => 'আপনার সব ডিভাইসে ডেটা রাখুন',
+			'settings.profile.title' => 'আমার প্রোফাইল',
+			'settings.profile.rowSubtitle' => 'আপনার Google অ্যাকাউন্ট',
+			'settings.profile.nameLabel' => 'নাম',
+			'settings.profile.emailLabel' => 'ইমেইল',
+			'settings.profile.noName' => 'এই Google অ্যাকাউন্টে কোনো নাম নেই',
+			'settings.profile.signedInWith' => 'Google দিয়ে সাইন ইন করা',
+			'settings.profile.googleNote' => 'আপনার নাম ও ছবি Google অ্যাকাউন্ট থেকে আসে। সেখানে পরিবর্তন করুন।',
+			'settings.profile.deletingAccount' => 'আপনার অ্যাকাউন্ট মুছে ফেলা হচ্ছে…',
+			'settings.profile.accountDeleted' => 'আপনার অ্যাকাউন্ট মুছে ফেলা হয়েছে',
+			'settings.profile.signedOutTitle' => 'আপনি সাইন ইন করেননি',
+			'settings.profile.signedOutBody' => 'সব ডিভাইসে আপনার লেনদেন রাখতে Google দিয়ে সাইন ইন করুন।',
+			'settings.profile.guestName' => 'অতিথি',
+			'settings.profile.guestSubtitle' => 'ডেটা সিঙ্ক করতে সাইন ইন করুন',
 			'settings.deleteDialog.title' => 'অ্যাকাউন্ট মুছুন',
 			'settings.deleteDialog.question' => 'আপনি কি নিশ্চিত যে আপনার অ্যাকাউন্ট মুছে ফেলতে চান?',
-			'settings.deleteDialog.listTitle' => 'এতে স্থায়ীভাবে মুছে যাবে:',
-			'settings.deleteDialog.expenses' => '• আপনার সব খরচ',
+			'settings.deleteDialog.listTitle' => 'আপনার অ্যাকাউন্ট ও এই ফোন থেকে স্থায়ীভাবে মুছে যাবে:',
+			'settings.deleteDialog.transactions' => '• আপনার সব লেনদেন',
 			'settings.deleteDialog.categories' => '• আপনার সব ক্যাটাগরি',
 			'settings.deleteDialog.budgets' => '• আপনার সব বাজেট',
 			'settings.deleteDialog.recurring' => '• আপনার সব পুনরাবৃত্ত লেনদেন',

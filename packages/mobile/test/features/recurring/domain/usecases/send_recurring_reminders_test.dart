@@ -1,10 +1,8 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:talker/talker.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
-import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/features/recurring/domain/entities/recurring_transaction.dart';
 import 'package:expense_tracker/features/recurring/domain/usecases/get_recurring_list.dart';
@@ -42,7 +40,6 @@ void main() {
   final nineToday = DateTime(2026, 10, 12, 9);
 
   setUpAll(() {
-    appLogger.configure(settings: TalkerSettings(useConsoleLogs: false));
     registerFallbackValue(NoParams());
   });
 

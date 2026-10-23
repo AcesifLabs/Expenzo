@@ -45,7 +45,7 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: AppSpacing.sm),
-          Text(dialogT.expenses),
+          Text(dialogT.transactions),
           Text(dialogT.categories),
           Text(dialogT.budgets),
           Text(dialogT.recurring),

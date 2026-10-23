@@ -130,11 +130,50 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Either<AuthFailure, Unit>> reauthenticate() async {
+    try {
+      await remoteDatasource.reauthenticate();
+
+      return const Right(unit);
+    } on RequiresRecentLoginException catch (e) {
+      return Left(e.toFailure());
+    } on AuthException catch (e) {
+      return Left(
+        AuthFailure(message: e.message, errorCode: FailureCodes.userMessage),
+      );
+    } catch (e) {
+      return Left(
+        AuthFailure(
+          message: mapExceptionToMessage(e),
+          errorCode: FailureCodes.userMessage,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> deleteServerAccount() async {
+    try {
+      await remoteDatasource.deleteServerAccount();
+
+      return const Right(unit);
+    } on AuthException catch (e) {
+      return Left(e.toFailure());
+    } on NetworkException catch (e) {
+      return Left(e.toFailure());
+    } on ServerException catch (e) {
+      return Left(e.toFailure());
+    }
+  }
+
+  @override
   Future<Either<AuthFailure, Unit>> deleteAccount() async {
     try {
       await remoteDatasource.deleteAccount();
 
       return const Right(unit);
+    } on RequiresRecentLoginException catch (e) {
+      return Left(e.toFailure());
     } on AuthException catch (e) {
       return Left(
         AuthFailure(message: e.message, errorCode: FailureCodes.userMessage),
@@ -163,6 +202,20 @@ class AuthRepositoryImpl implements AuthRepository {
         ),
       );
     }
+  }
+
+  @override
+  Future<void> pauseSyncEngine() async {
+    try {
+      await di.getIt<SyncEngine>().pause();
+    } catch (_) {}
+  }
+
+  @override
+  Future<void> resumeSyncEngine() async {
+    try {
+      await di.getIt<SyncEngine>().resume();
+    } catch (_) {}
   }
 
   @override

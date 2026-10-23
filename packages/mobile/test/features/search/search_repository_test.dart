@@ -1,9 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:dartz/dartz.dart';
-import 'package:talker/talker.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
-import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/features/search/data/datasources/search_local_datasource.dart';
 import 'package:expense_tracker/features/search/data/repositories/search_repository_impl.dart';
 import 'package:expense_tracker/features/search/domain/entities/search_filters.dart';
@@ -19,7 +17,6 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(_SearchFiltersFake());
-    appLogger.configure(settings: TalkerSettings(useConsoleLogs: false));
   });
 
   setUp(() {

@@ -6,7 +6,10 @@ import 'package:expense_tracker/features/settings/domain/repositories/settings_r
 import 'package:expense_tracker/features/settings/domain/usecases/get_settings.dart';
 import 'package:expense_tracker/features/settings/domain/usecases/update_settings.dart';
 import 'package:expense_tracker/features/settings/presentation/bloc/settings_bloc.dart';
-import 'package:expense_tracker/features/auth/domain/usecases/delete_account.dart';
+import 'package:expense_tracker/features/auth/domain/repositories/auth_repository.dart';
+import 'package:expense_tracker/features/data_wipe/domain/usecases/wipe_local_data.dart';
+import 'package:expense_tracker/features/settings/domain/usecases/delete_account_and_data.dart';
+import 'package:expense_tracker/features/settings/presentation/bloc/delete_account_bloc.dart';
 
 void initSettingsModule(GetIt getIt) {
   getIt.registerLazySingleton<SettingsLocalDatasource>(
@@ -30,7 +33,19 @@ void initSettingsModule(GetIt getIt) {
     () => SettingsBloc(
       getSettings: getIt<GetSettings>(),
       updateSettings: getIt<UpdateSettings>(),
-      deleteAccount: getIt<DeleteAccount>(),
     ),
+  );
+
+  // WipeLocalData comes from initDataWipeModule, which runs later; both are
+  // resolved at first use.
+  getIt.registerLazySingleton(
+    () => DeleteAccountAndData(
+      authRepository: getIt<AuthRepository>(),
+      wipeLocalData: getIt<WipeLocalData>(),
+    ),
+  );
+  getIt.registerFactory(
+    () =>
+        DeleteAccountBloc(deleteAccountAndData: getIt<DeleteAccountAndData>()),
   );
 }

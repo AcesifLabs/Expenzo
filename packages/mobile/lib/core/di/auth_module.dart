@@ -1,11 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:get_it/get_it.dart';
+import 'package:expense_tracker/core/api/api_client.dart';
 import 'package:expense_tracker/core/database/daos/user_dao.dart';
 import 'package:expense_tracker/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:expense_tracker/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:expense_tracker/features/auth/domain/repositories/auth_repository.dart';
-import 'package:expense_tracker/features/auth/domain/usecases/delete_account.dart';
 import 'package:expense_tracker/features/auth/domain/usecases/get_current_user.dart';
 import 'package:expense_tracker/features/auth/domain/usecases/sign_in_with_google.dart';
 import 'package:expense_tracker/features/auth/domain/usecases/sign_out.dart';
@@ -17,6 +17,7 @@ void initAuthModule(GetIt getIt) {
       googleSignIn: getIt<GoogleSignIn>(),
       firebaseAuth: getIt<FirebaseAuth>(),
       userDao: getIt<UserDao>(),
+      apiClient: getIt<ApiClient>(),
     ),
   );
   getIt.registerLazySingleton<AuthRepository>(
@@ -25,7 +26,6 @@ void initAuthModule(GetIt getIt) {
   getIt.registerLazySingleton(() => SignInWithGoogle(getIt<AuthRepository>()));
   getIt.registerLazySingleton(() => SignOut(getIt<AuthRepository>()));
   getIt.registerLazySingleton(() => GetCurrentUser(getIt<AuthRepository>()));
-  getIt.registerLazySingleton(() => DeleteAccount(getIt<AuthRepository>()));
   getIt.registerFactory<AuthBloc>(
     () => AuthBloc(
       signInWithGoogle: getIt<SignInWithGoogle>(),

@@ -1,4 +1,5 @@
 import { Injectable, UnauthorizedException, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -14,6 +15,7 @@ export class AuthService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService,
+    private readonly config: ConfigService,
   ) {}
 
   async loginWithFirebaseToken(firebaseToken: string): Promise<LoginResponse> {
@@ -35,7 +37,7 @@ export class AuthService {
   }
 
   private async verifyFirebaseToken(token: string): Promise<FirebaseTokenPayload> {
-    if (token.startsWith('dev-')) {
+    if (token.startsWith('dev-') && this.devTokensAllowed()) {
       return this.parseDevToken(token);
     }
 
@@ -45,6 +47,12 @@ export class AuthService {
       const message = error instanceof Error ? error.message : 'Unknown error';
       throw new UnauthorizedException('Invalid Firebase token: ' + message);
     }
+  }
+
+  // Unsigned `dev-` tokens let anyone sign in as any uid, so they only work
+  // when explicitly switched on outside production.
+  private devTokensAllowed(): boolean {
+    return this.config.get<string>('ALLOW_DEV_TOKENS') === 'true' && this.config.get<string>('NODE_ENV') !== 'production';
   }
 
   private parseDevToken(token: string): FirebaseTokenPayload {
