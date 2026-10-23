@@ -11,6 +11,7 @@ import { ExpenseTemplate } from '../expense-templates/entities/expense-template.
 import { ParsingRule } from '../parsing-rules/entities/parsing-rule.entity';
 import { RecurringTransaction } from '../recurring-transactions/entities/recurring-transaction.entity';
 import { PendingRecurring } from '../recurring-transactions/entities/pending-recurring.entity';
+import { Goal } from '../goals/entities/goal.entity';
 import { SyncableEntity } from '../common/interfaces/syncable-entity.interface';
 import { DEFAULT_BUDGET_NAME } from '../budgets/budgets.constants';
 
@@ -38,6 +39,7 @@ export class SyncService {
     @InjectRepository(ParsingRule) ruleRepo: Repository<ParsingRule>,
     @InjectRepository(RecurringTransaction) recRepo: Repository<RecurringTransaction>,
     @InjectRepository(PendingRecurring) pendRepo: Repository<PendingRecurring>,
+    @InjectRepository(Goal) goalRepo: Repository<Goal>,
   ) {
     this.repoMap.set(SyncTable.RECORDS, recordRepo);
     this.repoMap.set(SyncTable.CATEGORIES, categoryRepo);
@@ -47,6 +49,9 @@ export class SyncService {
     this.repoMap.set(SyncTable.PARSING_RULES, ruleRepo);
     this.repoMap.set(SyncTable.RECURRING_TRANSACTIONS, recRepo);
     this.repoMap.set(SyncTable.PENDING_RECURRING, pendRepo);
+    // savedAmount is last-write-wins like every synced field: two devices
+    // adding to the same goal offline keep only the later total.
+    this.repoMap.set(SyncTable.GOALS, goalRepo);
   }
 
   async pushChanges(userId: string, dto: PushSyncDto): Promise<SyncPushResponse> {
@@ -181,6 +186,7 @@ export class SyncService {
       SyncTable.EXPENSE_TEMPLATES,
       SyncTable.PARSING_RULES,
       SyncTable.MESSAGE_SOURCES,
+      SyncTable.GOALS,
       SyncTable.BUDGETS,
       SyncTable.RECORDS,
       SyncTable.CATEGORIES,

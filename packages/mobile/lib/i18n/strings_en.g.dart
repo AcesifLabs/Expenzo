@@ -49,8 +49,10 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$currencies$en currencies = Translations$currencies$en.internal(_root);
 	late final Translations$dashboard$en dashboard = Translations$dashboard$en.internal(_root);
 	late final Translations$enums$en enums = Translations$enums$en.internal(_root);
+	late final Translations$goals$en goals = Translations$goals$en.internal(_root);
 	late final Translations$messageTemplates$en messageTemplates = Translations$messageTemplates$en.internal(_root);
 	late final Translations$notifications$en notifications = Translations$notifications$en.internal(_root);
+	late final Translations$onboarding$en onboarding = Translations$onboarding$en.internal(_root);
 	late final Translations$parsingRules$en parsingRules = Translations$parsingRules$en.internal(_root);
 	late final Translations$receiptScan$en receiptScan = Translations$receiptScan$en.internal(_root);
 	late final Translations$records$en records = Translations$records$en.internal(_root);
@@ -59,6 +61,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$settings$en settings = Translations$settings$en.internal(_root);
 	late final Translations$shell$en shell = Translations$shell$en.internal(_root);
 	late final Translations$smsParser$en smsParser = Translations$smsParser$en.internal(_root);
+	late final Translations$support$en support = Translations$support$en.internal(_root);
 }
 
 // Path: aiAssistant
@@ -386,6 +389,23 @@ class Translations$enums$en {
 	late final Translations$enums$firstDayOfWeek$en firstDayOfWeek = Translations$enums$firstDayOfWeek$en.internal(_root);
 }
 
+// Path: goals
+class Translations$goals$en {
+	Translations$goals$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	late final Translations$goals$errors$en errors = Translations$goals$errors$en.internal(_root);
+	late final Translations$goals$card$en card = Translations$goals$card$en.internal(_root);
+	late final Translations$goals$addSheet$en addSheet = Translations$goals$addSheet$en.internal(_root);
+
+	/// en: 'Added {amount} to {name}'
+	String added({required Object amount, required Object name}) => 'Added ${amount} to ${name}';
+
+	late final Translations$goals$form$en form = Translations$goals$form$en.internal(_root);
+}
+
 // Path: messageTemplates
 class Translations$messageTemplates$en {
 	Translations$messageTemplates$en.internal(this._root);
@@ -432,6 +452,24 @@ class Translations$notifications$en {
 	late final Translations$notifications$weeklySummary$en weeklySummary = Translations$notifications$weeklySummary$en.internal(_root);
 	late final Translations$notifications$scan$en scan = Translations$notifications$scan$en.internal(_root);
 	late final Translations$notifications$syncError$en syncError = Translations$notifications$syncError$en.internal(_root);
+}
+
+// Path: onboarding
+class Translations$onboarding$en {
+	Translations$onboarding$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	late final Translations$onboarding$budgetNames$en budgetNames = Translations$onboarding$budgetNames$en.internal(_root);
+	late final Translations$onboarding$common$en common = Translations$onboarding$common$en.internal(_root);
+	late final Translations$onboarding$income$en income = Translations$onboarding$income$en.internal(_root);
+	late final Translations$onboarding$recurring$en recurring = Translations$onboarding$recurring$en.internal(_root);
+	late final Translations$onboarding$plan$en plan = Translations$onboarding$plan$en.internal(_root);
+	late final Translations$onboarding$goal$en goal = Translations$onboarding$goal$en.internal(_root);
+	late final Translations$onboarding$timeline$en timeline = Translations$onboarding$timeline$en.internal(_root);
+	late final Translations$onboarding$complete$en complete = Translations$onboarding$complete$en.internal(_root);
+	late final Translations$onboarding$tutorial$en tutorial = Translations$onboarding$tutorial$en.internal(_root);
 }
 
 // Path: parsingRules
@@ -657,9 +695,7 @@ class Translations$settings$en {
 	String get matchingRulesSubtitle => 'Patterns for messages auto-import can\'t read yet';
 
 	late final Translations$settings$recurring$en recurring = Translations$settings$recurring$en.internal(_root);
-
-	/// en: 'Report a problem or suggest an idea'
-	String get feedbackSubtitle => 'Report a problem or suggest an idea';
+	late final Translations$settings$help$en help = Translations$settings$help$en.internal(_root);
 
 	/// en: 'Sign out'
 	String get signOut => 'Sign out';
@@ -713,6 +749,19 @@ class Translations$smsParser$en {
 	late final Translations$smsParser$customRange$en customRange = Translations$smsParser$customRange$en.internal(_root);
 	late final Translations$smsParser$results$en results = Translations$smsParser$results$en.internal(_root);
 	late final Translations$smsParser$autoImport$en autoImport = Translations$smsParser$autoImport$en.internal(_root);
+}
+
+// Path: support
+class Translations$support$en {
+	Translations$support$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	late final Translations$support$help$en help = Translations$support$help$en.internal(_root);
+	late final Translations$support$about$en about = Translations$support$about$en.internal(_root);
+	late final Translations$support$faq$en faq = Translations$support$faq$en.internal(_root);
+	late final Translations$support$rate$en rate = Translations$support$rate$en.internal(_root);
 }
 
 // Path: aiAssistant.suggestions
@@ -1554,6 +1603,138 @@ class Translations$enums$firstDayOfWeek$en {
 	String get saturday => 'Saturday';
 }
 
+// Path: goals.errors
+class Translations$goals$errors$en {
+	Translations$goals$errors$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Give your goal a name.'
+	String get nameRequired => 'Give your goal a name.';
+
+	/// en: 'Enter a target amount above zero.'
+	String get targetPositive => 'Enter a target amount above zero.';
+
+	/// en: 'Enter an amount above zero.'
+	String get amountPositive => 'Enter an amount above zero.';
+
+	/// en: 'Enter an amount up to 9,999,999,999.99.'
+	String get amountTooLarge => 'Enter an amount up to 9,999,999,999.99.';
+}
+
+// Path: goals.card
+class Translations$goals$card$en {
+	Translations$goals$card$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Savings goal'
+	String get section => 'Savings goal';
+
+	/// en: '{saved} of {target}'
+	String progress({required Object saved, required Object target}) => '${saved} of ${target}';
+
+	/// en: '(one) {{n} month left} (other) {{n} months left}'
+	String monthsLeft({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: '${n} month left',
+		other: '${n} months left',
+	);
+
+	/// en: 'Due this month'
+	String get dueThisMonth => 'Due this month';
+
+	/// en: 'Goal reached'
+	String get reached => 'Goal reached';
+
+	/// en: 'Plan: {amount}/month'
+	String plan({required Object amount}) => 'Plan: ${amount}/month';
+
+	/// en: 'Add to goal'
+	String get addToGoal => 'Add to goal';
+
+	/// en: 'Edit goal'
+	String get edit => 'Edit goal';
+
+	/// en: 'Set a savings goal'
+	String get setGoal => 'Set a savings goal';
+}
+
+// Path: goals.addSheet
+class Translations$goals$addSheet$en {
+	Translations$goals$addSheet$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Add to {name}'
+	String title({required Object name}) => 'Add to ${name}';
+
+	/// en: 'Amount'
+	String get amount => 'Amount';
+
+	/// en: 'This only updates the goal. It does not add a transaction.'
+	String get note => 'This only updates the goal. It does not add a transaction.';
+}
+
+// Path: goals.form
+class Translations$goals$form$en {
+	Translations$goals$form$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Edit goal'
+	String get title => 'Edit goal';
+
+	/// en: 'New savings goal'
+	String get createTitle => 'New savings goal';
+
+	/// en: 'Goal name'
+	String get name => 'Goal name';
+
+	/// en: 'Target amount'
+	String get target => 'Target amount';
+
+	/// en: 'Saved so far'
+	String get saved => 'Saved so far';
+
+	/// en: 'Target date'
+	String get targetDate => 'Target date';
+
+	/// en: 'No date'
+	String get noDate => 'No date';
+
+	/// en: 'Clear date'
+	String get clearDate => 'Clear date';
+
+	/// en: 'Monthly contribution'
+	String get monthly => 'Monthly contribution';
+
+	/// en: 'Suggested: {amount}/month'
+	String suggestMonthly({required Object amount}) => 'Suggested: ${amount}/month';
+
+	/// en: 'Delete goal?'
+	String get deleteTitle => 'Delete goal?';
+
+	/// en: 'This removes the goal and its saved amount. Your transactions are not affected.'
+	String get deleteBody => 'This removes the goal and its saved amount. Your transactions are not affected.';
+
+	/// en: 'Goal saved'
+	String get savedMessage => 'Goal saved';
+
+	/// en: 'Goal created'
+	String get createdMessage => 'Goal created';
+
+	/// en: 'Goal deleted'
+	String get deleted => 'Goal deleted';
+}
+
 // Path: messageTemplates.errors
 class Translations$messageTemplates$errors$en {
 	Translations$messageTemplates$errors$en.internal(this._root);
@@ -1798,6 +1979,248 @@ class Translations$notifications$syncError$en {
 
 	/// en: 'Sync error'
 	String get title => 'Sync error';
+}
+
+// Path: onboarding.budgetNames
+class Translations$onboarding$budgetNames$en {
+	Translations$onboarding$budgetNames$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Needs'
+	String get needs => 'Needs';
+
+	/// en: 'Wants'
+	String get wants => 'Wants';
+
+	/// en: 'Savings'
+	String get savings => 'Savings';
+}
+
+// Path: onboarding.common
+class Translations$onboarding$common$en {
+	Translations$onboarding$common$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Skip'
+	String get skip => 'Skip';
+
+	/// en: 'Continue'
+	String get continueLabel => 'Continue';
+
+	/// en: 'Step {current} of {total}'
+	String stepOf({required Object current, required Object total}) => 'Step ${current} of ${total}';
+}
+
+// Path: onboarding.income
+class Translations$onboarding$income$en {
+	Translations$onboarding$income$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Let's set up your budget'
+	String get title => 'Let\'s set up your budget';
+
+	/// en: 'First, tell us about your monthly income so we can create a budget that works for you.'
+	String get subtitle => 'First, tell us about your monthly income so we can create a budget that works for you.';
+
+	/// en: 'Monthly net income'
+	String get amountLabel => 'Monthly net income';
+
+	/// en: 'Enter an amount up to 9,999,999,999.99.'
+	String get amountInvalid => 'Enter an amount up to 9,999,999,999.99.';
+
+	/// en: 'Income frequency'
+	String get frequencyLabel => 'Income frequency';
+
+	late final Translations$onboarding$income$frequency$en frequency = Translations$onboarding$income$frequency$en.internal(_root);
+
+	/// en: '{amount}/month'
+	String perMonth({required Object amount}) => '${amount}/month';
+}
+
+// Path: onboarding.recurring
+class Translations$onboarding$recurring$en {
+	Translations$onboarding$recurring$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Any recurring payments?'
+	String get title => 'Any recurring payments?';
+
+	/// en: 'Add your regular fixed expenses so we can account for them in your budget.'
+	String get subtitle => 'Add your regular fixed expenses so we can account for them in your budget.';
+
+	/// en: 'Add another'
+	String get addAnother => 'Add another';
+
+	/// en: 'Add a payment'
+	String get addFirst => 'Add a payment';
+
+	/// en: 'Total recurring'
+	String get total => 'Total recurring';
+
+	/// en: 'Remove {name}'
+	String remove({required Object name}) => 'Remove ${name}';
+
+	late final Translations$onboarding$recurring$sheet$en sheet = Translations$onboarding$recurring$sheet$en.internal(_root);
+}
+
+// Path: onboarding.plan
+class Translations$onboarding$plan$en {
+	Translations$onboarding$plan$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Your budget plan'
+	String get title => 'Your budget plan';
+
+	/// en: 'Based on your income, we suggest this 50/30/20 split.'
+	String get subtitle => 'Based on your income, we suggest this 50/30/20 split.';
+
+	/// en: '{amount}/mo'
+	String perMonth({required Object amount}) => '${amount}/mo';
+
+	/// en: '{percent}%'
+	String share({required Object percent}) => '${percent}%';
+
+	/// en: 'Create these as monthly budgets'
+	String get createBudgets => 'Create these as monthly budgets';
+
+	/// en: 'Add your income on the first step to see a plan.'
+	String get noIncome => 'Add your income on the first step to see a plan.';
+
+	/// en: 'Your recurring payments use all of your income, so there is nothing left to split.'
+	String get noRoom => 'Your recurring payments use all of your income, so there is nothing left to split.';
+
+	/// en: 'Needs {needs}, wants {wants}, savings {savings}'
+	String chartLabel({required Object needs, required Object wants, required Object savings}) => 'Needs ${needs}, wants ${wants}, savings ${savings}';
+}
+
+// Path: onboarding.goal
+class Translations$onboarding$goal$en {
+	Translations$onboarding$goal$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'What are you saving for?'
+	String get title => 'What are you saving for?';
+
+	/// en: 'Set a savings goal and we'll help you track progress.'
+	String get subtitle => 'Set a savings goal and we\'ll help you track progress.';
+
+	/// en: 'Goal name'
+	String get nameLabel => 'Goal name';
+
+	/// en: 'e.g. New laptop'
+	String get nameHint => 'e.g. New laptop';
+
+	/// en: 'Target amount'
+	String get amountLabel => 'Target amount';
+
+	/// en: 'No goal for now'
+	String get notNow => 'No goal for now';
+}
+
+// Path: onboarding.timeline
+class Translations$onboarding$timeline$en {
+	Translations$onboarding$timeline$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Pick your timeline'
+	String get title => 'Pick your timeline';
+
+	/// en: 'You can afford {name} in {months} months saving {amount}/month.'
+	String canAfford({required Object name, required Object months, required Object amount}) => 'You can afford ${name} in ${months} months saving ${amount}/month.';
+
+	/// en: 'Your savings of {amount}/month don't cover these. Pick a later custom date.'
+	String cannotAfford({required Object amount}) => 'Your savings of ${amount}/month don\'t cover these. Pick a later custom date.';
+
+	/// en: '(one) {{n} month} (other) {{n} months}'
+	String months({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: '${n} month',
+		other: '${n} months',
+	);
+
+	/// en: '{amount}/mo'
+	String perMonth({required Object amount}) => '${amount}/mo';
+
+	/// en: 'Custom'
+	String get custom => 'Custom';
+
+	/// en: 'Set your own'
+	String get customHint => 'Set your own';
+
+	late final Translations$onboarding$timeline$fit$en fit = Translations$onboarding$timeline$fit$en.internal(_root);
+}
+
+// Path: onboarding.complete
+class Translations$onboarding$complete$en {
+	Translations$onboarding$complete$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Setup complete!'
+	String get title => 'Setup complete!';
+
+	/// en: 'Budget created'
+	String get budgets => 'Budget created';
+
+	/// en: '(one) {{n} recurring payment} (other) {{n} recurring payments}'
+	String recurring({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: '${n} recurring payment',
+		other: '${n} recurring payments',
+	);
+
+	/// en: 'Savings goal: {name}'
+	String goal({required Object name}) => 'Savings goal: ${name}';
+
+	/// en: 'You can change your budgets and goal at any time.'
+	String get tip => 'You can change your budgets and goal at any time.';
+
+	/// en: 'Finish setup'
+	String get finish => 'Finish setup';
+
+	/// en: 'Saving your setup…'
+	String get saving => 'Saving your setup…';
+
+	/// en: 'Some items couldn't be saved. You can add them later.'
+	String get partialFailure => 'Some items couldn\'t be saved. You can add them later.';
+}
+
+// Path: onboarding.tutorial
+class Translations$onboarding$tutorial$en {
+	Translations$onboarding$tutorial$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	late final Translations$onboarding$tutorial$dashboard$en dashboard = Translations$onboarding$tutorial$dashboard$en.internal(_root);
+	late final Translations$onboarding$tutorial$addTransaction$en addTransaction = Translations$onboarding$tutorial$addTransaction$en.internal(_root);
+	late final Translations$onboarding$tutorial$reports$en reports = Translations$onboarding$tutorial$reports$en.internal(_root);
+
+	/// en: 'Page {current} of {total}'
+	String pageOf({required Object current, required Object total}) => 'Page ${current} of ${total}';
+
+	late final Translations$onboarding$tutorial$cta$en cta = Translations$onboarding$tutorial$cta$en.internal(_root);
 }
 
 // Path: parsingRules.empty
@@ -2395,6 +2818,21 @@ class Translations$settings$recurring$en {
 
 	/// en: 'Bills and income that repeat'
 	String get subtitle => 'Bills and income that repeat';
+}
+
+// Path: settings.help
+class Translations$settings$help$en {
+	Translations$settings$help$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Help & Support'
+	String get title => 'Help & Support';
+
+	/// en: 'FAQ, contact us, rate the app, legal'
+	String get rowSubtitle => 'FAQ, contact us, rate the app, legal';
 }
 
 // Path: settings.signIn
@@ -3066,6 +3504,125 @@ class Translations$smsParser$autoImport$en {
 	String get scanPast => 'Scan past SMS';
 }
 
+// Path: support.help
+class Translations$support$help$en {
+	Translations$support$help$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Watch tutorial'
+	String get watchTutorial => 'Watch tutorial';
+
+	late final Translations$support$help$replaySetup$en replaySetup = Translations$support$help$replaySetup$en.internal(_root);
+
+	/// en: 'Help & Support'
+	String get title => 'Help & Support';
+
+	/// en: 'FAQ'
+	String get faq => 'FAQ';
+
+	/// en: 'Contact support'
+	String get contactSupport => 'Contact support';
+
+	/// en: 'Rate the app'
+	String get rateApp => 'Rate the app';
+
+	/// en: 'Privacy policy'
+	String get privacyPolicy => 'Privacy policy';
+
+	/// en: 'Terms of service'
+	String get termsOfService => 'Terms of service';
+
+	/// en: 'About'
+	String get about => 'About';
+
+	/// en: 'Couldn't open the page. Try again later.'
+	String get linkFailed => 'Couldn\'t open the page. Try again later.';
+}
+
+// Path: support.about
+class Translations$support$about$en {
+	Translations$support$about$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'About Expenzo'
+	String get title => 'About Expenzo';
+
+	/// en: 'Version {version} ({build})'
+	String version({required Object version, required Object build}) => 'Version ${version} (${build})';
+
+	/// en: 'Expenzo tracks your spending, budgets and recurring bills, and can read bank SMS to log transactions for you.'
+	String get description => 'Expenzo tracks your spending, budgets and recurring bills, and can read bank SMS to log transactions for you.';
+
+	/// en: 'Made by Acesif Labs'
+	String get madeBy => 'Made by Acesif Labs';
+}
+
+// Path: support.faq
+class Translations$support$faq$en {
+	Translations$support$faq$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'FAQ'
+	String get title => 'FAQ';
+
+	/// en: 'Search FAQs...'
+	String get searchHint => 'Search FAQs...';
+
+	/// en: 'No questions match "{query}".'
+	String noResults({required Object query}) => 'No questions match "${query}".';
+
+	late final Translations$support$faq$addTransaction$en addTransaction = Translations$support$faq$addTransaction$en.internal(_root);
+	late final Translations$support$faq$autoImport$en autoImport = Translations$support$faq$autoImport$en.internal(_root);
+	late final Translations$support$faq$budget$en budget = Translations$support$faq$budget$en.internal(_root);
+	late final Translations$support$faq$recurring$en recurring = Translations$support$faq$recurring$en.internal(_root);
+	late final Translations$support$faq$export$en export = Translations$support$faq$export$en.internal(_root);
+	late final Translations$support$faq$sync$en sync = Translations$support$faq$sync$en.internal(_root);
+	late final Translations$support$faq$aiAssistant$en aiAssistant = Translations$support$faq$aiAssistant$en.internal(_root);
+	late final Translations$support$faq$currency$en currency = Translations$support$faq$currency$en.internal(_root);
+}
+
+// Path: support.rate
+class Translations$support$rate$en {
+	Translations$support$rate$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Love Expenzo?'
+	String get title => 'Love Expenzo?';
+
+	/// en: 'Enjoying Expenzo?'
+	String get heading => 'Enjoying Expenzo?';
+
+	/// en: 'Your feedback helps us improve. Tap a star to rate the app.'
+	String get subtitle => 'Your feedback helps us improve. Tap a star to rate the app.';
+
+	/// en: 'Write a review'
+	String get writeReview => 'Write a review';
+
+	/// en: 'Tell us what to improve'
+	String get tellUs => 'Tell us what to improve';
+
+	/// en: 'Maybe later'
+	String get maybeLater => 'Maybe later';
+
+	/// en: 'No thanks'
+	String get noThanks => 'No thanks';
+
+	/// en: '{n} of 5 stars'
+	String starLabel({required Object n}) => '${n} of 5 stars';
+}
+
 // Path: budgets.details.periodBudget
 class Translations$budgets$details$periodBudget$en {
 	Translations$budgets$details$periodBudget$en.internal(this._root);
@@ -3193,6 +3750,129 @@ class Translations$enums$fontSize$extraLarge$en {
 
 	/// en: 'Maximum size for accessibility'
 	String get description => 'Maximum size for accessibility';
+}
+
+// Path: onboarding.income.frequency
+class Translations$onboarding$income$frequency$en {
+	Translations$onboarding$income$frequency$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Monthly'
+	String get monthly => 'Monthly';
+
+	/// en: 'Bi-weekly'
+	String get biWeekly => 'Bi-weekly';
+
+	/// en: 'Weekly'
+	String get weekly => 'Weekly';
+}
+
+// Path: onboarding.recurring.sheet
+class Translations$onboarding$recurring$sheet$en {
+	Translations$onboarding$recurring$sheet$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Recurring payment'
+	String get title => 'Recurring payment';
+
+	/// en: 'Name'
+	String get name => 'Name';
+
+	/// en: 'e.g. Rent'
+	String get nameHint => 'e.g. Rent';
+
+	/// en: 'Amount'
+	String get amount => 'Amount';
+
+	/// en: 'Repeats'
+	String get frequency => 'Repeats';
+}
+
+// Path: onboarding.timeline.fit
+class Translations$onboarding$timeline$fit$en {
+	Translations$onboarding$timeline$fit$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Fits your savings'
+	String get affordable => 'Fits your savings';
+
+	/// en: 'More than your savings'
+	String get tooExpensive => 'More than your savings';
+
+	/// en: 'Takes a long time'
+	String get slow => 'Takes a long time';
+}
+
+// Path: onboarding.tutorial.dashboard
+class Translations$onboarding$tutorial$dashboard$en {
+	Translations$onboarding$tutorial$dashboard$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Your money at a glance'
+	String get title => 'Your money at a glance';
+
+	/// en: 'Home shows this month's net, your budgets and recent activity.'
+	String get body => 'Home shows this month\'s net, your budgets and recent activity.';
+}
+
+// Path: onboarding.tutorial.addTransaction
+class Translations$onboarding$tutorial$addTransaction$en {
+	Translations$onboarding$tutorial$addTransaction$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Add a transaction in seconds'
+	String get title => 'Add a transaction in seconds';
+
+	/// en: 'Tap + on any tab, type the amount and pick a category.'
+	String get body => 'Tap + on any tab, type the amount and pick a category.';
+}
+
+// Path: onboarding.tutorial.reports
+class Translations$onboarding$tutorial$reports$en {
+	Translations$onboarding$tutorial$reports$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'See where your money goes'
+	String get title => 'See where your money goes';
+
+	/// en: 'Reports shows trends, categories and insights.'
+	String get body => 'Reports shows trends, categories and insights.';
+}
+
+// Path: onboarding.tutorial.cta
+class Translations$onboarding$tutorial$cta$en {
+	Translations$onboarding$tutorial$cta$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'You're all set!'
+	String get title => 'You\'re all set!';
+
+	/// en: 'You now know the basics. Let's start tracking your finances!'
+	String get body => 'You now know the basics. Let\'s start tracking your finances!';
+
+	/// en: 'Let's get started!'
+	String get start => 'Let\'s get started!';
 }
 
 // Path: records.sheet.placeholders
@@ -3653,6 +4333,147 @@ class Translations$settings$deleteData$sections$en {
 	String get confirmation => 'Confirmation';
 }
 
+// Path: support.help.replaySetup
+class Translations$support$help$replaySetup$en {
+	Translations$support$help$replaySetup$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Replay setup'
+	String get title => 'Replay setup';
+
+	/// en: 'Go through income, budgets and goal again'
+	String get rowSubtitle => 'Go through income, budgets and goal again';
+
+	/// en: 'Replay setup?'
+	String get confirmTitle => 'Replay setup?';
+
+	/// en: 'Your transactions stay as they are. Budgets, recurring payments and a goal you add again are created as new items.'
+	String get confirmBody => 'Your transactions stay as they are. Budgets, recurring payments and a goal you add again are created as new items.';
+}
+
+// Path: support.faq.addTransaction
+class Translations$support$faq$addTransaction$en {
+	Translations$support$faq$addTransaction$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'How do I add a transaction?'
+	String get q => 'How do I add a transaction?';
+
+	/// en: 'Tap the + button at the bottom of any tab. Choose expense or income, enter the amount, pick a category and tap Add expense or Add income.'
+	String get a => 'Tap the + button at the bottom of any tab. Choose expense or income, enter the amount, pick a category and tap Add expense or Add income.';
+}
+
+// Path: support.faq.autoImport
+class Translations$support$faq$autoImport$en {
+	Translations$support$faq$autoImport$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'How does Auto-import work?'
+	String get q => 'How does Auto-import work?';
+
+	/// en: 'Go to Settings → Auto-import from SMS and allow SMS access. Expenzo reads bank and payment messages on your phone and turns them into transactions. The message text stays on your phone; the transactions it creates sync like any other. Tap Scan past SMS on that page to import older messages.'
+	String get a => 'Go to Settings → Auto-import from SMS and allow SMS access. Expenzo reads bank and payment messages on your phone and turns them into transactions. The message text stays on your phone; the transactions it creates sync like any other. Tap Scan past SMS on that page to import older messages.';
+}
+
+// Path: support.faq.budget
+class Translations$support$faq$budget$en {
+	Translations$support$faq$budget$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'How do I set up a budget?'
+	String get q => 'How do I set up a budget?';
+
+	/// en: 'Open the Budgets tab and tap New budget. Give it a name, an amount and a period (weekly, monthly or yearly). When you add an expense, choose the budget it counts toward, and the budget shows how much is left. Income does not count toward budgets.'
+	String get a => 'Open the Budgets tab and tap New budget. Give it a name, an amount and a period (weekly, monthly or yearly). When you add an expense, choose the budget it counts toward, and the budget shows how much is left. Income does not count toward budgets.';
+}
+
+// Path: support.faq.recurring
+class Translations$support$faq$recurring$en {
+	Translations$support$faq$recurring$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'How do recurring transactions work?'
+	String get q => 'How do recurring transactions work?';
+
+	/// en: 'Go to Settings → Recurring transactions and add a bill or income with how often it repeats. Turn on Auto-create transactions and Expenzo adds due transactions when you open the app. If it is off, open Recurring transactions and tap Process pending (the circular arrows at the top).'
+	String get a => 'Go to Settings → Recurring transactions and add a bill or income with how often it repeats. Turn on Auto-create transactions and Expenzo adds due transactions when you open the app. If it is off, open Recurring transactions and tap Process pending (the circular arrows at the top).';
+}
+
+// Path: support.faq.export
+class Translations$support$faq$export$en {
+	Translations$support$faq$export$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Can I export my data?'
+	String get q => 'Can I export my data?';
+
+	/// en: 'Yes. Go to Settings → Export data, pick a date range and what to include (transactions, budgets, categories). One type is shared as a CSV file; several come as a ZIP of CSV files.'
+	String get a => 'Yes. Go to Settings → Export data, pick a date range and what to include (transactions, budgets, categories). One type is shared as a CSV file; several come as a ZIP of CSV files.';
+}
+
+// Path: support.faq.sync
+class Translations$support$faq$sync$en {
+	Translations$support$faq$sync$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Is my data safe if I lose my phone?'
+	String get q => 'Is my data safe if I lose my phone?';
+
+	/// en: 'If you sign in with Google and Sync is on (it is on by default), your transactions, budgets, categories, recurring transactions, and auto-import senders and rules are kept in your account. Sign in on your new phone to get them back. App settings stay on each phone. Without signing in, your data stays only on this phone.'
+	String get a => 'If you sign in with Google and Sync is on (it is on by default), your transactions, budgets, categories, recurring transactions, and auto-import senders and rules are kept in your account. Sign in on your new phone to get them back. App settings stay on each phone. Without signing in, your data stays only on this phone.';
+}
+
+// Path: support.faq.aiAssistant
+class Translations$support$faq$aiAssistant$en {
+	Translations$support$faq$aiAssistant$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'How does the AI assistant work?'
+	String get q => 'How does the AI assistant work?';
+
+	/// en: 'Tap Ask AI on the Reports tab and ask about your spending, budgets or income. The assistant answers from a summary of this month's data, with personal details such as emails and phone numbers removed, sent to our AI provider, Groq. It gives suggestions, not financial advice.'
+	String get a => 'Tap Ask AI on the Reports tab and ask about your spending, budgets or income. The assistant answers from a summary of this month\'s data, with personal details such as emails and phone numbers removed, sent to our AI provider, Groq. It gives suggestions, not financial advice.';
+}
+
+// Path: support.faq.currency
+class Translations$support$faq$currency$en {
+	Translations$support$faq$currency$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'How do I change the currency?'
+	String get q => 'How do I change the currency?';
+
+	/// en: 'Go to Settings → Default currency. Amounts are not converted; only the symbol and format change.'
+	String get a => 'Go to Settings → Default currency. Amounts are not converted; only the symbol and format change.';
+}
+
 // Path: settings.homePage.options.home
 class Translations$settings$homePage$options$home$en {
 	Translations$settings$homePage$options$home$en.internal(this._root);
@@ -4018,6 +4839,38 @@ extension on Translations {
 			'enums.firstDayOfWeek.sunday' => 'Sunday',
 			'enums.firstDayOfWeek.monday' => 'Monday',
 			'enums.firstDayOfWeek.saturday' => 'Saturday',
+			'goals.errors.nameRequired' => 'Give your goal a name.',
+			'goals.errors.targetPositive' => 'Enter a target amount above zero.',
+			'goals.errors.amountPositive' => 'Enter an amount above zero.',
+			'goals.errors.amountTooLarge' => 'Enter an amount up to 9,999,999,999.99.',
+			'goals.card.section' => 'Savings goal',
+			'goals.card.progress' => ({required Object saved, required Object target}) => '${saved} of ${target}',
+			'goals.card.monthsLeft' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} month left', other: '${n} months left', ), 
+			'goals.card.dueThisMonth' => 'Due this month',
+			'goals.card.reached' => 'Goal reached',
+			'goals.card.plan' => ({required Object amount}) => 'Plan: ${amount}/month',
+			'goals.card.addToGoal' => 'Add to goal',
+			'goals.card.edit' => 'Edit goal',
+			'goals.card.setGoal' => 'Set a savings goal',
+			'goals.addSheet.title' => ({required Object name}) => 'Add to ${name}',
+			'goals.addSheet.amount' => 'Amount',
+			'goals.addSheet.note' => 'This only updates the goal. It does not add a transaction.',
+			'goals.added' => ({required Object amount, required Object name}) => 'Added ${amount} to ${name}',
+			'goals.form.title' => 'Edit goal',
+			'goals.form.createTitle' => 'New savings goal',
+			'goals.form.name' => 'Goal name',
+			'goals.form.target' => 'Target amount',
+			'goals.form.saved' => 'Saved so far',
+			'goals.form.targetDate' => 'Target date',
+			'goals.form.noDate' => 'No date',
+			'goals.form.clearDate' => 'Clear date',
+			'goals.form.monthly' => 'Monthly contribution',
+			'goals.form.suggestMonthly' => ({required Object amount}) => 'Suggested: ${amount}/month',
+			'goals.form.deleteTitle' => 'Delete goal?',
+			'goals.form.deleteBody' => 'This removes the goal and its saved amount. Your transactions are not affected.',
+			'goals.form.savedMessage' => 'Goal saved',
+			'goals.form.createdMessage' => 'Goal created',
+			'goals.form.deleted' => 'Goal deleted',
 			'messageTemplates.errors.deleteFailed' => 'Couldn\'t delete the SMS format. Try again.',
 			'messageTemplates.errors.restoreFailed' => 'Couldn\'t restore the SMS format. Try again.',
 			'messageTemplates.alreadyExists' => 'SMS format already exists',
@@ -4072,6 +4925,74 @@ extension on Translations {
 			'notifications.scan.emailTitle' => 'Email scan complete',
 			'notifications.scan.found' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} new expense found', other: '${n} new expenses found', ), 
 			'notifications.syncError.title' => 'Sync error',
+			'onboarding.budgetNames.needs' => 'Needs',
+			'onboarding.budgetNames.wants' => 'Wants',
+			'onboarding.budgetNames.savings' => 'Savings',
+			'onboarding.common.skip' => 'Skip',
+			'onboarding.common.continueLabel' => 'Continue',
+			'onboarding.common.stepOf' => ({required Object current, required Object total}) => 'Step ${current} of ${total}',
+			'onboarding.income.title' => 'Let\'s set up your budget',
+			'onboarding.income.subtitle' => 'First, tell us about your monthly income so we can create a budget that works for you.',
+			'onboarding.income.amountLabel' => 'Monthly net income',
+			'onboarding.income.amountInvalid' => 'Enter an amount up to 9,999,999,999.99.',
+			'onboarding.income.frequencyLabel' => 'Income frequency',
+			'onboarding.income.frequency.monthly' => 'Monthly',
+			'onboarding.income.frequency.biWeekly' => 'Bi-weekly',
+			'onboarding.income.frequency.weekly' => 'Weekly',
+			'onboarding.income.perMonth' => ({required Object amount}) => '${amount}/month',
+			'onboarding.recurring.title' => 'Any recurring payments?',
+			'onboarding.recurring.subtitle' => 'Add your regular fixed expenses so we can account for them in your budget.',
+			'onboarding.recurring.addAnother' => 'Add another',
+			'onboarding.recurring.addFirst' => 'Add a payment',
+			'onboarding.recurring.total' => 'Total recurring',
+			'onboarding.recurring.remove' => ({required Object name}) => 'Remove ${name}',
+			'onboarding.recurring.sheet.title' => 'Recurring payment',
+			'onboarding.recurring.sheet.name' => 'Name',
+			'onboarding.recurring.sheet.nameHint' => 'e.g. Rent',
+			'onboarding.recurring.sheet.amount' => 'Amount',
+			'onboarding.recurring.sheet.frequency' => 'Repeats',
+			'onboarding.plan.title' => 'Your budget plan',
+			'onboarding.plan.subtitle' => 'Based on your income, we suggest this 50/30/20 split.',
+			'onboarding.plan.perMonth' => ({required Object amount}) => '${amount}/mo',
+			'onboarding.plan.share' => ({required Object percent}) => '${percent}%',
+			'onboarding.plan.createBudgets' => 'Create these as monthly budgets',
+			'onboarding.plan.noIncome' => 'Add your income on the first step to see a plan.',
+			'onboarding.plan.noRoom' => 'Your recurring payments use all of your income, so there is nothing left to split.',
+			'onboarding.plan.chartLabel' => ({required Object needs, required Object wants, required Object savings}) => 'Needs ${needs}, wants ${wants}, savings ${savings}',
+			'onboarding.goal.title' => 'What are you saving for?',
+			'onboarding.goal.subtitle' => 'Set a savings goal and we\'ll help you track progress.',
+			'onboarding.goal.nameLabel' => 'Goal name',
+			'onboarding.goal.nameHint' => 'e.g. New laptop',
+			'onboarding.goal.amountLabel' => 'Target amount',
+			'onboarding.goal.notNow' => 'No goal for now',
+			'onboarding.timeline.title' => 'Pick your timeline',
+			'onboarding.timeline.canAfford' => ({required Object name, required Object months, required Object amount}) => 'You can afford ${name} in ${months} months saving ${amount}/month.',
+			'onboarding.timeline.cannotAfford' => ({required Object amount}) => 'Your savings of ${amount}/month don\'t cover these. Pick a later custom date.',
+			'onboarding.timeline.months' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} month', other: '${n} months', ), 
+			'onboarding.timeline.perMonth' => ({required Object amount}) => '${amount}/mo',
+			'onboarding.timeline.custom' => 'Custom',
+			'onboarding.timeline.customHint' => 'Set your own',
+			'onboarding.timeline.fit.affordable' => 'Fits your savings',
+			'onboarding.timeline.fit.tooExpensive' => 'More than your savings',
+			'onboarding.timeline.fit.slow' => 'Takes a long time',
+			'onboarding.complete.title' => 'Setup complete!',
+			'onboarding.complete.budgets' => 'Budget created',
+			'onboarding.complete.recurring' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} recurring payment', other: '${n} recurring payments', ), 
+			'onboarding.complete.goal' => ({required Object name}) => 'Savings goal: ${name}',
+			'onboarding.complete.tip' => 'You can change your budgets and goal at any time.',
+			'onboarding.complete.finish' => 'Finish setup',
+			'onboarding.complete.saving' => 'Saving your setup…',
+			'onboarding.complete.partialFailure' => 'Some items couldn\'t be saved. You can add them later.',
+			'onboarding.tutorial.dashboard.title' => 'Your money at a glance',
+			'onboarding.tutorial.dashboard.body' => 'Home shows this month\'s net, your budgets and recent activity.',
+			'onboarding.tutorial.addTransaction.title' => 'Add a transaction in seconds',
+			'onboarding.tutorial.addTransaction.body' => 'Tap + on any tab, type the amount and pick a category.',
+			'onboarding.tutorial.reports.title' => 'See where your money goes',
+			'onboarding.tutorial.reports.body' => 'Reports shows trends, categories and insights.',
+			'onboarding.tutorial.pageOf' => ({required Object current, required Object total}) => 'Page ${current} of ${total}',
+			'onboarding.tutorial.cta.title' => 'You\'re all set!',
+			'onboarding.tutorial.cta.body' => 'You now know the basics. Let\'s start tracking your finances!',
+			'onboarding.tutorial.cta.start' => 'Let\'s get started!',
 			'parsingRules.addFromFormats' => 'Add rules from SMS formats',
 			'parsingRules.newRule' => 'New rule',
 			'parsingRules.editRule' => 'Edit rule',
@@ -4133,6 +5054,8 @@ extension on Translations {
 			'receiptScan.readFailed' => 'Couldn\'t read the receipt. Try again or add it by hand.',
 			'receiptScan.chooseFromGallery' => 'Choose from gallery',
 			'receiptScan.flashOff' => 'Turn flash off',
+			_ => null,
+		} ?? switch (path) {
 			'receiptScan.flashOn' => 'Turn flash on',
 			'receiptScan.align' => 'Align receipt with the frame',
 			'receiptScan.reading' => 'Reading your receipt',
@@ -4233,8 +5156,6 @@ extension on Translations {
 			'recurring.form.activeDetail' => 'Process this recurring transaction',
 			'recurring.form.amountRequired' => 'Enter an amount',
 			'recurring.form.amountInvalid' => 'Enter a valid number',
-			_ => null,
-		} ?? switch (path) {
 			'recurring.form.nameRequired' => 'Enter a name',
 			'recurring.form.create' => 'New recurring',
 			'reports.insights.highestDay.title' => 'Highest spending day',
@@ -4300,7 +5221,8 @@ extension on Translations {
 			'settings.matchingRulesSubtitle' => 'Patterns for messages auto-import can\'t read yet',
 			'settings.recurring.title' => 'Recurring transactions',
 			'settings.recurring.subtitle' => 'Bills and income that repeat',
-			'settings.feedbackSubtitle' => 'Report a problem or suggest an idea',
+			'settings.help.title' => 'Help & Support',
+			'settings.help.rowSubtitle' => 'FAQ, contact us, rate the app, legal',
 			'settings.signOut' => 'Sign out',
 			'settings.deleteAccount' => 'Delete account',
 			'settings.signIn.title' => 'Sign in',
@@ -4481,6 +5403,50 @@ extension on Translations {
 			'smsParser.results.emptyBody' => 'Try scanning again or add more matching rules',
 			'smsParser.results.create' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: 'Add ${n} selected record', other: 'Add ${n} selected records', ), 
 			'smsParser.autoImport.scanPast' => 'Scan past SMS',
+			'support.help.watchTutorial' => 'Watch tutorial',
+			'support.help.replaySetup.title' => 'Replay setup',
+			'support.help.replaySetup.rowSubtitle' => 'Go through income, budgets and goal again',
+			'support.help.replaySetup.confirmTitle' => 'Replay setup?',
+			'support.help.replaySetup.confirmBody' => 'Your transactions stay as they are. Budgets, recurring payments and a goal you add again are created as new items.',
+			'support.help.title' => 'Help & Support',
+			'support.help.faq' => 'FAQ',
+			'support.help.contactSupport' => 'Contact support',
+			'support.help.rateApp' => 'Rate the app',
+			'support.help.privacyPolicy' => 'Privacy policy',
+			'support.help.termsOfService' => 'Terms of service',
+			'support.help.about' => 'About',
+			'support.help.linkFailed' => 'Couldn\'t open the page. Try again later.',
+			'support.about.title' => 'About Expenzo',
+			'support.about.version' => ({required Object version, required Object build}) => 'Version ${version} (${build})',
+			'support.about.description' => 'Expenzo tracks your spending, budgets and recurring bills, and can read bank SMS to log transactions for you.',
+			'support.about.madeBy' => 'Made by Acesif Labs',
+			'support.faq.title' => 'FAQ',
+			'support.faq.searchHint' => 'Search FAQs...',
+			'support.faq.noResults' => ({required Object query}) => 'No questions match "${query}".',
+			'support.faq.addTransaction.q' => 'How do I add a transaction?',
+			'support.faq.addTransaction.a' => 'Tap the + button at the bottom of any tab. Choose expense or income, enter the amount, pick a category and tap Add expense or Add income.',
+			'support.faq.autoImport.q' => 'How does Auto-import work?',
+			'support.faq.autoImport.a' => 'Go to Settings → Auto-import from SMS and allow SMS access. Expenzo reads bank and payment messages on your phone and turns them into transactions. The message text stays on your phone; the transactions it creates sync like any other. Tap Scan past SMS on that page to import older messages.',
+			'support.faq.budget.q' => 'How do I set up a budget?',
+			'support.faq.budget.a' => 'Open the Budgets tab and tap New budget. Give it a name, an amount and a period (weekly, monthly or yearly). When you add an expense, choose the budget it counts toward, and the budget shows how much is left. Income does not count toward budgets.',
+			'support.faq.recurring.q' => 'How do recurring transactions work?',
+			'support.faq.recurring.a' => 'Go to Settings → Recurring transactions and add a bill or income with how often it repeats. Turn on Auto-create transactions and Expenzo adds due transactions when you open the app. If it is off, open Recurring transactions and tap Process pending (the circular arrows at the top).',
+			'support.faq.export.q' => 'Can I export my data?',
+			'support.faq.export.a' => 'Yes. Go to Settings → Export data, pick a date range and what to include (transactions, budgets, categories). One type is shared as a CSV file; several come as a ZIP of CSV files.',
+			'support.faq.sync.q' => 'Is my data safe if I lose my phone?',
+			'support.faq.sync.a' => 'If you sign in with Google and Sync is on (it is on by default), your transactions, budgets, categories, recurring transactions, and auto-import senders and rules are kept in your account. Sign in on your new phone to get them back. App settings stay on each phone. Without signing in, your data stays only on this phone.',
+			'support.faq.aiAssistant.q' => 'How does the AI assistant work?',
+			'support.faq.aiAssistant.a' => 'Tap Ask AI on the Reports tab and ask about your spending, budgets or income. The assistant answers from a summary of this month\'s data, with personal details such as emails and phone numbers removed, sent to our AI provider, Groq. It gives suggestions, not financial advice.',
+			'support.faq.currency.q' => 'How do I change the currency?',
+			'support.faq.currency.a' => 'Go to Settings → Default currency. Amounts are not converted; only the symbol and format change.',
+			'support.rate.title' => 'Love Expenzo?',
+			'support.rate.heading' => 'Enjoying Expenzo?',
+			'support.rate.subtitle' => 'Your feedback helps us improve. Tap a star to rate the app.',
+			'support.rate.writeReview' => 'Write a review',
+			'support.rate.tellUs' => 'Tell us what to improve',
+			'support.rate.maybeLater' => 'Maybe later',
+			'support.rate.noThanks' => 'No thanks',
+			'support.rate.starLabel' => ({required Object n}) => '${n} of 5 stars',
 			_ => null,
 		};
 	}

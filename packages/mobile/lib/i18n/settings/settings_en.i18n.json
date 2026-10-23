@@ -64,7 +64,10 @@
     "title": "Recurring transactions",
     "subtitle": "Bills and income that repeat"
   },
-  "feedbackSubtitle": "Report a problem or suggest an idea",
+  "help": {
+    "title": "Help & Support",
+    "rowSubtitle": "FAQ, contact us, rate the app, legal"
+  },
   "signOut": "Sign out",
   "deleteAccount": "Delete account",
   "signIn": {

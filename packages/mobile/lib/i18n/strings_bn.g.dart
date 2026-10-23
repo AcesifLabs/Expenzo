@@ -47,8 +47,10 @@ class TranslationsBn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$currencies$bn currencies = _Translations$currencies$bn._(_root);
 	@override late final _Translations$dashboard$bn dashboard = _Translations$dashboard$bn._(_root);
 	@override late final _Translations$enums$bn enums = _Translations$enums$bn._(_root);
+	@override late final _Translations$goals$bn goals = _Translations$goals$bn._(_root);
 	@override late final _Translations$messageTemplates$bn messageTemplates = _Translations$messageTemplates$bn._(_root);
 	@override late final _Translations$notifications$bn notifications = _Translations$notifications$bn._(_root);
+	@override late final _Translations$onboarding$bn onboarding = _Translations$onboarding$bn._(_root);
 	@override late final _Translations$parsingRules$bn parsingRules = _Translations$parsingRules$bn._(_root);
 	@override late final _Translations$receiptScan$bn receiptScan = _Translations$receiptScan$bn._(_root);
 	@override late final _Translations$records$bn records = _Translations$records$bn._(_root);
@@ -57,6 +59,7 @@ class TranslationsBn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$settings$bn settings = _Translations$settings$bn._(_root);
 	@override late final _Translations$shell$bn shell = _Translations$shell$bn._(_root);
 	@override late final _Translations$smsParser$bn smsParser = _Translations$smsParser$bn._(_root);
+	@override late final _Translations$support$bn support = _Translations$support$bn._(_root);
 }
 
 // Path: aiAssistant
@@ -284,6 +287,20 @@ class _Translations$enums$bn extends Translations$enums$en {
 	@override late final _Translations$enums$firstDayOfWeek$bn firstDayOfWeek = _Translations$enums$firstDayOfWeek$bn._(_root);
 }
 
+// Path: goals
+class _Translations$goals$bn extends Translations$goals$en {
+	_Translations$goals$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override late final _Translations$goals$errors$bn errors = _Translations$goals$errors$bn._(_root);
+	@override late final _Translations$goals$card$bn card = _Translations$goals$card$bn._(_root);
+	@override late final _Translations$goals$addSheet$bn addSheet = _Translations$goals$addSheet$bn._(_root);
+	@override String added({required Object name, required Object amount}) => '${name}-এ ${amount} যোগ হয়েছে';
+	@override late final _Translations$goals$form$bn form = _Translations$goals$form$bn._(_root);
+}
+
 // Path: messageTemplates
 class _Translations$messageTemplates$bn extends Translations$messageTemplates$en {
 	_Translations$messageTemplates$bn._(TranslationsBn root) : this._root = root, super.internal(root);
@@ -317,6 +334,24 @@ class _Translations$notifications$bn extends Translations$notifications$en {
 	@override late final _Translations$notifications$weeklySummary$bn weeklySummary = _Translations$notifications$weeklySummary$bn._(_root);
 	@override late final _Translations$notifications$scan$bn scan = _Translations$notifications$scan$bn._(_root);
 	@override late final _Translations$notifications$syncError$bn syncError = _Translations$notifications$syncError$bn._(_root);
+}
+
+// Path: onboarding
+class _Translations$onboarding$bn extends Translations$onboarding$en {
+	_Translations$onboarding$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override late final _Translations$onboarding$budgetNames$bn budgetNames = _Translations$onboarding$budgetNames$bn._(_root);
+	@override late final _Translations$onboarding$common$bn common = _Translations$onboarding$common$bn._(_root);
+	@override late final _Translations$onboarding$income$bn income = _Translations$onboarding$income$bn._(_root);
+	@override late final _Translations$onboarding$recurring$bn recurring = _Translations$onboarding$recurring$bn._(_root);
+	@override late final _Translations$onboarding$plan$bn plan = _Translations$onboarding$plan$bn._(_root);
+	@override late final _Translations$onboarding$goal$bn goal = _Translations$onboarding$goal$bn._(_root);
+	@override late final _Translations$onboarding$timeline$bn timeline = _Translations$onboarding$timeline$bn._(_root);
+	@override late final _Translations$onboarding$complete$bn complete = _Translations$onboarding$complete$bn._(_root);
+	@override late final _Translations$onboarding$tutorial$bn tutorial = _Translations$onboarding$tutorial$bn._(_root);
 }
 
 // Path: parsingRules
@@ -449,7 +484,7 @@ class _Translations$settings$bn extends Translations$settings$en {
 	@override String get autoImportSubtitle => 'ব্যাংক ও পেমেন্টের মেসেজ থেকে লেনদেন তৈরি করুন';
 	@override String get matchingRulesSubtitle => 'যেসব মেসেজ অটো-ইমপোর্ট এখনো পড়তে পারে না, সেগুলোর প্যাটার্ন';
 	@override late final _Translations$settings$recurring$bn recurring = _Translations$settings$recurring$bn._(_root);
-	@override String get feedbackSubtitle => 'সমস্যা জানান বা কোনো আইডিয়া দিন';
+	@override late final _Translations$settings$help$bn help = _Translations$settings$help$bn._(_root);
 	@override String get signOut => 'সাইন আউট';
 	@override String get deleteAccount => 'অ্যাকাউন্ট মুছুন';
 	@override late final _Translations$settings$signIn$bn signIn = _Translations$settings$signIn$bn._(_root);
@@ -495,6 +530,19 @@ class _Translations$smsParser$bn extends Translations$smsParser$en {
 	@override late final _Translations$smsParser$customRange$bn customRange = _Translations$smsParser$customRange$bn._(_root);
 	@override late final _Translations$smsParser$results$bn results = _Translations$smsParser$results$bn._(_root);
 	@override late final _Translations$smsParser$autoImport$bn autoImport = _Translations$smsParser$autoImport$bn._(_root);
+}
+
+// Path: support
+class _Translations$support$bn extends Translations$support$en {
+	_Translations$support$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override late final _Translations$support$help$bn help = _Translations$support$help$bn._(_root);
+	@override late final _Translations$support$about$bn about = _Translations$support$about$bn._(_root);
+	@override late final _Translations$support$faq$bn faq = _Translations$support$faq$bn._(_root);
+	@override late final _Translations$support$rate$bn rate = _Translations$support$rate$bn._(_root);
 }
 
 // Path: aiAssistant.suggestions
@@ -997,6 +1045,76 @@ class _Translations$enums$firstDayOfWeek$bn extends Translations$enums$firstDayO
 	@override String get saturday => 'শনিবার';
 }
 
+// Path: goals.errors
+class _Translations$goals$errors$bn extends Translations$goals$errors$en {
+	_Translations$goals$errors$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get nameRequired => 'আপনার লক্ষ্যের একটি নাম দিন।';
+	@override String get targetPositive => 'শূন্যের বেশি একটি লক্ষ্য পরিমাণ লিখুন।';
+	@override String get amountPositive => 'শূন্যের বেশি একটি পরিমাণ লিখুন।';
+	@override String get amountTooLarge => 'সর্বোচ্চ 9,999,999,999.99 পর্যন্ত পরিমাণ লিখুন।';
+}
+
+// Path: goals.card
+class _Translations$goals$card$bn extends Translations$goals$card$en {
+	_Translations$goals$card$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get section => 'সঞ্চয়ের লক্ষ্য';
+	@override String progress({required Object target, required Object saved}) => '${target}-এর মধ্যে ${saved}';
+	@override String monthsLeft({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n,
+		one: 'আর ${n} মাস বাকি',
+		other: 'আর ${n} মাস বাকি',
+	);
+	@override String get dueThisMonth => 'এই মাসেই শেষ সময়';
+	@override String get reached => 'লক্ষ্য পূরণ হয়েছে';
+	@override String plan({required Object amount}) => 'পরিকল্পনা: মাসে ${amount}';
+	@override String get addToGoal => 'লক্ষ্যে যোগ করুন';
+	@override String get edit => 'লক্ষ্য সম্পাদনা';
+	@override String get setGoal => 'একটি সঞ্চয়ের লক্ষ্য ঠিক করুন';
+}
+
+// Path: goals.addSheet
+class _Translations$goals$addSheet$bn extends Translations$goals$addSheet$en {
+	_Translations$goals$addSheet$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String title({required Object name}) => '${name}-এ যোগ করুন';
+	@override String get amount => 'পরিমাণ';
+	@override String get note => 'এটি শুধু লক্ষ্য আপডেট করে, কোনো লেনদেন যোগ করে না।';
+}
+
+// Path: goals.form
+class _Translations$goals$form$bn extends Translations$goals$form$en {
+	_Translations$goals$form$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'লক্ষ্য সম্পাদনা';
+	@override String get createTitle => 'নতুন সঞ্চয়ের লক্ষ্য';
+	@override String get name => 'লক্ষ্যের নাম';
+	@override String get target => 'লক্ষ্য পরিমাণ';
+	@override String get saved => 'এ পর্যন্ত সঞ্চয়';
+	@override String get targetDate => 'লক্ষ্যের তারিখ';
+	@override String get noDate => 'কোনো তারিখ নেই';
+	@override String get clearDate => 'তারিখ মুছুন';
+	@override String get monthly => 'মাসিক জমা';
+	@override String suggestMonthly({required Object amount}) => 'প্রস্তাবিত: মাসে ${amount}';
+	@override String get deleteTitle => 'লক্ষ্য মুছবেন?';
+	@override String get deleteBody => 'এতে লক্ষ্য ও এর সঞ্চিত পরিমাণ মুছে যাবে। আপনার লেনদেনে কোনো প্রভাব পড়বে না।';
+	@override String get savedMessage => 'লক্ষ্য সংরক্ষিত হয়েছে';
+	@override String get createdMessage => 'লক্ষ্য তৈরি হয়েছে';
+	@override String get deleted => 'লক্ষ্য মুছে ফেলা হয়েছে';
+}
+
 // Path: messageTemplates.errors
 class _Translations$messageTemplates$errors$bn extends Translations$messageTemplates$errors$en {
 	_Translations$messageTemplates$errors$bn._(TranslationsBn root) : this._root = root, super.internal(root);
@@ -1145,6 +1263,148 @@ class _Translations$notifications$syncError$bn extends Translations$notification
 
 	// Translations
 	@override String get title => 'সিঙ্কে সমস্যা';
+}
+
+// Path: onboarding.budgetNames
+class _Translations$onboarding$budgetNames$bn extends Translations$onboarding$budgetNames$en {
+	_Translations$onboarding$budgetNames$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get needs => 'প্রয়োজন';
+	@override String get wants => 'চাহিদা';
+	@override String get savings => 'সঞ্চয়';
+}
+
+// Path: onboarding.common
+class _Translations$onboarding$common$bn extends Translations$onboarding$common$en {
+	_Translations$onboarding$common$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get skip => 'এড়িয়ে যান';
+	@override String get continueLabel => 'চালিয়ে যান';
+	@override String stepOf({required Object current, required Object total}) => 'ধাপ ${current}/${total}';
+}
+
+// Path: onboarding.income
+class _Translations$onboarding$income$bn extends Translations$onboarding$income$en {
+	_Translations$onboarding$income$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'চলুন আপনার বাজেট সাজাই';
+	@override String get subtitle => 'প্রথমে আপনার মাসিক আয় জানান, যাতে আমরা আপনার জন্য মানানসই একটি বাজেট তৈরি করতে পারি।';
+	@override String get amountLabel => 'মাসিক নিট আয়';
+	@override String get amountInvalid => 'সর্বোচ্চ 9,999,999,999.99 পর্যন্ত পরিমাণ লিখুন।';
+	@override String get frequencyLabel => 'আয়ের ব্যবধান';
+	@override late final _Translations$onboarding$income$frequency$bn frequency = _Translations$onboarding$income$frequency$bn._(_root);
+	@override String perMonth({required Object amount}) => '${amount}/মাস';
+}
+
+// Path: onboarding.recurring
+class _Translations$onboarding$recurring$bn extends Translations$onboarding$recurring$en {
+	_Translations$onboarding$recurring$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'কোনো নিয়মিত পেমেন্ট আছে?';
+	@override String get subtitle => 'আপনার নিয়মিত নির্দিষ্ট খরচগুলো যোগ করুন, যাতে বাজেটে সেগুলো হিসাব করা যায়।';
+	@override String get addAnother => 'আরেকটি যোগ করুন';
+	@override String get addFirst => 'একটি পেমেন্ট যোগ করুন';
+	@override String get total => 'মোট নিয়মিত';
+	@override String remove({required Object name}) => '${name} সরান';
+	@override late final _Translations$onboarding$recurring$sheet$bn sheet = _Translations$onboarding$recurring$sheet$bn._(_root);
+}
+
+// Path: onboarding.plan
+class _Translations$onboarding$plan$bn extends Translations$onboarding$plan$en {
+	_Translations$onboarding$plan$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'আপনার বাজেট পরিকল্পনা';
+	@override String get subtitle => 'আপনার আয়ের ভিত্তিতে আমরা এই 50/30/20 ভাগের পরামর্শ দিচ্ছি।';
+	@override String perMonth({required Object amount}) => '${amount}/মাস';
+	@override String share({required Object percent}) => '${percent}%';
+	@override String get createBudgets => 'এগুলো মাসিক বাজেট হিসেবে তৈরি করুন';
+	@override String get noIncome => 'পরিকল্পনা দেখতে প্রথম ধাপে আপনার আয় যোগ করুন।';
+	@override String get noRoom => 'আপনার নিয়মিত পেমেন্টে পুরো আয় চলে যায়, তাই ভাগ করার মতো কিছু বাকি নেই।';
+	@override String chartLabel({required Object needs, required Object wants, required Object savings}) => 'প্রয়োজন ${needs}, চাহিদা ${wants}, সঞ্চয় ${savings}';
+}
+
+// Path: onboarding.goal
+class _Translations$onboarding$goal$bn extends Translations$onboarding$goal$en {
+	_Translations$onboarding$goal$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'আপনি কীসের জন্য সঞ্চয় করছেন?';
+	@override String get subtitle => 'একটি সঞ্চয়ের লক্ষ্য ঠিক করুন, আমরা অগ্রগতি দেখতে সাহায্য করব।';
+	@override String get nameLabel => 'লক্ষ্যের নাম';
+	@override String get nameHint => 'যেমন: নতুন ল্যাপটপ';
+	@override String get amountLabel => 'লক্ষ্য পরিমাণ';
+	@override String get notNow => 'এখন কোনো লক্ষ্য নয়';
+}
+
+// Path: onboarding.timeline
+class _Translations$onboarding$timeline$bn extends Translations$onboarding$timeline$en {
+	_Translations$onboarding$timeline$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'সময়সীমা বাছুন';
+	@override String canAfford({required Object amount, required Object months, required Object name}) => 'মাসে ${amount} সঞ্চয় করলে ${months} মাসে ${name} কিনতে পারবেন।';
+	@override String cannotAfford({required Object amount}) => 'মাসে ${amount} সঞ্চয় দিয়ে এগুলো হবে না। আরও পরের একটি নিজস্ব তারিখ বাছুন।';
+	@override String months({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n,
+		one: '${n} মাস',
+		other: '${n} মাস',
+	);
+	@override String perMonth({required Object amount}) => '${amount}/মাস';
+	@override String get custom => 'নিজস্ব';
+	@override String get customHint => 'নিজে ঠিক করুন';
+	@override late final _Translations$onboarding$timeline$fit$bn fit = _Translations$onboarding$timeline$fit$bn._(_root);
+}
+
+// Path: onboarding.complete
+class _Translations$onboarding$complete$bn extends Translations$onboarding$complete$en {
+	_Translations$onboarding$complete$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'সেটআপ সম্পন্ন!';
+	@override String get budgets => 'বাজেট তৈরি হয়েছে';
+	@override String recurring({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n,
+		one: '${n}টি নিয়মিত পেমেন্ট',
+		other: '${n}টি নিয়মিত পেমেন্ট',
+	);
+	@override String goal({required Object name}) => 'সঞ্চয়ের লক্ষ্য: ${name}';
+	@override String get tip => 'আপনি যেকোনো সময় বাজেট ও লক্ষ্য বদলাতে পারবেন।';
+	@override String get finish => 'সেটআপ শেষ করুন';
+	@override String get saving => 'আপনার সেটআপ সংরক্ষণ হচ্ছে…';
+	@override String get partialFailure => 'কিছু আইটেম সংরক্ষণ করা যায়নি। পরে যোগ করতে পারবেন।';
+}
+
+// Path: onboarding.tutorial
+class _Translations$onboarding$tutorial$bn extends Translations$onboarding$tutorial$en {
+	_Translations$onboarding$tutorial$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override late final _Translations$onboarding$tutorial$dashboard$bn dashboard = _Translations$onboarding$tutorial$dashboard$bn._(_root);
+	@override late final _Translations$onboarding$tutorial$addTransaction$bn addTransaction = _Translations$onboarding$tutorial$addTransaction$bn._(_root);
+	@override late final _Translations$onboarding$tutorial$reports$bn reports = _Translations$onboarding$tutorial$reports$bn._(_root);
+	@override String pageOf({required Object current, required Object total}) => 'পৃষ্ঠা ${current}/${total}';
+	@override late final _Translations$onboarding$tutorial$cta$bn cta = _Translations$onboarding$tutorial$cta$bn._(_root);
 }
 
 // Path: parsingRules.empty
@@ -1473,6 +1733,17 @@ class _Translations$settings$recurring$bn extends Translations$settings$recurrin
 	// Translations
 	@override String get title => 'পুনরাবৃত্ত লেনদেন';
 	@override String get subtitle => 'নিয়মিত আসা বিল ও আয়';
+}
+
+// Path: settings.help
+class _Translations$settings$help$bn extends Translations$settings$help$en {
+	_Translations$settings$help$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'সাহায্য ও সহায়তা';
+	@override String get rowSubtitle => 'প্রশ্নোত্তর, যোগাযোগ, রেটিং, আইনি তথ্য';
 }
 
 // Path: settings.signIn
@@ -1866,6 +2137,75 @@ class _Translations$smsParser$autoImport$bn extends Translations$smsParser$autoI
 	@override String get scanPast => 'পুরোনো SMS স্ক্যান করুন';
 }
 
+// Path: support.help
+class _Translations$support$help$bn extends Translations$support$help$en {
+	_Translations$support$help$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get watchTutorial => 'টিউটোরিয়াল দেখুন';
+	@override late final _Translations$support$help$replaySetup$bn replaySetup = _Translations$support$help$replaySetup$bn._(_root);
+	@override String get title => 'সাহায্য ও সহায়তা';
+	@override String get faq => 'সাধারণ প্রশ্ন';
+	@override String get contactSupport => 'সহায়তার জন্য যোগাযোগ';
+	@override String get rateApp => 'অ্যাপটি রেট করুন';
+	@override String get privacyPolicy => 'গোপনীয়তা নীতি';
+	@override String get termsOfService => 'পরিষেবার শর্তাবলি';
+	@override String get about => 'সম্পর্কে';
+	@override String get linkFailed => 'পেজটি খোলা যায়নি। পরে আবার চেষ্টা করুন।';
+}
+
+// Path: support.about
+class _Translations$support$about$bn extends Translations$support$about$en {
+	_Translations$support$about$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Expenzo সম্পর্কে';
+	@override String version({required Object version, required Object build}) => 'সংস্করণ ${version} (${build})';
+	@override String get description => 'Expenzo আপনার খরচ, বাজেট ও নিয়মিত বিল ট্র্যাক করে, এবং ব্যাংকের SMS পড়ে আপনার হয়ে লেনদেন লিখে রাখতে পারে।';
+	@override String get madeBy => 'তৈরি করেছে Acesif Labs';
+}
+
+// Path: support.faq
+class _Translations$support$faq$bn extends Translations$support$faq$en {
+	_Translations$support$faq$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'সাধারণ প্রশ্ন';
+	@override String get searchHint => 'প্রশ্ন খুঁজুন...';
+	@override String noResults({required Object query}) => '"${query}"-এর সাথে কোনো প্রশ্ন মেলেনি।';
+	@override late final _Translations$support$faq$addTransaction$bn addTransaction = _Translations$support$faq$addTransaction$bn._(_root);
+	@override late final _Translations$support$faq$autoImport$bn autoImport = _Translations$support$faq$autoImport$bn._(_root);
+	@override late final _Translations$support$faq$budget$bn budget = _Translations$support$faq$budget$bn._(_root);
+	@override late final _Translations$support$faq$recurring$bn recurring = _Translations$support$faq$recurring$bn._(_root);
+	@override late final _Translations$support$faq$export$bn export = _Translations$support$faq$export$bn._(_root);
+	@override late final _Translations$support$faq$sync$bn sync = _Translations$support$faq$sync$bn._(_root);
+	@override late final _Translations$support$faq$aiAssistant$bn aiAssistant = _Translations$support$faq$aiAssistant$bn._(_root);
+	@override late final _Translations$support$faq$currency$bn currency = _Translations$support$faq$currency$bn._(_root);
+}
+
+// Path: support.rate
+class _Translations$support$rate$bn extends Translations$support$rate$en {
+	_Translations$support$rate$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Expenzo ভালো লাগছে?';
+	@override String get heading => 'Expenzo উপভোগ করছেন?';
+	@override String get subtitle => 'আপনার মতামত আমাদের আরও ভালো করতে সাহায্য করে। অ্যাপটি রেট করতে একটি তারায় ট্যাপ করুন।';
+	@override String get writeReview => 'রিভিউ লিখুন';
+	@override String get tellUs => 'কী ভালো করা দরকার জানান';
+	@override String get maybeLater => 'পরে দেখব';
+	@override String get noThanks => 'না, ধন্যবাদ';
+	@override String starLabel({required Object n}) => '5টির মধ্যে ${n}টি তারা';
+}
+
 // Path: budgets.details.periodBudget
 class _Translations$budgets$details$periodBudget$bn extends Translations$budgets$details$periodBudget$en {
 	_Translations$budgets$details$periodBudget$bn._(TranslationsBn root) : this._root = root, super.internal(root);
@@ -1955,6 +2295,89 @@ class _Translations$enums$fontSize$extraLarge$bn extends Translations$enums$font
 	// Translations
 	@override String get title => 'অনেক বড়';
 	@override String get description => 'সহজে দেখার জন্য সবচেয়ে বড়';
+}
+
+// Path: onboarding.income.frequency
+class _Translations$onboarding$income$frequency$bn extends Translations$onboarding$income$frequency$en {
+	_Translations$onboarding$income$frequency$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get monthly => 'মাসিক';
+	@override String get biWeekly => 'দুই সপ্তাহ পরপর';
+	@override String get weekly => 'সাপ্তাহিক';
+}
+
+// Path: onboarding.recurring.sheet
+class _Translations$onboarding$recurring$sheet$bn extends Translations$onboarding$recurring$sheet$en {
+	_Translations$onboarding$recurring$sheet$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'নিয়মিত পেমেন্ট';
+	@override String get name => 'নাম';
+	@override String get nameHint => 'যেমন: ভাড়া';
+	@override String get amount => 'পরিমাণ';
+	@override String get frequency => 'পুনরাবৃত্তি';
+}
+
+// Path: onboarding.timeline.fit
+class _Translations$onboarding$timeline$fit$bn extends Translations$onboarding$timeline$fit$en {
+	_Translations$onboarding$timeline$fit$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get affordable => 'আপনার সঞ্চয়ে হবে';
+	@override String get tooExpensive => 'আপনার সঞ্চয়ের চেয়ে বেশি';
+	@override String get slow => 'অনেক সময় লাগবে';
+}
+
+// Path: onboarding.tutorial.dashboard
+class _Translations$onboarding$tutorial$dashboard$bn extends Translations$onboarding$tutorial$dashboard$en {
+	_Translations$onboarding$tutorial$dashboard$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'এক নজরে আপনার টাকা';
+	@override String get body => 'হোমে এই মাসের নিট হিসাব, বাজেট ও সাম্প্রতিক লেনদেন দেখা যায়।';
+}
+
+// Path: onboarding.tutorial.addTransaction
+class _Translations$onboarding$tutorial$addTransaction$bn extends Translations$onboarding$tutorial$addTransaction$en {
+	_Translations$onboarding$tutorial$addTransaction$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'কয়েক সেকেন্ডে লেনদেন যোগ করুন';
+	@override String get body => 'যেকোনো ট্যাবে + চাপুন, পরিমাণ লিখুন এবং একটি ক্যাটাগরি বাছুন।';
+}
+
+// Path: onboarding.tutorial.reports
+class _Translations$onboarding$tutorial$reports$bn extends Translations$onboarding$tutorial$reports$en {
+	_Translations$onboarding$tutorial$reports$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'দেখুন টাকা কোথায় যায়';
+	@override String get body => 'রিপোর্টে ট্রেন্ড, ক্যাটাগরি ও বিশ্লেষণ দেখা যায়।';
+}
+
+// Path: onboarding.tutorial.cta
+class _Translations$onboarding$tutorial$cta$bn extends Translations$onboarding$tutorial$cta$en {
+	_Translations$onboarding$tutorial$cta$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'সব প্রস্তুত!';
+	@override String get body => 'আপনি এখন মূল বিষয়গুলো জানেন। চলুন আপনার আর্থিক হিসাব রাখা শুরু করি!';
+	@override String get start => 'চলুন শুরু করি!';
 }
 
 // Path: records.sheet.placeholders
@@ -2289,6 +2712,107 @@ class _Translations$settings$deleteData$sections$bn extends Translations$setting
 	// Translations
 	@override String get summary => 'যে ডেটা মুছে যাবে';
 	@override String get confirmation => 'নিশ্চিতকরণ';
+}
+
+// Path: support.help.replaySetup
+class _Translations$support$help$replaySetup$bn extends Translations$support$help$replaySetup$en {
+	_Translations$support$help$replaySetup$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'আবার সেটআপ করুন';
+	@override String get rowSubtitle => 'আয়, বাজেট ও লক্ষ্য আবার ঠিক করুন';
+	@override String get confirmTitle => 'আবার সেটআপ করবেন?';
+	@override String get confirmBody => 'আপনার লেনদেন যেমন আছে তেমনই থাকবে। আবার যোগ করা বাজেট, নিয়মিত পেমেন্ট ও লক্ষ্য নতুন আইটেম হিসেবে তৈরি হবে।';
+}
+
+// Path: support.faq.addTransaction
+class _Translations$support$faq$addTransaction$bn extends Translations$support$faq$addTransaction$en {
+	_Translations$support$faq$addTransaction$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get q => 'কীভাবে লেনদেন যোগ করব?';
+	@override String get a => 'যেকোনো ট্যাবের নিচের + বোতামে ট্যাপ করুন। খরচ বা আয় বেছে নিন, পরিমাণ লিখুন, একটি ক্যাটাগরি বাছুন, তারপর খরচ যোগ করুন বা আয় যোগ করুন-এ ট্যাপ করুন।';
+}
+
+// Path: support.faq.autoImport
+class _Translations$support$faq$autoImport$bn extends Translations$support$faq$autoImport$en {
+	_Translations$support$faq$autoImport$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get q => 'স্বয়ংক্রিয় ইমপোর্ট কীভাবে কাজ করে?';
+	@override String get a => 'সেটিংস → SMS থেকে স্বয়ংক্রিয় ইমপোর্ট-এ গিয়ে SMS পড়ার অনুমতি দিন। Expenzo আপনার ফোনের ব্যাংক ও পেমেন্ট মেসেজ পড়ে সেগুলোকে লেনদেনে রূপান্তর করে। মেসেজের লেখা ফোনেই থাকে; এ থেকে তৈরি লেনদেন অন্য লেনদেনের মতোই সিঙ্ক হয়। পুরোনো মেসেজ আনতে ওই পেজে পুরোনো SMS স্ক্যান করুন-এ ট্যাপ করুন।';
+}
+
+// Path: support.faq.budget
+class _Translations$support$faq$budget$bn extends Translations$support$faq$budget$en {
+	_Translations$support$faq$budget$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get q => 'কীভাবে বাজেট তৈরি করব?';
+	@override String get a => 'বাজেট ট্যাব খুলে নতুন বাজেট-এ ট্যাপ করুন। একটি নাম, পরিমাণ ও সময়কাল (সাপ্তাহিক, মাসিক বা বার্ষিক) দিন। খরচ যোগ করার সময় সেটি কোন বাজেটে গণ্য হবে তা বেছে নিন, আর বাজেটে দেখাবে কত বাকি আছে। আয় কোনো বাজেটে গণ্য হয় না।';
+}
+
+// Path: support.faq.recurring
+class _Translations$support$faq$recurring$bn extends Translations$support$faq$recurring$en {
+	_Translations$support$faq$recurring$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get q => 'পুনরাবৃত্ত লেনদেন কীভাবে কাজ করে?';
+	@override String get a => 'সেটিংস → পুনরাবৃত্ত লেনদেন-এ গিয়ে একটি বিল বা আয় এবং কত দিন পরপর হয় তা যোগ করুন। নিজে থেকে লেনদেন তৈরি চালু করলে অ্যাপ খুললেই Expenzo বকেয়া লেনদেন যোগ করে দেয়। বন্ধ থাকলে পুনরাবৃত্ত লেনদেন খুলে ওপরের বাকিগুলো প্রসেস করুন বোতামে (গোল তীর চিহ্ন) ট্যাপ করুন।';
+}
+
+// Path: support.faq.export
+class _Translations$support$faq$export$bn extends Translations$support$faq$export$en {
+	_Translations$support$faq$export$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get q => 'আমি কি আমার ডেটা এক্সপোর্ট করতে পারি?';
+	@override String get a => 'হ্যাঁ। সেটিংস → ডেটা এক্সপোর্ট-এ গিয়ে তারিখের পরিসর এবং কী কী রাখবেন (লেনদেন, বাজেট, ক্যাটাগরি) বেছে নিন। একটি ধরন হলে CSV ফাইল হিসেবে, একাধিক হলে CSV ফাইলের একটি ZIP হিসেবে শেয়ার হয়।';
+}
+
+// Path: support.faq.sync
+class _Translations$support$faq$sync$bn extends Translations$support$faq$sync$en {
+	_Translations$support$faq$sync$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get q => 'ফোন হারালে কি আমার ডেটা নিরাপদ থাকবে?';
+	@override String get a => 'Google দিয়ে সাইন ইন করা থাকলে এবং সিঙ্ক চালু থাকলে (এটি ডিফল্টভাবে চালু), আপনার লেনদেন, বাজেট, ক্যাটাগরি, পুনরাবৃত্ত লেনদেন এবং স্বয়ংক্রিয় ইমপোর্টের প্রেরক ও নিয়ম আপনার অ্যাকাউন্টে থাকে। নতুন ফোনে সাইন ইন করলে সেগুলো ফিরে পাবেন। অ্যাপের সেটিংস প্রতিটি ফোনে আলাদা থাকে। সাইন ইন না করলে ডেটা শুধু এই ফোনেই থাকে।';
+}
+
+// Path: support.faq.aiAssistant
+class _Translations$support$faq$aiAssistant$bn extends Translations$support$faq$aiAssistant$en {
+	_Translations$support$faq$aiAssistant$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get q => 'AI সহকারী কীভাবে কাজ করে?';
+	@override String get a => 'রিপোর্ট ট্যাবে AI-কে জিজ্ঞেস করুন-এ ট্যাপ করে আপনার খরচ, বাজেট বা আয় নিয়ে প্রশ্ন করুন। সহকারী এই মাসের ডেটার একটি সারাংশ থেকে উত্তর দেয়; ইমেইল ও ফোন নম্বরের মতো ব্যক্তিগত তথ্য বাদ দিয়ে সারাংশটি আমাদের AI প্রদানকারী Groq-এ পাঠানো হয়। এটি পরামর্শ দেয়, আর্থিক উপদেশ নয়।';
+}
+
+// Path: support.faq.currency
+class _Translations$support$faq$currency$bn extends Translations$support$faq$currency$en {
+	_Translations$support$faq$currency$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get q => 'কীভাবে মুদ্রা বদলাব?';
+	@override String get a => 'সেটিংস → ডিফল্ট মুদ্রা-তে যান। পরিমাণ রূপান্তর হয় না; শুধু চিহ্ন ও ফরম্যাট বদলায়।';
 }
 
 // Path: settings.homePage.options.home
@@ -2640,6 +3164,38 @@ extension on TranslationsBn {
 			'enums.firstDayOfWeek.sunday' => 'রবিবার',
 			'enums.firstDayOfWeek.monday' => 'সোমবার',
 			'enums.firstDayOfWeek.saturday' => 'শনিবার',
+			'goals.errors.nameRequired' => 'আপনার লক্ষ্যের একটি নাম দিন।',
+			'goals.errors.targetPositive' => 'শূন্যের বেশি একটি লক্ষ্য পরিমাণ লিখুন।',
+			'goals.errors.amountPositive' => 'শূন্যের বেশি একটি পরিমাণ লিখুন।',
+			'goals.errors.amountTooLarge' => 'সর্বোচ্চ 9,999,999,999.99 পর্যন্ত পরিমাণ লিখুন।',
+			'goals.card.section' => 'সঞ্চয়ের লক্ষ্য',
+			'goals.card.progress' => ({required Object target, required Object saved}) => '${target}-এর মধ্যে ${saved}',
+			'goals.card.monthsLeft' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n, one: 'আর ${n} মাস বাকি', other: 'আর ${n} মাস বাকি', ), 
+			'goals.card.dueThisMonth' => 'এই মাসেই শেষ সময়',
+			'goals.card.reached' => 'লক্ষ্য পূরণ হয়েছে',
+			'goals.card.plan' => ({required Object amount}) => 'পরিকল্পনা: মাসে ${amount}',
+			'goals.card.addToGoal' => 'লক্ষ্যে যোগ করুন',
+			'goals.card.edit' => 'লক্ষ্য সম্পাদনা',
+			'goals.card.setGoal' => 'একটি সঞ্চয়ের লক্ষ্য ঠিক করুন',
+			'goals.addSheet.title' => ({required Object name}) => '${name}-এ যোগ করুন',
+			'goals.addSheet.amount' => 'পরিমাণ',
+			'goals.addSheet.note' => 'এটি শুধু লক্ষ্য আপডেট করে, কোনো লেনদেন যোগ করে না।',
+			'goals.added' => ({required Object name, required Object amount}) => '${name}-এ ${amount} যোগ হয়েছে',
+			'goals.form.title' => 'লক্ষ্য সম্পাদনা',
+			'goals.form.createTitle' => 'নতুন সঞ্চয়ের লক্ষ্য',
+			'goals.form.name' => 'লক্ষ্যের নাম',
+			'goals.form.target' => 'লক্ষ্য পরিমাণ',
+			'goals.form.saved' => 'এ পর্যন্ত সঞ্চয়',
+			'goals.form.targetDate' => 'লক্ষ্যের তারিখ',
+			'goals.form.noDate' => 'কোনো তারিখ নেই',
+			'goals.form.clearDate' => 'তারিখ মুছুন',
+			'goals.form.monthly' => 'মাসিক জমা',
+			'goals.form.suggestMonthly' => ({required Object amount}) => 'প্রস্তাবিত: মাসে ${amount}',
+			'goals.form.deleteTitle' => 'লক্ষ্য মুছবেন?',
+			'goals.form.deleteBody' => 'এতে লক্ষ্য ও এর সঞ্চিত পরিমাণ মুছে যাবে। আপনার লেনদেনে কোনো প্রভাব পড়বে না।',
+			'goals.form.savedMessage' => 'লক্ষ্য সংরক্ষিত হয়েছে',
+			'goals.form.createdMessage' => 'লক্ষ্য তৈরি হয়েছে',
+			'goals.form.deleted' => 'লক্ষ্য মুছে ফেলা হয়েছে',
 			'messageTemplates.errors.deleteFailed' => 'SMS ফরম্যাট মোছা যায়নি। আবার চেষ্টা করুন।',
 			'messageTemplates.errors.restoreFailed' => 'SMS ফরম্যাট ফেরানো যায়নি। আবার চেষ্টা করুন।',
 			'messageTemplates.alreadyExists' => 'SMS ফরম্যাটটি আগে থেকেই আছে',
@@ -2694,6 +3250,74 @@ extension on TranslationsBn {
 			'notifications.scan.emailTitle' => 'ইমেইল স্ক্যান শেষ',
 			'notifications.scan.found' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n, one: '${n}টি নতুন খরচ পাওয়া গেছে', other: '${n}টি নতুন খরচ পাওয়া গেছে', ), 
 			'notifications.syncError.title' => 'সিঙ্কে সমস্যা',
+			'onboarding.budgetNames.needs' => 'প্রয়োজন',
+			'onboarding.budgetNames.wants' => 'চাহিদা',
+			'onboarding.budgetNames.savings' => 'সঞ্চয়',
+			'onboarding.common.skip' => 'এড়িয়ে যান',
+			'onboarding.common.continueLabel' => 'চালিয়ে যান',
+			'onboarding.common.stepOf' => ({required Object current, required Object total}) => 'ধাপ ${current}/${total}',
+			'onboarding.income.title' => 'চলুন আপনার বাজেট সাজাই',
+			'onboarding.income.subtitle' => 'প্রথমে আপনার মাসিক আয় জানান, যাতে আমরা আপনার জন্য মানানসই একটি বাজেট তৈরি করতে পারি।',
+			'onboarding.income.amountLabel' => 'মাসিক নিট আয়',
+			'onboarding.income.amountInvalid' => 'সর্বোচ্চ 9,999,999,999.99 পর্যন্ত পরিমাণ লিখুন।',
+			'onboarding.income.frequencyLabel' => 'আয়ের ব্যবধান',
+			'onboarding.income.frequency.monthly' => 'মাসিক',
+			'onboarding.income.frequency.biWeekly' => 'দুই সপ্তাহ পরপর',
+			'onboarding.income.frequency.weekly' => 'সাপ্তাহিক',
+			'onboarding.income.perMonth' => ({required Object amount}) => '${amount}/মাস',
+			'onboarding.recurring.title' => 'কোনো নিয়মিত পেমেন্ট আছে?',
+			'onboarding.recurring.subtitle' => 'আপনার নিয়মিত নির্দিষ্ট খরচগুলো যোগ করুন, যাতে বাজেটে সেগুলো হিসাব করা যায়।',
+			'onboarding.recurring.addAnother' => 'আরেকটি যোগ করুন',
+			'onboarding.recurring.addFirst' => 'একটি পেমেন্ট যোগ করুন',
+			'onboarding.recurring.total' => 'মোট নিয়মিত',
+			'onboarding.recurring.remove' => ({required Object name}) => '${name} সরান',
+			'onboarding.recurring.sheet.title' => 'নিয়মিত পেমেন্ট',
+			'onboarding.recurring.sheet.name' => 'নাম',
+			'onboarding.recurring.sheet.nameHint' => 'যেমন: ভাড়া',
+			'onboarding.recurring.sheet.amount' => 'পরিমাণ',
+			'onboarding.recurring.sheet.frequency' => 'পুনরাবৃত্তি',
+			'onboarding.plan.title' => 'আপনার বাজেট পরিকল্পনা',
+			'onboarding.plan.subtitle' => 'আপনার আয়ের ভিত্তিতে আমরা এই 50/30/20 ভাগের পরামর্শ দিচ্ছি।',
+			'onboarding.plan.perMonth' => ({required Object amount}) => '${amount}/মাস',
+			'onboarding.plan.share' => ({required Object percent}) => '${percent}%',
+			'onboarding.plan.createBudgets' => 'এগুলো মাসিক বাজেট হিসেবে তৈরি করুন',
+			'onboarding.plan.noIncome' => 'পরিকল্পনা দেখতে প্রথম ধাপে আপনার আয় যোগ করুন।',
+			'onboarding.plan.noRoom' => 'আপনার নিয়মিত পেমেন্টে পুরো আয় চলে যায়, তাই ভাগ করার মতো কিছু বাকি নেই।',
+			'onboarding.plan.chartLabel' => ({required Object needs, required Object wants, required Object savings}) => 'প্রয়োজন ${needs}, চাহিদা ${wants}, সঞ্চয় ${savings}',
+			'onboarding.goal.title' => 'আপনি কীসের জন্য সঞ্চয় করছেন?',
+			'onboarding.goal.subtitle' => 'একটি সঞ্চয়ের লক্ষ্য ঠিক করুন, আমরা অগ্রগতি দেখতে সাহায্য করব।',
+			'onboarding.goal.nameLabel' => 'লক্ষ্যের নাম',
+			'onboarding.goal.nameHint' => 'যেমন: নতুন ল্যাপটপ',
+			'onboarding.goal.amountLabel' => 'লক্ষ্য পরিমাণ',
+			'onboarding.goal.notNow' => 'এখন কোনো লক্ষ্য নয়',
+			'onboarding.timeline.title' => 'সময়সীমা বাছুন',
+			'onboarding.timeline.canAfford' => ({required Object amount, required Object months, required Object name}) => 'মাসে ${amount} সঞ্চয় করলে ${months} মাসে ${name} কিনতে পারবেন।',
+			'onboarding.timeline.cannotAfford' => ({required Object amount}) => 'মাসে ${amount} সঞ্চয় দিয়ে এগুলো হবে না। আরও পরের একটি নিজস্ব তারিখ বাছুন।',
+			'onboarding.timeline.months' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n, one: '${n} মাস', other: '${n} মাস', ), 
+			'onboarding.timeline.perMonth' => ({required Object amount}) => '${amount}/মাস',
+			'onboarding.timeline.custom' => 'নিজস্ব',
+			'onboarding.timeline.customHint' => 'নিজে ঠিক করুন',
+			'onboarding.timeline.fit.affordable' => 'আপনার সঞ্চয়ে হবে',
+			'onboarding.timeline.fit.tooExpensive' => 'আপনার সঞ্চয়ের চেয়ে বেশি',
+			'onboarding.timeline.fit.slow' => 'অনেক সময় লাগবে',
+			'onboarding.complete.title' => 'সেটআপ সম্পন্ন!',
+			'onboarding.complete.budgets' => 'বাজেট তৈরি হয়েছে',
+			'onboarding.complete.recurring' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n, one: '${n}টি নিয়মিত পেমেন্ট', other: '${n}টি নিয়মিত পেমেন্ট', ), 
+			'onboarding.complete.goal' => ({required Object name}) => 'সঞ্চয়ের লক্ষ্য: ${name}',
+			'onboarding.complete.tip' => 'আপনি যেকোনো সময় বাজেট ও লক্ষ্য বদলাতে পারবেন।',
+			'onboarding.complete.finish' => 'সেটআপ শেষ করুন',
+			'onboarding.complete.saving' => 'আপনার সেটআপ সংরক্ষণ হচ্ছে…',
+			'onboarding.complete.partialFailure' => 'কিছু আইটেম সংরক্ষণ করা যায়নি। পরে যোগ করতে পারবেন।',
+			'onboarding.tutorial.dashboard.title' => 'এক নজরে আপনার টাকা',
+			'onboarding.tutorial.dashboard.body' => 'হোমে এই মাসের নিট হিসাব, বাজেট ও সাম্প্রতিক লেনদেন দেখা যায়।',
+			'onboarding.tutorial.addTransaction.title' => 'কয়েক সেকেন্ডে লেনদেন যোগ করুন',
+			'onboarding.tutorial.addTransaction.body' => 'যেকোনো ট্যাবে + চাপুন, পরিমাণ লিখুন এবং একটি ক্যাটাগরি বাছুন।',
+			'onboarding.tutorial.reports.title' => 'দেখুন টাকা কোথায় যায়',
+			'onboarding.tutorial.reports.body' => 'রিপোর্টে ট্রেন্ড, ক্যাটাগরি ও বিশ্লেষণ দেখা যায়।',
+			'onboarding.tutorial.pageOf' => ({required Object current, required Object total}) => 'পৃষ্ঠা ${current}/${total}',
+			'onboarding.tutorial.cta.title' => 'সব প্রস্তুত!',
+			'onboarding.tutorial.cta.body' => 'আপনি এখন মূল বিষয়গুলো জানেন। চলুন আপনার আর্থিক হিসাব রাখা শুরু করি!',
+			'onboarding.tutorial.cta.start' => 'চলুন শুরু করি!',
 			'parsingRules.addFromFormats' => 'SMS ফরম্যাট থেকে নিয়ম যোগ করুন',
 			'parsingRules.newRule' => 'নতুন নিয়ম',
 			'parsingRules.editRule' => 'নিয়ম সম্পাদনা',
@@ -2755,6 +3379,8 @@ extension on TranslationsBn {
 			'receiptScan.readFailed' => 'রসিদটি পড়া যায়নি। আবার চেষ্টা করুন অথবা নিজে যোগ করুন।',
 			'receiptScan.chooseFromGallery' => 'গ্যালারি থেকে বেছে নিন',
 			'receiptScan.flashOff' => 'ফ্ল্যাশ বন্ধ করুন',
+			_ => null,
+		} ?? switch (path) {
 			'receiptScan.flashOn' => 'ফ্ল্যাশ চালু করুন',
 			'receiptScan.align' => 'রসিদটি ফ্রেমের মধ্যে রাখুন',
 			'receiptScan.reading' => 'আপনার রসিদ পড়া হচ্ছে',
@@ -2855,8 +3481,6 @@ extension on TranslationsBn {
 			'recurring.form.activeDetail' => 'এই পুনরাবৃত্ত লেনদেনটি প্রসেস করুন',
 			'recurring.form.amountRequired' => 'একটি পরিমাণ লিখুন',
 			'recurring.form.amountInvalid' => 'সঠিক সংখ্যা লিখুন',
-			_ => null,
-		} ?? switch (path) {
 			'recurring.form.nameRequired' => 'একটি নাম লিখুন',
 			'recurring.form.create' => 'নতুন পুনরাবৃত্ত',
 			'reports.insights.highestDay.title' => 'সবচেয়ে বেশি খরচের দিন',
@@ -2922,7 +3546,8 @@ extension on TranslationsBn {
 			'settings.matchingRulesSubtitle' => 'যেসব মেসেজ অটো-ইমপোর্ট এখনো পড়তে পারে না, সেগুলোর প্যাটার্ন',
 			'settings.recurring.title' => 'পুনরাবৃত্ত লেনদেন',
 			'settings.recurring.subtitle' => 'নিয়মিত আসা বিল ও আয়',
-			'settings.feedbackSubtitle' => 'সমস্যা জানান বা কোনো আইডিয়া দিন',
+			'settings.help.title' => 'সাহায্য ও সহায়তা',
+			'settings.help.rowSubtitle' => 'প্রশ্নোত্তর, যোগাযোগ, রেটিং, আইনি তথ্য',
 			'settings.signOut' => 'সাইন আউট',
 			'settings.deleteAccount' => 'অ্যাকাউন্ট মুছুন',
 			'settings.signIn.title' => 'সাইন ইন',
@@ -3103,6 +3728,50 @@ extension on TranslationsBn {
 			'smsParser.results.emptyBody' => 'আবার স্ক্যান করুন অথবা আরও মিলানোর নিয়ম যোগ করুন',
 			'smsParser.results.create' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n, one: 'বাছাই করা ${n}টি রেকর্ড যোগ করুন', other: 'বাছাই করা ${n}টি রেকর্ড যোগ করুন', ), 
 			'smsParser.autoImport.scanPast' => 'পুরোনো SMS স্ক্যান করুন',
+			'support.help.watchTutorial' => 'টিউটোরিয়াল দেখুন',
+			'support.help.replaySetup.title' => 'আবার সেটআপ করুন',
+			'support.help.replaySetup.rowSubtitle' => 'আয়, বাজেট ও লক্ষ্য আবার ঠিক করুন',
+			'support.help.replaySetup.confirmTitle' => 'আবার সেটআপ করবেন?',
+			'support.help.replaySetup.confirmBody' => 'আপনার লেনদেন যেমন আছে তেমনই থাকবে। আবার যোগ করা বাজেট, নিয়মিত পেমেন্ট ও লক্ষ্য নতুন আইটেম হিসেবে তৈরি হবে।',
+			'support.help.title' => 'সাহায্য ও সহায়তা',
+			'support.help.faq' => 'সাধারণ প্রশ্ন',
+			'support.help.contactSupport' => 'সহায়তার জন্য যোগাযোগ',
+			'support.help.rateApp' => 'অ্যাপটি রেট করুন',
+			'support.help.privacyPolicy' => 'গোপনীয়তা নীতি',
+			'support.help.termsOfService' => 'পরিষেবার শর্তাবলি',
+			'support.help.about' => 'সম্পর্কে',
+			'support.help.linkFailed' => 'পেজটি খোলা যায়নি। পরে আবার চেষ্টা করুন।',
+			'support.about.title' => 'Expenzo সম্পর্কে',
+			'support.about.version' => ({required Object version, required Object build}) => 'সংস্করণ ${version} (${build})',
+			'support.about.description' => 'Expenzo আপনার খরচ, বাজেট ও নিয়মিত বিল ট্র্যাক করে, এবং ব্যাংকের SMS পড়ে আপনার হয়ে লেনদেন লিখে রাখতে পারে।',
+			'support.about.madeBy' => 'তৈরি করেছে Acesif Labs',
+			'support.faq.title' => 'সাধারণ প্রশ্ন',
+			'support.faq.searchHint' => 'প্রশ্ন খুঁজুন...',
+			'support.faq.noResults' => ({required Object query}) => '"${query}"-এর সাথে কোনো প্রশ্ন মেলেনি।',
+			'support.faq.addTransaction.q' => 'কীভাবে লেনদেন যোগ করব?',
+			'support.faq.addTransaction.a' => 'যেকোনো ট্যাবের নিচের + বোতামে ট্যাপ করুন। খরচ বা আয় বেছে নিন, পরিমাণ লিখুন, একটি ক্যাটাগরি বাছুন, তারপর খরচ যোগ করুন বা আয় যোগ করুন-এ ট্যাপ করুন।',
+			'support.faq.autoImport.q' => 'স্বয়ংক্রিয় ইমপোর্ট কীভাবে কাজ করে?',
+			'support.faq.autoImport.a' => 'সেটিংস → SMS থেকে স্বয়ংক্রিয় ইমপোর্ট-এ গিয়ে SMS পড়ার অনুমতি দিন। Expenzo আপনার ফোনের ব্যাংক ও পেমেন্ট মেসেজ পড়ে সেগুলোকে লেনদেনে রূপান্তর করে। মেসেজের লেখা ফোনেই থাকে; এ থেকে তৈরি লেনদেন অন্য লেনদেনের মতোই সিঙ্ক হয়। পুরোনো মেসেজ আনতে ওই পেজে পুরোনো SMS স্ক্যান করুন-এ ট্যাপ করুন।',
+			'support.faq.budget.q' => 'কীভাবে বাজেট তৈরি করব?',
+			'support.faq.budget.a' => 'বাজেট ট্যাব খুলে নতুন বাজেট-এ ট্যাপ করুন। একটি নাম, পরিমাণ ও সময়কাল (সাপ্তাহিক, মাসিক বা বার্ষিক) দিন। খরচ যোগ করার সময় সেটি কোন বাজেটে গণ্য হবে তা বেছে নিন, আর বাজেটে দেখাবে কত বাকি আছে। আয় কোনো বাজেটে গণ্য হয় না।',
+			'support.faq.recurring.q' => 'পুনরাবৃত্ত লেনদেন কীভাবে কাজ করে?',
+			'support.faq.recurring.a' => 'সেটিংস → পুনরাবৃত্ত লেনদেন-এ গিয়ে একটি বিল বা আয় এবং কত দিন পরপর হয় তা যোগ করুন। নিজে থেকে লেনদেন তৈরি চালু করলে অ্যাপ খুললেই Expenzo বকেয়া লেনদেন যোগ করে দেয়। বন্ধ থাকলে পুনরাবৃত্ত লেনদেন খুলে ওপরের বাকিগুলো প্রসেস করুন বোতামে (গোল তীর চিহ্ন) ট্যাপ করুন।',
+			'support.faq.export.q' => 'আমি কি আমার ডেটা এক্সপোর্ট করতে পারি?',
+			'support.faq.export.a' => 'হ্যাঁ। সেটিংস → ডেটা এক্সপোর্ট-এ গিয়ে তারিখের পরিসর এবং কী কী রাখবেন (লেনদেন, বাজেট, ক্যাটাগরি) বেছে নিন। একটি ধরন হলে CSV ফাইল হিসেবে, একাধিক হলে CSV ফাইলের একটি ZIP হিসেবে শেয়ার হয়।',
+			'support.faq.sync.q' => 'ফোন হারালে কি আমার ডেটা নিরাপদ থাকবে?',
+			'support.faq.sync.a' => 'Google দিয়ে সাইন ইন করা থাকলে এবং সিঙ্ক চালু থাকলে (এটি ডিফল্টভাবে চালু), আপনার লেনদেন, বাজেট, ক্যাটাগরি, পুনরাবৃত্ত লেনদেন এবং স্বয়ংক্রিয় ইমপোর্টের প্রেরক ও নিয়ম আপনার অ্যাকাউন্টে থাকে। নতুন ফোনে সাইন ইন করলে সেগুলো ফিরে পাবেন। অ্যাপের সেটিংস প্রতিটি ফোনে আলাদা থাকে। সাইন ইন না করলে ডেটা শুধু এই ফোনেই থাকে।',
+			'support.faq.aiAssistant.q' => 'AI সহকারী কীভাবে কাজ করে?',
+			'support.faq.aiAssistant.a' => 'রিপোর্ট ট্যাবে AI-কে জিজ্ঞেস করুন-এ ট্যাপ করে আপনার খরচ, বাজেট বা আয় নিয়ে প্রশ্ন করুন। সহকারী এই মাসের ডেটার একটি সারাংশ থেকে উত্তর দেয়; ইমেইল ও ফোন নম্বরের মতো ব্যক্তিগত তথ্য বাদ দিয়ে সারাংশটি আমাদের AI প্রদানকারী Groq-এ পাঠানো হয়। এটি পরামর্শ দেয়, আর্থিক উপদেশ নয়।',
+			'support.faq.currency.q' => 'কীভাবে মুদ্রা বদলাব?',
+			'support.faq.currency.a' => 'সেটিংস → ডিফল্ট মুদ্রা-তে যান। পরিমাণ রূপান্তর হয় না; শুধু চিহ্ন ও ফরম্যাট বদলায়।',
+			'support.rate.title' => 'Expenzo ভালো লাগছে?',
+			'support.rate.heading' => 'Expenzo উপভোগ করছেন?',
+			'support.rate.subtitle' => 'আপনার মতামত আমাদের আরও ভালো করতে সাহায্য করে। অ্যাপটি রেট করতে একটি তারায় ট্যাপ করুন।',
+			'support.rate.writeReview' => 'রিভিউ লিখুন',
+			'support.rate.tellUs' => 'কী ভালো করা দরকার জানান',
+			'support.rate.maybeLater' => 'পরে দেখব',
+			'support.rate.noThanks' => 'না, ধন্যবাদ',
+			'support.rate.starLabel' => ({required Object n}) => '5টির মধ্যে ${n}টি তারা',
 			_ => null,
 		};
 	}

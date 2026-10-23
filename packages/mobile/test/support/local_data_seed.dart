@@ -10,8 +10,16 @@ Future<void> seedLocalData(
   int recurring = 1,
   int templates = 1,
   int rules = 1,
+  int goals = 0,
 }) async {
   final day = DateTime(2026, 3, 1);
+  for (var i = 0; i < goals; i++) {
+    await db
+        .into(db.goals)
+        .insert(
+          GoalsCompanion.insert(id: 'g$i', name: 'Goal $i', targetAmount: 1000),
+        );
+  }
   await db
       .into(db.users)
       .insert(UsersCompanion.insert(uid: 'u1', email: 'a@b.c'));

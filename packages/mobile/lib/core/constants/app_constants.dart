@@ -1,6 +1,18 @@
 class AppConstants {
   static const String appName = 'Expenzo';
 
+  /// Largest amount the backend stores (`decimal(12,2)`).
+  static const double maxAmount = 9999999999.99;
+
+  /// Onboarding budget plan: a fixed 50/30/20 split (ADR 0011 cuts the
+  /// design's "Drag to adjust").
+  static const double needsShare = 0.5;
+  static const double wantsShare = 0.3;
+  static const double savingsShare = 0.2;
+
+  /// Months offered on the onboarding goal timeline.
+  static const List<int> goalTimelineMonths = [1, 3, 6, 12];
+
   /// The earliest day a date picker offers.
   static final DateTime pickerFirstDate = DateTime(2000);
   static const String displayDateFormat = 'MMM dd, yyyy';
@@ -17,6 +29,10 @@ class AppConstants {
   /// Device large text × Extra large can exceed what layouts survive; cap the
   /// product. Overflow tests run at this value.
   static const double maxTextScale = 2.0;
+
+  /// Rate the app: this many stars or more go to the store review; fewer
+  /// open the feedback email instead.
+  static const int minStoreStars = 4;
   static const int defaultPaginationLimit = 20;
   static const int maxPaginationLimit = 100;
   static const String defaultEmoji = '📦';

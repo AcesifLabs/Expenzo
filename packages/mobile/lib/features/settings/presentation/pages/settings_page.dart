@@ -18,7 +18,6 @@ import 'package:expense_tracker/features/auth/presentation/bloc/auth_event.dart'
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_state.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_back_button.dart';
-import 'package:expense_tracker/shared/services/feedback_mailer.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 
 import '../../domain/entities/notification_toggle.dart';
@@ -64,7 +63,7 @@ class SettingsPage extends StatelessWidget {
 /// | Data & budget (`_dataSection`) | Recurring transactions, Sync, Export data, Delete all data | Recurring transactions, Sync (SAAP-71), Export data (SAAP-69), Delete all data (SAAP-70) |
 /// | Automation (`_automationSection`) | Auto-import from SMS, Matching rules | none |
 /// | General (`_generalSection`) | Language, Home page, Category settings | none |
-/// | Support (`_supportSection`) | Send feedback | SAAP-73 adds Help & Support and removes Send feedback |
+/// | Support (`_supportSection`) | Help & Support | none |
 /// | none (`_signOutRow`) | Sign out (signed in only), always last | none |
 /// | Developer (`kDebugMode` only) | Database inspector | none |
 ///
@@ -326,10 +325,10 @@ class SettingsView extends StatelessWidget {
       title: settingsT.sections.support,
       children: [
         SettingsTile(
-          icon: PiconsRegular.envelopeSimple,
-          title: t.common.sendFeedback,
-          subtitle: settingsT.feedbackSubtitle,
-          onTap: () => sendFeedback(context),
+          icon: PiconsRegular.lifebuoy,
+          title: settingsT.help.title,
+          subtitle: settingsT.help.rowSubtitle,
+          onTap: () => context.push(SettingsRoute.help.location),
         ),
       ],
     );

@@ -30,8 +30,8 @@ class DataWipeLocalDatasourceImpl implements DataWipeLocalDatasource {
   @override
   Future<LocalDataSummary> countData() async {
     try {
-      // Goals have no table before SAAP-74; the row stays hidden until a
-      // goals handler is registered.
+      // Goals count only while a goals handler is registered; without one
+      // the row stays hidden.
       final goals = registry[SyncTableNames.goals];
       final (
         transactions,

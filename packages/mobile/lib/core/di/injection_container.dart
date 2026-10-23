@@ -14,6 +14,7 @@ import 'package:expense_tracker/core/database/daos/pending_recurring_dao.dart';
 import 'package:expense_tracker/core/database/daos/message_template_dao.dart';
 import 'package:expense_tracker/core/database/daos/user_dao.dart';
 import 'package:expense_tracker/core/database/daos/budget_dao.dart';
+import 'package:expense_tracker/core/database/daos/goals_dao.dart';
 import 'package:expense_tracker/core/database/daos/sync_queue_dao.dart';
 import 'package:expense_tracker/core/lifecycle/local_data_epoch.dart';
 import 'package:expense_tracker/core/api/api_client.dart';
@@ -42,6 +43,9 @@ import 'sync_module.dart';
 import 'dashboard_module.dart';
 import 'ai_assistant_module.dart';
 import 'receipt_scan_module.dart';
+import 'goals_module.dart';
+import 'onboarding_module.dart';
+import 'support_module.dart';
 
 final getIt = GetIt.instance;
 
@@ -80,6 +84,7 @@ void _registerDaoFactories() {
   );
   getIt.registerFactory<UserDao>(() => UserDao(getIt<AppDatabase>()));
   getIt.registerFactory<BudgetDao>(() => BudgetDao(getIt<AppDatabase>()));
+  getIt.registerFactory<GoalsDao>(() => GoalsDao(getIt<AppDatabase>()));
   getIt.registerFactory<SyncQueueDao>(() => SyncQueueDao(getIt<AppDatabase>()));
   getIt.registerFactory<TransactionRunner>(
     () => DriftTransactionRunner(getIt<AppDatabase>()),
@@ -181,6 +186,7 @@ Future<void> initCriticalDependencies() async {
   final prefs = await SharedPreferences.getInstance();
   getIt.registerLazySingleton<SharedPreferences>(() => prefs);
   initSettingsModule(getIt);
+  initOnboardingCoreModule(getIt);
   initExportModule(getIt);
   initDataWipeModule(getIt);
   initSyncModule(getIt);
@@ -238,6 +244,9 @@ Future<void> initFeatureDependencies() async {
   try {
     initBudgetModule(getIt);
     initRecurringModule(getIt);
+    initGoalsModule(getIt);
+    initOnboardingFeatureModule(getIt);
+    initSupportModule(getIt);
     initBackgroundModule(getIt);
     completer.complete();
   } catch (e, s) {

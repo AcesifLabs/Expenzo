@@ -2,9 +2,9 @@ import './config/force-ipv4'; // MUST be first import
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { join } from 'path';
 import { AppModule } from './app.module';
 import { initializeFirebase } from './config/firebase.config';
+import { configureStaticPages } from './config/static-pages';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -23,7 +23,7 @@ async function bootstrap() {
     exclude: ['delete-account'],
   });
 
-  app.useStaticAssets(join(__dirname, '..', 'public'));
+  configureStaticPages(app);
 
   app.useGlobalPipes(
     new ValidationPipe({

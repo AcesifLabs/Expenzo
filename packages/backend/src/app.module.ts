@@ -12,6 +12,7 @@ import { MessageSourcesModule } from './message-sources/message-sources.module';
 import { ExpenseTemplatesModule } from './expense-templates/expense-templates.module';
 import { ParsingRulesModule } from './parsing-rules/parsing-rules.module';
 import { RecurringTransactionsModule } from './recurring-transactions/recurring-transactions.module';
+import { GoalsModule } from './goals/goals.module';
 import { SyncModule } from './sync/sync.module';
 import { AppController } from './app.controller';
 import { getDatabaseSslConfig } from './config/database-ssl';
@@ -51,6 +52,7 @@ import { getDatabaseSslConfig } from './config/database-ssl';
     ExpenseTemplatesModule,
     ParsingRulesModule,
     RecurringTransactionsModule,
+    GoalsModule,
     SyncModule,
   ],
   controllers: [AppController],

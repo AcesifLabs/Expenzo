@@ -1,0 +1,108 @@
+{
+  "budgetNames": {
+    "needs": "Needs",
+    "wants": "Wants",
+    "savings": "Savings"
+  },
+  "common": {
+    "skip": "Skip",
+    "continueLabel": "Continue",
+    "stepOf": "Step {current} of {total}"
+  },
+  "income": {
+    "title": "Let's set up your budget",
+    "subtitle": "First, tell us about your monthly income so we can create a budget that works for you.",
+    "amountLabel": "Monthly net income",
+    "amountInvalid": "Enter an amount up to 9,999,999,999.99.",
+    "frequencyLabel": "Income frequency",
+    "frequency": {
+      "monthly": "Monthly",
+      "biWeekly": "Bi-weekly",
+      "weekly": "Weekly"
+    },
+    "perMonth": "{amount}/month"
+  },
+  "recurring": {
+    "title": "Any recurring payments?",
+    "subtitle": "Add your regular fixed expenses so we can account for them in your budget.",
+    "addAnother": "Add another",
+    "addFirst": "Add a payment",
+    "total": "Total recurring",
+    "remove": "Remove {name}",
+    "sheet": {
+      "title": "Recurring payment",
+      "name": "Name",
+      "nameHint": "e.g. Rent",
+      "amount": "Amount",
+      "frequency": "Repeats"
+    }
+  },
+  "plan": {
+    "title": "Your budget plan",
+    "subtitle": "Based on your income, we suggest this 50/30/20 split.",
+    "perMonth": "{amount}/mo",
+    "share": "{percent}%",
+    "createBudgets": "Create these as monthly budgets",
+    "noIncome": "Add your income on the first step to see a plan.",
+    "noRoom": "Your recurring payments use all of your income, so there is nothing left to split.",
+    "chartLabel": "Needs {needs}, wants {wants}, savings {savings}"
+  },
+  "goal": {
+    "title": "What are you saving for?",
+    "subtitle": "Set a savings goal and we'll help you track progress.",
+    "nameLabel": "Goal name",
+    "nameHint": "e.g. New laptop",
+    "amountLabel": "Target amount",
+    "notNow": "No goal for now"
+  },
+  "timeline": {
+    "title": "Pick your timeline",
+    "canAfford": "You can afford {name} in {months} months saving {amount}/month.",
+    "cannotAfford": "Your savings of {amount}/month don't cover these. Pick a later custom date.",
+    "months": {
+      "one": "{n} month",
+      "other": "{n} months"
+    },
+    "perMonth": "{amount}/mo",
+    "custom": "Custom",
+    "customHint": "Set your own",
+    "fit": {
+      "affordable": "Fits your savings",
+      "tooExpensive": "More than your savings",
+      "slow": "Takes a long time"
+    }
+  },
+  "complete": {
+    "title": "Setup complete!",
+    "budgets": "Budget created",
+    "recurring": {
+      "one": "{n} recurring payment",
+      "other": "{n} recurring payments"
+    },
+    "goal": "Savings goal: {name}",
+    "tip": "You can change your budgets and goal at any time.",
+    "finish": "Finish setup",
+    "saving": "Saving your setup…",
+    "partialFailure": "Some items couldn't be saved. You can add them later."
+  },
+  "tutorial": {
+    "dashboard": {
+      "title": "Your money at a glance",
+      "body": "Home shows this month's net, your budgets and recent activity."
+    },
+    "addTransaction": {
+      "title": "Add a transaction in seconds",
+      "body": "Tap + on any tab, type the amount and pick a category."
+    },
+    "reports": {
+      "title": "See where your money goes",
+      "body": "Reports shows trends, categories and insights."
+    },
+    "pageOf": "Page {current} of {total}",
+    "cta": {
+      "title": "You're all set!",
+      "body": "You now know the basics. Let's start tracking your finances!",
+      "start": "Let's get started!"
+    }
+  }
+}

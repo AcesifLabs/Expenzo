@@ -18,7 +18,8 @@ enum SettingsRoute {
   recurring('recurring'),
   sync('sync'),
   export('export'),
-  deleteData('delete-data');
+  deleteData('delete-data'),
+  help('help');
 
   /// The child segment under [rootPath].
   final String path;

@@ -1,0 +1,45 @@
+{
+  "errors": {
+    "nameRequired": "Give your goal a name.",
+    "targetPositive": "Enter a target amount above zero.",
+    "amountPositive": "Enter an amount above zero.",
+    "amountTooLarge": "Enter an amount up to 9,999,999,999.99."
+  },
+  "card": {
+    "section": "Savings goal",
+    "progress": "{saved} of {target}",
+    "monthsLeft": {
+      "one": "{n} month left",
+      "other": "{n} months left"
+    },
+    "dueThisMonth": "Due this month",
+    "reached": "Goal reached",
+    "plan": "Plan: {amount}/month",
+    "addToGoal": "Add to goal",
+    "edit": "Edit goal",
+    "setGoal": "Set a savings goal"
+  },
+  "addSheet": {
+    "title": "Add to {name}",
+    "amount": "Amount",
+    "note": "This only updates the goal. It does not add a transaction."
+  },
+  "added": "Added {amount} to {name}",
+  "form": {
+    "title": "Edit goal",
+    "createTitle": "New savings goal",
+    "name": "Goal name",
+    "target": "Target amount",
+    "saved": "Saved so far",
+    "targetDate": "Target date",
+    "noDate": "No date",
+    "clearDate": "Clear date",
+    "monthly": "Monthly contribution",
+    "suggestMonthly": "Suggested: {amount}/month",
+    "deleteTitle": "Delete goal?",
+    "deleteBody": "This removes the goal and its saved amount. Your transactions are not affected.",
+    "savedMessage": "Goal saved",
+    "createdMessage": "Goal created",
+    "deleted": "Goal deleted"
+  }
+}
