@@ -1,6 +1,18 @@
 class AppConstants {
   static const String appName = 'Expenzo';
 
+  /// Largest amount the backend stores (`decimal(12,2)`).
+  static const double maxAmount = 9999999999.99;
+
+  /// Onboarding budget plan: a fixed 50/30/20 split (ADR 0011 cuts the
+  /// design's "Drag to adjust").
+  static const double needsShare = 0.5;
+  static const double wantsShare = 0.3;
+  static const double savingsShare = 0.2;
+
+  /// Months offered on the onboarding goal timeline.
+  static const List<int> goalTimelineMonths = [1, 3, 6, 12];
+
   /// The earliest day a date picker offers.
   static final DateTime pickerFirstDate = DateTime(2000);
   static const String displayDateFormat = 'MMM dd, yyyy';

@@ -1,0 +1,46 @@
+{
+  "@@i18n-review": "Machine-drafted Bangla. Needs native review before release.",
+  "errors": {
+    "nameRequired": "আপনার লক্ষ্যের একটি নাম দিন।",
+    "targetPositive": "শূন্যের বেশি একটি লক্ষ্য পরিমাণ লিখুন।",
+    "amountPositive": "শূন্যের বেশি একটি পরিমাণ লিখুন।",
+    "amountTooLarge": "সর্বোচ্চ 9,999,999,999.99 পর্যন্ত পরিমাণ লিখুন।"
+  },
+  "card": {
+    "section": "সঞ্চয়ের লক্ষ্য",
+    "progress": "{target}-এর মধ্যে {saved}",
+    "monthsLeft": {
+      "one": "আর {n} মাস বাকি",
+      "other": "আর {n} মাস বাকি"
+    },
+    "dueThisMonth": "এই মাসেই শেষ সময়",
+    "reached": "লক্ষ্য পূরণ হয়েছে",
+    "plan": "পরিকল্পনা: মাসে {amount}",
+    "addToGoal": "লক্ষ্যে যোগ করুন",
+    "edit": "লক্ষ্য সম্পাদনা",
+    "setGoal": "একটি সঞ্চয়ের লক্ষ্য ঠিক করুন"
+  },
+  "addSheet": {
+    "title": "{name}-এ যোগ করুন",
+    "amount": "পরিমাণ",
+    "note": "এটি শুধু লক্ষ্য আপডেট করে, কোনো লেনদেন যোগ করে না।"
+  },
+  "added": "{name}-এ {amount} যোগ হয়েছে",
+  "form": {
+    "title": "লক্ষ্য সম্পাদনা",
+    "createTitle": "নতুন সঞ্চয়ের লক্ষ্য",
+    "name": "লক্ষ্যের নাম",
+    "target": "লক্ষ্য পরিমাণ",
+    "saved": "এ পর্যন্ত সঞ্চয়",
+    "targetDate": "লক্ষ্যের তারিখ",
+    "noDate": "কোনো তারিখ নেই",
+    "clearDate": "তারিখ মুছুন",
+    "monthly": "মাসিক জমা",
+    "suggestMonthly": "প্রস্তাবিত: মাসে {amount}",
+    "deleteTitle": "লক্ষ্য মুছবেন?",
+    "deleteBody": "এতে লক্ষ্য ও এর সঞ্চিত পরিমাণ মুছে যাবে। আপনার লেনদেনে কোনো প্রভাব পড়বে না।",
+    "savedMessage": "লক্ষ্য সংরক্ষিত হয়েছে",
+    "createdMessage": "লক্ষ্য তৈরি হয়েছে",
+    "deleted": "লক্ষ্য মুছে ফেলা হয়েছে"
+  }
+}

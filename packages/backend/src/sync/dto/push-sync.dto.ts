@@ -6,7 +6,7 @@ export enum SyncTable {
   RECORDS = 'records', CATEGORIES = 'categories', BUDGETS = 'budgets',
   MESSAGE_SOURCES = 'message_sources', EXPENSE_TEMPLATES = 'expense_templates',
   PARSING_RULES = 'parsing_rules', RECURRING_TRANSACTIONS = 'recurring_transactions',
-  PENDING_RECURRING = 'pending_recurring',
+  PENDING_RECURRING = 'pending_recurring', GOALS = 'goals',
 }
 
 export class SyncChangeItem {

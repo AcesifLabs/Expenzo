@@ -10,9 +10,10 @@ import { ExpenseTemplate } from '../expense-templates/entities/expense-template.
 import { ParsingRule } from '../parsing-rules/entities/parsing-rule.entity';
 import { RecurringTransaction } from '../recurring-transactions/entities/recurring-transaction.entity';
 import { PendingRecurring } from '../recurring-transactions/entities/pending-recurring.entity';
+import { Goal } from '../goals/entities/goal.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Record, Category, Budget, MessageSource, ExpenseTemplate, ParsingRule, RecurringTransaction, PendingRecurring])],
+  imports: [TypeOrmModule.forFeature([Record, Category, Budget, MessageSource, ExpenseTemplate, ParsingRule, RecurringTransaction, PendingRecurring, Goal])],
   controllers: [SyncController],
   providers: [SyncService],
 })

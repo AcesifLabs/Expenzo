@@ -17,6 +17,7 @@ import 'tables/recurring_table.dart';
 import 'tables/users_table.dart';
 import 'tables/sync_queue_table.dart';
 import 'tables/app_settings_table.dart';
+import 'tables/goals_table.dart';
 
 import '../constants/source_types.dart';
 import '../constants/record_type.dart';
@@ -30,6 +31,7 @@ import 'daos/parsing_rule_dao.dart';
 import 'daos/message_template_dao.dart';
 import 'daos/user_dao.dart';
 import 'daos/sync_queue_dao.dart';
+import 'daos/goals_dao.dart';
 import 'package:expense_tracker/core/theme/category_palette.dart';
 
 part 'app_database.g.dart';
@@ -47,6 +49,7 @@ part 'app_database.g.dart';
     Users,
     SyncQueue,
     AppSettings,
+    Goals,
   ],
   daos: [
     RecordDao,
@@ -58,13 +61,14 @@ part 'app_database.g.dart';
     MessageTemplateDao,
     UserDao,
     SyncQueueDao,
+    GoalsDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   Future<String>? _dbPathFuture;
 
   @override
-  int get schemaVersion => 17;
+  int get schemaVersion => 18;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -130,6 +134,7 @@ class AppDatabase extends _$AppDatabase {
       _MigrationStep(15, _migrateV15),
       _MigrationStep(16, _migrateV16),
       _MigrationStep(17, _migrateV17),
+      _MigrationStep(18, () => _migrateV18(m)),
     ];
 
     for (final step in steps) {
@@ -355,6 +360,14 @@ class AppDatabase extends _$AppDatabase {
         [id],
       );
     }
+  }
+
+  /// Adds savings goals (SAAP-74, ADR 0009).
+  Future<void> _migrateV18(Migrator m) async {
+    await m.createTable(goals);
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_goals_user_id ON goals (user_id)',
+    );
   }
 
   Future<void> _migrateV16() async {

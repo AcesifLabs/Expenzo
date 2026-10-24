@@ -36,6 +36,13 @@ import 'package:expense_tracker/features/settings/presentation/pages/notificatio
 import 'package:expense_tracker/features/settings/presentation/pages/number_format_page.dart';
 import 'package:expense_tracker/features/settings/presentation/pages/profile_page.dart';
 import 'package:expense_tracker/features/settings/presentation/bloc/settings_bloc.dart';
+import 'package:expense_tracker/features/settings/presentation/bloc/settings_state.dart';
+import 'package:expense_tracker/features/settings/domain/entities/user_settings.dart';
+import 'package:expense_tracker/features/goals/presentation/bloc/goal_form_bloc.dart';
+import 'package:expense_tracker/features/goals/presentation/bloc/goal_form_event.dart';
+import 'package:expense_tracker/features/goals/presentation/pages/goal_form_page.dart';
+import 'package:expense_tracker/features/onboarding/presentation/pages/onboarding_page.dart';
+import 'package:expense_tracker/features/onboarding/presentation/pages/tutorial_page.dart';
 import 'package:expense_tracker/features/settings/presentation/pages/settings_page.dart';
 import 'package:expense_tracker/features/support/presentation/pages/about_page.dart';
 import 'package:expense_tracker/features/support/presentation/pages/faq_page.dart';
@@ -78,6 +85,28 @@ List<RouteBase> _buildNestedRoutes() {
     GoRoute(path: 'sync-conflict', builder: (_, _) => const SyncConflictPage()),
     GoRoute(path: 'reports', builder: (_, _) => const ReportsScreen()),
     GoRoute(path: 'ai-assistant', builder: (_, _) => const AiAssistantPage()),
+    GoRoute(path: 'onboarding', builder: (_, _) => const OnboardingRoute()),
+    GoRoute(path: 'tutorial', builder: (_, _) => const TutorialPage()),
+    // Before 'goals/:id/edit' so "new" is never read as an id.
+    GoRoute(
+      path: 'goals/new',
+      builder: (_, _) => BlocProvider(
+        create: (_) =>
+            di.getIt<GoalFormBloc>()..add(const GoalFormStartedNew()),
+        child: const GoalFormPage(),
+      ),
+    ),
+    GoRoute(
+      path: 'goals/:id/edit',
+      builder: (_, state) {
+        final id = state.pathParameters['id'] ?? '';
+
+        return BlocProvider(
+          create: (_) => di.getIt<GoalFormBloc>()..add(GoalFormLoaded(id)),
+          child: GoalFormPage(goalId: id),
+        );
+      },
+    ),
   ];
 }
 
@@ -322,8 +351,49 @@ Widget _buildScanResultsRoute(BuildContext _, GoRouterState state) {
 ///
 /// Leaving /login after signing in is LoginPage's job: it pops back to the
 /// screen that opened it. Redirecting here too would race that pop.
-String? authRedirect(BuildContext context, GoRouterState state) =>
-    authRedirectFor(context.read<AuthBloc>().state, state.matchedLocation);
+///
+/// Then sends a user who hasn't done onboarding to /onboarding (SAAP-74). A
+/// pending sync conflict wins: onboarding waits until it is resolved, or the
+/// two redirects would bounce between each other.
+String? authRedirect(BuildContext context, GoRouterState state) => redirectFor(
+  context.read<AuthBloc>().state,
+  _loadedSettings(),
+  state.matchedLocation,
+);
+
+@visibleForTesting
+String? redirectFor(
+  AuthState authState,
+  UserSettings? settings,
+  String location,
+) {
+  final authTarget = authRedirectFor(authState, location);
+  if (authTarget != null || authState is AuthSyncConflictPending) {
+    return authTarget;
+  }
+
+  return onboardingRedirectFor(settings, location);
+}
+
+/// The app-wide settings once loaded, else null (no redirect yet).
+UserSettings? _loadedSettings() {
+  if (!di.getIt.isRegistered<SettingsBloc>()) return null;
+
+  return switch (di.getIt<SettingsBloc>().state) {
+    SettingsLoaded(:final settings) => settings,
+    SettingsUpdateSuccess(:final settings) => settings,
+    _ => null,
+  };
+}
+
+/// Onboarding opens by itself while [UserSettings.onboardingCompleted] is
+/// false. A finished user may still open /onboarding (Replay setup).
+@visibleForTesting
+String? onboardingRedirectFor(UserSettings? settings, String location) {
+  if (settings?.onboardingCompleted != false) return null;
+
+  return location.startsWith('/onboarding') ? null : '/onboarding';
+}
 
 @visibleForTesting
 String? authRedirectFor(AuthState authState, String location) {

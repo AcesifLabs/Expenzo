@@ -1,6 +1,13 @@
 {
   "@@i18n-review": "Machine-drafted Bangla. Needs native review before release.",
   "help": {
+    "watchTutorial": "টিউটোরিয়াল দেখুন",
+    "replaySetup": {
+      "title": "আবার সেটআপ করুন",
+      "rowSubtitle": "আয়, বাজেট ও লক্ষ্য আবার ঠিক করুন",
+      "confirmTitle": "আবার সেটআপ করবেন?",
+      "confirmBody": "আপনার লেনদেন যেমন আছে তেমনই থাকবে। আবার যোগ করা বাজেট, নিয়মিত পেমেন্ট ও লক্ষ্য নতুন আইটেম হিসেবে তৈরি হবে।"
+    },
     "title": "সাহায্য ও সহায়তা",
     "faq": "সাধারণ প্রশ্ন",
     "contactSupport": "সহায়তার জন্য যোগাযোগ",

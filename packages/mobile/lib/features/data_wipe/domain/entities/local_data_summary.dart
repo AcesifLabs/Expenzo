@@ -10,7 +10,7 @@ class LocalDataSummary extends Equatable {
   /// SMS Formats plus Matching Rules.
   final int smsRules;
 
-  /// Null until the app has goals (SAAP-74); the row is hidden then.
+  /// Null when no goals sync handler is registered; the row is hidden then.
   final int? goals;
 
   @override

@@ -53,6 +53,15 @@ class UserSettings extends Equatable {
   /// Sync with the account on this device. Off stops sending and receiving;
   /// changes still queue.
   final bool syncEnabled;
+
+  /// False until the user finishes or skips onboarding. Null only for
+  /// settings saved before onboarding existed; `ResolveOnboardingStatus`
+  /// replaces it on the next start.
+  final bool? onboardingCompleted;
+
+  /// Monthly net income from onboarding, normalised to a month. Device-only
+  /// (ADR 0010).
+  final double? monthlyIncome;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -77,6 +86,8 @@ class UserSettings extends Equatable {
     firstDayOfWeek,
     homeTab,
     syncEnabled,
+    onboardingCompleted,
+    monthlyIncome,
     createdAt,
     updatedAt,
   ];
@@ -101,6 +112,8 @@ class UserSettings extends Equatable {
     this.firstDayOfWeek,
     this.homeTab = AppRootTab.home,
     this.syncEnabled = true,
+    this.onboardingCompleted,
+    this.monthlyIncome,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -125,6 +138,8 @@ class UserSettings extends Equatable {
     FirstDayOfWeek? firstDayOfWeek,
     AppRootTab? homeTab,
     bool? syncEnabled,
+    bool? onboardingCompleted,
+    double? monthlyIncome,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -153,6 +168,8 @@ class UserSettings extends Equatable {
       firstDayOfWeek: firstDayOfWeek ?? this.firstDayOfWeek,
       homeTab: homeTab ?? this.homeTab,
       syncEnabled: syncEnabled ?? this.syncEnabled,
+      onboardingCompleted: onboardingCompleted ?? this.onboardingCompleted,
+      monthlyIncome: monthlyIncome ?? this.monthlyIncome,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

@@ -10,6 +10,7 @@ import { ExpenseTemplate } from './expense-templates/entities/expense-template.e
 import { ParsingRule } from './parsing-rules/entities/parsing-rule.entity';
 import { RecurringTransaction } from './recurring-transactions/entities/recurring-transaction.entity';
 import { PendingRecurring } from './recurring-transactions/entities/pending-recurring.entity';
+import { Goal } from './goals/entities/goal.entity';
 import { getDatabaseSslConfig } from './config/database-ssl';
 
 config();
@@ -18,6 +19,6 @@ export default new DataSource({
   type: 'postgres',
   url: process.env.DATABASE_URL,
   ssl: getDatabaseSslConfig(process.env.DATABASE_URL, process.env.DATABASE_SSL),
-  entities: [User, Record, Category, Budget, MessageSource, ExpenseTemplate, ParsingRule, RecurringTransaction, PendingRecurring],
+  entities: [User, Record, Category, Budget, MessageSource, ExpenseTemplate, ParsingRule, RecurringTransaction, PendingRecurring, Goal],
   migrations: [__dirname + '/migrations/**/*{.ts,.js}'],
 });

@@ -9,6 +9,7 @@ import { ExpenseTemplate } from '../expense-templates/entities/expense-template.
 import { ParsingRule } from '../parsing-rules/entities/parsing-rule.entity';
 import { RecurringTransaction } from '../recurring-transactions/entities/recurring-transaction.entity';
 import { PendingRecurring } from '../recurring-transactions/entities/pending-recurring.entity';
+import { Goal } from '../goals/entities/goal.entity';
 import { SyncAction, SyncTable } from './dto/push-sync.dto';
 import { SyncStatus } from './sync.types';
 import { BudgetPeriod } from '../common/enums/budget-period.enum';
@@ -45,6 +46,7 @@ describe('SyncService', () => {
         { provide: getRepositoryToken(ParsingRule), useFactory: mockRepo },
         { provide: getRepositoryToken(RecurringTransaction), useFactory: mockRepo },
         { provide: getRepositoryToken(PendingRecurring), useFactory: mockRepo },
+        { provide: getRepositoryToken(Goal), useFactory: mockRepo },
       ],
     }).compile();
 
@@ -242,6 +244,64 @@ describe('SyncService', () => {
     });
   });
 
+  describe('goals', () => {
+    let goalRepo: AnyRepo;
+    const goal = { name: 'Laptop', targetAmount: 1999, savedAmount: 250, targetDate: '2027-01-24T00:00:00.000Z', monthlyContribution: 583.17 };
+
+    beforeEach(() => {
+      goalRepo = module.get(getRepositoryToken(Goal));
+    });
+
+    it('should store a pushed goal for the caller', async () => {
+      goalRepo.findOne.mockResolvedValue(null);
+      goalRepo.create.mockImplementation((data: any) => ({ ...data }));
+      goalRepo.save.mockImplementation((entity: any) => Promise.resolve(entity));
+
+      const result = await service.pushChanges('user-1', {
+        changes: [{ table: SyncTable.GOALS, action: SyncAction.INSERT, id: 'goal-1', data: goal }],
+      });
+
+      expect(result.results[0].status).toBe(SyncStatus.SUCCESS);
+      expect(goalRepo.save).toHaveBeenCalledWith(expect.objectContaining({ id: 'goal-1', userId: 'user-1', name: 'Laptop', savedAmount: 250 }));
+    });
+
+    it('should report a conflict for an update older than the stored goal', async () => {
+      goalRepo.findOne.mockResolvedValue({ id: 'goal-1', userId: 'user-1', ...goal, updatedAt: new Date('2026-06-01') });
+
+      const result = await service.pushChanges('user-1', {
+        changes: [{ table: SyncTable.GOALS, action: SyncAction.UPDATE, id: 'goal-1', data: { ...goal, savedAmount: 300 }, updatedAt: '2026-01-01T00:00:00.000Z' }],
+      });
+
+      expect(result.results[0].status).toBe(SyncStatus.CONFLICT);
+      expect(goalRepo.save).not.toHaveBeenCalled();
+    });
+
+    it('should delete the user\'s goals on clear', async () => {
+      await service.clearUserData('user-1');
+
+      expect(goalRepo.delete).toHaveBeenCalledWith({ userId: 'user-1' });
+    });
+
+    it('should pull goals without userId or user', async () => {
+      goalRepo.find.mockResolvedValue([{ id: 'goal-1', userId: 'user-1', user: {}, ...goal, updatedAt: new Date() }]);
+
+      const result = await service.pullChanges('user-1');
+      const change = result.changes.find((c) => c.table === SyncTable.GOALS);
+
+      expect(change?.data).toEqual(expect.objectContaining({ name: 'Laptop' }));
+      expect(change?.data).not.toHaveProperty('userId');
+      expect(change?.data).not.toHaveProperty('user');
+    });
+
+    it('should count goals in the summary', async () => {
+      goalRepo.count.mockResolvedValue(2);
+
+      const summary = await service.getSummary('user-1');
+
+      expect(summary.tables.goals).toBe(2);
+    });
+  });
+
   describe('owner checks', () => {
     const tables = Object.values(SyncTable);
     const entityFor: Record<SyncTable, unknown> = {
@@ -253,6 +313,7 @@ describe('SyncService', () => {
       [SyncTable.PARSING_RULES]: ParsingRule,
       [SyncTable.RECURRING_TRANSACTIONS]: RecurringTransaction,
       [SyncTable.PENDING_RECURRING]: PendingRecurring,
+      [SyncTable.GOALS]: Goal,
     };
     const repoFor = (table: SyncTable): AnyRepo => module.get(getRepositoryToken(entityFor[table] as any));
 

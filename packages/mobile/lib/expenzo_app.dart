@@ -16,6 +16,7 @@ import 'package:expense_tracker/core/theme/first_day_material_localizations.dart
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/core/utils/number_display_format.dart';
 import 'package:expense_tracker/core/utils/week_utils.dart';
+import 'package:expense_tracker/features/onboarding/domain/usecases/resolve_onboarding_status.dart';
 import 'package:expense_tracker/features/settings/domain/entities/user_settings.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_text_scale.dart';
 import 'package:expense_tracker/shared/presentation/widgets/currency_scope.dart';
@@ -113,6 +114,9 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
       await _initFirebase();
       await di.initCriticalDependencies();
       if (!mounted) return;
+      // Before the first settings load, so it already sees the resolved
+      // onboarding flag. A failure leaves it null, which never redirects.
+      await di.getIt<ResolveOnboardingStatus>()();
 
       if (kDebugMode) {
         await _startDriftDebugServer();
@@ -217,7 +221,12 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
   }
 
   void _applySettings(UserSettings settings) {
+    final onboardingChanged =
+        _lastSettings?.onboardingCompleted != settings.onboardingCompleted;
     _lastSettings = settings;
+    // The router has no refresh listenable: re-run the onboarding redirect
+    // when the flag is first known or changes, as RefreshOnAuthChange does.
+    if (onboardingChanged) _appRouter?.config.refresh();
     _themeModeNotifier.value = _themeModeFromString(settings.theme);
     _fontScaleNotifier.value = settings.fontSize.scale;
     CurrencyFormatter.current.value = CurrencyConfig.byCode(

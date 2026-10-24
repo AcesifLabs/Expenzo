@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/features/budgets/domain/repositories/budget_repository.dart';
+import 'package:expense_tracker/features/goals/domain/repositories/goal_repository.dart';
 
 void main() {
   setUp(() async {
@@ -155,6 +156,7 @@ void main() {
         reason:
             'getter should have run the feature module inits as a side-effect',
       );
+      expect(di.getIt.isRegistered<GoalRepository>(), isTrue);
       expect(
         di.featureInitRunCount,
         equals(1),
