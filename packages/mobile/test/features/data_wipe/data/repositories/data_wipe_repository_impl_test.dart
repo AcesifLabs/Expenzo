@@ -84,6 +84,7 @@ void main() {
             categories: 3,
             recurring: 1,
             smsRules: 2,
+            goals: 0,
           ),
         ),
       );

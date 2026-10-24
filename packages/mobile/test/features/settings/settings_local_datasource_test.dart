@@ -324,4 +324,69 @@ void main() {
 
     expect((await datasource.resetSettings()).syncEnabled, isTrue);
   });
+
+  group('onboarding (SAAP-74)', () {
+    test('a first run starts with onboarding not done and no income', () async {
+      final datasource = await datasourceWith(null);
+
+      final settings = await datasource.getSettings();
+
+      expect(settings.onboardingCompleted, isFalse);
+      expect(settings.monthlyIncome, isNull);
+    });
+
+    test(
+      'settings saved before onboarding existed read the flag as null',
+      () async {
+        final datasource = await datasourceWith(_storedSettings(code: 'BDT'));
+
+        final settings = await datasource.getSettings();
+
+        expect(settings.onboardingCompleted, isNull);
+        expect(settings.currencyCode, 'BDT');
+      },
+    );
+
+    test('the flag and income are saved and read back', () async {
+      final datasource = await datasourceWith(null);
+      final settings = await datasource.getSettings();
+
+      await datasource.updateSettings(
+        settings.copyWith(onboardingCompleted: true, monthlyIncome: 45000.0),
+      );
+
+      final read = await datasource.getSettings();
+      expect(read.onboardingCompleted, isTrue);
+      expect(read.monthlyIncome, 45000.0);
+    });
+
+    test('an income stored as a JSON int reads as a double', () async {
+      final datasource = await datasourceWith({
+        ..._storedSettings(code: 'BDT'),
+        'monthlyIncome': 45000,
+      });
+
+      expect((await datasource.getSettings()).monthlyIncome, 45000.0);
+    });
+
+    test(
+      'Delete all data keeps onboarding done and clears the income',
+      () async {
+        final datasource = await datasourceWith(null);
+        final firstRun = await datasource.getSettings();
+        await datasource.updateSettings(
+          firstRun.copyWith(onboardingCompleted: true, monthlyIncome: 45000.0),
+        );
+
+        final reset = await datasource.resetSettings();
+
+        expect(reset.onboardingCompleted, isTrue);
+        expect(reset.monthlyIncome, isNull);
+        expect(reset.currencyCode, firstRun.currencyCode);
+        expect(reset.theme, firstRun.theme);
+        expect(reset.syncEnabled, firstRun.syncEnabled);
+        expect(await datasource.getSettings(), reset);
+      },
+    );
+  });
 }

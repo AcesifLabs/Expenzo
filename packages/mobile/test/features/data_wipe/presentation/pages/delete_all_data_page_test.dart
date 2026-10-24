@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:expense_tracker/i18n/strings.g.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:expense_tracker/features/data_wipe/domain/entities/local_data_summary.dart';
 import 'package:expense_tracker/features/data_wipe/presentation/bloc/delete_all_data_bloc.dart';
@@ -143,5 +144,25 @@ void main() {
 
     expect(button(tester).onPressed, isNull);
     expect(find.text('Deleting…'), findsOneWidget);
+  });
+
+  testWidgets('lists goals when there are some', (tester) async {
+    await pump(
+      tester,
+      const DeleteAllDataState(
+        status: DeleteAllDataStatus.ready,
+        summary: LocalDataSummary(
+          transactions: 3,
+          budgets: 1,
+          categories: 18,
+          recurring: 2,
+          smsRules: 0,
+          goals: 1,
+        ),
+      ),
+    );
+
+    expect(find.text(t.settings.deleteData.goals), findsOneWidget);
+    expect(find.text('1 goal'), findsOneWidget);
   });
 }

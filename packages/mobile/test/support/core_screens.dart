@@ -44,6 +44,8 @@ import 'package:expense_tracker/features/settings/presentation/bloc/settings_blo
 import 'package:expense_tracker/features/settings/presentation/bloc/settings_state.dart';
 import 'package:expense_tracker/features/settings/presentation/widgets/calendar_month_preview.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
+import 'package:expense_tracker/features/goals/presentation/bloc/goal_bloc.dart';
+import 'package:expense_tracker/features/goals/presentation/bloc/goal_state.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_shell.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_text_scale.dart';
 
@@ -103,11 +105,24 @@ B mockBloc<B extends BlocBase<S>, S>(B bloc, S state) {
   return bloc;
 }
 
+class MockGoalBloc extends Mock implements GoalBloc {}
+
 /// Skips the real feature start-up (database, network) in widget tests.
 void registerScreenTestDependencies() {
   di.getIt.registerSingleton<Future<void>>(
     Future<void>.value(),
     instanceName: 'featureReady',
+  );
+  registerNoGoalBloc();
+}
+
+/// The dashboard goal card with no goal (it then shows "Set a savings goal").
+void registerNoGoalBloc() {
+  di.getIt.registerFactory<GoalBloc>(
+    () => mockBloc<MockGoalBloc, GoalState>(
+      MockGoalBloc(),
+      const GoalState(status: GoalStatus.ready),
+    ),
   );
 }
 

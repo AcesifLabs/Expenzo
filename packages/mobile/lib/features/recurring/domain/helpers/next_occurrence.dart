@@ -20,15 +20,16 @@ DateTime calculateNextOccurrence(
     case RecurringFrequency.weekly:
       return current.add(const Duration(days: 7));
     case RecurringFrequency.monthly:
-      return _addMonths(current, 1, dayOfMonth: dayOfMonth);
+      return addMonths(current, 1, dayOfMonth: dayOfMonth);
     case RecurringFrequency.yearly:
       return _addYears(current, 1, dayOfMonth: dayOfMonth);
   }
 }
 
 /// Adds [months] months to [date], clamping the day to the target month's
-/// last day if the original day exceeds the target month's days.
-DateTime _addMonths(DateTime date, int months, {int? dayOfMonth}) {
+/// last day if the original day exceeds the target month's days. Also used
+/// by the onboarding goal timeline.
+DateTime addMonths(DateTime date, int months, {int? dayOfMonth}) {
   final targetMonth = date.month + months;
   final targetYear = date.year + ((targetMonth - 1) ~/ 12);
   final normalizedMonth = ((targetMonth - 1) % 12) + 1;

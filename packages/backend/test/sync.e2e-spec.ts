@@ -13,6 +13,7 @@ import { ExpenseTemplate } from '../src/expense-templates/entities/expense-templ
 import { ParsingRule } from '../src/parsing-rules/entities/parsing-rule.entity';
 import { RecurringTransaction } from '../src/recurring-transactions/entities/recurring-transaction.entity';
 import { PendingRecurring } from '../src/recurring-transactions/entities/pending-recurring.entity';
+import { Goal } from '../src/goals/entities/goal.entity';
 import { DEFAULT_BUDGET_NAME } from '../src/budgets/budgets.constants';
 
 jest.setTimeout(30000);
@@ -56,6 +57,7 @@ const entities = {
   parsing_rules: ParsingRule,
   recurring_transactions: RecurringTransaction,
   pending_recurring: PendingRecurring,
+  goals: Goal,
 };
 type Table = keyof typeof entities;
 
@@ -133,6 +135,44 @@ describe('SyncController budgets (e2e)', () => {
 
     expect(await pulledName()).toBe('Groceries');
     expect(budgets.rows.get('bud-1')?.amount).toBe(500);
+  });
+});
+
+describe('SyncController goals (e2e)', () => {
+  const goal = { name: 'Laptop', targetAmount: 1999, savedAmount: 0, targetDate: '2027-01-24T00:00:00.000Z', monthlyContribution: 666.33 };
+
+  const push = (action: 'insert' | 'update', data: Record<string, unknown>) =>
+    request(app.getHttpServer())
+      .post('/sync/push')
+      .send({ changes: [{ table: 'goals', action, id: 'goal-1', data, updatedAt: new Date().toISOString() }] })
+      .expect(200);
+
+  const pulledGoal = async () => {
+    const response = await request(app.getHttpServer()).get('/sync/pull').expect(200);
+    const change = (response.body.changes as { table: string; data: Record<string, unknown> }[]).find((c) => c.table === 'goals');
+    return change?.data;
+  };
+
+  it('should return a pushed goal on pull', async () => {
+    await push('insert', goal);
+
+    expect(await pulledGoal()).toEqual(expect.objectContaining(goal));
+  });
+
+  it('should return the raised savedAmount after an update', async () => {
+    await push('insert', goal);
+
+    await push('update', { ...goal, savedAmount: 400 });
+
+    expect((await pulledGoal())?.savedAmount).toBe(400);
+  });
+
+  it('should keep a null targetDate', async () => {
+    await push('insert', { ...goal, targetDate: null, monthlyContribution: null });
+
+    const pulled = await pulledGoal();
+    expect(pulled?.targetDate).toBeNull();
+    expect(pulled?.monthlyContribution).toBeNull();
   });
 });
 

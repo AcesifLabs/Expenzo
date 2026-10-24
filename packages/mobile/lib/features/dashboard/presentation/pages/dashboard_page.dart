@@ -11,6 +11,7 @@ import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/core/utils/money_format.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:expense_tracker/features/goals/presentation/widgets/dashboard_goal_card.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_event.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_state.dart';
 import 'package:expense_tracker/features/auth/presentation/helpers/user_display.dart';
@@ -471,6 +472,8 @@ class _DashboardViewState extends State<DashboardView> {
       ),
       _buildBudgetsSection(),
       const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
+      // Adds its own bottom gap only when shown.
+      const SliverToBoxAdapter(child: DashboardGoalCard()),
       SliverPadding(
         padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
         sliver: SliverToBoxAdapter(

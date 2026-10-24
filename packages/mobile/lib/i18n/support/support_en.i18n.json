@@ -1,5 +1,12 @@
 {
   "help": {
+    "watchTutorial": "Watch tutorial",
+    "replaySetup": {
+      "title": "Replay setup",
+      "rowSubtitle": "Go through income, budgets and goal again",
+      "confirmTitle": "Replay setup?",
+      "confirmBody": "Your transactions stay as they are. Budgets, recurring payments and a goal you add again are created as new items."
+    },
     "title": "Help & Support",
     "faq": "FAQ",
     "contactSupport": "Contact support",

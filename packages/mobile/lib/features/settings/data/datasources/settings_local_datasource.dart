@@ -38,6 +38,7 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
           notificationsEnabled: true,
           theme: 'system',
           languageCode: 'system',
+          onboardingCompleted: false,
           createdAt: now,
           updatedAt: now,
         );
@@ -62,8 +63,11 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
       throw CacheException(message: e.toString());
     }
 
-    // With no stored settings, getSettings writes and returns the defaults.
-    return getSettings();
+    // With no stored settings, getSettings writes the defaults. Delete all
+    // data keeps onboarding done (ADR 0010, SAAP-74).
+    final defaults = await getSettings();
+
+    return updateSettings(defaults.copyWith(onboardingCompleted: true));
   }
 
   @override
@@ -100,6 +104,8 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
       'firstDayOfWeek': settings.firstDayOfWeek?.name,
       'homeTab': settings.homeTab.name,
       'syncEnabled': settings.syncEnabled,
+      'onboardingCompleted': settings.onboardingCompleted,
+      'monthlyIncome': settings.monthlyIncome,
       'createdAt': settings.createdAt.toIso8601String(),
       'updatedAt': settings.updatedAt.toIso8601String(),
     };
@@ -136,6 +142,9 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
       ),
       homeTab: AppRootTab.fromName(json['homeTab'] as String?),
       syncEnabled: json['syncEnabled'] as bool? ?? true,
+      // A missing key stays null on purpose: ResolveOnboardingStatus decides.
+      onboardingCompleted: json['onboardingCompleted'] as bool?,
+      monthlyIncome: (json['monthlyIncome'] as num?)?.toDouble(),
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );

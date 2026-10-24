@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:expense_tracker/features/goals/presentation/bloc/goal_bloc.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_bloc.dart';
@@ -22,6 +23,7 @@ import 'package:expense_tracker/features/records/presentation/bloc/record_event.
 import 'package:expense_tracker/features/records/presentation/bloc/record_state.dart';
 import 'package:expense_tracker/features/records/presentation/widgets/new_transaction_sheet.dart';
 import 'package:expense_tracker/features/recurring/domain/repositories/recurring_repository.dart';
+import '../../../../support/core_screens.dart' show registerNoGoalBloc;
 import '../../../../support/pump_localized.dart';
 import '../../../../support/receipt_camera.dart';
 
@@ -102,6 +104,7 @@ void main() {
       ..registerSingleton<RecurringRepository>(_MockRecurringRepository())
       ..registerSingleton<GetBudgets>(getBudgets)
       ..registerSingleton<GetCategories>(getCategories);
+    registerNoGoalBloc();
 
     mockCameraPermissionDenied();
   });
@@ -112,6 +115,7 @@ void main() {
     await di.getIt.unregister<RecurringRepository>();
     await di.getIt.unregister<GetBudgets>();
     await di.getIt.unregister<GetCategories>();
+    await di.getIt.unregister<GoalBloc>();
   });
 
   Future<void> pumpDashboard(WidgetTester tester) async {

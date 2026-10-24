@@ -25,6 +25,14 @@ void main() {
               ),
           ],
         ),
+        GoRoute(
+          path: '/tutorial',
+          builder: (_, _) => const Text('tutorial-page'),
+        ),
+        GoRoute(
+          path: '/onboarding',
+          builder: (_, _) => const Text('onboarding-page'),
+        ),
       ],
     );
     addTearDown(router.dispose);
@@ -34,13 +42,13 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('shows the six rows in order and no Watch tutorial', (
-    tester,
-  ) async {
+  testWidgets('shows the eight rows in order', (tester) async {
     await pumpHelp(tester);
     final helpT = t.support.help;
 
     final titles = [
+      helpT.watchTutorial,
+      helpT.replaySetup.title,
       helpT.faq,
       helpT.contactSupport,
       helpT.rateApp,
@@ -52,7 +60,41 @@ void main() {
       for (final title in titles) tester.getTopLeft(find.text(title)).dy,
     ];
     expect(tops, [...tops]..sort());
-    expect(find.textContaining('tutorial'), findsNothing);
+  });
+
+  testWidgets('Watch tutorial opens the tutorial', (tester) async {
+    await pumpHelp(tester);
+
+    await tester.tap(find.text(t.support.help.watchTutorial));
+    await tester.pumpAndSettle();
+
+    expect(find.text('tutorial-page'), findsOneWidget);
+  });
+
+  testWidgets('Replay setup asks first; Continue opens onboarding', (
+    tester,
+  ) async {
+    await pumpHelp(tester);
+
+    await tester.tap(find.text(t.support.help.replaySetup.title));
+    await tester.pumpAndSettle();
+    expect(find.text(t.support.help.replaySetup.confirmTitle), findsOneWidget);
+    await tester.tap(find.text(t.onboarding.common.continueLabel));
+    await tester.pumpAndSettle();
+
+    expect(find.text('onboarding-page'), findsOneWidget);
+  });
+
+  testWidgets('Replay setup Cancel stays on Help', (tester) async {
+    await pumpHelp(tester);
+
+    await tester.tap(find.text(t.support.help.replaySetup.title));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(t.common.cancel));
+    await tester.pumpAndSettle();
+
+    expect(find.text('onboarding-page'), findsNothing);
+    expect(find.text(t.support.help.faq), findsOneWidget);
   });
 
   for (final (label, route) in [

@@ -1,0 +1,9 @@
+export 'entities/goal.dart';
+export 'repositories/goal_repository.dart';
+export 'usecases/add_goal_contribution.dart';
+export 'usecases/create_goal.dart';
+export 'usecases/delete_goal.dart';
+export 'usecases/get_active_goal.dart';
+export 'usecases/update_goal.dart';
+export 'usecases/validate_goal.dart';
+export 'usecases/watch_active_goal.dart';

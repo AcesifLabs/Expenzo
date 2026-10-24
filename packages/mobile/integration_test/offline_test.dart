@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:expense_tracker/main.dart' as app;
+
+import 'onboarded.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('Startup resilience scenarios', () {
+    setUp(markOnboarded);
+
     testWidgets(
       'App starts and shows dashboard without initialization errors',
       (tester) async {
-        app.main();
-        await tester.pumpAndSettle(const Duration(seconds: 20));
+        await startApp(tester);
 
         expect(find.text('Initialization Failed'), findsNothing);
 
@@ -22,8 +24,7 @@ void main() {
     testWidgets('Dashboard renders with seeded categories after startup', (
       tester,
     ) async {
-      app.main();
-      await tester.pumpAndSettle(const Duration(seconds: 20));
+      await startApp(tester);
 
       final hasContent = find.byType(Scaffold).evaluate().isNotEmpty;
       expect(hasContent, isTrue);

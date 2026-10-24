@@ -29,6 +29,34 @@ class _HelpPageState extends State<HelpPage> {
   /// While the mail app or the browser opens, a second tap does nothing.
   bool _busy = false;
 
+  void _openTutorial() => context.push('/tutorial');
+
+  /// Reopens onboarding after a confirm. The flag stays true, so quitting
+  /// half-way never forces onboarding again.
+  Future<void> _replaySetup() async {
+    final replayT = t.support.help.replaySetup;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(replayT.confirmTitle),
+        content: Text(replayT.confirmBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(t.common.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(t.onboarding.common.continueLabel),
+          ),
+        ],
+      ),
+    );
+    if ((confirmed ?? false) && mounted) unawaited(context.push('/onboarding'));
+  }
+
+  void _onReplaySetup() => unawaited(_replaySetup());
+
   void _openFaq() => context.push(HelpRoute.faq.location);
 
   void _openRate() => context.push(HelpRoute.rate.location);
@@ -66,6 +94,17 @@ class _HelpPageState extends State<HelpPage> {
     final helpT = t.support.help;
 
     return [
+      SettingsTile(
+        icon: PiconsRegular.playCircle,
+        title: helpT.watchTutorial,
+        onTap: _openTutorial,
+      ),
+      SettingsTile(
+        icon: PiconsRegular.arrowCounterClockwise,
+        title: helpT.replaySetup.title,
+        subtitle: helpT.replaySetup.rowSubtitle,
+        onTap: _onReplaySetup,
+      ),
       SettingsTile(
         icon: PiconsRegular.question,
         title: helpT.faq,
