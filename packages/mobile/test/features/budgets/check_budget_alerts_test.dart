@@ -29,7 +29,11 @@ class _MemoryAlertLog implements BudgetAlertLog {
   Future<void> markSent(Iterable<String> keys) async => sent.addAll(keys);
 }
 
-BudgetProgress _progress(double percentage, {DateTime? periodStart}) {
+BudgetProgress _progress(
+  double percentage, {
+  DateTime? periodStart,
+  String? groupId,
+}) {
   final start = periodStart ?? DateTime(2026, 10);
 
   return BudgetProgress(
@@ -46,6 +50,7 @@ BudgetProgress _progress(double percentage, {DateTime? periodStart}) {
       end: DateTime(start.year, start.month + 1),
     ),
     period: BudgetPeriod.monthly,
+    groupId: groupId,
   );
 }
 
@@ -127,6 +132,16 @@ void main() {
 
     // Once the user allows notifications, the alert still goes out.
     when(() => notifications.canNotify()).thenAnswer((_) async => true);
+    await checkAlerts();
+    expect(alertsSent(), 1);
+  });
+
+  test('a Shared Budget gets no alert, a personal one still does', () async {
+    spending([_progress(120, groupId: 'group-1')]);
+    await checkAlerts();
+    expectNoAlert();
+
+    spending([_progress(120)]);
     await checkAlerts();
     expect(alertsSent(), 1);
   });

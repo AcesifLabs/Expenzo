@@ -25,6 +25,7 @@ import 'package:expense_tracker/core/sync/sync_table_registry.dart';
 import 'package:expense_tracker/core/sync/default_sync_registry.dart';
 import 'package:expense_tracker/features/budgets/data/services/budget_name_repair.dart';
 import 'package:expense_tracker/features/records/data/services/record_budget_link_repair.dart';
+import 'package:expense_tracker/features/family/data/services/group_refresh_policy.dart';
 import 'package:expense_tracker/features/recurring/application/recurring_auto_poster.dart';
 import 'package:expense_tracker/features/settings/data/datasources/settings_local_datasource.dart';
 
@@ -34,6 +35,7 @@ import 'record_module.dart';
 import 'parsing_module.dart';
 import 'report_module.dart';
 import 'budget_module.dart';
+import 'family_module.dart';
 import 'recurring_module.dart';
 import 'background_module.dart';
 import 'settings_module.dart';
@@ -121,13 +123,7 @@ Future<void> initCriticalDependencies() async {
   );
 
   getIt.registerLazySingleton<GoogleSignIn>(
-    () => GoogleSignIn(
-      scopes: [
-        'email',
-        'profile',
-        'https://www.googleapis.com/auth/gmail.readonly',
-      ],
-    ),
+    () => GoogleSignIn(scopes: ['email', 'profile']),
   );
   getIt.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
   getIt.registerLazySingleton<http.Client>(() => http.Client());
@@ -166,6 +162,12 @@ Future<void> initCriticalDependencies() async {
         () async {
           if (getIt.isRegistered<RecordBudgetLinkRepair>()) {
             await getIt<RecordBudgetLinkRepair>().runOnce();
+          }
+        },
+        // Drops Shared Budgets the phone should no longer have (SAAP-75).
+        () async {
+          if (getIt.isRegistered<GroupRefreshPolicy>()) {
+            await getIt<GroupRefreshPolicy>().refreshIfDue();
           }
         },
         _autoPostRecurringAfterSync,
@@ -243,6 +245,7 @@ Future<void> initFeatureDependencies() async {
 
   try {
     initBudgetModule(getIt);
+    initFamilyModule(getIt);
     initRecurringModule(getIt);
     initGoalsModule(getIt);
     initOnboardingFeatureModule(getIt);

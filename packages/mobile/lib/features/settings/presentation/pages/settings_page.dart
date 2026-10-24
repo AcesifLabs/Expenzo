@@ -28,6 +28,7 @@ import '../widgets/settings_profile_card.dart';
 import '../widgets/settings_section.dart';
 import '../widgets/settings_state_view.dart';
 import '../widgets/settings_tile.dart';
+import 'package:expense_tracker/features/family/domain/repositories/family_repository.dart';
 import 'debug_db_inspector_page.dart';
 import 'appearance_page.dart';
 import 'home_page_settings_page.dart';
@@ -57,7 +58,7 @@ class SettingsPage extends StatelessWidget {
 /// | Section (builder) | Rows now | Rows later tickets add, in final order |
 /// |---|---|---|
 /// | none (`SettingsProfileCard`) | Profile card: My profile (signed in) / Sign in (signed out) | none |
-/// | Profile & account (`_accountSection`) | Sign in (signed out) / My profile (signed in) | SAAP-75 Family group right after My profile |
+/// | Profile & account (`_accountSection`) | Sign in (signed out) / My profile, Family group (signed in) | none |
 /// | Preferences (`_preferencesSection`) | Default currency, Number format, Font size, Appearance, Calendar | none |
 /// | Notifications (`_notificationsSection`) | Notifications | none |
 /// | Data & budget (`_dataSection`) | Recurring transactions, Sync, Export data, Delete all data | Recurring transactions, Sync (SAAP-71), Export data (SAAP-69), Delete all data (SAAP-70) |
@@ -133,23 +134,35 @@ class SettingsView extends StatelessWidget {
     );
   }
 
+  /// The signed-in user's group, from the last `/groups/me`.
+  String? _cachedGroupName() => di.getIt.isRegistered<FamilyRepository>()
+      ? di.getIt<FamilyRepository>().cachedGroup?.group.name
+      : null;
+
   Widget _accountSection(BuildContext context) {
     final settingsT = t.settings;
     final signInT = settingsT.signIn;
     final profileT = settingsT.profile;
+    final familyT = settingsT.family;
     final isSignedIn = context.watch<AuthBloc>().state is Authenticated;
 
     return SettingsSection(
       title: settingsT.sections.account,
       children: [
-        if (isSignedIn)
+        if (isSignedIn) ...[
           SettingsTile(
             icon: PiconsRegular.userCircle,
             title: profileT.title,
             subtitle: profileT.rowSubtitle,
             onTap: () => context.push(SettingsRoute.profile.location),
-          )
-        else
+          ),
+          SettingsTile(
+            icon: PiconsRegular.usersThree,
+            title: familyT.title,
+            subtitle: _cachedGroupName() ?? familyT.rowSubtitle,
+            onTap: () => context.push(SettingsRoute.family.location),
+          ),
+        ] else
           SettingsTile(
             icon: PiconsRegular.signIn,
             title: signInT.title,

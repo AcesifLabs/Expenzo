@@ -10,6 +10,8 @@ import { ParsingRule } from '../parsing-rules/entities/parsing-rule.entity';
 import { RecurringTransaction } from '../recurring-transactions/entities/recurring-transaction.entity';
 import { PendingRecurring } from '../recurring-transactions/entities/pending-recurring.entity';
 import { Goal } from '../goals/entities/goal.entity';
+import { GroupMember } from '../groups/entities/group-member.entity';
+import { GroupRole } from '../groups/groups.constants';
 import { SyncAction, SyncTable } from './dto/push-sync.dto';
 import { SyncStatus } from './sync.types';
 import { BudgetPeriod } from '../common/enums/budget-period.enum';
@@ -22,6 +24,7 @@ describe('SyncService', () => {
   let service: SyncService;
   let recordRepo: AnyRepo;
   let budgetRepo: AnyRepo;
+  let memberRepo: AnyRepo;
   let module: TestingModule;
 
   const mockRepo = () => ({
@@ -47,12 +50,119 @@ describe('SyncService', () => {
         { provide: getRepositoryToken(RecurringTransaction), useFactory: mockRepo },
         { provide: getRepositoryToken(PendingRecurring), useFactory: mockRepo },
         { provide: getRepositoryToken(Goal), useFactory: mockRepo },
+        { provide: getRepositoryToken(GroupMember), useFactory: mockRepo },
       ],
     }).compile();
 
     service = module.get<SyncService>(SyncService);
     recordRepo = module.get(getRepositoryToken(RecordEntity));
     budgetRepo = module.get(getRepositoryToken(Budget));
+    memberRepo = module.get(getRepositoryToken(GroupMember));
+  });
+
+  describe('clearUserData', () => {
+    it('should delete only the caller rows and leave group tables alone', async () => {
+      await service.clearUserData('user-1');
+
+      for (const repo of [recordRepo, budgetRepo]) {
+        for (const [where] of repo.delete.mock.calls as [unknown][]) expect(where).toEqual({ userId: 'user-1' });
+      }
+      expect(memberRepo.delete).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('budget groupId rule', () => {
+    const own = (groupId: string | null) => ({ id: 'bud-1', userId: 'user-1', amount: 100, groupId, updatedAt: new Date(0) });
+    const push = (action: SyncAction, data: Record<string, unknown>) =>
+      service.pushChanges('user-1', { changes: [{ table: SyncTable.BUDGETS, action, id: 'bud-1', data }] });
+    const as = (role: GroupRole | null, groupId = 'group-1') =>
+      memberRepo.findOne.mockResolvedValue(role ? { groupId, userId: 'user-1', role } : null);
+    const saved = () => budgetRepo.save.mock.calls.at(-1)?.[0];
+
+    beforeEach(() => budgetRepo.save.mockImplementation((e: unknown) => Promise.resolve(e)));
+
+    it('should let an admin share into their own group', async () => {
+      as(GroupRole.ADMIN);
+      budgetRepo.findOne.mockResolvedValue(own(null));
+
+      const { results } = await push(SyncAction.UPDATE, { groupId: 'group-1' });
+
+      expect(results[0].status).toBe(SyncStatus.SUCCESS);
+      expect(saved().groupId).toBe('group-1');
+    });
+
+    it.each([
+      ['an admin sharing into another group', GroupRole.ADMIN, 'group-2'],
+      ['a member', GroupRole.MEMBER, 'group-1'],
+      ['a viewer', GroupRole.VIEWER, 'group-1'],
+      ['a caller without a group', null, 'group-1'],
+    ])('should keep the stored groupId for %s and still save the rest', async (_label, role, target) => {
+      as(role);
+      budgetRepo.findOne.mockResolvedValue(own(null));
+
+      const { results } = await push(SyncAction.UPDATE, { groupId: target, amount: 250 });
+
+      expect(results[0].status).toBe(SyncStatus.SUCCESS);
+      expect(saved().groupId).toBeNull();
+      expect(saved().amount).toBe(250);
+    });
+
+    it('should let a demoted owner unshare', async () => {
+      as(GroupRole.MEMBER);
+      budgetRepo.findOne.mockResolvedValue(own('group-1'));
+
+      await push(SyncAction.UPDATE, { groupId: null });
+
+      expect(saved().groupId).toBeNull();
+      expect(memberRepo.findOne).not.toHaveBeenCalled();
+    });
+
+    it('should accept an unchanged groupId from a non-admin owner', async () => {
+      as(GroupRole.MEMBER);
+      budgetRepo.findOne.mockResolvedValue(own('group-1'));
+
+      await push(SyncAction.UPDATE, { groupId: 'group-1', amount: 300 });
+
+      expect(saved()).toEqual(expect.objectContaining({ groupId: 'group-1', amount: 300 }));
+    });
+
+    it('should keep the stored groupId when the key is absent', async () => {
+      budgetRepo.findOne.mockResolvedValue(own('group-1'));
+
+      await push(SyncAction.UPDATE, { amount: 300 });
+
+      expect(saved().groupId).toBe('group-1');
+    });
+
+    it('should store NULL when an insert carries a groupId the caller may not set', async () => {
+      as(GroupRole.MEMBER);
+      budgetRepo.findOne.mockResolvedValue(null);
+      budgetRepo.create.mockImplementation((d: unknown) => d);
+
+      const { results } = await push(SyncAction.INSERT, { groupId: 'group-1', amount: 100 });
+
+      expect(results[0].status).toBe(SyncStatus.SUCCESS);
+      expect(saved().groupId).toBeNull();
+    });
+
+    it('should keep the groupId on an insert by the group admin', async () => {
+      as(GroupRole.ADMIN);
+      budgetRepo.findOne.mockResolvedValue(null);
+      budgetRepo.create.mockImplementation((d: unknown) => d);
+
+      await push(SyncAction.INSERT, { groupId: 'group-1', amount: 100 });
+
+      expect(saved().groupId).toBe('group-1');
+    });
+
+    it('should never return an error status for this rule', async () => {
+      as(null);
+      budgetRepo.findOne.mockResolvedValue(own(null));
+
+      const { results } = await push(SyncAction.UPDATE, { groupId: 'group-9' });
+
+      expect(results[0].status).not.toBe(SyncStatus.ERROR);
+    });
   });
 
   describe('handleUpdate', () => {
@@ -155,6 +265,70 @@ describe('SyncService', () => {
       expect(change.data).not.toHaveProperty('user');
       expect(change.data).toHaveProperty('amount', 42.0);
       expect(change.data).toHaveProperty('description', 'test');
+    });
+
+    it('should strip the group relation from budgets and keep groupId', async () => {
+      budgetRepo.find.mockResolvedValue([
+        {
+          id: 'bud-1',
+          userId: 'user-1',
+          groupId: 'group-1',
+          group: { id: 'group-1', name: 'Family' },
+          updatedAt: new Date('2025-06-01'),
+        },
+      ]);
+
+      const result = await service.pullChanges('user-1');
+
+      const change = result.changes.find((c) => c.table === SyncTable.BUDGETS);
+      expect(change?.data).not.toHaveProperty('group');
+      expect(change?.data).toHaveProperty('groupId', 'group-1');
+    });
+
+    describe('shared budgets', () => {
+      const shared = { id: 'bud-9', userId: 'admin-1', groupId: 'group-1', name: 'Rent', updatedAt: new Date('2026-05-01') };
+      const pullWhere = () => (budgetRepo.find.mock.calls as [{ where: Record<string, unknown> }][]).map(([o]) => o.where);
+
+      it('should not look for shared budgets when the caller is in no group', async () => {
+        memberRepo.findOne.mockResolvedValue(null);
+
+        await service.pullChanges('user-1');
+
+        expect(budgetRepo.find).toHaveBeenCalledTimes(1);
+      });
+
+      it('should add other members shared budgets changed since the last pull, without duplicating own rows', async () => {
+        memberRepo.findOne.mockResolvedValue({ groupId: 'group-1', userId: 'user-1', joinedAt: new Date('2026-01-01') });
+        budgetRepo.find.mockResolvedValueOnce([]).mockResolvedValueOnce([shared]);
+
+        const result = await service.pullChanges('user-1', '2026-04-01T00:00:00.000Z');
+
+        const where = pullWhere()[1];
+        expect(where.groupId).toBe('group-1');
+        expect(where.userId).toEqual(expect.objectContaining({ type: 'not', value: 'user-1' }));
+        expect(where.updatedAt).toEqual(expect.objectContaining({ type: 'moreThan' }));
+        expect(result.changes.filter((c) => c.id === 'bud-9')).toHaveLength(1);
+      });
+
+      it('should send every shared budget once after joining, however old', async () => {
+        memberRepo.findOne.mockResolvedValue({ groupId: 'group-1', userId: 'user-1', joinedAt: new Date('2026-06-01') });
+
+        await service.pullChanges('user-1', '2026-05-15T00:00:00.000Z');
+
+        expect(pullWhere()[1]).not.toHaveProperty('updatedAt');
+      });
+
+      it('should strip owner fields and keep groupId on shared budgets', async () => {
+        memberRepo.findOne.mockResolvedValue({ groupId: 'group-1', userId: 'user-1', joinedAt: new Date('2026-01-01') });
+        budgetRepo.find.mockResolvedValueOnce([]).mockResolvedValueOnce([{ ...shared, user: {}, group: {} }]);
+
+        const change = (await service.pullChanges('user-1')).changes.find((c) => c.id === 'bud-9');
+
+        expect(change?.data).not.toHaveProperty('userId');
+        expect(change?.data).not.toHaveProperty('user');
+        expect(change?.data).not.toHaveProperty('group');
+        expect(change?.data).toHaveProperty('groupId', 'group-1');
+      });
     });
 
     it('should return serverTime in ISO format', async () => {

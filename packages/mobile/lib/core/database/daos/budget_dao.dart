@@ -31,6 +31,26 @@ class BudgetDao extends DatabaseAccessor<AppDatabase> with _$BudgetDaoMixin {
     await update(budgets).replace(budget);
   }
 
+  /// Shared Budgets: every budget with a Family Group id.
+  Future<List<Budget>> getBudgetsWithGroup() {
+    return (select(budgets)..where((b) => b.groupId.isNotNull())).get();
+  }
+
+  /// Deletes budgets on this device only: nothing is queued for sync and
+  /// records keep their budgetId.
+  Future<void> deleteBudgetsByIds(List<String> ids) async {
+    if (ids.isEmpty) return;
+    await (delete(budgets)..where((b) => b.id.isIn(ids))).go();
+  }
+
+  /// Makes budgets personal on this device only; nothing is queued.
+  Future<void> clearGroupId(List<String> ids) async {
+    if (ids.isEmpty) return;
+    await (update(budgets)..where((b) => b.id.isIn(ids))).write(
+      const BudgetsCompanion(groupId: Value(null)),
+    );
+  }
+
   Future<void> deleteBudget(String id) async {
     await (delete(budgets)..where((b) => b.id.equals(id))).go();
   }

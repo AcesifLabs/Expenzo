@@ -33,6 +33,20 @@ class SyncQueueDao extends DatabaseAccessor<AppDatabase>
         .get();
   }
 
+  /// Ids of [table] rows with changes not yet pushed.
+  Future<Set<String>> pendingRecordIds(String table) async {
+    final rows =
+        await (selectOnly(syncQueue, distinct: true)
+              ..addColumns([syncQueue.recordId])
+              ..where(
+                syncQueue.entityTable.equals(table) &
+                    syncQueue.syncedAt.isNull(),
+              ))
+            .get();
+
+    return {for (final row in rows) ?row.read(syncQueue.recordId)};
+  }
+
   Future<void> markSynced(List<int> ids) async {
     if (ids.isEmpty) return;
     final now = DateTime.now().toUtc();

@@ -11,6 +11,7 @@ Budget makeBudget({
   bool? rolloverEnabled,
   double? rolloverAmount,
   bool? isEnabled,
+  String? groupId,
 }) {
   return Budget(
     id: id ?? 'budget-0001',
@@ -21,5 +22,6 @@ Budget makeBudget({
     rolloverEnabled: rolloverEnabled ?? false,
     rolloverAmount: rolloverAmount ?? 0,
     isEnabled: isEnabled ?? true,
+    groupId: groupId,
   );
 }

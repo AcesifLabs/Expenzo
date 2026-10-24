@@ -12,6 +12,16 @@ abstract final class FailureCodes {
 
   /// [Failure.message] is already user-facing text in the app language.
   static const userMessage = 'USER_MESSAGE';
+
+  // Family Group errors: the `code` in the server's error body
+  // (packages/backend/src/groups/groups.types.ts GroupErrorCode).
+  static const alreadyInGroup = 'ALREADY_IN_GROUP';
+  static const currencyMismatch = 'CURRENCY_MISMATCH';
+  static const groupFull = 'GROUP_FULL';
+  static const inviteExpired = 'INVITE_EXPIRED';
+  static const inviteNotFound = 'INVITE_NOT_FOUND';
+  static const lastAdmin = 'LAST_ADMIN';
+  static const notInGroup = 'NOT_IN_GROUP';
 }
 
 /// The localized text a user sees for [failure].
@@ -20,8 +30,23 @@ abstract final class FailureCodes {
 /// the code is [FailureCodes.userMessage].
 String failureText(Failure failure) {
   final errors = t.common.errors;
+  final family = t.family.errors;
 
   switch (failure.errorCode) {
+    case FailureCodes.alreadyInGroup:
+      return family.alreadyInGroup;
+    case FailureCodes.currencyMismatch:
+      return family.currencyMismatch;
+    case FailureCodes.groupFull:
+      return family.groupFull;
+    case FailureCodes.inviteExpired:
+      return family.inviteExpired;
+    case FailureCodes.inviteNotFound:
+      return family.inviteNotFound;
+    case FailureCodes.lastAdmin:
+      return family.lastAdmin;
+    case FailureCodes.notInGroup:
+      return family.notInGroup;
     case FailureCodes.notFound:
       return errors.notFound;
     case FailureCodes.smsScan:

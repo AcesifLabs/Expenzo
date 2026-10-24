@@ -1,6 +1,14 @@
 import 'package:equatable/equatable.dart';
 import 'package:expense_tracker/core/constants/budget_period.dart';
 
+/// Distinguishes "not passed" from "set to null" for [Budget.groupId] in
+/// [Budget.copyWith], the same way [Record.copyWith] does.
+class _BudgetSentinel {
+  const _BudgetSentinel();
+}
+
+const _sentinel = _BudgetSentinel();
+
 class Budget extends Equatable {
   final String? id;
   final String name;
@@ -10,6 +18,11 @@ class Budget extends Equatable {
   final bool rolloverEnabled;
   final double rolloverAmount;
   final bool isEnabled;
+
+  /// The Family Group this budget is shared into (a Shared Budget), or null.
+  final String? groupId;
+
+  bool get isShared => groupId != null;
 
   @override
   List<Object?> get props => [
@@ -21,6 +34,7 @@ class Budget extends Equatable {
     rolloverEnabled,
     rolloverAmount,
     isEnabled,
+    groupId,
   ];
 
   const Budget({
@@ -32,6 +46,7 @@ class Budget extends Equatable {
     this.rolloverEnabled = false,
     this.rolloverAmount = 0,
     this.isEnabled = true,
+    this.groupId,
   });
 
   Budget copyWith({
@@ -43,6 +58,7 @@ class Budget extends Equatable {
     bool? rolloverEnabled,
     double? rolloverAmount,
     bool? isEnabled,
+    Object? groupId = _sentinel,
   }) {
     return Budget(
       id: id ?? this.id,
@@ -53,6 +69,7 @@ class Budget extends Equatable {
       rolloverEnabled: rolloverEnabled ?? this.rolloverEnabled,
       rolloverAmount: rolloverAmount ?? this.rolloverAmount,
       isEnabled: isEnabled ?? this.isEnabled,
+      groupId: groupId == _sentinel ? this.groupId : groupId as String?,
     );
   }
 }

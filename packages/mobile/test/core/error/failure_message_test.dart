@@ -72,6 +72,29 @@ void main() {
     );
   });
 
+  test('each family code maps to its own text', () {
+    final family = t.family.errors;
+    final expected = {
+      FailureCodes.alreadyInGroup: family.alreadyInGroup,
+      FailureCodes.currencyMismatch: family.currencyMismatch,
+      FailureCodes.groupFull: family.groupFull,
+      FailureCodes.inviteExpired: family.inviteExpired,
+      FailureCodes.inviteNotFound: family.inviteNotFound,
+      FailureCodes.lastAdmin: family.lastAdmin,
+      FailureCodes.notInGroup: family.notInGroup,
+    };
+    for (final MapEntry(key: code, value: text) in expected.entries) {
+      expect(failureText(ServerFailure(message: code, errorCode: code)), text);
+    }
+  });
+
+  test('an unknown server code still gets the server text', () {
+    expect(
+      failureText(const ServerFailure(message: 'NOPE', errorCode: 'NOPE')),
+      t.common.errors.server,
+    );
+  });
+
   test('an unknown failure type falls back to the generic text', () {
     expect(failureText(const _OtherFailure()), t.common.errors.generic);
   });

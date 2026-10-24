@@ -8,30 +8,35 @@ import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:expense_tracker/core/theme/app_typography.dart';
 import 'package:expense_tracker/features/budgets/presentation/helpers/budget_summary.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_badge.dart';
 import 'package:expense_tracker/features/budgets/presentation/helpers/budget_display_name.dart';
+import 'package:expense_tracker/features/budgets/presentation/helpers/budget_money_format.dart';
 
 class BudgetProgressCard extends StatelessWidget {
   final BudgetProgress progress;
   final VoidCallback onTap;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
+
+  /// Null hides the action, as for a Shared Budget someone else owns; with
+  /// both null a long press does nothing.
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
   const BudgetProgressCard({
     super.key,
     required this.progress,
     required this.onTap,
-    required this.onEdit,
-    required this.onDelete,
+    this.onEdit,
+    this.onDelete,
   });
 
   void _handleEdit(BuildContext context) {
     Navigator.pop(context);
-    onEdit();
+    onEdit?.call();
   }
 
   void _handleDelete(BuildContext context) {
     Navigator.pop(context);
-    onDelete();
+    onDelete?.call();
   }
 
   void _showOptions(BuildContext context) {
@@ -51,25 +56,27 @@ class BudgetProgressCard extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ListTile(
-                leading: Icon(
-                  PiconsRegular.pencilSimple,
-                  color: palette.textPrimary,
+              if (onEdit != null)
+                ListTile(
+                  leading: Icon(
+                    PiconsRegular.pencilSimple,
+                    color: palette.textPrimary,
+                  ),
+                  title: Text(
+                    t.budgets.edit,
+                    style: TextStyle(color: palette.textPrimary),
+                  ),
+                  onTap: () => _handleEdit(context),
                 ),
-                title: Text(
-                  t.budgets.edit,
-                  style: TextStyle(color: palette.textPrimary),
+              if (onDelete != null)
+                ListTile(
+                  leading: Icon(PiconsRegular.trash, color: palette.error),
+                  title: Text(
+                    t.common.delete,
+                    style: TextStyle(color: palette.error),
+                  ),
+                  onTap: () => _handleDelete(context),
                 ),
-                onTap: () => _handleEdit(context),
-              ),
-              ListTile(
-                leading: Icon(PiconsRegular.trash, color: palette.error),
-                title: Text(
-                  t.common.delete,
-                  style: TextStyle(color: palette.error),
-                ),
-                onTap: () => _handleDelete(context),
-              ),
             ],
           ),
         ),
@@ -96,7 +103,11 @@ class BudgetProgressCard extends StatelessWidget {
     final palette = context.palette;
     final textTheme = Theme.of(context).textTheme;
     final summary = BudgetSummary.of(progress);
-    final whole = CurrencyFormatter.getFormatter(decimalDigits: 0);
+    final whole = budgetMoneyFormat(
+      progress.groupId,
+      fallback: CurrencyFormatter.getFormatter(decimalDigits: 0),
+      decimalDigits: 0,
+    );
     final card = t.budgets.card;
     final secondaryStyle = textTheme.bodySmall?.copyWith(
       color: palette.textSecondary,
@@ -114,7 +125,9 @@ class BudgetProgressCard extends StatelessWidget {
       ),
       child: GestureDetector(
         onTap: onTap,
-        onLongPress: () => _showOptions(context),
+        onLongPress: onEdit == null && onDelete == null
+            ? null
+            : () => _showOptions(context),
         child: Container(
           padding: const EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
@@ -134,6 +147,14 @@ class BudgetProgressCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
+                    if (progress.groupId != null) ...[
+                      const SizedBox(width: AppSpacing.sm),
+                      AppBadge(
+                        label: t.budgets.sharedBadge,
+                        color: palette.accent,
+                        size: AppBadgeSize.small,
+                      ),
+                    ],
                     const SizedBox(width: AppSpacing.sm),
                     // Wraps rather than truncates at large text sizes, so the
                     // number of days stays readable.

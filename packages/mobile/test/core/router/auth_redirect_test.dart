@@ -31,4 +31,12 @@ void main() {
     expect(authRedirectFor(const Authenticated(user), '/login'), isNull);
     expect(authRedirectFor(const Unauthenticated(), '/login'), isNull);
   });
+
+  test('keeps signed-out users out of Family group screens', () {
+    for (final location in ['/settings/family', '/settings/family/members']) {
+      expect(authRedirectFor(const Unauthenticated(), location), '/settings');
+      expect(authRedirectFor(const Authenticated(user), location), isNull);
+    }
+    expect(authRedirectFor(const AuthInitial(), '/settings/family'), isNull);
+  });
 }

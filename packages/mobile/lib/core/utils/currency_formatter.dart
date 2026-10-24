@@ -34,15 +34,25 @@ abstract final class CurrencyFormatter {
   /// [decimalDigits] can only lower the currency's own precision (a summary
   /// may drop decimals; yen never gains them), and so can the user's
   /// decimal places setting.
-  static MoneyFormat getFormatter({int? decimalDigits}) {
-    final currency = current.value;
+  static MoneyFormat getFormatter({int? decimalDigits}) =>
+      _formatterFor(current.value, decimalDigits);
 
-    return MoneyFormat(
-      symbol: currency.symbol,
-      decimalDigits: _digits(currency, decimalDigits),
-      grouping: displayFormat.value.grouping,
-    );
-  }
+  /// Like [getFormatter], in [currencyCode] instead of the user's Currency.
+  /// Family amounts use the group's Currency (CONTEXT.md Shared Budget):
+  /// the user's is device-local and can differ after joining (ADR 0010).
+  static MoneyFormat getFormatterFor(
+    String currencyCode, {
+    int? decimalDigits,
+  }) => _formatterFor(CurrencyConfig.byCode(currencyCode), decimalDigits);
+
+  static String formatIn(
+    double amount,
+    String currencyCode, {
+    int? decimalDigits,
+  }) => getFormatterFor(
+    currencyCode,
+    decimalDigits: decimalDigits,
+  ).format(amount);
 
   static String format(double amount, {int? decimalDigits}) {
     return getFormatter(decimalDigits: decimalDigits).format(amount);
@@ -92,6 +102,14 @@ abstract final class CurrencyFormatter {
     if (!fixed.contains('.')) return fixed;
 
     return fixed.replaceFirst(RegExp(r'\.?0+$'), '');
+  }
+
+  static MoneyFormat _formatterFor(CurrencyInfo currency, int? decimalDigits) {
+    return MoneyFormat(
+      symbol: currency.symbol,
+      decimalDigits: _digits(currency, decimalDigits),
+      grouping: displayFormat.value.grouping,
+    );
   }
 
   static int _digits(CurrencyInfo currency, int? requested) {

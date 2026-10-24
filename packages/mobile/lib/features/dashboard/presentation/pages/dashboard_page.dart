@@ -52,6 +52,7 @@ import '../bloc/dashboard_state.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 import 'package:expense_tracker/features/categories/presentation/helpers/category_display_name.dart';
 import 'package:expense_tracker/features/budgets/presentation/helpers/budget_display_name.dart';
+import 'package:expense_tracker/features/budgets/presentation/helpers/budget_money_format.dart';
 
 class DashboardPage extends StatelessWidget {
   final ValueChanged<AppRootTab>? onNavigateToTab;
@@ -933,6 +934,11 @@ class _BudgetPreviewTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final money = budgetMoneyFormat(
+      preview.progress.groupId,
+      fallback: currencyFmt,
+      decimalDigits: 0,
+    );
 
     return InkWell(
       onTap: onTap,
@@ -959,8 +965,8 @@ class _BudgetPreviewTile extends StatelessWidget {
                 const SizedBox(width: AppSpacing.sm),
                 Text(
                   t.dashboard.budgetSpentOf(
-                    spent: currencyFmt.format(preview.progress.spentAmount),
-                    total: currencyFmt.format(preview.progress.effectiveAmount),
+                    spent: money.format(preview.progress.spentAmount),
+                    total: money.format(preview.progress.effectiveAmount),
                   ),
                   style: AppTypography.bodyMedium.copyWith(
                     color: colors.onSurface.withAlpha(170),

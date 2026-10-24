@@ -40,8 +40,6 @@ abstract class AuthRemoteDatasource {
   /// Throws: [RequiresRecentLoginException] when Firebase still wants a
   /// fresh sign-in; Firebase errors otherwise.
   Future<void> deleteAccount();
-
-  Future<bool> hasGmailScope();
 }
 
 class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
@@ -159,21 +157,6 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
       await _bestEffort(userDao.clearUser);
       await _bestEffort(googleSignIn.signOut);
       await _bestEffort(firebaseAuth.signOut);
-    }
-  }
-
-  @override
-  Future<bool> hasGmailScope() async {
-    try {
-      return await googleSignIn.canAccessScopes([
-        'https://www.googleapis.com/auth/gmail.readonly',
-      ]);
-    } catch (e) {
-      debugPrint(
-        'AuthRemoteDatasource: Failed to check Gmail scope: ${e.runtimeType}',
-      );
-
-      return false;
     }
   }
 

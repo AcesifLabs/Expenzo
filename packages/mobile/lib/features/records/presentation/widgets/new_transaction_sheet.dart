@@ -42,6 +42,7 @@ import 'package:expense_tracker/i18n/strings.g.dart';
 import 'package:expense_tracker/core/error/failure_message.dart';
 import 'package:expense_tracker/features/categories/presentation/helpers/category_display_name.dart';
 import 'package:expense_tracker/features/budgets/presentation/helpers/budget_display_name.dart';
+import 'package:expense_tracker/features/budgets/presentation/helpers/budget_access_lookup.dart';
 
 /// Opens the transaction sheet to add a record, or to edit [record].
 ///
@@ -189,10 +190,11 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     final result = await di.getIt<GetBudgets>()();
     if (!mounted) return;
     setState(() {
-      _budgets = result
-          .getOrElse(() => <Budget>[])
-          .where((b) => b.isEnabled)
-          .toList();
+      // A Viewer cannot add to Shared Budgets (CONTEXT.md Group Role). A
+      // record already linked to one keeps showing it as selected.
+      _budgets = budgetAccess().assignable(
+        result.getOrElse(() => <Budget>[]).where((b) => b.isEnabled).toList(),
+      );
       _budgetsLoading = false;
     });
   }

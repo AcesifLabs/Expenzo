@@ -80,20 +80,6 @@ void main() {
       expect(result.isRight(), true);
       verify(() => mockRepository.signOut()).called(1);
     });
-
-    test('hasGmailScope returns false when scope not granted', () async {
-      when(
-        () => mockRepository.hasGmailScope(),
-      ).thenAnswer((_) async => const Right(false));
-
-      final result = await mockRepository.hasGmailScope();
-
-      expect(result.isRight(), true);
-      result.fold(
-        (failure) => fail('Should not return failure'),
-        (hasScope) => expect(hasScope, false),
-      );
-    });
   });
 
   group('User Entity Tests', () {

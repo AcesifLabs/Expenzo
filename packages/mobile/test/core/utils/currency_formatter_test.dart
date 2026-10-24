@@ -27,6 +27,25 @@ void main() {
     CurrencyFormatter.displayFormat.value = NumberDisplayFormat.standard;
   });
 
+  group('formatIn', () {
+    test('uses the given currency, not the current one', () {
+      CurrencyFormatter.current.value = CurrencyConfig.byCode('BDT');
+
+      expect(
+        CurrencyFormatter.formatIn(1234.5, 'USD'),
+        CurrencyFormatter.getFormatterFor('USD').format(1234.5),
+      );
+      expect(
+        CurrencyFormatter.formatIn(1234.5, 'USD'),
+        contains(CurrencyConfig.byCode('USD').symbol.trim()),
+      );
+      expect(
+        CurrencyFormatter.formatIn(1234.5, 'USD'),
+        isNot(contains(CurrencyConfig.byCode('BDT').symbol.trim())),
+      );
+    });
+  });
+
   group('format', () {
     test('defaults to taka with two decimals and grouping', () {
       expect(CurrencyFormatter.format(1234567.89), '৳1,234,567.89');

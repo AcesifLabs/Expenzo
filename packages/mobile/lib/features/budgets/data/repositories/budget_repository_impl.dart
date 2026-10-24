@@ -75,6 +75,7 @@ class BudgetRepositoryImpl implements BudgetRepository {
         'rolloverEnabled': budget.rolloverEnabled,
         'rolloverAmount': budget.rolloverAmount,
         'isEnabled': budget.isEnabled,
+        'groupId': budget.groupId,
       });
 
       return Right(budgetWithId);
@@ -103,6 +104,7 @@ class BudgetRepositoryImpl implements BudgetRepository {
         'rolloverEnabled': budget.rolloverEnabled,
         'rolloverAmount': budget.rolloverAmount,
         'isEnabled': budget.isEnabled,
+        'groupId': budget.groupId,
       });
 
       return Right(budget);

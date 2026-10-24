@@ -19,11 +19,16 @@ class DeleteAllDataBloc extends Bloc<DeleteAllDataEvent, DeleteAllDataState> {
   final DataWipeRepository repository;
   final DeleteAllData deleteAllData;
 
+  /// From the cached Family Group; no request, so the screen opens offline.
+  final bool Function() isFamilyAdmin;
+
   DeleteAllDataBloc({
     required this.getSummary,
     required this.repository,
     required this.deleteAllData,
-  }) : super(const DeleteAllDataState()) {
+    bool Function()? isFamilyAdmin,
+  }) : isFamilyAdmin = isFamilyAdmin ?? _never,
+       super(const DeleteAllDataState()) {
     on<DeleteAllDataStarted>(_onStarted);
     on<DeleteConfirmationChanged>(_onConfirmationChanged);
     on<DeleteAllRequested>(_onRequested, transformer: droppable());
@@ -41,6 +46,7 @@ class DeleteAllDataBloc extends Bloc<DeleteAllDataEvent, DeleteAllDataState> {
       DeleteAllDataState(
         summary: summary.fold((_) => null, (value) => value),
         isSignedIn: signedIn,
+        isFamilyAdmin: signedIn && isFamilyAdmin(),
         confirmation: state.confirmation,
         status: DeleteAllDataStatus.ready,
       ),
@@ -96,4 +102,6 @@ class DeleteAllDataBloc extends Bloc<DeleteAllDataEvent, DeleteAllDataState> {
       failure is NetworkFailure || failure is ServerFailure
       ? t.settings.deleteData.serverFailed
       : failureText(failure);
+
+  static bool _never() => false;
 }

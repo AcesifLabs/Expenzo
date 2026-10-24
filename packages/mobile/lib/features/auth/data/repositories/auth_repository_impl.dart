@@ -189,22 +189,6 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<AuthFailure, bool>> hasGmailScope() async {
-    try {
-      final hasScope = await remoteDatasource.hasGmailScope();
-
-      return Right(hasScope);
-    } catch (e) {
-      return Left(
-        AuthFailure(
-          message: mapExceptionToMessage(e),
-          errorCode: FailureCodes.userMessage,
-        ),
-      );
-    }
-  }
-
-  @override
   Future<void> pauseSyncEngine() async {
     try {
       await di.getIt<SyncEngine>().pause();

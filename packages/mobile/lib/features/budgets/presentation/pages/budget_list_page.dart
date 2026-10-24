@@ -18,6 +18,9 @@ import '../widgets/budget_progress_card.dart';
 import '../widgets/skeletons/budget_list_skeleton.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 import 'package:expense_tracker/features/budgets/presentation/helpers/budget_display_name.dart';
+import 'package:expense_tracker/features/budgets/presentation/helpers/budget_access_lookup.dart';
+import 'package:expense_tracker/features/family/domain/repositories/family_repository.dart';
+import 'package:expense_tracker/features/family/domain/usecases/get_group_summary.dart';
 
 class BudgetListPage extends StatelessWidget {
   const BudgetListPage({super.key});
@@ -44,6 +47,26 @@ class _BudgetListViewState extends State<BudgetListView> {
   /// Ask for notification permission at most once per app run, and only
   /// once there is a budget to be alerted about.
   static bool _askedForAlertPermission = false;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_refreshSharedProgress());
+  }
+
+  /// Shared Budget cards show the server's spent (CONTEXT.md Shared
+  /// Budget); a fresh summary each time the tab opens keeps them current.
+  /// A failure leaves the cached or local numbers in place.
+  Future<void> _refreshSharedProgress() async {
+    if (!di.getIt.isRegistered<FamilyRepository>()) return;
+    final group = di.getIt<FamilyRepository>().cachedGroup;
+    if (group == null) return;
+    final result = await di.getIt<GetGroupSummary>()(
+      GroupIdParams(group.group.id),
+    );
+    if (!mounted || result.isLeft()) return;
+    context.read<BudgetBloc>().add(const LoadBudgets());
+  }
 
   void _onStateChanged(BuildContext context, BudgetState state) {
     if (state is BudgetLoaded &&
@@ -144,6 +167,8 @@ class _BudgetListViewState extends State<BudgetListView> {
   }
 
   Widget _buildBudgetList(BudgetLoaded state) {
+    final access = budgetAccess();
+
     return SliverPadding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.md,
@@ -154,6 +179,7 @@ class _BudgetListViewState extends State<BudgetListView> {
       sliver: SliverList(
         delegate: SliverChildBuilderDelegate((context, index) {
           final budget = state.budgets[index];
+          final canEdit = access.canEdit(budget);
           final progress = _findProgress(state, budget);
 
           final displayProgress =
@@ -174,6 +200,7 @@ class _BudgetListViewState extends State<BudgetListView> {
                   end: budget.startDate,
                 ),
                 period: budget.period,
+                groupId: budget.groupId,
               );
 
           return Padding(
@@ -181,8 +208,8 @@ class _BudgetListViewState extends State<BudgetListView> {
             child: BudgetProgressCard(
               progress: displayProgress,
               onTap: () => _navigateToDetails(context, displayProgress),
-              onEdit: () => _navigateToEdit(context, budget),
-              onDelete: () => _confirmDelete(context, budget),
+              onEdit: canEdit ? () => _navigateToEdit(context, budget) : null,
+              onDelete: canEdit ? () => _confirmDelete(context, budget) : null,
             ),
           );
         }, childCount: state.budgets.length),

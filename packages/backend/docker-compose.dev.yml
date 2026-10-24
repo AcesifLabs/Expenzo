@@ -1,0 +1,22 @@
+# Local development database. Production uses docker-compose.yml with a hosted Postgres.
+# Usage: docker compose -f docker-compose.dev.yml up -d
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: expenzo
+    ports:
+      - "5656:5432"
+    volumes:
+      - expenzo-db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d expenzo"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  expenzo-db-data:

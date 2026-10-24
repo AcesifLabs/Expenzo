@@ -6,13 +6,23 @@ import '../entities/budget.dart';
 import '../repositories/budget_repository.dart';
 import 'get_budget_progress.dart';
 
+/// The server's spent for a Shared Budget in the period starting at
+/// [periodStart], or null when it has none for that period.
+typedef SharedSpentLookup =
+    double? Function(String budgetId, DateTime periodStart);
+
 class GetBudgetsWithProgress {
   final BudgetRepository budgetRepository;
   final RecordRepository recordRepository;
 
+  /// Shared Budget progress comes from the server (CONTEXT.md Shared
+  /// Budget): local Records are only this member's share of it.
+  final SharedSpentLookup? sharedSpent;
+
   GetBudgetsWithProgress({
     required this.budgetRepository,
     required this.recordRepository,
+    this.sharedSpent,
   });
 
   Future<Either<Failure, List<BudgetProgress>>> call({int? limit}) async {
@@ -44,7 +54,10 @@ class GetBudgetsWithProgress {
     final results = <BudgetProgress>[];
     for (final budget in budgets) {
       final id = budget.id ?? '';
-      final spentAmount = spentById[id] ?? 0.0;
+      final localSpent = spentById[id] ?? 0.0;
+      final spentAmount = budget.groupId == null
+          ? localSpent
+          : sharedSpent?.call(id, periods[id]!.start) ?? localSpent;
       final effectiveBudget =
           budget.amount + (budget.rolloverEnabled ? budget.rolloverAmount : 0);
       final percentage = effectiveBudget > 0
@@ -63,6 +76,7 @@ class GetBudgetsWithProgress {
           name: budget.name,
           periodRange: periods[id]!,
           period: budget.period,
+          groupId: budget.groupId,
         ),
       );
     }

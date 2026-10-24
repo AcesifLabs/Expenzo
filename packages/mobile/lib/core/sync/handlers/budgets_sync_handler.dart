@@ -34,6 +34,7 @@ class BudgetsSyncHandler extends SyncTableHandler<$BudgetsTable, Budget> {
     'rolloverEnabled': row.rolloverEnabled,
     'rolloverAmount': row.rolloverAmount,
     'isEnabled': row.isEnabled,
+    'groupId': row.groupId,
     'createdAt': row.createdAt.toUtc().toIso8601String(),
     'updatedAt': row.updatedAt.toUtc().toIso8601String(),
   };
@@ -54,6 +55,9 @@ class BudgetsSyncHandler extends SyncTableHandler<$BudgetsTable, Budget> {
         isEnabled: data['isEnabled'] != null
             ? Value(data['isEnabled'] == true)
             : const Value.absent(),
+        // Always written, null included: a budget unshared on the server,
+        // or a share the server refused, must clear the local groupId.
+        groupId: Value(data['groupId']?.toString()),
         createdAt: data['createdAt'] != null
             ? Value(parseSyncDate(data['createdAt']))
             : const Value.absent(),

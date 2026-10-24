@@ -6,6 +6,13 @@ import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/core/router/settings_route.dart';
 import 'package:expense_tracker/core/router/help_route.dart';
+import 'package:expense_tracker/core/router/family_route.dart';
+import 'package:expense_tracker/features/family/presentation/bloc/family_bloc.dart';
+import 'package:expense_tracker/features/family/presentation/bloc/family_event.dart';
+import 'package:expense_tracker/features/family/presentation/pages/family_home_page.dart';
+import 'package:expense_tracker/features/family/presentation/pages/family_invite_page.dart';
+import 'package:expense_tracker/features/family/presentation/pages/family_join_page.dart';
+import 'package:expense_tracker/features/family/presentation/pages/family_members_page.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:expense_tracker/features/auth/presentation/pages/login_page.dart';
 import 'package:expense_tracker/features/auth/presentation/pages/sync_conflict_page.dart';
@@ -193,6 +200,37 @@ GoRoute _buildSettingsRoute() {
         builder: (_, _) => const DeleteAllDataPage(),
       ),
       _buildHelpRoute(),
+      _buildFamilyRoute(),
+    ],
+  );
+}
+
+/// Family group and its screens, at `/settings/family/<FamilyRoute.path>`.
+/// Each page gets its own FamilyBloc with `create:` (a factory): child
+/// pages are pushed as siblings, so a provider here would not reach them.
+/// Every bloc starts from the per-account cache, so all show one group.
+GoRoute _buildFamilyRoute() {
+  Widget withBloc(Widget page) => BlocProvider(
+    create: (_) => di.getIt<FamilyBloc>()..add(const FamilyLoadRequested()),
+    child: page,
+  );
+
+  return GoRoute(
+    path: SettingsRoute.family.path,
+    builder: (_, _) => withBloc(const FamilyHomePage()),
+    routes: [
+      GoRoute(
+        path: FamilyRoute.join.path,
+        builder: (_, _) => withBloc(const FamilyJoinPage()),
+      ),
+      GoRoute(
+        path: FamilyRoute.invite.path,
+        builder: (_, _) => withBloc(const FamilyInvitePage()),
+      ),
+      GoRoute(
+        path: FamilyRoute.members.path,
+        builder: (_, _) => withBloc(const FamilyMembersPage()),
+      ),
     ],
   );
 }
@@ -409,6 +447,12 @@ String? authRedirectFor(AuthState authState, String location) {
   // The conflict page has no way out of its own (it blocks back), so leave
   // it as soon as the conflict is resolved.
   if (!isConflictPending && isConflictRoute) return '/';
+
+  // Family group needs an account (ADR 0008).
+  if (authState is Unauthenticated &&
+      location.startsWith(SettingsRoute.family.location)) {
+    return SettingsRoute.rootLocation;
+  }
 
   return null;
 }

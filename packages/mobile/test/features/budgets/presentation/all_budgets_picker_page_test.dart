@@ -11,8 +11,11 @@ import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/features/budgets/domain/entities/budget_progress.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets_with_progress.dart';
 import 'package:expense_tracker/features/budgets/presentation/pages/all_budgets_picker_page.dart';
+import 'package:expense_tracker/features/family/domain/entities/group_role.dart';
+import 'package:expense_tracker/features/family/domain/services/budget_access.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
+import '../../../support/factories/family_factory.dart';
 import '../../../support/pump_localized.dart';
 
 class _MockGetBudgetsWithProgress extends Mock
@@ -23,6 +26,7 @@ BudgetProgress _progress({
   required String name,
   double spent = 120,
   double limit = 500,
+  String? groupId,
 }) {
   return BudgetProgress(
     budgetId: id,
@@ -38,6 +42,7 @@ BudgetProgress _progress({
       end: DateTime(2026, 11),
     ),
     period: BudgetPeriod.monthly,
+    groupId: groupId,
   );
 }
 
@@ -107,6 +112,29 @@ void main() {
       findsOneWidget,
     );
   });
+
+  for (final (role, listsShared) in [
+    (GroupRole.viewer, false),
+    (GroupRole.member, true),
+  ]) {
+    testWidgets('a ${role.name} sees shared budgets: $listsShared', (
+      tester,
+    ) async {
+      di.getIt.registerSingleton(
+        BudgetAccess(currentGroup: () => makeMyGroup(myRole: role)),
+      );
+      addTearDown(() => di.getIt.unregister<BudgetAccess>());
+      stubBudgets([
+        _progress(id: 'b1', name: 'Food'),
+        _progress(id: 'b2', name: 'Rent', groupId: 'group-1'),
+      ]);
+
+      await openPicker(tester);
+
+      expect(find.text('Food'), findsOneWidget);
+      expect(find.text('Rent'), listsShared ? findsOneWidget : findsNothing);
+    });
+  }
 
   testWidgets('marks only the selected budget', (tester) async {
     stubBudgets([

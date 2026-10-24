@@ -113,7 +113,7 @@ _Avoid_: record form, edit expense screen
 
 ## Budget Alert
 
-A notification sent once when a budget reaches 80% of its effective amount and once when it goes over, per budget period. Each level has its own switch under Settings → Notifications, below the master "Allow notifications" switch.
+A notification sent once when a budget reaches 80% of its effective amount and once when it goes over, per budget period. Each level has its own switch under Settings → Notifications, below the master "Allow notifications" switch. Not sent for Shared Budgets: their spending lives on the server.
 
 ## App Language
 
@@ -159,7 +159,7 @@ A member's permission level in a Family Group: Admin (manage members, invites an
 
 ## Shared Budget
 
-A Budget marked with a Family Group's id. Only an Admin can share a Budget into the group; its owner can always unshare it, even after losing the Admin role. Members see it read-only; its progress counts Records from current members assigned to it and comes from the server, not local data (ADR 0008). Family totals and spending by member count only Records linked to Shared Budgets; a member's other Records stay private.
+A Budget marked with a Family Group's id. Only an Admin can share a Budget into the group; its owner can always unshare it, even after losing the Admin role. Members see it read-only; its progress counts Records from current members assigned to it and comes from the server, not local data (ADR 0008). Family totals and spending by member count only Records linked to Shared Budgets; a member's other Records stay private. Its progress and amounts are shown in the Family Group's Currency on every screen.
 
 ## Invite Code
 

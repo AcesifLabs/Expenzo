@@ -13,6 +13,7 @@ import 'package:expense_tracker/shared/presentation/widgets/app_back_button.dart
 import 'package:expense_tracker/shared/presentation/widgets/app_page_header.dart';
 import 'package:expense_tracker/shared/presentation/widgets/budget_progress_indicator.dart';
 import 'package:expense_tracker/features/budgets/presentation/helpers/budget_display_name.dart';
+import 'package:expense_tracker/features/budgets/presentation/helpers/budget_access_lookup.dart';
 
 /// Full-screen budget picker (`AllBudgetsPicker` in expenzo.pen).
 ///
@@ -45,10 +46,13 @@ class _AllBudgetsPickerPageState extends State<AllBudgetsPickerPage> {
     if (!mounted) return;
     setState(() {
       _loading = false;
-      result.fold(
-        (failure) => _errorText = failureText(failure),
-        (budgets) => _budgets = budgets,
-      );
+      result.fold((failure) => _errorText = failureText(failure), (budgets) {
+        final access = budgetAccess();
+        _budgets = [
+          for (final budget in budgets)
+            if (access.canAssignTo(budget.groupId)) budget,
+        ];
+      });
     });
   }
 
