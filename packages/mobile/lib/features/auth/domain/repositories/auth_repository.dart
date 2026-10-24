@@ -45,11 +45,6 @@ abstract class AuthRepository {
   /// Returns [Right(unit)] on success, [Left(AuthFailure)] on failure.
   Future<Either<AuthFailure, Unit>> deleteAccount();
 
-  /// Checks if the user has granted Gmail OAuth scope.
-  ///
-  /// Returns [Right(bool)] on success, [Left(AuthFailure)] on failure.
-  Future<Either<AuthFailure, bool>> hasGmailScope();
-
   /// Stops the background sync engine.
   Future<void> stopSyncEngine();
 

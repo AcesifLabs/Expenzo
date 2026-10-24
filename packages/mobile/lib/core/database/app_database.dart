@@ -68,7 +68,7 @@ class AppDatabase extends _$AppDatabase {
   Future<String>? _dbPathFuture;
 
   @override
-  int get schemaVersion => 18;
+  int get schemaVersion => 19;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -135,6 +135,7 @@ class AppDatabase extends _$AppDatabase {
       _MigrationStep(16, _migrateV16),
       _MigrationStep(17, _migrateV17),
       _MigrationStep(18, () => _migrateV18(m)),
+      _MigrationStep(19, () => _migrateV19(m)),
     ];
 
     for (final step in steps) {
@@ -368,6 +369,12 @@ class AppDatabase extends _$AppDatabase {
     await customStatement(
       'CREATE INDEX IF NOT EXISTS idx_goals_user_id ON goals (user_id)',
     );
+  }
+
+  /// Marks Shared Budgets with their Family Group (SAAP-75, ADR 0008). No
+  /// index: the table holds tens of rows.
+  Future<void> _migrateV19(Migrator m) async {
+    await m.addColumn(budgets, budgets.groupId);
   }
 
   Future<void> _migrateV16() async {

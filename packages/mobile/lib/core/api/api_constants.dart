@@ -25,6 +25,9 @@ class ApiConstants {
   static const String syncSummary = '/sync/summary';
   static const String syncClear = '/sync/clear';
   static const String health = '/health';
+  static const String groups = '/groups';
+  static const String groupsMe = '/groups/me';
+  static const String groupsJoin = '/groups/join';
 
   /// Returns the configured backend base URL.
   ///
@@ -57,4 +60,13 @@ class ApiConstants {
       '/categories/$id/increment-usage';
 
   static String budgetProgress(String id) => '/budgets/$id/progress';
+
+  static String group(String id) => '/groups/$id';
+
+  static String groupInvites(String id) => '/groups/$id/invites';
+
+  static String groupMember(String id, String userId) =>
+      '/groups/$id/members/$userId';
+
+  static String groupSummary(String id) => '/groups/$id/summary';
 }

@@ -12,6 +12,9 @@ class DeleteAllDataState extends Equatable {
   /// Null while loading, or when counting failed (the delete still runs).
   final LocalDataSummary? summary;
   final bool isSignedIn;
+
+  /// Signed in as a Family Admin: their Shared Budgets go for the family too.
+  final bool isFamilyAdmin;
   final String confirmation;
   final DeleteAllDataStatus status;
 
@@ -22,6 +25,7 @@ class DeleteAllDataState extends Equatable {
   List<Object?> get props => [
     summary,
     isSignedIn,
+    isFamilyAdmin,
     confirmation,
     status,
     errorMessage,
@@ -36,6 +40,7 @@ class DeleteAllDataState extends Equatable {
   const DeleteAllDataState({
     this.summary,
     this.isSignedIn = false,
+    this.isFamilyAdmin = false,
     this.confirmation = '',
     this.status = DeleteAllDataStatus.loading,
     this.errorMessage,
@@ -45,6 +50,7 @@ class DeleteAllDataState extends Equatable {
   DeleteAllDataState copyWith({
     LocalDataSummary? summary,
     bool? isSignedIn,
+    bool? isFamilyAdmin,
     String? confirmation,
     DeleteAllDataStatus? status,
     String? errorMessage,
@@ -52,6 +58,7 @@ class DeleteAllDataState extends Equatable {
     return DeleteAllDataState(
       summary: summary ?? this.summary,
       isSignedIn: isSignedIn ?? this.isSignedIn,
+      isFamilyAdmin: isFamilyAdmin ?? this.isFamilyAdmin,
       confirmation: confirmation ?? this.confirmation,
       status: status ?? this.status,
       errorMessage: errorMessage,

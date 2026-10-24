@@ -22,7 +22,8 @@ enum BudgetAlertLevel { nearLimit, over }
 /// Sends a Budget Alert (CONTEXT.md) after records change.
 ///
 /// Each budget gets at most one alert at 80% and one when it goes over, per
-/// budget period. Nothing is sent while the master switch is off; each level
+/// budget period. Shared Budgets get none: their spending lives on the
+/// server (CONTEXT.md Budget Alert). Nothing is sent while the master switch is off; each level
 /// has its own toggle (Settings → Notifications).
 class CheckBudgetAlerts {
   static const nearLimitPercent = 80.0;
@@ -89,6 +90,7 @@ class CheckBudgetAlerts {
         budgets,
       ) async {
         for (final budget in budgets) {
+          if (budget.groupId != null) continue;
           await _alertIfNeeded(budget, settings);
         }
 

@@ -2,12 +2,14 @@ import { Injectable, UnauthorizedException, NotFoundException } from '@nestjs/co
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { FirebaseTokenPayload } from './dto/firebasetokenpayload.dto';
 import { firebaseAuth } from '../config/firebase.config';
 import { v4 as uuidv4 } from 'uuid';
 import { LoginResponse, UserProfile, DeleteAccountResponse, JwtPayload } from './auth.types';
+import { GroupsService } from '../groups/groups.service';
+import { GroupMember } from '../groups/entities/group-member.entity';
 
 @Injectable()
 export class AuthService {
@@ -16,6 +18,8 @@ export class AuthService {
     private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService,
     private readonly config: ConfigService,
+    private readonly dataSource: DataSource,
+    private readonly groupsService: GroupsService,
   ) {}
 
   async loginWithFirebaseToken(firebaseToken: string): Promise<LoginResponse> {
@@ -25,9 +29,18 @@ export class AuthService {
     return { accessToken, user: this.toUserProfile(user) };
   }
 
+  /**
+   * Removes the user and, by cascade, every row they own. Leaves their Family
+   * Group first with the same rules as tapping Leave, so the group keeps an
+   * Admin or is deleted when they were its last member.
+   */
   async deleteAccount(userId: string): Promise<DeleteAccountResponse> {
     const user = await this.findUserOrFail(userId);
-    await this.userRepository.remove(user);
+    await this.dataSource.transaction(async (manager) => {
+      const membership = await manager.findOne(GroupMember, { where: { userId } });
+      if (membership) await this.groupsService.applyLeaveRules(manager, membership.groupId, userId);
+      await manager.remove(user);
+    });
     return { deleted: true, userId };
   }
 

@@ -11,9 +11,10 @@ import { ParsingRule } from '../parsing-rules/entities/parsing-rule.entity';
 import { RecurringTransaction } from '../recurring-transactions/entities/recurring-transaction.entity';
 import { PendingRecurring } from '../recurring-transactions/entities/pending-recurring.entity';
 import { Goal } from '../goals/entities/goal.entity';
+import { GroupMember } from '../groups/entities/group-member.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Record, Category, Budget, MessageSource, ExpenseTemplate, ParsingRule, RecurringTransaction, PendingRecurring, Goal])],
+  imports: [TypeOrmModule.forFeature([Record, Category, Budget, MessageSource, ExpenseTemplate, ParsingRule, RecurringTransaction, PendingRecurring, Goal, GroupMember])],
   controllers: [SyncController],
   providers: [SyncService],
 })

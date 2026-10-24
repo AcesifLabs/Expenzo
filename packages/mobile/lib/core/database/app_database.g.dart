@@ -3720,6 +3720,17 @@ class $BudgetsTable extends Budgets with TableInfo<$BudgetsTable, Budget> {
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _groupIdMeta = const VerificationMeta(
+    'groupId',
+  );
+  @override
+  late final GeneratedColumn<String> groupId = GeneratedColumn<String>(
+    'group_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -3755,6 +3766,7 @@ class $BudgetsTable extends Budgets with TableInfo<$BudgetsTable, Budget> {
     rolloverAmount,
     isEnabled,
     userId,
+    groupId,
     createdAt,
     updatedAt,
   ];
@@ -3837,6 +3849,12 @@ class $BudgetsTable extends Budgets with TableInfo<$BudgetsTable, Budget> {
         userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
       );
     }
+    if (data.containsKey('group_id')) {
+      context.handle(
+        _groupIdMeta,
+        groupId.isAcceptableOrUnknown(data['group_id']!, _groupIdMeta),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -3894,6 +3912,10 @@ class $BudgetsTable extends Budgets with TableInfo<$BudgetsTable, Budget> {
         DriftSqlType.int,
         data['${effectivePrefix}user_id'],
       ),
+      groupId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}group_id'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -3921,6 +3943,9 @@ class Budget extends DataClass implements Insertable<Budget> {
   final double rolloverAmount;
   final bool isEnabled;
   final int? userId;
+
+  /// The Family Group this budget is shared into; null for a personal one.
+  final String? groupId;
   final DateTime createdAt;
   final DateTime updatedAt;
   const Budget({
@@ -3933,6 +3958,7 @@ class Budget extends DataClass implements Insertable<Budget> {
     required this.rolloverAmount,
     required this.isEnabled,
     this.userId,
+    this.groupId,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -3949,6 +3975,9 @@ class Budget extends DataClass implements Insertable<Budget> {
     map['is_enabled'] = Variable<bool>(isEnabled);
     if (!nullToAbsent || userId != null) {
       map['user_id'] = Variable<int>(userId);
+    }
+    if (!nullToAbsent || groupId != null) {
+      map['group_id'] = Variable<String>(groupId);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
@@ -3968,6 +3997,9 @@ class Budget extends DataClass implements Insertable<Budget> {
       userId: userId == null && nullToAbsent
           ? const Value.absent()
           : Value(userId),
+      groupId: groupId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(groupId),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -3988,6 +4020,7 @@ class Budget extends DataClass implements Insertable<Budget> {
       rolloverAmount: serializer.fromJson<double>(json['rolloverAmount']),
       isEnabled: serializer.fromJson<bool>(json['isEnabled']),
       userId: serializer.fromJson<int?>(json['userId']),
+      groupId: serializer.fromJson<String?>(json['groupId']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -4005,6 +4038,7 @@ class Budget extends DataClass implements Insertable<Budget> {
       'rolloverAmount': serializer.toJson<double>(rolloverAmount),
       'isEnabled': serializer.toJson<bool>(isEnabled),
       'userId': serializer.toJson<int?>(userId),
+      'groupId': serializer.toJson<String?>(groupId),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -4020,6 +4054,7 @@ class Budget extends DataClass implements Insertable<Budget> {
     double? rolloverAmount,
     bool? isEnabled,
     Value<int?> userId = const Value.absent(),
+    Value<String?> groupId = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => Budget(
@@ -4032,6 +4067,7 @@ class Budget extends DataClass implements Insertable<Budget> {
     rolloverAmount: rolloverAmount ?? this.rolloverAmount,
     isEnabled: isEnabled ?? this.isEnabled,
     userId: userId.present ? userId.value : this.userId,
+    groupId: groupId.present ? groupId.value : this.groupId,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -4050,6 +4086,7 @@ class Budget extends DataClass implements Insertable<Budget> {
           : this.rolloverAmount,
       isEnabled: data.isEnabled.present ? data.isEnabled.value : this.isEnabled,
       userId: data.userId.present ? data.userId.value : this.userId,
+      groupId: data.groupId.present ? data.groupId.value : this.groupId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -4067,6 +4104,7 @@ class Budget extends DataClass implements Insertable<Budget> {
           ..write('rolloverAmount: $rolloverAmount, ')
           ..write('isEnabled: $isEnabled, ')
           ..write('userId: $userId, ')
+          ..write('groupId: $groupId, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -4084,6 +4122,7 @@ class Budget extends DataClass implements Insertable<Budget> {
     rolloverAmount,
     isEnabled,
     userId,
+    groupId,
     createdAt,
     updatedAt,
   );
@@ -4100,6 +4139,7 @@ class Budget extends DataClass implements Insertable<Budget> {
           other.rolloverAmount == this.rolloverAmount &&
           other.isEnabled == this.isEnabled &&
           other.userId == this.userId &&
+          other.groupId == this.groupId &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -4114,6 +4154,7 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
   final Value<double> rolloverAmount;
   final Value<bool> isEnabled;
   final Value<int?> userId;
+  final Value<String?> groupId;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<int> rowid;
@@ -4127,6 +4168,7 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
     this.rolloverAmount = const Value.absent(),
     this.isEnabled = const Value.absent(),
     this.userId = const Value.absent(),
+    this.groupId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -4141,6 +4183,7 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
     this.rolloverAmount = const Value.absent(),
     this.isEnabled = const Value.absent(),
     this.userId = const Value.absent(),
+    this.groupId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -4159,6 +4202,7 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
     Expression<double>? rolloverAmount,
     Expression<bool>? isEnabled,
     Expression<int>? userId,
+    Expression<String>? groupId,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
@@ -4173,6 +4217,7 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
       if (rolloverAmount != null) 'rollover_amount': rolloverAmount,
       if (isEnabled != null) 'is_enabled': isEnabled,
       if (userId != null) 'user_id': userId,
+      if (groupId != null) 'group_id': groupId,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
@@ -4189,6 +4234,7 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
     Value<double>? rolloverAmount,
     Value<bool>? isEnabled,
     Value<int?>? userId,
+    Value<String?>? groupId,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<int>? rowid,
@@ -4203,6 +4249,7 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
       rolloverAmount: rolloverAmount ?? this.rolloverAmount,
       isEnabled: isEnabled ?? this.isEnabled,
       userId: userId ?? this.userId,
+      groupId: groupId ?? this.groupId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
@@ -4239,6 +4286,9 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
     if (userId.present) {
       map['user_id'] = Variable<int>(userId.value);
     }
+    if (groupId.present) {
+      map['group_id'] = Variable<String>(groupId.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -4263,6 +4313,7 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
           ..write('rolloverAmount: $rolloverAmount, ')
           ..write('isEnabled: $isEnabled, ')
           ..write('userId: $userId, ')
+          ..write('groupId: $groupId, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
@@ -8290,6 +8341,7 @@ typedef $$BudgetsTableCreateCompanionBuilder =
       Value<double> rolloverAmount,
       Value<bool> isEnabled,
       Value<int?> userId,
+      Value<String?> groupId,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<int> rowid,
@@ -8305,6 +8357,7 @@ typedef $$BudgetsTableUpdateCompanionBuilder =
       Value<double> rolloverAmount,
       Value<bool> isEnabled,
       Value<int?> userId,
+      Value<String?> groupId,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<int> rowid,
@@ -8343,6 +8396,7 @@ class $$BudgetsTableTableManager
                 Value<double> rolloverAmount = const Value.absent(),
                 Value<bool> isEnabled = const Value.absent(),
                 Value<int?> userId = const Value.absent(),
+                Value<String?> groupId = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -8356,6 +8410,7 @@ class $$BudgetsTableTableManager
                 rolloverAmount: rolloverAmount,
                 isEnabled: isEnabled,
                 userId: userId,
+                groupId: groupId,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
@@ -8371,6 +8426,7 @@ class $$BudgetsTableTableManager
                 Value<double> rolloverAmount = const Value.absent(),
                 Value<bool> isEnabled = const Value.absent(),
                 Value<int?> userId = const Value.absent(),
+                Value<String?> groupId = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -8384,6 +8440,7 @@ class $$BudgetsTableTableManager
                 rolloverAmount: rolloverAmount,
                 isEnabled: isEnabled,
                 userId: userId,
+                groupId: groupId,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
@@ -8445,6 +8502,12 @@ class $$BudgetsTableFilterComposer
 
   ColumnFilters<int> get userId => $state.composableBuilder(
     column: $state.table.userId,
+    builder: (column, joinBuilders) =>
+        ColumnFilters(column, joinBuilders: joinBuilders),
+  );
+
+  ColumnFilters<String> get groupId => $state.composableBuilder(
+    column: $state.table.groupId,
     builder: (column, joinBuilders) =>
         ColumnFilters(column, joinBuilders: joinBuilders),
   );
@@ -8515,6 +8578,12 @@ class $$BudgetsTableOrderingComposer
 
   ColumnOrderings<int> get userId => $state.composableBuilder(
     column: $state.table.userId,
+    builder: (column, joinBuilders) =>
+        ColumnOrderings(column, joinBuilders: joinBuilders),
+  );
+
+  ColumnOrderings<String> get groupId => $state.composableBuilder(
+    column: $state.table.groupId,
     builder: (column, joinBuilders) =>
         ColumnOrderings(column, joinBuilders: joinBuilders),
   );

@@ -15,6 +15,9 @@ class BudgetProgress {
   final DateTimeRange periodRange;
   final BudgetPeriod period;
 
+  /// Set for a Shared Budget (its Family Group's id).
+  final String? groupId;
+
   const BudgetProgress({
     required this.budgetId,
     required this.budgetAmount,
@@ -26,5 +29,6 @@ class BudgetProgress {
     required this.name,
     required this.periodRange,
     required this.period,
+    this.groupId,
   });
 }

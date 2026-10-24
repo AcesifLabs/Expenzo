@@ -40,6 +40,7 @@ class GetBudgetProgress {
           name: budget.name,
           periodRange: periodRange,
           period: budget.period,
+          groupId: budget.groupId,
         ),
       );
     });

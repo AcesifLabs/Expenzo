@@ -4,6 +4,7 @@
 /// from here, so a rename can't leave a stale link.
 enum SettingsRoute {
   profile('profile'),
+  family('family'),
   appearance('appearance'),
   currency('currency'),
   language('language'),

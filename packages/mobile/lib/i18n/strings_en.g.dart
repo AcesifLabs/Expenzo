@@ -49,6 +49,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$currencies$en currencies = Translations$currencies$en.internal(_root);
 	late final Translations$dashboard$en dashboard = Translations$dashboard$en.internal(_root);
 	late final Translations$enums$en enums = Translations$enums$en.internal(_root);
+	late final Translations$family$en family = Translations$family$en.internal(_root);
 	late final Translations$goals$en goals = Translations$goals$en.internal(_root);
 	late final Translations$messageTemplates$en messageTemplates = Translations$messageTemplates$en.internal(_root);
 	late final Translations$notifications$en notifications = Translations$notifications$en.internal(_root);
@@ -135,6 +136,9 @@ class Translations$budgets$en {
 	late final Translations$budgets$form$en form = Translations$budgets$form$en.internal(_root);
 	late final Translations$budgets$details$en details = Translations$budgets$details$en.internal(_root);
 	late final Translations$budgets$picker$en picker = Translations$budgets$picker$en.internal(_root);
+
+	/// en: 'Shared'
+	String get sharedBadge => 'Shared';
 }
 
 // Path: categories
@@ -387,6 +391,23 @@ class Translations$enums$en {
 	late final Translations$enums$digitGrouping$en digitGrouping = Translations$enums$digitGrouping$en.internal(_root);
 	late final Translations$enums$fontSize$en fontSize = Translations$enums$fontSize$en.internal(_root);
 	late final Translations$enums$firstDayOfWeek$en firstDayOfWeek = Translations$enums$firstDayOfWeek$en.internal(_root);
+}
+
+// Path: family
+class Translations$family$en {
+	Translations$family$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	late final Translations$family$create$en create = Translations$family$create$en.internal(_root);
+	late final Translations$family$join$en join = Translations$family$join$en.internal(_root);
+	late final Translations$family$invite$en invite = Translations$family$invite$en.internal(_root);
+	late final Translations$family$dashboard$en dashboard = Translations$family$dashboard$en.internal(_root);
+	late final Translations$family$members$en members = Translations$family$members$en.internal(_root);
+	late final Translations$family$roles$en roles = Translations$family$roles$en.internal(_root);
+	late final Translations$family$roleHints$en roleHints = Translations$family$roleHints$en.internal(_root);
+	late final Translations$family$errors$en errors = Translations$family$errors$en.internal(_root);
 }
 
 // Path: goals
@@ -720,6 +741,7 @@ class Translations$settings$en {
 	late final Translations$settings$export$en export = Translations$settings$export$en.internal(_root);
 	late final Translations$settings$deleteData$en deleteData = Translations$settings$deleteData$en.internal(_root);
 	late final Translations$settings$categories$en categories = Translations$settings$categories$en.internal(_root);
+	late final Translations$settings$family$en family = Translations$settings$family$en.internal(_root);
 }
 
 // Path: shell
@@ -1044,6 +1066,27 @@ class Translations$budgets$form$en {
 
 	/// en: 'Pick a different name'
 	String get nameReserved => 'Pick a different name';
+
+	/// en: 'Shared by your family admin. Only they can change it.'
+	String get sharedReadOnly => 'Shared by your family admin. Only they can change it.';
+
+	/// en: 'Shared budget'
+	String get sharedTitle => 'Shared budget';
+
+	/// en: 'Share with family'
+	String get share => 'Share with family';
+
+	/// en: 'Members of {name} can see it and add expenses to it'
+	String shareDetail({required Object name}) => 'Members of ${name} can see it and add expenses to it';
+
+	/// en: 'Stop sharing?'
+	String get unshareTitle => 'Stop sharing?';
+
+	/// en: 'Members will no longer see this budget. Transactions already added stay as they are.'
+	String get unshareBody => 'Members will no longer see this budget. Transactions already added stay as they are.';
+
+	/// en: 'Stop sharing'
+	String get unshareConfirm => 'Stop sharing';
 }
 
 // Path: budgets.details
@@ -1601,6 +1644,297 @@ class Translations$enums$firstDayOfWeek$en {
 
 	/// en: 'Saturday'
 	String get saturday => 'Saturday';
+}
+
+// Path: family.create
+class Translations$family$create$en {
+	Translations$family$create$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Create family group'
+	String get title => 'Create family group';
+
+	/// en: 'Start your family plan'
+	String get heading => 'Start your family plan';
+
+	/// en: 'Create a shared budget space for your family.'
+	String get body => 'Create a shared budget space for your family.';
+
+	/// en: 'Group name'
+	String get nameLabel => 'Group name';
+
+	/// en: 'Rahman Family'
+	String get nameHint => 'Rahman Family';
+
+	/// en: 'Enter a group name'
+	String get nameRequired => 'Enter a group name';
+
+	/// en: 'Monthly family budget (optional)'
+	String get budgetLabel => 'Monthly family budget (optional)';
+
+	/// en: 'Enter an amount above zero'
+	String get budgetInvalid => 'Enter an amount above zero';
+
+	/// en: 'Currency: {code} (from your settings)'
+	String currencyNote({required Object code}) => 'Currency: ${code} (from your settings)';
+
+	/// en: 'Create group'
+	String get submit => 'Create group';
+
+	/// en: 'Have an invite code? Join a family'
+	String get haveCode => 'Have an invite code? Join a family';
+}
+
+// Path: family.join
+class Translations$family$join$en {
+	Translations$family$join$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Join a family'
+	String get title => 'Join a family';
+
+	/// en: 'Enter the 6-character code your family admin shared.'
+	String get body => 'Enter the 6-character code your family admin shared.';
+
+	/// en: 'Invite code'
+	String get codeLabel => 'Invite code';
+
+	/// en: 'Codes have 6 letters and numbers'
+	String get codeInvalid => 'Codes have 6 letters and numbers';
+
+	/// en: 'Your currency: {code}'
+	String currencyNote({required Object code}) => 'Your currency: ${code}';
+
+	/// en: 'Join group'
+	String get submit => 'Join group';
+
+	/// en: 'You joined {name}'
+	String joined({required Object name}) => 'You joined ${name}';
+
+	/// en: 'You joined. Turn on Sync in Settings to see the shared budgets.'
+	String get syncOff => 'You joined. Turn on Sync in Settings to see the shared budgets.';
+}
+
+// Path: family.invite
+class Translations$family$invite$en {
+	Translations$family$invite$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Invite members'
+	String get title => 'Invite members';
+
+	/// en: 'Invite your family'
+	String get heading => 'Invite your family';
+
+	/// en: 'Up to 10 members, you included'
+	String get limitNote => 'Up to 10 members, you included';
+
+	/// en: 'Share this invite code'
+	String get codeCaption => 'Share this invite code';
+
+	/// en: 'Valid until {time}'
+	String validUntil({required Object time}) => 'Valid until ${time}';
+
+	/// en: 'Share invite'
+	String get share => 'Share invite';
+
+	/// en: 'Join my family "{name}" on Expenzo: open Settings > Family group > Join a family and enter {code}. The code works until {time}.'
+	String shareText({required Object name, required Object code, required Object time}) => 'Join my family "${name}" on Expenzo: open Settings > Family group > Join a family and enter ${code}. The code works until ${time}.';
+
+	/// en: 'Regenerate code'
+	String get regenerate => 'Regenerate code';
+
+	/// en: 'Make a new code?'
+	String get regenerateTitle => 'Make a new code?';
+
+	/// en: 'The current code will stop working.'
+	String get regenerateBody => 'The current code will stop working.';
+
+	/// en: 'Code copied'
+	String get copied => 'Code copied';
+
+	/// en: 'You're offline. Connect to get an invite code.'
+	String get offline => 'You\'re offline. Connect to get an invite code.';
+
+	/// en: 'This code has expired. Make a new one.'
+	String get expired => 'This code has expired. Make a new one.';
+}
+
+// Path: family.dashboard
+class Translations$family$dashboard$en {
+	Translations$family$dashboard$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Spent of planned'
+	String get spentOfPlanned => 'Spent of planned';
+
+	/// en: '{spent} of {planned}'
+	String spentOfPlannedValue({required Object spent, required Object planned}) => '${spent} of ${planned}';
+
+	/// en: 'Expense: {amount}'
+	String expense({required Object amount}) => 'Expense: ${amount}';
+
+	/// en: 'Shared budget total: {amount}'
+	String sharedBudgetTotal({required Object amount}) => 'Shared budget total: ${amount}';
+
+	/// en: '{spent} of {budget} this month'
+	String ofMonthlyBudget({required Object spent, required Object budget}) => '${spent} of ${budget} this month';
+
+	/// en: 'Only transactions in shared budgets count here.'
+	String get onlySharedNote => 'Only transactions in shared budgets count here.';
+
+	/// en: '{name} (you)'
+	String you({required Object name}) => '${name} (you)';
+
+	/// en: 'Family member'
+	String get memberFallback => 'Family member';
+
+	/// en: '+{n}'
+	String moreMembers({required Object n}) => '+${n}';
+
+	/// en: 'No shared budgets yet. Admins can share one from the budget form.'
+	String get noSharedBudgets => 'No shared budgets yet. Admins can share one from the budget form.';
+
+	/// en: 'See all budgets'
+	String get seeAllBudgets => 'See all budgets';
+
+	/// en: 'Last updated {time}'
+	String lastUpdated({required Object time}) => 'Last updated ${time}';
+
+	/// en: 'Couldn't load your family. Check your connection and try again.'
+	String get loadFailed => 'Couldn\'t load your family. Check your connection and try again.';
+
+	/// en: 'Couldn't load the latest numbers.'
+	String get summaryFailed => 'Couldn\'t load the latest numbers.';
+
+	/// en: 'Manage members'
+	String get manageMembers => 'Manage members';
+}
+
+// Path: family.members
+class Translations$family$members$en {
+	Translations$family$members$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Members ({count})'
+	String title({required Object count}) => 'Members (${count})';
+
+	/// en: 'Invite more'
+	String get inviteMore => 'Invite more';
+
+	/// en: 'Leave group'
+	String get leave => 'Leave group';
+
+	/// en: 'Leave {name}?'
+	String leaveTitle({required Object name}) => 'Leave ${name}?';
+
+	/// en: 'Shared budgets from this group will be removed from your phone. Your own transactions stay with you.'
+	String get leaveBody => 'Shared budgets from this group will be removed from your phone. Your own transactions stay with you.';
+
+	/// en: 'You are the last member. Leaving deletes the group.'
+	String get leaveLastBody => 'You are the last member. Leaving deletes the group.';
+
+	/// en: 'Change role'
+	String get changeRole => 'Change role';
+
+	/// en: 'Remove from group'
+	String get remove => 'Remove from group';
+
+	/// en: 'Remove {name}?'
+	String removeTitle({required Object name}) => 'Remove ${name}?';
+
+	/// en: 'Delete group'
+	String get deleteGroup => 'Delete group';
+
+	/// en: 'Delete {name}?'
+	String deleteTitle({required Object name}) => 'Delete ${name}?';
+
+	/// en: 'Everyone is removed. Shared budgets become personal budgets of their owner.'
+	String get deleteBody => 'Everyone is removed. Shared budgets become personal budgets of their owner.';
+}
+
+// Path: family.roles
+class Translations$family$roles$en {
+	Translations$family$roles$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Admin'
+	String get admin => 'Admin';
+
+	/// en: 'Member'
+	String get member => 'Member';
+
+	/// en: 'Viewer'
+	String get viewer => 'Viewer';
+}
+
+// Path: family.roleHints
+class Translations$family$roleHints$en {
+	Translations$family$roleHints$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Manages members and shared budgets'
+	String get admin => 'Manages members and shared budgets';
+
+	/// en: 'Sees the dashboard and adds transactions to shared budgets'
+	String get member => 'Sees the dashboard and adds transactions to shared budgets';
+
+	/// en: 'Sees the dashboard only'
+	String get viewer => 'Sees the dashboard only';
+}
+
+// Path: family.errors
+class Translations$family$errors$en {
+	Translations$family$errors$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'You're already in a family group. Leave it first.'
+	String get alreadyInGroup => 'You\'re already in a family group. Leave it first.';
+
+	/// en: 'This family uses a different currency. Switch to the same currency in Settings, then join.'
+	String get currencyMismatch => 'This family uses a different currency. Switch to the same currency in Settings, then join.';
+
+	/// en: 'Group is full. A family group can have up to 10 members.'
+	String get groupFull => 'Group is full. A family group can have up to 10 members.';
+
+	/// en: 'This code has expired. Ask your admin for a new one.'
+	String get inviteExpired => 'This code has expired. Ask your admin for a new one.';
+
+	/// en: 'No family uses this code. Check it and try again.'
+	String get inviteNotFound => 'No family uses this code. Check it and try again.';
+
+	/// en: 'Make someone else an admin first.'
+	String get lastAdmin => 'Make someone else an admin first.';
+
+	/// en: 'You're no longer in this group.'
+	String get notInGroup => 'You\'re no longer in this group.';
+
+	/// en: 'Sign in to use Family group.'
+	String get signInRequired => 'Sign in to use Family group.';
 }
 
 // Path: goals.errors
@@ -3274,6 +3608,9 @@ class Translations$settings$deleteData$en {
 
 	/// en: 'Couldn't delete the data in your account. Nothing was deleted. Check your connection and try again.'
 	String get serverFailed => 'Couldn\'t delete the data in your account. Nothing was deleted. Check your connection and try again.';
+
+	/// en: 'Shared budgets you created will be removed for your family.'
+	String get familyAdminNote => 'Shared budgets you created will be removed for your family.';
 }
 
 // Path: settings.categories
@@ -3286,6 +3623,23 @@ class Translations$settings$categories$en {
 
 	/// en: 'Add, edit and remove categories'
 	String get rowSubtitle => 'Add, edit and remove categories';
+}
+
+// Path: settings.family
+class Translations$settings$family$en {
+	Translations$settings$family$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Family group'
+	String get title => 'Family group';
+
+	/// en: 'Share budgets with your family'
+	String get rowSubtitle => 'Share budgets with your family';
+
+	late final Translations$settings$family$sections$en sections = Translations$settings$family$sections$en.internal(_root);
 }
 
 // Path: shell.tabs
@@ -4333,6 +4687,21 @@ class Translations$settings$deleteData$sections$en {
 	String get confirmation => 'Confirmation';
 }
 
+// Path: settings.family.sections
+class Translations$settings$family$sections$en {
+	Translations$settings$family$sections$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Spending by member'
+	String get spendingByMember => 'Spending by member';
+
+	/// en: 'Shared budget progress'
+	String get sharedBudgets => 'Shared budget progress';
+}
+
 // Path: support.help.replaySetup
 class Translations$support$help$replaySetup$en {
 	Translations$support$help$replaySetup$en.internal(this._root);
@@ -4612,6 +4981,13 @@ extension on Translations {
 			'budgets.form.amountInvalid' => 'Enter a valid number',
 			'budgets.form.nameRequired' => 'Enter a name',
 			'budgets.form.nameReserved' => 'Pick a different name',
+			'budgets.form.sharedReadOnly' => 'Shared by your family admin. Only they can change it.',
+			'budgets.form.sharedTitle' => 'Shared budget',
+			'budgets.form.share' => 'Share with family',
+			'budgets.form.shareDetail' => ({required Object name}) => 'Members of ${name} can see it and add expenses to it',
+			'budgets.form.unshareTitle' => 'Stop sharing?',
+			'budgets.form.unshareBody' => 'Members will no longer see this budget. Transactions already added stay as they are.',
+			'budgets.form.unshareConfirm' => 'Stop sharing',
 			'budgets.details.title' => 'Budget details',
 			'budgets.details.loadFailed' => 'Couldn\'t load budget details. Try again.',
 			'budgets.details.notFound' => 'Budget not found.',
@@ -4636,6 +5012,7 @@ extension on Translations {
 			'budgets.picker.previousBudgetHint' => 'Keep the current link',
 			'budgets.picker.progress' => ({required Object period, required Object spent, required Object limit}) => '${period} · ${spent} / ${limit}',
 			'budgets.picker.empty' => 'No active budgets',
+			'budgets.sharedBadge' => 'Shared',
 			'categories.uncategorized' => 'Uncategorized',
 			'categories.defaults.default_in_salary' => 'Salary',
 			'categories.defaults.default_in_freelance' => 'Freelance',
@@ -4839,6 +5216,79 @@ extension on Translations {
 			'enums.firstDayOfWeek.sunday' => 'Sunday',
 			'enums.firstDayOfWeek.monday' => 'Monday',
 			'enums.firstDayOfWeek.saturday' => 'Saturday',
+			'family.create.title' => 'Create family group',
+			'family.create.heading' => 'Start your family plan',
+			'family.create.body' => 'Create a shared budget space for your family.',
+			'family.create.nameLabel' => 'Group name',
+			'family.create.nameHint' => 'Rahman Family',
+			'family.create.nameRequired' => 'Enter a group name',
+			'family.create.budgetLabel' => 'Monthly family budget (optional)',
+			'family.create.budgetInvalid' => 'Enter an amount above zero',
+			'family.create.currencyNote' => ({required Object code}) => 'Currency: ${code} (from your settings)',
+			'family.create.submit' => 'Create group',
+			'family.create.haveCode' => 'Have an invite code? Join a family',
+			'family.join.title' => 'Join a family',
+			'family.join.body' => 'Enter the 6-character code your family admin shared.',
+			'family.join.codeLabel' => 'Invite code',
+			'family.join.codeInvalid' => 'Codes have 6 letters and numbers',
+			'family.join.currencyNote' => ({required Object code}) => 'Your currency: ${code}',
+			'family.join.submit' => 'Join group',
+			'family.join.joined' => ({required Object name}) => 'You joined ${name}',
+			'family.join.syncOff' => 'You joined. Turn on Sync in Settings to see the shared budgets.',
+			'family.invite.title' => 'Invite members',
+			'family.invite.heading' => 'Invite your family',
+			'family.invite.limitNote' => 'Up to 10 members, you included',
+			'family.invite.codeCaption' => 'Share this invite code',
+			'family.invite.validUntil' => ({required Object time}) => 'Valid until ${time}',
+			'family.invite.share' => 'Share invite',
+			'family.invite.shareText' => ({required Object name, required Object code, required Object time}) => 'Join my family "${name}" on Expenzo: open Settings > Family group > Join a family and enter ${code}. The code works until ${time}.',
+			'family.invite.regenerate' => 'Regenerate code',
+			'family.invite.regenerateTitle' => 'Make a new code?',
+			'family.invite.regenerateBody' => 'The current code will stop working.',
+			'family.invite.copied' => 'Code copied',
+			'family.invite.offline' => 'You\'re offline. Connect to get an invite code.',
+			'family.invite.expired' => 'This code has expired. Make a new one.',
+			'family.dashboard.spentOfPlanned' => 'Spent of planned',
+			'family.dashboard.spentOfPlannedValue' => ({required Object spent, required Object planned}) => '${spent} of ${planned}',
+			'family.dashboard.expense' => ({required Object amount}) => 'Expense: ${amount}',
+			'family.dashboard.sharedBudgetTotal' => ({required Object amount}) => 'Shared budget total: ${amount}',
+			'family.dashboard.ofMonthlyBudget' => ({required Object spent, required Object budget}) => '${spent} of ${budget} this month',
+			'family.dashboard.onlySharedNote' => 'Only transactions in shared budgets count here.',
+			'family.dashboard.you' => ({required Object name}) => '${name} (you)',
+			'family.dashboard.memberFallback' => 'Family member',
+			'family.dashboard.moreMembers' => ({required Object n}) => '+${n}',
+			'family.dashboard.noSharedBudgets' => 'No shared budgets yet. Admins can share one from the budget form.',
+			'family.dashboard.seeAllBudgets' => 'See all budgets',
+			'family.dashboard.lastUpdated' => ({required Object time}) => 'Last updated ${time}',
+			'family.dashboard.loadFailed' => 'Couldn\'t load your family. Check your connection and try again.',
+			'family.dashboard.summaryFailed' => 'Couldn\'t load the latest numbers.',
+			'family.dashboard.manageMembers' => 'Manage members',
+			'family.members.title' => ({required Object count}) => 'Members (${count})',
+			'family.members.inviteMore' => 'Invite more',
+			'family.members.leave' => 'Leave group',
+			'family.members.leaveTitle' => ({required Object name}) => 'Leave ${name}?',
+			'family.members.leaveBody' => 'Shared budgets from this group will be removed from your phone. Your own transactions stay with you.',
+			'family.members.leaveLastBody' => 'You are the last member. Leaving deletes the group.',
+			'family.members.changeRole' => 'Change role',
+			'family.members.remove' => 'Remove from group',
+			'family.members.removeTitle' => ({required Object name}) => 'Remove ${name}?',
+			'family.members.deleteGroup' => 'Delete group',
+			'family.members.deleteTitle' => ({required Object name}) => 'Delete ${name}?',
+			'family.members.deleteBody' => 'Everyone is removed. Shared budgets become personal budgets of their owner.',
+			'family.roles.admin' => 'Admin',
+			'family.roles.member' => 'Member',
+			'family.roles.viewer' => 'Viewer',
+			'family.roleHints.admin' => 'Manages members and shared budgets',
+			'family.roleHints.member' => 'Sees the dashboard and adds transactions to shared budgets',
+			'family.roleHints.viewer' => 'Sees the dashboard only',
+			'family.errors.alreadyInGroup' => 'You\'re already in a family group. Leave it first.',
+			'family.errors.currencyMismatch' => 'This family uses a different currency. Switch to the same currency in Settings, then join.',
+			'family.errors.groupFull' => 'Group is full. A family group can have up to 10 members.',
+			'family.errors.inviteExpired' => 'This code has expired. Ask your admin for a new one.',
+			'family.errors.inviteNotFound' => 'No family uses this code. Check it and try again.',
+			'family.errors.lastAdmin' => 'Make someone else an admin first.',
+			'family.errors.notInGroup' => 'You\'re no longer in this group.',
+			'family.errors.signInRequired' => 'Sign in to use Family group.',
 			'goals.errors.nameRequired' => 'Give your goal a name.',
 			'goals.errors.targetPositive' => 'Enter a target amount above zero.',
 			'goals.errors.amountPositive' => 'Enter an amount above zero.',
@@ -4973,6 +5423,8 @@ extension on Translations {
 			'onboarding.timeline.custom' => 'Custom',
 			'onboarding.timeline.customHint' => 'Set your own',
 			'onboarding.timeline.fit.affordable' => 'Fits your savings',
+			_ => null,
+		} ?? switch (path) {
 			'onboarding.timeline.fit.tooExpensive' => 'More than your savings',
 			'onboarding.timeline.fit.slow' => 'Takes a long time',
 			'onboarding.complete.title' => 'Setup complete!',
@@ -5054,8 +5506,6 @@ extension on Translations {
 			'receiptScan.readFailed' => 'Couldn\'t read the receipt. Try again or add it by hand.',
 			'receiptScan.chooseFromGallery' => 'Choose from gallery',
 			'receiptScan.flashOff' => 'Turn flash off',
-			_ => null,
-		} ?? switch (path) {
 			'receiptScan.flashOn' => 'Turn flash on',
 			'receiptScan.align' => 'Align receipt with the frame',
 			'receiptScan.reading' => 'Reading your receipt',
@@ -5365,7 +5815,12 @@ extension on Translations {
 			'settings.deleteData.deleting' => 'Deleting…',
 			'settings.deleteData.done' => 'All data deleted',
 			'settings.deleteData.serverFailed' => 'Couldn\'t delete the data in your account. Nothing was deleted. Check your connection and try again.',
+			'settings.deleteData.familyAdminNote' => 'Shared budgets you created will be removed for your family.',
 			'settings.categories.rowSubtitle' => 'Add, edit and remove categories',
+			'settings.family.title' => 'Family group',
+			'settings.family.rowSubtitle' => 'Share budgets with your family',
+			'settings.family.sections.spendingByMember' => 'Spending by member',
+			'settings.family.sections.sharedBudgets' => 'Shared budget progress',
 			'shell.tabs.home' => 'Home',
 			'shell.tabs.activity' => 'Activity',
 			'shell.tabs.budgets' => 'Budgets',

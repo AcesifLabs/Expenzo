@@ -46,6 +46,9 @@ class AppConstants {
   /// Longest budget name the backend accepts (`BUDGET_NAME_MAX_LENGTH`).
   static const int budgetNameMaxLength = 100;
 
+  /// Longest Family Group name (backend GROUP_NAME_MAX_LENGTH).
+  static const int groupNameMaxLength = 60;
+
   /// Most names one `POST /budgets/names` request may carry
   /// (`FILL_BUDGET_NAMES_MAX_ITEMS`).
   static const int fillBudgetNamesBatchSize = 200;

@@ -10,6 +10,7 @@ import 'package:expense_tracker/core/sync/sync_table_registry.dart';
 import 'package:expense_tracker/features/data_wipe/data/datasources/data_wipe_local_datasource.dart';
 import 'package:expense_tracker/features/data_wipe/data/datasources/data_wipe_remote_datasource.dart';
 import 'package:expense_tracker/features/data_wipe/data/repositories/data_wipe_repository_impl.dart';
+import 'package:expense_tracker/features/family/domain/repositories/family_repository.dart';
 import 'package:expense_tracker/features/data_wipe/data/services/data_wipe_hooks.dart';
 import 'package:expense_tracker/features/data_wipe/data/services/local_data_prefs.dart';
 import 'package:expense_tracker/features/data_wipe/domain/repositories/data_wipe_repository.dart';
@@ -61,6 +62,9 @@ void initDataWipeModule(GetIt getIt) {
       getSummary: getIt<GetLocalDataSummary>(),
       repository: getIt<DataWipeRepository>(),
       deleteAllData: getIt<DeleteAllData>(),
+      isFamilyAdmin: () =>
+          getIt.isRegistered<FamilyRepository>() &&
+          (getIt<FamilyRepository>().cachedGroup?.myRole.isAdmin ?? false),
     ),
   );
 }

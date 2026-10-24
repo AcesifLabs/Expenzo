@@ -1,0 +1,91 @@
+{
+  "create": {
+    "title": "Create family group",
+    "heading": "Start your family plan",
+    "body": "Create a shared budget space for your family.",
+    "nameLabel": "Group name",
+    "nameHint": "Rahman Family",
+    "nameRequired": "Enter a group name",
+    "budgetLabel": "Monthly family budget (optional)",
+    "budgetInvalid": "Enter an amount above zero",
+    "currencyNote": "Currency: {code} (from your settings)",
+    "submit": "Create group",
+    "haveCode": "Have an invite code? Join a family"
+  },
+  "join": {
+    "title": "Join a family",
+    "body": "Enter the 6-character code your family admin shared.",
+    "codeLabel": "Invite code",
+    "codeInvalid": "Codes have 6 letters and numbers",
+    "currencyNote": "Your currency: {code}",
+    "submit": "Join group",
+    "joined": "You joined {name}",
+    "syncOff": "You joined. Turn on Sync in Settings to see the shared budgets."
+  },
+  "invite": {
+    "title": "Invite members",
+    "heading": "Invite your family",
+    "limitNote": "Up to 10 members, you included",
+    "codeCaption": "Share this invite code",
+    "validUntil": "Valid until {time}",
+    "share": "Share invite",
+    "shareText": "Join my family \"{name}\" on Expenzo: open Settings > Family group > Join a family and enter {code}. The code works until {time}.",
+    "regenerate": "Regenerate code",
+    "regenerateTitle": "Make a new code?",
+    "regenerateBody": "The current code will stop working.",
+    "copied": "Code copied",
+    "offline": "You're offline. Connect to get an invite code.",
+    "expired": "This code has expired. Make a new one."
+  },
+  "dashboard": {
+    "spentOfPlanned": "Spent of planned",
+    "spentOfPlannedValue": "{spent} of {planned}",
+    "expense": "Expense: {amount}",
+    "sharedBudgetTotal": "Shared budget total: {amount}",
+    "ofMonthlyBudget": "{spent} of {budget} this month",
+    "onlySharedNote": "Only transactions in shared budgets count here.",
+    "you": "{name} (you)",
+    "memberFallback": "Family member",
+    "moreMembers": "+{n}",
+    "noSharedBudgets": "No shared budgets yet. Admins can share one from the budget form.",
+    "seeAllBudgets": "See all budgets",
+    "lastUpdated": "Last updated {time}",
+    "loadFailed": "Couldn't load your family. Check your connection and try again.",
+    "summaryFailed": "Couldn't load the latest numbers.",
+    "manageMembers": "Manage members"
+  },
+  "members": {
+    "title": "Members ({count})",
+    "inviteMore": "Invite more",
+    "leave": "Leave group",
+    "leaveTitle": "Leave {name}?",
+    "leaveBody": "Shared budgets from this group will be removed from your phone. Your own transactions stay with you.",
+    "leaveLastBody": "You are the last member. Leaving deletes the group.",
+    "changeRole": "Change role",
+    "remove": "Remove from group",
+    "removeTitle": "Remove {name}?",
+    "deleteGroup": "Delete group",
+    "deleteTitle": "Delete {name}?",
+    "deleteBody": "Everyone is removed. Shared budgets become personal budgets of their owner."
+  },
+  "roles": {
+    "admin": "Admin",
+    "member": "Member",
+    "viewer": "Viewer"
+  },
+  "roleHints": {
+    "admin": "Manages members and shared budgets",
+    "member": "Sees the dashboard and adds transactions to shared budgets",
+    "viewer": "Sees the dashboard only"
+  },
+  "errors": {
+    "alreadyInGroup": "You're already in a family group. Leave it first.",
+    "currencyMismatch": "This family uses a different currency. Switch to the same currency in Settings, then join.",
+    "groupFull": "Group is full. A family group can have up to 10 members.",
+    "inviteExpired": "This code has expired. Ask your admin for a new one.",
+    "inviteNotFound": "No family uses this code. Check it and try again.",
+    "lastAdmin": "Make someone else an admin first.",
+    "notInGroup": "You're no longer in this group.",
+    "signInRequired": "Sign in to use Family group."
+  }
+}

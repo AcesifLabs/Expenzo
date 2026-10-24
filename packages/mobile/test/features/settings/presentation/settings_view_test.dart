@@ -502,4 +502,38 @@ void main() {
       expect(find.text('profile-page'), findsOneWidget);
     });
   }
+
+  group('Family group row', () {
+    const signedIn = Authenticated(User(uid: 'u1', displayName: 'Sam'));
+
+    testWidgets('is hidden when signed out', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(400, 3000));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await pumpSettings(tester);
+
+      expect(find.text('Family group'), findsNothing);
+    });
+
+    testWidgets('sits right below My profile when signed in', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(400, 3000));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      when(() => authBloc.state).thenReturn(signedIn);
+      await pumpSettings(tester);
+
+      double top(String text) => tester.getTopLeft(find.text(text)).dy;
+      expect(top('Family group'), greaterThan(top('My profile')));
+      expect(top('Family group'), lessThan(top('PREFERENCES')));
+      expect(find.text('Share budgets with your family'), findsOneWidget);
+    });
+
+    testWidgets('opens /settings/family', (tester) async {
+      when(() => authBloc.state).thenReturn(signedIn);
+      await pumpSettingsRouter(tester, child: 'family');
+
+      await tester.tap(find.text('Family group'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('family-page'), findsOneWidget);
+    });
+  });
 }

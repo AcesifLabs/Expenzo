@@ -8,6 +8,7 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RecordsModule } from './records/records.module';
 import { CategoriesModule } from './categories/categories.module';
 import { BudgetsModule } from './budgets/budgets.module';
+import { GroupsModule } from './groups/groups.module';
 import { MessageSourcesModule } from './message-sources/message-sources.module';
 import { ExpenseTemplatesModule } from './expense-templates/expense-templates.module';
 import { ParsingRulesModule } from './parsing-rules/parsing-rules.module';
@@ -48,6 +49,7 @@ import { getDatabaseSslConfig } from './config/database-ssl';
     RecordsModule,
     CategoriesModule,
     BudgetsModule,
+    GroupsModule,
     MessageSourcesModule,
     ExpenseTemplatesModule,
     ParsingRulesModule,

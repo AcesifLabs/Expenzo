@@ -11,6 +11,9 @@ class Budgets extends Table {
   RealColumn get rolloverAmount => real().withDefault(const Constant(0.0))();
   BoolColumn get isEnabled => boolean().withDefault(const Constant(true))();
   IntColumn get userId => integer().nullable()();
+
+  /// The Family Group this budget is shared into; null for a personal one.
+  TextColumn get groupId => text().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 

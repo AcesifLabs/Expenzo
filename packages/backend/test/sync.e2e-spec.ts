@@ -1,6 +1,7 @@
 import { ExecutionContext, INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { FindOperator } from 'typeorm';
 import request = require('supertest');
 import { SyncController } from '../src/sync/sync.controller';
 import { SyncService } from '../src/sync/sync.service';
@@ -14,12 +15,24 @@ import { ParsingRule } from '../src/parsing-rules/entities/parsing-rule.entity';
 import { RecurringTransaction } from '../src/recurring-transactions/entities/recurring-transaction.entity';
 import { PendingRecurring } from '../src/recurring-transactions/entities/pending-recurring.entity';
 import { Goal } from '../src/goals/entities/goal.entity';
+import { GroupMember } from '../src/groups/entities/group-member.entity';
+import { GroupRole } from '../src/groups/groups.constants';
 import { DEFAULT_BUDGET_NAME } from '../src/budgets/budgets.constants';
 
 jest.setTimeout(30000);
 
 type Row = { id: string; userId: string; [field: string]: unknown };
 type Where = { id: string; userId?: string };
+
+/** Equality, or the TypeORM Not / MoreThan operators the sync pull uses. */
+function fieldMatches(value: unknown, condition: unknown): boolean {
+  if (condition instanceof FindOperator) {
+    if (condition.type === 'not') return value !== condition.value;
+    if (condition.type === 'moreThan') return (value as Date) > (condition.value as Date);
+    throw new Error(`memoryRepo does not support ${condition.type}`);
+  }
+  return value === condition;
+}
 
 /** Stores rows in memory and applies the column default for `name` like Postgres would. */
 function memoryRepo(defaults: Partial<Row> = {}) {
@@ -37,8 +50,8 @@ function memoryRepo(defaults: Partial<Row> = {}) {
       rows.set(row.id, { ...defaults, ...row });
       return Promise.resolve(row);
     },
-    find: ({ where }: { where: { userId: string } }) =>
-      Promise.resolve([...rows.values()].filter((r) => r.userId === where.userId)),
+    find: ({ where }: { where: Record<string, unknown> }) =>
+      Promise.resolve([...rows.values()].filter((r) => Object.entries(where).every(([k, v]) => fieldMatches(r[k], v)))),
     delete: (where: Where) => {
       const affected = matches(where) ? 1 : 0;
       if (affected) rows.delete(where.id);
@@ -64,9 +77,12 @@ type Table = keyof typeof entities;
 let app: INestApplication;
 let repos: Record<Table, ReturnType<typeof memoryRepo>>;
 let currentUser: string;
+/** Group memberships by userId, read by the groupId rule on push. */
+let memberships: Map<string, { groupId: string; userId: string; role: GroupRole; joinedAt: Date }>;
 
 beforeEach(async () => {
   currentUser = 'user-1';
+  memberships = new Map();
   repos = Object.fromEntries(
     Object.keys(entities).map((table) => [table, memoryRepo(table === 'budgets' ? { name: DEFAULT_BUDGET_NAME } : {})]),
   ) as typeof repos;
@@ -75,6 +91,10 @@ beforeEach(async () => {
     providers: [
       SyncService,
       ...(Object.keys(entities) as Table[]).map((table) => ({ provide: getRepositoryToken(entities[table]), useValue: repos[table] })),
+      {
+        provide: getRepositoryToken(GroupMember),
+        useValue: { findOne: ({ where }: { where: { userId: string } }) => Promise.resolve(memberships.get(where.userId) ?? null) },
+      },
     ],
   })
     .overrideGuard(JwtAuthGuard)
@@ -249,3 +269,89 @@ describe('SyncController record budget links (e2e)', () => {
     expect((await pulledRecord())?.data.budgetId ?? null).toBeNull();
   });
 });
+
+describe('SyncController shared budgets (e2e)', () => {
+  const budget = { amount: 400, period: 'monthly', startDate: '2026-10-01T00:00:00.000Z', name: 'Groceries' };
+  const push = (action: 'insert' | 'update', data: Record<string, unknown>) =>
+    request(app.getHttpServer())
+      .post('/sync/push')
+      .send({ changes: [{ table: 'budgets', action, id: 'bud-1', data, updatedAt: new Date().toISOString() }] })
+      .expect(200);
+  const pulledGroupId = async () => {
+    const response = await request(app.getHttpServer()).get('/sync/pull').expect(200);
+    const change = (response.body.changes as { table: string; data: { groupId: string | null } }[]).find(
+      (c) => c.table === 'budgets',
+    );
+    return change?.data.groupId;
+  };
+  const joinAs = (role: GroupRole) =>
+    memberships.set('user-1', { groupId: 'group-1', userId: 'user-1', role, joinedAt: new Date() });
+
+  it('should let an admin share a budget into their group', async () => {
+    joinAs(GroupRole.ADMIN);
+
+    const response = await push('insert', { ...budget, groupId: 'group-1' });
+
+    expect(response.body.results[0].status).toBe('success');
+    expect(await pulledGroupId()).toBe('group-1');
+  });
+
+  it('should answer success to a member share and pull the budget back unshared', async () => {
+    joinAs(GroupRole.MEMBER);
+
+    const response = await push('insert', { ...budget, groupId: 'group-1' });
+
+    expect(response.body.results[0].status).toBe('success');
+    expect(await pulledGroupId()).toBeNull();
+  });
+
+  it('should let the owner unshare after being demoted', async () => {
+    joinAs(GroupRole.ADMIN);
+    await push('insert', { ...budget, groupId: 'group-1' });
+    joinAs(GroupRole.MEMBER);
+
+    const response = await push('update', { ...budget, groupId: null });
+
+    expect(response.body.results[0].status).toBe('success');
+    expect(await pulledGroupId()).toBeNull();
+  });
+});
+
+describe('SyncController shared budget pull (e2e)', () => {
+  const pull = async (since?: string) => {
+    const response = await request(app.getHttpServer())
+      .get('/sync/pull')
+      .query(since ? { since } : {})
+      .expect(200);
+    return response.body as { changes: { table: string; id: string; data: Record<string, unknown> }[]; serverTime: string };
+  };
+
+  it('should give a member the admin shared budget once, then nothing until it changes', async () => {
+    memberships.set('admin-1', { groupId: 'group-1', userId: 'admin-1', role: GroupRole.ADMIN, joinedAt: new Date(0) });
+    currentUser = 'admin-1';
+    await request(app.getHttpServer())
+      .post('/sync/push')
+      .send({
+        changes: [
+          {
+            table: 'budgets',
+            action: 'insert',
+            id: 'bud-shared',
+            data: { name: 'Rent', amount: 900, period: 'monthly', startDate: '2026-10-01T00:00:00.000Z', groupId: 'group-1' },
+          },
+        ],
+      })
+      .expect(200);
+
+    memberships.set('user-2', { groupId: 'group-1', userId: 'user-2', role: GroupRole.MEMBER, joinedAt: new Date() });
+    currentUser = 'user-2';
+    const first = await pull();
+    const shared = first.changes.find((c) => c.id === 'bud-shared');
+    expect(shared?.data).toEqual(expect.objectContaining({ name: 'Rent', groupId: 'group-1' }));
+    expect(shared?.data).not.toHaveProperty('userId');
+
+    const second = await pull(first.serverTime);
+    expect(second.changes.find((c) => c.id === 'bud-shared')).toBeUndefined();
+  });
+});
+

@@ -4,7 +4,7 @@ import 'package:expense_tracker/core/logger/app_logger.dart';
 
 enum ShareOutcome { shared, dismissed }
 
-/// Opens the system share sheet for files the app wrote.
+/// Opens the system share sheet for files the app wrote, or for text.
 class FileShareService {
   const FileShareService();
 
@@ -22,6 +22,19 @@ class FileShareService {
       return outcomeFor(result.status);
     } catch (e, s) {
       appLogger.error('File share failed', e, s);
+      rethrow;
+    }
+  }
+
+  /// Shares plain [text], such as a Family invite. Platform errors are
+  /// logged and rethrown.
+  Future<ShareOutcome> shareText(String text) async {
+    try {
+      final result = await Share.share(text);
+
+      return outcomeFor(result.status);
+    } catch (e, s) {
+      appLogger.error('Text share failed', e, s);
       rethrow;
     }
   }

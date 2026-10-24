@@ -50,6 +50,7 @@ class BudgetLocalDatasourceImpl implements BudgetLocalDatasource {
         rolloverEnabled: Value(budget.rolloverEnabled),
         rolloverAmount: Value(budget.rolloverAmount),
         isEnabled: Value(budget.isEnabled),
+        groupId: Value(budget.groupId),
         createdAt: Value(now),
         updatedAt: Value(now),
       ),
@@ -71,6 +72,7 @@ class BudgetLocalDatasourceImpl implements BudgetLocalDatasource {
         rolloverEnabled: Value(budget.rolloverEnabled),
         rolloverAmount: Value(budget.rolloverAmount),
         isEnabled: Value(budget.isEnabled),
+        groupId: Value(budget.groupId),
         createdAt: Value(budget.startDate),
         updatedAt: Value(now),
       ),
@@ -99,6 +101,7 @@ class BudgetLocalDatasourceImpl implements BudgetLocalDatasource {
       rolloverEnabled: b.rolloverEnabled,
       rolloverAmount: b.rolloverAmount,
       isEnabled: b.isEnabled,
+      groupId: b.groupId,
     );
   }
 

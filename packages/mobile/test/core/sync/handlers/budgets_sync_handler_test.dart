@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart' hide isNull;
 import 'package:drift/native.dart';
 import 'package:expense_tracker/core/constants/app_constants.dart';
 import 'package:expense_tracker/core/database/app_database.dart';
@@ -8,7 +9,7 @@ void main() {
   final handler = BudgetsSyncHandler();
   final now = DateTime.utc(2026, 10, 11);
 
-  Budget budget({String name = 'Groceries'}) => Budget(
+  Budget budget({String name = 'Groceries', String? groupId}) => Budget(
     id: 'bud-1',
     name: name,
     amount: 400,
@@ -17,6 +18,7 @@ void main() {
     rolloverEnabled: false,
     rolloverAmount: 0,
     isEnabled: true,
+    groupId: groupId,
     createdAt: now,
     updatedAt: now,
   );
@@ -45,6 +47,34 @@ void main() {
           expect(pulled(payload).name.value, AppConstants.defaultBudgetName);
         });
       }
+    });
+
+    group('groupId payload', () {
+      test('sends groupId in the push payload', () {
+        expect(
+          handler.toSyncPayload(budget(groupId: 'group-1'))['groupId'],
+          'group-1',
+        );
+      });
+
+      test('reads a pulled groupId', () {
+        final payload = handler.toSyncPayload(budget(groupId: 'group-1'));
+
+        expect(pulled(payload).groupId, const Value('group-1'));
+      });
+
+      test('writes null when the server unshared the budget', () {
+        final payload = handler.toSyncPayload(budget())..['groupId'] = null;
+
+        expect(pulled(payload).groupId, const Value<String?>(null));
+      });
+
+      test('writes null, not absent, when the key is missing', () {
+        final payload = handler.toSyncPayload(budget())..remove('groupId');
+
+        expect(pulled(payload).groupId.present, isTrue);
+        expect(pulled(payload).groupId.value, isNull);
+      });
     });
 
     group('keepLocalValues while the name repair is pending', () {

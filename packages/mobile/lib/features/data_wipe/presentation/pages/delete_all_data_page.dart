@@ -51,7 +51,10 @@ class DeleteAllDataView extends StatelessWidget {
         child: ListView(
           padding: AppSpacing.pagePadding,
           children: [
-            _WarningCard(isSignedIn: state.isSignedIn),
+            _WarningCard(
+              isSignedIn: state.isSignedIn,
+              isFamilyAdmin: state.isFamilyAdmin,
+            ),
             if (state.status == DeleteAllDataStatus.loading)
               const Padding(
                 padding: EdgeInsets.all(AppSpacing.lg),
@@ -129,7 +132,11 @@ class DeleteAllDataView extends StatelessWidget {
 class _WarningCard extends StatelessWidget {
   final bool isSignedIn;
 
-  const _WarningCard({required this.isSignedIn});
+  /// Adds that their Shared Budgets go for the family too (Q20); the
+  /// delete is never blocked.
+  final bool isFamilyAdmin;
+
+  const _WarningCard({required this.isSignedIn, required this.isFamilyAdmin});
 
   @override
   Widget build(BuildContext context) {
@@ -139,6 +146,9 @@ class _WarningCard extends StatelessWidget {
     final body = isSignedIn
         ? '${deleteDataT.warningBodySignedIn} ${deleteDataT.otherDevicesNote}'
         : deleteDataT.warningBody;
+    final bodyStyle = textTheme.bodyMedium?.copyWith(
+      color: palette.textPrimary,
+    );
 
     return AppCard(
       backgroundColor: palette.expenseTint,
@@ -160,12 +170,11 @@ class _WarningCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xs),
-                Text(
-                  body,
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: palette.textPrimary,
-                  ),
-                ),
+                Text(body, style: bodyStyle),
+                if (isFamilyAdmin) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(deleteDataT.familyAdminNote, style: bodyStyle),
+                ],
               ],
             ),
           ),

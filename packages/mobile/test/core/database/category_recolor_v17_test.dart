@@ -51,6 +51,22 @@ void main() {
         synced_at INTEGER
       )
     ''', const []);
+    // Every v16 install has budgets; later steps (v19) alter it.
+    await raw.runCustom('''
+      CREATE TABLE budgets (
+        id TEXT NOT NULL PRIMARY KEY,
+        name TEXT NOT NULL DEFAULT '',
+        amount REAL NOT NULL,
+        period TEXT NOT NULL,
+        start_date INTEGER NOT NULL,
+        rollover_enabled INTEGER NOT NULL DEFAULT 0,
+        rollover_amount REAL NOT NULL DEFAULT 0.0,
+        is_enabled INTEGER NOT NULL DEFAULT 1,
+        user_id INTEGER,
+        created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
+        updated_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
+      )
+    ''', const []);
     // Untouched default (old Bills gold), lower-case hex to check matching.
     await raw.runCustom(
       "INSERT INTO categories (id, name, emoji, color, is_default) "

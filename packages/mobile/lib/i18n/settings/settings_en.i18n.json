@@ -287,9 +287,18 @@
     "button": "Delete all data",
     "deleting": "Deleting…",
     "done": "All data deleted",
-    "serverFailed": "Couldn't delete the data in your account. Nothing was deleted. Check your connection and try again."
+    "serverFailed": "Couldn't delete the data in your account. Nothing was deleted. Check your connection and try again.",
+    "familyAdminNote": "Shared budgets you created will be removed for your family."
   },
   "categories": {
     "rowSubtitle": "Add, edit and remove categories"
+  },
+  "family": {
+    "title": "Family group",
+    "rowSubtitle": "Share budgets with your family",
+    "sections": {
+      "spendingByMember": "Spending by member",
+      "sharedBudgets": "Shared budget progress"
+    }
   }
 }

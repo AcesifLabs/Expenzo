@@ -1,8 +1,8 @@
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, MoreThan } from 'typeorm';
+import { Repository, MoreThan, Not } from 'typeorm';
 import { PushSyncDto, SyncAction, SyncChangeItem, SyncTable } from './dto/push-sync.dto';
-import { SyncStatus, SyncActionResult, SyncConflictResult, PullChangesResponse, SyncSummary, SyncPushResponse } from './sync.types';
+import { SyncStatus, SyncActionResult, SyncConflictResult, PullChange, PullChangesResponse, SyncSummary, SyncPushResponse } from './sync.types';
 import { Record as RecordEntity } from '../records/entities/record.entity';
 import { Category } from '../categories/entities/category.entity';
 import { Budget } from '../budgets/entities/budget.entity';
@@ -14,6 +14,8 @@ import { PendingRecurring } from '../recurring-transactions/entities/pending-rec
 import { Goal } from '../goals/entities/goal.entity';
 import { SyncableEntity } from '../common/interfaces/syncable-entity.interface';
 import { DEFAULT_BUDGET_NAME } from '../budgets/budgets.constants';
+import { GroupMember } from '../groups/entities/group-member.entity';
+import { GroupRole } from '../groups/groups.constants';
 
 /**
  * Required fields a client may send without a real value: null, blank or the
@@ -33,13 +35,15 @@ export class SyncService {
   constructor(
     @InjectRepository(RecordEntity) recordRepo: Repository<RecordEntity>,
     @InjectRepository(Category) categoryRepo: Repository<Category>,
-    @InjectRepository(Budget) budgetRepo: Repository<Budget>,
+    @InjectRepository(Budget) private readonly budgetRepo: Repository<Budget>,
     @InjectRepository(MessageSource) msgRepo: Repository<MessageSource>,
     @InjectRepository(ExpenseTemplate) tmplRepo: Repository<ExpenseTemplate>,
     @InjectRepository(ParsingRule) ruleRepo: Repository<ParsingRule>,
     @InjectRepository(RecurringTransaction) recRepo: Repository<RecurringTransaction>,
     @InjectRepository(PendingRecurring) pendRepo: Repository<PendingRecurring>,
     @InjectRepository(Goal) goalRepo: Repository<Goal>,
+    // Not a synced table: read to check who may share a budget.
+    @InjectRepository(GroupMember) private readonly memberRepo: Repository<GroupMember>,
   ) {
     this.repoMap.set(SyncTable.RECORDS, recordRepo);
     this.repoMap.set(SyncTable.CATEGORIES, categoryRepo);
@@ -92,6 +96,10 @@ export class SyncService {
     }
     const conflict = await this.notOwner(repo, change);
     if (conflict) return conflict;
+    return this.createRow(repo, await this.withAllowedGroupId(change, null, userId), userId);
+  }
+
+  private async createRow(repo: Repository<SyncableEntity>, change: SyncChangeItem, userId: string): Promise<SyncActionResult> {
     const entity = repo.create({ ...this.withRequiredDefaults(change), id: change.id, userId, createdAt: new Date(), updatedAt: new Date() });
     await repo.save(entity);
     return { id: change.id, status: SyncStatus.SUCCESS, serverId: entity.id };
@@ -102,17 +110,46 @@ export class SyncService {
     if (!existing) {
       const conflict = await this.notOwner(repo, change);
       if (conflict) return conflict;
-      const entity = repo.create({ ...this.withRequiredDefaults(change), id: change.id, userId, createdAt: new Date(), updatedAt: new Date() });
-      await repo.save(entity);
-      return { id: change.id, status: SyncStatus.SUCCESS, serverId: entity.id };
+      return this.createRow(repo, await this.withAllowedGroupId(change, null, userId), userId);
     }
     if (change.updatedAt && existing.updatedAt && new Date(change.updatedAt) < existing.updatedAt) {
       return { id: change.id, status: SyncStatus.CONFLICT, serverId: existing.id, message: 'Server version newer' };
     }
-    const { id: _id, userId: _userId, createdAt: _createdAt, ...updateData } = this.withoutBlankRequiredFields(change);
+    const allowed = await this.withAllowedGroupId(change, existing, userId);
+    const { id: _id, userId: _userId, createdAt: _createdAt, ...updateData } = this.withoutBlankRequiredFields(allowed);
     Object.assign(existing, updateData, { userId, updatedAt: new Date() });
     await repo.save(existing);
     return { id: change.id, status: SyncStatus.SUCCESS, serverId: existing.id };
+  }
+
+  /**
+   * Only an Admin may share a budget, and only into their own group; the
+   * owner may always unshare it (CONTEXT.md Shared Budget). Runs after the
+   * owner check, so [existing] is the caller's own row.
+   *
+   * A groupId the caller may not set is dropped, not refused: the device only
+   * marks success and conflict as synced, so an error would be retried
+   * forever. On update the stored value stays; on insert it is NULL. Either
+   * way updatedAt moves, so the next pull puts the server value back on the
+   * device. This covers an Admin who shared offline and was demoted since.
+   */
+  private async withAllowedGroupId(
+    change: SyncChangeItem,
+    existing: SyncableEntity | null,
+    userId: string,
+  ): Promise<SyncChangeItem> {
+    // Old app versions never send the key; the stored value stays.
+    if (change.table !== SyncTable.BUDGETS || !change.data || !('groupId' in change.data)) return change;
+    const next = change.data.groupId ?? null;
+    const current = (existing as Budget | null)?.groupId ?? null;
+    if (next === current || next === null) return change;
+
+    const member = typeof next === 'string' ? await this.memberRepo.findOne({ where: { userId } }) : null;
+    if (member?.role === GroupRole.ADMIN && member.groupId === next) return change;
+
+    this.logger.warn(`Dropped a groupId the caller may not set on budget ${change.id}`);
+    const { groupId: _groupId, ...data } = change.data;
+    return { ...change, data: existing ? data : { ...data, groupId: null } };
   }
 
   private withRequiredDefaults(change: SyncChangeItem): Record<string, unknown> {
@@ -160,12 +197,41 @@ export class SyncService {
     const changes: PullChangesResponse['changes'] = [];
     for (const [table, repo] of this.repoMap) {
       const entities = await repo.find({ where: { userId, updatedAt: MoreThan(sinceDate) } });
-      for (const entity of entities) {
-        const { userId: _userId, user: _user, ...data } = entity as SyncableEntity & { user?: unknown };
-        changes.push({ table, action: SyncAction.INSERT, id: entity.id, data, updatedAt: entity.updatedAt?.toISOString() });
-      }
+      for (const entity of entities) changes.push(this.toPullChange(table, entity));
+    }
+    for (const budget of await this.pullSharedBudgets(userId, sinceDate)) {
+      changes.push(this.toPullChange(SyncTable.BUDGETS, budget));
     }
     return { changes, serverTime: new Date().toISOString() };
+  }
+
+  /**
+   * Other members' Shared Budgets in the caller's group, read-only on the
+   * device (ADR 0008). Pull filters by updatedAt, so a member who joined
+   * after a budget was shared gets the whole set once on their first pull
+   * after joining. There are no tombstones: the device drops unshared and
+   * deleted ones after its next `/groups/me`.
+   */
+  private async pullSharedBudgets(userId: string, since: Date): Promise<Budget[]> {
+    const member = await this.memberRepo.findOne({ where: { userId } });
+    if (!member) return [];
+    const joinedSince = member.joinedAt > since;
+    return this.budgetRepo.find({
+      where: {
+        groupId: member.groupId,
+        userId: Not(userId),
+        ...(joinedSince ? {} : { updatedAt: MoreThan(since) }),
+      },
+    });
+  }
+
+  private toPullChange(table: SyncTable, entity: SyncableEntity): PullChange {
+    // Relations are not eager; stripped in case one is ever loaded.
+    const { userId: _userId, user: _user, group: _group, ...data } = entity as SyncableEntity & {
+      user?: unknown;
+      group?: unknown;
+    };
+    return { table, action: SyncAction.INSERT, id: entity.id, data, updatedAt: entity.updatedAt?.toISOString() };
   }
 
   async getSummary(userId: string): Promise<SyncSummary> {
@@ -179,6 +245,11 @@ export class SyncService {
     return { totalCount, tables };
   }
 
+  /**
+   * Deletes the caller's rows only, their own Shared Budgets included. Group
+   * tables and other members' rows are not touched; members drop the
+   * cleared budgets from their phones after their next `/groups/me`.
+   */
   async clearUserData(userId: string): Promise<void> {
     const deletionOrder: SyncTable[] = [
       SyncTable.PENDING_RECURRING,

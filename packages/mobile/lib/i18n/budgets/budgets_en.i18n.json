@@ -39,7 +39,14 @@
     "amountRequired": "Enter an amount",
     "amountInvalid": "Enter a valid number",
     "nameRequired": "Enter a name",
-    "nameReserved": "Pick a different name"
+    "nameReserved": "Pick a different name",
+    "sharedReadOnly": "Shared by your family admin. Only they can change it.",
+    "sharedTitle": "Shared budget",
+    "share": "Share with family",
+    "shareDetail": "Members of {name} can see it and add expenses to it",
+    "unshareTitle": "Stop sharing?",
+    "unshareBody": "Members will no longer see this budget. Transactions already added stay as they are.",
+    "unshareConfirm": "Stop sharing"
   },
   "details": {
     "title": "Budget details",
@@ -70,5 +77,6 @@
     "previousBudgetHint": "Keep the current link",
     "progress": "{period} · {spent} / {limit}",
     "empty": "No active budgets"
-  }
+  },
+  "sharedBadge": "Shared"
 }

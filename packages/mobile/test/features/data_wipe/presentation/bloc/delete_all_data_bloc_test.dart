@@ -70,6 +70,41 @@ void main() {
     expect(bloc.state.isSignedIn, isTrue);
   });
 
+  group('family admin line', () {
+    DeleteAllDataBloc blocWith({bool Function()? isFamilyAdmin}) =>
+        DeleteAllDataBloc(
+          getSummary: getSummary,
+          repository: repository,
+          deleteAllData: deleteAllData,
+          isFamilyAdmin: isFamilyAdmin,
+        );
+
+    Future<bool> startedAsAdmin(DeleteAllDataBloc subject) async {
+      addTearDown(subject.close);
+      subject.add(const DeleteAllDataStarted());
+      await pumpEventQueue();
+
+      return subject.state.isFamilyAdmin;
+    }
+
+    test('a signed-in family admin gets it', () async {
+      expect(await startedAsAdmin(blocWith(isFamilyAdmin: () => true)), isTrue);
+    });
+
+    test('signed out never gets it', () async {
+      when(() => repository.isSignedIn()).thenAnswer((_) async => false);
+
+      expect(
+        await startedAsAdmin(blocWith(isFamilyAdmin: () => true)),
+        isFalse,
+      );
+    });
+
+    test('without the callback there is no line', () async {
+      expect(await startedAsAdmin(blocWith()), isFalse);
+    });
+  });
+
   test('a summary failure still reaches ready', () async {
     when(
       () => getSummary(any()),

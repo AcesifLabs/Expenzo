@@ -24,6 +24,8 @@ import '../bloc/budget_bloc.dart';
 import '../bloc/budget_event.dart';
 import '../bloc/budget_state.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
+import '../helpers/budget_access_lookup.dart';
+import 'package:expense_tracker/features/family/domain/usecases/get_my_group.dart';
 
 class BudgetFormPage extends StatefulWidget {
   final Budget? budget;
@@ -49,6 +51,31 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
 
   BudgetPeriod _selectedPeriod = BudgetPeriod.monthly;
   bool _rolloverEnabled = false;
+
+  /// The budget being edited, once loaded; its groupId and rollover amount
+  /// are kept on save.
+  Budget? _budget;
+
+  /// A Shared Budget someone else owns: shown, never saved (ADR 0008).
+  var _readOnly = false;
+
+  /// The "Share with family" switch.
+  var _shared = false;
+
+  /// The save changed whether the budget is shared.
+  var _sharingChanged = false;
+
+  /// An Admin may share; a budget's owner may always unshare (CONTEXT.md
+  /// Shared Budget).
+  bool get _showShareRow {
+    final access = budgetAccess();
+    final budget = _budget;
+
+    return !_readOnly &&
+        (access.canShare(budget) ||
+            (budget != null && access.canUnshare(budget)));
+  }
+
   var _isLoading = false;
   var _amountFocused = false;
   String? _amountError;
@@ -101,6 +128,9 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
   }
 
   void _initFromBudget(Budget? budget) {
+    _budget = budget;
+    _readOnly = budget != null && !budgetAccess().canEdit(budget);
+    _shared = budget?.groupId != null;
     if (budget != null) {
       _amountController.text = CurrencyFormatter.formatInput(budget.amount);
       // A placeholder is not a name to edit; the user is asked for one.
@@ -116,6 +146,7 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
     switch (state) {
       case BudgetOperationSuccess():
         if (!isEditing) unawaited(requestBudgetAlertPermissionIfNeeded());
+        if (_sharingChanged) _refreshGroup();
         context.pop(true);
       case BudgetError(:final message):
         ScaffoldMessenger.of(context)
@@ -180,19 +211,76 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
     setState(() => _rolloverEnabled = value);
   }
 
+  /// The Family dashboard lists Shared Budgets from `/groups/me`.
+  void _refreshGroup() {
+    if (!di.getIt.isRegistered<GetMyGroup>()) return;
+    unawaited(di.getIt<GetMyGroup>()(const GetMyGroupParams()));
+  }
+
+  void _onShareChanged(bool value) {
+    if (value || _budget?.groupId == null) {
+      setState(() => _shared = value);
+
+      return;
+    }
+    // Unsharing a budget members already see asks first.
+    unawaited(_confirmUnshare());
+  }
+
+  Future<void> _confirmUnshare() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: _buildUnshareDialog,
+    );
+    if (confirmed == true && mounted) setState(() => _shared = false);
+  }
+
+  Widget _buildUnshareDialog(BuildContext dialogContext) {
+    final strings = t.budgets.form;
+
+    return AlertDialog(
+      title: Text(strings.unshareTitle),
+      content: Text(strings.unshareBody),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext, false),
+          child: Text(t.common.cancel),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext, true),
+          child: Text(
+            strings.unshareConfirm,
+            style: TextStyle(color: _palette.expense),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// The groupId to save: the switch when it is shown, else unchanged, so
+  /// editing the amount never unshares by accident.
+  String? _groupIdToSave() {
+    final current = _budget?.groupId;
+    if (!_showShareRow) return current;
+
+    return _shared ? current ?? budgetAccess().currentGroupId : null;
+  }
+
   void _submit() {
     if (!_validate()) return;
 
     final budget = Budget(
-      id: widget.budget?.id ?? widget.budgetId,
+      id: _budget?.id ?? widget.budgetId,
       name: _nameController.text.trim(),
       amount: double.parse(_amountController.text),
       period: _selectedPeriod,
       startDate: DateTime(DateTime.now().year, DateTime.now().month, 1),
       rolloverEnabled: _rolloverEnabled,
-      rolloverAmount: widget.budget?.rolloverAmount ?? 0,
+      rolloverAmount: _budget?.rolloverAmount ?? 0,
       isEnabled: true,
+      groupId: _groupIdToSave(),
     );
+    _sharingChanged = budget.groupId != _budget?.groupId;
 
     if (isEditing) {
       context.read<BudgetBloc>().add(UpdateBudgetEvent(budget));
@@ -255,6 +343,7 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
                   child: TextFormField(
                     controller: _amountController,
                     focusNode: _amountFocus,
+                    readOnly: _readOnly,
                     cursorColor: _palette.brand,
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
@@ -315,6 +404,7 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
             alignment: Alignment.centerLeft,
             child: TextFormField(
               controller: _nameController,
+              readOnly: _readOnly,
               cursorColor: _palette.brand,
               style: AppTypography.bodyLarge.copyWith(
                 color: _palette.textPrimary,
@@ -405,7 +495,7 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
                     ),
                   ),
               ],
-              onChanged: _onPeriodChanged,
+              onChanged: _readOnly ? null : _onPeriodChanged,
             ),
           ),
         ],
@@ -453,7 +543,64 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
             ),
             Switch(
               value: _rolloverEnabled,
-              onChanged: _onRolloverChanged,
+              onChanged: _readOnly ? null : _onRolloverChanged,
+              activeThumbColor: _palette.brand,
+              activeTrackColor: _palette.brand.withAlpha(0x40),
+              inactiveThumbColor: _palette.toggleKnob,
+              inactiveTrackColor: _palette.toggleTrack,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShareRow() {
+    final strings = t.budgets.form;
+    final budget = _budget;
+    // A demoted owner may turn sharing off, not back on.
+    final canTurnOn = budgetAccess().canShare(budget);
+
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.smd),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.smd,
+        ),
+        decoration: BoxDecoration(
+          color: _palette.surface,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
+        ),
+        child: Row(
+          children: [
+            Icon(PiconsRegular.usersThree, color: _palette.brand),
+            const SizedBox(width: AppSpacing.smd),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    strings.share,
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: _palette.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    strings.shareDetail(
+                      name: budgetAccess().currentGroupName ?? '',
+                    ),
+                    style: AppTypography.bodySmall.copyWith(
+                      color: _palette.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Switch(
+              value: _shared,
+              onChanged: _shared || canTurnOn ? _onShareChanged : null,
               activeThumbColor: _palette.brand,
               activeTrackColor: _palette.brand.withAlpha(0x40),
               inactiveThumbColor: _palette.toggleKnob,
@@ -503,9 +650,39 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
     );
   }
 
-  Widget _buildForm(BudgetState state) {
+  Widget _buildReadOnlyBanner() {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: _palette.surfaceHigh,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+      ),
+      child: Row(
+        children: [
+          Icon(PiconsRegular.info, color: _palette.info),
+          const SizedBox(width: AppSpacing.smd),
+          Expanded(
+            child: Text(
+              t.budgets.form.sharedReadOnly,
+              style: AppTypography.bodyMedium.copyWith(
+                color: _palette.textSecondary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String get _title {
     final strings = t.budgets.form;
-    final title = isEditing ? strings.edit : strings.add;
+    if (_readOnly) return strings.sharedTitle;
+
+    return isEditing ? strings.edit : strings.add;
+  }
+
+  Widget _buildForm(BudgetState state) {
+    final title = _title;
 
     return Scaffold(
       backgroundColor: _palette.bg,
@@ -521,11 +698,13 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (_readOnly) _buildReadOnlyBanner(),
               _buildAmountField(),
               _buildNameField(),
               _buildPeriodField(),
               _buildRolloverRow(),
-              _buildSubmitButton(state),
+              if (_showShareRow) _buildShareRow(),
+              if (!_readOnly) _buildSubmitButton(state),
             ],
           ),
         ),

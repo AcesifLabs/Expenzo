@@ -95,6 +95,24 @@ void main() {
     );
   });
 
+  for (final isFamilyAdmin in [true, false]) {
+    testWidgets('family admin line shown: $isFamilyAdmin', (tester) async {
+      await pump(
+        tester,
+        DeleteAllDataState(
+          status: DeleteAllDataStatus.ready,
+          isSignedIn: true,
+          isFamilyAdmin: isFamilyAdmin,
+        ),
+      );
+
+      expect(
+        find.text(t.settings.deleteData.familyAdminNote),
+        isFamilyAdmin ? findsOneWidget : findsNothing,
+      );
+    });
+  }
+
   testWidgets('signed out, the note is not shown', (tester) async {
     await pump(
       tester,

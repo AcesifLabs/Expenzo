@@ -47,6 +47,7 @@ class TranslationsBn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$currencies$bn currencies = _Translations$currencies$bn._(_root);
 	@override late final _Translations$dashboard$bn dashboard = _Translations$dashboard$bn._(_root);
 	@override late final _Translations$enums$bn enums = _Translations$enums$bn._(_root);
+	@override late final _Translations$family$bn family = _Translations$family$bn._(_root);
 	@override late final _Translations$goals$bn goals = _Translations$goals$bn._(_root);
 	@override late final _Translations$messageTemplates$bn messageTemplates = _Translations$messageTemplates$bn._(_root);
 	@override late final _Translations$notifications$bn notifications = _Translations$notifications$bn._(_root);
@@ -110,6 +111,7 @@ class _Translations$budgets$bn extends Translations$budgets$en {
 	@override late final _Translations$budgets$form$bn form = _Translations$budgets$form$bn._(_root);
 	@override late final _Translations$budgets$details$bn details = _Translations$budgets$details$bn._(_root);
 	@override late final _Translations$budgets$picker$bn picker = _Translations$budgets$picker$bn._(_root);
+	@override String get sharedBadge => 'শেয়ার করা';
 }
 
 // Path: categories
@@ -285,6 +287,23 @@ class _Translations$enums$bn extends Translations$enums$en {
 	@override late final _Translations$enums$digitGrouping$bn digitGrouping = _Translations$enums$digitGrouping$bn._(_root);
 	@override late final _Translations$enums$fontSize$bn fontSize = _Translations$enums$fontSize$bn._(_root);
 	@override late final _Translations$enums$firstDayOfWeek$bn firstDayOfWeek = _Translations$enums$firstDayOfWeek$bn._(_root);
+}
+
+// Path: family
+class _Translations$family$bn extends Translations$family$en {
+	_Translations$family$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override late final _Translations$family$create$bn create = _Translations$family$create$bn._(_root);
+	@override late final _Translations$family$join$bn join = _Translations$family$join$bn._(_root);
+	@override late final _Translations$family$invite$bn invite = _Translations$family$invite$bn._(_root);
+	@override late final _Translations$family$dashboard$bn dashboard = _Translations$family$dashboard$bn._(_root);
+	@override late final _Translations$family$members$bn members = _Translations$family$members$bn._(_root);
+	@override late final _Translations$family$roles$bn roles = _Translations$family$roles$bn._(_root);
+	@override late final _Translations$family$roleHints$bn roleHints = _Translations$family$roleHints$bn._(_root);
+	@override late final _Translations$family$errors$bn errors = _Translations$family$errors$bn._(_root);
 }
 
 // Path: goals
@@ -501,6 +520,7 @@ class _Translations$settings$bn extends Translations$settings$en {
 	@override late final _Translations$settings$export$bn export = _Translations$settings$export$bn._(_root);
 	@override late final _Translations$settings$deleteData$bn deleteData = _Translations$settings$deleteData$bn._(_root);
 	@override late final _Translations$settings$categories$bn categories = _Translations$settings$categories$bn._(_root);
+	@override late final _Translations$settings$family$bn family = _Translations$settings$family$bn._(_root);
 }
 
 // Path: shell
@@ -705,6 +725,13 @@ class _Translations$budgets$form$bn extends Translations$budgets$form$en {
 	@override String get amountInvalid => 'সঠিক সংখ্যা লিখুন';
 	@override String get nameRequired => 'একটি নাম লিখুন';
 	@override String get nameReserved => 'অন্য একটি নাম দিন';
+	@override String get sharedReadOnly => 'পরিবারের অ্যাডমিন এটি শেয়ার করেছেন। শুধু তিনিই এটি বদলাতে পারবেন।';
+	@override String get sharedTitle => 'শেয়ার করা বাজেট';
+	@override String get share => 'পরিবারের সাথে শেয়ার করুন';
+	@override String shareDetail({required Object name}) => '${name}-এর সদস্যরা এটি দেখতে এবং এতে খরচ যোগ করতে পারবেন';
+	@override String get unshareTitle => 'শেয়ার বন্ধ করবেন?';
+	@override String get unshareBody => 'সদস্যরা আর এই বাজেট দেখতে পাবেন না। আগে যোগ করা লেনদেন যেমন আছে তেমনই থাকবে।';
+	@override String get unshareConfirm => 'শেয়ার বন্ধ করুন';
 }
 
 // Path: budgets.details
@@ -1043,6 +1070,151 @@ class _Translations$enums$firstDayOfWeek$bn extends Translations$enums$firstDayO
 	@override String get sunday => 'রবিবার';
 	@override String get monday => 'সোমবার';
 	@override String get saturday => 'শনিবার';
+}
+
+// Path: family.create
+class _Translations$family$create$bn extends Translations$family$create$en {
+	_Translations$family$create$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'পারিবারিক গ্রুপ তৈরি করুন';
+	@override String get heading => 'আপনার পারিবারিক পরিকল্পনা শুরু করুন';
+	@override String get body => 'আপনার পরিবারের জন্য একটি শেয়ার করা বাজেটের জায়গা তৈরি করুন।';
+	@override String get nameLabel => 'গ্রুপের নাম';
+	@override String get nameHint => 'রহমান পরিবার';
+	@override String get nameRequired => 'গ্রুপের নাম লিখুন';
+	@override String get budgetLabel => 'মাসিক পারিবারিক বাজেট (ঐচ্ছিক)';
+	@override String get budgetInvalid => 'শূন্যের বেশি একটি পরিমাণ লিখুন';
+	@override String currencyNote({required Object code}) => 'মুদ্রা: ${code} (আপনার সেটিংস থেকে)';
+	@override String get submit => 'গ্রুপ তৈরি করুন';
+	@override String get haveCode => 'ইনভাইট কোড আছে? পরিবারে যোগ দিন';
+}
+
+// Path: family.join
+class _Translations$family$join$bn extends Translations$family$join$en {
+	_Translations$family$join$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'পরিবারে যোগ দিন';
+	@override String get body => 'পরিবারের অ্যাডমিনের শেয়ার করা 6 অক্ষরের কোডটি লিখুন।';
+	@override String get codeLabel => 'ইনভাইট কোড';
+	@override String get codeInvalid => 'কোডে 6টি অক্ষর ও সংখ্যা থাকে';
+	@override String currencyNote({required Object code}) => 'আপনার মুদ্রা: ${code}';
+	@override String get submit => 'গ্রুপে যোগ দিন';
+	@override String joined({required Object name}) => 'আপনি ${name}-এ যোগ দিয়েছেন';
+	@override String get syncOff => 'আপনি যোগ দিয়েছেন। শেয়ার করা বাজেট দেখতে সেটিংসে সিঙ্ক চালু করুন।';
+}
+
+// Path: family.invite
+class _Translations$family$invite$bn extends Translations$family$invite$en {
+	_Translations$family$invite$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'সদস্য আমন্ত্রণ করুন';
+	@override String get heading => 'আপনার পরিবারকে আমন্ত্রণ করুন';
+	@override String get limitNote => 'আপনিসহ সর্বোচ্চ 10 জন সদস্য';
+	@override String get codeCaption => 'এই ইনভাইট কোডটি শেয়ার করুন';
+	@override String validUntil({required Object time}) => '${time} পর্যন্ত বৈধ';
+	@override String get share => 'ইনভাইট শেয়ার করুন';
+	@override String shareText({required Object name, required Object code, required Object time}) => 'Expenzo-তে আমার পরিবার "${name}"-এ যোগ দিন: সেটিংস > পারিবারিক গ্রুপ > পরিবারে যোগ দিন খুলে ${code} লিখুন। কোডটি ${time} পর্যন্ত কাজ করবে।';
+	@override String get regenerate => 'নতুন কোড তৈরি করুন';
+	@override String get regenerateTitle => 'নতুন কোড তৈরি করবেন?';
+	@override String get regenerateBody => 'বর্তমান কোডটি আর কাজ করবে না।';
+	@override String get copied => 'কোড কপি হয়েছে';
+	@override String get offline => 'আপনি অফলাইনে আছেন। ইনভাইট কোড পেতে ইন্টারনেটে যুক্ত হোন।';
+	@override String get expired => 'এই কোডের মেয়াদ শেষ। নতুন কোড তৈরি করুন।';
+}
+
+// Path: family.dashboard
+class _Translations$family$dashboard$bn extends Translations$family$dashboard$en {
+	_Translations$family$dashboard$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get spentOfPlanned => 'পরিকল্পনার মধ্যে খরচ';
+	@override String spentOfPlannedValue({required Object planned, required Object spent}) => '${planned}-এর মধ্যে ${spent}';
+	@override String expense({required Object amount}) => 'খরচ: ${amount}';
+	@override String sharedBudgetTotal({required Object amount}) => 'শেয়ার করা বাজেটের মোট: ${amount}';
+	@override String ofMonthlyBudget({required Object budget, required Object spent}) => 'এই মাসে ${budget}-এর মধ্যে ${spent}';
+	@override String get onlySharedNote => 'এখানে শুধু শেয়ার করা বাজেটের লেনদেন গোনা হয়।';
+	@override String you({required Object name}) => '${name} (আপনি)';
+	@override String get memberFallback => 'পরিবারের সদস্য';
+	@override String moreMembers({required Object n}) => '+${n}';
+	@override String get noSharedBudgets => 'এখনো কোনো শেয়ার করা বাজেট নেই। অ্যাডমিন বাজেট ফর্ম থেকে একটি বাজেট শেয়ার করতে পারেন।';
+	@override String get seeAllBudgets => 'সব বাজেট দেখুন';
+	@override String lastUpdated({required Object time}) => 'সর্বশেষ আপডেট ${time}';
+	@override String get loadFailed => 'আপনার পরিবারের তথ্য লোড করা যায়নি। সংযোগ দেখে আবার চেষ্টা করুন।';
+	@override String get summaryFailed => 'সর্বশেষ হিসাব লোড করা যায়নি।';
+	@override String get manageMembers => 'সদস্য পরিচালনা';
+}
+
+// Path: family.members
+class _Translations$family$members$bn extends Translations$family$members$en {
+	_Translations$family$members$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String title({required Object count}) => 'সদস্য (${count})';
+	@override String get inviteMore => 'আরও আমন্ত্রণ করুন';
+	@override String get leave => 'গ্রুপ ছেড়ে দিন';
+	@override String leaveTitle({required Object name}) => '${name} ছেড়ে দেবেন?';
+	@override String get leaveBody => 'এই গ্রুপের শেয়ার করা বাজেটগুলো আপনার ফোন থেকে সরে যাবে। আপনার নিজের লেনদেন আপনার কাছেই থাকবে।';
+	@override String get leaveLastBody => 'আপনিই শেষ সদস্য। ছেড়ে দিলে গ্রুপটি মুছে যাবে।';
+	@override String get changeRole => 'ভূমিকা বদলান';
+	@override String get remove => 'গ্রুপ থেকে সরান';
+	@override String removeTitle({required Object name}) => '${name}-কে সরাবেন?';
+	@override String get deleteGroup => 'গ্রুপ মুছুন';
+	@override String deleteTitle({required Object name}) => '${name} মুছবেন?';
+	@override String get deleteBody => 'সবাইকে সরিয়ে দেওয়া হবে। শেয়ার করা বাজেটগুলো তাদের মালিকের ব্যক্তিগত বাজেট হয়ে যাবে।';
+}
+
+// Path: family.roles
+class _Translations$family$roles$bn extends Translations$family$roles$en {
+	_Translations$family$roles$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get admin => 'অ্যাডমিন';
+	@override String get member => 'সদস্য';
+	@override String get viewer => 'দর্শক';
+}
+
+// Path: family.roleHints
+class _Translations$family$roleHints$bn extends Translations$family$roleHints$en {
+	_Translations$family$roleHints$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get admin => 'সদস্য ও শেয়ার করা বাজেট পরিচালনা করেন';
+	@override String get member => 'ড্যাশবোর্ড দেখেন এবং শেয়ার করা বাজেটে লেনদেন যোগ করেন';
+	@override String get viewer => 'শুধু ড্যাশবোর্ড দেখেন';
+}
+
+// Path: family.errors
+class _Translations$family$errors$bn extends Translations$family$errors$en {
+	_Translations$family$errors$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get alreadyInGroup => 'আপনি ইতিমধ্যে একটি পারিবারিক গ্রুপে আছেন। আগে সেটি ছেড়ে দিন।';
+	@override String get currencyMismatch => 'এই পরিবার অন্য একটি মুদ্রা ব্যবহার করে। সেটিংসে একই মুদ্রা বেছে নিয়ে তারপর যোগ দিন।';
+	@override String get groupFull => 'গ্রুপ পূর্ণ। একটি পারিবারিক গ্রুপে সর্বোচ্চ 10 জন সদস্য থাকতে পারেন।';
+	@override String get inviteExpired => 'এই কোডের মেয়াদ শেষ। অ্যাডমিনের কাছে নতুন কোড চান।';
+	@override String get inviteNotFound => 'এই কোডের কোনো পরিবার নেই। কোডটি দেখে আবার চেষ্টা করুন।';
+	@override String get lastAdmin => 'আগে অন্য কাউকে অ্যাডমিন করুন।';
+	@override String get notInGroup => 'আপনি আর এই গ্রুপে নেই।';
+	@override String get signInRequired => 'পারিবারিক গ্রুপ ব্যবহার করতে সাইন ইন করুন।';
 }
 
 // Path: goals.errors
@@ -1983,6 +2155,7 @@ class _Translations$settings$deleteData$bn extends Translations$settings$deleteD
 	@override String get deleting => 'মুছে ফেলা হচ্ছে…';
 	@override String get done => 'সব ডেটা মুছে ফেলা হয়েছে';
 	@override String get serverFailed => 'আপনার অ্যাকাউন্টের ডেটা মুছতে পারা যায়নি। কিছুই মোছা হয়নি। সংযোগ দেখে আবার চেষ্টা করুন।';
+	@override String get familyAdminNote => 'আপনার তৈরি শেয়ার করা বাজেটগুলো আপনার পরিবারের জন্যও মুছে যাবে।';
 }
 
 // Path: settings.categories
@@ -1993,6 +2166,18 @@ class _Translations$settings$categories$bn extends Translations$settings$categor
 
 	// Translations
 	@override String get rowSubtitle => 'ক্যাটাগরি যোগ, সম্পাদনা ও মুছে ফেলুন';
+}
+
+// Path: settings.family
+class _Translations$settings$family$bn extends Translations$settings$family$en {
+	_Translations$settings$family$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'পারিবারিক গ্রুপ';
+	@override String get rowSubtitle => 'পরিবারের সাথে বাজেট শেয়ার করুন';
+	@override late final _Translations$settings$family$sections$bn sections = _Translations$settings$family$sections$bn._(_root);
 }
 
 // Path: shell.tabs
@@ -2714,6 +2899,17 @@ class _Translations$settings$deleteData$sections$bn extends Translations$setting
 	@override String get confirmation => 'নিশ্চিতকরণ';
 }
 
+// Path: settings.family.sections
+class _Translations$settings$family$sections$bn extends Translations$settings$family$sections$en {
+	_Translations$settings$family$sections$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get spendingByMember => 'সদস্য অনুযায়ী খরচ';
+	@override String get sharedBudgets => 'শেয়ার করা বাজেটের অগ্রগতি';
+}
+
 // Path: support.help.replaySetup
 class _Translations$support$help$replaySetup$bn extends Translations$support$help$replaySetup$en {
 	_Translations$support$help$replaySetup$bn._(TranslationsBn root) : this._root = root, super.internal(root);
@@ -2937,6 +3133,13 @@ extension on TranslationsBn {
 			'budgets.form.amountInvalid' => 'সঠিক সংখ্যা লিখুন',
 			'budgets.form.nameRequired' => 'একটি নাম লিখুন',
 			'budgets.form.nameReserved' => 'অন্য একটি নাম দিন',
+			'budgets.form.sharedReadOnly' => 'পরিবারের অ্যাডমিন এটি শেয়ার করেছেন। শুধু তিনিই এটি বদলাতে পারবেন।',
+			'budgets.form.sharedTitle' => 'শেয়ার করা বাজেট',
+			'budgets.form.share' => 'পরিবারের সাথে শেয়ার করুন',
+			'budgets.form.shareDetail' => ({required Object name}) => '${name}-এর সদস্যরা এটি দেখতে এবং এতে খরচ যোগ করতে পারবেন',
+			'budgets.form.unshareTitle' => 'শেয়ার বন্ধ করবেন?',
+			'budgets.form.unshareBody' => 'সদস্যরা আর এই বাজেট দেখতে পাবেন না। আগে যোগ করা লেনদেন যেমন আছে তেমনই থাকবে।',
+			'budgets.form.unshareConfirm' => 'শেয়ার বন্ধ করুন',
 			'budgets.details.title' => 'বাজেটের বিস্তারিত',
 			'budgets.details.loadFailed' => 'বাজেটের বিস্তারিত লোড করা যায়নি। আবার চেষ্টা করুন।',
 			'budgets.details.notFound' => 'বাজেট পাওয়া যায়নি।',
@@ -2961,6 +3164,7 @@ extension on TranslationsBn {
 			'budgets.picker.previousBudgetHint' => 'বর্তমান সংযোগ রাখুন',
 			'budgets.picker.progress' => ({required Object period, required Object spent, required Object limit}) => '${period} · ${spent} / ${limit}',
 			'budgets.picker.empty' => 'কোনো সক্রিয় বাজেট নেই',
+			'budgets.sharedBadge' => 'শেয়ার করা',
 			'categories.uncategorized' => 'ক্যাটাগরি নেই',
 			'categories.defaults.default_in_salary' => 'বেতন',
 			'categories.defaults.default_in_freelance' => 'ফ্রিল্যান্স',
@@ -3164,6 +3368,79 @@ extension on TranslationsBn {
 			'enums.firstDayOfWeek.sunday' => 'রবিবার',
 			'enums.firstDayOfWeek.monday' => 'সোমবার',
 			'enums.firstDayOfWeek.saturday' => 'শনিবার',
+			'family.create.title' => 'পারিবারিক গ্রুপ তৈরি করুন',
+			'family.create.heading' => 'আপনার পারিবারিক পরিকল্পনা শুরু করুন',
+			'family.create.body' => 'আপনার পরিবারের জন্য একটি শেয়ার করা বাজেটের জায়গা তৈরি করুন।',
+			'family.create.nameLabel' => 'গ্রুপের নাম',
+			'family.create.nameHint' => 'রহমান পরিবার',
+			'family.create.nameRequired' => 'গ্রুপের নাম লিখুন',
+			'family.create.budgetLabel' => 'মাসিক পারিবারিক বাজেট (ঐচ্ছিক)',
+			'family.create.budgetInvalid' => 'শূন্যের বেশি একটি পরিমাণ লিখুন',
+			'family.create.currencyNote' => ({required Object code}) => 'মুদ্রা: ${code} (আপনার সেটিংস থেকে)',
+			'family.create.submit' => 'গ্রুপ তৈরি করুন',
+			'family.create.haveCode' => 'ইনভাইট কোড আছে? পরিবারে যোগ দিন',
+			'family.join.title' => 'পরিবারে যোগ দিন',
+			'family.join.body' => 'পরিবারের অ্যাডমিনের শেয়ার করা 6 অক্ষরের কোডটি লিখুন।',
+			'family.join.codeLabel' => 'ইনভাইট কোড',
+			'family.join.codeInvalid' => 'কোডে 6টি অক্ষর ও সংখ্যা থাকে',
+			'family.join.currencyNote' => ({required Object code}) => 'আপনার মুদ্রা: ${code}',
+			'family.join.submit' => 'গ্রুপে যোগ দিন',
+			'family.join.joined' => ({required Object name}) => 'আপনি ${name}-এ যোগ দিয়েছেন',
+			'family.join.syncOff' => 'আপনি যোগ দিয়েছেন। শেয়ার করা বাজেট দেখতে সেটিংসে সিঙ্ক চালু করুন।',
+			'family.invite.title' => 'সদস্য আমন্ত্রণ করুন',
+			'family.invite.heading' => 'আপনার পরিবারকে আমন্ত্রণ করুন',
+			'family.invite.limitNote' => 'আপনিসহ সর্বোচ্চ 10 জন সদস্য',
+			'family.invite.codeCaption' => 'এই ইনভাইট কোডটি শেয়ার করুন',
+			'family.invite.validUntil' => ({required Object time}) => '${time} পর্যন্ত বৈধ',
+			'family.invite.share' => 'ইনভাইট শেয়ার করুন',
+			'family.invite.shareText' => ({required Object name, required Object code, required Object time}) => 'Expenzo-তে আমার পরিবার "${name}"-এ যোগ দিন: সেটিংস > পারিবারিক গ্রুপ > পরিবারে যোগ দিন খুলে ${code} লিখুন। কোডটি ${time} পর্যন্ত কাজ করবে।',
+			'family.invite.regenerate' => 'নতুন কোড তৈরি করুন',
+			'family.invite.regenerateTitle' => 'নতুন কোড তৈরি করবেন?',
+			'family.invite.regenerateBody' => 'বর্তমান কোডটি আর কাজ করবে না।',
+			'family.invite.copied' => 'কোড কপি হয়েছে',
+			'family.invite.offline' => 'আপনি অফলাইনে আছেন। ইনভাইট কোড পেতে ইন্টারনেটে যুক্ত হোন।',
+			'family.invite.expired' => 'এই কোডের মেয়াদ শেষ। নতুন কোড তৈরি করুন।',
+			'family.dashboard.spentOfPlanned' => 'পরিকল্পনার মধ্যে খরচ',
+			'family.dashboard.spentOfPlannedValue' => ({required Object planned, required Object spent}) => '${planned}-এর মধ্যে ${spent}',
+			'family.dashboard.expense' => ({required Object amount}) => 'খরচ: ${amount}',
+			'family.dashboard.sharedBudgetTotal' => ({required Object amount}) => 'শেয়ার করা বাজেটের মোট: ${amount}',
+			'family.dashboard.ofMonthlyBudget' => ({required Object budget, required Object spent}) => 'এই মাসে ${budget}-এর মধ্যে ${spent}',
+			'family.dashboard.onlySharedNote' => 'এখানে শুধু শেয়ার করা বাজেটের লেনদেন গোনা হয়।',
+			'family.dashboard.you' => ({required Object name}) => '${name} (আপনি)',
+			'family.dashboard.memberFallback' => 'পরিবারের সদস্য',
+			'family.dashboard.moreMembers' => ({required Object n}) => '+${n}',
+			'family.dashboard.noSharedBudgets' => 'এখনো কোনো শেয়ার করা বাজেট নেই। অ্যাডমিন বাজেট ফর্ম থেকে একটি বাজেট শেয়ার করতে পারেন।',
+			'family.dashboard.seeAllBudgets' => 'সব বাজেট দেখুন',
+			'family.dashboard.lastUpdated' => ({required Object time}) => 'সর্বশেষ আপডেট ${time}',
+			'family.dashboard.loadFailed' => 'আপনার পরিবারের তথ্য লোড করা যায়নি। সংযোগ দেখে আবার চেষ্টা করুন।',
+			'family.dashboard.summaryFailed' => 'সর্বশেষ হিসাব লোড করা যায়নি।',
+			'family.dashboard.manageMembers' => 'সদস্য পরিচালনা',
+			'family.members.title' => ({required Object count}) => 'সদস্য (${count})',
+			'family.members.inviteMore' => 'আরও আমন্ত্রণ করুন',
+			'family.members.leave' => 'গ্রুপ ছেড়ে দিন',
+			'family.members.leaveTitle' => ({required Object name}) => '${name} ছেড়ে দেবেন?',
+			'family.members.leaveBody' => 'এই গ্রুপের শেয়ার করা বাজেটগুলো আপনার ফোন থেকে সরে যাবে। আপনার নিজের লেনদেন আপনার কাছেই থাকবে।',
+			'family.members.leaveLastBody' => 'আপনিই শেষ সদস্য। ছেড়ে দিলে গ্রুপটি মুছে যাবে।',
+			'family.members.changeRole' => 'ভূমিকা বদলান',
+			'family.members.remove' => 'গ্রুপ থেকে সরান',
+			'family.members.removeTitle' => ({required Object name}) => '${name}-কে সরাবেন?',
+			'family.members.deleteGroup' => 'গ্রুপ মুছুন',
+			'family.members.deleteTitle' => ({required Object name}) => '${name} মুছবেন?',
+			'family.members.deleteBody' => 'সবাইকে সরিয়ে দেওয়া হবে। শেয়ার করা বাজেটগুলো তাদের মালিকের ব্যক্তিগত বাজেট হয়ে যাবে।',
+			'family.roles.admin' => 'অ্যাডমিন',
+			'family.roles.member' => 'সদস্য',
+			'family.roles.viewer' => 'দর্শক',
+			'family.roleHints.admin' => 'সদস্য ও শেয়ার করা বাজেট পরিচালনা করেন',
+			'family.roleHints.member' => 'ড্যাশবোর্ড দেখেন এবং শেয়ার করা বাজেটে লেনদেন যোগ করেন',
+			'family.roleHints.viewer' => 'শুধু ড্যাশবোর্ড দেখেন',
+			'family.errors.alreadyInGroup' => 'আপনি ইতিমধ্যে একটি পারিবারিক গ্রুপে আছেন। আগে সেটি ছেড়ে দিন।',
+			'family.errors.currencyMismatch' => 'এই পরিবার অন্য একটি মুদ্রা ব্যবহার করে। সেটিংসে একই মুদ্রা বেছে নিয়ে তারপর যোগ দিন।',
+			'family.errors.groupFull' => 'গ্রুপ পূর্ণ। একটি পারিবারিক গ্রুপে সর্বোচ্চ 10 জন সদস্য থাকতে পারেন।',
+			'family.errors.inviteExpired' => 'এই কোডের মেয়াদ শেষ। অ্যাডমিনের কাছে নতুন কোড চান।',
+			'family.errors.inviteNotFound' => 'এই কোডের কোনো পরিবার নেই। কোডটি দেখে আবার চেষ্টা করুন।',
+			'family.errors.lastAdmin' => 'আগে অন্য কাউকে অ্যাডমিন করুন।',
+			'family.errors.notInGroup' => 'আপনি আর এই গ্রুপে নেই।',
+			'family.errors.signInRequired' => 'পারিবারিক গ্রুপ ব্যবহার করতে সাইন ইন করুন।',
 			'goals.errors.nameRequired' => 'আপনার লক্ষ্যের একটি নাম দিন।',
 			'goals.errors.targetPositive' => 'শূন্যের বেশি একটি লক্ষ্য পরিমাণ লিখুন।',
 			'goals.errors.amountPositive' => 'শূন্যের বেশি একটি পরিমাণ লিখুন।',
@@ -3298,6 +3575,8 @@ extension on TranslationsBn {
 			'onboarding.timeline.custom' => 'নিজস্ব',
 			'onboarding.timeline.customHint' => 'নিজে ঠিক করুন',
 			'onboarding.timeline.fit.affordable' => 'আপনার সঞ্চয়ে হবে',
+			_ => null,
+		} ?? switch (path) {
 			'onboarding.timeline.fit.tooExpensive' => 'আপনার সঞ্চয়ের চেয়ে বেশি',
 			'onboarding.timeline.fit.slow' => 'অনেক সময় লাগবে',
 			'onboarding.complete.title' => 'সেটআপ সম্পন্ন!',
@@ -3379,8 +3658,6 @@ extension on TranslationsBn {
 			'receiptScan.readFailed' => 'রসিদটি পড়া যায়নি। আবার চেষ্টা করুন অথবা নিজে যোগ করুন।',
 			'receiptScan.chooseFromGallery' => 'গ্যালারি থেকে বেছে নিন',
 			'receiptScan.flashOff' => 'ফ্ল্যাশ বন্ধ করুন',
-			_ => null,
-		} ?? switch (path) {
 			'receiptScan.flashOn' => 'ফ্ল্যাশ চালু করুন',
 			'receiptScan.align' => 'রসিদটি ফ্রেমের মধ্যে রাখুন',
 			'receiptScan.reading' => 'আপনার রসিদ পড়া হচ্ছে',
@@ -3690,7 +3967,12 @@ extension on TranslationsBn {
 			'settings.deleteData.deleting' => 'মুছে ফেলা হচ্ছে…',
 			'settings.deleteData.done' => 'সব ডেটা মুছে ফেলা হয়েছে',
 			'settings.deleteData.serverFailed' => 'আপনার অ্যাকাউন্টের ডেটা মুছতে পারা যায়নি। কিছুই মোছা হয়নি। সংযোগ দেখে আবার চেষ্টা করুন।',
+			'settings.deleteData.familyAdminNote' => 'আপনার তৈরি শেয়ার করা বাজেটগুলো আপনার পরিবারের জন্যও মুছে যাবে।',
 			'settings.categories.rowSubtitle' => 'ক্যাটাগরি যোগ, সম্পাদনা ও মুছে ফেলুন',
+			'settings.family.title' => 'পারিবারিক গ্রুপ',
+			'settings.family.rowSubtitle' => 'পরিবারের সাথে বাজেট শেয়ার করুন',
+			'settings.family.sections.spendingByMember' => 'সদস্য অনুযায়ী খরচ',
+			'settings.family.sections.sharedBudgets' => 'শেয়ার করা বাজেটের অগ্রগতি',
 			'shell.tabs.home' => 'হোম',
 			'shell.tabs.activity' => 'লেনদেন',
 			'shell.tabs.budgets' => 'বাজেট',
