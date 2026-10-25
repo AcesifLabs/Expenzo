@@ -1,9 +1,9 @@
 {
   "@@i18n-review": "Machine-drafted Bangla. Needs native review before release.",
   "range": {
-    "last7Days": "গত ৭ দিন",
-    "last30Days": "গত ৩০ দিন",
-    "last3Months": "গত ৩ মাস",
+    "last7Days": "গত 7 দিন",
+    "last30Days": "গত 30 দিন",
+    "last3Months": "গত 3 মাস",
     "allTime": "সব সময়",
     "custom": "নির্দিষ্ট তারিখের সীমা",
     "from": "{date} থেকে",
@@ -16,7 +16,8 @@
     "selected": "বাছাই করা"
   },
   "card": {
-    "rule": "নিয়ম: {id}"
+    "rule": "নিয়ম: {id}",
+    "noAmount": "পরিমাণ নেই"
   },
   "options": {
     "title": "রেকর্ডের জন্য পুরোনো SMS স্ক্যান করুন"

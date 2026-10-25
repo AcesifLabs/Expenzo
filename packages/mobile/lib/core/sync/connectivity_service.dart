@@ -31,6 +31,29 @@ class ConnectivityService {
     }
   }
 
+  /// True when the device reports any link (Wi‑Fi, mobile, …). Does not ping
+  /// the backend — use this for "you're offline" UI on features that need
+  /// the public internet (sign-in, Ask AI, Receipt Scan).
+  Future<bool> hasNetworkLink() async {
+    try {
+      final results = await _connectivity.checkConnectivity();
+
+      return results.any((r) => r != ConnectivityResult.none);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static bool _isHealthy(Response<Object?> response) {
+    final status = response.statusCode ?? 0;
+    final body = response.data;
+
+    return status >= 200 &&
+        status < 300 &&
+        body is Map &&
+        body[ApiConstants.healthStatusKey] == ApiConstants.healthOk;
+  }
+
   Future<bool> _checkConnectivity(List<ConnectivityResult> results) async {
     if (results.isEmpty || results.contains(ConnectivityResult.none)) {
       _isOnline = false;
@@ -38,15 +61,17 @@ class ConnectivityService {
       return false;
     }
     try {
-      await _apiClient.dio
-          .get(
+      final response = await _apiClient.dio
+          .get<Object?>(
             ApiConstants.health,
             options: Options(validateStatus: (_) => true),
           )
           .timeout(const Duration(seconds: 5));
-      _isOnline = true;
+      // Only our backend's answer counts: a captive portal or a proxy also
+      // returns 200, with its own page.
+      _isOnline = _isHealthy(response);
 
-      return true;
+      return _isOnline;
     } catch (e) {
       _isOnline = false;
 

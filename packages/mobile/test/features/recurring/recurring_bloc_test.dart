@@ -96,14 +96,14 @@ void main() {
     test('emits [RecurringLoading, RecurringError] on failure', () async {
       when(
         () => mockGetRecurringList(any()),
-      ).thenAnswer((_) async => Left(ServerFailure(message: 'Failed to load')));
+      ).thenAnswer((_) async => Left(CacheFailure(message: 'Failed to load')));
 
       final expected = [
         isA<RecurringLoading>(),
         isA<RecurringError>().having(
           (s) => s.message,
           'message',
-          t.common.errors.server,
+          t.common.errors.storage,
         ),
       ];
 
@@ -135,14 +135,14 @@ void main() {
     test('emits [RecurringLoading, RecurringError] on failure', () async {
       when(
         () => mockCreateRecurring(any()),
-      ).thenAnswer((_) async => Left(ServerFailure(message: 'Create failed')));
+      ).thenAnswer((_) async => Left(CacheFailure(message: 'Create failed')));
 
       final expected = [
         isA<RecurringLoading>(),
         isA<RecurringError>().having(
           (s) => s.message,
           'message',
-          t.common.errors.server,
+          t.common.errors.storage,
         ),
       ];
 
@@ -221,5 +221,23 @@ void main() {
       );
       bloc.add(const ProcessRecurring());
     });
+  });
+
+  test('a double tap on Add creates one recurring item', () async {
+    when(() => mockCreateRecurring(any())).thenAnswer((_) async {
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+
+      return Right(testRecurring);
+    });
+    when(
+      () => mockGetRecurringList(any()),
+    ).thenAnswer((_) async => Right([testRecurring]));
+
+    bloc
+      ..add(CreateRecurring(testRecurring))
+      ..add(CreateRecurring(testRecurring));
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+
+    verify(() => mockCreateRecurring(any())).called(1);
   });
 }

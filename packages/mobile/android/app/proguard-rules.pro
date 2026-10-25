@@ -21,9 +21,24 @@
 -keep class androidx.work.** { *; }
 -dontwarn androidx.work.**
 
-# Drift / SQLite
--keep class * extends com.github.drift.** { *; }
+# Drift runs on sqlite3 through FFI, so there are no Java classes to keep.
 -dontwarn com.squareup.moshi.**
+
+# The app's own receiver and SMS store (MainActivity, SmsBroadcastReceiver,
+# SmsEventStore), called from the manifest and the platform channel.
+-keep class com.acesiflabs.expenzo.** { *; }
+
+# flutter_local_notifications stores notification details with Gson, which
+# reads fields by reflection (plugin README, "Release build configuration").
+-keep class com.dexterous.** { *; }
+-keepattributes Signature
+-keepattributes *Annotation*
+-keep class * extends com.google.gson.TypeAdapter
+-keep class * implements com.google.gson.TypeAdapterFactory
+-keep class * implements com.google.gson.JsonSerializer
+-keep class * implements com.google.gson.JsonDeserializer
+-keep class com.google.gson.reflect.TypeToken { *; }
+-keep class * extends com.google.gson.reflect.TypeToken
 
 # Play Core: the Flutter engine references the deferred-components classes
 # (com.google.android.play.core.splitinstall/splitcompat/tasks), which this app

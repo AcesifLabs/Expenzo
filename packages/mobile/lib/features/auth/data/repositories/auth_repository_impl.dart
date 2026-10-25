@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import '../../domain/entities/user.dart';
@@ -192,14 +193,18 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> pauseSyncEngine() async {
     try {
       await di.getIt<SyncEngine>().pause();
-    } catch (_) {}
+    } catch (e, s) {
+      appLogger.error('Sync engine pause failed', e, s);
+    }
   }
 
   @override
   Future<void> resumeSyncEngine() async {
     try {
       await di.getIt<SyncEngine>().resume();
-    } catch (_) {}
+    } catch (e, s) {
+      appLogger.error('Sync engine resume failed', e, s);
+    }
   }
 
   @override
@@ -214,14 +219,18 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> stopSyncEngine() async {
     try {
       await di.getIt<SyncEngine>().stop();
-    } catch (_) {}
+    } catch (e, s) {
+      appLogger.error('Sync engine stop failed', e, s);
+    }
   }
 
   @override
   Future<void> startSyncEngine() async {
     try {
       await di.getIt<SyncEngine>().start();
-    } catch (_) {}
+    } catch (e, s) {
+      appLogger.error('Sync engine start failed', e, s);
+    }
   }
 
   static String _mapFirebaseAuthException(fb.FirebaseAuthException e) {

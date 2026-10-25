@@ -4,6 +4,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/features/reports/domain/entities/weekly_summary.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
 class NotificationService {
@@ -227,10 +228,7 @@ class NotificationService {
 
       return data['deepLink'] as String?;
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
-      if (kDebugMode) {
-        debugPrint('Failed to parse notification payload: $e');
-      }
+      appLogger.error('Notification payload is not a valid deep link', e, s);
 
       return null;
     }

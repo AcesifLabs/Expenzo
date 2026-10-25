@@ -1,0 +1,20 @@
+{
+  "records_scroll": {
+    "average_frame_build_time_millis": 0.20497307692307684,
+    "worst_frame_build_time_millis": 0.548,
+    "missed_frame_build_budget_count": 0,
+    "frame_count": 260
+  },
+  "dashboard_range": {
+    "average_frame_build_time_millis": 0.5650750000000001,
+    "worst_frame_build_time_millis": 6.411,
+    "missed_frame_build_budget_count": 0,
+    "frame_count": 40
+  },
+  "open_reports": {
+    "average_frame_build_time_millis": 0.5189,
+    "worst_frame_build_time_millis": 5.982,
+    "missed_frame_build_budget_count": 0,
+    "frame_count": 30
+  }
+}

@@ -19,7 +19,7 @@ class BudgetRemoteDatasourceImpl implements BudgetRemoteDatasource {
   @override
   Future<void> fillMissingNames(List<BudgetNameEntry> names) async {
     try {
-      await apiClient.dio.post(
+      await apiClient.dio.post<Object?>(
         ApiConstants.budgetNames,
         data: {
           'names': [

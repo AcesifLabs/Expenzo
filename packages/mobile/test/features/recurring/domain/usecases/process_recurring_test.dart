@@ -108,4 +108,27 @@ void main() {
     expect(result.getOrElse(() => []), hasLength(2));
     expect(savedUpdates().single.isActive, isFalse);
   });
+
+  test('a monthly item saved without a day of month keeps its start day '
+      'after a short month', () async {
+    dueItems([
+      makeRecurring(
+        startDate: DateTime(2025, 1, 31),
+        nextOccurrence: DateTime(2025, 2, 28),
+      ),
+    ]);
+
+    final result = await processRecurring();
+
+    final dates = result.getOrElse(() => []).map((r) => r.nextOccurrence);
+    expect(dates.take(3), [
+      DateTime(2025, 2, 28),
+      DateTime(2025, 3, 31),
+      DateTime(2025, 4, 30),
+    ]);
+    for (final date in dates) {
+      final lastDay = DateTime(date.year, date.month + 1, 0).day;
+      expect(date.day, lastDay < 31 ? lastDay : 31, reason: '$date');
+    }
+  });
 }

@@ -75,7 +75,7 @@ class _ToggleTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fgColor = isActive ? activeColor : colors.onSurface.withAlpha(120);
+    final fgColor = isActive ? activeColor : colors.onSurfaceVariant;
 
     return Semantics(
       button: true,

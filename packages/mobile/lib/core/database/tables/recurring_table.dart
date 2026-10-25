@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+@TableIndex(name: 'idx_recurring_transactions_cat_id', columns: {#categoryId})
 class RecurringTransactions extends Table {
   TextColumn get id => text()();
   TextColumn get description => text()();
@@ -18,11 +19,4 @@ class RecurringTransactions extends Table {
 
   @override
   Set<Column> get primaryKey => {id};
-
-  Set<TableIndex> get indexes => {
-    const TableIndex(
-      name: 'idx_recurring_transactions_cat_id',
-      columns: {#categoryId},
-    ),
-  };
 }

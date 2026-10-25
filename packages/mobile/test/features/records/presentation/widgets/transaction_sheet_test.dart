@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:expense_tracker/features/records/data/services/transaction_draft_store.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:go_router/go_router.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/core/utils/number_display_format.dart';
@@ -251,6 +253,80 @@ void main() {
     await tester.enterText(find.byType(TextField).first, 'Lunch');
     await tester.pump();
     expect(find.text('Add expense'), findsOneWidget);
+  });
+
+  group('draft', () {
+    late TransactionDraftStore drafts;
+
+    setUp(() async {
+      SharedPreferences.setMockInitialValues({});
+      drafts = TransactionDraftStore(await SharedPreferences.getInstance());
+      di.getIt.registerSingleton<TransactionDraftStore>(drafts);
+    });
+
+    tearDown(() => di.getIt.unregister<TransactionDraftStore>());
+
+    testWidgets('typed fields are kept when the app goes to the background', (
+      tester,
+    ) async {
+      await pumpSheet(tester);
+      for (final digit in ['4', '5']) {
+        await tester.tap(find.text(digit).first);
+      }
+      await tester.enterText(find.byType(TextField).first, 'Taxi');
+
+      void moveThrough(List<AppLifecycleState> states) {
+        for (final state in states) {
+          tester.binding.handleAppLifecycleStateChanged(state);
+        }
+      }
+
+      moveThrough(const [
+        AppLifecycleState.inactive,
+        AppLifecycleState.hidden,
+        AppLifecycleState.paused,
+      ]);
+      await tester.pump();
+
+      expect(drafts.load()?.amountText, '45');
+      expect(drafts.load()?.note, 'Taxi');
+      moveThrough(const [
+        AppLifecycleState.hidden,
+        AppLifecycleState.inactive,
+        AppLifecycleState.resumed,
+      ]);
+    });
+
+    testWidgets('a new sheet opens with the saved draft', (tester) async {
+      await drafts.save((
+        type: RecordType.expense,
+        amountText: '45',
+        note: 'Taxi',
+        categoryId: null,
+        budgetId: null,
+        date: DateTime(2026, 10, 24),
+      ));
+
+      await pumpSheet(tester);
+
+      expect(find.text('Taxi'), findsOneWidget);
+    });
+
+    testWidgets('closing the sheet drops the draft', (tester) async {
+      await drafts.save((
+        type: RecordType.expense,
+        amountText: '45',
+        note: 'Taxi',
+        categoryId: null,
+        budgetId: null,
+        date: DateTime(2026, 10, 24),
+      ));
+      await pumpSheet(tester);
+
+      await tester.pumpWidget(const SizedBox());
+
+      expect(drafts.load(), isNull);
+    });
   });
 
   testWidgets('delete asks first, then deletes the record', (tester) async {

@@ -1,3 +1,4 @@
+import 'package:clock/clock.dart';
 import 'package:intl/intl.dart';
 import '../../domain/entities/record.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
@@ -27,7 +28,7 @@ List<RecordDayGroup> groupRecordsByDay(List<Record> records) {
 
 /// "Today", "Yesterday", "Mon, 6 Oct", or "Mon, 6 Oct 2025" for other years.
 String dayHeaderLabel(DateTime day, {DateTime? now}) {
-  final current = now ?? DateTime.now();
+  final current = now ?? clock.now();
   final today = DateTime(current.year, current.month, current.day);
   // Count calendar days in UTC: local midnights can be 23 or 25 hours
   // apart across a daylight-saving change.

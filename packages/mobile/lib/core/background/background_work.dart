@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:workmanager/workmanager.dart';
 
 /// The plugin calls the scheduler needs, so tests don't touch platform
@@ -32,8 +32,7 @@ class WorkmanagerBackgroundWork implements BackgroundWork {
       await Workmanager().initialize(dispatcher);
       _initialized.complete(true);
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
-      debugPrint('Workmanager init failed: $e');
+      appLogger.error('Workmanager init failed', e, s);
       _initialized.complete(false);
     }
   }

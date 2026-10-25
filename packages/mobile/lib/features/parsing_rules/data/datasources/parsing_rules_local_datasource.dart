@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import 'package:expense_tracker/core/database/app_database.dart';
 import 'package:expense_tracker/core/database/daos/parsing_rule_dao.dart';
 import '../../domain/entities/parsing_rule.dart' as domain;
+import '../../domain/entities/date_order.dart';
 
 abstract class ParsingRulesLocalDatasource {
   Future<List<domain.ParsingRule>> getRules({
@@ -79,7 +80,7 @@ class ParsingRulesLocalDatasourceImpl implements ParsingRulesLocalDatasource {
     return domain.ParsingRule(
       id: data.id,
       name: data.name,
-      triggerWords: List<String>.from(json.decode(data.triggerWords)),
+      triggerWords: List<String>.from(json.decode(data.triggerWords) as List),
       amountPattern: data.amountPattern,
       datePattern: data.datePattern,
       categoryId: data.categoryId,
@@ -89,6 +90,7 @@ class ParsingRulesLocalDatasourceImpl implements ParsingRulesLocalDatasource {
       ),
       isEnabled: data.isEnabled,
       priority: data.priority,
+      dateOrder: DateOrder.fromName(data.dateOrder),
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
     );
@@ -105,6 +107,7 @@ class ParsingRulesLocalDatasourceImpl implements ParsingRulesLocalDatasource {
       sourceType: Value(rule.sourceType.name),
       isEnabled: Value(rule.isEnabled),
       priority: Value(rule.priority),
+      dateOrder: Value(rule.dateOrder.name),
       createdAt: Value(rule.createdAt),
       updatedAt: Value(rule.updatedAt),
     );

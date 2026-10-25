@@ -12,6 +12,7 @@ abstract class MessageTemplateLocalDatasource {
   Stream<List<domain.MessageSource>> watchMessageSources();
 
   Future<List<domain.ExpenseTemplate>> getTemplatesForSource(String sourceId);
+  Future<domain.ExpenseTemplate?> getTemplateById(String id);
   Future<List<domain.ExpenseTemplate>> getAllTemplates();
   Future<domain.ExpenseTemplate> saveTemplate(domain.ExpenseTemplate template);
   Future<void> deleteTemplate(String id);
@@ -75,6 +76,13 @@ class MessageTemplateLocalDatasourceImpl
     final templates = await dao.getTemplatesForSource(sourceId);
 
     return templates.map(_mapTemplateToDomain).toList();
+  }
+
+  @override
+  Future<domain.ExpenseTemplate?> getTemplateById(String id) async {
+    final template = await dao.getTemplateById(id);
+
+    return template != null ? _mapTemplateToDomain(template) : null;
   }
 
   @override

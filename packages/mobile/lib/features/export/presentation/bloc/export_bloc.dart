@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/core/bloc/transformers.dart';
 import 'package:expense_tracker/core/error/failure_message.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
@@ -84,7 +85,8 @@ class ExportBloc extends Bloc<ExportEvent, ExportState> {
             subject: t.settings.export.shareSubject,
           );
           emit(state.copyWith(status: ExportStatus.shared));
-        } catch (_) {
+        } catch (e, s) {
+          appLogger.error('Export share failed', e, s);
           emit(
             state.copyWith(
               status: ExportStatus.failed,

@@ -5,7 +5,8 @@ import 'package:expense_tracker/features/recurring/domain/entities/recurring_fre
 import 'package:expense_tracker/features/recurring/presentation/bloc/recurring_bloc.dart';
 import 'package:expense_tracker/features/recurring/presentation/bloc/recurring_state.dart';
 import 'package:expense_tracker/features/recurring/presentation/pages/recurring_form_page.dart';
-import 'package:flutter/widgets.dart';
+import 'package:expense_tracker/features/recurring/presentation/bloc/recurring_event.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -18,11 +19,16 @@ class _MockCategoryBloc extends Mock implements CategoryBloc {}
 
 class _FakeCategoryEvent extends Fake implements CategoryEvent {}
 
+class _FakeRecurringEvent extends Fake implements RecurringEvent {}
+
 void main() {
   late _MockRecurringBloc recurringBloc;
   late _MockCategoryBloc categoryBloc;
 
-  setUpAll(() => registerFallbackValue(_FakeCategoryEvent()));
+  setUpAll(() {
+    registerFallbackValue(_FakeCategoryEvent());
+    registerFallbackValue(_FakeRecurringEvent());
+  });
 
   setUp(() {
     recurringBloc = _MockRecurringBloc();
@@ -71,5 +77,36 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     expect(find.text('Include in auto-create'), findsOneWidget);
+  });
+
+  testWidgets('a new monthly item repeats on the start date\'s day', (
+    tester,
+  ) async {
+    await pumpForm(
+      tester,
+      const RecurringFormPage(defaultFrequency: RecurringFrequency.monthly),
+    );
+    await tester.pumpAndSettle();
+
+    final fields = find.byType(TextFormField);
+    await tester.enterText(fields.at(0), '1200');
+    await tester.enterText(fields.at(1), 'Rent');
+    // Typing leaves the keyboard's focus in the form; drop it first.
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pumpAndSettle();
+    final add = find.widgetWithText(ElevatedButton, 'Add');
+    await tester.scrollUntilVisible(
+      add,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(add);
+    await tester.pump();
+
+    final event =
+        verify(() => recurringBloc.add(captureAny())).captured.single
+            as CreateRecurring;
+    expect(event.recurring.dayOfMonth, event.recurring.startDate.day);
   });
 }

@@ -51,11 +51,12 @@ class SyncEngineHarness {
   SyncEngine engine({
     Future<bool> Function()? isEnabled,
     List<SyncTask> stopTasks = const [],
+    SyncTableRegistry? registry,
   }) => _engine = SyncEngine(
     syncQueueDao: queue,
     apiClient: apiClient,
     connectivity: connectivity,
-    registry: SyncTableRegistry(),
+    registry: registry ?? SyncTableRegistry(),
     isEnabled: isEnabled,
     stopTasks: stopTasks,
   );
@@ -64,28 +65,28 @@ class SyncEngineHarness {
       when(() => connectivity.checkNow()).thenAnswer((_) async => value);
 
   void pullReturns() => when(
-    () => dio.get<dynamic>(
+    () => dio.get<Object?>(
       ApiConstants.syncPull,
       queryParameters: any(named: 'queryParameters'),
     ),
   ).thenAnswer((_) async => _pullResponse());
 
   void pullThrows() => when(
-    () => dio.get<dynamic>(
+    () => dio.get<Object?>(
       ApiConstants.syncPull,
       queryParameters: any(named: 'queryParameters'),
     ),
   ).thenThrow(Exception('server down'));
 
   void pullWith(Future<Response<dynamic>> Function() answer) => when(
-    () => dio.get<dynamic>(
+    () => dio.get<Object?>(
       ApiConstants.syncPull,
       queryParameters: any(named: 'queryParameters'),
     ),
   ).thenAnswer((_) => answer());
 
   void pushSucceeds() =>
-      when(() => dio.post<dynamic>(any(), data: any(named: 'data'))).thenAnswer(
+      when(() => dio.post<Object?>(any(), data: any(named: 'data'))).thenAnswer(
         (invocation) async => Response(
           requestOptions: RequestOptions(path: ApiConstants.syncPush),
           data: {'results': _okResults(invocation)},
@@ -93,7 +94,7 @@ class SyncEngineHarness {
       );
 
   void pushThrows() => when(
-    () => dio.post<dynamic>(any(), data: any(named: 'data')),
+    () => dio.post<Object?>(any(), data: any(named: 'data')),
   ).thenThrow(Exception('server down'));
 
   /// Queues one change so a push sends something.
@@ -105,7 +106,7 @@ class SyncEngineHarness {
   );
 
   int pullCount() => verify(
-    () => dio.get<dynamic>(
+    () => dio.get<Object?>(
       ApiConstants.syncPull,
       queryParameters: any(named: 'queryParameters'),
     ),
@@ -113,7 +114,7 @@ class SyncEngineHarness {
 
   static Response<dynamic> _pullResponse() => Response(
     requestOptions: RequestOptions(path: ApiConstants.syncPull),
-    data: {'changes': [], 'serverTime': '2026-10-15T00:00:00.000Z'},
+    data: {'changes': <Object>[], 'serverTime': '2026-10-15T00:00:00.000Z'},
   );
 
   static List<Map<String, dynamic>> _okResults(Invocation invocation) {

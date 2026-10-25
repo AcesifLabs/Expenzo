@@ -11,16 +11,16 @@ class ChatInput extends StatelessWidget {
   final TextEditingController controller;
   final FocusNode? focusNode;
   final bool enabled;
-  final ValueChanged<String>? onSubmitted;
-  final VoidCallback? onSend;
+  final ValueChanged<String> onSubmitted;
+  final VoidCallback onSend;
 
   const ChatInput({
     super.key,
     required this.controller,
     this.focusNode,
     this.enabled = true,
-    this.onSubmitted,
-    this.onSend,
+    required this.onSubmitted,
+    required this.onSend,
   });
 
   OutlineInputBorder _border(Color color) {
@@ -58,8 +58,11 @@ class ChatInput extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: SizedBox(
-              height: 44,
+            child: ConstrainedBox(
+              // A 48 dp tap target that grows with large text.
+              constraints: const BoxConstraints(
+                minHeight: AppSpacing.minTapTarget,
+              ),
               child: TextField(
                 controller: controller,
                 focusNode: focusNode,

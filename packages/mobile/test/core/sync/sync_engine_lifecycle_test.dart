@@ -11,7 +11,7 @@ import 'sync_engine_harness.dart';
 
 Response<dynamic> _pulled() => Response(
   requestOptions: RequestOptions(path: ApiConstants.syncPull),
-  data: {'changes': [], 'serverTime': '2026-10-15T00:00:00.000Z'},
+  data: {'changes': <Object>[], 'serverTime': '2026-10-15T00:00:00.000Z'},
 );
 
 void main() {
@@ -84,7 +84,7 @@ void main() {
 
       expect(asked, hasLength(1));
       verifyNever(
-        () => harness.dio.get<dynamic>(
+        () => harness.dio.get<Object?>(
           any(),
           queryParameters: any(named: 'queryParameters'),
         ),

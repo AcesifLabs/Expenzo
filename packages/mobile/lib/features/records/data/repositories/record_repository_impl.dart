@@ -1,27 +1,21 @@
 import 'dart:convert';
 import 'package:dartz/dartz.dart';
-import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/sync/sync_event.dart';
-import 'package:expense_tracker/core/sync/connectivity_service.dart';
 import 'package:expense_tracker/core/database/daos/sync_queue_dao.dart';
 import '../../domain/repositories/record_repository.dart';
 import '../datasources/record_local_datasource.dart';
-import '../datasources/record_remote_datasource.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/core/error/failure_message.dart';
 
 class RecordRepositoryImpl implements RecordRepository {
   final RecordLocalDatasource localDatasource;
-  final RecordRemoteDatasource remoteDatasource;
-  final ConnectivityService connectivity;
   final SyncQueueDao? _syncQueueDao;
 
   RecordRepositoryImpl({
     required this.localDatasource,
-    required this.remoteDatasource,
-    required this.connectivity,
     SyncQueueDao? syncQueueDao,
   }) : _syncQueueDao = syncQueueDao;
 
@@ -44,41 +38,26 @@ class RecordRepositoryImpl implements RecordRepository {
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
+      appLogger.error('RecordRepositoryImpl.getRecords failed', e, s);
 
       return Left(CacheFailure(message: e.toString()));
     }
   }
 
   @override
-  Future<Either<Failure, List<Record>>> getFilteredRecords(
+  Stream<List<Record>> watchFilteredRecords(RecordFilter filter) =>
+      localDatasource.watchFilteredRecords(filter);
+
+  @override
+  Future<Either<CacheFailure, List<Record>>> getFilteredRecords(
     RecordFilter filter,
   ) async {
     try {
-      final online = await _checkConnectivity();
-      if (online) {
-        final resp = await remoteDatasource.getRecords(
-          RemoteRecordQuery(
-            limit: filter.limit,
-            startDate: filter.startDate?.toUtc().toIso8601String(),
-            endDate: filter.endDate?.toUtc().toIso8601String(),
-            categoryIds: filter.categoryIds,
-            recordType: filter.recordType,
-          ),
-        );
-
-        return Right(resp.data);
-      }
-
-      final records = await localDatasource.getFilteredRecords(filter);
-
-      return Right(records);
+      return Right(await localDatasource.getFilteredRecords(filter));
     } on CacheException catch (e) {
       return Left(e.toFailure());
-    } on ServerException catch (e) {
-      return Left(e.toFailure());
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
+      appLogger.error('RecordRepositoryImpl.getFilteredRecords failed', e, s);
 
       return Left(CacheFailure(message: e.toString()));
     }
@@ -101,7 +80,7 @@ class RecordRepositoryImpl implements RecordRepository {
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
+      appLogger.error('RecordRepositoryImpl.getRecordById failed', e, s);
 
       return Left(CacheFailure(message: e.toString()));
     }
@@ -128,7 +107,7 @@ class RecordRepositoryImpl implements RecordRepository {
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
+      appLogger.error('RecordRepositoryImpl.addRecord failed', e, s);
 
       return Left(CacheFailure(message: e.toString()));
     }
@@ -155,7 +134,7 @@ class RecordRepositoryImpl implements RecordRepository {
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
+      appLogger.error('RecordRepositoryImpl.updateRecord failed', e, s);
 
       return Left(CacheFailure(message: e.toString()));
     }
@@ -171,7 +150,7 @@ class RecordRepositoryImpl implements RecordRepository {
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
+      appLogger.error('RecordRepositoryImpl.deleteRecord failed', e, s);
 
       return Left(CacheFailure(message: e.toString()));
     }
@@ -193,7 +172,11 @@ class RecordRepositoryImpl implements RecordRepository {
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
+      appLogger.error(
+        'RecordRepositoryImpl.recordExistsBySourceId failed',
+        e,
+        s,
+      );
 
       return Left(CacheFailure(message: e.toString()));
     }
@@ -210,7 +193,26 @@ class RecordRepositoryImpl implements RecordRepository {
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
+      appLogger.error('RecordRepositoryImpl.getExistingSourceIds failed', e, s);
+
+      return Left(CacheFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<CacheFailure, Map<String, List<double>>>> getAmountsBySourceIds(
+    List<String> sourceIds,
+  ) async {
+    try {
+      return Right(await localDatasource.getAmountsBySourceIds(sourceIds));
+    } on CacheException catch (e) {
+      return Left(e.toFailure());
+    } catch (e, s) {
+      appLogger.error(
+        'RecordRepositoryImpl.getAmountsBySourceIds failed',
+        e,
+        s,
+      );
 
       return Left(CacheFailure(message: e.toString()));
     }
@@ -233,7 +235,11 @@ class RecordRepositoryImpl implements RecordRepository {
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
+      appLogger.error(
+        'RecordRepositoryImpl.getRecordsByCategoryAndDateRange failed',
+        e,
+        s,
+      );
 
       return Left(CacheFailure(message: e.toString()));
     }
@@ -256,7 +262,7 @@ class RecordRepositoryImpl implements RecordRepository {
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
+      appLogger.error('RecordRepositoryImpl.getCategorySpending failed', e, s);
 
       return Left(CacheFailure(message: e.toString()));
     }
@@ -274,7 +280,7 @@ class RecordRepositoryImpl implements RecordRepository {
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
+      appLogger.error('RecordRepositoryImpl.getTotalSpending failed', e, s);
 
       return Left(CacheFailure(message: e.toString()));
     }
@@ -291,7 +297,11 @@ class RecordRepositoryImpl implements RecordRepository {
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
+      appLogger.error(
+        'RecordRepositoryImpl.getSpendingForBudgets failed',
+        e,
+        s,
+      );
 
       return Left(CacheFailure(message: e.toString()));
     }
@@ -312,7 +322,11 @@ class RecordRepositoryImpl implements RecordRepository {
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
+      appLogger.error(
+        'RecordRepositoryImpl.getRecordsByDateRangeOnly failed',
+        e,
+        s,
+      );
 
       return Left(CacheFailure(message: e.toString()));
     }
@@ -329,27 +343,35 @@ class RecordRepositoryImpl implements RecordRepository {
         for (final r in records)
           r.id == null ? r.copyWith(id: const Uuid().v4()) : r,
       ];
-      await localDatasource.addRecordsBatch(withIds);
-      for (final r in withIds) {
-        final recordId = r.id;
-        if (recordId != null) {
-          await _enqueueSync('insert', recordId, {
-            'amount': r.amount,
-            'description': r.description,
-            'date': r.date.toUtc().toIso8601String(),
-            'categoryId': r.categoryId,
-            'budgetId': r.budgetId,
-            'source': r.source.name,
-            'recordType': r.recordType.dbValue,
-          });
-        }
-      }
+      final inserted = await localDatasource.addRecordsBatch(withIds);
+      final syncQueueDao = _syncQueueDao;
+      if (syncQueueDao == null || inserted.isEmpty) return const Right(unit);
+      await syncQueueDao.enqueueAll([
+        for (final r in withIds)
+          // A skipped duplicate must not reach the server as a new record.
+          if (r.id case final recordId? when inserted.contains(recordId))
+            (
+              tableName: 'records',
+              recordId: recordId,
+              action: 'insert',
+              payload: jsonEncode({
+                'amount': r.amount,
+                'description': r.description,
+                'date': r.date.toUtc().toIso8601String(),
+                'categoryId': r.categoryId,
+                'budgetId': r.budgetId,
+                'source': r.source.name,
+                'recordType': r.recordType.dbValue,
+              }),
+            ),
+      ]);
+      SyncEventBus().trigger();
 
       return const Right(unit);
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
+      appLogger.error('RecordRepositoryImpl.addRecordsBatch failed', e, s);
 
       return Left(CacheFailure(message: e.toString()));
     }
@@ -366,7 +388,11 @@ class RecordRepositoryImpl implements RecordRepository {
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
+      appLogger.error(
+        'RecordRepositoryImpl.getRecordCountByCategory failed',
+        e,
+        s,
+      );
 
       return Left(CacheFailure(message: e.toString()));
     }
@@ -382,23 +408,13 @@ class RecordRepositoryImpl implements RecordRepository {
     } on CacheException catch (e) {
       return Left(e.toFailure());
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
+      appLogger.error(
+        'RecordRepositoryImpl.getCategoryRecordCounts failed',
+        e,
+        s,
+      );
 
       return Left(CacheFailure(message: e.toString()));
-    }
-  }
-
-  Future<bool> _checkConnectivity() async {
-    try {
-      return await connectivity.checkNow().timeout(
-        const Duration(seconds: 3),
-        onTimeout: () => false,
-      );
-    } catch (e, s) {
-      debugPrint('Error: $e\n$s');
-      debugPrint('Connectivity check failed, assuming offline: $e');
-
-      return false;
     }
   }
 

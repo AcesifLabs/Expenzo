@@ -1,6 +1,8 @@
 import 'package:drift/drift.dart';
 import 'message_sources_table.dart';
 
+@TableIndex(name: 'idx_expense_templates_source_id', columns: {#sourceId})
+@TableIndex(name: 'idx_expense_templates_cat_id', columns: {#categoryId})
 class ExpenseTemplates extends Table {
   TextColumn get id => text()();
   TextColumn get sourceId => text().references(MessageSources, #id)();
@@ -16,15 +18,4 @@ class ExpenseTemplates extends Table {
 
   @override
   Set<Column> get primaryKey => {id};
-
-  Set<TableIndex> get indexes => {
-    const TableIndex(
-      name: 'idx_expense_templates_source_id',
-      columns: {#sourceId},
-    ),
-    const TableIndex(
-      name: 'idx_expense_templates_cat_id',
-      columns: {#categoryId},
-    ),
-  };
 }

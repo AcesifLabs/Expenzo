@@ -20,6 +20,8 @@ class RecurringAutoPoster {
   /// Set by the session's first successful pull; cleared on sign-out.
   bool _pulled = false;
 
+  // Optional hook after posting.
+  // ignore: unnecessary-nullable
   RecurringAutoPoster({
     required this.getSettings,
     required this.postDueRecurring,

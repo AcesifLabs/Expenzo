@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -193,5 +194,20 @@ void main() {
       verify(() => mockAuthRepository.checkConflict()).called(1);
       verify(() => mockAuthRepository.startSyncEngine()).called(2);
     });
+
+    blocTest<AuthBloc, AuthState>(
+      'a failed conflict check signs in but leaves sync stopped, so '
+      'nothing merges without the user choosing',
+      setUp: () {
+        signedIn(syncEnabled: true);
+        when(
+          () => mockAuthRepository.checkConflict(),
+        ).thenThrow(Exception('summary unreachable'));
+      },
+      build: () => bloc,
+      act: (bloc) => bloc.add(const AuthCheckRequested()),
+      expect: () => [isA<AuthLoading>(), Authenticated(testUser)],
+      verify: (_) => verifyNever(() => mockAuthRepository.startSyncEngine()),
+    );
   });
 }

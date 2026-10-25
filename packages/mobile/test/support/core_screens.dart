@@ -1,6 +1,8 @@
+import 'package:clock/clock.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +11,7 @@ import 'package:expense_tracker/core/constants/app_font_size.dart';
 import 'package:expense_tracker/core/constants/budget_period.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
+import 'package:expense_tracker/core/sync/connectivity_service.dart';
 import 'package:expense_tracker/core/theme/app_theme.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_state.dart';
@@ -76,13 +79,18 @@ class MockGetBudgets extends Mock implements GetBudgets {}
 
 class MockSettingsBloc extends Mock implements SettingsBloc {}
 
+class MockConnectivityService extends Mock implements ConnectivityService {}
+
 /// Phone sizes the screen tests run at.
 enum TestPhone {
   /// About 411×914 logical pixels.
   large(Size(1080, 2400), 2.625),
 
   /// About 360×640 logical pixels, the harder case.
-  small(Size(720, 1280), 2.0);
+  small(Size(720, 1280), 2.0),
+
+  /// 800×1280 logical pixels: portrait-only phones layouts must still fit.
+  tablet(Size(1600, 2560), 2.0);
 
   final Size physicalSize;
   final double devicePixelRatio;
@@ -107,13 +115,32 @@ B mockBloc<B extends BlocBase<S>, S>(B bloc, S state) {
 
 class MockGoalBloc extends Mock implements GoalBloc {}
 
-/// Skips the real feature start-up (database, network) in widget tests.
+const _permissionChannel = MethodChannel(
+  'flutter.baseflow.com/permissions/methods',
+);
+
+/// Skips the real feature start-up (database, network) in widget tests,
+/// and answers permission checks with "not granted yet".
 void registerScreenTestDependencies() {
   di.getIt.registerSingleton<Future<void>>(
     Future<void>.value(),
     instanceName: 'featureReady',
   );
+  final connectivity = MockConnectivityService();
+  when(() => connectivity.hasNetworkLink()).thenAnswer((_) async => true);
+  when(() => connectivity.checkNow()).thenAnswer((_) async => true);
+  di.getIt.registerSingleton<ConnectivityService>(connectivity);
   registerNoGoalBloc();
+  final messenger =
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+  // PermissionStatus.denied is 0.
+  messenger.setMockMethodCallHandler(
+    _permissionChannel,
+    (call) async => call.method == 'checkPermissionStatus' ? 0 : null,
+  );
+  addTearDown(
+    () => messenger.setMockMethodCallHandler(_permissionChannel, null),
+  );
 }
 
 /// The dashboard goal card with no goal (it then shows "Set a savings goal").
@@ -137,23 +164,35 @@ List<Record> get sampleRecords => [
   ),
 ];
 
-/// Home's dashboard with this month's income, spending and two records.
-DashboardBloc _loadedDashboardBloc() {
+/// Home's dashboard with this month's income, spending and two records,
+/// or [state].
+DashboardBloc _loadedDashboardBloc([DashboardState? state]) {
   return mockBloc<MockDashboardBloc, DashboardState>(
     MockDashboardBloc(),
-    DashboardLoaded(
-      summary: DashboardSummary(
-        totalIncome: 5000,
-        totalExpense: 122,
-        totalSpent: 122,
-        previousPeriodTotal: 0,
-        categoryBreakdown: const [],
-        recentTransactions: sampleRecords,
-      ),
-      dateRange: DateRange.thisMonth(),
-    ),
+    state ??
+        DashboardLoaded(
+          summary: DashboardSummary(
+            totalIncome: 5000,
+            totalExpense: 122,
+            totalSpent: 122,
+            previousPeriodTotal: 0,
+            categoryBreakdown: const [],
+            recentTransactions: sampleRecords,
+          ),
+          dateRange: DateRange.thisMonth(),
+        ),
   );
 }
+
+/// A month with nothing recorded.
+const emptyDashboardSummary = DashboardSummary(
+  totalIncome: 0,
+  totalExpense: 0,
+  totalSpent: 0,
+  previousPeriodTotal: 0,
+  categoryBreakdown: [],
+  recentTransactions: [],
+);
 
 AuthBloc _signedOutAuthBloc() {
   return mockBloc<MockAuthBloc, AuthState>(
@@ -172,13 +211,13 @@ void _registerHomeSettings() {
   );
 }
 
-Widget homeScreen() {
+Widget homeScreen({DashboardState? state}) {
   _registerHomeSettings();
 
   return MultiBlocProvider(
     providers: [
       BlocProvider<AuthBloc>.value(value: _signedOutAuthBloc()),
-      BlocProvider<DashboardBloc>.value(value: _loadedDashboardBloc()),
+      BlocProvider<DashboardBloc>.value(value: _loadedDashboardBloc(state)),
     ],
     child: const DashboardView(),
   );
@@ -201,13 +240,13 @@ Widget appShellScreen() {
   );
 }
 
-Widget activityScreen() {
+Widget activityScreen({RecordState? state}) {
   return MultiBlocProvider(
     providers: [
       BlocProvider<RecordBloc>.value(
         value: mockBloc<MockRecordBloc, RecordState>(
           MockRecordBloc(),
-          RecordLoaded(records: sampleRecords),
+          state ?? RecordLoaded(records: sampleRecords),
         ),
       ),
       BlocProvider<CategoryBloc>.value(
@@ -223,7 +262,7 @@ Widget activityScreen() {
 
 /// One Food budget, 85% spent this month.
 BudgetProgress sampleBudgetProgress() {
-  final now = DateTime.now();
+  final now = clock.now();
 
   return BudgetProgress(
     budgetId: 'b1',
@@ -242,16 +281,17 @@ BudgetProgress sampleBudgetProgress() {
   );
 }
 
-Widget budgetsScreen() {
+Widget budgetsScreen({BudgetState? state}) {
   final budget = makeBudget(id: 'b1', name: 'Food', amount: 1000);
 
   return BlocProvider<BudgetBloc>.value(
     value: mockBloc<MockBudgetBloc, BudgetState>(
       MockBudgetBloc(),
-      BudgetLoaded(
-        [budget],
-        progressByBudgetId: {'b1': sampleBudgetProgress()},
-      ),
+      state ??
+          BudgetLoaded(
+            [budget],
+            progressByBudgetId: {'b1': sampleBudgetProgress()},
+          ),
     ),
     child: const BudgetListView(),
   );
@@ -289,32 +329,33 @@ Widget budgetFormScreen() {
   );
 }
 
-Widget reportsScreen() {
-  final now = DateTime.now();
+Widget reportsScreen({ReportsState? state}) {
+  final now = clock.now();
   final reports = mockBloc<MockReportsBloc, ReportsState>(
     MockReportsBloc(),
-    ReportsLoaded(
-      spendingTrend: [DateAmount(date: now, amount: 122)],
-      categoryBreakdown: const [
-        CategoryAmount(
-          categoryId: 'c1',
-          categoryName: 'Food',
-          emoji: 'forkKnife',
-          amount: 122,
-          percentage: 100,
-          colorHex: '#F8BBD0',
+    state ??
+        ReportsLoaded(
+          spendingTrend: [DateAmount(date: now, amount: 122)],
+          categoryBreakdown: const [
+            CategoryAmount(
+              categoryId: 'c1',
+              categoryName: 'Food',
+              emoji: 'forkKnife',
+              amount: 122,
+              percentage: 100,
+              colorHex: '#F8BBD0',
+            ),
+          ],
+          insights: const SpendingInsights(
+            highestDayAmount: 122,
+            avgDailySpending: 4,
+            totalTransactionCount: 1,
+            totalSpent: 122,
+          ),
+          startDate: now.subtract(const Duration(days: 30)),
+          endDate: now,
+          granularity: Granularity.daily,
         ),
-      ],
-      insights: const SpendingInsights(
-        highestDayAmount: 122,
-        avgDailySpending: 4,
-        totalTransactionCount: 1,
-        totalSpent: 122,
-      ),
-      startDate: now.subtract(const Duration(days: 30)),
-      endDate: now,
-      granularity: Granularity.daily,
-    ),
   );
   di.getIt
     ..registerFactory<ReportsBloc>(() => reports)
@@ -365,6 +406,7 @@ Future<void> pumpAtMaxScale(
   Widget screen, {
   TestPhone phone = TestPhone.large,
   AppLocale locale = AppLocale.en,
+  ThemeData? theme,
   Widget Function(Widget app)? wrap,
 }) async {
   useTestPhone(tester, phone);
@@ -378,7 +420,7 @@ Future<void> pumpAtMaxScale(
       child: Scaffold(body: screen),
     ),
     locale: locale,
-    theme: AppTheme.lightTheme,
+    theme: theme ?? AppTheme.lightTheme,
     wrap: wrap,
   );
   await tester.pump(const Duration(milliseconds: 500));
@@ -388,7 +430,13 @@ Future<void> pumpAtMaxScale(
 
 /// No overflow was reported and no text on screen is clipped.
 void expectLayoutFits(WidgetTester tester) {
-  expect(tester.takeException(), isNull);
+  final error = tester.takeException();
+  // The full error names the widget that overflowed.
+  expect(
+    error,
+    isNull,
+    reason: error is FlutterError ? error.toStringDeep() : null,
+  );
   expectNoClippedText(tester);
 }
 

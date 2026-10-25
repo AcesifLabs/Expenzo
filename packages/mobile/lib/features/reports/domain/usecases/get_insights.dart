@@ -89,7 +89,7 @@ class GetInsights {
 
       return Right(items);
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to compute insights: $e'));
+      return Left(CacheFailure(message: 'Failed to compute insights: $e'));
     }
   }
 

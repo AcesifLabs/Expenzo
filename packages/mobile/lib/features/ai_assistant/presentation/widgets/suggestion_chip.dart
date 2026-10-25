@@ -5,9 +5,9 @@ import 'package:expense_tracker/core/theme/app_spacing.dart';
 
 class SuggestionChip extends StatelessWidget {
   final String label;
-  final VoidCallback? onTap;
+  final VoidCallback onTap;
 
-  const SuggestionChip({super.key, required this.label, this.onTap});
+  const SuggestionChip({super.key, required this.label, required this.onTap});
 
   Widget _chip(AppPalette palette) {
     return Container(

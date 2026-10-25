@@ -57,6 +57,8 @@ DateTime nextWeeklySummaryAt(DateTime now, {int? firstWeekday}) {
         );
 }
 
+// Null means the week start from the language.
+// ignore: unnecessary-nullable
 /// The latest summary time at or before [now]. A summary that runs late
 /// (after midnight) still reports the week it was due for.
 DateTime lastWeeklySummaryAt(DateTime now, {int? firstWeekday}) {

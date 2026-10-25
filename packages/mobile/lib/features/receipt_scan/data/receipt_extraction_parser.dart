@@ -1,5 +1,9 @@
 import 'dart:convert';
 
+import 'package:expense_tracker/core/constants/app_constants.dart';
+import 'package:expense_tracker/core/utils/strict_date.dart';
+import 'package:expense_tracker/core/utils/money.dart';
+
 import '../domain/entities/receipt_extraction.dart';
 
 /// Parses the JSON payload returned by the multimodal receipt prompt.
@@ -14,9 +18,6 @@ class ReceiptExtractionParser {
     final date = _parseDate(decoded['date']);
     final categoryName = _parseOptionalString(decoded['category']);
 
-    if (amount <= 0) {
-      throw FormatException('Receipt amount must be positive, got $amount');
-    }
     if (description.isEmpty) {
       throw FormatException('Receipt description is empty');
     }
@@ -44,52 +45,53 @@ class ReceiptExtractionParser {
   Map<String, Object?> _decodeJsonObject(String text) {
     // Prefer the last balanced {...} that decodes as a Map — models often
     // echo example JSON before the final answer.
-    for (final candidate in _jsonObjectCandidates(text).toList().reversed) {
+    for (final candidate in _jsonObjectCandidates(text)) {
       try {
         final decoded = jsonDecode(candidate);
         if (decoded is Map) {
           return Map<String, Object?>.from(decoded);
         }
-      } catch (_) {}
+      } on FormatException {
+        // Not JSON; try the next candidate.
+      }
     }
 
-    throw FormatException('Receipt extraction response is not JSON: $text');
+    // The reply itself stays out of the message: it holds the receipt.
+    throw FormatException(
+      'Receipt extraction response is not JSON (${text.length} chars)',
+    );
   }
 
+  /// Every balanced `{...}` in [text]: whole objects first, the latest
+  /// first, then the objects nested in them, so an inner object never wins
+  /// over the object around it. Found in one pass, and each candidate is cut
+  /// out only when tried: a reply of thousands of braces stays fast.
   Iterable<String> _jsonObjectCandidates(String text) sync* {
-    for (var i = 0; i < text.length; i++) {
-      if (text[i] != '{') continue;
-      final candidate = _balancedObjectFrom(text, i);
-      if (candidate != null) yield candidate;
-    }
-  }
-
-  /// Returns the balanced `{...}` starting at [start], or null if none closes.
-  String? _balancedObjectFrom(String text, int start) {
-    var depth = 0;
+    final outer = <(int, int)>[];
+    final nested = <(int, int)>[];
+    final openBraces = <int>[];
     var inString = false;
     var escaped = false;
 
-    for (var j = start; j < text.length; j++) {
-      final ch = text[j];
+    for (var i = 0; i < text.length; i++) {
+      final ch = text[i];
       if (inString) {
         final next = _advanceStringState(ch, escaped);
         inString = next.inString;
         escaped = next.escaped;
-        continue;
-      }
-      if (ch == '"') {
-        inString = true;
-        continue;
-      }
-      if (ch == '{') depth++;
-      if (ch == '}') {
-        depth--;
-        if (depth == 0) return text.substring(start, j + 1);
+      } else if (ch == '"') {
+        inString = openBraces.isNotEmpty;
+      } else if (ch == '{') {
+        openBraces.add(i);
+      } else if (ch == '}' && openBraces.isNotEmpty) {
+        final start = openBraces.removeLast();
+        (openBraces.isEmpty ? outer : nested).add((start, i + 1));
       }
     }
-
-    return null;
+    nested.sort((a, b) => b.$1.compareTo(a.$1));
+    for (final (start, end) in [...outer.reversed, ...nested]) {
+      yield text.substring(start, end);
+    }
   }
 
   ({bool inString, bool escaped}) _advanceStringState(String ch, bool escaped) {
@@ -100,14 +102,40 @@ class ReceiptExtractionParser {
     return (inString: true, escaped: false);
   }
 
+  /// A positive amount up to [AppConstants.maxAmount], rounded to 2
+  /// decimals. Strings may use either decimal mark: in `1.234,50` the last
+  /// mark is the decimal one, and a lone comma before exactly 2 digits
+  /// (`45,90`) is a decimal comma.
   double _parseAmount(Object? value) {
-    if (value is num) return value.toDouble();
-    if (value is String) {
-      final cleaned = value.replaceAll(RegExp(r'[^0-9.\-]'), '');
-      final parsed = double.tryParse(cleaned);
-      if (parsed != null) return parsed;
+    final amount = switch (value) {
+      num() => value.toDouble(),
+      String() => _amountFromText(value),
+      _ => null,
+    };
+    if (amount == null || !amount.isFinite) {
+      throw const FormatException('Invalid receipt amount');
     }
-    throw FormatException('Invalid receipt amount: $value');
+    // Checked after rounding: 0.004 would otherwise be saved as 0.00.
+    final rounded = roundMoney(amount);
+    if (rounded <= 0 || rounded > AppConstants.maxAmount) {
+      throw const FormatException('Receipt amount is out of range');
+    }
+
+    return rounded;
+  }
+
+  double? _amountFromText(String text) {
+    var digits = text.replaceAll(RegExp(r'[^0-9.,\-]'), '');
+    final lastDot = digits.lastIndexOf('.');
+    final lastComma = digits.lastIndexOf(',');
+    final decimalComma =
+        lastComma > lastDot &&
+        (lastDot >= 0 || RegExp(r'^-?\d+,\d{2}$').hasMatch(digits));
+    digits = decimalComma
+        ? digits.replaceAll('.', '').replaceAll(',', '.')
+        : digits.replaceAll(',', '');
+
+    return double.tryParse(digits);
   }
 
   String _parseDescription(Object? value) {
@@ -125,34 +153,18 @@ class ReceiptExtractionParser {
     return text;
   }
 
+  /// The day of an ISO-style date (`2026-07-15`, `2026/7/15`, with or
+  /// without a time), or null when there is none or it does not exist.
   DateTime? _parseDate(Object? value) {
     if (value == null) return null;
-    final text = value.toString().trim();
-    if (text.isEmpty || text.toLowerCase() == 'null') return null;
-
-    final iso = DateTime.tryParse(text);
-    if (iso != null) {
-      return DateTime(iso.year, iso.month, iso.day);
-    }
-
     final match = RegExp(
-      r'^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$',
-    ).firstMatch(text);
-    if (match != null) {
-      final yearText = match.group(1);
-      final monthText = match.group(2);
-      final dayText = match.group(3);
-      if (yearText == null || monthText == null || dayText == null) {
-        return null;
-      }
-      final year = int.parse(yearText);
-      final month = int.parse(monthText);
-      final day = int.parse(dayText);
-      if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
-        return DateTime(year, month, day);
-      }
-    }
+      r'^(\d{4})[-/](\d{1,2})[-/](\d{1,2})',
+    ).firstMatch(value.toString().trim());
+    if (match == null) return null;
+    final [year, month, day] = [
+      for (final group in match.groups([1, 2, 3])) int.parse(group ?? ''),
+    ];
 
-    return null;
+    return strictDate(year, month, day);
   }
 }

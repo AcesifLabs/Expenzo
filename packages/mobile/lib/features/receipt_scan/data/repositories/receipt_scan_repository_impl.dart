@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
+import 'package:expense_tracker/core/error/network_error.dart';
 import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/features/ai_assistant/data/datasources/groq_datasource.dart';
 import 'package:expense_tracker/features/ai_assistant/data/datasources/groq_vision_request.dart';
@@ -69,7 +70,7 @@ No markdown, no commentary.
     } catch (e, s) {
       appLogger.error('ReceiptScan extract failed', e, s);
 
-      return Left(ServerFailure(message: e.toString()));
+      return Left(failureFromNetworkOrServer(e));
     }
   }
 

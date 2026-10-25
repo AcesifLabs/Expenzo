@@ -6,17 +6,23 @@ import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/core/utils/regex_utils.dart';
 import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/core/theme/app_typography.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
+import '../../domain/entities/date_order.dart';
+import '../../domain/services/amount_match_resolver.dart';
+import '../../domain/services/rule_date.dart';
 
 class RegexTesterWidget extends StatefulWidget {
   final String pattern;
   final String? datePattern;
-  final Function(ParsedTestResult)? onResult;
+  final DateOrder dateOrder;
+  final void Function(ParsedTestResult)? onResult;
 
   const RegexTesterWidget({
     super.key,
     required this.pattern,
     this.datePattern,
+    this.dateOrder = DateOrder.dmy,
     this.onResult,
   });
 
@@ -61,7 +67,7 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
     try {
       _runPatternTest(sample, stopwatch);
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
+      appLogger.warning('Test pattern is not a valid regex', e, s);
       _handlePatternError(sample, stopwatch, e);
     }
   }
@@ -101,9 +107,7 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
     final amountStr = match.group(1) ?? match.group(0);
     if (amountStr == null) return null;
 
-    final cleanAmount = amountStr.replaceAll(RegExp(r'[^\d.]'), '');
-
-    return double.tryParse(cleanAmount);
+    return parseResolvedAmount(amountStr);
   }
 
   DateTime? _extractDate(String sample) {
@@ -117,7 +121,7 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
     final dateMatch = dateRegex.firstMatch(sample);
     if (dateMatch == null) return null;
 
-    return _parseDate(dateMatch.group(0) ?? '');
+    return parseRuleDate(dateMatch.group(0) ?? '', widget.dateOrder);
   }
 
   double _computeConfidence(double? amount, DateTime? date) {
@@ -143,38 +147,6 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
       _result = result;
     });
     widget.onResult?.call(result);
-  }
-
-  DateTime? _parseDate(String dateStr) {
-    final patterns = [
-      RegExp(r'(\d{2})/(\d{2})/(\d{4})'),
-      RegExp(r'(\d{2})-(\d{2})-(\d{4})'),
-    ];
-    for (final pattern in patterns) {
-      final match = pattern.firstMatch(dateStr);
-      if (match != null) {
-        try {
-          final month = _intFromGroup(match, 1);
-          final day = _intFromGroup(match, 2);
-          final year = _intFromGroup(match, 3);
-          if (month == null || day == null || year == null) continue;
-
-          return DateTime(year, month, day);
-        } catch (e, s) {
-          debugPrint('Error: $e\n$s');
-          debugPrint('RegexTesterWidget: Failed to parse date components: $e');
-        }
-      }
-    }
-
-    return null;
-  }
-
-  int? _intFromGroup(RegExpMatch match, int group) {
-    final value = match.group(group);
-    if (value == null) return null;
-
-    return int.tryParse(value);
   }
 
   Widget _buildResultCard() {

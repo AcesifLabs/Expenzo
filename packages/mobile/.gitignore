@@ -1,3 +1,14 @@
 
 # FVM Version Cache
 .fvm/
+# flutter test --coverage output
+coverage/
+
+# Golden images with real text (GOLDENS_PLATFORM=true) and failure diffs: local only.
+test/goldens/goldens/macos/
+test/goldens/goldens/linux/
+test/goldens/goldens/windows/
+**/failures/
+
+# Local mutation_test output.
+mutation-test-report/

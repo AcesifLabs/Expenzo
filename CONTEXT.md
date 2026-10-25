@@ -164,3 +164,21 @@ A Budget marked with a Family Group's id. Only an Admin can share a Budget into 
 ## Invite Code
 
 A 6-character code (A–Z, 2–9, no lookalikes) that lets a signed-in user join a Family Group. Valid for 48 hours, reusable until it expires; regenerating it voids the previous code.
+
+## Failed Sync Change
+
+A queued local change the server rejected 5 times. It stays in the sync queue with a failed time set and is not retried automatically. The user retries it from Sync settings.
+
+_Avoid_: dead letter, stuck row
+
+## Date Order
+
+How a parsing rule reads an all-numeric date: day/month (`dmy`, the default) or month/day (`mdy`). Dates with a month name do not use it (ADR 0015).
+
+_Avoid_: date format
+
+## Crash Report
+
+A scrubbed error event sent to Sentry. It never contains SMS text, amounts, descriptions or account numbers, and the user can turn it off in Settings (ADR 0013).
+
+_Avoid_: telemetry, analytics

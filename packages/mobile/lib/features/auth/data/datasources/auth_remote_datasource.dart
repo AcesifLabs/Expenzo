@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
-import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../../../../core/database/app_database.dart' show UsersCompanion;
 import '../../../../core/database/daos/user_dao.dart';
@@ -10,6 +9,7 @@ import '../../../../core/api/api_constants.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
 import '../../../../core/api/token_storage.dart';
 import '../../domain/entities/user.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
 abstract class AuthRemoteDatasource {
@@ -131,7 +131,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
   @override
   Future<void> deleteServerAccount() async {
     try {
-      await apiClient.dio.delete(ApiConstants.deleteAccount);
+      await apiClient.dio.delete<Object?>(ApiConstants.deleteAccount);
     } on DioException catch (e) {
       // A retry after a lost response: the JWT's user is already gone.
       // No 404 shortcut: a deleted user gets this 401 from the JWT check, so
@@ -176,8 +176,8 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
   static Future<void> _bestEffort(Future<Object?> Function() step) async {
     try {
       await step();
-    } catch (e) {
-      debugPrint('AuthRemoteDatasource: Cleanup step failed: ${e.runtimeType}');
+    } catch (e, s) {
+      appLogger.error('AuthRemoteDatasource: Cleanup step failed', e, s);
     }
   }
 
@@ -229,20 +229,25 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
           lastLoginAt: Value(now),
         ),
       );
-    } catch (e) {
-      debugPrint(
-        'AuthRemoteDatasource: Failed to sync user to local DB: ${e.runtimeType}',
+    } catch (e, s) {
+      appLogger.error(
+        'AuthRemoteDatasource: Failed to sync user to local DB',
+        e,
+        s,
       );
     }
   }
 
   Future<void> _obtainJwtToken(fb.User firebaseUser) async {
     final firebaseToken = await firebaseUser.getIdToken(true);
-    final response = await apiClient.dio.post(
+    final response = await apiClient.dio.post<Object?>(
       ApiConstants.login,
       data: {'firebaseToken': firebaseToken},
     );
-    final accessToken = response.data['accessToken'];
+    final data = response.data;
+    final accessToken = data is Map<String, Object?>
+        ? data['accessToken']
+        : null;
     if (accessToken is! String || accessToken.isEmpty) {
       throw ServerException(
         message: 'Invalid access token received from server.',

@@ -17,6 +17,17 @@ void mockCameraPermissionDenied() {
       );
 }
 
+/// Like [mockCameraPermissionDenied], but refused for good ("Don't ask
+/// again"), so only Settings can turn it back on.
+void mockCameraPermissionPermanentlyDenied() {
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMethodCallHandler(
+        _permissionChannel,
+        // PermissionStatus.permanentlyDenied is 4.
+        (call) async => call.method == 'requestPermissions' ? {1: 4} : null,
+      );
+}
+
 void clearCameraPermissionMock() {
   TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
       .setMockMethodCallHandler(_permissionChannel, null);

@@ -53,8 +53,10 @@
     "reference": "Ref: {id}",
     "closeApp": "Close app",
     "debugDetails": "Details (debug)",
-    "criticalTitle": "Unexpected error occurred",
-    "criticalBody": "The app will close shortly."
+    "storageBody": "The data on this phone can't be read. Reset it to keep using Expenzo. Anything you synced comes back after you sign in.",
+    "resetLocalData": "Reset local data",
+    "resetConfirm": "This deletes the transactions, budgets and categories saved on this phone. Synced data comes back after you sign in. Changes that weren't synced are lost.",
+    "resetConfirmAction": "Delete and start again"
   },
   "smsGate": {
     "title": "SMS access required",

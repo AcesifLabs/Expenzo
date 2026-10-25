@@ -5,6 +5,8 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:expense_tracker/core/database/app_database.dart';
 
+import 'migrations/v19_tables.dart';
+
 /// Verifies the V15 -> V16 migration:
 ///  - budgets: category_id dropped, NOT NULL name added (legacy rows -> '')
 ///  - records: budget_id column added (nullable; legacy rows -> null)
@@ -99,6 +101,7 @@ void main() {
         synced_at INTEGER
       )
     ''', const []);
+    await addMissingV19Tables(raw, except: {'goals'});
     await raw.runCustom('PRAGMA user_version = 15', const []);
     await raw.close();
   }

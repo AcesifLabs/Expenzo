@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:clock/clock.dart';
+
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/shared/services/notification_permission.dart';
 import 'package:flutter/services.dart';
@@ -10,10 +12,12 @@ import 'package:expense_tracker/core/constants/app_constants.dart';
 import 'package:expense_tracker/core/utils/budget_name.dart';
 import 'package:expense_tracker/core/constants/budget_period.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
+import 'package:expense_tracker/core/error/failure_message.dart';
 import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/shared/presentation/widgets/shimmer_box.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_back_button.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_error_state.dart';
 import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_page_header.dart';
 import 'package:expense_tracker/core/theme/app_typography.dart';
@@ -81,6 +85,10 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
   String? _amountError;
   String? _nameError;
 
+  /// Set when the budget to edit couldn't load. The form stays hidden,
+  /// so Save can't write blank fields over the real budget.
+  String? _loadError;
+
   bool get isEditing => widget.budget != null || widget.budgetId != null;
 
   AppPalette get _palette => context.palette;
@@ -109,14 +117,28 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
     setState(() => _amountFocused = _amountFocus.hasFocus);
   }
 
+  void _retryLoad(String id) {
+    setState(() {
+      _loadError = null;
+      _isLoading = true;
+    });
+    unawaited(_loadBudget(id));
+  }
+
   Future<void> _loadBudget(String id) async {
     final repo = di.getIt<BudgetRepository>();
     final result = await repo.getBudgetById(id);
     if (!mounted) return;
     result.fold(
-      (failure) => appLogger.error(
-        'BudgetFormPage: Failed to load budget: ${failure.message}',
-      ),
+      (failure) {
+        appLogger.warning(
+          'BudgetFormPage: Failed to load budget: ${failure.message}',
+        );
+        setState(() {
+          _isLoading = false;
+          _loadError = failureText(failure);
+        });
+      },
       (budget) {
         if (!mounted) return;
         setState(() {
@@ -269,12 +291,13 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
   void _submit() {
     if (!_validate()) return;
 
+    final now = clock.now();
     final budget = Budget(
       id: _budget?.id ?? widget.budgetId,
       name: _nameController.text.trim(),
       amount: double.parse(_amountController.text),
       period: _selectedPeriod,
-      startDate: DateTime(DateTime.now().year, DateTime.now().month, 1),
+      startDate: DateTime(now.year, now.month, 1),
       rolloverEnabled: _rolloverEnabled,
       rolloverAmount: _budget?.rolloverAmount ?? 0,
       isEnabled: true,
@@ -319,7 +342,10 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
           _buildLabel(t.budgets.form.amount),
           const SizedBox(height: AppSpacing.sm),
           Container(
-            height: 52,
+            // Grows with large text.
+            constraints: const BoxConstraints(
+              minHeight: AppSpacing.fieldHeight,
+            ),
             decoration: BoxDecoration(
               color: _palette.inputFill,
               borderRadius: _inputRadius,
@@ -363,7 +389,10 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
                       enabledBorder: InputBorder.none,
                       focusedBorder: InputBorder.none,
                       filled: false,
-                      contentPadding: EdgeInsets.zero,
+                      // Pads the field to a 48 dp tap target.
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.smd,
+                      ),
                       isDense: true,
                     ),
                     onChanged: _onAmountChanged,
@@ -389,7 +418,10 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
           _buildLabel(strings.name),
           const SizedBox(height: AppSpacing.sm),
           Container(
-            height: 52,
+            // Grows with large text.
+            constraints: const BoxConstraints(
+              minHeight: AppSpacing.fieldHeight,
+            ),
             decoration: BoxDecoration(
               color: _palette.inputFill,
               borderRadius: _inputRadius,
@@ -416,7 +448,10 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
                 filled: false,
-                contentPadding: EdgeInsets.zero,
+                // Pads the field to a 48 dp tap target.
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: AppSpacing.smd,
+                ),
                 isDense: true,
               ),
               inputFormatters: [
@@ -442,7 +477,10 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
           _buildLabel(t.budgets.form.period),
           const SizedBox(height: AppSpacing.sm),
           Container(
-            height: 52,
+            // Grows with large text.
+            constraints: const BoxConstraints(
+              minHeight: AppSpacing.fieldHeight,
+            ),
             decoration: BoxDecoration(
               color: _palette.inputFill,
               borderRadius: _inputRadius,
@@ -465,7 +503,10 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
                 filled: false,
-                contentPadding: EdgeInsets.zero,
+                // Pads the field to a 48 dp tap target.
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: AppSpacing.smd,
+                ),
                 isDense: true,
                 prefixIcon: Padding(
                   padding: const EdgeInsets.only(right: AppSpacing.sm),
@@ -541,13 +582,16 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
                 ],
               ),
             ),
-            Switch(
-              value: _rolloverEnabled,
-              onChanged: _readOnly ? null : _onRolloverChanged,
-              activeThumbColor: _palette.brand,
-              activeTrackColor: _palette.brand.withAlpha(0x40),
-              inactiveThumbColor: _palette.toggleKnob,
-              inactiveTrackColor: _palette.toggleTrack,
+            Semantics(
+              label: strings.rollover,
+              child: Switch(
+                value: _rolloverEnabled,
+                onChanged: _readOnly ? null : _onRolloverChanged,
+                activeThumbColor: _palette.brand,
+                activeTrackColor: _palette.brand.withAlpha(0x40),
+                inactiveThumbColor: _palette.toggleKnob,
+                inactiveTrackColor: _palette.toggleTrack,
+              ),
             ),
           ],
         ),
@@ -598,13 +642,16 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
                 ],
               ),
             ),
-            Switch(
-              value: _shared,
-              onChanged: _shared || canTurnOn ? _onShareChanged : null,
-              activeThumbColor: _palette.brand,
-              activeTrackColor: _palette.brand.withAlpha(0x40),
-              inactiveThumbColor: _palette.toggleKnob,
-              inactiveTrackColor: _palette.toggleTrack,
+            Semantics(
+              label: strings.share,
+              child: Switch(
+                value: _shared,
+                onChanged: _shared || canTurnOn ? _onShareChanged : null,
+                activeThumbColor: _palette.brand,
+                activeTrackColor: _palette.brand.withAlpha(0x40),
+                inactiveThumbColor: _palette.toggleKnob,
+                inactiveTrackColor: _palette.toggleTrack,
+              ),
             ),
           ],
         ),
@@ -622,7 +669,9 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
         onTap: isLoading ? null : _submit,
         child: Container(
           width: double.infinity,
-          height: 52,
+          // Grows with the label at large text sizes.
+          constraints: const BoxConstraints(minHeight: AppSpacing.fieldHeight),
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
           decoration: BoxDecoration(
             color: isLoading
                 ? _palette.brandFill.withAlpha(0x80)
@@ -720,10 +769,12 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
         children: [
           _buildLabel(label),
           const SizedBox(height: AppSpacing.sm),
-          ShimmerBox.rectangle(
-            width: double.infinity,
-            height: 52,
-            borderRadius: AppSpacing.radiusControl,
+          ShimmerBox(
+            child: ShimmerBox.rectangle(
+              width: double.infinity,
+              height: AppSpacing.fieldHeight,
+              borderRadius: AppSpacing.radiusControl,
+            ),
           ),
         ],
       ),
@@ -764,6 +815,19 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
               ],
             ),
           ),
+        ),
+      );
+    }
+
+    final loadError = _loadError;
+    final budgetId = widget.budgetId;
+    if (loadError != null && budgetId != null) {
+      return Scaffold(
+        backgroundColor: _palette.bg,
+        appBar: _buildTopBar(title),
+        body: AppErrorState(
+          message: loadError,
+          onRetry: () => _retryLoad(budgetId),
         ),
       );
     }

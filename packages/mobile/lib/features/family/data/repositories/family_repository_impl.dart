@@ -42,6 +42,8 @@ class FamilyRepositoryImpl implements FamilyRepository {
   GroupSummary? get cachedSummary =>
       cachedGroup == null ? null : local.readSummary()?.value;
 
+  // Optional hook: tests and older wiring leave it out.
+  // ignore: unnecessary-nullable
   FamilyRepositoryImpl({
     required this.remote,
     required this.local,

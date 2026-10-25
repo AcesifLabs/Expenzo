@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:expense_tracker/core/utils/money.dart';
 import 'package:expense_tracker/core/constants/budget_period.dart';
 import 'package:expense_tracker/core/database/app_database.dart';
 import 'package:expense_tracker/core/database/daos/budget_dao.dart';
@@ -44,11 +45,11 @@ class BudgetLocalDatasourceImpl implements BudgetLocalDatasource {
           budget.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
         ),
         name: Value(budget.name),
-        amount: Value(budget.amount),
+        amount: Value(roundMoney(budget.amount)),
         period: Value(budget.period.name),
         startDate: Value(budget.startDate),
         rolloverEnabled: Value(budget.rolloverEnabled),
-        rolloverAmount: Value(budget.rolloverAmount),
+        rolloverAmount: Value(roundMoney(budget.rolloverAmount)),
         isEnabled: Value(budget.isEnabled),
         groupId: Value(budget.groupId),
         createdAt: Value(now),
@@ -66,11 +67,11 @@ class BudgetLocalDatasourceImpl implements BudgetLocalDatasource {
       BudgetsCompanion(
         id: Value(id),
         name: Value(budget.name),
-        amount: Value(budget.amount),
+        amount: Value(roundMoney(budget.amount)),
         period: Value(budget.period.name),
         startDate: Value(budget.startDate),
         rolloverEnabled: Value(budget.rolloverEnabled),
-        rolloverAmount: Value(budget.rolloverAmount),
+        rolloverAmount: Value(roundMoney(budget.rolloverAmount)),
         isEnabled: Value(budget.isEnabled),
         groupId: Value(budget.groupId),
         createdAt: Value(budget.startDate),

@@ -10,7 +10,9 @@ import 'package:expense_tracker/features/auth/presentation/bloc/auth_event.dart'
 import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/core/lifecycle/local_data_epoch.dart';
+import 'package:expense_tracker/shared/presentation/widgets/scrollable_center.dart';
 
 class SyncConflictPage extends StatefulWidget {
   const SyncConflictPage({super.key});
@@ -155,7 +157,7 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
   void _showReplaceConfirm() {
     final strings = t.auth.syncConflict;
 
-    showDialog(
+    showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (_) => AlertDialog(
@@ -210,7 +212,7 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
         // This device may hold the only copy of budget names the server lost
         // (ADR 0012); send them before the local data is wiped. A failure
         // stops the replace so the names are not lost.
-        if (!await _saveLocalOnlyData()) return;
+        if (!await _saveLocalOnlyData() || !mounted) return;
         setState(() => _status = t.auth.syncConflict.clearing);
         await di.resetDatabaseInstance();
       }
@@ -223,12 +225,12 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
         _progress = 1.0;
         _status = t.auth.syncConflict.done;
       });
-      await Future.delayed(const Duration(seconds: 1));
+      await Future<void>.delayed(const Duration(seconds: 1));
       if (mounted) {
         context.read<AuthBloc>().add(const AuthCheckRequested());
       }
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
+      appLogger.error('SyncConflictPage: Applying the choice failed', e, s);
       if (mounted) {
         setState(() {
           _syncing = false;
@@ -243,10 +245,8 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
       await di.getIt<SyncEngine>().prepareForLocalWipe();
 
       return true;
-    } catch (e) {
-      debugPrint(
-        'SyncConflictPage: Local data upload failed: ${e.runtimeType}',
-      );
+    } catch (e, s) {
+      appLogger.error('SyncConflictPage: Local data upload failed', e, s);
       if (mounted) {
         setState(() => _syncing = false);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -272,8 +272,11 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
     try {
       di.getIt<SyncEngine>().onProgress = null;
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
-      debugPrint('SyncConflictPage: Failed to clear onProgress callback: $e');
+      appLogger.error(
+        'SyncConflictPage: Failed to clear onProgress callback',
+        e,
+        s,
+      );
     }
     super.dispose();
   }
@@ -285,14 +288,9 @@ class _SyncConflictPageState extends State<SyncConflictPage> {
       child: Scaffold(
         backgroundColor: Theme.of(context).colorScheme.surface,
         body: SafeArea(
-          child: Padding(
+          child: ScrollableCenter(
             padding: AppSpacing.paddingLg,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (_syncing) _buildProgressView() else _buildDecisionView(),
-              ],
-            ),
+            child: _syncing ? _buildProgressView() : _buildDecisionView(),
           ),
         ),
       ),

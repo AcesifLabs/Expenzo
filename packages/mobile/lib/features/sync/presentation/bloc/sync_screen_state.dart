@@ -12,16 +12,26 @@ class SyncScreenState extends Equatable {
   final SyncOverview? overview;
   final bool isSyncing;
 
+  /// Failed Sync Changes: rejected 5 times, waiting for the user's Retry.
+  final int failedCount;
+
   /// The last "Sync now" result, shown once; cleared by the next request.
   final SyncRunResult? lastResult;
 
   @override
-  List<Object?> get props => [loadStatus, overview, isSyncing, lastResult];
+  List<Object?> get props => [
+    loadStatus,
+    overview,
+    isSyncing,
+    failedCount,
+    lastResult,
+  ];
 
   const SyncScreenState({
     this.loadStatus = SyncScreenLoadStatus.loading,
     this.overview,
     this.isSyncing = false,
+    this.failedCount = 0,
     this.lastResult,
   });
 
@@ -32,12 +42,14 @@ class SyncScreenState extends Equatable {
     SyncScreenLoadStatus? loadStatus,
     SyncOverview? overview,
     bool? isSyncing,
+    int? failedCount,
     Object? lastResult = _lastResultUnset,
   }) {
     return SyncScreenState(
       loadStatus: loadStatus ?? this.loadStatus,
       overview: overview ?? this.overview,
       isSyncing: isSyncing ?? this.isSyncing,
+      failedCount: failedCount ?? this.failedCount,
       lastResult: identical(lastResult, _lastResultUnset)
           ? this.lastResult
           : lastResult as SyncRunResult?,

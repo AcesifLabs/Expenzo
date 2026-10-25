@@ -28,6 +28,7 @@ import '../widgets/record_card.dart';
 import '../widgets/record_filter_modal.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 import 'package:expense_tracker/features/categories/presentation/helpers/category_display_name.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_error_state.dart';
 
 class RecordListPage extends StatelessWidget {
   const RecordListPage({super.key});
@@ -95,6 +96,11 @@ class _RecordListViewState extends State<RecordListView> {
     );
   }
 
+  Widget _buildError(RecordError state) => AppErrorState(
+    message: state.message,
+    onRetry: () => context.read<RecordBloc>().add(const LoadRecords()),
+  );
+
   Widget _buildRecordsList() {
     return BlocBuilder<RecordBloc, RecordState>(
       buildWhen: (previous, current) =>
@@ -104,7 +110,7 @@ class _RecordListViewState extends State<RecordListView> {
           current is RecordLoadingMore,
       builder: (context, state) {
         if (state is RecordLoading) return _buildShimmerList();
-        if (state is RecordError) return Center(child: Text(state.message));
+        if (state is RecordError) return _buildError(state);
 
         final listState = _extractListState(state);
         final records = listState.$1;
@@ -233,7 +239,7 @@ class _RecordListViewState extends State<RecordListView> {
           : Text(
               t.records.list.scrollForMore,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface.withAlpha(100),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
     );

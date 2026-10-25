@@ -68,6 +68,10 @@
     "title": "Help & Support",
     "rowSubtitle": "FAQ, contact us, rate the app, legal"
   },
+  "crashReports": {
+    "title": "Send crash reports",
+    "subtitle": "Error details only. Amounts, numbers and SMS text are removed."
+  },
   "signOut": "Sign out",
   "deleteAccount": "Delete account",
   "signIn": {
@@ -191,6 +195,10 @@
       "other": "{n} changes waiting to send"
     },
     "allSent": "All changes sent",
+    "failed": {
+      "one": "{n} change couldn't sync",
+      "other": "{n} changes couldn't sync"
+    },
     "sections": {
       "device": "This device"
     },

@@ -13,6 +13,8 @@ class AppScaffold extends StatelessWidget {
   final Widget? _body;
   final bool _isSlivers;
 
+  // A page may have no title.
+  // ignore: unnecessary-nullable
   const AppScaffold({
     super.key,
     required this.title,

@@ -33,6 +33,9 @@ abstract final class AppSpacing {
   /// Minimum size of anything tappable (Material accessibility guideline).
   static const double minTapTarget = 48;
 
+  /// Height of a form field or a full-width form button.
+  static const double fieldHeight = 52;
+
   /// Square tile behind a row's leading icon or symbol.
   static const double iconTile = 40;
 

@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -19,6 +22,8 @@ import '../widgets/icon_grid_picker.dart';
 import '../widgets/color_picker_row.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 import 'package:expense_tracker/features/categories/presentation/helpers/category_display_name.dart';
+import 'package:expense_tracker/core/error/failure_message.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_error_state.dart';
 
 class CategoryFormPage extends StatefulWidget {
   final Category? category;
@@ -47,6 +52,10 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
   RecordType _type = RecordType.expense;
   var _isLoading = false;
 
+  /// Set when the category to edit couldn't load. The form stays hidden,
+  /// so Save can't write blank fields over the real category.
+  String? _loadError;
+
   bool get _isEditing => widget.category != null || widget.categoryId != null;
 
   @override
@@ -65,16 +74,27 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
     }
   }
 
+  void _retryLoad(String id) {
+    setState(() {
+      _loadError = null;
+      _isLoading = true;
+    });
+    unawaited(_loadCategory(id));
+  }
+
   Future<void> _loadCategory(String id) async {
     final repo = di.getIt<CategoryRepository>();
     final result = await repo.getCategoryById(id);
     if (!mounted) return;
     result.fold(
       (failure) {
-        debugPrint(
+        appLogger.warning(
           'CategoryFormPage: Failed to load category: ${failure.message}',
         );
-        setState(() => _isLoading = false);
+        setState(() {
+          _isLoading = false;
+          _loadError = failureText(failure);
+        });
       },
       (category) {
         if (!mounted) return;
@@ -157,7 +177,11 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
           ),
           const SizedBox(height: AppSpacing.sm),
           Container(
-            height: 48,
+            // Grows with large text.
+            constraints: const BoxConstraints(
+              minHeight: AppSpacing.minTapTarget,
+            ),
+            alignment: Alignment.centerLeft,
             decoration: BoxDecoration(
               color: _palette.inputFill,
               borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
@@ -191,9 +215,12 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
         AppSpacing.lg,
         AppSpacing.lg,
       ),
-      child: SizedBox(
-        width: double.infinity,
-        height: 52,
+      child: ConstrainedBox(
+        // Grows with the label at large text sizes.
+        constraints: const BoxConstraints(
+          minWidth: double.infinity,
+          minHeight: AppSpacing.fieldHeight,
+        ),
         child: ElevatedButton(
           onPressed: _saveCategory,
           style: ElevatedButton.styleFrom(
@@ -222,6 +249,18 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
       return Scaffold(
         backgroundColor: _palette.bg,
         body: Center(child: CircularProgressIndicator(color: _palette.brand)),
+      );
+    }
+    final loadError = _loadError;
+    final categoryId = widget.categoryId;
+    if (loadError != null && categoryId != null) {
+      return Scaffold(
+        backgroundColor: _palette.bg,
+        appBar: _buildTopBar(),
+        body: AppErrorState(
+          message: loadError,
+          onRetry: () => _retryLoad(categoryId),
+        ),
       );
     }
 

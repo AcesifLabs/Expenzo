@@ -54,5 +54,11 @@ class SyncOverviewRepositoryImpl implements SyncOverviewRepository {
   Stream<int> watchPendingCount() => queue.watchUnsyncedCount();
 
   @override
+  Stream<int> watchFailedCount() => queue.watchFailedCount();
+
+  @override
+  Future<void> retryFailed() => queue.retryFailed();
+
+  @override
   Future<SyncRunResult> syncNow() => engine.syncNow();
 }

@@ -105,7 +105,7 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
 
   void _onMessageTap(SmsMessage msg) {
     Navigator.of(context).push(
-      SlidePageRoute(
+      SlidePageRoute<void>(
         builder: (_) =>
             TemplateEditorPage(source: widget.source, sampleMessage: msg),
       ),
@@ -130,7 +130,7 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
   void _onEditTemplate(SmsMessage msg, ExpenseTemplate template) {
     final sampleMessage = _resolveEditSample(template, msg);
     Navigator.of(context).push(
-      SlidePageRoute(
+      SlidePageRoute<void>(
         builder: (_) => TemplateEditorPage(
           source: widget.source,
           sampleMessage: sampleMessage,
@@ -329,24 +329,34 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
 
     return GestureDetector(
       onTap: () => _onMessageTap(msg),
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.smd,
-          vertical: AppSpacing.sm,
-        ),
-        decoration: BoxDecoration(
-          color: accent.withAlpha(0x1F),
-          borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(PiconsRegular.magicWand, size: 16, color: accent),
-            Text(
-              t.messageTemplates.analyzer.useMessage,
-              style: AppTypography.bodySmall.copyWith(color: accent),
+      // A 48 dp tap area around the button.
+      behavior: HitTestBehavior.opaque,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: AppSpacing.minTapTarget),
+        child: Center(
+          widthFactor: 1,
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.smd,
+              vertical: AppSpacing.sm,
             ),
-          ],
+            decoration: BoxDecoration(
+              color: accent.withAlpha(0x1F),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(PiconsRegular.magicWand, size: 16, color: accent),
+                Flexible(
+                  child: Text(
+                    t.messageTemplates.analyzer.useMessage,
+                    style: AppTypography.bodySmall.copyWith(color: accent),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -530,9 +540,13 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: AppSpacing.smd),
-                _buildInfoBanner(),
+                // At large text sizes the banner scrolls in up to a third
+                // of the height, leaving the rest to the messages.
+                Flexible(
+                  child: SingleChildScrollView(child: _buildInfoBanner()),
+                ),
                 const SizedBox(height: AppSpacing.smd),
-                Expanded(child: _buildContent()),
+                Expanded(flex: 2, child: _buildContent()),
               ],
             ),
           ),

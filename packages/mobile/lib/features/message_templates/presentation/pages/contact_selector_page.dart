@@ -104,9 +104,9 @@ class _ContactSelectorViewState extends State<ContactSelectorView>
           updatedAt: DateTime.now(),
         );
 
-    await Navigator.of(
-      context,
-    ).push(SlidePageRoute(builder: (_) => SampleAnalyzerPage(source: source)));
+    await Navigator.of(context).push(
+      SlidePageRoute<void>(builder: (_) => SampleAnalyzerPage(source: source)),
+    );
     if (!mounted) return;
     context.read<MessageSourcesBloc>().add(LoadMessageSources());
   }
@@ -129,7 +129,7 @@ class _ContactSelectorViewState extends State<ContactSelectorView>
   }
 
   Widget _buildSearchField(ColorScheme colors) {
-    final surfaceDimAlpha = colors.onSurface.withAlpha(100);
+    final surfaceDimAlpha = colors.onSurfaceVariant;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, 0),
@@ -278,9 +278,7 @@ class _ContactSelectorViewState extends State<ContactSelectorView>
       contact.lastMessage,
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
-      style: AppTypography.bodyMedium.copyWith(
-        color: colors.onSurface.withAlpha(120),
-      ),
+      style: AppTypography.bodyMedium.copyWith(color: colors.onSurfaceVariant),
     );
   }
 

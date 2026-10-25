@@ -92,8 +92,9 @@ class _AddToGoalSheetState extends State<_AddToGoalSheet> {
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
-              SizedBox(
-                height: AppSpacing.xxl,
+              ConstrainedBox(
+                // Grows with the label at large text sizes.
+                constraints: const BoxConstraints(minHeight: AppSpacing.xxl),
                 child: ElevatedButton(
                   onPressed: _save,
                   child: Text(t.common.add),

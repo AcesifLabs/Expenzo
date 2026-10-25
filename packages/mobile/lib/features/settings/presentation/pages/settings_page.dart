@@ -23,10 +23,12 @@ import 'package:expense_tracker/core/theme/app_spacing.dart';
 import '../../domain/entities/notification_toggle.dart';
 import '../../domain/entities/user_settings.dart';
 import '../bloc/settings_bloc.dart';
+import '../bloc/settings_event.dart';
 import '../bloc/settings_state.dart';
 import '../widgets/settings_profile_card.dart';
 import '../widgets/settings_section.dart';
 import '../widgets/settings_state_view.dart';
+import '../widgets/settings_switch_tile.dart';
 import '../widgets/settings_tile.dart';
 import 'package:expense_tracker/features/family/domain/repositories/family_repository.dart';
 import 'debug_db_inspector_page.dart';
@@ -64,7 +66,7 @@ class SettingsPage extends StatelessWidget {
 /// | Data & budget (`_dataSection`) | Recurring transactions, Sync, Export data, Delete all data | Recurring transactions, Sync (SAAP-71), Export data (SAAP-69), Delete all data (SAAP-70) |
 /// | Automation (`_automationSection`) | Auto-import from SMS, Matching rules | none |
 /// | General (`_generalSection`) | Language, Home page, Category settings | none |
-/// | Support (`_supportSection`) | Help & Support | none |
+/// | Support (`_supportSection`) | Help & Support, Send crash reports | none |
 /// | none (`_signOutRow`) | Sign out (signed in only), always last | none |
 /// | Developer (`kDebugMode` only) | Database inspector | none |
 ///
@@ -331,8 +333,9 @@ class SettingsView extends StatelessWidget {
     );
   }
 
-  Widget _supportSection(BuildContext context) {
+  Widget _supportSection(BuildContext context, UserSettings? settings) {
     final settingsT = t.settings;
+    final bloc = context.read<SettingsBloc>();
 
     return SettingsSection(
       title: settingsT.sections.support,
@@ -342,6 +345,15 @@ class SettingsView extends StatelessWidget {
           title: settingsT.help.title,
           subtitle: settingsT.help.rowSubtitle,
           onTap: () => context.push(SettingsRoute.help.location),
+        ),
+        SettingsSwitchTile(
+          icon: PiconsRegular.bug,
+          title: settingsT.crashReports.title,
+          subtitle: settingsT.crashReports.subtitle,
+          value: settings?.crashReportsEnabled ?? true,
+          onChanged: settings == null
+              ? null
+              : (enabled) => bloc.add(UpdateCrashReportsEnabled(enabled)),
         ),
       ],
     );
@@ -408,7 +420,7 @@ class SettingsView extends StatelessWidget {
                 _dataSection(context),
                 _automationSection(context),
                 _generalSection(context, settings),
-                _supportSection(context),
+                _supportSection(context, settings),
                 _signOutRow(context),
                 if (kDebugMode) _developerSection(context),
               ],

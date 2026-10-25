@@ -3,6 +3,8 @@ import 'package:expense_tracker/core/utils/money_format.dart';
 
 import 'budget_access_lookup.dart';
 
+// Null keeps the currency's own decimals.
+// ignore: unnecessary-nullable
 /// [fallback] for a personal budget; the Family Group's Currency for one
 /// shared into [groupId] (CONTEXT.md Shared Budget).
 MoneyFormat budgetMoneyFormat(

@@ -147,7 +147,7 @@ class AiAssistantBloc extends Bloc<AiAssistantEvent, AiAssistantState> {
         (token) => add(StreamTokenReceived(token)),
       ),
       onDone: () => add(const StreamCompleted()),
-      onError: (error) => add(StreamError(error.toString())),
+      onError: (Object error) => add(StreamError(error.toString())),
     );
   }
 

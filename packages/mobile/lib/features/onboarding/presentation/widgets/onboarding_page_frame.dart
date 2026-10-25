@@ -8,14 +8,14 @@ import 'package:expense_tracker/i18n/strings.g.dart';
 /// a Continue button kept above the keyboard. [onContinue] null disables it.
 class OnboardingPageFrame extends StatelessWidget {
   final String title;
-  final String? subtitle;
+  final String subtitle;
   final List<Widget> body;
   final VoidCallback? onContinue;
 
   const OnboardingPageFrame({
     super.key,
     required this.title,
-    this.subtitle,
+    required this.subtitle,
     required this.body,
     this.onContinue,
   });
@@ -108,12 +108,20 @@ class OnboardingPrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      height: AppSpacing.xxl,
+    return ConstrainedBox(
+      // Grows with the label at large text sizes.
+      constraints: const BoxConstraints(
+        minWidth: double.infinity,
+        minHeight: AppSpacing.xxl,
+      ),
       child: ElevatedButton(
         onPressed: onPressed,
-        child: Text(label, style: Theme.of(context).textTheme.titleMedium),
+        // Via the button style, so the label keeps the button's foreground
+        // colour (a Text style colour would override it).
+        style: ElevatedButton.styleFrom(
+          textStyle: Theme.of(context).textTheme.titleMedium,
+        ),
+        child: Text(label),
       ),
     );
   }

@@ -141,9 +141,12 @@ class _FamilyInvitePageState extends State<FamilyInvitePage> {
         ),
         _buildCodeCard(context, state, invite),
         const SizedBox(height: AppSpacing.lg),
-        SizedBox(
-          width: double.infinity,
-          height: AppSpacing.xxl,
+        ConstrainedBox(
+          // Grows with the label at large text sizes.
+          constraints: const BoxConstraints(
+            minWidth: double.infinity,
+            minHeight: AppSpacing.xxl,
+          ),
           child: ElevatedButton.icon(
             icon: const Icon(PiconsRegular.shareNetwork),
             label: Text(inviteT.share),
@@ -161,9 +164,12 @@ class _FamilyInvitePageState extends State<FamilyInvitePage> {
           ),
         ),
         const SizedBox(height: AppSpacing.md),
-        SizedBox(
-          width: double.infinity,
-          height: AppSpacing.xxl,
+        ConstrainedBox(
+          // Grows with the label at large text sizes.
+          constraints: const BoxConstraints(
+            minWidth: double.infinity,
+            minHeight: AppSpacing.xxl,
+          ),
           child: OutlinedButton(onPressed: _onDone, child: Text(t.common.done)),
         ),
       ],
@@ -253,10 +259,12 @@ class _FamilyInvitePageState extends State<FamilyInvitePage> {
             padding: EdgeInsets.all(AppSpacing.sm),
             child: CircularProgressIndicator(),
           )
-        : ShimmerBox.rectangle(
-            width: AppSpacing.xxl * 4,
-            height: AppSpacing.xl,
-            borderRadius: AppSpacing.radiusControl,
+        : ShimmerBox(
+            child: ShimmerBox.rectangle(
+              width: AppSpacing.xxl * 4,
+              height: AppSpacing.xl,
+              borderRadius: AppSpacing.radiusControl,
+            ),
           );
   }
 

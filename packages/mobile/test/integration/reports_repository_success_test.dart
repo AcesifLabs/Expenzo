@@ -104,4 +104,46 @@ void main() {
     expect(byName['Food']?.amount, 75);
     expect(byName['Uncategorized']?.colorHex, isNull);
   });
+
+  group('income is not spending', () {
+    Future<void> earn(String id, double amount, DateTime date) =>
+        records.insertRecord(
+          RecordsCompanion.insert(
+            id: id,
+            amount: amount,
+            description: id,
+            date: date,
+            recordType: 'IN',
+            categoryId: const Value('cat-salary'),
+          ),
+        );
+
+    setUp(() async {
+      await spend('lunch', 200, DateTime(2026, 10, 2, 13), cat: 'cat-food');
+      await earn('salary', 5000, DateTime(2026, 10, 1, 9));
+    });
+
+    test('total spent counts expenses only', () async {
+      final result = await repository.getSpendingInsights(
+        startDate: DateTime(2026, 10, 1),
+        endDate: DateTime(2026, 10, 31),
+      );
+      final insights = result.getOrElse(() => throw StateError('failed'));
+
+      expect(insights.totalSpent, 200);
+      expect(insights.totalTransactionCount, 1);
+      expect(insights.highestDayAmount, 200);
+    });
+
+    test('the category breakdown leaves income categories out', () async {
+      final result = await repository.getCategoryBreakdown(
+        startDate: DateTime(2026, 10, 1),
+        endDate: DateTime(2026, 10, 31),
+      );
+      final breakdown = result.getOrElse(() => throw StateError('failed'));
+
+      expect(breakdown.map((c) => c.categoryId), ['cat-food']);
+      expect(breakdown.single.amount, 200);
+    });
+  });
 }

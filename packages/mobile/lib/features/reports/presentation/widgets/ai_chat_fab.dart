@@ -5,9 +5,9 @@ import 'package:expense_tracker/i18n/strings.g.dart';
 /// Opens the AI assistant from Reports. Labelled, so it reads as "ask about
 /// these numbers" rather than a second add button.
 class AIChatFAB extends StatelessWidget {
-  final VoidCallback? onPressed;
+  final VoidCallback onPressed;
 
-  const AIChatFAB({super.key, this.onPressed});
+  const AIChatFAB({super.key, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {

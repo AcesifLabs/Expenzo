@@ -7,6 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:expense_tracker/core/database/app_database.dart';
 import 'package:expense_tracker/core/theme/category_palette.dart';
 
+import 'migrations/v19_tables.dart';
+
 /// Verifies the V16 -> V17 migration (category palette recolor):
 ///  - untouched default categories move to the new palette
 ///  - defaults the user recolored, and custom categories, keep their color
@@ -85,6 +87,7 @@ void main() {
       "VALUES ('custom-1', 'Pets', 'pawPrint', '#FFD700', 0)",
       const [],
     );
+    await addMissingV19Tables(raw, except: {'goals'});
     await raw.runCustom('PRAGMA user_version = 16', const []);
     await raw.close();
   }

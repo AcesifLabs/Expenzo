@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+@TableIndex(name: 'idx_budgets_user_id', columns: {#userId})
 class Budgets extends Table {
   TextColumn get id => text()();
   TextColumn get name => text()();
@@ -19,8 +20,4 @@ class Budgets extends Table {
 
   @override
   Set<Column> get primaryKey => {id};
-
-  Set<TableIndex> get indexes => {
-    const TableIndex(name: 'idx_budgets_user_id', columns: {#userId}),
-  };
 }

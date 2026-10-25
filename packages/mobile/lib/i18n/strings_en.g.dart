@@ -553,6 +553,9 @@ class Translations$receiptScan$en {
 	/// en: 'Camera permission is required to scan receipts.'
 	String get permissionRequired => 'Camera permission is required to scan receipts.';
 
+	/// en: 'Camera access is off for Expenzo. Turn it on in Settings to scan receipts.'
+	String get permissionBlocked => 'Camera access is off for Expenzo. Turn it on in Settings to scan receipts.';
+
 	/// en: 'No camera available on this device.'
 	String get noCamera => 'No camera available on this device.';
 
@@ -717,6 +720,7 @@ class Translations$settings$en {
 
 	late final Translations$settings$recurring$en recurring = Translations$settings$recurring$en.internal(_root);
 	late final Translations$settings$help$en help = Translations$settings$help$en.internal(_root);
+	late final Translations$settings$crashReports$en crashReports = Translations$settings$crashReports$en.internal(_root);
 
 	/// en: 'Sign out'
 	String get signOut => 'Sign out';
@@ -1111,6 +1115,9 @@ class Translations$budgets$details$en {
 
 	late final Translations$budgets$details$periodBudget$en periodBudget = Translations$budgets$details$periodBudget$en.internal(_root);
 
+	/// en: 'Includes {amount} carried over'
+	String carriedOver({required Object amount}) => 'Includes ${amount} carried over';
+
 	/// en: '{percent}% used'
 	String used({required Object percent}) => '${percent}% used';
 
@@ -1359,11 +1366,17 @@ class Translations$common$fallback$en {
 	/// en: 'Details (debug)'
 	String get debugDetails => 'Details (debug)';
 
-	/// en: 'Unexpected error occurred'
-	String get criticalTitle => 'Unexpected error occurred';
+	/// en: 'The data on this phone can't be read. Reset it to keep using Expenzo. Anything you synced comes back after you sign in.'
+	String get storageBody => 'The data on this phone can\'t be read. Reset it to keep using Expenzo. Anything you synced comes back after you sign in.';
 
-	/// en: 'The app will close shortly.'
-	String get criticalBody => 'The app will close shortly.';
+	/// en: 'Reset local data'
+	String get resetLocalData => 'Reset local data';
+
+	/// en: 'This deletes the transactions, budgets and categories saved on this phone. Synced data comes back after you sign in. Changes that weren't synced are lost.'
+	String get resetConfirm => 'This deletes the transactions, budgets and categories saved on this phone. Synced data comes back after you sign in. Changes that weren\'t synced are lost.';
+
+	/// en: 'Delete and start again'
+	String get resetConfirmAction => 'Delete and start again';
 }
 
 // Path: common.smsGate
@@ -2655,6 +2668,15 @@ class Translations$parsingRules$form$en {
 	/// en: 'Leave empty if date is not needed'
 	String get dateHelper => 'Leave empty if date is not needed';
 
+	/// en: 'Dates like 05/10/2026'
+	String get dateOrder => 'Dates like 05/10/2026';
+
+	/// en: 'Day first'
+	String get dayFirst => 'Day first';
+
+	/// en: 'Month first'
+	String get monthFirst => 'Month first';
+
 	/// en: 'Source'
 	String get source => 'Source';
 
@@ -3169,6 +3191,21 @@ class Translations$settings$help$en {
 	String get rowSubtitle => 'FAQ, contact us, rate the app, legal';
 }
 
+// Path: settings.crashReports
+class Translations$settings$crashReports$en {
+	Translations$settings$crashReports$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Send crash reports'
+	String get title => 'Send crash reports';
+
+	/// en: 'Error details only. Amounts, numbers and SMS text are removed.'
+	String get subtitle => 'Error details only. Amounts, numbers and SMS text are removed.';
+}
+
 // Path: settings.signIn
 class Translations$settings$signIn$en {
 	Translations$settings$signIn$en.internal(this._root);
@@ -3442,6 +3479,12 @@ class Translations$settings$sync$en {
 
 	/// en: 'All changes sent'
 	String get allSent => 'All changes sent';
+
+	/// en: '(one) {{n} change couldn't sync} (other) {{n} changes couldn't sync}'
+	String failed({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: '${n} change couldn\'t sync',
+		other: '${n} changes couldn\'t sync',
+	);
 
 	late final Translations$settings$sync$sections$en sections = Translations$settings$sync$sections$en.internal(_root);
 
@@ -3742,6 +3785,9 @@ class Translations$smsParser$card$en {
 
 	/// en: 'Rule: {id}'
 	String rule({required Object id}) => 'Rule: ${id}';
+
+	/// en: 'No amount'
+	String get noAmount => 'No amount';
 }
 
 // Path: smsParser.options
@@ -4995,6 +5041,7 @@ extension on Translations {
 			'budgets.details.periodBudget.weekly' => 'Weekly budget',
 			'budgets.details.periodBudget.monthly' => 'Monthly budget',
 			'budgets.details.periodBudget.yearly' => 'Yearly budget',
+			'budgets.details.carriedOver' => ({required Object amount}) => 'Includes ${amount} carried over',
 			'budgets.details.used' => ({required Object percent}) => '${percent}% used',
 			'budgets.details.over' => 'Over budget',
 			'budgets.details.transactionsFailed' => 'Couldn\'t load transactions',
@@ -5115,8 +5162,10 @@ extension on Translations {
 			'common.fallback.reference' => ({required Object id}) => 'Ref: ${id}',
 			'common.fallback.closeApp' => 'Close app',
 			'common.fallback.debugDetails' => 'Details (debug)',
-			'common.fallback.criticalTitle' => 'Unexpected error occurred',
-			'common.fallback.criticalBody' => 'The app will close shortly.',
+			'common.fallback.storageBody' => 'The data on this phone can\'t be read. Reset it to keep using Expenzo. Anything you synced comes back after you sign in.',
+			'common.fallback.resetLocalData' => 'Reset local data',
+			'common.fallback.resetConfirm' => 'This deletes the transactions, budgets and categories saved on this phone. Synced data comes back after you sign in. Changes that weren\'t synced are lost.',
+			'common.fallback.resetConfirmAction' => 'Delete and start again',
 			'common.smsGate.title' => 'SMS access required',
 			'common.smsGate.body' => 'Expenzo needs access to your SMS to automatically track expenses from your bank and payment apps. Your messages never leave your device.',
 			'common.smsGate.allow' => 'Allow access',
@@ -5420,11 +5469,11 @@ extension on Translations {
 			'onboarding.timeline.cannotAfford' => ({required Object amount}) => 'Your savings of ${amount}/month don\'t cover these. Pick a later custom date.',
 			'onboarding.timeline.months' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} month', other: '${n} months', ), 
 			'onboarding.timeline.perMonth' => ({required Object amount}) => '${amount}/mo',
+			_ => null,
+		} ?? switch (path) {
 			'onboarding.timeline.custom' => 'Custom',
 			'onboarding.timeline.customHint' => 'Set your own',
 			'onboarding.timeline.fit.affordable' => 'Fits your savings',
-			_ => null,
-		} ?? switch (path) {
 			'onboarding.timeline.fit.tooExpensive' => 'More than your savings',
 			'onboarding.timeline.fit.slow' => 'Takes a long time',
 			'onboarding.complete.title' => 'Setup complete!',
@@ -5473,6 +5522,9 @@ extension on Translations {
 			'parsingRules.form.datePattern' => 'Date pattern (optional)',
 			'parsingRules.form.dateRegex' => 'Date regex (optional)',
 			'parsingRules.form.dateHelper' => 'Leave empty if date is not needed',
+			'parsingRules.form.dateOrder' => 'Dates like 05/10/2026',
+			'parsingRules.form.dayFirst' => 'Day first',
+			'parsingRules.form.monthFirst' => 'Month first',
 			'parsingRules.form.source' => 'Source',
 			'parsingRules.form.priority' => 'Priority',
 			'parsingRules.form.priorityHelper' => 'Higher priority rules are tried first',
@@ -5500,6 +5552,7 @@ extension on Translations {
 			'parsingRules.templates.flipkart_order_email' => 'Parses Flipkart order emails',
 			'parsingRules.templates.generic_payment_email' => 'Parses generic payment confirmation emails',
 			'receiptScan.permissionRequired' => 'Camera permission is required to scan receipts.',
+			'receiptScan.permissionBlocked' => 'Camera access is off for Expenzo. Turn it on in Settings to scan receipts.',
 			'receiptScan.noCamera' => 'No camera available on this device.',
 			'receiptScan.cameraFailed' => 'Couldn\'t open the camera.',
 			'receiptScan.captureFailed' => 'Couldn\'t take the photo. Try again.',
@@ -5673,6 +5726,8 @@ extension on Translations {
 			'settings.recurring.subtitle' => 'Bills and income that repeat',
 			'settings.help.title' => 'Help & Support',
 			'settings.help.rowSubtitle' => 'FAQ, contact us, rate the app, legal',
+			'settings.crashReports.title' => 'Send crash reports',
+			'settings.crashReports.subtitle' => 'Error details only. Amounts, numbers and SMS text are removed.',
 			'settings.signOut' => 'Sign out',
 			'settings.deleteAccount' => 'Delete account',
 			'settings.signIn.title' => 'Sign in',
@@ -5752,6 +5807,7 @@ extension on Translations {
 			'settings.sync.failureBannerBody' => 'Your changes are safe on this phone and will be sent when Sync works again.',
 			'settings.sync.pending' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} change waiting to send', other: '${n} changes waiting to send', ), 
 			'settings.sync.allSent' => 'All changes sent',
+			'settings.sync.failed' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} change couldn\'t sync', other: '${n} changes couldn\'t sync', ), 
 			'settings.sync.sections.device' => 'This device',
 			'settings.sync.enable' => 'Sync on this device',
 			'settings.sync.syncNow' => 'Sync now',
@@ -5840,6 +5896,7 @@ extension on Translations {
 			'smsParser.summary.matches' => 'Matches',
 			'smsParser.summary.selected' => 'Selected',
 			'smsParser.card.rule' => ({required Object id}) => 'Rule: ${id}',
+			'smsParser.card.noAmount' => 'No amount',
 			'smsParser.options.title' => 'Scan past SMS for records',
 			'smsParser.toolbar.sender' => 'Sender',
 			'smsParser.toolbar.flatList' => 'Flat list',

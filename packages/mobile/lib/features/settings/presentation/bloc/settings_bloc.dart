@@ -54,6 +54,10 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       _onUpdateRecurringAutoCreate,
       transformer: concurrent(),
     );
+    on<UpdateCrashReportsEnabled>(
+      _onUpdateCrashReportsEnabled,
+      transformer: concurrent(),
+    );
     on<UpdateNumberFormat>(_onUpdateNumberFormat, transformer: concurrent());
     on<UpdateFontSize>(_onUpdateFontSize, transformer: concurrent());
     on<UpdateFirstDayOfWeek>(
@@ -150,6 +154,13 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     Emitter<SettingsState> emit,
   ) {
     _updateFromLast((s) => s.copyWith(recurringAutoCreate: event.enabled));
+  }
+
+  void _onUpdateCrashReportsEnabled(
+    UpdateCrashReportsEnabled event,
+    Emitter<SettingsState> emit,
+  ) {
+    _updateFromLast((s) => s.copyWith(crashReportsEnabled: event.enabled));
   }
 
   void _onUpdateNumberFormat(

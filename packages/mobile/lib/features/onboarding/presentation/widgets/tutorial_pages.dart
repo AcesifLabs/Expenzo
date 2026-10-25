@@ -86,21 +86,22 @@ class _TutorialPagesState extends State<TutorialPages> {
       ),
       child: Row(
         children: [
-          TextButton(
-            style: TextButton.styleFrom(
-              minimumSize: const Size(0, AppSpacing.minTapTarget),
-            ),
-            onPressed: widget.onDone,
-            child: Text(
-              t.onboarding.common.skip,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: context.palette.textSecondary,
+          Flexible(
+            child: TextButton(
+              style: TextButton.styleFrom(
+                minimumSize: const Size(0, AppSpacing.minTapTarget),
+              ),
+              onPressed: widget.onDone,
+              child: Text(
+                t.onboarding.common.skip,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: context.palette.textSecondary,
+                ),
               ),
             ),
           ),
-          const Spacer(),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
-            flex: 2,
             child: OnboardingPrimaryButton(
               label: t.common.next,
               onPressed: _next,
@@ -179,17 +180,26 @@ class _TutorialPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: textTheme.headlineMedium,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            page.body(),
-            textAlign: TextAlign.center,
-            style: textTheme.bodyLarge?.copyWith(
-              color: context.palette.textSecondary,
+          // Scrolls when large text needs more room than the image leaves.
+          Flexible(
+            child: SingleChildScrollView(
+              child: ListBody(
+                children: [
+                  Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    style: textTheme.headlineMedium,
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    page.body(),
+                    textAlign: TextAlign.center,
+                    style: textTheme.bodyLarge?.copyWith(
+                      color: context.palette.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

@@ -61,9 +61,12 @@ class _RateAppPageState extends State<RateAppPage> {
         ? rateT.tellUs
         : rateT.writeReview;
 
-    return SizedBox(
-      width: double.infinity,
-      height: AppSpacing.xxl,
+    return ConstrainedBox(
+      // Grows with the label at large text sizes.
+      constraints: const BoxConstraints(
+        minWidth: double.infinity,
+        minHeight: AppSpacing.xxl,
+      ),
       child: ElevatedButton(
         onPressed: stars == null || _busy ? null : _onPrimaryPressed,
         child: _busy

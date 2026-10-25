@@ -1,3 +1,4 @@
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:picons/picons.dart';
@@ -91,7 +92,7 @@ class _AppShellState extends State<AppShell> {
 
   Widget _navItem(int i, ColorScheme colors) {
     final sel = _currentIndex == i;
-    final mutedColor = colors.onSurface.withAlpha(120);
+    final mutedColor = colors.onSurfaceVariant;
 
     return Expanded(
       child: GestureDetector(
@@ -147,7 +148,7 @@ class _AppShellState extends State<AppShell> {
   }
 
   void _onFabPressed(BuildContext context) async {
-    final now = DateTime.now();
+    final now = clock.now();
     final lastPress = _lastFabPress;
     if (lastPress != null &&
         now.difference(lastPress) < const Duration(seconds: 1)) {

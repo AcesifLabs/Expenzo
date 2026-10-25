@@ -84,7 +84,9 @@ class ProcessRecurring {
       current = calculateNextOccurrence(
         current,
         recurring.frequency,
-        dayOfMonth: recurring.dayOfMonth,
+        // Items saved without a day of month keep their start day, so a
+        // short month doesn't move every later date to the 28th.
+        dayOfMonth: recurring.dayOfMonth ?? recurring.startDate.day,
       );
       count++;
     }

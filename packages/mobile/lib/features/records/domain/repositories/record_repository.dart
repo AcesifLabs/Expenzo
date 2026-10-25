@@ -14,7 +14,9 @@ abstract class RecordRepository {
     int? offset,
   });
 
-  Future<Either<Failure, List<Record>>> getFilteredRecords(RecordFilter filter);
+  Future<Either<CacheFailure, List<Record>>> getFilteredRecords(
+    RecordFilter filter,
+  );
 
   Future<Either<CacheFailure, Record>> getRecordById(String id);
 
@@ -26,12 +28,20 @@ abstract class RecordRepository {
 
   Stream<List<Record>> watchRecords({int? limit, int? offset});
 
+  /// The records matching [filter], sent again whenever the records change.
+  Stream<List<Record>> watchFilteredRecords(RecordFilter filter);
+
   /// Checks if a record exists for the given [sourceId].
   ///
   /// Returns [Right(bool)] on success, [Left(CacheFailure)] on failure.
   Future<Either<CacheFailure, bool>> recordExistsBySourceId(String sourceId);
 
   Future<Either<CacheFailure, Set<String>>> getExistingSourceIds(
+    List<String> sourceIds,
+  );
+
+  /// Absolute amounts of the records stored under each of [sourceIds].
+  Future<Either<CacheFailure, Map<String, List<double>>>> getAmountsBySourceIds(
     List<String> sourceIds,
   );
 

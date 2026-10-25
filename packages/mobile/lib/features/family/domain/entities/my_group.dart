@@ -39,6 +39,8 @@ class GroupMember extends Equatable {
     required this.joinedAt,
   });
 
+  // copyWith: null keeps the current role.
+  // ignore: unnecessary-nullable
   GroupMember copyWith({GroupRole? role}) => GroupMember(
     userId: userId,
     displayName: displayName,

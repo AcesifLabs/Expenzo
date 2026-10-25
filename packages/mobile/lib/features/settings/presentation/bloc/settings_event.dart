@@ -94,6 +94,15 @@ class UpdateDefaultRecurringFrequency extends SettingsEvent {
   const UpdateDefaultRecurringFrequency(this.frequency);
 }
 
+class UpdateCrashReportsEnabled extends SettingsEvent {
+  final bool enabled;
+
+  @override
+  List<Object?> get props => [enabled];
+
+  const UpdateCrashReportsEnabled(this.enabled);
+}
+
 class UpdateRecurringAutoCreate extends SettingsEvent {
   final bool enabled;
 

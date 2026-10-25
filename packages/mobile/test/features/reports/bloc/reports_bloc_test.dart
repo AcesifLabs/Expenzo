@@ -1,3 +1,4 @@
+import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:dartz/dartz.dart';
@@ -93,62 +94,56 @@ void main() {
       },
     );
 
-    test('emits [ReportsLoading, ReportsError] when trend fails', () async {
-      when(
-        () => mockGetSpendingTrend(
-          startDate: any(named: 'startDate'),
-          endDate: any(named: 'endDate'),
-          granularity: any(named: 'granularity'),
-        ),
-      ).thenAnswer((_) async => Left(ServerFailure(message: 'Trend failed')));
-      when(
-        () => mockGetCategoryBreakdown(
-          startDate: any(named: 'startDate'),
-          endDate: any(named: 'endDate'),
-        ),
-      ).thenAnswer((_) async => Right(const []));
-      when(
-        () => mockGetSpendingInsights(
-          startDate: any(named: 'startDate'),
-          endDate: any(named: 'endDate'),
-        ),
-      ).thenAnswer(
-        (_) async => Right(
-          const SpendingInsights(
-            highestDayAmount: 0,
-            avgDailySpending: 0,
-            totalTransactionCount: 0,
-            totalSpent: 0,
+    blocTest<ReportsBloc, ReportsState>(
+      'emits loading, then the storage message when the trend fails',
+      setUp: () {
+        when(
+          () => mockGetSpendingTrend(
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
+            granularity: any(named: 'granularity'),
           ),
-        ),
-      );
-
-      bloc = ReportsBloc(
+        ).thenAnswer((_) async => Left(CacheFailure(message: 'Trend failed')));
+        when(
+          () => mockGetCategoryBreakdown(
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
+          ),
+        ).thenAnswer((_) async => Right(const []));
+        when(
+          () => mockGetSpendingInsights(
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
+          ),
+        ).thenAnswer(
+          (_) async => Right(
+            const SpendingInsights(
+              highestDayAmount: 0,
+              avgDailySpending: 0,
+              totalTransactionCount: 0,
+              totalSpent: 0,
+            ),
+          ),
+        );
+      },
+      build: () => ReportsBloc(
         getSpendingTrend: mockGetSpendingTrend,
         getCategoryBreakdown: mockGetCategoryBreakdown,
         getSpendingInsights: mockGetSpendingInsights,
         startDate: startDate,
         endDate: endDate,
         granularity: Granularity.monthly,
-      );
+      ),
+      expect: () => [
+        isA<ReportsLoading>(),
+        isA<ReportsError>().having(
+          (s) => s.message,
+          'message',
+          t.common.errors.storage,
+        ),
+      ],
+    );
 
-      await expectLater(
-        bloc.stream,
-        emitsInOrder([
-          isA<ReportsLoading>(),
-          isA<ReportsError>().having(
-            (s) => s.message,
-            'message',
-            t.common.errors.server,
-          ),
-        ]),
-      );
-
-      bloc.close();
-    });
-  });
-
-  group('RefreshReports', () {
     test('reloads the same length of range, ending now', () async {
       when(
         () => mockGetSpendingTrend(

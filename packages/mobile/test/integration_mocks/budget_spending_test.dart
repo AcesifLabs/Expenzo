@@ -1,3 +1,6 @@
+import 'package:clock/clock.dart';
+import 'package:expense_tracker/features/budgets/domain/entities/budget.dart';
+import 'package:expense_tracker/features/budgets/domain/entities/budget_progress.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:dartz/dartz.dart';
@@ -164,28 +167,100 @@ void main() {
       verify(() => mockRecordRepository.getSpendingForBudgets(any())).called(1);
     });
 
-    test('rollover is included in the effective amount', () async {
-      final budget = makeBudget(
-        id: 'budget-rollover',
-        amount: 500.0,
-        startDate: periodStart,
+    group('rollover', () {
+      // Mid-June: the current monthly period is June, the previous is May.
+      final june15 = Clock.fixed(DateTime(2026, 6, 15));
+      final june = DateTime(2026, 6, 1);
+
+      /// Answers each spending query by period: June gets [current], any
+      /// earlier period gets [previous].
+      Future<BudgetProgress> progressFor(
+        Budget budget, {
+        required double current,
+        double previous = 0,
+      }) async {
+        when(
+          () => mockBudgetRepository.getBudgets(),
+        ).thenAnswer((_) async => Right([budget]));
+        when(
+          () => mockRecordRepository.getSpendingForBudgets(any()),
+        ).thenAnswer((invocation) async {
+          final periods =
+              invocation.positionalArguments[0]
+                  as Map<String, ({DateTime start, DateTime end})>;
+
+          return Right({
+            for (final MapEntry(:key, :value) in periods.entries)
+              key: value.start == june ? current : previous,
+          });
+        });
+        final result = await withClock(june15, () => getBudgetsWithProgress());
+
+        return result.getOrElse(() => []).single;
+      }
+
+      List<Map<String, ({DateTime start, DateTime end})>> queriedPeriods() =>
+          verify(
+            () => mockRecordRepository.getSpendingForBudgets(captureAny()),
+          ).captured.cast<Map<String, ({DateTime start, DateTime end})>>();
+
+      Budget rolloverBudget({DateTime? startDate}) => makeBudget(
+        id: 'b',
+        amount: 500,
+        startDate: startDate ?? DateTime(2026, 1, 1),
         rolloverEnabled: true,
-        rolloverAmount: 100.0,
       );
 
-      when(
-        () => mockBudgetRepository.getBudgets(),
-      ).thenAnswer((_) async => Right([budget]));
-      stubSpendByBudget({'budget-rollover': 300.0});
+      test('unspent money from the previous period carries over', () async {
+        final progress = await progressFor(
+          rolloverBudget(),
+          current: 300,
+          previous: 350,
+        );
 
-      final result = await getBudgetsWithProgress();
+        expect(progress.rolloverAmount, 150);
+        expect(progress.effectiveAmount, 650);
+        expect(progress.percentage, closeTo(300 / 650 * 100, 0.001));
+      });
 
-      result.fold((_) => fail('Should not return failure'), (progressList) {
-        final progress = progressList.first;
-        expect(progress.effectiveAmount, 600.0);
-        expect(progress.percentage, 50.0);
-        expect(progress.rolloverAmount, 100.0);
-        expect(progress.isOverBudget, false);
+      test('overspending never lowers the next period', () async {
+        final progress = await progressFor(
+          rolloverBudget(),
+          current: 100,
+          previous: 650,
+        );
+
+        expect(progress.rolloverAmount, 0);
+        expect(progress.effectiveAmount, 500);
+      });
+
+      test('a budget that started this period has nothing to carry', () async {
+        final progress = await progressFor(
+          rolloverBudget(startDate: DateTime(2026, 6, 1)),
+          current: 100,
+        );
+
+        expect(progress.rolloverAmount, 0);
+        expect(queriedPeriods(), hasLength(1));
+      });
+
+      test('with rollover off only the current period is read', () async {
+        final progress = await progressFor(
+          makeBudget(id: 'b', amount: 500, startDate: DateTime(2026, 1, 1)),
+          current: 100,
+        );
+
+        expect(queriedPeriods(), hasLength(1));
+        expect(progress.effectiveAmount, 500);
+      });
+
+      test('the previous period is the one before the current', () async {
+        await progressFor(rolloverBudget(), current: 0);
+
+        final [current, previous] = queriedPeriods();
+        expect(current['b']?.start, DateTime(2026, 6, 1));
+        expect(previous['b']?.start, DateTime(2026, 5, 1));
+        expect(previous['b']?.end, DateTime(2026, 6, 1));
       });
     });
   });

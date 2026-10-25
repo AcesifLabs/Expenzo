@@ -7,6 +7,15 @@ on:
         description: 'Mobile release tag to promote, for audit only. Example: mobile-v1.2.3+45'
         required: true
         type: string
+      rollout:
+        description: 'Share of production users: 0.1 promotes the internal build; 0.5 and 1.0 widen the staged rollout (RELEASE.md, Release gates)'
+        required: true
+        default: '0.1'
+        type: choice
+        options:
+          - '0.1'
+          - '0.5'
+          - '1.0'
 
 jobs:
   promote:
@@ -39,8 +48,17 @@ jobs:
           bundler-cache: true
           working-directory: packages/mobile/android
 
-      - name: Promote internal build to production
+      - name: Promote internal build to 10% of production
+        if: inputs.rollout == '0.1'
         working-directory: packages/mobile/android
-        run: bundle exec fastlane production
+        run: bundle exec fastlane production rollout:0.1
         env:
+          PLAY_STORE_JSON_KEY: ${{ secrets.PLAY_STORE_JSON_KEY }}
+
+      - name: Widen the production rollout
+        if: inputs.rollout != '0.1'
+        working-directory: packages/mobile/android
+        run: bundle exec fastlane production_rollout "rollout:${ROLLOUT}"
+        env:
+          ROLLOUT: ${{ inputs.rollout }}
           PLAY_STORE_JSON_KEY: ${{ secrets.PLAY_STORE_JSON_KEY }}

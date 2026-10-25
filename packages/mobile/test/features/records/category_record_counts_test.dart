@@ -2,9 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/database/daos/record_dao.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/error/failures.dart';
-import 'package:expense_tracker/core/sync/connectivity_service.dart';
 import 'package:expense_tracker/features/records/data/datasources/record_local_datasource.dart';
-import 'package:expense_tracker/features/records/data/datasources/record_remote_datasource.dart';
 import 'package:expense_tracker/features/records/data/repositories/record_repository_impl.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,10 +11,6 @@ import 'package:mocktail/mocktail.dart';
 class _MockRecordDao extends Mock implements RecordDao {}
 
 class _MockLocalDatasource extends Mock implements RecordLocalDatasource {}
-
-class _MockRemoteDatasource extends Mock implements RecordRemoteDatasource {}
-
-class _MockConnectivityService extends Mock implements ConnectivityService {}
 
 void main() {
   group('RecordLocalDatasourceImpl.getCategoryRecordCounts', () {
@@ -52,11 +46,7 @@ void main() {
 
     setUp(() {
       local = _MockLocalDatasource();
-      repository = RecordRepositoryImpl(
-        localDatasource: local,
-        remoteDatasource: _MockRemoteDatasource(),
-        connectivity: _MockConnectivityService(),
-      );
+      repository = RecordRepositoryImpl(localDatasource: local);
     });
 
     test('returns the datasource map as Right', () async {

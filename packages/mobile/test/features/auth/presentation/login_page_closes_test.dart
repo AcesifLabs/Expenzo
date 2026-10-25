@@ -5,12 +5,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/core/router/app_routes.dart';
 import 'package:expense_tracker/core/router/refresh_on_auth_change.dart';
+import 'package:expense_tracker/core/sync/connectivity_service.dart';
 import 'package:expense_tracker/features/auth/domain/entities/user.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_state.dart';
 import 'package:expense_tracker/features/auth/presentation/pages/login_page.dart';
+import '../../../support/core_screens.dart';
 import '../../../support/pump_localized.dart';
 
 class _MockAuthBloc extends Mock implements AuthBloc {}
@@ -26,6 +29,11 @@ void main() {
     when(() => authBloc.state).thenAnswer((_) => current);
     when(() => authBloc.stream).thenAnswer((_) => states.stream);
     when(() => authBloc.close()).thenAnswer((_) async {});
+
+    final connectivity = MockConnectivityService();
+    when(() => connectivity.hasNetworkLink()).thenAnswer((_) async => true);
+    di.getIt.registerSingleton<ConnectivityService>(connectivity);
+    addTearDown(() => di.getIt.reset());
 
     final router = GoRouter(
       initialLocation: '/',

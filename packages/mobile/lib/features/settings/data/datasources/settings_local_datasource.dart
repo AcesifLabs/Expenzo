@@ -1,5 +1,6 @@
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:expense_tracker/core/constants/app_font_size.dart';
 import 'package:expense_tracker/core/constants/digit_grouping.dart';
 import 'package:expense_tracker/core/constants/first_day_of_week.dart';
@@ -105,6 +106,7 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
       'homeTab': settings.homeTab.name,
       'syncEnabled': settings.syncEnabled,
       'onboardingCompleted': settings.onboardingCompleted,
+      'crashReportsEnabled': settings.crashReportsEnabled,
       'monthlyIncome': settings.monthlyIncome,
       'createdAt': settings.createdAt.toIso8601String(),
       'updatedAt': settings.updatedAt.toIso8601String(),
@@ -144,6 +146,7 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
       syncEnabled: json['syncEnabled'] as bool? ?? true,
       // A missing key stays null on purpose: ResolveOnboardingStatus decides.
       onboardingCompleted: json['onboardingCompleted'] as bool?,
+      crashReportsEnabled: json['crashReportsEnabled'] as bool? ?? true,
       monthlyIncome: (json['monthlyIncome'] as num?)?.toDouble(),
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),

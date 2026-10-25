@@ -29,24 +29,29 @@ class SettingsSwitchTile extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final subtitle = this.subtitle;
 
-    return ListTile(
-      leading: SettingsIconTile(
-        idleForeground: palette.accent,
-        child: Icon(icon),
-      ),
-      title: Text(
-        title,
-        style: textTheme.bodyMedium?.copyWith(color: palette.textPrimary),
-      ),
-      subtitle: subtitle == null
-          ? null
-          : Text(
-              subtitle,
-              style: textTheme.bodySmall?.copyWith(
-                color: palette.textSecondary,
+    // One node for screen readers: the switch is read with its title, and a
+    // tap anywhere on the row flips it.
+    return MergeSemantics(
+      child: ListTile(
+        onTap: onChanged == null ? null : () => onChanged?.call(!value),
+        leading: SettingsIconTile(
+          idleForeground: palette.accent,
+          child: Icon(icon),
+        ),
+        title: Text(
+          title,
+          style: textTheme.bodyMedium?.copyWith(color: palette.textPrimary),
+        ),
+        subtitle: subtitle == null
+            ? null
+            : Text(
+                subtitle,
+                style: textTheme.bodySmall?.copyWith(
+                  color: palette.textSecondary,
+                ),
               ),
-            ),
-      trailing: Switch(value: value, onChanged: onChanged),
+        trailing: Switch(value: value, onChanged: onChanged),
+      ),
     );
   }
 }

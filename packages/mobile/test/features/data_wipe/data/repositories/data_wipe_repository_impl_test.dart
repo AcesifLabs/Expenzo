@@ -18,7 +18,10 @@ void main() {
 
   group('wipeLocalData', () {
     test('leaves the 18 default categories and keeps the user row', () async {
-      expect(await harness.repository.wipeLocalData(), const Right(unit));
+      expect(
+        await harness.repository.wipeLocalData(),
+        const Right<Failure, Unit>(unit),
+      );
 
       expect(await harness.recordCount(), 0);
       expect(await harness.categoryCount(), 18);
@@ -66,7 +69,10 @@ void main() {
     test('a failing later step still completes the wipe', () async {
       harness.cancelError = Exception('plugin missing');
 
-      expect(await harness.repository.wipeLocalData(), const Right(unit));
+      expect(
+        await harness.repository.wipeLocalData(),
+        const Right<Failure, Unit>(unit),
+      );
       expect(harness.calls.last, 'clearLocalPrefs');
     });
   });

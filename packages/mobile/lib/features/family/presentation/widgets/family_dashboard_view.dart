@@ -70,10 +70,12 @@ class FamilyDashboardView extends StatelessWidget {
         for (final height in const [180.0, 120.0, 120.0])
           Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.md),
-            child: ShimmerBox.rectangle(
-              width: double.infinity,
-              height: height,
-              borderRadius: AppSpacing.radiusCard,
+            child: ShimmerBox(
+              child: ShimmerBox.rectangle(
+                width: double.infinity,
+                height: height,
+                borderRadius: AppSpacing.radiusCard,
+              ),
             ),
           ),
       ],

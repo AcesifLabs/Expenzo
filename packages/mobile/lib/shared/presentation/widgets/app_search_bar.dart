@@ -12,6 +12,8 @@ class AppSearchBar extends StatefulWidget {
   final String? hintText;
   final FocusNode? focusNode;
 
+  // Null uses the default hint.
+  // ignore: unnecessary-nullable
   const AppSearchBar({
     super.key,
     required this.controller,

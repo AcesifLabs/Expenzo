@@ -26,7 +26,7 @@ class DataWipeRemoteDatasourceImpl implements DataWipeRemoteDatasource {
   @override
   Future<void> clearSyncedData() async {
     try {
-      await apiClient.dio.delete(ApiConstants.syncClear);
+      await apiClient.dio.delete<Object?>(ApiConstants.syncClear);
     } on DioException catch (e) {
       throw _exceptionFor(e);
     } catch (e) {

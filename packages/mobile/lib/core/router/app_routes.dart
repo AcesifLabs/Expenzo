@@ -123,50 +123,20 @@ GoRoute _buildSettingsRoute() {
     path: SettingsRoute.rootPath,
     builder: (_, _) => const SettingsPage(),
     routes: [
-      GoRoute(
-        path: SettingsRoute.profile.path,
-        builder: (_, _) => const ProfilePage(),
+      _settingsPage(SettingsRoute.profile, const ProfilePage()),
+      _settingsPage(SettingsRoute.appearance, const AppearancePage()),
+      _settingsPage(SettingsRoute.currency, const CurrencyPage()),
+      _settingsPage(SettingsRoute.language, const LanguagePage()),
+      _settingsPage(SettingsRoute.numberFormat, const NumberFormatPage()),
+      _settingsPage(SettingsRoute.fontSize, const FontSizePage()),
+      _settingsPage(SettingsRoute.calendar, const CalendarPage()),
+      _settingsPage(SettingsRoute.homePage, const HomePageSettingsPage()),
+      _settingsPage(
+        SettingsRoute.notifications,
+        const NotificationSettingsPage(),
       ),
-      GoRoute(
-        path: SettingsRoute.appearance.path,
-        builder: (_, _) => const AppearancePage(),
-      ),
-      GoRoute(
-        path: SettingsRoute.currency.path,
-        builder: (_, _) => const CurrencyPage(),
-      ),
-      GoRoute(
-        path: SettingsRoute.language.path,
-        builder: (_, _) => const LanguagePage(),
-      ),
-      GoRoute(
-        path: SettingsRoute.numberFormat.path,
-        builder: (_, _) => const NumberFormatPage(),
-      ),
-      GoRoute(
-        path: SettingsRoute.fontSize.path,
-        builder: (_, _) => const FontSizePage(),
-      ),
-      GoRoute(
-        path: SettingsRoute.calendar.path,
-        builder: (_, _) => const CalendarPage(),
-      ),
-      GoRoute(
-        path: SettingsRoute.homePage.path,
-        builder: (_, _) => const HomePageSettingsPage(),
-      ),
-      GoRoute(
-        path: SettingsRoute.notifications.path,
-        builder: (_, _) => const NotificationSettingsPage(),
-      ),
-      GoRoute(
-        path: SettingsRoute.categories.path,
-        builder: (_, _) => const CategoryListPage(),
-      ),
-      GoRoute(
-        path: SettingsRoute.autoImport.path,
-        builder: (_, _) => const AutoImportPage(),
-      ),
+      _settingsPage(SettingsRoute.categories, const CategoryListPage()),
+      _settingsPage(SettingsRoute.autoImport, const AutoImportPage()),
       GoRoute(
         path: SettingsRoute.matchingRules.path,
         builder: (_, _) => BlocProvider(
@@ -187,23 +157,18 @@ GoRoute _buildSettingsRoute() {
           child: const RecurringListView(),
         ),
       ),
-      GoRoute(
-        path: SettingsRoute.sync.path,
-        builder: (_, _) => const SyncSettingsPage(),
-      ),
-      GoRoute(
-        path: SettingsRoute.export.path,
-        builder: (_, _) => const ExportDataPage(),
-      ),
-      GoRoute(
-        path: SettingsRoute.deleteData.path,
-        builder: (_, _) => const DeleteAllDataPage(),
-      ),
+      _settingsPage(SettingsRoute.sync, const SyncSettingsPage()),
+      _settingsPage(SettingsRoute.export, const ExportDataPage()),
+      _settingsPage(SettingsRoute.deleteData, const DeleteAllDataPage()),
       _buildHelpRoute(),
       _buildFamilyRoute(),
     ],
   );
 }
+
+/// A settings screen with no bloc of its own.
+GoRoute _settingsPage(SettingsRoute route, Widget page) =>
+    GoRoute(path: route.path, builder: (_, _) => page);
 
 /// Family group and its screens, at `/settings/family/<FamilyRoute.path>`.
 /// Each page gets its own FamilyBloc with `create:` (a factory): child

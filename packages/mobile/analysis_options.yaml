@@ -1,18 +1,32 @@
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
+  language:
+    strict-casts: true
+    strict-raw-types: true
+    strict-inference: true
   exclude:
     - "**/*.g.dart"
     - "**/*.freezed.dart"
     - "**/*.gr.dart"
     - build/**
     - android/**
+    # drift_dev schema helpers (dart run drift_dev schema generate).
+    - test/core/database/generated/**
 
 linter:
   rules: []
 
 dart_code_linter:
   rules:
+    # Flutter widget rules (QA hardening, task 45).
+    - always-remove-listener
+    - avoid-unnecessary-setstate
+    - use-setstate-synchronously
+    - avoid-shrink-wrap-in-lists
+    - prefer-using-list-view
+    - avoid-expanded-as-spacer
+    - prefer-correct-edge-insets-constructor
     - avoid-dynamic
     - avoid-late-keyword
     - avoid-nested-conditional-expressions
@@ -32,7 +46,20 @@ dart_code_linter:
     - prefer-extracting-callbacks
     - prefer-first
     - prefer-last
-    - prefer-moving-to-variable
+    # Label lookups keep full `t.` paths: slang analyze only sees full
+    # paths (ADR 0007), so an alias would hide used keys.
+    - prefer-moving-to-variable:
+        exclude:
+          - lib/core/constants/record_type.dart
+          - lib/features/ai_assistant/presentation/pages/ai_assistant_page.dart
+          - lib/features/categories/presentation/pages/category_list_page.dart
+          - lib/features/dashboard/domain/entities/date_range.dart
+          - lib/features/family/presentation/helpers/member_actions.dart
+          - lib/features/parsing_rules/domain/entities/source_type.dart
+          - lib/features/recurring/domain/entities/recurring_frequency.dart
+          - lib/features/reports/presentation/widgets/reports_tab_bar.dart
+          - lib/features/support/domain/faq_entry.dart
+          - lib/shared/presentation/widgets/app_shell.dart
 
   metrics:
     cyclomatic-complexity: 25

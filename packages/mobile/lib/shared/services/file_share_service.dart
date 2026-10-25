@@ -8,6 +8,8 @@ enum ShareOutcome { shared, dismissed }
 class FileShareService {
   const FileShareService();
 
+  // Optional email subject.
+  // ignore: unnecessary-nullable
   /// Shares the file at [path]. Platform errors are logged and rethrown.
   Future<ShareOutcome> shareFile(
     String path, {

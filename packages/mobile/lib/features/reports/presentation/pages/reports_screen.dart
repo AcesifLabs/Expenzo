@@ -1,3 +1,4 @@
+import 'package:clock/clock.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -23,6 +24,9 @@ import '../widgets/ai_chat_fab.dart';
 import '../../domain/usecases/get_insights.dart';
 import 'package:expense_tracker/core/error/failure_message.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_error_state.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_empty_state.dart';
+import 'package:picons/picons.dart';
 
 /// Single parent screen for Trend / Categories / Insights.
 ///
@@ -49,7 +53,7 @@ class ReportsScreen extends StatelessWidget {
 }
 
 void _handleReportsDateRangeSelected(BuildContext context, String value) {
-  final now = DateTime.now();
+  final now = clock.now();
   DateTime startDate;
   DateTime endDate = now;
 
@@ -122,9 +126,10 @@ Widget _buildReportsTrendContent(
   final start = DateFormat('MMM d').format(state.startDate);
   final end = DateFormat('MMM d').format(state.endDate);
   final total = state.insights.totalSpent;
+  final totalText = wholeNumberFmt.format(total);
   final compareText = total == 0
       ? t.reports.noSpending
-      : t.reports.totalSpentInPeriod(amount: wholeNumberFmt.format(total));
+      : t.reports.totalSpentInPeriod(amount: totalText);
 
   return SingleChildScrollView(
     padding: EdgeInsets.only(
@@ -148,7 +153,7 @@ Widget _buildReportsTrendContent(
         Column(
           children: [
             MetricBox(
-              value: wholeNumberFmt.format(state.insights.totalSpent),
+              value: totalText,
               label: metrics.totalSpent,
               valueColor: palette.expense,
             ),
@@ -181,6 +186,13 @@ Widget _buildReportsCategoriesContent(
   ReportsLoaded state,
   double reportsContentInnerInset,
 ) {
+  if (state.categoryBreakdown.isEmpty) {
+    return AppEmptyState(
+      icon: PiconsRegular.chartPie,
+      message: t.reports.noSpending,
+    );
+  }
+
   return SingleChildScrollView(
     padding: EdgeInsets.only(
       top: AppSpacing.lg,
@@ -337,8 +349,12 @@ Widget _buildReportsStateContent(
   }
   if (state is ReportsError) {
     return Expanded(
-      child: Center(
-        child: Text(state.message, style: TextStyle(color: palette.expense)),
+      child: Builder(
+        builder: (context) => AppErrorState(
+          message: state.message,
+          onRetry: () =>
+              context.read<ReportsBloc>().add(const RefreshReports()),
+        ),
       ),
     );
   }

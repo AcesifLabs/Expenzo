@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+@TableIndex(name: 'idx_parsing_rules_cat_id', columns: {#categoryId})
 class ParsingRules extends Table {
   TextColumn get id => text()();
   TextColumn get name => text()();
@@ -10,6 +11,14 @@ class ParsingRules extends Table {
   TextColumn get sourceType => text()();
   BoolColumn get isEnabled => boolean().withDefault(const Constant(true))();
   IntColumn get priority => integer().withDefault(const Constant(0))();
+
+  /// Date Order (ADR 0015): 'dmy' or 'mdy'. Device-only: the server has no
+  /// column for it, so sync neither sends nor overwrites it.
+  TextColumn get dateOrder => text()
+      .withDefault(const Constant('dmy'))
+      // Drift reads the column inside its own check.
+      // ignore: recursive_getters
+      .check(dateOrder.isIn(const ['dmy', 'mdy']))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 

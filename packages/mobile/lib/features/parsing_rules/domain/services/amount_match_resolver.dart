@@ -1,5 +1,29 @@
-String normalizeResolvedAmount(String amount) =>
-    amount.replaceAll(RegExp(r'[^\d.]'), '');
+import 'package:expense_tracker/core/constants/app_constants.dart';
+import 'package:expense_tracker/core/utils/amount_input.dart';
+import 'package:expense_tracker/core/utils/money.dart';
+
+/// The digits and decimal point of an SMS amount: Bangla digits become
+/// Latin, everything else but digits and dots goes, and dots at either end
+/// are dropped. That last step also removes the dot of a currency word:
+/// `Tk.1,500.00` becomes `.1500.00`, then `1500.00`; `BDT 500.` becomes
+/// `500`.
+String normalizeResolvedAmount(String amount) => latinDigits(
+  amount,
+).replaceAll(RegExp(r'[^\d.]'), '').replaceAll(RegExp(r'^\.+|\.+$'), '');
+
+/// The amount in matched SMS text, rounded to 2 decimals, or null when it
+/// is not a usable amount: unreadable, zero, or above
+/// [AppConstants.maxAmount]. A null amount skips the message; it never
+/// becomes a 0 record.
+double? parseResolvedAmount(String text) {
+  final value = double.tryParse(normalizeResolvedAmount(text));
+  if (value == null) return null;
+  // Checked after rounding: 0.004 would otherwise become a 0.00 record.
+  final rounded = roundMoney(value);
+
+  // Never negative: normalizing drops the sign.
+  return rounded == 0 || rounded > AppConstants.maxAmount ? null : rounded;
+}
 
 Match? resolveAmountMatch(
   List<Match> allMatches,

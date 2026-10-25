@@ -19,12 +19,17 @@ class AppErrorFallback extends StatelessWidget {
   final StackTrace? stack;
   final String Function(Object exception)? formatDebugType;
   final VoidCallback? onRetry;
-  final VoidCallback? onHardReset;
   final VoidCallback? onRestart;
+
+  /// Set when the database file can't be read: offers to start again with
+  /// an empty one.
+  final VoidCallback? onResetLocalData;
 
   /// Shows the Send feedback action when set.
   final VoidCallback? onSendFeedback;
 
+  // Each fallback context offers different actions.
+  // ignore: unnecessary-nullable
   const AppErrorFallback({
     super.key,
     required this.fallbackContext,
@@ -33,8 +38,8 @@ class AppErrorFallback extends StatelessWidget {
     this.stack,
     this.formatDebugType,
     this.onRetry,
-    this.onHardReset,
     this.onRestart,
+    this.onResetLocalData,
     this.onSendFeedback,
   });
 
@@ -51,6 +56,8 @@ class AppErrorFallback extends StatelessWidget {
 
   String get _body {
     final fallback = t.common.fallback;
+
+    if (onResetLocalData != null) return fallback.storageBody;
 
     return switch (fallbackContext) {
       AppFallbackContext.init => fallback.initBody,
@@ -76,7 +83,7 @@ class AppErrorFallback extends StatelessWidget {
       textAlign: TextAlign.center,
       style: AppTypography.bodyMedium.copyWith(
         height: 1.5,
-        color: scheme.onSurface.withAlpha(140),
+        color: scheme.onSurfaceVariant,
       ),
     );
   }
@@ -87,7 +94,7 @@ class AppErrorFallback extends StatelessWidget {
       textAlign: TextAlign.center,
       style: AppTypography.bodySmall.copyWith(
         letterSpacing: 0.5,
-        color: scheme.onSurface.withAlpha(100),
+        color: scheme.onSurfaceVariant,
         fontFeatures: [const FontFeature.tabularFigures()],
       ),
     );
@@ -99,13 +106,18 @@ class AppErrorFallback extends StatelessWidget {
       icon: PiconsRegular.arrowsClockwise,
       filled: true,
       onTap: onRetry,
-      onLongPress: onHardReset,
     );
   }
 
   List<Widget> _buildActions(VoidCallback? onSendFeedback) {
+    final resetLocalData = onResetLocalData;
+
     return [
       _retryButton(),
+      if (resetLocalData != null) ...[
+        const SizedBox(height: AppSpacing.sm),
+        _ResetLocalDataButton(onConfirmed: resetLocalData),
+      ],
       if (onRestart != null) ...[
         const SizedBox(height: AppSpacing.sm),
         _FallbackButton(
@@ -175,13 +187,61 @@ class AppErrorFallback extends StatelessWidget {
 
 enum AppFallbackContext { build, framework, async, init }
 
+/// Reset local data, asking first: the first tap explains what goes and
+/// shows the button that does it. The fallback has no Navigator above it,
+/// so this can't be a dialog.
+class _ResetLocalDataButton extends StatefulWidget {
+  final VoidCallback onConfirmed;
+
+  const _ResetLocalDataButton({required this.onConfirmed});
+
+  @override
+  State<_ResetLocalDataButton> createState() => _ResetLocalDataButtonState();
+}
+
+class _ResetLocalDataButtonState extends State<_ResetLocalDataButton> {
+  bool _confirming = false;
+
+  void _ask() => setState(() => _confirming = true);
+
+  @override
+  Widget build(BuildContext context) {
+    final fallback = t.common.fallback;
+    if (!_confirming) {
+      return _FallbackButton(
+        label: fallback.resetLocalData,
+        icon: PiconsRegular.trash,
+        filled: false,
+        onTap: _ask,
+      );
+    }
+    final scheme = Theme.of(context).colorScheme;
+
+    return Column(
+      children: [
+        Text(
+          fallback.resetConfirm,
+          textAlign: TextAlign.center,
+          style: AppTypography.bodyMedium.copyWith(color: scheme.error),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        _FallbackButton(
+          label: fallback.resetConfirmAction,
+          icon: PiconsRegular.trash,
+          filled: true,
+          onTap: widget.onConfirmed,
+        ),
+      ],
+    );
+  }
+}
+
 class _FallbackButton extends StatelessWidget {
   final String label;
   final IconData icon;
   final bool filled;
   final bool textOnly;
   final VoidCallback? onTap;
-  final VoidCallback? onLongPress;
 
   const _FallbackButton({
     required this.label,
@@ -189,7 +249,6 @@ class _FallbackButton extends StatelessWidget {
     required this.filled,
     this.textOnly = false,
     this.onTap,
-    this.onLongPress,
   });
 
   (Color, Color, BorderSide?) _resolveStyle(ColorScheme scheme) {
@@ -221,7 +280,6 @@ class _FallbackButton extends StatelessWidget {
         ),
         child: InkWell(
           onTap: onTap,
-          onLongPress: onLongPress,
           borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
           child: Padding(
             padding: const EdgeInsets.symmetric(

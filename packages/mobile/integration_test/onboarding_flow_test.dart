@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:integration_test/integration_test.dart';
+import 'package:patrol/patrol.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -11,7 +11,7 @@ import 'package:expense_tracker/core/database/app_database.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/i18n/strings.g.dart';
 
-import 'onboarded.dart';
+import 'support/app.dart';
 
 /// A device keeps app data between runs: start from a fresh install.
 Future<void> _freshInstall() async {
@@ -31,7 +31,11 @@ Future<void> _settle(WidgetTester tester, [int seconds = 2]) async {
 }
 
 Future<void> _tapText(WidgetTester tester, String text) async {
-  await tester.tap(find.text(text).last);
+  await hideKeyboard(tester);
+  final target = find.text(text).last;
+  await tester.ensureVisible(target);
+  await _settle(tester, 1);
+  await tester.tap(target);
   await _settle(tester);
 }
 
@@ -39,11 +43,8 @@ Future<void> _continue(WidgetTester tester) =>
     _tapText(tester, t.onboarding.common.continueLabel);
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-
-  testWidgets('a fresh install goes through onboarding to Home', (
-    tester,
-  ) async {
+  patrolTest('a fresh install goes through onboarding to Home', ($) async {
+    final tester = $.tester;
     await _freshInstall();
     await startApp(tester);
     LocaleSettings.setLocaleSync(AppLocale.en);
@@ -122,11 +123,10 @@ void main() {
     final settings = jsonDecode(prefs.getString('user_settings')!) as Map;
     expect(settings['onboardingCompleted'], isTrue);
     expect(settings['monthlyIncome'], 5000.0);
-  });
 
-  testWidgets('a relaunch after onboarding opens Home', (tester) async {
+    // A relaunch opens Home, not onboarding again. (Each Patrol test starts
+    // from cleared data, so this can't be a test of its own.)
     await startApp(tester);
-
     expect(find.text(t.onboarding.income.title), findsNothing);
     await tester.scrollUntilVisible(find.text('Laptop'), 200);
     expect(find.text('Laptop'), findsWidgets);

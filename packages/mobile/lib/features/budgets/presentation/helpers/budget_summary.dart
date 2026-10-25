@@ -1,3 +1,4 @@
+import 'package:clock/clock.dart';
 import 'package:expense_tracker/features/budgets/domain/entities/budget_progress.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
@@ -22,7 +23,7 @@ class BudgetSummary {
   const BudgetSummary({required this.remaining, required this.daysLeft});
 
   factory BudgetSummary.of(BudgetProgress progress, {DateTime? now}) {
-    final today = _dateOnly(now ?? DateTime.now());
+    final today = _dateOnly(now ?? clock.now());
     // periodRange.end is exclusive (the first moment of the next period).
     final end = _dateOnly(progress.periodRange.end);
     final days = end.difference(today).inDays;

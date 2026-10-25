@@ -58,7 +58,8 @@ class ExpenseTemplatesSyncHandler
   Future<List<ExpenseTemplate>> fetchAll(AppDatabase db) =>
       db.select(db.expenseTemplates).get();
 
-  static String _str(Map<String, dynamic> data, String key) => data[key] ?? '';
+  static String _str(Map<String, dynamic> data, String key) =>
+      data[key] as String? ?? '';
   static Value<String> _optStr(Map<String, dynamic> data, String key) =>
       data[key] != null ? Value(data[key] as String) : const Value.absent();
   static DateTime _dt(Map<String, dynamic> data, String key) =>

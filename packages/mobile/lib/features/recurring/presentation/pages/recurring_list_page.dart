@@ -166,11 +166,15 @@ class _RecurringListViewState extends State<RecurringListView> {
           ),
         ],
       ),
-      trailing: Switch(
-        value: recurring.isActive,
-        onChanged: interactive
-            ? (value) => _onSwitchChanged(recurring, value)
-            : null,
+      // Its own label: a tap on the row opens the item instead.
+      trailing: Semantics(
+        label: recurring.description,
+        child: Switch(
+          value: recurring.isActive,
+          onChanged: interactive
+              ? (value) => _onSwitchChanged(recurring, value)
+              : null,
+        ),
       ),
       onTap: interactive ? () => _navigateToForm(context, recurring) : null,
       onLongPress: interactive
@@ -239,7 +243,7 @@ class _RecurringListViewState extends State<RecurringListView> {
   void _showDeleteDialog(BuildContext context, RecurringTransaction recurring) {
     final deleteT = t.recurring.delete;
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(deleteT.title),

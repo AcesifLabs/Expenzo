@@ -76,11 +76,14 @@ class AppPageHeader extends StatelessWidget implements PreferredSizeWidget {
                     ),
                     if (localSubtitle != null) ...[
                       const SizedBox(height: AppSpacing.xs),
+                      // One line: the header's height is fixed.
                       Text(
                         localSubtitle,
                         style: textTheme.bodyMedium?.copyWith(
                           color: colors.onSurfaceVariant,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ],

@@ -19,6 +19,7 @@ class SyncScreenBloc extends Bloc<SyncScreenEvent, SyncScreenState> {
   final SyncOverviewRepository repository;
 
   StreamSubscription<int>? _pendingSub;
+  StreamSubscription<int>? _failedSub;
   bool _listeningToSyncing = false;
 
   SyncScreenBloc({
@@ -29,6 +30,11 @@ class SyncScreenBloc extends Bloc<SyncScreenEvent, SyncScreenState> {
     on<SyncScreenStarted>(_onStarted);
     on<SyncNowRequested>(_onSyncNowRequested, transformer: droppable());
     on<_PendingCountChanged>(_onPendingCountChanged);
+    on<_FailedCountChanged>(_onFailedCountChanged);
+    on<FailedChangesRetryRequested>(
+      _onFailedRetryRequested,
+      transformer: droppable(),
+    );
     on<_SyncingChanged>(_onSyncingChanged);
     // A newer read replaces one in flight, so an older overview never lands
     // last.
@@ -38,6 +44,7 @@ class SyncScreenBloc extends Bloc<SyncScreenEvent, SyncScreenState> {
   @override
   Future<void> close() async {
     await _pendingSub?.cancel();
+    await _failedSub?.cancel();
     if (_listeningToSyncing) repository.isSyncing.removeListener(_onSyncing);
 
     return super.close();
@@ -56,6 +63,19 @@ class SyncScreenBloc extends Bloc<SyncScreenEvent, SyncScreenState> {
     emit(state.copyWith(isSyncing: true, lastResult: null));
     final result = await syncNow();
     add(_ReloadRequested(lastResult: result));
+  }
+
+  void _onFailedCountChanged(
+    _FailedCountChanged event,
+    Emitter<SyncScreenState> emit,
+  ) => emit(state.copyWith(failedCount: event.count));
+
+  Future<void> _onFailedRetryRequested(
+    FailedChangesRetryRequested event,
+    Emitter<SyncScreenState> emit,
+  ) async {
+    await repository.retryFailed();
+    add(const SyncNowRequested());
   }
 
   void _onPendingCountChanged(
@@ -81,6 +101,9 @@ class SyncScreenBloc extends Bloc<SyncScreenEvent, SyncScreenState> {
   void _listen() {
     _pendingSub ??= repository.watchPendingCount().listen(
       (count) => add(_PendingCountChanged(count)),
+    );
+    _failedSub ??= repository.watchFailedCount().listen(
+      (count) => add(_FailedCountChanged(count)),
     );
     if (_listeningToSyncing) return;
     _listeningToSyncing = true;
@@ -119,6 +142,15 @@ class SyncScreenBloc extends Bloc<SyncScreenEvent, SyncScreenState> {
       ),
     );
   }
+}
+
+class _FailedCountChanged extends SyncScreenEvent {
+  final int count;
+
+  @override
+  List<Object?> get props => [count];
+
+  const _FailedCountChanged(this.count);
 }
 
 class _PendingCountChanged extends SyncScreenEvent {

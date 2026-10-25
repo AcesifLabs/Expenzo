@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:expense_tracker/core/utils/money.dart';
 import 'package:expense_tracker/core/database/app_database.dart';
 import 'package:expense_tracker/core/database/daos/goals_dao.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
@@ -69,8 +70,8 @@ class GoalLocalDatasourceImpl implements GoalLocalDatasource {
     return GoalsCompanion(
       id: Value(goal.id ?? ''),
       name: Value(goal.name),
-      targetAmount: Value(goal.targetAmount),
-      savedAmount: Value(goal.savedAmount),
+      targetAmount: Value(roundMoney(goal.targetAmount)),
+      savedAmount: Value(roundMoney(goal.savedAmount)),
       targetDate: Value(goal.targetDate),
       monthlyContribution: Value(goal.monthlyContribution),
       createdAt: Value(createdAt),

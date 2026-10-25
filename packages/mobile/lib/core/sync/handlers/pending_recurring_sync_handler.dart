@@ -12,16 +12,21 @@ class PendingRecurringSyncHandler
     AppDatabase db,
   ) => db.pendingRecurring;
   @override
-  Map<String, dynamic> toSyncPayload(PendingRecurringData row) => {
-    'id': row.id,
-    'recurringId': row.recurringId,
-    'dueDate': row.dueDate.toUtc().toIso8601String(),
-    'amount': row.amount,
-    'description': row.description,
-    'categoryId': row.categoryId,
-    'createdAt': row.createdAt.toUtc().toIso8601String(),
-    'updatedAt': row.createdAt.toUtc().toIso8601String(),
-  };
+  Map<String, dynamic> toSyncPayload(PendingRecurringData row) {
+    final createdAt = row.createdAt.toUtc().toIso8601String();
+
+    return {
+      'id': row.id,
+      'recurringId': row.recurringId,
+      'dueDate': row.dueDate.toUtc().toIso8601String(),
+      'amount': row.amount,
+      'description': row.description,
+      'categoryId': row.categoryId,
+      'createdAt': createdAt,
+      'updatedAt': createdAt,
+    };
+  }
+
   @override
   Insertable<PendingRecurringData> fromSyncPayload(
     String id,

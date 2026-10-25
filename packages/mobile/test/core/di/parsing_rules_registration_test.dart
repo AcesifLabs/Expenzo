@@ -2,6 +2,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:expense_tracker/core/database/app_database.dart';
+import 'package:expense_tracker/core/database/daos/sync_queue_dao.dart';
 import 'package:expense_tracker/core/di/parsing_module.dart';
 import 'package:expense_tracker/features/parsing_rules/presentation/bloc/parsing_rules_bloc.dart';
 
@@ -10,6 +11,7 @@ void main() {
     final getIt = GetIt.asNewInstance();
     final db = AppDatabase.forTesting(NativeDatabase.memory());
     getIt.registerSingleton<AppDatabase>(db);
+    getIt.registerFactory<SyncQueueDao>(() => SyncQueueDao(db));
     initParsingModule(getIt);
 
     final bloc = getIt<ParsingRulesBloc>();

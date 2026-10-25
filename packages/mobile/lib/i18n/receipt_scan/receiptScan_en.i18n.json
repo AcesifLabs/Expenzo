@@ -1,5 +1,6 @@
 {
   "permissionRequired": "Camera permission is required to scan receipts.",
+  "permissionBlocked": "Camera access is off for Expenzo. Turn it on in Settings to scan receipts.",
   "noCamera": "No camera available on this device.",
   "cameraFailed": "Couldn't open the camera.",
   "captureFailed": "Couldn't take the photo. Try again.",

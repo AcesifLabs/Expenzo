@@ -48,7 +48,7 @@ class TrendBarChart extends StatelessWidget {
           child: Text(
             t.reports.noTrendData,
             style: AppTypography.bodySmall.copyWith(
-              color: palette.textPrimary.withAlpha(0x80),
+              color: palette.textSecondary,
             ),
           ),
         ),

@@ -17,8 +17,8 @@ class TemplateEditorBloc
     required this.saveTemplateUseCase,
     required this.repository,
   }) : super(TemplateEditorInitial()) {
-    on<SaveTemplateEvent>(_onSaveTemplate, transformer: concurrent());
-    on<DeleteTemplateEvent>(_onDeleteTemplate, transformer: concurrent());
+    on<SaveTemplateEvent>(_onSaveTemplate, transformer: droppable());
+    on<DeleteTemplateEvent>(_onDeleteTemplate, transformer: droppable());
   }
 
   Future<void> _onSaveTemplate(

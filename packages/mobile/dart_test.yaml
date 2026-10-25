@@ -1,0 +1,4 @@
+tags:
+  # Screen images compared with `test/goldens/**/goldens/ci/*.png`.
+  # Update with `flutter test --tags golden --update-goldens`.
+  golden: {}

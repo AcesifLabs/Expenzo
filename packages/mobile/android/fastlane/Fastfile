@@ -1,5 +1,15 @@
 default_platform(:android)
 
+# The share of production users a release goes to: "0.1" (default),
+# "0.5" or "1.0".
+def rollout_fraction(options)
+  rollout = (options[:rollout] || "0.1").to_s
+  unless %w[0.1 0.5 1.0].include?(rollout)
+    UI.user_error!("rollout must be 0.1, 0.5 or 1.0, not #{rollout}")
+  end
+  rollout
+end
+
 platform :android do
 
   desc "Run tests"
@@ -18,13 +28,16 @@ platform :android do
     # Clean previous builds
     sh "cd .. && flutter clean"
 
-    # Build the AAB
-    sh "cd .. && flutter build appbundle --release --build-name #{build_name} --build-number #{build_number}"
+    # Build the AAB. Obfuscated Dart: the symbols in build/symbols turn
+    # stack traces back into names (uploaded to Sentry by the deploy job).
+    sh "cd .. && flutter build appbundle --release --obfuscate --split-debug-info=build/symbols --build-name #{build_name} --build-number #{build_number}"
 
-    # Upload to Play Store internal track
+    # Upload to Play Store internal track, with the R8 mapping so Android
+    # vitals shows readable Java stack traces.
     upload_to_play_store(
       track: "internal",
       aab: "../build/app/outputs/bundle/release/app-release.aab",
+      mapping: "../build/app/outputs/mapping/release/mapping.txt",
       release_status: "completed",
       skip_upload_metadata: true,
       skip_upload_images: true,
@@ -33,10 +46,30 @@ platform :android do
   end
 
   desc "Promote internal build to production"
-  lane :production do
+  # Promotes the internal build to production for a share of users.
+  # rollout: "0.1" (default), "0.5" or "1.0". Below 1.0 it is a staged
+  # rollout that production_rollout widens later (RELEASE.md, Release gates).
+  lane :production do |options|
     upload_to_play_store(
       track: "internal",
       track_promote_to: "production",
+      rollout: rollout_fraction(options),
+      skip_upload_changelogs: true,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+    )
+  end
+
+  desc "Widen the staged production rollout"
+  # Widens the staged production rollout to rollout ("0.5" or "1.0"). Uploads
+  # nothing: the release is the one production already has.
+  lane :production_rollout do |options|
+    upload_to_play_store(
+      track: "production",
+      rollout: rollout_fraction(options),
+      skip_upload_apk: true,
+      skip_upload_aab: true,
       skip_upload_changelogs: true,
       skip_upload_metadata: true,
       skip_upload_images: true,

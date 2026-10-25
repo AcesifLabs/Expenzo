@@ -94,4 +94,70 @@ void main() {
       expect(result, false);
     });
   });
+
+  group('hasNetworkLink', () {
+    test('is true for wifi without pinging the backend', () async {
+      when(
+        () => mockConnectivity.checkConnectivity(),
+      ).thenAnswer((_) async => [ConnectivityResult.wifi]);
+
+      expect(await service.hasNetworkLink(), isTrue);
+      verifyNever(
+        () => mockDio.get<Object?>(any(), options: any(named: 'options')),
+      );
+    });
+
+    test('is false when the only result is none', () async {
+      when(
+        () => mockConnectivity.checkConnectivity(),
+      ).thenAnswer((_) async => [ConnectivityResult.none]);
+
+      expect(await service.hasNetworkLink(), isFalse);
+    });
+  });
+
+  group('the health check decides online', () {
+    setUp(() {
+      when(
+        () => mockConnectivity.checkConnectivity(),
+      ).thenAnswer((_) async => [ConnectivityResult.wifi]);
+    });
+
+    void healthAnswers(int status, Object? body) =>
+        when(
+          () => mockDio.get<Object?>(any(), options: any(named: 'options')),
+        ).thenAnswer(
+          (_) async => Response<dynamic>(
+            requestOptions: RequestOptions(),
+            statusCode: status,
+            data: body,
+          ),
+        );
+
+    test('the backend answering ok is online', () async {
+      healthAnswers(200, {'status': 'ok', 'timestamp': '2026-10-25T00:00:00Z'});
+
+      expect(await service.checkNow(), isTrue);
+    });
+
+    test('a captive portal page with status 200 is offline', () async {
+      healthAnswers(200, '<html><body>Sign in to Wi-Fi</body></html>');
+
+      expect(await service.checkNow(), isFalse);
+    });
+
+    test('a 503 is offline', () async {
+      healthAnswers(503, {'status': 'down'});
+
+      expect(await service.checkNow(), isFalse);
+    });
+
+    test('a timeout is offline', () async {
+      when(
+        () => mockDio.get<Object?>(any(), options: any(named: 'options')),
+      ).thenAnswer((_) => Completer<Response<dynamic>>().future);
+
+      expect(await service.checkNow(), isFalse);
+    }, timeout: const Timeout(Duration(seconds: 10)));
+  });
 }

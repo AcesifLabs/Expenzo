@@ -37,6 +37,7 @@ class MemberAvatarRow extends StatelessWidget {
       children: [
         for (final (index, member) in slice.shown.indexed)
           Semantics(
+            container: true,
             label: memberLabel(
               userId: member.userId,
               displayName: member.displayName,
@@ -58,14 +59,21 @@ class MemberAvatarRow extends StatelessWidget {
           ),
         if (group.myRole.isAdmin)
           Semantics(
+            container: true,
             button: true,
             label: t.family.invite.title,
             child: InkWell(
               customBorder: const CircleBorder(),
               onTap: () => _openInvite(context),
-              child: _circle(
-                context,
-                Icon(PiconsRegular.userPlus, color: context.palette.accent),
+              // A 48 dp tap target around the 40 dp circle.
+              child: SizedBox.square(
+                dimension: AppSpacing.minTapTarget,
+                child: Center(
+                  child: _circle(
+                    context,
+                    Icon(PiconsRegular.userPlus, color: context.palette.accent),
+                  ),
+                ),
               ),
             ),
           ),

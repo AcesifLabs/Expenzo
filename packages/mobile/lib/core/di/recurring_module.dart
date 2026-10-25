@@ -1,7 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:expense_tracker/core/api/token_storage.dart';
 import 'package:expense_tracker/core/database/app_database.dart';
-import 'package:expense_tracker/core/database/daos/pending_recurring_dao.dart';
 import 'package:expense_tracker/core/database/daos/sync_queue_dao.dart';
 import 'package:expense_tracker/features/recurring/data/datasources/recurring_local_datasource.dart';
 import 'package:expense_tracker/features/recurring/data/repositories/recurring_repository_impl.dart';
@@ -38,7 +37,6 @@ void initRecurringModule(GetIt getIt) {
   getIt.registerLazySingleton<RecurringRepository>(
     () => RecurringRepositoryImpl(
       localDatasource: getIt<RecurringLocalDatasource>(),
-      pendingRecurringDao: getIt<PendingRecurringDao>(),
       syncQueueDao: getIt<SyncQueueDao>(),
     ),
   );

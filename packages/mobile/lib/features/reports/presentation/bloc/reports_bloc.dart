@@ -1,3 +1,4 @@
+import 'package:clock/clock.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:expense_tracker/core/bloc/transformers.dart';
 import '../../domain/entities/granularity.dart';
@@ -60,7 +61,7 @@ class ReportsBloc extends Bloc<ReportsEvent, ReportsState> {
     Emitter<ReportsState> emit,
   ) async {
     final span = _endDate.difference(_startDate);
-    _endDate = DateTime.now();
+    _endDate = clock.now();
     _startDate = _endDate.subtract(span);
 
     await _loadReportsData(emit);

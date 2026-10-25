@@ -1,3 +1,4 @@
+import 'package:expense_tracker/features/records/data/services/transaction_draft_store.dart';
 import 'package:expense_tracker/features/categories/domain/repositories/category_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
@@ -5,14 +6,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:expense_tracker/core/api/api_client.dart';
 import 'package:expense_tracker/core/database/daos/record_dao.dart';
 import 'package:expense_tracker/core/database/daos/sync_queue_dao.dart';
-import 'package:expense_tracker/core/sync/connectivity_service.dart';
 import 'package:expense_tracker/features/records/data/datasources/record_local_datasource.dart';
 import 'package:expense_tracker/features/records/data/datasources/record_remote_datasource.dart';
 import 'package:expense_tracker/features/records/data/repositories/record_repository_impl.dart';
 import 'package:expense_tracker/features/records/data/services/record_budget_link_repair.dart';
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
 import 'package:expense_tracker/features/records/domain/usecases/add_record.dart';
-import 'package:expense_tracker/features/records/domain/usecases/create_record_from_parsed.dart';
 import 'package:expense_tracker/features/records/domain/usecases/create_records_from_parsed_list.dart';
 import 'package:expense_tracker/features/records/domain/usecases/delete_record.dart';
 import 'package:expense_tracker/features/records/domain/usecases/get_category_record_counts.dart';
@@ -36,11 +35,12 @@ void initRecordModule(GetIt getIt) {
       currentUserId: () => getIt<FirebaseAuth>().currentUser?.uid,
     ),
   );
+  getIt.registerLazySingleton(
+    () => TransactionDraftStore(getIt<SharedPreferences>()),
+  );
   getIt.registerLazySingleton<RecordRepository>(
     () => RecordRepositoryImpl(
       localDatasource: getIt<RecordLocalDatasource>(),
-      remoteDatasource: getIt<RecordRemoteDatasource>(),
-      connectivity: getIt<ConnectivityService>(),
       syncQueueDao: getIt<SyncQueueDao>(),
     ),
   );
@@ -52,9 +52,6 @@ void initRecordModule(GetIt getIt) {
   getIt.registerLazySingleton(() => DeleteRecord(getIt<RecordRepository>()));
   getIt.registerLazySingleton(
     () => GetCategoryRecordCounts(getIt<RecordRepository>()),
-  );
-  getIt.registerLazySingleton(
-    () => CreateRecordFromParsed(getIt<RecordRepository>()),
   );
   getIt.registerLazySingleton(
     () => CreateRecordsFromParsedList(getIt<RecordRepository>()),

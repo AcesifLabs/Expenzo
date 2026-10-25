@@ -1,4 +1,6 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../logger/app_logger.dart';
 import '../sync/sync_outcome_store.dart';
 
 class TokenStorage {
@@ -11,9 +13,7 @@ class TokenStorage {
     await _storage.write(key: _tokenKey, value: token);
   }
 
-  static Future<String?> getToken() {
-    return _storage.read(key: _tokenKey);
-  }
+  static Future<String?> getToken() => _read(_tokenKey);
 
   static Future<void> deleteToken() async {
     await _storage.delete(key: _tokenKey);
@@ -29,12 +29,10 @@ class TokenStorage {
     await _storage.write(key: _lastSyncKey, value: isoTime);
   }
 
-  static Future<String?> getLastSyncAt() {
-    return _storage.read(key: _lastSyncKey);
-  }
+  static Future<String?> getLastSyncAt() => _read(_lastSyncKey);
 
   static Future<bool> isFirstSync() async {
-    final value = await _storage.read(key: _isFirstSyncKey);
+    final value = await _read(_isFirstSyncKey);
 
     return value == null || value == 'true';
   }
@@ -52,5 +50,18 @@ class TokenStorage {
 
   static Future<void> clearAll() async {
     await _storage.deleteAll();
+  }
+
+  /// [key]'s value, or null when the platform store can't be read (on
+  /// Android its keys can be lost, after a restore for example): the user is
+  /// then signed out and sync starts over, instead of the app failing.
+  static Future<String?> _read(String key) async {
+    try {
+      return await _storage.read(key: key);
+    } on PlatformException catch (e, s) {
+      appLogger.error('Secure storage could not read $key', e, s);
+
+      return null;
+    }
   }
 }

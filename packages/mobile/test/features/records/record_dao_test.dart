@@ -284,4 +284,38 @@ void main() {
       );
     });
   });
+
+  group('RecordDao spending totals', () {
+    Future<void> add(String id, double amount, String type, String? cat) => db
+        .into(db.records)
+        .insert(
+          RecordsCompanion.insert(
+            id: id,
+            amount: amount,
+            description: id,
+            date: DateTime(2026, 8, 10),
+            recordType: type,
+            categoryId: Value(cat),
+          ),
+        );
+
+    setUp(() async {
+      await add('a', -25.10, 'OUT', 'food');
+      await add('b', -10.20, 'OUT', 'food');
+      await add('c', -5, 'OUT', 'taxi');
+      await add('salary', 1000, 'IN', 'food');
+    });
+
+    final start = DateTime(2026, 8, 1);
+    final end = DateTime(2026, 8, 31, 23, 59);
+
+    test('total spending sums expenses only', () async {
+      expect(await dao.getTotalSpending(start, end), 40.30);
+    });
+
+    test('category spending sums that category\'s expenses', () async {
+      expect(await dao.getCategorySpending('food', start, end), 35.30);
+      expect(await dao.getCategorySpending('none', start, end), 0);
+    });
+  });
 }

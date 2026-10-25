@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
+import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/features/categories/domain/repositories/category_repository.dart';
 import 'package:expense_tracker/features/dashboard/domain/entities/date_range.dart';
 import 'package:expense_tracker/features/dashboard/domain/usecases/get_dashboard_summary.dart';
@@ -158,5 +159,18 @@ void main() {
     )).getOrElse(() => throw StateError('expected summary'));
 
     expect(summary.percentChange, isNull);
+  });
+
+  test('a local getRecords failure surfaces as CacheFailure', () async {
+    when(
+      () => records.getRecords(dateRange: any(named: 'dateRange')),
+    ).thenAnswer((_) async => const Left(CacheFailure(message: 'db locked')));
+
+    final result = await useCase(thisMonth);
+
+    expect(
+      result.fold((f) => f, (_) => null),
+      isA<CacheFailure>().having((f) => f.message, 'message', 'db locked'),
+    );
   });
 }

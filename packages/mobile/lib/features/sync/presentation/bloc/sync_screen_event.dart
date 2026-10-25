@@ -16,3 +16,9 @@ class SyncScreenStarted extends SyncScreenEvent {
 class SyncNowRequested extends SyncScreenEvent {
   const SyncNowRequested();
 }
+
+/// Retry on the "couldn't sync" row: queues the Failed Sync Changes again
+/// and syncs.
+class FailedChangesRetryRequested extends SyncScreenEvent {
+  const FailedChangesRetryRequested();
+}

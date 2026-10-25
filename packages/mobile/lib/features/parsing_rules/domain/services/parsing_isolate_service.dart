@@ -1,5 +1,6 @@
-import 'dart:isolate';
 import 'dart:developer' show log;
+
+import 'package:expense_tracker/core/utils/isolate_deadline.dart';
 import '../entities/parsed_transaction.dart';
 import '../entities/parsing_rule.dart';
 import '../entities/evaluate_rules_params.dart';
@@ -8,7 +9,14 @@ import '../../../message_templates/domain/entities/expense_template.dart';
 import '../../../message_templates/domain/entities/message_source.dart';
 import '../services/rule_evaluator.dart';
 
+/// Time a parse may take before its isolate is killed: generous for a full
+/// inbox, short enough that a broken user regex doesn't hang the scan.
+Duration parseDeadline(int messageCount) =>
+    Duration(seconds: 10, milliseconds: 20 * messageCount);
+
 class ParsingIsolateService {
+  /// Throws a `TimeoutException` when parsing passes [parseDeadline], which
+  /// in practice means a matching rule's pattern backtracks forever.
   Future<List<ParsedTransaction>> parseMessages({
     required List<ParseMessageInput> messages,
     required ParsingContext context,
@@ -24,7 +32,10 @@ class ParsingIsolateService {
       sourceType: sourceType,
     );
 
-    return Isolate.run(() => _parseInIsolate(payload));
+    return runWithDeadline(
+      () => _parseInIsolate(payload),
+      parseDeadline(messages.length),
+    );
   }
 }
 

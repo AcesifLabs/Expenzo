@@ -1,10 +1,13 @@
 import 'dart:async';
 
+import 'package:clock/clock.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:picons/picons.dart';
+import 'package:expense_tracker/features/records/data/services/transaction_draft_store.dart';
 import 'package:expense_tracker/core/constants/app_constants.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
@@ -93,6 +96,8 @@ class NewTransactionSheet extends StatefulWidget {
   /// Ignored when editing.
   final bool startWithReceiptScan;
 
+  // Test seam; null reads it from GetIt.
+  // ignore: unnecessary-nullable
   const NewTransactionSheet({
     super.key,
     this.recurringRepository,
@@ -106,7 +111,10 @@ class NewTransactionSheet extends StatefulWidget {
 }
 
 class _NewTransactionSheetState extends State<NewTransactionSheet>
-    with TickerProviderStateMixin, TypewriterAnimationMixin {
+    with
+        TickerProviderStateMixin,
+        TypewriterAnimationMixin,
+        WidgetsBindingObserver {
   static List<String> get _expensePlaceholders =>
       t.records.sheet.placeholders.expense;
 
@@ -123,7 +131,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   var _labelError = false;
   var _categoryError = false;
   var _isSubmitting = false;
-  var _selectedDate = DateTime.now();
+  var _selectedDate = clock.now();
   var _isRecurring = false;
   Animation<double>? _routeAnimation;
   AnimationStatusListener? _routeSettledListener;
@@ -140,20 +148,28 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   void initState() {
     super.initState();
     _prefillFrom(widget.initialRecord);
+    if (!_isEditing) _restoreDraft();
     _selectedBudgetId ??= widget.initialBudgetId;
+    WidgetsBinding.instance.addObserver(this);
     _loadCategories();
     _loadBudgets();
     initTypewriter(
       _type == RecordType.expense ? _expensePlaceholders : _incomePlaceholders,
     );
     _noteCtrl.addListener(_onNoteChanged);
-    // A prefilled name needs no example names cycling behind it.
+    // A prefilled name (an edit, or a restored draft) needs no example
+    // names cycling behind it.
+    final prefilled = _noteCtrl.text.isNotEmpty;
     if (_isEditing) {
       pauseTypewriter();
     } else {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        startTypewriter();
+        if (prefilled) {
+          pauseTypewriter();
+        } else {
+          startTypewriter();
+        }
         if (widget.startWithReceiptScan) _openReceiptScanWhenSettled();
       });
     }
@@ -167,6 +183,42 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     _selectedCategoryId = record.categoryId;
     _selectedBudgetId = record.budgetId;
     _selectedDate = record.date;
+  }
+
+  TransactionDraftStore? get _draftStore =>
+      di.getIt.isRegistered<TransactionDraftStore>()
+      ? di.getIt<TransactionDraftStore>()
+      : null;
+
+  /// Brings back what the user typed before Android closed the app.
+  void _restoreDraft() {
+    final draft = _draftStore?.load();
+    if (draft == null) return;
+    _type = draft.type;
+    _amountText.value = draft.amountText;
+    _noteCtrl.text = draft.note;
+    _selectedCategoryId = draft.categoryId;
+    _selectedBudgetId = draft.budgetId;
+    _selectedDate = draft.date;
+  }
+
+  /// Saves a new transaction's fields when the app goes to the background,
+  /// the only time Android may kill it. Closing the sheet clears it.
+  void _saveDraft() {
+    if (_isEditing ||
+        (_amountText.value.isEmpty && _noteCtrl.text.trim().isEmpty)) {
+      return;
+    }
+    unawaited(
+      _draftStore?.save((
+        type: _type,
+        amountText: _amountText.value,
+        note: _noteCtrl.text,
+        categoryId: _selectedCategoryId,
+        budgetId: _selectedBudgetId,
+        date: _selectedDate,
+      )),
+    );
   }
 
   void _onNoteChanged() {
@@ -316,7 +368,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
 
     setState(() => _isSubmitting = true);
 
-    final now = DateTime.now().toUtc();
+    final now = clock.now().toUtc();
     final finalAmount = _type == RecordType.expense ? -amount : amount;
     final budgetId = _type == RecordType.expense ? _selectedBudgetId : null;
     final original = widget.initialRecord;
@@ -464,9 +516,10 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
         throw StateError(failure.message);
       }, (_) => true);
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
-      debugPrint(
-        'NewTransactionSheet: Failed to create recurring transaction: $e',
+      appLogger.error(
+        'NewTransactionSheet: Failed to create recurring transaction',
+        e,
+        s,
       );
       if (mounted) {
         ScaffoldMessenger.of(context)
@@ -618,7 +671,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
             isEmpty ? '${symbol}0' : '$sign$symbol$shown',
             style: AppTypography.headlineLarge.copyWith(
               color: isEmpty
-                  ? Theme.of(context).colorScheme.onSurface.withAlpha(90)
+                  ? Theme.of(context).colorScheme.onSurfaceVariant
                   : _typeAccentColor,
               letterSpacing: -1,
             ),
@@ -796,7 +849,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       firstDate: AppConstants.pickerFirstDate,
       lastDate: DateTime(2100),
     );
-    if (picked != null) setState(() => _selectedDate = picked);
+    if (picked != null && mounted) setState(() => _selectedDate = picked);
   }
 
   Widget _buildAllCategoriesButton(ColorScheme colors) {
@@ -850,6 +903,13 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     final showInactiveLink =
         selectedId != null && !isListed && !_budgetsLoading;
     final sheetT = t.records.sheet;
+    if (noneOrEmpty && !showInactiveLink) {
+      // Nothing to pick: say so in readable text, not a greyed-out menu.
+      return InputDecorator(
+        decoration: _buildBudgetFieldDecoration(colors),
+        child: _buildBudgetHint(colors),
+      );
+    }
 
     return InputDecorator(
       decoration: _buildBudgetFieldDecoration(colors),
@@ -889,9 +949,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                 ),
               ),
           ],
-          onChanged: noneOrEmpty && !showInactiveLink
-              ? null
-              : _onBudgetSelected,
+          onChanged: _onBudgetSelected,
         ),
       ),
     );
@@ -924,7 +982,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   }
 
   Widget _buildBudgetHint(ColorScheme colors) {
-    final hintColor = colors.onSurface.withAlpha(120);
+    final hintColor = colors.onSurfaceVariant;
     final sheetT = t.records.sheet;
     final text = _budgetsLoading ? sheetT.loadingBudgets : sheetT.noBudget;
 
@@ -957,7 +1015,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
         ),
         child: Text(
           t.records.sheet.noCategories,
-          style: TextStyle(color: colors.onSurface.withAlpha(80)),
+          style: TextStyle(color: colors.onSurfaceVariant),
         ),
       );
     }
@@ -1142,7 +1200,15 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) _saveDraft();
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    // Closed on purpose (saved or dismissed): nothing to bring back.
+    if (!_isEditing) unawaited(_draftStore?.clear());
     _removeRouteSettledListener();
     _noteCtrl.removeListener(_onNoteChanged);
     _amountText.dispose();
@@ -1244,7 +1310,7 @@ class _SubmitButton extends StatelessWidget {
           child: ConstrainedBox(
             constraints: const BoxConstraints(
               minWidth: double.infinity,
-              minHeight: 52,
+              minHeight: AppSpacing.fieldHeight,
             ),
             child: ElevatedButton(
               onPressed: isSubmitting ? null : () => unawaited(onSubmit()),
@@ -1367,7 +1433,7 @@ class _RecurringCheckbox extends StatelessWidget {
                   child: Text(
                     t.records.sheet.repeatMonthly,
                     style: AppTypography.bodyMedium.copyWith(
-                      color: mutedIconColor,
+                      color: colors.onSurfaceVariant,
                     ),
                   ),
                 ),

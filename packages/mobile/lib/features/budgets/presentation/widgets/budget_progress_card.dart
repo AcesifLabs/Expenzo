@@ -115,11 +115,12 @@ class BudgetProgressCard extends StatelessWidget {
     final headline = summary.isOver
         ? card.overBy(amount: whole.format(-summary.remaining))
         : card.left(amount: whole.format(summary.remaining));
+    final name = budgetDisplayName(progress.name);
 
     return Semantics(
       button: true,
       label: card.a11y(
-        name: budgetDisplayName(progress.name),
+        name: name,
         headline: headline,
         daysLeft: summary.daysLeftLabel,
       ),
@@ -138,34 +139,10 @@ class BudgetProgressCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        budgetDisplayName(progress.name),
-                        style: textTheme.titleSmall,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    if (progress.groupId != null) ...[
-                      const SizedBox(width: AppSpacing.sm),
-                      AppBadge(
-                        label: t.budgets.sharedBadge,
-                        color: palette.accent,
-                        size: AppBadgeSize.small,
-                      ),
-                    ],
-                    const SizedBox(width: AppSpacing.sm),
-                    // Wraps rather than truncates at large text sizes, so the
-                    // number of days stays readable.
-                    Flexible(
-                      child: Text(
-                        summary.daysLeftLabel,
-                        style: secondaryStyle,
-                        textAlign: TextAlign.end,
-                      ),
-                    ),
-                  ],
+                _CardHeader(
+                  name: name,
+                  isShared: progress.groupId != null,
+                  daysLeft: summary.daysLeftLabel,
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
@@ -190,6 +167,55 @@ class BudgetProgressCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Budget name, the Shared badge and the days left.
+class _CardHeader extends StatelessWidget {
+  final String name;
+  final bool isShared;
+  final String daysLeft;
+
+  const _CardHeader({
+    required this.name,
+    required this.isShared,
+    required this.daysLeft,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            name,
+            style: textTheme.titleSmall,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        if (isShared) ...[
+          const SizedBox(width: AppSpacing.sm),
+          AppBadge(
+            label: t.budgets.sharedBadge,
+            color: palette.accent,
+            size: AppBadgeSize.small,
+          ),
+        ],
+        const SizedBox(width: AppSpacing.sm),
+        // Wraps rather than truncates at large text sizes, so the number of
+        // days stays readable.
+        Flexible(
+          child: Text(
+            daysLeft,
+            style: textTheme.bodySmall?.copyWith(color: palette.textSecondary),
+            textAlign: TextAlign.end,
+          ),
+        ),
+      ],
     );
   }
 }

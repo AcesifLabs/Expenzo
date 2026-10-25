@@ -58,8 +58,11 @@ class _TestRecordBloc extends RecordBloc {
       );
 
   List<Record> _records;
+  var loadRequests = 0;
 
   void seed() => _emitLoaded();
+
+  void fail() => emit(const RecordError("Couldn't load records"));
 
   void _emitLoaded() =>
       emit(RecordLoaded(records: _records, total: _records.length));
@@ -72,6 +75,7 @@ class _TestRecordBloc extends RecordBloc {
 
       return;
     }
+    if (event is LoadRecords) loadRequests++;
     if (event is LoadRecords || event is LoadMoreRecords) return;
     super.add(event);
   }
@@ -184,5 +188,21 @@ void main() {
 
       expect(find.byType(SnackBar), findsNothing);
     });
+  });
+
+  testWidgets('a failed load offers Try again, which reloads', (tester) async {
+    final bloc = _TestRecordBloc(const []);
+    addTearDown(bloc.close);
+    final categoryBloc = _TestCategoryBloc();
+    addTearDown(categoryBloc.close);
+    await tester.pumpWidget(_wrap(bloc, categoryBloc));
+    final loadsOnOpen = bloc.loadRequests;
+
+    bloc.fail();
+    await tester.pump();
+    await tester.tap(find.text('Try again'));
+
+    expect(find.text("Couldn't load records"), findsOneWidget);
+    expect(bloc.loadRequests, loadsOnOpen + 1);
   });
 }

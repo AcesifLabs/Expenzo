@@ -65,8 +65,8 @@ class FamilyBloc extends Bloc<FamilyEvent, FamilyState> {
       (_, emit) => _load(emit, preferCache: false),
       transformer: restartable(),
     );
-    on<FamilyCreateRequested>(_onCreate, transformer: sequential());
-    on<FamilyJoinRequested>(_onJoin, transformer: sequential());
+    on<FamilyCreateRequested>(_onCreate, transformer: droppable());
+    on<FamilyJoinRequested>(_onJoin, transformer: droppable());
     on<FamilyInviteRequested>(_onInvite, transformer: sequential());
     on<FamilyRoleChangeRequested>(_onRoleChange, transformer: sequential());
     on<FamilyMemberRemoveRequested>(_onRemove, transformer: sequential());

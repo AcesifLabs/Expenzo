@@ -91,13 +91,34 @@ Map<String, Widget Function()> get settingsScreens => {
   'Calendar': () => _withSettings(const CalendarView()),
   'Home page': () => _withSettings(const HomePageSettingsView()),
   'Notifications': _notificationsScreen,
-  'Recurring transactions': _recurringScreen,
+  'Recurring transactions': recurringScreen,
   'Sync': _syncScreen,
   'Export data': _exportScreen,
   'Delete all data': _deleteDataScreen,
-  'Matching rules': _matchingRulesScreen,
+  'Matching rules': matchingRulesScreen,
   'Language': () => _withSettings(const LanguageView()),
   'Categories': _categoriesScreen,
+};
+
+/// The page file under `lib/features/` each of [settingsScreens] renders.
+const settingsPages = {
+  'Settings list': 'settings/presentation/pages/settings_page.dart',
+  'Default currency': 'settings/presentation/pages/currency_page.dart',
+  'Number format': 'settings/presentation/pages/number_format_page.dart',
+  'Font size': 'settings/presentation/pages/font_size_page.dart',
+  'Appearance': 'settings/presentation/pages/appearance_page.dart',
+  'Calendar': 'settings/presentation/pages/calendar_page.dart',
+  'Home page': 'settings/presentation/pages/home_page_settings_page.dart',
+  'Notifications':
+      'settings/presentation/pages/notification_settings_page.dart',
+  'Recurring transactions':
+      'recurring/presentation/pages/recurring_list_page.dart',
+  'Sync': 'sync/presentation/pages/sync_settings_page.dart',
+  'Export data': 'export/presentation/pages/export_data_page.dart',
+  'Delete all data': 'data_wipe/presentation/pages/delete_all_data_page.dart',
+  'Matching rules': 'parsing_rules/presentation/pages/rules_list_page.dart',
+  'Language': 'settings/presentation/pages/language_page.dart',
+  'Categories': 'categories/presentation/pages/category_list_page.dart',
 };
 
 /// The busiest state: signed in, the last sync failed, banner showing.
@@ -185,7 +206,7 @@ Widget _notificationsScreen() {
   );
 }
 
-Widget _recurringScreen() {
+Widget recurringScreen({RecurringState? state}) {
   final autoPoster = MockAutoPoster();
   when(() => autoPoster.isReadyToPost()).thenAnswer((_) async => true);
   di.getIt.registerSingleton<RecurringAutoPoster>(autoPoster);
@@ -195,7 +216,8 @@ Widget _recurringScreen() {
       BlocProvider<RecurringBloc>.value(
         value: mockBloc<MockRecurringBloc, RecurringState>(
           MockRecurringBloc(),
-          RecurringLoaded([makeRecurring(id: 'rent', description: 'Rent')]),
+          state ??
+              RecurringLoaded([makeRecurring(id: 'rent', description: 'Rent')]),
         ),
       ),
       BlocProvider<SettingsBloc>.value(value: _loadedSettingsBloc()),
@@ -222,27 +244,28 @@ Widget _categoriesScreen() {
   );
 }
 
-Widget _matchingRulesScreen() {
+Widget matchingRulesScreen({ParsingRulesState? state}) {
   final now = DateTime(2026);
 
   return BlocProvider<ParsingRulesBloc>.value(
     value: mockBloc<MockParsingRulesBloc, ParsingRulesState>(
       MockParsingRulesBloc(),
-      ParsingRulesLoaded(
-        rules: [
-          ParsingRule(
-            id: 'rule-1',
-            name: 'Bank debit alerts',
-            triggerWords: const ['debited'],
-            amountPattern: r'Tk ([\d,.]+)',
-            sourceType: SourceType.sms,
-            isEnabled: true,
-            priority: 1,
-            createdAt: now,
-            updatedAt: now,
+      state ??
+          ParsingRulesLoaded(
+            rules: [
+              ParsingRule(
+                id: 'rule-1',
+                name: 'Bank debit alerts',
+                triggerWords: const ['debited'],
+                amountPattern: r'Tk ([\d,.]+)',
+                sourceType: SourceType.sms,
+                isEnabled: true,
+                priority: 1,
+                createdAt: now,
+                updatedAt: now,
+              ),
+            ],
           ),
-        ],
-      ),
     ),
     child: const RulesListPage(),
   );

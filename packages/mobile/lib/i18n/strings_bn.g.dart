@@ -414,6 +414,7 @@ class _Translations$receiptScan$bn extends Translations$receiptScan$en {
 
 	// Translations
 	@override String get permissionRequired => 'রসিদ স্ক্যান করতে ক্যামেরার অনুমতি দরকার।';
+	@override String get permissionBlocked => 'Expenzo-র জন্য ক্যামেরা বন্ধ আছে। রসিদ স্ক্যান করতে সেটিংসে চালু করুন।';
 	@override String get noCamera => 'এই ডিভাইসে কোনো ক্যামেরা নেই।';
 	@override String get cameraFailed => 'ক্যামেরা চালু করা যায়নি।';
 	@override String get captureFailed => 'ছবি তোলা যায়নি। আবার চেষ্টা করুন।';
@@ -474,8 +475,8 @@ class _Translations$reports$bn extends Translations$reports$en {
 	@override late final _Translations$reports$insights$bn insights = _Translations$reports$insights$bn._(_root);
 	@override String get title => 'রিপোর্ট';
 	@override String get askAi => 'AI-কে জিজ্ঞেস করুন';
-	@override String get last7Days => 'গত ৭ দিন';
-	@override String get last30Days => 'গত ৩০ দিন';
+	@override String get last7Days => 'গত 7 দিন';
+	@override String get last30Days => 'গত 30 দিন';
 	@override String get noCategoryData => 'ক্যাটাগরির কোনো ডেটা নেই';
 	@override String get noTrendData => 'এখনো প্রবণতার ডেটা নেই';
 	@override String get noSpending => 'এখনো খরচের ডেটা নেই';
@@ -504,6 +505,7 @@ class _Translations$settings$bn extends Translations$settings$en {
 	@override String get matchingRulesSubtitle => 'যেসব মেসেজ অটো-ইমপোর্ট এখনো পড়তে পারে না, সেগুলোর প্যাটার্ন';
 	@override late final _Translations$settings$recurring$bn recurring = _Translations$settings$recurring$bn._(_root);
 	@override late final _Translations$settings$help$bn help = _Translations$settings$help$bn._(_root);
+	@override late final _Translations$settings$crashReports$bn crashReports = _Translations$settings$crashReports$bn._(_root);
 	@override String get signOut => 'সাইন আউট';
 	@override String get deleteAccount => 'অ্যাকাউন্ট মুছুন';
 	@override late final _Translations$settings$signIn$bn signIn = _Translations$settings$signIn$bn._(_root);
@@ -746,6 +748,7 @@ class _Translations$budgets$details$bn extends Translations$budgets$details$en {
 	@override String get notFound => 'বাজেট পাওয়া যায়নি।';
 	@override String ofTotal({required Object total}) => ' / ${total}';
 	@override late final _Translations$budgets$details$periodBudget$bn periodBudget = _Translations$budgets$details$periodBudget$bn._(_root);
+	@override String carriedOver({required Object amount}) => 'আগের সময় থেকে আসা ${amount} সহ';
 	@override String used({required Object percent}) => '${percent}% খরচ হয়েছে';
 	@override String get over => 'বাজেট ছাড়িয়ে গেছে';
 	@override String get transactionsFailed => 'লেনদেন লোড করা যায়নি';
@@ -887,8 +890,10 @@ class _Translations$common$fallback$bn extends Translations$common$fallback$en {
 	@override String reference({required Object id}) => 'রেফারেন্স: ${id}';
 	@override String get closeApp => 'অ্যাপ বন্ধ করুন';
 	@override String get debugDetails => 'বিস্তারিত (ডিবাগ)';
-	@override String get criticalTitle => 'অপ্রত্যাশিত সমস্যা হয়েছে';
-	@override String get criticalBody => 'অ্যাপটি কিছুক্ষণের মধ্যে বন্ধ হয়ে যাবে।';
+	@override String get storageBody => 'এই ফোনে রাখা ডেটা পড়া যাচ্ছে না। Expenzo ব্যবহার চালিয়ে যেতে এটি রিসেট করুন। সিঙ্ক করা ডেটা সাইন ইন করলে ফিরে আসবে।';
+	@override String get resetLocalData => 'লোকাল ডেটা রিসেট করুন';
+	@override String get resetConfirm => 'এতে এই ফোনে রাখা লেনদেন, বাজেট ও ক্যাটাগরি মুছে যাবে। সিঙ্ক করা ডেটা সাইন ইন করলে ফিরে আসবে। যে পরিবর্তন সিঙ্ক হয়নি তা হারিয়ে যাবে।';
+	@override String get resetConfirmAction => 'মুছে আবার শুরু করুন';
 }
 
 // Path: common.smsGate
@@ -1320,14 +1325,14 @@ class _Translations$messageTemplates$editor$bn extends Translations$messageTempl
 	// Translations
 	@override String get noNumbers => 'এই মেসেজে কোনো সংখ্যা পাওয়া যায়নি।';
 	@override String get amountsFound => 'এই মেসেজে পাওয়া পরিমাণ:';
-	@override String get step1 => 'ধাপ ১/৩: একটি মূল শব্দ বেছে নিন';
+	@override String get step1 => 'ধাপ 1/3: একটি মূল শব্দ বেছে নিন';
 	@override String get step1Body => 'এমন একটি শব্দ বেছে নিন যা এই ধরনের প্রতিটি মেসেজে থাকে, যেমন "debited", "paid" বা "spent"।';
 	@override String get wordsInMessage => 'এই মেসেজের শব্দগুলো';
 	@override String get step1Hint => 'চালিয়ে যেতে একটি শব্দ বেছে নিন।';
-	@override String get step2 => 'ধাপ ২/৩: পরিমাণ বেছে নিন';
+	@override String get step2 => 'ধাপ 2/3: পরিমাণ বেছে নিন';
 	@override String get step2Body => 'কোন সংখ্যাটি আপনার খরচের পরিমাণ?';
 	@override String get step2Hint => 'চালিয়ে যেতে পরিমাণ বেছে নিন।';
-	@override String get step3 => 'ধাপ ৩/৩: দেখে নিন';
+	@override String get step3 => 'ধাপ 3/3: দেখে নিন';
 	@override String get step3Body => 'এখন থেকে এ রকম মেসেজ নিজে থেকে খরচ হিসেবে যোগ হবে।';
 	@override String get sender => 'প্রেরক';
 	@override String get keyWord => 'মূল শব্দ';
@@ -1634,6 +1639,9 @@ class _Translations$parsingRules$form$bn extends Translations$parsingRules$form$
 	@override String get datePattern => 'তারিখের প্যাটার্ন (ঐচ্ছিক)';
 	@override String get dateRegex => 'তারিখের regex (ঐচ্ছিক)';
 	@override String get dateHelper => 'তারিখ না লাগলে খালি রাখুন';
+	@override String get dateOrder => '05/10/2026-এর মতো তারিখ';
+	@override String get dayFirst => 'আগে দিন';
+	@override String get monthFirst => 'আগে মাস';
 	@override String get source => 'উৎস';
 	@override String get priority => 'অগ্রাধিকার';
 	@override String get priorityHelper => 'বেশি অগ্রাধিকারের নিয়ম আগে চেষ্টা করা হয়';
@@ -1648,7 +1656,7 @@ class _Translations$parsingRules$tester$bn extends Translations$parsingRules$tes
 	final TranslationsBn _root; // ignore: unused_field
 
 	// Translations
-	@override String get timeout => 'সময় শেষ: প্যাটার্নটি ২ সেকেন্ডের বেশি সময় নিয়েছে';
+	@override String get timeout => 'সময় শেষ: প্যাটার্নটি 2 সেকেন্ডের বেশি সময় নিয়েছে';
 	@override String get error => 'সমস্যা';
 	@override String get match => 'মিল পাওয়া গেছে';
 	@override String get noMatch => 'মিল নেই';
@@ -1918,6 +1926,17 @@ class _Translations$settings$help$bn extends Translations$settings$help$en {
 	@override String get rowSubtitle => 'প্রশ্নোত্তর, যোগাযোগ, রেটিং, আইনি তথ্য';
 }
 
+// Path: settings.crashReports
+class _Translations$settings$crashReports$bn extends Translations$settings$crashReports$en {
+	_Translations$settings$crashReports$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'ক্র্যাশ রিপোর্ট পাঠান';
+	@override String get subtitle => 'শুধু ত্রুটির তথ্য। টাকার অঙ্ক, নম্বর ও SMS-এর লেখা বাদ দেওয়া হয়।';
+}
+
 // Path: settings.signIn
 class _Translations$settings$signIn$bn extends Translations$settings$signIn$en {
 	_Translations$settings$signIn$bn._(TranslationsBn root) : this._root = root, super.internal(root);
@@ -2073,6 +2092,10 @@ class _Translations$settings$sync$bn extends Translations$settings$sync$en {
 		other: '${n}টি পরিবর্তন পাঠানোর অপেক্ষায়',
 	);
 	@override String get allSent => 'সব পরিবর্তন পাঠানো হয়েছে';
+	@override String failed({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n,
+		one: '${n}টি পরিবর্তন সিঙ্ক হয়নি',
+		other: '${n}টি পরিবর্তন সিঙ্ক হয়নি',
+	);
 	@override late final _Translations$settings$sync$sections$bn sections = _Translations$settings$sync$sections$bn._(_root);
 	@override String get enable => 'এই ডিভাইসে সিঙ্ক';
 	@override String get syncNow => 'এখনই সিঙ্ক করুন';
@@ -2212,9 +2235,9 @@ class _Translations$smsParser$range$bn extends Translations$smsParser$range$en {
 	final TranslationsBn _root; // ignore: unused_field
 
 	// Translations
-	@override String get last7Days => 'গত ৭ দিন';
-	@override String get last30Days => 'গত ৩০ দিন';
-	@override String get last3Months => 'গত ৩ মাস';
+	@override String get last7Days => 'গত 7 দিন';
+	@override String get last30Days => 'গত 30 দিন';
+	@override String get last3Months => 'গত 3 মাস';
 	@override String get allTime => 'সব সময়';
 	@override String get custom => 'নির্দিষ্ট তারিখের সীমা';
 	@override String from({required Object date}) => '${date} থেকে';
@@ -2242,6 +2265,7 @@ class _Translations$smsParser$card$bn extends Translations$smsParser$card$en {
 
 	// Translations
 	@override String rule({required Object id}) => 'নিয়ম: ${id}';
+	@override String get noAmount => 'পরিমাণ নেই';
 }
 
 // Path: smsParser.options
@@ -3147,6 +3171,7 @@ extension on TranslationsBn {
 			'budgets.details.periodBudget.weekly' => 'সাপ্তাহিক বাজেট',
 			'budgets.details.periodBudget.monthly' => 'মাসিক বাজেট',
 			'budgets.details.periodBudget.yearly' => 'বার্ষিক বাজেট',
+			'budgets.details.carriedOver' => ({required Object amount}) => 'আগের সময় থেকে আসা ${amount} সহ',
 			'budgets.details.used' => ({required Object percent}) => '${percent}% খরচ হয়েছে',
 			'budgets.details.over' => 'বাজেট ছাড়িয়ে গেছে',
 			'budgets.details.transactionsFailed' => 'লেনদেন লোড করা যায়নি',
@@ -3267,8 +3292,10 @@ extension on TranslationsBn {
 			'common.fallback.reference' => ({required Object id}) => 'রেফারেন্স: ${id}',
 			'common.fallback.closeApp' => 'অ্যাপ বন্ধ করুন',
 			'common.fallback.debugDetails' => 'বিস্তারিত (ডিবাগ)',
-			'common.fallback.criticalTitle' => 'অপ্রত্যাশিত সমস্যা হয়েছে',
-			'common.fallback.criticalBody' => 'অ্যাপটি কিছুক্ষণের মধ্যে বন্ধ হয়ে যাবে।',
+			'common.fallback.storageBody' => 'এই ফোনে রাখা ডেটা পড়া যাচ্ছে না। Expenzo ব্যবহার চালিয়ে যেতে এটি রিসেট করুন। সিঙ্ক করা ডেটা সাইন ইন করলে ফিরে আসবে।',
+			'common.fallback.resetLocalData' => 'লোকাল ডেটা রিসেট করুন',
+			'common.fallback.resetConfirm' => 'এতে এই ফোনে রাখা লেনদেন, বাজেট ও ক্যাটাগরি মুছে যাবে। সিঙ্ক করা ডেটা সাইন ইন করলে ফিরে আসবে। যে পরিবর্তন সিঙ্ক হয়নি তা হারিয়ে যাবে।',
+			'common.fallback.resetConfirmAction' => 'মুছে আবার শুরু করুন',
 			'common.smsGate.title' => 'SMS পড়ার অনুমতি দরকার',
 			'common.smsGate.body' => 'আপনার ব্যাংক ও পেমেন্ট অ্যাপের খরচ স্বয়ংক্রিয়ভাবে হিসাব রাখতে Expenzo-র আপনার SMS পড়ার অনুমতি দরকার। আপনার মেসেজ কখনো আপনার ফোনের বাইরে যায় না।',
 			'common.smsGate.allow' => 'অনুমতি দিন',
@@ -3486,14 +3513,14 @@ extension on TranslationsBn {
 			'messageTemplates.retro.review' => 'যে পুরোনো খরচ পাওয়া গেছে তা দেখে যোগ করতে সেটিংস → SMS থেকে স্বয়ংক্রিয় ইমপোর্ট-এ যান।',
 			'messageTemplates.editor.noNumbers' => 'এই মেসেজে কোনো সংখ্যা পাওয়া যায়নি।',
 			'messageTemplates.editor.amountsFound' => 'এই মেসেজে পাওয়া পরিমাণ:',
-			'messageTemplates.editor.step1' => 'ধাপ ১/৩: একটি মূল শব্দ বেছে নিন',
+			'messageTemplates.editor.step1' => 'ধাপ 1/3: একটি মূল শব্দ বেছে নিন',
 			'messageTemplates.editor.step1Body' => 'এমন একটি শব্দ বেছে নিন যা এই ধরনের প্রতিটি মেসেজে থাকে, যেমন "debited", "paid" বা "spent"।',
 			'messageTemplates.editor.wordsInMessage' => 'এই মেসেজের শব্দগুলো',
 			'messageTemplates.editor.step1Hint' => 'চালিয়ে যেতে একটি শব্দ বেছে নিন।',
-			'messageTemplates.editor.step2' => 'ধাপ ২/৩: পরিমাণ বেছে নিন',
+			'messageTemplates.editor.step2' => 'ধাপ 2/3: পরিমাণ বেছে নিন',
 			'messageTemplates.editor.step2Body' => 'কোন সংখ্যাটি আপনার খরচের পরিমাণ?',
 			'messageTemplates.editor.step2Hint' => 'চালিয়ে যেতে পরিমাণ বেছে নিন।',
-			'messageTemplates.editor.step3' => 'ধাপ ৩/৩: দেখে নিন',
+			'messageTemplates.editor.step3' => 'ধাপ 3/3: দেখে নিন',
 			'messageTemplates.editor.step3Body' => 'এখন থেকে এ রকম মেসেজ নিজে থেকে খরচ হিসেবে যোগ হবে।',
 			'messageTemplates.editor.sender' => 'প্রেরক',
 			'messageTemplates.editor.keyWord' => 'মূল শব্দ',
@@ -3572,11 +3599,11 @@ extension on TranslationsBn {
 			'onboarding.timeline.cannotAfford' => ({required Object amount}) => 'মাসে ${amount} সঞ্চয় দিয়ে এগুলো হবে না। আরও পরের একটি নিজস্ব তারিখ বাছুন।',
 			'onboarding.timeline.months' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n, one: '${n} মাস', other: '${n} মাস', ), 
 			'onboarding.timeline.perMonth' => ({required Object amount}) => '${amount}/মাস',
+			_ => null,
+		} ?? switch (path) {
 			'onboarding.timeline.custom' => 'নিজস্ব',
 			'onboarding.timeline.customHint' => 'নিজে ঠিক করুন',
 			'onboarding.timeline.fit.affordable' => 'আপনার সঞ্চয়ে হবে',
-			_ => null,
-		} ?? switch (path) {
 			'onboarding.timeline.fit.tooExpensive' => 'আপনার সঞ্চয়ের চেয়ে বেশি',
 			'onboarding.timeline.fit.slow' => 'অনেক সময় লাগবে',
 			'onboarding.complete.title' => 'সেটআপ সম্পন্ন!',
@@ -3625,12 +3652,15 @@ extension on TranslationsBn {
 			'parsingRules.form.datePattern' => 'তারিখের প্যাটার্ন (ঐচ্ছিক)',
 			'parsingRules.form.dateRegex' => 'তারিখের regex (ঐচ্ছিক)',
 			'parsingRules.form.dateHelper' => 'তারিখ না লাগলে খালি রাখুন',
+			'parsingRules.form.dateOrder' => '05/10/2026-এর মতো তারিখ',
+			'parsingRules.form.dayFirst' => 'আগে দিন',
+			'parsingRules.form.monthFirst' => 'আগে মাস',
 			'parsingRules.form.source' => 'উৎস',
 			'parsingRules.form.priority' => 'অগ্রাধিকার',
 			'parsingRules.form.priorityHelper' => 'বেশি অগ্রাধিকারের নিয়ম আগে চেষ্টা করা হয়',
 			'parsingRules.form.enabled' => 'চালু',
 			'parsingRules.form.enabledDetail' => 'মেসেজ পড়ার সময় এই নিয়মটি ব্যবহার করুন',
-			'parsingRules.tester.timeout' => 'সময় শেষ: প্যাটার্নটি ২ সেকেন্ডের বেশি সময় নিয়েছে',
+			'parsingRules.tester.timeout' => 'সময় শেষ: প্যাটার্নটি 2 সেকেন্ডের বেশি সময় নিয়েছে',
 			'parsingRules.tester.error' => 'সমস্যা',
 			'parsingRules.tester.match' => 'মিল পাওয়া গেছে',
 			'parsingRules.tester.noMatch' => 'মিল নেই',
@@ -3652,6 +3682,7 @@ extension on TranslationsBn {
 			'parsingRules.templates.flipkart_order_email' => 'Flipkart অর্ডারের ইমেইল পড়ে',
 			'parsingRules.templates.generic_payment_email' => 'সাধারণ পেমেন্ট কনফার্মেশনের ইমেইল পড়ে',
 			'receiptScan.permissionRequired' => 'রসিদ স্ক্যান করতে ক্যামেরার অনুমতি দরকার।',
+			'receiptScan.permissionBlocked' => 'Expenzo-র জন্য ক্যামেরা বন্ধ আছে। রসিদ স্ক্যান করতে সেটিংসে চালু করুন।',
 			'receiptScan.noCamera' => 'এই ডিভাইসে কোনো ক্যামেরা নেই।',
 			'receiptScan.cameraFailed' => 'ক্যামেরা চালু করা যায়নি।',
 			'receiptScan.captureFailed' => 'ছবি তোলা যায়নি। আবার চেষ্টা করুন।',
@@ -3772,8 +3803,8 @@ extension on TranslationsBn {
 			'reports.insights.budgets.description' => 'এই মাসে ঠিক পথে থাকতে আপনার বাজেটগুলো দেখুন।',
 			'reports.title' => 'রিপোর্ট',
 			'reports.askAi' => 'AI-কে জিজ্ঞেস করুন',
-			'reports.last7Days' => 'গত ৭ দিন',
-			'reports.last30Days' => 'গত ৩০ দিন',
+			'reports.last7Days' => 'গত 7 দিন',
+			'reports.last30Days' => 'গত 30 দিন',
 			'reports.noCategoryData' => 'ক্যাটাগরির কোনো ডেটা নেই',
 			'reports.noTrendData' => 'এখনো প্রবণতার ডেটা নেই',
 			'reports.noSpending' => 'এখনো খরচের ডেটা নেই',
@@ -3825,6 +3856,8 @@ extension on TranslationsBn {
 			'settings.recurring.subtitle' => 'নিয়মিত আসা বিল ও আয়',
 			'settings.help.title' => 'সাহায্য ও সহায়তা',
 			'settings.help.rowSubtitle' => 'প্রশ্নোত্তর, যোগাযোগ, রেটিং, আইনি তথ্য',
+			'settings.crashReports.title' => 'ক্র্যাশ রিপোর্ট পাঠান',
+			'settings.crashReports.subtitle' => 'শুধু ত্রুটির তথ্য। টাকার অঙ্ক, নম্বর ও SMS-এর লেখা বাদ দেওয়া হয়।',
 			'settings.signOut' => 'সাইন আউট',
 			'settings.deleteAccount' => 'অ্যাকাউন্ট মুছুন',
 			'settings.signIn.title' => 'সাইন ইন',
@@ -3904,6 +3937,7 @@ extension on TranslationsBn {
 			'settings.sync.failureBannerBody' => 'আপনার পরিবর্তনগুলো এই ফোনে নিরাপদ আছে এবং সিঙ্ক আবার কাজ করলে পাঠানো হবে।',
 			'settings.sync.pending' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n, one: '${n}টি পরিবর্তন পাঠানোর অপেক্ষায়', other: '${n}টি পরিবর্তন পাঠানোর অপেক্ষায়', ), 
 			'settings.sync.allSent' => 'সব পরিবর্তন পাঠানো হয়েছে',
+			'settings.sync.failed' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n, one: '${n}টি পরিবর্তন সিঙ্ক হয়নি', other: '${n}টি পরিবর্তন সিঙ্ক হয়নি', ), 
 			'settings.sync.sections.device' => 'এই ডিভাইস',
 			'settings.sync.enable' => 'এই ডিভাইসে সিঙ্ক',
 			'settings.sync.syncNow' => 'এখনই সিঙ্ক করুন',
@@ -3980,9 +4014,9 @@ extension on TranslationsBn {
 			'shell.reportsTabs.trend' => 'প্রবণতা',
 			'shell.reportsTabs.categories' => 'ক্যাটাগরি',
 			'shell.reportsTabs.insights' => 'বিশ্লেষণ',
-			'smsParser.range.last7Days' => 'গত ৭ দিন',
-			'smsParser.range.last30Days' => 'গত ৩০ দিন',
-			'smsParser.range.last3Months' => 'গত ৩ মাস',
+			'smsParser.range.last7Days' => 'গত 7 দিন',
+			'smsParser.range.last30Days' => 'গত 30 দিন',
+			'smsParser.range.last3Months' => 'গত 3 মাস',
 			'smsParser.range.allTime' => 'সব সময়',
 			'smsParser.range.custom' => 'নির্দিষ্ট তারিখের সীমা',
 			'smsParser.range.from' => ({required Object date}) => '${date} থেকে',
@@ -3992,6 +4026,7 @@ extension on TranslationsBn {
 			'smsParser.summary.matches' => 'মিলেছে',
 			'smsParser.summary.selected' => 'বাছাই করা',
 			'smsParser.card.rule' => ({required Object id}) => 'নিয়ম: ${id}',
+			'smsParser.card.noAmount' => 'পরিমাণ নেই',
 			'smsParser.options.title' => 'রেকর্ডের জন্য পুরোনো SMS স্ক্যান করুন',
 			'smsParser.toolbar.sender' => 'প্রেরক',
 			'smsParser.toolbar.flatList' => 'সাধারণ তালিকা',

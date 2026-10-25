@@ -16,6 +16,8 @@ class EvaluateRulesParams extends Equatable {
     messageDate,
   ];
 
+  // Email and pasted text have no sender or date.
+  // ignore: unnecessary-nullable
   const EvaluateRulesParams({
     required this.rawMessage,
     required this.sourceType,

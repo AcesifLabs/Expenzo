@@ -33,10 +33,10 @@ void main() {
   });
 
   void deleteThrows(Object error) =>
-      when(() => dio.delete<dynamic>(any())).thenThrow(error);
+      when(() => dio.delete<Object?>(any())).thenThrow(error);
 
   test('calls DELETE /sync/clear', () async {
-    when(() => dio.delete<dynamic>(any())).thenAnswer(
+    when(() => dio.delete<Object?>(any())).thenAnswer(
       (_) async => Response(
         requestOptions: RequestOptions(path: ApiConstants.syncClear),
         statusCode: 200,
@@ -45,7 +45,7 @@ void main() {
 
     await datasource.clearSyncedData();
 
-    verify(() => dio.delete<dynamic>(ApiConstants.syncClear)).called(1);
+    verify(() => dio.delete<Object?>(ApiConstants.syncClear)).called(1);
   });
 
   test('401 throws AuthException', () {

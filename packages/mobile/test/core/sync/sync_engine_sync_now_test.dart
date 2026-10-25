@@ -4,7 +4,11 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:expense_tracker/core/api/api_constants.dart';
+import 'package:expense_tracker/core/api/token_storage.dart';
+import 'package:expense_tracker/core/database/app_database.dart';
+import 'package:expense_tracker/core/sync/handlers/records_sync_handler.dart';
 import 'package:expense_tracker/core/sync/sync_engine.dart';
+import 'package:expense_tracker/core/sync/sync_table_registry.dart';
 
 import 'sync_engine_harness.dart';
 
@@ -17,13 +21,13 @@ void main() {
 
   void expectNoRequests() {
     verifyNever(
-      () => harness.dio.get<dynamic>(
+      () => harness.dio.get<Object?>(
         any(),
         queryParameters: any(named: 'queryParameters'),
       ),
     );
     verifyNever(
-      () => harness.dio.post<dynamic>(any(), data: any(named: 'data')),
+      () => harness.dio.post<Object?>(any(), data: any(named: 'data')),
     );
   }
 
@@ -40,6 +44,64 @@ void main() {
     expect(await harness.engine().syncNow(), SyncRunResult.firstSyncPending);
     expectNoRequests();
   });
+
+  test('a partly failed first upload is retried by Sync now', () async {
+    harness.setUp(firstSyncDone: false);
+    await harness.db
+        .into(harness.db.records)
+        .insert(
+          RecordsCompanion.insert(
+            id: 'r1',
+            amount: -50,
+            description: 'Lunch',
+            date: DateTime(2026, 10, 1),
+            recordType: 'OUT',
+          ),
+        );
+    when(
+      () => harness.dio.post<Object?>(any(), data: any(named: 'data')),
+    ).thenThrow(
+      DioException(requestOptions: RequestOptions(path: ApiConstants.syncPush)),
+    );
+    final sync = harness.engine(
+      registry: SyncTableRegistry()..register(RecordsSyncHandler()),
+    );
+    await sync.start();
+    expect(await TokenStorage.isFirstSync(), isTrue);
+
+    harness.pushSucceeds();
+
+    expect(await sync.syncNow(), SyncRunResult.success);
+    expect(await TokenStorage.isFirstSync(), isFalse);
+  });
+
+  test(
+    'a merge whose upload partly fails keeps the first sync pending',
+    () async {
+      harness.setUp(firstSyncDone: false);
+      await harness.db
+          .into(harness.db.records)
+          .insert(
+            RecordsCompanion.insert(
+              id: 'r1',
+              amount: -50,
+              description: 'Lunch',
+              date: DateTime(2026, 10, 1),
+              recordType: 'OUT',
+            ),
+          );
+      harness.pushThrows();
+      final sync = harness.engine(
+        registry: SyncTableRegistry()..register(RecordsSyncHandler()),
+      );
+
+      await expectLater(
+        sync.executeDecision(SyncMode.merge),
+        throwsA(isA<StateError>()),
+      );
+      expect(await TokenStorage.isFirstSync(), isTrue);
+    },
+  );
 
   test('paused returns disabled without requests', () async {
     harness.setUp();
@@ -92,7 +154,7 @@ void main() {
     pull.complete(
       Response(
         requestOptions: RequestOptions(path: ApiConstants.syncPull),
-        data: {'changes': [], 'serverTime': '2026-10-15T00:00:00.000Z'},
+        data: {'changes': <Object>[], 'serverTime': '2026-10-15T00:00:00.000Z'},
       ),
     );
 

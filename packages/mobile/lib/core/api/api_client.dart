@@ -5,7 +5,9 @@ import 'package:flutter/foundation.dart';
 import 'api_constants.dart';
 import 'token_storage.dart';
 import '../sync/connectivity_service.dart';
+import '../logger/app_logger.dart';
 import '../di/injection_container.dart' as di;
+import 'fault_injection_interceptor.dart';
 
 /// Whether [response] is the 401 for a JWT whose server account was deleted.
 bool isDeletedUserResponse(Response<dynamic>? response) {
@@ -16,8 +18,20 @@ bool isDeletedUserResponse(Response<dynamic>? response) {
       data['message'] == ApiConstants.deletedUserMessage;
 }
 
+/// The server refused to log in again with the Firebase session (401 or
+/// 403 from the login endpoint): the JWT can't be renewed.
+class TokenRefreshRejected implements Exception {
+  const TokenRefreshRejected();
+}
+
 class ApiClient {
   Dio dio;
+
+  /// Replaces the Firebase re-login in tests. Returns the new JWT or null,
+  /// or throws [TokenRefreshRejected].
+  @visibleForTesting
+  static Future<String?> Function()? refreshOverride;
+
   static final ApiClient _instance = ApiClient._internal();
 
   factory ApiClient() => _instance;
@@ -43,11 +57,17 @@ class ApiClient {
   }
 
   void _setupInterceptors() {
-    dio.interceptors.addAll([_AuthInterceptor(dio), _LoggingInterceptor()]);
+    dio.interceptors.addAll([
+      ?FaultInjectionInterceptor.fromEnvironment(),
+      _AuthInterceptor(dio),
+      _LoggingInterceptor(),
+    ]);
   }
 }
 
 class _AuthInterceptor extends Interceptor {
+  static const _retriedKey = 'retriedAfterRefresh';
+
   final Dio _dio;
 
   /// Single-flight guard for token refresh.
@@ -67,8 +87,8 @@ class _AuthInterceptor extends Interceptor {
       if (token != null && token.isNotEmpty) {
         options.headers['Authorization'] = 'Bearer $token';
       }
-    } catch (e) {
-      debugPrint('AuthInterceptor.onRequest error: ${e.runtimeType}');
+    } catch (e, s) {
+      appLogger.error('AuthInterceptor.onRequest error', e, s);
     } finally {
       handler.next(options);
     }
@@ -85,39 +105,55 @@ class _AuthInterceptor extends Interceptor {
       for (final step in [TokenStorage.clearAll, _signOutFirebase]) {
         try {
           await step();
-        } catch (e) {
-          debugPrint('AuthInterceptor: sign-out step failed: ${e.runtimeType}');
+        } catch (e, s) {
+          appLogger.error('AuthInterceptor: sign-out step failed', e, s);
         }
       }
       handler.next(err);
 
       return;
     }
-    if (err.response?.statusCode == 401) {
-      try {
-        final connectivity = di.getIt<ConnectivityService>();
-        if (!await connectivity.checkNow()) {
-          handler.next(err);
-
-          return;
+    final options = err.requestOptions;
+    // A request already retried with a fresh JWT doesn't refresh again: a
+    // server that keeps rejecting new tokens would otherwise loop forever.
+    if (err.response?.statusCode == 401 && options.extra[_retriedKey] != true) {
+      final newJwt = await _refreshWhenOnline(options);
+      if (newJwt != null) {
+        options.headers['Authorization'] = 'Bearer $newJwt';
+        options.extra[_retriedKey] = true;
+        try {
+          handler.resolve(await _dio.fetch(options));
+        } on DioException catch (retryError) {
+          // The retry's own failure (a 500, a timeout) goes to the caller.
+          // It says nothing about the sign-in, so nothing is cleared.
+          handler.next(retryError);
         }
 
-        final newJwt = await _refreshToken();
-
-        if (newJwt != null) {
-          final opts = err.requestOptions;
-          opts.headers['Authorization'] = 'Bearer $newJwt';
-          final retryResponse = await _dio.fetch(opts);
-          handler.resolve(retryResponse);
-
-          return;
-        }
-      } catch (e) {
-        debugPrint('Token refresh failed: ${e.runtimeType}');
-        await TokenStorage.clearAll();
+        return;
       }
     }
     handler.next(err);
+  }
+
+  /// A JWT to retry [options] with. When another request already replaced
+  /// the token this one was sent with, that token is reused, so a burst of
+  /// 401s costs one login.
+  Future<String?> _refreshWhenOnline(RequestOptions options) async {
+    try {
+      final current = await TokenStorage.getToken();
+      if (current != null &&
+          current.isNotEmpty &&
+          options.headers['Authorization'] != 'Bearer $current') {
+        return current;
+      }
+      if (!await di.getIt<ConnectivityService>().checkNow()) return null;
+
+      return await _refreshToken();
+    } catch (e, s) {
+      appLogger.error('Token refresh failed', e, s);
+
+      return null;
+    }
   }
 
   static Future<void> _signOutFirebase() => FirebaseAuth.instance.signOut();
@@ -133,13 +169,19 @@ class _AuthInterceptor extends Interceptor {
     final completer = Completer<String?>();
     _refreshCompleter = completer;
 
-    _doRefresh()
+    (ApiClient.refreshOverride ?? _doRefresh)()
         .then((token) {
           completer.complete(token);
           _refreshCompleter = null;
         })
-        .catchError((Object e) {
-          debugPrint('Token refresh error: ${e.runtimeType}');
+        .catchError((Object e, StackTrace s) async {
+          // Only a refusal ends the sign-in. A timeout or a 5xx keeps the
+          // JWT and the sync state; the next request tries again.
+          if (e is TokenRefreshRejected) {
+            await TokenStorage.deleteToken();
+          } else {
+            appLogger.error('Token refresh error', e, s);
+          }
           completer.complete(null);
           _refreshCompleter = null;
         });
@@ -152,11 +194,26 @@ class _AuthInterceptor extends Interceptor {
     if (firebaseUser == null) return null;
 
     final firebaseToken = await firebaseUser.getIdToken(true);
-    final authDio = Dio(BaseOptions(baseUrl: ApiConstants.baseUrl));
-    final response = await authDio.post(
-      ApiConstants.login,
-      data: {'firebaseToken': firebaseToken},
+    // Short timeouts: every request waiting on a 401 waits for this.
+    final authDio = Dio(
+      BaseOptions(
+        baseUrl: ApiConstants.baseUrl,
+        connectTimeout: const Duration(seconds: 15),
+        receiveTimeout: const Duration(seconds: 15),
+        sendTimeout: const Duration(seconds: 15),
+      ),
     );
+    final Response<dynamic> response;
+    try {
+      response = await authDio.post(
+        ApiConstants.login,
+        data: {'firebaseToken': firebaseToken},
+      );
+    } on DioException catch (e) {
+      final status = e.response?.statusCode;
+      if (status == 401 || status == 403) throw const TokenRefreshRejected();
+      rethrow;
+    }
     final newJwt = response.data['accessToken'];
     if (newJwt is! String || newJwt.isEmpty) {
       return null;
@@ -175,7 +232,10 @@ class _LoggingInterceptor extends Interceptor {
   }
 
   @override
-  void onResponse(Response response, ResponseInterceptorHandler handler) {
+  void onResponse(
+    Response<dynamic> response,
+    ResponseInterceptorHandler handler,
+  ) {
     debugPrint('[API] ${response.statusCode}');
     handler.next(response);
   }

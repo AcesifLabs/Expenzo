@@ -115,6 +115,28 @@ void main() {
     verify(() => syncBloc.add(const SyncNowRequested())).called(1);
   });
 
+  testWidgets('Failed Sync Changes show with their own Retry', (tester) async {
+    await pump(
+      tester,
+      state: SyncScreenState(
+        loadStatus: SyncScreenLoadStatus.loaded,
+        overview: _overview(),
+        failedCount: 3,
+      ),
+    );
+
+    expect(find.text("3 changes couldn't sync"), findsOneWidget);
+    await tester.tap(find.text('Retry'));
+
+    verify(() => syncBloc.add(const FailedChangesRetryRequested())).called(1);
+  });
+
+  testWidgets('no failed row while nothing failed', (tester) async {
+    await pump(tester);
+
+    expect(find.textContaining("couldn't sync"), findsNothing);
+  });
+
   testWidgets('Sync now adds SyncNowRequested', (tester) async {
     await pump(tester);
 

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:clock/clock.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -229,7 +230,7 @@ class _DashboardViewState extends State<DashboardView> {
 
   /// "Hi, Sam" when we know the name, otherwise today's date.
   String _greeting(String? firstName) => firstName == null
-      ? DateFormat('EEEE, d MMMM').format(DateTime.now())
+      ? DateFormat('EEEE, d MMMM').format(clock.now())
       : t.dashboard.greeting(name: firstName);
 
   Widget _buildAvatarWidget(BuildContext context, AuthState authState) {
@@ -539,13 +540,12 @@ class _DashboardViewState extends State<DashboardView> {
               padding: const EdgeInsets.all(AppSpacing.md),
               child: Column(
                 children: [
-                  for (var i = 0; i < data.budgetPreviews.length; i++) ...[
+                  for (final (i, preview) in data.budgetPreviews.indexed) ...[
                     _BudgetPreviewTile(
-                      preview: data.budgetPreviews[i],
+                      preview: preview,
                       currencyFmt: currencyFmt,
-                      onTap: () => context.push(
-                        '/budgets/${data.budgetPreviews[i].progress.budgetId}',
-                      ),
+                      onTap: () =>
+                          context.push('/budgets/${preview.progress.budgetId}'),
                     ),
                     if (i != data.budgetPreviews.length - 1)
                       const Padding(
@@ -1009,7 +1009,7 @@ class _RecentTile extends StatelessWidget {
   });
 
   String _timeLabel() {
-    final now = DateTime.now();
+    final now = clock.now();
     final today = DateTime(now.year, now.month, now.day);
     final date = DateTime(record.date.year, record.date.month, record.date.day);
     final difference = today.difference(date).inDays;

@@ -92,10 +92,10 @@ void main() {
 
   group('deleteServerAccount', () {
     void deleteThrows(Object error) =>
-        when(() => dio.delete<dynamic>(any())).thenThrow(error);
+        when(() => dio.delete<Object?>(any())).thenThrow(error);
 
     test('calls DELETE /auth/account', () async {
-      when(() => dio.delete<dynamic>(any())).thenAnswer(
+      when(() => dio.delete<Object?>(any())).thenAnswer(
         (_) async => Response(
           requestOptions: RequestOptions(path: ApiConstants.deleteAccount),
           statusCode: 200,
@@ -104,7 +104,7 @@ void main() {
 
       await datasource.deleteServerAccount();
 
-      verify(() => dio.delete<dynamic>(ApiConstants.deleteAccount)).called(1);
+      verify(() => dio.delete<Object?>(ApiConstants.deleteAccount)).called(1);
       expect(secureStorageCalls, contains('deleteAll'));
     });
 

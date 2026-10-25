@@ -5,6 +5,8 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:expense_tracker/core/database/app_database.dart';
 
+import 'migrations/v19_tables.dart';
+
 /// Verifies the V17 -> V18 migration (goals table, SAAP-74):
 ///  - `goals` is created with its index
 ///  - rows in other tables are untouched
@@ -44,6 +46,7 @@ void main() {
       "VALUES ('bud-1', 'Groceries', 400, 'monthly', 0)",
       const [],
     );
+    await addMissingV19Tables(raw, except: {'goals'});
     await raw.runCustom('PRAGMA user_version = 17', const []);
     await raw.close();
   }

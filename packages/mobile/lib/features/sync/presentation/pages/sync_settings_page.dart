@@ -96,6 +96,11 @@ class SyncSettingsView extends StatelessWidget {
             onRetry: canSync ? () => _onSyncNow(context) : null,
           ),
           _PendingRow(count: overview.pendingCount),
+          if (state.failedCount > 0)
+            _FailedRow(
+              count: state.failedCount,
+              onRetry: canSync ? () => _onRetryFailed(context) : null,
+            ),
         ],
       ),
       SettingsSection(
@@ -120,6 +125,10 @@ class SyncSettingsView extends StatelessWidget {
 
   void _onReload(BuildContext context) {
     context.read<SyncScreenBloc>().add(const SyncScreenStarted());
+  }
+
+  void _onRetryFailed(BuildContext context) {
+    context.read<SyncScreenBloc>().add(const FailedChangesRetryRequested());
   }
 
   void _onSyncNow(BuildContext context) {
@@ -367,6 +376,32 @@ class _PendingRow extends StatelessWidget {
         count == 0 ? syncT.allSent : syncT.pending(n: count),
         style: Theme.of(context).textTheme.bodyLarge,
       ),
+    );
+  }
+}
+
+/// Failed Sync Changes: the server refused them 5 times, so they wait for
+/// the user to retry.
+class _FailedRow extends StatelessWidget {
+  final int count;
+
+  /// Null disables Retry (syncing, or Sync is off).
+  final VoidCallback? onRetry;
+
+  const _FailedRow({required this.count, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    final syncT = t.settings.sync;
+
+    return ListTile(
+      title: Text(
+        syncT.failed(n: count),
+        style: Theme.of(
+          context,
+        ).textTheme.bodyLarge?.copyWith(color: context.palette.warning),
+      ),
+      trailing: TextButton(onPressed: onRetry, child: Text(syncT.retry)),
     );
   }
 }

@@ -68,13 +68,13 @@ class DatabaseSeeder {
     String categoryType,
     DateTime now,
   ) {
+    final (id, name, emoji) = cat;
+
     return CategoriesCompanion.insert(
-      id: cat.$1,
-      name: cat.$2,
-      emoji: Value(cat.$3),
-      color: Value(
-        CategoryPalette.seedColors[cat.$1] ?? CategoryPalette.slate.hex,
-      ),
+      id: id,
+      name: name,
+      emoji: Value(emoji),
+      color: Value(CategoryPalette.seedColors[id] ?? CategoryPalette.slate.hex),
       categoryType: Value(categoryType),
       isDefault: const Value(true),
       createdAt: Value(now),

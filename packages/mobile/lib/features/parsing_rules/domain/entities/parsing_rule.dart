@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'source_type.dart';
+import 'date_order.dart';
 
 export 'source_type.dart';
 
@@ -13,6 +14,9 @@ class ParsingRule extends Equatable {
   final SourceType sourceType;
   final bool isEnabled;
   final int priority;
+
+  /// How all-numeric dates in this rule's messages are read.
+  final DateOrder dateOrder;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -27,6 +31,7 @@ class ParsingRule extends Equatable {
     sourceType,
     isEnabled,
     priority,
+    dateOrder,
     createdAt,
     updatedAt,
   ];
@@ -41,6 +46,7 @@ class ParsingRule extends Equatable {
     required this.sourceType,
     required this.isEnabled,
     required this.priority,
+    this.dateOrder = DateOrder.dmy,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -55,6 +61,7 @@ class ParsingRule extends Equatable {
     SourceType? sourceType,
     bool? isEnabled,
     int? priority,
+    DateOrder? dateOrder,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -68,6 +75,7 @@ class ParsingRule extends Equatable {
       sourceType: _v(sourceType, this.sourceType),
       isEnabled: _v(isEnabled, this.isEnabled),
       priority: _v(priority, this.priority),
+      dateOrder: _v(dateOrder, this.dateOrder),
       createdAt: _v(createdAt, this.createdAt),
       updatedAt: _v(updatedAt, this.updatedAt),
     );

@@ -1,4 +1,6 @@
 import 'dart:ui';
+
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:picons/picons.dart';
@@ -76,12 +78,12 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
     final picked = await showDateRangePicker(
       context: context,
       firstDate: AppConstants.pickerFirstDate,
-      lastDate: DateTime.now().add(const Duration(days: 365)),
+      lastDate: clock.now().add(const Duration(days: 365)),
       initialDateRange: startDate != null && endDate != null
           ? DateTimeRange(start: startDate, end: endDate)
           : null,
     );
-    if (picked != null) {
+    if (picked != null && mounted) {
       setState(() {
         _startDate = picked.start;
         _endDate = picked.end;
@@ -250,7 +252,7 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
     return Text(
       t.records.filter.noCategories,
       style: theme.textTheme.bodySmall?.copyWith(
-        color: theme.colorScheme.onSurface.withAlpha(100),
+        color: theme.colorScheme.onSurfaceVariant,
       ),
     );
   }
@@ -261,7 +263,7 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
     int selectedCount,
   ) {
     final csOnSurface = theme.colorScheme.onSurface;
-    final csOnSurface120 = csOnSurface.withAlpha(120);
+    final csOnSurface120 = theme.colorScheme.onSurfaceVariant;
     final csOnSurface160 = csOnSurface.withAlpha(160);
     final csOutline60 = theme.colorScheme.outline.withAlpha(60);
     final label = _categoryLabel(selectedCount, categories.length);
@@ -314,7 +316,7 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
   }
 
   void _showCategoryDialog(BuildContext context, List<Category> categories) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (dialogCtx) {
         return StatefulBuilder(
@@ -435,7 +437,7 @@ class _FilterHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final onSurface120 = theme.colorScheme.onSurface.withAlpha(120);
+    final onSurface120 = theme.colorScheme.onSurfaceVariant;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -477,7 +479,7 @@ class _DateRangeBox extends StatelessWidget {
     final ed = endDate;
     final colorScheme = theme.colorScheme;
     final onSurface = colorScheme.onSurface;
-    final onSurface120 = onSurface.withAlpha(120);
+    final onSurface120 = colorScheme.onSurfaceVariant;
     final onSurface160 = onSurface.withAlpha(160);
     final outline60 = colorScheme.outline.withAlpha(60);
     final strings = t.records.filter;

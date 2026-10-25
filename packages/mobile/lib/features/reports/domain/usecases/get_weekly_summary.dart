@@ -11,6 +11,8 @@ class GetWeeklySummary {
 
   GetWeeklySummary(this.repository);
 
+  // Null means the week start from the language.
+  // ignore: unnecessary-nullable
   Future<Either<Failure, WeeklySummary>> call({
     required DateTime now,
     int? firstWeekday,

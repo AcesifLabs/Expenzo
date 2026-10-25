@@ -14,5 +14,11 @@ abstract class SyncOverviewRepository {
   /// Changes waiting in the sync queue, updated as it changes.
   Stream<int> watchPendingCount();
 
+  /// Failed Sync Changes (CONTEXT.md), updated as the queue changes.
+  Stream<int> watchFailedCount();
+
+  /// Puts the Failed Sync Changes back in the queue.
+  Future<void> retryFailed();
+
   Future<SyncRunResult> syncNow();
 }

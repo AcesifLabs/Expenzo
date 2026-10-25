@@ -150,9 +150,10 @@ class FamilyRemoteDatasourceImpl implements FamilyRemoteDatasource {
   Json _body(Response<Object?> response) {
     final data = response.data;
     if (data is! Json) {
+      // Not JSON: most likely a captive portal's page, not our server. No
+      // status, so it reads as offline and the cache stays usable.
       throw ServerException(
         message: 'Unexpected response shape: ${data.runtimeType}',
-        statusCode: response.statusCode,
       );
     }
 
@@ -174,7 +175,9 @@ class FamilyRemoteDatasourceImpl implements FamilyRemoteDatasource {
     } on ServerException {
       rethrow;
     } catch (e) {
-      throw ServerException(message: e.toString());
+      // The server answered, but not in a shape we can read: its fault, so
+      // 502, which shows a server error and keeps the cache usable.
+      throw ServerException(message: e.toString(), statusCode: 502);
     }
   }
 }

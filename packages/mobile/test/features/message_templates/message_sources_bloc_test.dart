@@ -74,7 +74,7 @@ void main() {
       'emits [MessageSourcesLoading, MessageSourcesError] on failure',
       () async {
         when(() => mockGetMessageSources(any())).thenAnswer(
-          (_) async => Left(ServerFailure(message: 'Failed to load')),
+          (_) async => Left(CacheFailure(message: 'Failed to load')),
         );
 
         final expected = [
@@ -82,7 +82,7 @@ void main() {
           isA<MessageSourcesError>().having(
             (s) => s.message,
             'message',
-            t.common.errors.server,
+            t.common.errors.storage,
           ),
         ];
 

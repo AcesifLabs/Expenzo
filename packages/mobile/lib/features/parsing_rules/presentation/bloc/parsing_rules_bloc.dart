@@ -25,7 +25,7 @@ class ParsingRulesBloc extends Bloc<ParsingRulesEvent, ParsingRulesState> {
     required this.repository,
   }) : super(ParsingRulesInitial()) {
     on<LoadRules>(_onLoadRules, transformer: concurrent());
-    on<CreateRuleEvent>(_onCreateRule, transformer: concurrent());
+    on<CreateRuleEvent>(_onCreateRule, transformer: droppable());
     on<RefreshRules>(_onRefreshRules, transformer: concurrent());
     on<ToggleRule>(_onToggleRule, transformer: concurrent());
     on<DeleteRuleRequested>(_onDeleteRule, transformer: concurrent());

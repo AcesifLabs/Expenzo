@@ -6,13 +6,11 @@ import 'package:expense_tracker/core/logger/app_logger.dart';
 import '../../domain/entities/search_filters.dart';
 import '../../domain/entities/search_result.dart';
 import '../../domain/helpers/fts_query_helper.dart';
-import '../../../records/domain/entities/record.dart';
 
 abstract class SearchLocalDatasource {
+  /// The index follows the records table through triggers
+  /// (`AppDatabase._createFtsTriggers`); nothing writes to it directly.
   Future<List<SearchResult>> searchRecords(SearchFilters filters);
-  Future<void> indexRecord(Record record);
-  Future<void> removeRecordFromIndex(String recordId);
-  Future<void> rebuildIndex();
 }
 
 class SearchLocalDatasourceImpl implements SearchLocalDatasource {
@@ -46,52 +44,12 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
 
         return SearchResult(
           recordId: data['id'] as String,
-          amount: _toDouble(data['amount']),
+          amount: _toDouble(data['amount'] as Object),
           description: data['description'] as String,
-          date: _intToDateTime(data['date']),
+          date: _intToDateTime(data['date'] as Object),
           relevanceScore: _computeRelevanceScore(data, filters.query),
         );
       }).toList();
-    } catch (e, s) {
-      appLogger.error('Search local datasource error', e, s);
-      throw CacheException(message: e.toString());
-    }
-  }
-
-  @override
-  Future<void> indexRecord(Record record) async {
-    try {
-      await db.customStatement(
-        'INSERT INTO expense_fts (expense_id, description) VALUES (?, ?)',
-        [record.id, record.description],
-      );
-    } catch (e, s) {
-      appLogger.error('Search local datasource error', e, s);
-      throw CacheException(message: e.toString());
-    }
-  }
-
-  @override
-  Future<void> removeRecordFromIndex(String recordId) async {
-    try {
-      await db.customStatement('DELETE FROM expense_fts WHERE expense_id = ?', [
-        recordId,
-      ]);
-    } catch (e, s) {
-      appLogger.error('Search local datasource error', e, s);
-      throw CacheException(message: e.toString());
-    }
-  }
-
-  @override
-  Future<void> rebuildIndex() async {
-    try {
-      await db.customStatement('DELETE FROM expense_fts');
-
-      await db.customStatement('''
-        INSERT INTO expense_fts (expense_id, description)
-        SELECT id, description FROM records
-      ''');
     } catch (e, s) {
       appLogger.error('Search local datasource error', e, s);
       throw CacheException(message: e.toString());
@@ -102,7 +60,7 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
     String query = '''
       SELECT r.*, expense_fts.description as fts_description
       FROM records r
-      INNER JOIN expense_fts ON expense_fts.expense_id = r.id
+      INNER JOIN expense_fts ON expense_fts.rowid = r.rowid
     ''';
 
     if (conditions.isNotEmpty) {
@@ -151,6 +109,8 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
     }
   }
 
+  /// Amount filters compare sizes: expenses are stored negative, so a
+  /// 100–500 filter must find an expense of -250.
   void _addAmountConditions(
     SearchFilters filters,
     List<String> conditions,
@@ -158,13 +118,13 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
   ) {
     final minAmount = filters.minAmount;
     if (minAmount != null) {
-      conditions.add('r.amount >= ?');
+      conditions.add('ABS(r.amount) >= ?');
       args.add(minAmount);
     }
 
     final maxAmount = filters.maxAmount;
     if (maxAmount != null) {
-      conditions.add('r.amount <= ?');
+      conditions.add('ABS(r.amount) <= ?');
       args.add(maxAmount);
     }
   }

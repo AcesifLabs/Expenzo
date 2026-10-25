@@ -10,11 +10,10 @@ import '../entities/parsing_context.dart';
 import 'amount_match_resolver.dart' as amount_match_resolver;
 import '../../../message_templates/domain/entities/expense_template.dart';
 import '../../../message_templates/domain/entities/message_source.dart';
+import '../entities/date_order.dart';
+import 'rule_date.dart';
 
 class RuleEvaluator {
-  static String normalizeAmount(String amount) =>
-      amount_match_resolver.normalizeResolvedAmount(amount);
-
   static ParsedTransaction? evaluateWithContext(
     ParsingContext context,
     EvaluateRulesParams params,
@@ -152,9 +151,7 @@ class RuleEvaluator {
     final amountStr = amountMatch.group(1) ?? amountMatch.group(0);
     if (amountStr == null) return null;
 
-    final cleanAmount = normalizeAmount(amountStr);
-
-    return double.tryParse(cleanAmount);
+    return amount_match_resolver.parseResolvedAmount(amountStr);
   }
 
   static ParsedTransaction? _evaluateRule(
@@ -170,9 +167,11 @@ class RuleEvaluator {
       if (amountMatch == null) return null;
 
       final amount = _extractAmount(amountMatch);
+      // A rule that finds no usable amount has not found a transaction.
+      if (amount == null) return null;
       final datePattern = rule.datePattern;
       final date = datePattern != null
-          ? _extractDate(datePattern, params, regexCache)
+          ? _extractDate(datePattern, rule.dateOrder, params, regexCache)
           : null;
 
       final snippetStart = _calcSnippetStart(amountMatch.start);
@@ -184,7 +183,7 @@ class RuleEvaluator {
           .substring(snippetStart, snippetEnd)
           .trim();
 
-      final confidenceScore = _computeConfidenceScore(amount, date);
+      final confidenceScore = _computeConfidenceScore(date);
 
       return ParsedTransaction(
         rawMessage: params.rawMessage,
@@ -220,6 +219,7 @@ class RuleEvaluator {
 
   static DateTime? _extractDate(
     String datePattern,
+    DateOrder dateOrder,
     EvaluateRulesParams params,
     Map<String, RegExp> regexCache,
   ) {
@@ -227,7 +227,7 @@ class RuleEvaluator {
     final dateMatch = matchFirstWithBudget(dateRegex, params.rawMessage);
     if (dateMatch == null) return null;
 
-    return _parseDate(dateMatch.group(0) ?? '');
+    return parseRuleDate(dateMatch.group(0) ?? '', dateOrder);
   }
 
   static int _calcSnippetStart(int matchStart) {
@@ -238,50 +238,8 @@ class RuleEvaluator {
     return matchEnd + 20 < messageLength ? matchEnd + 20 : messageLength;
   }
 
-  static double _computeConfidenceScore(double? amount, DateTime? date) {
-    if (amount != null && date != null) return 1.0;
-    if (amount != null) return 0.9;
-
-    return 0.7;
-  }
-
-  static DateTime? _parseDate(String dateStr) {
-    final datePatterns = [
-      RegExp(r'(\d{2})/(\d{2})/(\d{4})'),
-      RegExp(r'(\d{2})-(\d{2})-(\d{4})'),
-      RegExp(r'(\d{4})/(\d{2})/(\d{2})'),
-      RegExp(r'(\d{4})-(\d{2})-(\d{2})'),
-    ];
-
-    for (final pattern in datePatterns) {
-      final match = pattern.firstMatch(dateStr);
-      if (match == null) continue;
-
-      final g1 = match.group(1);
-      final g2 = match.group(2);
-      final g3 = match.group(3);
-      if (g1 == null || g2 == null || g3 == null) continue;
-
-      final n1 = int.tryParse(g1);
-      final n2 = int.tryParse(g2);
-      final n3 = int.tryParse(g3);
-      if (n1 == null || n2 == null || n3 == null) continue;
-
-      return n1 > 31 ? _safeDateTime(n1, n2, n3) : _safeDateTime(n3, n1, n2);
-    }
-
-    return null;
-  }
-
-  static DateTime? _safeDateTime(int year, int month, int day) {
-    if (month < 1 || month > 12) return null;
-    if (day < 1 || day > 31) return null;
-    try {
-      return DateTime(year, month, day);
-    } catch (e) {
-      appLogger.error('Rule evaluation error', e);
-
-      return null;
-    }
-  }
+  /// A match always has an amount (without one it isn't a transaction); a
+  /// date as well makes it surer.
+  static double _computeConfidenceScore(DateTime? date) =>
+      date != null ? 1.0 : 0.9;
 }

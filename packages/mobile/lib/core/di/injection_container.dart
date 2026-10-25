@@ -10,7 +10,6 @@ import 'package:expense_tracker/core/database/database_seeder.dart';
 import 'package:expense_tracker/core/database/transaction_runner.dart';
 import 'package:expense_tracker/core/database/daos/record_dao.dart';
 import 'package:expense_tracker/core/database/daos/category_dao.dart';
-import 'package:expense_tracker/core/database/daos/pending_recurring_dao.dart';
 import 'package:expense_tracker/core/database/daos/message_template_dao.dart';
 import 'package:expense_tracker/core/database/daos/user_dao.dart';
 import 'package:expense_tracker/core/database/daos/budget_dao.dart';
@@ -78,9 +77,6 @@ Future<void> get featureDependenciesReady =>
 void _registerDaoFactories() {
   getIt.registerFactory<RecordDao>(() => RecordDao(getIt<AppDatabase>()));
   getIt.registerFactory<CategoryDao>(() => CategoryDao(getIt<AppDatabase>()));
-  getIt.registerFactory<PendingRecurringDao>(
-    () => PendingRecurringDao(getIt<AppDatabase>()),
-  );
   getIt.registerFactory<MessageTemplateDao>(
     () => MessageTemplateDao(getIt<AppDatabase>()),
   );
@@ -128,7 +124,11 @@ Future<void> initCriticalDependencies() async {
   getIt.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
   getIt.registerLazySingleton<http.Client>(() => http.Client());
   getIt.registerLazySingleton<AppDatabase>(() => AppDatabase());
-  getIt.registerLazySingleton<LocalDataEpoch>(LocalDataEpoch.new);
+  getIt.registerLazySingleton<LocalDataEpoch>(
+    LocalDataEpoch.new,
+    // A restart resets GetIt; the old epoch's listeners go with it.
+    dispose: (epoch) => epoch.dispose(),
+  );
 
   _registerDaoFactories();
 

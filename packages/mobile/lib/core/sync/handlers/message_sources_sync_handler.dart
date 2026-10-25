@@ -25,22 +25,22 @@ class MessageSourcesSyncHandler
     Map<String, dynamic> data,
   ) => MessageSourcesCompanion.insert(
     id: id,
-    contactId: data['contactId'] ?? '',
-    contactName: data['contactName'] ?? '',
+    contactId: data['contactId'] as String? ?? '',
+    contactName: data['contactName'] as String? ?? '',
     isMonitored: data['isMonitored'] != null
-        ? Value(data['isMonitored'])
+        ? Value(data['isMonitored'] as bool)
         : const Value.absent(),
     autoCreateOption: data['autoCreateOption'] != null
         ? Value(int.parse(data['autoCreateOption'].toString()))
         : const Value.absent(),
     createdAt: Value(
       data['createdAt'] != null
-          ? DateTime.parse(data['createdAt']).toLocal()
+          ? DateTime.parse(data['createdAt'] as String).toLocal()
           : DateTime.now(),
     ),
     updatedAt: Value(
       data['updatedAt'] != null
-          ? DateTime.parse(data['updatedAt']).toLocal()
+          ? DateTime.parse(data['updatedAt'] as String).toLocal()
           : DateTime.now(),
     ),
   );

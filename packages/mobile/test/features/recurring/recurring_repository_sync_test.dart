@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:expense_tracker/core/database/app_database.dart' as db;
-import 'package:expense_tracker/core/database/daos/pending_recurring_dao.dart';
 import 'package:expense_tracker/core/database/daos/sync_queue_dao.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/sync/handlers/recurring_transactions_sync_handler.dart';
@@ -14,8 +13,6 @@ import 'package:mocktail/mocktail.dart';
 import '../../support/factories/recurring_factory.dart';
 
 class _MockDatasource extends Mock implements RecurringLocalDatasource {}
-
-class _MockPendingDao extends Mock implements PendingRecurringDao {}
 
 class _MockSyncQueueDao extends Mock implements SyncQueueDao {}
 
@@ -43,7 +40,6 @@ void main() {
     when(() => datasource.deleteRecurring(any())).thenAnswer((_) async {});
     repository = RecurringRepositoryImpl(
       localDatasource: datasource,
-      pendingRecurringDao: _MockPendingDao(),
       syncQueueDao: queue,
     );
   });
@@ -175,10 +171,7 @@ void main() {
   });
 
   test('writes still succeed without a sync queue', () async {
-    final local = RecurringRepositoryImpl(
-      localDatasource: datasource,
-      pendingRecurringDao: _MockPendingDao(),
-    );
+    final local = RecurringRepositoryImpl(localDatasource: datasource);
 
     final result = await local.createRecurring(makeRecurring());
 

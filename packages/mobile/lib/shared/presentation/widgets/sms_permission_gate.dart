@@ -7,12 +7,16 @@ import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/features/sms_parser/application/realtime_sms_processor.dart';
 import 'package:expense_tracker/core/theme/app_typography.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
+import 'package:expense_tracker/shared/presentation/widgets/scrollable_center.dart';
 
 class SmsPermissionGate extends StatefulWidget {
   final Widget child;
   final ValueChanged<bool>? onPermissionChanged;
 
+  // Optional: most screens only need the gate.
+  // ignore: unnecessary-nullable
   const SmsPermissionGate({
     super.key,
     required this.child,
@@ -66,7 +70,7 @@ class _SmsPermissionGateState extends State<SmsPermissionGate> {
     }
 
     if (!status.isGranted && status.isPermanentlyDenied && mounted) {
-      showDialog(
+      showDialog<void>(
         context: context,
         builder: (_) => const _PermissionRequiredDialog(),
       );
@@ -77,8 +81,7 @@ class _SmsPermissionGateState extends State<SmsPermissionGate> {
     try {
       await di.getIt<RealtimeSmsProcessor>().start();
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
-      debugPrint('SmsPermissionGate start skipped: $e');
+      appLogger.error('SmsPermissionGate start skipped', e, s);
     }
   }
 
@@ -94,48 +97,46 @@ class _SmsPermissionGateState extends State<SmsPermissionGate> {
 
     final strings = t.common.smsGate;
 
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              PiconsRegular.warningCircle,
-              size: 80,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Text(
-              strings.title,
-              style: AppTypography.headlineSmall,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              strings.body,
-              style: AppTypography.bodyLarge,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            ElevatedButton.icon(
-              icon: const Icon(PiconsRegular.check),
-              label: Text(
-                strings.allow,
-                style: AppTypography.titleLarge.copyWith(
-                  fontWeight: FontWeight.w400,
-                ),
+    return ScrollableCenter(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            PiconsRegular.warningCircle,
+            size: 80,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Text(
+            strings.title,
+            style: AppTypography.headlineSmall,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            strings.body,
+            style: AppTypography.bodyLarge,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          ElevatedButton.icon(
+            icon: const Icon(PiconsRegular.check),
+            label: Text(
+              strings.allow,
+              style: AppTypography.titleLarge.copyWith(
+                fontWeight: FontWeight.w400,
               ),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.xl,
-                  vertical: AppSpacing.md,
-                ),
-              ),
-              onPressed: () => _requestPermission(),
             ),
-          ],
-        ),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.xl,
+                vertical: AppSpacing.md,
+              ),
+            ),
+            onPressed: () => _requestPermission(),
+          ),
+        ],
       ),
     );
   }

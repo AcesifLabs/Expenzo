@@ -65,10 +65,12 @@ class CreateRecordsFromParsedList
   List<Record> _buildRecords(List<ParsedTransaction> toCreate) {
     final now = DateTime.now();
 
-    return toCreate
-        .map(
-          (parsed) => Record(
-            amount: -(parsed.amount?.abs() ?? 0),
+    return [
+      for (final parsed in toCreate)
+        // A message without a usable amount is skipped, never saved as 0.
+        if (parsed.amount case final amount? when amount > 0)
+          Record(
+            amount: -amount.abs(),
             description: parsed.description ?? parsed.rawMessage,
             date: parsed.date ?? now,
             categoryId: parsed.categoryId ?? 'default_out_general',
@@ -80,8 +82,7 @@ class CreateRecordsFromParsedList
             createdAt: now,
             updatedAt: now,
           ),
-        )
-        .toList();
+    ];
   }
 }
 

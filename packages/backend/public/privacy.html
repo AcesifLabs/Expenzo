@@ -34,7 +34,7 @@
   <div class="container">
     <div class="card">
       <h1>Privacy Policy for Expenzo</h1>
-      <p><strong>Last updated: October 24, 2026</strong></p>
+      <p><strong>Last updated: October 25, 2026</strong></p>
       <h2>Introduction</h2>
       <p>This Privacy Policy describes how <strong>Acesif Labs</strong> (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) collects, uses, and protects your information when you use the <strong>Expenzo</strong> mobile application (the &quot;App&quot;).</p>
       <h2>Information We Collect</h2>
@@ -50,6 +50,7 @@
       <ul>
       <li><strong>SMS Messages</strong>: With your explicit permission, the App reads SMS messages on your device to automatically detect and parse transaction-related messages. SMS data is processed <strong>locally on your device</strong> and is not transmitted to our servers.</li>
       <li><strong>Device Storage</strong>: Financial data is stored locally on your device using encrypted local storage (flutter_secure_storage) and a local SQLite database (Drift). It stays on your device unless you sign in with Google and Sync is on (Sync is on by default after you sign in). Then your transactions, categories, budgets, recurring transactions and pending recurring items, SMS senders, matching rules and expense templates are stored on our server so you can restore them on your other devices. App settings and preferences stay on each device.</li>
+      <li><strong>Crash Reports</strong>: When the App hits an error, it sends a crash report to Sentry so we can fix it: the error type, where in the code it happened, the app version, and the device model and Android version. Before sending, the App removes amounts, account and phone numbers, and any text you entered or received. SMS content is never included. You can turn crash reports off in Settings, under Support.</li>
       </ul>
       <h3>Information We Do NOT Collect</h3>
       <ul>
@@ -103,6 +104,11 @@
       <td>Groq</td>
       <td>AI assistant answers and Receipt Scan</td>
       <td><a href="https://groq.com/privacy-policy">Groq Privacy Policy</a></td>
+      </tr>
+      <tr>
+      <td>Sentry (Functional Software, Inc.)</td>
+      <td>Crash reports, unless you turn them off</td>
+      <td><a href="https://sentry.io/privacy/">Sentry Privacy Policy</a></td>
       </tr>
       </tbody></table>
       <p>These services may collect information as described in their respective privacy policies. We do not share your personal data with any other third parties.</p>

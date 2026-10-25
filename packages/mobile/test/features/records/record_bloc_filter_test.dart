@@ -40,10 +40,13 @@ Record _testRecord({String id = 'rec-1'}) => Record(
 Future<List<RecordState>> collectStates(RecordBloc bloc, {int count = 3}) {
   final states = <RecordState>[];
   final sub = bloc.stream.listen(states.add);
-  return Future.delayed(const Duration(milliseconds: 100), () {
-    sub.cancel();
-    return states;
-  });
+  return Future<List<RecordState>>.delayed(
+    const Duration(milliseconds: 100),
+    () {
+      sub.cancel();
+      return states;
+    },
+  );
 }
 
 void main() {
@@ -53,6 +56,9 @@ void main() {
   late MockUpdateRecord mockUpdateRecord;
   late MockDeleteRecord mockDeleteRecord;
   late RecordBloc bloc;
+  // Live queries that send when the test says, like drift's watch().
+  late StreamController<List<Record>> allRecords;
+  late StreamController<List<Record>> filteredRecords;
 
   setUpAll(() {
     registerFallbackValue(FakeGetRecordsParams());
@@ -66,9 +72,14 @@ void main() {
     mockUpdateRecord = MockUpdateRecord();
     mockDeleteRecord = MockDeleteRecord();
 
+    allRecords = StreamController<List<Record>>.broadcast();
+    filteredRecords = StreamController<List<Record>>.broadcast();
     when(
       () => mockRepo.watchRecords(limit: any(named: 'limit')),
-    ).thenAnswer((_) => const Stream.empty());
+    ).thenAnswer((_) => allRecords.stream);
+    when(
+      () => mockRepo.watchFilteredRecords(any()),
+    ).thenAnswer((_) => filteredRecords.stream);
 
     bloc = RecordBloc(
       getRecords: mockGetRecords,
@@ -79,8 +90,118 @@ void main() {
     );
   });
 
-  tearDown(() {
-    bloc.close();
+  tearDown(() async {
+    await bloc.close();
+    await allRecords.close();
+    await filteredRecords.close();
+  });
+
+  Future<void> settle() =>
+      Future<void>.delayed(const Duration(milliseconds: 50));
+
+  Future<void> applyCategoryFilter() async {
+    when(
+      () => mockRepo.getFilteredRecords(any()),
+    ).thenAnswer((_) async => Right([_testRecord(id: 'filtered-1')]));
+    bloc.add(const ApplyFilters(categoryIds: ['cat-1']));
+    await settle();
+  }
+
+  group('live updates', () {
+    test('an unfiltered update does not replace the filtered list', () async {
+      await applyCategoryFilter();
+
+      allRecords.add([_testRecord(id: 'other-category')]);
+      await settle();
+
+      final loaded = bloc.state as RecordLoaded;
+      expect(loaded.records.map((r) => r.id), ['filtered-1']);
+      expect(loaded.filterCategoryIds, ['cat-1']);
+    });
+
+    test('a filtered update replaces the list and keeps the search', () async {
+      bloc.emit(const RecordLoaded(records: [], searchQuery: 'coffee'));
+      await applyCategoryFilter();
+
+      filteredRecords.add([
+        _testRecord(id: 'filtered-2'),
+        _testRecord(id: 'filtered-1'),
+      ]);
+      await settle();
+
+      final loaded = bloc.state as RecordLoaded;
+      expect(loaded.records.map((r) => r.id), ['filtered-2', 'filtered-1']);
+      expect(loaded.searchQuery, 'coffee');
+      expect(loaded.filterCategoryIds, ['cat-1']);
+    });
+
+    test('after load more, an update keeps every loaded row', () async {
+      final firstPage = List.generate(50, (i) => _testRecord(id: 'rec-$i'));
+      final secondPage = List.generate(
+        50,
+        (i) => _testRecord(id: 'rec-${50 + i}'),
+      );
+      when(
+        () => mockRepo.getFilteredRecords(any()),
+      ).thenAnswer((_) async => Right(secondPage));
+      bloc.emit(
+        RecordLoaded(
+          records: firstPage,
+          total: 50,
+          hasMore: true,
+          filterCategoryIds: const ['cat-1'],
+        ),
+      );
+
+      bloc.add(const LoadMoreRecords());
+      await settle();
+      filteredRecords.add([
+        _testRecord(id: 'new'),
+        ...firstPage,
+        ...secondPage.take(49),
+      ]);
+      await settle();
+
+      final watched = verify(
+        () => mockRepo.watchFilteredRecords(captureAny()),
+      ).captured.cast<RecordFilter>();
+      expect(watched.last.limit, 100);
+      final loaded = bloc.state as RecordLoaded;
+      expect(loaded.records, hasLength(100));
+      expect(loaded.hasMore, isTrue);
+    });
+
+    test('clearing the filters follows every record again', () async {
+      when(
+        () => mockGetRecords.call(any()),
+      ).thenAnswer((_) async => Right([_testRecord()]));
+      await applyCategoryFilter();
+
+      bloc.add(const ClearFilters());
+      await settle();
+      allRecords.add([_testRecord(id: 'any-category')]);
+      await settle();
+
+      final loaded = bloc.state as RecordLoaded;
+      expect(loaded.records.map((r) => r.id), ['any-category']);
+      expect(loaded.filterCategoryIds, isNull);
+    });
+
+    test('a failing live query shows the storage error', () async {
+      await applyCategoryFilter();
+
+      filteredRecords.addError(Exception('disk I/O error'));
+      await settle();
+
+      expect(
+        bloc.state,
+        isA<RecordError>().having(
+          (e) => e.message,
+          'message',
+          t.common.errors.storage,
+        ),
+      );
+    });
   });
 
   group('ApplyFilters', () {
@@ -96,7 +217,7 @@ void main() {
 
       bloc.add(const ApplyFilters(categoryIds: ['cat-1'], recordType: 'OUT'));
 
-      await Future.delayed(const Duration(milliseconds: 100));
+      await Future<void>.delayed(const Duration(milliseconds: 100));
       sub.cancel();
 
       expect(states.length, greaterThanOrEqualTo(2));
@@ -122,7 +243,7 @@ void main() {
       bloc.emit(RecordLoaded(records: [], searchQuery: 'coffee'));
       bloc.add(const ApplyFilters());
 
-      await Future.delayed(const Duration(milliseconds: 100));
+      await Future<void>.delayed(const Duration(milliseconds: 100));
       sub.cancel();
 
       final loaded = states.whereType<RecordLoaded>().last;
@@ -130,21 +251,21 @@ void main() {
     });
 
     test('emits RecordError on repository failure', () async {
-      when(() => mockRepo.getFilteredRecords(any())).thenAnswer(
-        (_) async => const Left(ServerFailure(message: 'Server error')),
-      );
+      when(
+        () => mockRepo.getFilteredRecords(any()),
+      ).thenAnswer((_) async => const Left(CacheFailure(message: 'DB error')));
 
       final states = <RecordState>[];
       final sub = bloc.stream.listen(states.add);
 
       bloc.add(const ApplyFilters());
 
-      await Future.delayed(const Duration(milliseconds: 100));
+      await Future<void>.delayed(const Duration(milliseconds: 100));
       sub.cancel();
 
       expect(states[0], isA<RecordLoading>());
       expect(states[1], isA<RecordError>());
-      expect((states[1] as RecordError).message, t.common.errors.server);
+      expect((states[1] as RecordError).message, t.common.errors.storage);
     });
   });
 
@@ -161,7 +282,7 @@ void main() {
 
       bloc.add(const ClearFilters());
 
-      await Future.delayed(const Duration(milliseconds: 100));
+      await Future<void>.delayed(const Duration(milliseconds: 100));
       sub.cancel();
 
       final loaded = states.whereType<RecordLoaded>().first;
@@ -196,7 +317,7 @@ void main() {
 
       bloc.add(const LoadMoreRecords());
 
-      await Future.delayed(const Duration(milliseconds: 100));
+      await Future<void>.delayed(const Duration(milliseconds: 100));
       sub.cancel();
 
       final loaded = states.whereType<RecordLoaded>().last;
@@ -229,7 +350,7 @@ void main() {
 
       bloc.add(const LoadMoreRecords());
 
-      await Future.delayed(const Duration(milliseconds: 100));
+      await Future<void>.delayed(const Duration(milliseconds: 100));
       sub.cancel();
 
       final loaded = states.whereType<RecordLoaded>().last;

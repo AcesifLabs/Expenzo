@@ -4,4 +4,8 @@ abstract final class SyncTableNames {
   /// Goals (SAAP-74). Delete all data shows its row once a handler with
   /// this name is registered.
   static const goals = 'goals';
+
+  static const parsingRules = 'parsing_rules';
+  static const messageSources = 'message_sources';
+  static const expenseTemplates = 'expense_templates';
 }

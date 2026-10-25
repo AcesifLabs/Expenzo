@@ -1,26 +1,38 @@
-/// Safe parsing helpers for sync handler fromSyncPayload methods.
-/// Handles malformed remote payloads without throwing.
+/// Parsing helpers for sync handler fromSyncPayload methods.
+///
+/// A value that can't be read throws a [FormatException]. The sync engine
+/// then skips that row and pulls it again later; inventing 0.0 or "now"
+/// would save a wrong amount or date for good.
 library;
 
+import 'package:expense_tracker/core/utils/money.dart';
+
+/// [value] as an amount rounded to 2 decimals (ADR 0014).
 double parseSyncAmount(Object? value) {
-  if (value is double) return value;
-  if (value is int) return value.toDouble();
-  if (value is String) return double.tryParse(value) ?? 0.0;
-
-  return 0.0;
-}
-
-DateTime parseSyncDate(Object? value) {
-  if (value is DateTime) return value.toLocal();
-  if (value is String) {
-    try {
-      return DateTime.parse(value).toLocal();
-    } catch (_) {
-      return DateTime.now().toUtc();
-    }
+  final amount = switch (value) {
+    num() => value.toDouble(),
+    String() => double.tryParse(value),
+    _ => null,
+  };
+  if (amount == null || !amount.isFinite) {
+    throw FormatException('Unreadable sync amount (${value.runtimeType})');
   }
 
-  return DateTime.now().toUtc();
+  return roundMoney(amount);
+}
+
+/// [value] as a local [DateTime].
+DateTime parseSyncDate(Object? value) {
+  final date = switch (value) {
+    DateTime() => value,
+    String() => DateTime.tryParse(value),
+    _ => null,
+  };
+  if (date == null) {
+    throw FormatException('Unreadable sync date (${value.runtimeType})');
+  }
+
+  return date.toLocal();
 }
 
 String parseSyncString(Object? value, [String fallback = '']) {

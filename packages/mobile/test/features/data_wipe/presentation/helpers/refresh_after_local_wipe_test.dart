@@ -25,6 +25,7 @@ void main() {
     tester,
   ) async {
     final epoch = LocalDataEpoch();
+    addTearDown(epoch.dispose);
     final settings = mockBloc<MockSettingsBloc, SettingsState>(
       MockSettingsBloc(),
       const SettingsInitial(),

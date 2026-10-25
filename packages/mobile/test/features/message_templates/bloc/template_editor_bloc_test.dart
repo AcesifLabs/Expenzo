@@ -1,3 +1,4 @@
+import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:dartz/dartz.dart';
@@ -91,14 +92,14 @@ void main() {
         ).thenAnswer((_) async => Right(testSource));
         when(
           () => mockSaveTemplate(any()),
-        ).thenAnswer((_) async => Left(ServerFailure(message: 'Save failed')));
+        ).thenAnswer((_) async => Left(CacheFailure(message: 'Save failed')));
 
         final expected = [
           isA<TemplateEditorSaving>(),
           isA<TemplateEditorError>().having(
             (s) => s.message,
             'message',
-            t.common.errors.server,
+            t.common.errors.storage,
           ),
         ];
 
@@ -107,6 +108,27 @@ void main() {
       },
     );
   });
+
+  blocTest<TemplateEditorBloc, TemplateEditorState>(
+    'a double tap on Save saves once',
+    setUp: () {
+      when(
+        () => mockRepository.saveMessageSource(any()),
+      ).thenAnswer((_) async => Right(testSource));
+      when(
+        () => mockSaveTemplate(any()),
+      ).thenAnswer((_) async => Right(testTemplate));
+    },
+    build: () => TemplateEditorBloc(
+      saveTemplateUseCase: mockSaveTemplate,
+      repository: mockRepository,
+    ),
+    act: (bloc) => bloc
+      ..add(SaveTemplateEvent(testTemplate, testSource))
+      ..add(SaveTemplateEvent(testTemplate, testSource)),
+    expect: () => [isA<TemplateEditorSaving>(), isA<TemplateEditorSaved>()],
+    verify: (_) => verify(() => mockSaveTemplate(any())).called(1),
+  );
 
   group('DeleteTemplateEvent', () {
     test(

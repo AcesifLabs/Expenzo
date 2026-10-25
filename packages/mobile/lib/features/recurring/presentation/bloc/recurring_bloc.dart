@@ -25,7 +25,7 @@ class RecurringBloc extends Bloc<RecurringEvent, RecurringState> {
     required this.postDueRecurring,
   }) : super(RecurringInitial()) {
     on<LoadRecurring>(_onLoadRecurring, transformer: concurrent());
-    on<CreateRecurring>(_onCreateRecurring, transformer: sequential());
+    on<CreateRecurring>(_onCreateRecurring, transformer: droppable());
     on<UpdateRecurring>(_onUpdateRecurring, transformer: sequential());
     on<DeleteRecurring>(_onDeleteRecurring, transformer: sequential());
     on<ProcessRecurring>(_onProcessRecurring, transformer: droppable());

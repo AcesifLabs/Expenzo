@@ -3,9 +3,6 @@ import 'package:dartz/dartz.dart';
 import 'package:uuid/uuid.dart';
 import 'package:expense_tracker/core/database/daos/sync_queue_dao.dart';
 import 'package:expense_tracker/core/sync/sync_event.dart';
-import 'package:expense_tracker/core/database/daos/pending_recurring_dao.dart';
-import 'package:expense_tracker/core/database/app_database.dart'
-    show PendingRecurringData;
 import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/logger/app_logger.dart';
@@ -16,12 +13,10 @@ import 'package:expense_tracker/core/error/failure_message.dart';
 
 class RecurringRepositoryImpl implements RecurringRepository {
   final RecurringLocalDatasource localDatasource;
-  final PendingRecurringDao pendingRecurringDao;
   final SyncQueueDao? _syncQueueDao;
 
   RecurringRepositoryImpl({
     required this.localDatasource,
-    required this.pendingRecurringDao,
     SyncQueueDao? syncQueueDao,
   }) : _syncQueueDao = syncQueueDao;
 
@@ -164,16 +159,6 @@ class RecurringRepositoryImpl implements RecurringRepository {
 
       return Left(CacheFailure(message: e.toString()));
     }
-  }
-
-  @override
-  Stream<List<PendingRecurringData>> watchPendingRecurring() {
-    return pendingRecurringDao.watchPending();
-  }
-
-  @override
-  Future<void> removePendingRecurring(String id) async {
-    await pendingRecurringDao.removePending(id);
   }
 
   /// Same fields as `RecurringTransactionsSyncHandler.toSyncPayload` without

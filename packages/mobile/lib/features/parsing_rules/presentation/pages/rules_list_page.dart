@@ -14,14 +14,17 @@ import '../bloc/parsing_rules_state.dart';
 import '../widgets/rule_card.dart';
 import '../widgets/regex_tester_widget.dart';
 import '../widgets/regex_pattern_validator.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
+import '../../domain/entities/date_order.dart';
+import 'package:expense_tracker/shared/presentation/widgets/scrollable_center.dart';
 
 class RulesListPage extends StatelessWidget {
   const RulesListPage({super.key});
 
   void _navigateToTemplates(BuildContext context) {
     Navigator.of(context).push(
-      SlidePageRoute(
+      SlidePageRoute<void>(
         builder: (_) => BlocProvider.value(
           value: context.read<ParsingRulesBloc>(),
           child: const AddTemplatesPage(),
@@ -32,7 +35,7 @@ class RulesListPage extends StatelessWidget {
 
   void _navigateToEditor(BuildContext context, [ParsingRule? rule]) {
     Navigator.of(context).push(
-      SlidePageRoute(
+      SlidePageRoute<void>(
         builder: (_) => BlocProvider.value(
           value: context.read<ParsingRulesBloc>(),
           child: RuleEditorPage(rule: rule),
@@ -88,29 +91,27 @@ class RulesListPage extends StatelessWidget {
   Widget _buildEmptyState(BuildContext context) {
     final strings = t.parsingRules.empty;
 
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              PiconsRegular.listChecks,
-              size: 64,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(strings.title, style: AppTypography.titleLarge),
-            const SizedBox(height: AppSpacing.sm),
-            Text(strings.body, textAlign: TextAlign.center),
-            const SizedBox(height: AppSpacing.lg),
-            ElevatedButton.icon(
-              icon: const Icon(PiconsRegular.plus),
-              label: Text(strings.add),
-              onPressed: () => _navigateToEditor(context),
-            ),
-          ],
-        ),
+    return ScrollableCenter(
+      padding: const EdgeInsets.all(AppSpacing.xl),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            PiconsRegular.listChecks,
+            size: 64,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(strings.title, style: AppTypography.titleLarge),
+          const SizedBox(height: AppSpacing.sm),
+          Text(strings.body, textAlign: TextAlign.center),
+          const SizedBox(height: AppSpacing.lg),
+          ElevatedButton.icon(
+            icon: const Icon(PiconsRegular.plus),
+            label: Text(strings.add),
+            onPressed: () => _navigateToEditor(context),
+          ),
+        ],
       ),
     );
   }
@@ -188,6 +189,7 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
   final TextEditingController _priorityController = TextEditingController();
 
   SourceType _sourceType = SourceType.sms;
+  DateOrder _dateOrder = DateOrder.dmy;
   String? _categoryId;
   bool _isEnabled = true;
 
@@ -206,6 +208,7 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
       _datePatternController.text = rule.datePattern ?? '';
       _priorityController.text = rule.priority.toString();
       _sourceType = rule.sourceType;
+      _dateOrder = rule.dateOrder;
       _categoryId = rule.categoryId;
       _isEnabled = rule.isEnabled;
     }
@@ -228,6 +231,7 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
       datePattern: datePattern.isEmpty ? null : datePattern,
       categoryId: _categoryId,
       sourceType: _sourceType,
+      dateOrder: _dateOrder,
       isEnabled: _isEnabled,
       priority: int.tryParse(_priorityController.text) ?? 0,
       createdAt: widget.rule?.createdAt ?? now,
@@ -281,12 +285,16 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
     try {
       RegExp(value);
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
+      appLogger.warning('Amount pattern is not a valid regex', e, s);
 
       return t.parsingRules.validation.invalidRegex;
     }
 
     return null;
+  }
+
+  void _onDateOrderChanged(Set<DateOrder> selection) {
+    setState(() => _dateOrder = selection.first);
   }
 
   void _onSourceTypeChanged(Set<SourceType> selection) {
@@ -358,6 +366,7 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
         RegexTesterWidget(
           pattern: _amountPatternController.text,
           datePattern: _datePatternController.text,
+          dateOrder: _dateOrder,
         ),
       ],
     );
@@ -382,6 +391,17 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
             border: OutlineInputBorder(),
             helperText: form.dateHelper,
           ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        Text(form.dateOrder),
+        const SizedBox(height: AppSpacing.sm),
+        SegmentedButton<DateOrder>(
+          segments: [
+            ButtonSegment(value: DateOrder.dmy, label: Text(form.dayFirst)),
+            ButtonSegment(value: DateOrder.mdy, label: Text(form.monthFirst)),
+          ],
+          selected: {_dateOrder},
+          onSelectionChanged: _onDateOrderChanged,
         ),
       ],
     );

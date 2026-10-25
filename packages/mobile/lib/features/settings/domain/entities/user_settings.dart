@@ -59,6 +59,9 @@ class UserSettings extends Equatable {
   /// replaces it on the next start.
   final bool? onboardingCompleted;
 
+  /// Send scrubbed Crash Reports to Sentry (ADR 0013). Device-only.
+  final bool crashReportsEnabled;
+
   /// Monthly net income from onboarding, normalised to a month. Device-only
   /// (ADR 0010).
   final double? monthlyIncome;
@@ -87,6 +90,7 @@ class UserSettings extends Equatable {
     homeTab,
     syncEnabled,
     onboardingCompleted,
+    crashReportsEnabled,
     monthlyIncome,
     createdAt,
     updatedAt,
@@ -113,6 +117,7 @@ class UserSettings extends Equatable {
     this.homeTab = AppRootTab.home,
     this.syncEnabled = true,
     this.onboardingCompleted,
+    this.crashReportsEnabled = true,
     this.monthlyIncome,
     required this.createdAt,
     required this.updatedAt,
@@ -139,6 +144,7 @@ class UserSettings extends Equatable {
     AppRootTab? homeTab,
     bool? syncEnabled,
     bool? onboardingCompleted,
+    bool? crashReportsEnabled,
     double? monthlyIncome,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -169,6 +175,7 @@ class UserSettings extends Equatable {
       homeTab: homeTab ?? this.homeTab,
       syncEnabled: syncEnabled ?? this.syncEnabled,
       onboardingCompleted: onboardingCompleted ?? this.onboardingCompleted,
+      crashReportsEnabled: crashReportsEnabled ?? this.crashReportsEnabled,
       monthlyIncome: monthlyIncome ?? this.monthlyIncome,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

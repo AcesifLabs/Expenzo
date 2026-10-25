@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:saropa_drift_advisor/saropa_drift_advisor.dart';
 import 'package:expense_tracker/core/constants/app_font_size.dart';
+import 'package:expense_tracker/core/logger/crash_reporter.dart';
 import 'package:expense_tracker/core/constants/first_day_of_week.dart';
 import 'package:expense_tracker/core/theme/currency_config.dart';
 import 'package:expense_tracker/core/theme/first_day_material_localizations.dart';
@@ -29,6 +30,7 @@ import 'package:expense_tracker/shared/services/feedback_mailer.dart';
 
 import 'core/background/background_task_scheduler.dart';
 import 'core/database/app_database.dart';
+import 'core/database/database_file.dart';
 import 'i18n/strings.g.dart';
 import 'core/di/injection_container.dart' as di;
 import 'core/lifecycle/bootstrap_service.dart';
@@ -48,16 +50,21 @@ import 'features/settings/presentation/bloc/settings_state.dart';
 import 'features/settings/presentation/helpers/first_settings.dart';
 import 'features/sms_parser/application/realtime_sms_processor.dart';
 import 'features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'shared/presentation/widgets/app_error_fallback.dart';
 
 /// App-open work, run in order: auto-post due recurring items (SAAP-63),
 /// then recurring reminders, so reminders see the advanced dates.
 Future<void> _runRecurringAppOpenWork() async {
-  if (di.getIt.isRegistered<RecurringAutoPoster>()) {
-    await di.getIt<RecurringAutoPoster>().runWhenReady();
-  }
-  if (di.getIt.isRegistered<SendRecurringReminders>()) {
-    await di.getIt<SendRecurringReminders>()(now: DateTime.now());
+  try {
+    if (di.getIt.isRegistered<RecurringAutoPoster>()) {
+      await di.getIt<RecurringAutoPoster>().runWhenReady();
+    }
+    if (di.getIt.isRegistered<SendRecurringReminders>()) {
+      await di.getIt<SendRecurringReminders>()(now: DateTime.now());
+    }
+  } catch (e, s) {
+    appLogger.error('Recurring app-open work failed', e, s);
   }
 }
 
@@ -101,6 +108,9 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
   bool _error = false;
   String _errorRefId = '';
 
+  /// The start-up error was a database file that can't be read.
+  bool _databaseUnreadable = false;
+
   /// False until the first settings after a cold start re-arm background
   /// work with fresh delays.
   bool _backgroundArmed = false;
@@ -111,8 +121,14 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
 
   Future<void> _startInitialization() async {
     try {
-      await _initFirebase();
+      // Firebase starts while the database and DI set up; both finish before
+      // anything can resolve FirebaseAuth.
+      final firebase = _initFirebase();
       await di.initCriticalDependencies();
+      // Opens the database now, so a file that can't be read stops start-up
+      // here, where the user can reset it, not on every screen later.
+      await di.getIt<AppDatabase>().customSelect('SELECT 1').get();
+      await firebase;
       if (!mounted) return;
       // Before the first settings load, so it already sees the resolved
       // onboarding flag. A failure leaves it null, which never redirects.
@@ -144,10 +160,13 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
       unawaited(_runRecurringAppOpenWork());
     } catch (e, stack) {
       debugPrint('App init failed: $e\n$stack');
+      final reference = AppErrorFallback.generateReferenceId();
+      unawaited(crashReporter.capture(e, stack, reference: reference));
       if (mounted) {
         setState(() {
           _error = true;
-          _errorRefId = AppErrorFallback.generateReferenceId();
+          _errorRefId = reference;
+          _databaseUnreadable = isDatabaseFileError(e);
         });
       }
     }
@@ -163,7 +182,7 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
       );
       debugPrint('Drift debug server ready on http://127.0.0.1:8642/');
     } catch (e, s) {
-      debugPrint('Drift debug server failed to start: $e\n$s');
+      appLogger.error('Drift debug server failed to start', e, s);
     }
   }
 
@@ -183,8 +202,7 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
         },
       );
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
-      debugPrint('Firebase init failed (non-fatal): $e');
+      appLogger.error('Firebase init failed (non-fatal)', e, s);
     }
   }
 
@@ -240,6 +258,7 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
     _applyWeekStart();
     unawaited(_applyBackgroundWork(settings));
     _syncSwitch.update(enabled: settings.syncEnabled);
+    unawaited(crashReporter.setEnabled(enabled: settings.crashReportsEnabled));
   }
 
   /// Sets [WeekStart] from the last settings and the current app language.
@@ -271,7 +290,7 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
       _backgroundArmed = true;
       await di.getIt<BackgroundTaskScheduler>().apply(settings, force: force);
     } catch (e, s) {
-      debugPrint('Background work scheduling failed: $e\n$s');
+      appLogger.error('Background work scheduling failed', e, s);
     }
   }
 
@@ -288,8 +307,7 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
       if (!status.isGranted) return;
       await di.getIt<RealtimeSmsProcessor>().start();
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
-      debugPrint('Realtime SMS start skipped: $e');
+      appLogger.error('Realtime SMS start skipped', e, s);
     }
   }
 
@@ -301,7 +319,7 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
       _dispatchDelayedCategoryLoad();
       _dispatchDelayedRecordLoad();
     } catch (e, s) {
-      debugPrint('Initial loads dispatch failed: $e\n$s');
+      appLogger.error('Initial loads dispatch failed', e, s);
     }
   }
 
@@ -356,6 +374,7 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
                   initialized: _initialized,
                   error: _error,
                   errorRefId: _errorRefId,
+                  databaseUnreadable: _databaseUnreadable,
                   onInitLoads: _dispatchInitialLoads,
                   child: child ?? const SizedBox.shrink(),
                 ),
@@ -424,6 +443,7 @@ class _AppContent extends StatefulWidget {
     required this.initialized,
     required this.error,
     required this.errorRefId,
+    required this.databaseUnreadable,
     required this.onInitLoads,
   });
 
@@ -431,6 +451,7 @@ class _AppContent extends StatefulWidget {
   final bool initialized;
   final bool error;
   final String errorRefId;
+  final bool databaseUnreadable;
   final VoidCallback onInitLoads;
 
   @override
@@ -455,25 +476,15 @@ class _AppContentState extends State<_AppContent> with WidgetsBindingObserver {
       if (!status.isGranted) return;
       await di.getIt<RealtimeSmsProcessor>().drainPendingMessages();
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
-      debugPrint('Realtime SMS drain skipped: $e');
+      appLogger.error('Realtime SMS drain skipped', e, s);
     }
   }
 
-  // AppErrorFallback manages retry internally; this callback exists only
-  // to satisfy the VoidCallback contract.
-  void _handleRetry() {
-    return;
-  }
+  /// Runs start-up again from the beginning.
+  void _handleRetry() => unawaited(di.getIt<BootstrapService>().retry());
 
-  void _handleHardReset() {
-    unawaited(
-      di.getIt<BootstrapService>().hardReset().then((_) {
-        if (!mounted) return;
-        di.getIt<BootstrapService>().remountRoot();
-      }),
-    );
-  }
+  void _handleResetLocalData() =>
+      unawaited(di.getIt<BootstrapService>().resetLocalData());
 
   void _handleRestart() {
     di.getIt<BootstrapService>().restart();
@@ -519,7 +530,9 @@ class _AppContentState extends State<_AppContent> with WidgetsBindingObserver {
         onSendFeedback: () =>
             sendFeedback(context, errorReference: widget.errorRefId),
         onRetry: _handleRetry,
-        onHardReset: _handleHardReset,
+        onResetLocalData: widget.databaseUnreadable
+            ? _handleResetLocalData
+            : null,
         onRestart: _handleRestart,
       );
     }

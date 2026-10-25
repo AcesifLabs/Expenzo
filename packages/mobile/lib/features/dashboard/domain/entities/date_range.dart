@@ -1,3 +1,4 @@
+import 'package:clock/clock.dart';
 import 'package:equatable/equatable.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
@@ -7,7 +8,7 @@ class DateRange extends Equatable {
   final DateTime? customEnd;
 
   DateTime get startDate {
-    final now = DateTime.now();
+    final now = clock.now();
     switch (preset) {
       case DateRangePreset.thisMonth:
         return DateTime(now.year, now.month, 1);
@@ -20,7 +21,7 @@ class DateRange extends Equatable {
   }
 
   DateTime get endDate {
-    final now = DateTime.now();
+    final now = clock.now();
     switch (preset) {
       case DateRangePreset.thisMonth:
         return DateTime(now.year, now.month + 1, 0, 23, 59, 59);
@@ -36,7 +37,7 @@ class DateRange extends Equatable {
       case DateRangePreset.thisMonth:
         return DateRange.lastMonth();
       case DateRangePreset.lastMonth:
-        final now = DateTime.now();
+        final now = clock.now();
         final prevMonth = DateTime(now.year, now.month - 2, 1);
         return DateRange(
           preset: DateRangePreset.lastMonth,
@@ -46,8 +47,8 @@ class DateRange extends Equatable {
       case DateRangePreset.thisYear:
         return DateRange(
           preset: DateRangePreset.thisYear,
-          customStart: DateTime(DateTime.now().year - 1, 1, 1),
-          customEnd: DateTime(DateTime.now().year - 1, 12, 31),
+          customStart: DateTime(clock.now().year - 1, 1, 1),
+          customEnd: DateTime(clock.now().year - 1, 12, 31),
         );
     }
   }

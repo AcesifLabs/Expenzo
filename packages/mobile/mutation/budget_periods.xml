@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Mutation testing (QA hardening task 42); see mutation/README.md. -->
+<mutations version="1.1">
+  <files>
+    <file>lib/core/utils/budget_period_utils.dart</file>
+  </files>
+  <exclude>
+    <!-- Logging, comments and imports: mutating them proves nothing. -->
+    <regex pattern="appLogger\.[a-z]+\([^;]*;" dotAll="true"/>
+    <regex pattern="catch \([a-z, ]+\) \{\s*appLogger\.[a-z]+\([^;]*;" dotAll="true"/>
+    <regex pattern="//[^\n]*"/>
+    <regex pattern="import [^;]*;"/>
+  </exclude>
+  <commands>
+    <command group="test" expected-return="0" working-directory="." timeout="300">flutter test test/core/utils/budget_period_utils_test.dart test/property/budget_period_property_test.dart test/features/budgets</command>
+  </commands>
+
+</mutations>

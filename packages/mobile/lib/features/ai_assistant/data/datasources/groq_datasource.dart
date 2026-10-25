@@ -155,6 +155,9 @@ class GroqDataSource {
       if (content != null && content.isNotEmpty) {
         sink.add(content);
       }
-    } catch (_) {}
+    } catch (e) {
+      // One bad chunk loses a few words, not the answer.
+      appLogger.warning('Skipped an unreadable AI stream line', e);
+    }
   }
 }

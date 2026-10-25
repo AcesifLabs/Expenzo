@@ -1,3 +1,4 @@
+import 'package:expense_tracker/core/error/failures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:dartz/dartz.dart';
@@ -42,7 +43,7 @@ void main() {
 
         final result = await repository.searchRecords(filters);
 
-        expect(result, Right(results));
+        expect(result, Right<Failure, List<SearchResult>>(results));
         verify(() => mockDatasource.searchRecords(filters)).called(1);
       });
 

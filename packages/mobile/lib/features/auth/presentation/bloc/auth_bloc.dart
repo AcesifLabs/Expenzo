@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/core/bloc/transformers.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
 import 'package:expense_tracker/core/api/token_storage.dart';
@@ -114,6 +114,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   /// With Sync off the conflict check is skipped: it talks to the server.
   /// The engine stays idle. Turning Sync on later runs this path
   /// ([FirstSyncRequested] from [SyncEngine.firstSyncNeeded]).
+  ///
+  /// When the check can't reach the server, the user is signed in but sync
+  /// stays stopped: starting it would merge this phone's data into the
+  /// account without asking. The check runs again on the next start, and
+  /// when the user taps Sync now.
   Future<void> _onAuthSuccess(User user, Emitter<AuthState> emit) async {
     if (await TokenStorage.isFirstSync() &&
         await _authRepository.isSyncEnabled()) {
@@ -125,8 +130,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           return;
         }
       } catch (e, s) {
-        addError(e, s);
-        debugPrint('AuthBloc: Conflict check failed, proceeding with auth: $e');
+        appLogger.warning('AuthBloc: Conflict check failed; sync waits', e, s);
+        emit(Authenticated(user));
+
+        return;
       }
     }
     emit(Authenticated(user));

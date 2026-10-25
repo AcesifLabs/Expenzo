@@ -39,6 +39,8 @@ MyGroup? myGroupFromJson(Json json) {
   );
 }
 
+// Null stores "in no group".
+// ignore: unnecessary-nullable
 Json myGroupToJson(MyGroup? value) {
   if (value == null) {
     return {

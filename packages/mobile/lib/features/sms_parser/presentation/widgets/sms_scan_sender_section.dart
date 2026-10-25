@@ -25,10 +25,11 @@ class SmsScanSenderSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
+    final itemCount = section.items.length;
     final selectedCount = section.items
         .where((item) => selectedIds.contains(item.sourceId))
         .length;
-    final allSelected = selectedCount == section.items.length;
+    final allSelected = selectedCount == itemCount;
     final sectionT = t.smsParser.section;
     final actionLabel = allSelected ? sectionT.clear : sectionT.selectAll;
     final actionColor = allSelected ? colors.primary : colors.onSurface;
@@ -39,25 +40,24 @@ class SmsScanSenderSection extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  section.senderLabel,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    section.senderLabel,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-                Text(
-                  sectionT.counts(
-                    n: section.items.length,
-                    selected: selectedCount,
+                  Text(
+                    sectionT.counts(n: itemCount, selected: selectedCount),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colors.onSurface.withAlpha(170),
+                    ),
                   ),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: colors.onSurface.withAlpha(170),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
             TextButton(
               key: Key('sender_section_action_${section.senderKey}'),

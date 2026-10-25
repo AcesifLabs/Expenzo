@@ -3,6 +3,7 @@ import 'package:flutter_sms_inbox/flutter_sms_inbox.dart' as fsms;
 import 'package:expense_tracker/core/database/app_database.dart';
 import 'package:expense_tracker/core/database/daos/parsing_rule_dao.dart';
 import 'package:expense_tracker/core/database/daos/message_template_dao.dart';
+import 'package:expense_tracker/core/database/daos/sync_queue_dao.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/repositories/parsing_rules_repository.dart';
 import 'package:expense_tracker/features/parsing_rules/data/datasources/parsing_rules_local_datasource.dart';
 import 'package:expense_tracker/features/parsing_rules/data/repositories/parsing_rules_repository_impl.dart';
@@ -53,6 +54,7 @@ void _initParsingInfrastructure(GetIt getIt) {
   getIt.registerLazySingleton<ParsingRulesRepository>(
     () => ParsingRulesRepositoryImpl(
       localDatasource: getIt<ParsingRulesLocalDatasource>(),
+      syncQueueDao: getIt<SyncQueueDao>(),
     ),
   );
   // Settings → Matching rules.
@@ -78,8 +80,10 @@ void _initMessageTemplates(GetIt getIt) {
     () => MessageTemplateLocalDatasourceImpl(getIt<MessageTemplateDao>()),
   );
   getIt.registerLazySingleton<MessageTemplateRepository>(
-    () =>
-        MessageTemplateRepositoryImpl(getIt<MessageTemplateLocalDatasource>()),
+    () => MessageTemplateRepositoryImpl(
+      localDatasource: getIt<MessageTemplateLocalDatasource>(),
+      syncQueueDao: getIt<SyncQueueDao>(),
+    ),
   );
   getIt.registerLazySingleton(
     () => GetMessageSources(getIt<MessageTemplateRepository>()),

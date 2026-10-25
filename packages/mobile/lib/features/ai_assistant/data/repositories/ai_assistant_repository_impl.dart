@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
+import 'package:expense_tracker/core/error/network_error.dart';
 import '../datasources/groq_datasource.dart';
 import '../../domain/repositories/ai_assistant_repository.dart';
 
@@ -17,11 +20,16 @@ class AiAssistantRepositoryImpl implements AiAssistantRepository {
       return dataSource
           .streamChat(systemPrompt: context, userMessage: message)
           .map<Either<Failure, String>>((token) => Right(token))
-          .handleError((error) {
-            return Left(ServerFailure(message: error.toString()));
-          });
+          // An error becomes a Left in the stream, so the chat shows it.
+          // (handleError would drop it: its return value is ignored.)
+          .transform(
+            StreamTransformer.fromHandlers(
+              handleError: (Object error, StackTrace _, sink) =>
+                  sink.add(Left(failureFromNetworkOrServer(error))),
+            ),
+          );
     } catch (e) {
-      return Stream.value(Left(ServerFailure(message: e.toString())));
+      return Stream.value(Left(failureFromNetworkOrServer(e)));
     }
   }
 
@@ -41,7 +49,7 @@ class AiAssistantRepositoryImpl implements AiAssistantRepository {
 
       return Right(buffer.toString());
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(failureFromNetworkOrServer(e));
     }
   }
 }

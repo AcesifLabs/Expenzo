@@ -41,14 +41,17 @@ class CategoryDonutChart extends StatelessWidget {
       );
     }
 
-    return SizedBox(
-      width: 160,
-      height: 160,
-      child: PieChart(
-        PieChartData(
-          centerSpaceRadius: 48,
-          sectionsSpace: 2,
-          sections: _buildSections(context.palette),
+    // Its own layer: scrolling the report doesn't repaint the chart.
+    return RepaintBoundary(
+      child: SizedBox(
+        width: 160,
+        height: 160,
+        child: PieChart(
+          PieChartData(
+            centerSpaceRadius: 48,
+            sectionsSpace: 2,
+            sections: _buildSections(context.palette),
+          ),
         ),
       ),
     );

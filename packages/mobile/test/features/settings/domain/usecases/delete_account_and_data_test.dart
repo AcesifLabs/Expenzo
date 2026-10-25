@@ -56,7 +56,7 @@ void main() {
   test('success runs every step in order, ending with resume', () async {
     final result = await useCase(NoParams());
 
-    expect(result, const Right(unit));
+    expect(result, const Right<Failure, Unit>(unit));
     expect(calls, ['pause', 'reauth', 'server', 'wipe', 'firebase', 'resume']);
   });
 
@@ -70,7 +70,7 @@ void main() {
 
     final result = await useCase(NoParams());
 
-    expect(result, const Left(failure));
+    expect(result, const Left<Failure, Unit>(failure));
     expect(calls, ['pause', 'reauth', 'resume']);
   });
 
@@ -84,7 +84,7 @@ void main() {
 
     final result = await useCase(NoParams());
 
-    expect(result, const Left(failure));
+    expect(result, const Left<Failure, Unit>(failure));
     expect(calls, ['pause', 'reauth', 'server', 'resume']);
   });
 
@@ -99,7 +99,7 @@ void main() {
 
       final result = await useCase(NoParams());
 
-      expect(result, const Right(unit));
+      expect(result, const Right<Failure, Unit>(unit));
       expect(calls, [
         'pause',
         'reauth',
@@ -116,7 +116,7 @@ void main() {
 
     final result = await useCase(NoParams());
 
-    expect(result, const Right(unit));
+    expect(result, const Right<Failure, Unit>(unit));
     expect(calls, ['pause', 'reauth', 'server', 'wipe', 'resume']);
   });
 }

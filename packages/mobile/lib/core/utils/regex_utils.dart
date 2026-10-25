@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 
 /// Default per-match budget for user-supplied regex patterns.
 const Duration kRegexMatchBudget = Duration(milliseconds: 250);
@@ -65,8 +66,8 @@ class TimedRegex {
   void _compile() {
     try {
       _compiled = RegExp(pattern);
-    } catch (e) {
-      debugPrint('TimedRegex: Failed to compile pattern: $e');
+    } catch (e, s) {
+      appLogger.warning('TimedRegex: Failed to compile pattern', e, s);
     }
   }
 }

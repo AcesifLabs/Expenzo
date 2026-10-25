@@ -9,17 +9,13 @@ class ApiConstants {
   /// user was deleted (packages/backend/src/auth/strategies/jwt.strategy.ts).
   static const String deletedUserMessage = 'User no longer exists';
 
-  static const String records = '/records';
-  static const String recordsBulk = '/records/bulk';
+  /// `GET /health` answers `{"status": "ok", ...}` (backend AppController).
+  static const String healthStatusKey = 'status';
+  static const String healthOk = 'ok';
+
+  /// One-shot repair POST after sync (not a list GET).
   static const String recordBudgetLinks = '/records/budget-links';
-  static const String categories = '/categories';
-  static const String budgets = '/budgets';
   static const String budgetNames = '/budgets/names';
-  static const String messageSources = '/message-sources';
-  static const String expenseTemplates = '/expense-templates';
-  static const String parsingRules = '/parsing-rules';
-  static const String recurringTransactions = '/recurring-transactions';
-  static const String pendingRecurrings = '/pending-recurrings';
   static const String syncPush = '/sync/push';
   static const String syncPull = '/sync/pull';
   static const String syncSummary = '/sync/summary';
@@ -37,7 +33,7 @@ class ApiConstants {
   static String get baseUrl {
     final value = dotenv.env['BACKEND_URL'];
     if (value == null || value.isEmpty || value == 'TBD') {
-      if (kDebugMode) {
+      if (!kReleaseMode) {
         return 'http://localhost:3000/api';
       }
       throw StateError(
@@ -46,7 +42,9 @@ class ApiConstants {
       );
     }
 
-    if (!kDebugMode && !value.startsWith('https://')) {
+    // Release only: profile builds load .env.dev (load_env.dart), which
+    // points at a local server.
+    if (kReleaseMode && !value.startsWith('https://')) {
       throw StateError(
         'BACKEND_URL must use HTTPS in release builds. '
         'Got: ${value.split('://').first}://',
@@ -55,11 +53,6 @@ class ApiConstants {
 
     return value;
   }
-
-  static String categoryIncrementUsage(String id) =>
-      '/categories/$id/increment-usage';
-
-  static String budgetProgress(String id) => '/budgets/$id/progress';
 
   static String group(String id) => '/groups/$id';
 

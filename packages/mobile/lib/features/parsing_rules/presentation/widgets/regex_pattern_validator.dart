@@ -4,6 +4,7 @@ import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/core/theme/app_typography.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:picons/picons.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
 class RegexPatternValidator extends StatelessWidget {
@@ -70,12 +71,12 @@ class _RegexValidatorIndicatorState extends State<RegexValidatorIndicator> {
     _validatePattern();
   }
 
+  /// Called from initState and didUpdateWidget, which both build next, so
+  /// it only sets the fields.
   void _validatePattern() {
     if (widget.pattern.isEmpty) {
-      setState(() {
-        _isValid = true;
-        _errorMessage = null;
-      });
+      _isValid = true;
+      _errorMessage = null;
 
       return;
     }
@@ -83,18 +84,14 @@ class _RegexValidatorIndicatorState extends State<RegexValidatorIndicator> {
     try {
       RegExp(widget.pattern);
       final warning = TimedRegex.validatePattern(widget.pattern);
-      setState(() {
-        _isValid = warning == null;
-        _errorMessage = warning;
-      });
+      _isValid = warning == null;
+      _errorMessage = warning;
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
-      setState(() {
-        _isValid = false;
-        _errorMessage = t.parsingRules.validation.invalidRegexDetail(
-          detail: e.toString(),
-        );
-      });
+      appLogger.warning('Pattern is not a valid regex', e, s);
+      _isValid = false;
+      _errorMessage = t.parsingRules.validation.invalidRegexDetail(
+        detail: e.toString(),
+      );
     }
   }
 

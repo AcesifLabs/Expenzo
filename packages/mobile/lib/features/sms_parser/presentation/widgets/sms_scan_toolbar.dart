@@ -28,28 +28,35 @@ class SmsScanToolbar extends StatelessWidget {
       key: const Key('sender_mode_chip'),
       onTap: onToggleViewMode,
       borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.smd,
-          vertical: AppSpacing.sm,
-        ),
-        decoration: BoxDecoration(
-          color: isGrouped ? colors.primary.withAlpha(30) : colors.surface,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(PiconsRegular.buildings, size: 14, color: chipFg),
-            const SizedBox(width: AppSpacing.xs),
-            Text(
-              isGrouped ? toolbarStrings.sender : toolbarStrings.flatList,
-              style: AppTypography.bodySmall.copyWith(
-                color: chipFg,
-                fontWeight: isGrouped ? FontWeight.w600 : FontWeight.w500,
-              ),
+      // A 48 dp tap area around the pill.
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: AppSpacing.minTapTarget),
+        child: Center(
+          widthFactor: 1,
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.smd,
+              vertical: AppSpacing.sm,
             ),
-          ],
+            decoration: BoxDecoration(
+              color: isGrouped ? colors.primary.withAlpha(30) : colors.surface,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(PiconsRegular.buildings, size: 14, color: chipFg),
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  isGrouped ? toolbarStrings.sender : toolbarStrings.flatList,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: chipFg,
+                    fontWeight: isGrouped ? FontWeight.w600 : FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -58,10 +65,9 @@ class SmsScanToolbar extends StatelessWidget {
   Widget _buildRangeChip(ColorScheme colors) {
     final chipFg = colors.onSurface.withAlpha(170);
 
-    return InkWell(
+    // Shows the scanned range; it has no action of its own.
+    return Container(
       key: const Key('date_range_chip'),
-      onTap: onToggleViewMode,
-      borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.smd,
@@ -93,25 +99,32 @@ class SmsScanToolbar extends StatelessWidget {
       key: const Key('clear_selection_chip'),
       onTap: onClearSelection,
       borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.smd,
-          vertical: AppSpacing.sm,
-        ),
-        decoration: BoxDecoration(
-          color: colors.surface,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(PiconsRegular.x, size: 14, color: chipFg),
-            const SizedBox(width: AppSpacing.xs),
-            Text(
-              t.smsParser.toolbar.clear,
-              style: AppTypography.bodySmall.copyWith(color: chipFg),
+      // A 48 dp tap area around the pill.
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: AppSpacing.minTapTarget),
+        child: Center(
+          widthFactor: 1,
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.smd,
+              vertical: AppSpacing.sm,
             ),
-          ],
+            decoration: BoxDecoration(
+              color: colors.surface,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(PiconsRegular.x, size: 14, color: chipFg),
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  t.smsParser.toolbar.clear,
+                  style: AppTypography.bodySmall.copyWith(color: chipFg),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Mutation testing (QA hardening task 42); see mutation/README.md. -->
+<mutations version="1.1">
+  <files>
+    <file>lib/features/recurring/domain/helpers/next_occurrence.dart</file>
+  </files>
+  <exclude>
+    <!-- Logging, comments and imports: mutating them proves nothing. -->
+    <regex pattern="appLogger\.[a-z]+\([^;]*;" dotAll="true"/>
+    <regex pattern="catch \([a-z, ]+\) \{\s*appLogger\.[a-z]+\([^;]*;" dotAll="true"/>
+    <regex pattern="//[^\n]*"/>
+    <regex pattern="import [^;]*;"/>
+  </exclude>
+  <commands>
+    <command group="test" expected-return="0" working-directory="." timeout="300">flutter test test/features/recurring/domain test/property/recurring_property_test.dart</command>
+  </commands>
+
+</mutations>

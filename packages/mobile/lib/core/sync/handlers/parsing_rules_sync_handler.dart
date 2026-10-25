@@ -35,7 +35,7 @@ class ParsingRulesSyncHandler
     amountPattern: _str(data, 'amountPattern'),
     datePattern: _optStr(data, 'datePattern'),
     categoryId: _optStr(data, 'categoryId'),
-    sourceType: data['sourceType'] ?? ExpenseSource.sms.name,
+    sourceType: data['sourceType'] as String? ?? ExpenseSource.sms.name,
     isEnabled: _optBool(data, 'isEnabled'),
     priority: _optInt(data, 'priority'),
     createdAt: Value(_dt(data, 'createdAt')),
@@ -58,7 +58,8 @@ class ParsingRulesSyncHandler
   Future<List<ParsingRule>> fetchAll(AppDatabase db) =>
       db.select(db.parsingRules).get();
 
-  static String _str(Map<String, dynamic> data, String key) => data[key] ?? '';
+  static String _str(Map<String, dynamic> data, String key) =>
+      data[key] as String? ?? '';
   static Value<String> _optStr(Map<String, dynamic> data, String key) =>
       data[key] != null ? Value(data[key] as String) : const Value.absent();
   static Value<bool> _optBool(Map<String, dynamic> data, String key) =>

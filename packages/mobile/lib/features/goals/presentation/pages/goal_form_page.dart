@@ -126,7 +126,7 @@ class _GoalFormPageState extends State<GoalFormPage> {
       lastDate: DateTime(now.year + 10, now.month, now.day),
     );
     // Cancel keeps the previous date.
-    if (picked != null) setState(() => _date = picked);
+    if (picked != null && mounted) setState(() => _date = picked);
   }
 
   void _clearDate() => setState(() => _date = null);
@@ -218,9 +218,12 @@ class _GoalFormPageState extends State<GoalFormPage> {
             AppSpacing.pageGutter,
             AppSpacing.md,
           ),
-          child: SizedBox(
-            width: double.infinity,
-            height: AppSpacing.xxl,
+          child: ConstrainedBox(
+            // Grows with the label at large text sizes.
+            constraints: const BoxConstraints(
+              minWidth: double.infinity,
+              minHeight: AppSpacing.xxl,
+            ),
             child: ElevatedButton(
               onPressed: state.isBusy ? null : () => _save(state),
               child: state.status == GoalFormStatus.saving

@@ -95,14 +95,14 @@ void main() {
       ).thenAnswer((_) => const Stream.empty());
       when(
         () => mockGetRules(any()),
-      ).thenAnswer((_) async => Left(ServerFailure(message: 'Failed to load')));
+      ).thenAnswer((_) async => Left(CacheFailure(message: 'Failed to load')));
 
       final expected = [
         isA<ParsingRulesLoading>(),
         isA<ParsingRulesError>().having(
           (s) => s.message,
           'message',
-          t.common.errors.server,
+          t.common.errors.storage,
         ),
       ];
 
@@ -118,9 +118,28 @@ void main() {
         neverEmits(isA<ParsingRulesError>()),
       );
       bloc.add(ToggleRule(ruleId: 'rule-1', isEnabled: false));
-      await Future.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
       await bloc.close();
       await expectation;
     });
+  });
+
+  test('a double tap on Save creates one rule', () async {
+    registerFallbackValue(testRule);
+    registerFallbackValue(GetRulesParams());
+    when(() => mockRepository.createRule(any())).thenAnswer((_) async {
+      // A real write takes a moment; the second tap lands during it.
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+
+      return Right(testRule);
+    });
+    when(() => mockGetRules(any())).thenAnswer((_) async => Right([testRule]));
+
+    bloc
+      ..add(CreateRuleEvent(testRule))
+      ..add(CreateRuleEvent(testRule));
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+
+    verify(() => mockRepository.createRule(any())).called(1);
   });
 }

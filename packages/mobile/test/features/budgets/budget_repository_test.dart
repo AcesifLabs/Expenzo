@@ -1,3 +1,4 @@
+import 'package:expense_tracker/core/error/failures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:dartz/dartz.dart';
@@ -59,7 +60,7 @@ void main() {
 
         final result = await repository.getBudgets();
 
-        expect(result, Right(budgets));
+        expect(result, Right<Failure, List<Budget>>(budgets));
         verify(() => mockDatasource.getBudgets()).called(1);
       });
 
@@ -87,7 +88,7 @@ void main() {
 
         final result = await repository.getBudgetById('budget-1');
 
-        expect(result, Right(budget));
+        expect(result, Right<Failure, Budget>(budget));
       });
 
       test('returns Left when not found', () async {
@@ -152,7 +153,7 @@ void main() {
 
         final result = await repository.updateBudget(budget);
 
-        expect(result, Right(budget));
+        expect(result, Right<Failure, Budget>(budget));
       });
 
       test('returns Left when budget has no id', () async {
@@ -183,7 +184,7 @@ void main() {
 
         final result = await repository.deleteBudget('budget-1');
 
-        expect(result, const Right(unit));
+        expect(result, const Right<Failure, Unit>(unit));
         verify(
           () => mockSyncDao.enqueue(
             tableName: 'budgets',
