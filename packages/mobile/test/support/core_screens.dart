@@ -11,7 +11,6 @@ import 'package:expense_tracker/core/constants/app_font_size.dart';
 import 'package:expense_tracker/core/constants/budget_period.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
-import 'package:expense_tracker/core/sync/connectivity_service.dart';
 import 'package:expense_tracker/core/theme/app_theme.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_state.dart';
@@ -52,6 +51,7 @@ import 'package:expense_tracker/features/goals/presentation/bloc/goal_state.dart
 import 'package:expense_tracker/shared/presentation/widgets/app_shell.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_text_scale.dart';
 
+import 'connectivity_test_support.dart';
 import 'factories/budget_factory.dart';
 import 'factories/record_factory.dart';
 import 'pump_localized.dart';
@@ -78,8 +78,6 @@ class MockAuthBloc extends Mock implements AuthBloc {}
 class MockGetBudgets extends Mock implements GetBudgets {}
 
 class MockSettingsBloc extends Mock implements SettingsBloc {}
-
-class MockConnectivityService extends Mock implements ConnectivityService {}
 
 /// Phone sizes the screen tests run at.
 enum TestPhone {
@@ -126,10 +124,7 @@ void registerScreenTestDependencies() {
     Future<void>.value(),
     instanceName: 'featureReady',
   );
-  final connectivity = MockConnectivityService();
-  when(() => connectivity.hasNetworkLink()).thenAnswer((_) async => true);
-  when(() => connectivity.checkNow()).thenAnswer((_) async => true);
-  di.getIt.registerSingleton<ConnectivityService>(connectivity);
+  registerTestConnectivity();
   registerNoGoalBloc();
   final messenger =
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
