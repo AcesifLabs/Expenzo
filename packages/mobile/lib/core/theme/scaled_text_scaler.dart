@@ -5,7 +5,7 @@ class ScaledTextScaler extends TextScaler {
   final double factor;
 
   @override
-  double get textScaleFactor => base.textScaleFactor * factor;
+  double get textScaleFactor => base.scale(1) * factor;
 
   @override
   int get hashCode => Object.hash(base, factor);

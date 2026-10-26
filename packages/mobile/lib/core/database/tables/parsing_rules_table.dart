@@ -12,7 +12,7 @@ class ParsingRules extends Table {
   BoolColumn get isEnabled => boolean().withDefault(const Constant(true))();
   IntColumn get priority => integer().withDefault(const Constant(0))();
 
-  TextColumn get dateOrder => text()
+  late final TextColumn dateOrder = text()
       .withDefault(const Constant('dmy'))
       .check(dateOrder.isIn(const ['dmy', 'mdy']))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
