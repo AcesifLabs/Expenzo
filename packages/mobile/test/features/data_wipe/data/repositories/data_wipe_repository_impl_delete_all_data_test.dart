@@ -6,7 +6,6 @@ import 'package:expense_tracker/core/error/failures.dart';
 
 import 'data_wipe_test_harness.dart';
 
-/// `DataWipeRepositoryImpl.deleteAllData`: the order of the delete.
 void main() {
   late DataWipeHarness harness;
 
@@ -31,7 +30,7 @@ void main() {
       verifyNever(() => harness.remote.clearSyncedData());
       expect(await harness.recordCount(), 0);
       expect(harness.calls.first, 'pauseSync');
-      // Resumed to lift the pause; without a token the engine stays idle.
+
       expect(harness.calls.last, 'resumeSync');
       expect(harness.calls, isNot(contains('resetSyncState')));
     },

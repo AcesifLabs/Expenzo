@@ -21,9 +21,6 @@ import 'package:expense_tracker/core/theme/app_spacing.dart';
 import '../../../parsing_rules/presentation/widgets/transaction_list_skeleton.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
-/// Returns true only when the keyboard transitioned from open to closed,
-/// i.e. the previous bottom view inset was positive and the current one is
-/// zero. Used to unfocus the search field once the keyboard collapses.
 bool keyboardJustCollapsed({
   required double previousBottomInset,
   required double currentBottomInset,
@@ -309,11 +306,9 @@ class _ContactSelectorViewState extends State<ContactSelectorView>
 
     return ListView.builder(
       controller: _scrollController,
-      // Without an explicit padding the list re-applies the status-bar inset,
-      // which the header above already accounts for. Keep the bottom inset so
-      // the last contact scrolls clear of the floating nav bar.
+
       padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
-      // The trailing spinner row only exists while a next page is loading.
+
       itemCount: filteredContacts.length + (isLoadingMore ? 1 : 0),
       itemBuilder: (context, index) {
         if (index >= filteredContacts.length) {

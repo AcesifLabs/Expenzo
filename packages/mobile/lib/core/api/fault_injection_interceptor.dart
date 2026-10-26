@@ -3,16 +3,6 @@ import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
-/// Makes server requests slow or fail on purpose, to try the app's error
-/// handling on a device or in end-to-end tests:
-///
-/// `flutter run --dart-define=FAULTS=latency:2000,error_rate:0.3,status:503`
-///
-/// - `latency`: milliseconds to wait before each request.
-/// - `error_rate`: the share of requests that fail, 0 to 1.
-/// - `status`: the HTTP status of a failed request; 0 means no connection.
-///
-/// Never in release builds.
 class FaultInjectionInterceptor extends Interceptor {
   final Duration latency;
   final double errorRate;
@@ -30,7 +20,6 @@ class FaultInjectionInterceptor extends Interceptor {
     Random? random,
   }) : _random = random ?? Random();
 
-  /// Reads `name:value` pairs from [spec]; unknown names are ignored.
   factory FaultInjectionInterceptor.parse(String spec, {Random? random}) {
     final values = {
       for (final pair in spec.split(','))
@@ -48,8 +37,6 @@ class FaultInjectionInterceptor extends Interceptor {
     );
   }
 
-  /// The interceptor the `FAULTS` define asks for, or null without one and
-  /// in release builds.
   static FaultInjectionInterceptor? fromEnvironment() =>
       kReleaseMode || _define.isEmpty
       ? null

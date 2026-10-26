@@ -17,7 +17,7 @@ void _expectValidOrFormatException(String reply) {
     expect(extraction.amount, lessThanOrEqualTo(AppConstants.maxAmount));
     expect(extraction.description.trim(), isNotEmpty);
   } on FormatException {
-    // A reply that isn't a usable receipt.
+    return;
   }
 }
 

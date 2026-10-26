@@ -11,7 +11,6 @@ import '../../domain/usecases/update_goal.dart';
 import 'goal_form_event.dart';
 import 'goal_form_state.dart';
 
-/// The goal form: edit an existing goal, or create one (Task 22b).
 class GoalFormBloc extends Bloc<GoalFormEvent, GoalFormState> {
   final GoalRepository repository;
   final CreateGoal createGoal;
@@ -88,7 +87,6 @@ class GoalFormBloc extends Bloc<GoalFormEvent, GoalFormState> {
     final result = await action();
     emit(
       result.fold(
-        // Back to ready so the filled form stays and can be saved again.
         (f) => state.copyWith(
           status: GoalFormStatus.ready,
           errorText: failureText(f),

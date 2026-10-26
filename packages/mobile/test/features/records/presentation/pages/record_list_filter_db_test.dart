@@ -40,7 +40,6 @@ class _MockDeleteCategory extends Mock implements DeleteCategory {}
 
 class _MockSearchCategories extends Mock implements SearchCategories {}
 
-/// Categories play no part here; this one ignores the load the page fires.
 class _IdleCategoryBloc extends CategoryBloc {
   _IdleCategoryBloc()
     : super(
@@ -58,8 +57,6 @@ class _IdleCategoryBloc extends CategoryBloc {
   }
 }
 
-/// The records list on a real database: DAO, repository and bloc, with no
-/// server at all, as for a guest.
 void main() {
   late db.AppDatabase database;
   late RecordRepositoryImpl repository;
@@ -97,7 +94,6 @@ void main() {
     ),
   );
 
-  /// Lets the database send its update, then draws it.
   Future<void> settle(WidgetTester tester) async {
     await tester.runAsync(
       () => Future<void>.delayed(const Duration(milliseconds: 50)),

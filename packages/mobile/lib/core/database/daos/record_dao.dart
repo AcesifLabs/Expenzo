@@ -38,7 +38,6 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
         .get();
   }
 
-  /// Expenses between [start] and [end], newest first.
   Future<List<Record>> getExpensesByDateRange(DateTime start, DateTime end) {
     return (select(records)
           ..where(
@@ -61,9 +60,6 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
     return into(records).insert(record);
   }
 
-  /// Inserts [companions] and returns the ids actually inserted. A row for
-  /// an SMS or email that already has a record is skipped: the unique
-  /// (source, source_id) index refuses it.
   Future<Set<String>> insertRecordsBatch(
     List<RecordsCompanion> companions,
   ) async {
@@ -74,7 +70,6 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
         (b) => b.insertAll(records, fresh, mode: InsertMode.insertOrIgnore),
       );
 
-      // A fresh row that isn't there now was refused by the source index.
       return _existingIds(fresh.map(_idOf).toList());
     });
   }
@@ -99,7 +94,6 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
     return result.read(count) ?? 0;
   }
 
-  /// Number of records per category id; categories with no records are absent.
   Future<Map<String, int>> getCategoryRecordCounts() async {
     final count = records.id.count();
     final query = selectOnly(records)
@@ -118,7 +112,6 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
     return counts;
   }
 
-  /// Id and budget of every record linked to a budget.
   Future<List<({String id, String budgetId})>> getBudgetLinks() async {
     final query = selectOnly(records)
       ..addColumns([records.id, records.budgetId])
@@ -162,15 +155,11 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
         .toSet();
   }
 
-  /// Absolute amounts of the records stored under each of [sourceIds],
-  /// including copies the v20 migration renamed to `<id>#<rowid>`.
   Future<Map<String, List<double>>> getAmountsBySourceIds(
     List<String> sourceIds,
   ) async {
     if (sourceIds.isEmpty) return {};
 
-    // `<id>#...` sorts from `<id>#` up to `<id>$` ('$' follows '#'). A
-    // range, unlike LIKE, can use the source id index.
     var match = records.sourceId.isIn(sourceIds);
     for (final id in sourceIds) {
       match =
@@ -219,12 +208,6 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
   Future<double> getTotalSpending(DateTime start, DateTime end) =>
       _expenseTotal(records.date.isBetweenValues(start, end));
 
-  /// Expense spend per budget, each over its own half-open [start, end)
-  /// period, in one query instead of one per budget.
-  ///
-  /// The end bound is exclusive so a record dated exactly at the next period's
-  /// start is not double-counted across adjacent periods. Every requested
-  /// budget is in the result, with 0.0 when nothing was spent.
   Future<Map<String, double>> getSpendingForBudgets(
     Map<String, ({DateTime start, DateTime end})> periods,
   ) async {
@@ -250,7 +233,7 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
       final date = row.read(records.date);
       final period = periods[budgetId];
       if (budgetId == null || date == null || period == null) continue;
-      // The query window covers every budget; keep each row to its own one.
+
       if (date.isBefore(period.start) || !date.isBefore(period.end)) continue;
       sums[budgetId] = sums[budgetId]! + (row.read(records.amount) ?? 0);
     }
@@ -272,13 +255,9 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
   Future<List<Record>> getFilteredRecords(RecordFilter filter) =>
       _filteredQuery(filter).get();
 
-  /// [getFilteredRecords], sent again whenever the records change.
   Stream<List<Record>> watchFilteredRecords(RecordFilter filter) =>
       _filteredQuery(filter).watch();
 
-  /// Expense spend per category between [start] and [end]. Income is left
-  /// out, and each row counts as its size, so a stray positive expense row
-  /// can't cancel out another.
   Future<List<({String? categoryId, double total})>> getCategoryBreakdown(
     DateTime start,
     DateTime end,
@@ -328,8 +307,6 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
     return const Constant(true);
   }
 
-  /// Expense spend over the rows matching [filter], summed in SQL so no row
-  /// is loaded.
   Future<double> _expenseTotal(Expression<bool> filter) async {
     final total = records.amount.abs().sum();
     final row =
@@ -345,7 +322,6 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
 
   static String _idOf(RecordsCompanion row) => row.id.value;
 
-  /// Which of [ids] have a record, in chunks under SQLite's variable limit.
   Future<Set<String>> _existingIds(List<String> ids) async {
     const chunk = 500;
     final found = <String>{};

@@ -91,7 +91,7 @@ void main() {
     final fields = find.byType(TextFormField);
     await tester.enterText(fields.at(0), '1200');
     await tester.enterText(fields.at(1), 'Rent');
-    // Typing leaves the keyboard's focus in the form; drop it first.
+
     FocusManager.instance.primaryFocus?.unfocus();
     await tester.pumpAndSettle();
     final add = find.widgetWithText(ElevatedButton, 'Add');

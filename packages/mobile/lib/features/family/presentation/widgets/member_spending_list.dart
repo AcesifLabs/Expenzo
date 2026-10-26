@@ -9,8 +9,6 @@ import '../../domain/entities/my_group.dart';
 import '../helpers/family_dashboard_helpers.dart';
 import 'member_avatar.dart';
 
-/// "Spending by member": each current member's linked expenses, highest
-/// first, as a bar relative to the biggest spender.
 class MemberSpendingList extends StatelessWidget {
   final MyGroup group;
   final GroupSummary summary;

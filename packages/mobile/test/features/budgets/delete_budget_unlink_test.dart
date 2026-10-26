@@ -51,15 +51,13 @@ void main() {
       await insertBudget('b1');
       await insertRecord('r1', budgetId: 'b1');
       await insertRecord('r2', budgetId: 'b1');
-      await insertRecord('r3', budgetId: 'b2'); // other budget
-      await insertRecord('r4'); // unlinked
+      await insertRecord('r3', budgetId: 'b2');
+      await insertRecord('r4');
 
       final affected = await budgetDao.deleteBudgetAndUnlinkRecords('b1');
 
-      // Budget is gone.
       expect(await budgetDao.getBudgetById('b1'), null);
 
-      // Linked records are unlinked; others untouched.
       final r1 = await recordDao.getRecordById('r1');
       final r2 = await recordDao.getRecordById('r2');
       final r3 = await recordDao.getRecordById('r3');
@@ -67,7 +65,6 @@ void main() {
       expect(r2!.budgetId, null);
       expect(r3!.budgetId, 'b2');
 
-      // Affected records returned (already unlinked) for sync enqueue.
       expect(affected.map((r) => r.id).toSet(), {'r1', 'r2'});
       expect(affected.every((r) => r.budgetId == null), isTrue);
     },

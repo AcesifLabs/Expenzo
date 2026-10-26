@@ -3,7 +3,7 @@ import { GroupErrorBody, GroupErrorCode } from './groups.types';
 
 const body = (code: GroupErrorCode, message: string): GroupErrorBody => ({ code, message });
 
-/** Group errors carry a stable `code` in the body (see [GroupErrorCode]). */
+
 export const groupErrors = {
   alreadyInGroup: (): HttpException => new ConflictException(body('ALREADY_IN_GROUP', 'Already in a family group')),
   notInGroup: (): HttpException => new NotFoundException(body('NOT_IN_GROUP', 'Not a member of this group')),

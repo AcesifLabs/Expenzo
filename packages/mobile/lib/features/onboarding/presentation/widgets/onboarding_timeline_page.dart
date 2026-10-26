@@ -17,8 +17,6 @@ import '../bloc/onboarding_state.dart';
 import 'onboarding_page_frame.dart';
 import 'setup_complete_card.dart';
 
-/// Step 5 (frame `OnboardingSavingsTimeline`): how fast to reach the goal,
-/// then the summary and Finish setup (Q24).
 class OnboardingTimelinePage extends StatelessWidget {
   static String? _subtitle(OnboardingDraft draft, GoalDraft goal) {
     final split = _split(draft);
@@ -58,7 +56,7 @@ class OnboardingTimelinePage extends StatelessWidget {
       firstDate: tomorrow,
       lastDate: DateTime(now.year + 10, now.month, now.day),
     );
-    // Cancel keeps the earlier choice, custom or not.
+
     if (picked != null) bloc.add(TimelineChosen(customDate: picked));
   }
 
@@ -240,7 +238,6 @@ class _FinishButton extends StatelessWidget {
     }
 
     return ConstrainedBox(
-      // Grows with the label at large text sizes.
       constraints: const BoxConstraints(
         minWidth: double.infinity,
         minHeight: AppSpacing.xxl,

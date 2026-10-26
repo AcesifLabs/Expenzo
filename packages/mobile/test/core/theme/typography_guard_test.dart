@@ -2,12 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
-/// Keeps typography inside the theme (docs/adr/0005).
-///
-/// Widgets get fonts and sizes from `Theme.of(context).textTheme` or
-/// `AppTypography`, never from inline values.
 const _fontFamilyAllowlist = {
-  // Code blocks and error reference IDs.
   'features/ai_assistant/presentation/widgets/chat_bubble.dart',
   'shared/presentation/widgets/app_error_fallback.dart',
 };

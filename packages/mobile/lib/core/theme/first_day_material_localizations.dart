@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 import 'package:expense_tracker/core/constants/first_day_of_week.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
-/// The formats Flutter's own Material delegate builds for a locale.
 typedef _Formats = ({
   DateFormat fullYear,
   DateFormat compactDate,
@@ -18,22 +17,10 @@ typedef _Formats = ({
   NumberFormat twoDigitZeroPadded,
 });
 
-/// Material localizations whose first day of week is [day], so every date
-/// picker starts its weeks there.
-///
-/// `showDatePicker` has no first-day parameter: it reads
-/// `MaterialLocalizations.firstDayOfWeekIndex`, which comes from intl's
-/// shared date symbols. Changing those in place is unsafe (intl caches the
-/// last locale's symbols in a static), so this delegate returns the stock
-/// English or Bangla translations with only that one getter overridden.
-/// Put it before `GlobalMaterialLocalizations.delegate`; the first delegate
-/// for a type wins.
 class FirstDayMaterialLocalizationsDelegate
     extends LocalizationsDelegate<MaterialLocalizations> {
   final FirstDayOfWeek day;
 
-  /// One instance per language and day (at most six), like Flutter's own
-  /// delegate keeps one per locale.
   static final _loaded = <(String, FirstDayOfWeek), MaterialLocalizations>{};
 
   const FirstDayMaterialLocalizationsDelegate(this.day);
@@ -57,8 +44,6 @@ class FirstDayMaterialLocalizationsDelegate
       old.day != day;
 
   MaterialLocalizations _build(Locale locale) {
-    // Loads Flutter's date data for the locale before the formats below
-    // read it; it completes synchronously.
     GlobalMaterialLocalizations.delegate.load(locale).ignore();
     final languageCode = locale.languageCode;
     final formats = _formatsFor(languageCode);

@@ -9,8 +9,6 @@ import '../support/core_screens.dart';
 import '../support/family_bloc_mock.dart';
 import '../support/pump_localized.dart';
 
-/// With the keyboard open over any field of a form, its submit button can
-/// still be scrolled to and tapped.
 void main() {
   setUpAll(() {
     registerFallbackValue(NoParams());
@@ -19,8 +17,6 @@ void main() {
   setUp(registerScreenTestDependencies);
   tearDown(() => di.getIt.reset());
 
-  /// The field editing [controller]. Found by controller, not position:
-  /// a lazy list builds and drops fields as it scrolls.
   Finder fieldWith(TextEditingController controller) => find.byWidgetPredicate(
     (w) => w is EditableText && identical(w.controller, controller),
   );
@@ -31,7 +27,7 @@ void main() {
 
     testWidgets('${screen.name} with the keyboard open', (tester) async {
       useTestPhone(tester, TestPhone.small);
-      // 300 logical pixels: a phone keyboard.
+
       tester.view.viewInsets = const FakeViewPadding(bottom: 600);
       await pumpLocalized(tester, Scaffold(body: screen.build()));
       await tester.pumpAndSettle();
@@ -42,7 +38,6 @@ void main() {
         await tester.pumpAndSettle();
       }
 
-      // Every field, top to bottom.
       final controllers = <TextEditingController>[];
       for (var step = 0; step < 20; step++) {
         for (final element in find.byType(EditableText).evaluate()) {
@@ -65,7 +60,6 @@ void main() {
         await tester.showKeyboard(field);
         await tester.pumpAndSettle();
 
-        // A lazy list builds the button only once it is scrolled near.
         if (submit().evaluate().isEmpty) {
           await tester.scrollUntilVisible(
             submit(),

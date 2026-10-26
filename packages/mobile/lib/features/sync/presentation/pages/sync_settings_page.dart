@@ -33,7 +33,6 @@ class SyncSettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        // The app-wide singleton; `create` would close it on pop.
         BlocProvider.value(value: di.getIt<SettingsBloc>()),
         BlocProvider(
           create: (_) =>
@@ -45,9 +44,6 @@ class SyncSettingsPage extends StatelessWidget {
   }
 }
 
-/// Sync status for this device: whether it's on, the last sync, changes
-/// waiting, the switch and "Sync now". The design's backup frequency is cut
-/// (docs/adr/0011); the UI never says "backup".
 class SyncSettingsView extends StatelessWidget {
   const SyncSettingsView({super.key});
 
@@ -190,7 +186,6 @@ class SyncSettingsView extends StatelessWidget {
   }
 }
 
-/// An icon beside a title and body, on a card.
 class _InfoCard extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
@@ -302,7 +297,6 @@ class _StatusCard extends StatelessWidget {
   }
 }
 
-/// Shown after [SyncOverview.failureBannerThreshold] failed syncs in a row.
 class _FailureBanner extends StatelessWidget {
   const _FailureBanner();
 
@@ -328,7 +322,6 @@ class _FailureBanner extends StatelessWidget {
 class _LastSyncRow extends StatelessWidget {
   final SyncOverview overview;
 
-  /// Null disables Retry (syncing, or Sync is off).
   final VoidCallback? onRetry;
 
   const _LastSyncRow({required this.overview, required this.onRetry});
@@ -380,12 +373,9 @@ class _PendingRow extends StatelessWidget {
   }
 }
 
-/// Failed Sync Changes: the server refused them 5 times, so they wait for
-/// the user to retry.
 class _FailedRow extends StatelessWidget {
   final int count;
 
-  /// Null disables Retry (syncing, or Sync is off).
   final VoidCallback? onRetry;
 
   const _FailedRow({required this.count, required this.onRetry});
@@ -431,7 +421,6 @@ class _LoadFailed extends StatelessWidget {
 class _SyncNowButton extends StatelessWidget {
   final bool isSyncing;
 
-  /// Null disables the button (syncing, or Sync is off).
   final VoidCallback? onPressed;
 
   const _SyncNowButton({required this.isSyncing, required this.onPressed});

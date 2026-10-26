@@ -1,16 +1,13 @@
 import 'package:equatable/equatable.dart';
 
-/// How much Delete all data will erase on this device.
 class LocalDataSummary extends Equatable {
   final int transactions;
   final int budgets;
   final int categories;
   final int recurring;
 
-  /// SMS Formats plus Matching Rules.
   final int smsRules;
 
-  /// Null when no goals sync handler is registered; the row is hidden then.
   final int? goals;
 
   @override

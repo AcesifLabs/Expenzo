@@ -235,8 +235,6 @@ class _SmsScanResultsPageState extends State<SmsScanResultsPage> {
 
     return Column(
       children: [
-        // At large text sizes the header scrolls in up to a third of the
-        // height, leaving the rest to the results.
         Flexible(
           child: SingleChildScrollView(child: _buildHeaderSection(state)),
         ),

@@ -17,7 +17,7 @@ import { SyncStatus } from './sync.types';
 import { BudgetPeriod } from '../common/enums/budget-period.enum';
 import { DEFAULT_BUDGET_NAME } from '../budgets/budgets.constants';
 
-// TypeORM entities are strict — mock data bypasses field requirements
+
 type AnyRepo = jest.Mocked<any>;
 
 describe('SyncService', () => {

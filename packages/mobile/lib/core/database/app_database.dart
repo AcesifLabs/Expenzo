@@ -71,12 +71,10 @@ class AppDatabase extends _$AppDatabase {
       await _createFtsTable(customStatement);
       await _createFtsTriggers(customStatement);
     },
-    // One transaction: an upgrade that fails leaves the old database as it
-    // was, instead of half migrated.
+
     onUpgrade: (Migrator m, int from, int to) =>
         transaction(() => _runMigrations(m, from)),
     beforeOpen: (details) async {
-      // WAL lets the background isolate write while the app reads.
       await customStatement('PRAGMA journal_mode = WAL');
       await customStatement('PRAGMA synchronous = NORMAL');
     },
@@ -87,9 +85,6 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
   AppDatabase.forTesting(super.e);
 
-  /// Empties every table and the search index. [keepUsers] keeps the
-  /// signed-in user row, so the user stays signed in. [refill] runs in the
-  /// same transaction, so no one sees the tables empty in between.
   Future<void> clearAllTables({
     bool keepUsers = false,
     Future<void> Function()? refill,
@@ -291,7 +286,6 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<void> _migrateV14() async {
-    // Remove duplicate category rows, keeping the most recently updated one
     await customStatement('''
       DELETE FROM categories
       WHERE rowid NOT IN (
@@ -318,12 +312,6 @@ class AppDatabase extends _$AppDatabase {
     }
   }
 
-  /// Moves untouched default categories to the new category palette.
-  ///
-  /// A default category is only recolored while it still has its old seed
-  /// color, so colors the user picked are kept. Each change is queued for
-  /// sync like a normal category edit, otherwise the next pull would restore
-  /// the old color. Rollback: `CategoryPalette.legacySeedColors`.
   Future<void> _migrateV17() async {
     for (final MapEntry(key: id, value: oldColor)
         in CategoryPalette.legacySeedColors.entries) {
@@ -357,7 +345,6 @@ class AppDatabase extends _$AppDatabase {
     }
   }
 
-  /// Adds savings goals (SAAP-74, ADR 0009).
   Future<void> _migrateV18(Migrator m) async {
     await m.createTable(goals);
     await customStatement(
@@ -365,14 +352,11 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
-  /// Marks Shared Budgets with their Family Group (SAAP-75, ADR 0008). No
-  /// index: the table holds tens of rows.
   Future<void> _migrateV19(Migrator m) async {
     await m.addColumn(budgets, budgets.groupId);
   }
 
   Future<void> _migrateV16() async {
-    // Rebuild budgets: drop category_id, add NOT NULL name (no backfill -> '').
     await customStatement('''
       CREATE TABLE budgets_new (
         id TEXT NOT NULL PRIMARY KEY,
@@ -403,20 +387,12 @@ class AppDatabase extends _$AppDatabase {
       'CREATE INDEX IF NOT EXISTS idx_budgets_user_id ON budgets (user_id)',
     );
 
-    // Add budget_id link to records (nullable; existing rows stay unlinked).
     await customStatement('ALTER TABLE records ADD COLUMN budget_id TEXT');
     await customStatement(
       'CREATE INDEX IF NOT EXISTS idx_records_budget_id ON records (budget_id)',
     );
   }
 
-  /// Database v20 (QA hardening, ADR 0014/0015):
-  /// - Failed Sync Change columns on sync_queue, Date Order on parsing_rules.
-  /// - One record per SMS (see [_separateSourceIdCopies]).
-  /// - Every declared index exists. Fresh installs before v20 had none: the
-  ///   tables listed them in a getter drift never read.
-  /// - The search index is keyed by rowid, so an edit or a delete updates
-  ///   it in place instead of scanning it.
   Future<void> _migrateV20(Migrator m) async {
     await m.addColumn(syncQueue, syncQueue.attemptCount);
     await m.addColumn(syncQueue, syncQueue.failedAt);
@@ -433,7 +409,7 @@ class AppDatabase extends _$AppDatabase {
     await customStatement('DROP INDEX IF EXISTS idx_records_category');
     for (final index in allSchemaEntities.whereType<Index>()) {
       final create = index.createStatementsByDialect[SqlDialect.sqlite] ?? '';
-      // Installs upgraded from older versions already have some of these.
+
       await customStatement(
         create.replaceFirstMapped(
           RegExp('CREATE (UNIQUE )?INDEX'),
@@ -449,12 +425,6 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
-  /// Makes (source, source_id) unique before its index is created. Rows
-  /// after the first with the same id are either a message imported twice
-  /// (same amount, date and description: deleted here and on the server) or
-  /// a different message whose id collided. Scanned SMS ids were a 30-bit
-  /// hash of sender and time, so collisions happen. Those keep their record
-  /// and get a local id suffix; source_id isn't synced.
   Future<void> _separateSourceIdCopies() async {
     await customStatement("""
       CREATE TEMP TABLE v20_copies AS
@@ -488,8 +458,6 @@ class AppDatabase extends _$AppDatabase {
     await customStatement('DROP TABLE v20_copies');
   }
 
-  /// The search index: description only, read from records by rowid
-  /// (external content), so it stores no second copy of the text.
   Future<void> _createFtsTable(Future<void> Function(String) executor) =>
       executor("""
         CREATE VIRTUAL TABLE IF NOT EXISTS expense_fts USING fts5(
@@ -499,8 +467,6 @@ class AppDatabase extends _$AppDatabase {
         )
       """);
 
-  /// Keeps [_createFtsTable] in step with records. External-content tables
-  /// remove a row with the 'delete' command and its old values.
   Future<void> _createFtsTriggers(
     Future<void> Function(String) executor,
   ) async {
@@ -527,8 +493,6 @@ class AppDatabase extends _$AppDatabase {
     """);
   }
 
-  /// The search index as steps before v20 built it, keyed by record id.
-  /// Kept for those steps: the records table had another name before v6.
   Future<void> _createLegacyFtsTable(
     Future<void> Function(String) executor,
   ) async {

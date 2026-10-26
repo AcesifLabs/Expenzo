@@ -23,8 +23,6 @@ import '../widgets/onboarding_step_dots.dart';
 import '../widgets/onboarding_timeline_page.dart';
 import '../widgets/tutorial_pages.dart';
 
-/// `/onboarding`. The bloc lives in feature dependencies, which may not be
-/// ready on the first frame, so this waits for them (with a retry).
 class OnboardingRoute extends StatefulWidget {
   const OnboardingRoute({super.key});
 
@@ -70,8 +68,6 @@ class _OnboardingRouteState extends State<OnboardingRoute> {
       FutureBuilder<void>(future: _ready, builder: _build);
 }
 
-/// The setup shell: step dots, Skip, a back button and the pages. Back and
-/// system Back go to the previous step (Q24); Skip ends setup.
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
 
@@ -85,7 +81,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
   void _onStateChanged(BuildContext context, OnboardingState state) {
     final messenger = ScaffoldMessenger.of(context);
     if (state.status == OnboardingStatus.failure) {
-      // The settings write failed (Task 12): stay so Finish can retry.
       messenger
         ..clearSnackBars()
         ..showSnackBar(SnackBar(content: Text(state.errorText ?? '')));
@@ -100,7 +95,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
             SnackBar(content: Text(t.onboarding.complete.partialFailure)),
           );
       }
-      // The tutorial follows (built below); onboarding is already saved.
+
       di.getIt<SettingsBloc>().add(const LoadSettings());
 
       return;

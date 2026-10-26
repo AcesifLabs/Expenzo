@@ -15,8 +15,8 @@ describe('JwtStrategy', () => {
     await expect(strategy.validate(payload)).resolves.toEqual({ sub: 'user-1', firebaseUid: 'uid-1' });
   });
 
-  // A deleted account's JWT must fail with 401 and this message, not reach the
-  // controller and get 404: the app relies on it to stop re-creating the user.
+  
+  
   it('should reject a valid JWT whose user was deleted', async () => {
     users.findOne.mockResolvedValue(null);
 

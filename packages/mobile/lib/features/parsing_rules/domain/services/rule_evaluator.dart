@@ -24,17 +24,6 @@ class RuleEvaluator {
     return _evaluateRules(context, params);
   }
 
-  /// Resolves which regex match in [allMatches] corresponds to the
-  /// transaction amount in [rawMessage]. Each candidate is scored by
-  /// context: numbers immediately preceded by a masked account suffix
-  /// (`***1234`) or a balance keyword (`Avl Bal`, `Balance`) are penalized;
-  /// numbers with decimals adjacent to a currency/action keyword
-  /// (`BDT`, `Rs`, `debited`, etc.) are rewarded. The highest-scoring
-  /// candidate wins.
-  ///
-  /// If [selectedAmount] is provided, exact-match wins immediately —
-  /// scoring is only used as a fallback when no match normalizes to that
-  /// value. On a score tie, the leftmost candidate wins.
   @visibleForTesting
   static Match? resolveAmountMatch(
     List<Match> allMatches,
@@ -146,8 +135,6 @@ class RuleEvaluator {
   }
 
   static double? _extractAmount(Match amountMatch) {
-    // group(1) holds the numeric portion for both legacy and new patterns;
-    // fall back to group(0) for patterns without a capture group.
     final amountStr = amountMatch.group(1) ?? amountMatch.group(0);
     if (amountStr == null) return null;
 
@@ -167,7 +154,7 @@ class RuleEvaluator {
       if (amountMatch == null) return null;
 
       final amount = _extractAmount(amountMatch);
-      // A rule that finds no usable amount has not found a transaction.
+
       if (amount == null) return null;
       final datePattern = rule.datePattern;
       final date = datePattern != null
@@ -238,8 +225,6 @@ class RuleEvaluator {
     return matchEnd + 20 < messageLength ? matchEnd + 20 : messageLength;
   }
 
-  /// A match always has an amount (without one it isn't a transaction); a
-  /// date as well makes it surer.
   static double _computeConfidenceScore(DateTime? date) =>
       date != null ? 1.0 : 0.9;
 }

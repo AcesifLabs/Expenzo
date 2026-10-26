@@ -11,9 +11,6 @@ import 'package:expense_tracker/features/records/presentation/bloc/record_event.
 import 'package:expense_tracker/features/settings/presentation/bloc/settings_bloc.dart';
 import 'package:expense_tracker/features/settings/presentation/bloc/settings_event.dart';
 
-/// Shows the app as it is after a local wipe: rebuilds every tab, reloads
-/// the reset settings (which re-applies theme, currency, language and
-/// background work) and the root blocs, then opens Home.
 void refreshAfterLocalWipe(BuildContext context) {
   di.getIt<LocalDataEpoch>().bump();
   di.getIt<SettingsBloc>().add(const LoadSettings());

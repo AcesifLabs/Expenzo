@@ -7,7 +7,6 @@ sealed class DeleteAllDataEvent extends Equatable {
   const DeleteAllDataEvent();
 }
 
-/// Loads the counts and the signed-in state.
 class DeleteAllDataStarted extends DeleteAllDataEvent {
   const DeleteAllDataStarted();
 }

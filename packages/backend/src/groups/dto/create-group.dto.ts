@@ -12,7 +12,7 @@ export class CreateGroupDto {
   @Matches(/^[A-Z]{3}$/)
   currencyCode: string;
 
-  // The column is decimal(12,2).
+  
   @IsOptional()
   @IsNumber({ maxDecimalPlaces: 2 })
   @IsPositive()

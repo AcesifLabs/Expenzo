@@ -16,13 +16,10 @@ import 'member_spending_list.dart';
 import 'shared_budget_progress_list.dart';
 import 'spent_of_planned_card.dart';
 
-/// Frame `FamilyDashboard`, from the server summary (ADR 0008). With
-/// cached numbers it says when they were fetched.
 class FamilyDashboardView extends StatelessWidget {
   final FamilyState state;
   final MyGroup group;
 
-  /// The time now, replaced in tests.
   final DateTime Function() clock;
 
   const FamilyDashboardView({

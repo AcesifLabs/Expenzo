@@ -20,8 +20,6 @@ class AiAssistantRepositoryImpl implements AiAssistantRepository {
       return dataSource
           .streamChat(systemPrompt: context, userMessage: message)
           .map<Either<Failure, String>>((token) => Right(token))
-          // An error becomes a Left in the stream, so the chat shows it.
-          // (handleError would drop it: its return value is ignored.)
           .transform(
             StreamTransformer.fromHandlers(
               handleError: (Object error, StackTrace _, sink) =>

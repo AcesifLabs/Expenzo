@@ -21,7 +21,6 @@ class HomePageSettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // SettingsBloc is an app-wide singleton; `create` would close it on pop.
     return BlocProvider.value(
       value: di.getIt<SettingsBloc>(),
       child: const Scaffold(body: HomePageSettingsView()),
@@ -29,12 +28,9 @@ class HomePageSettingsPage extends StatelessWidget {
   }
 }
 
-/// The tab the app opens on at cold start. The design's "Scan SMS" option
-/// is gone: Scan is not a tab (docs/adr/0006).
 class HomePageSettingsView extends StatelessWidget {
   const HomePageSettingsView({super.key});
 
-  /// The option's labels; also the Settings row subtitle.
   static ({String title, String subtitle}) optionFor(AppRootTab tab) {
     final options = t.settings.homePage.options;
 

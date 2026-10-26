@@ -1,7 +1,6 @@
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/features/categories/domain/entities/category.dart';
 
-/// Creates a [Category] for tests. All params optional with deterministic defaults.
 Category makeCategory({
   String? id,
   String? name,

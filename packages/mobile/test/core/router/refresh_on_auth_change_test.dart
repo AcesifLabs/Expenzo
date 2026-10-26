@@ -15,7 +15,6 @@ void main() {
   testWidgets('does not create the auth bloc before start-up finishes', (
     tester,
   ) async {
-    // Mirrors ExpenzoApp before DI is ready: creating AuthBloc throws.
     var created = false;
     await tester.pumpWidget(
       BlocProvider<AuthBloc>(
@@ -62,7 +61,7 @@ void main() {
     expect(refreshes, 0);
 
     await tester.pumpWidget(app(enabled: true));
-    // Plain sign-in leaves navigation to LoginPage.
+
     states.add(const Authenticated(user));
     await tester.pump();
     expect(refreshes, 0);
@@ -71,7 +70,6 @@ void main() {
     await tester.pump();
     expect(refreshes, 1);
 
-    // Resolving goes through loading first; that alone ends nothing.
     states.add(const AuthLoading());
     await tester.pump();
     expect(refreshes, 1);

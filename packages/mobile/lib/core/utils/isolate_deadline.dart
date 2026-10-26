@@ -1,12 +1,6 @@
 import 'dart:async';
 import 'dart:isolate';
 
-/// Runs [computation] in a new isolate and kills that isolate when
-/// [deadline] passes, throwing a [TimeoutException].
-///
-/// `Isolate.run(...).timeout(...)` only stops waiting: the isolate keeps
-/// running. A user's regex that backtracks forever would then hold a CPU
-/// core until the app is closed. Killing the isolate stops it.
 Future<R> runWithDeadline<R>(
   R Function() computation,
   Duration deadline,
@@ -24,7 +18,7 @@ Future<R> runWithDeadline<R>(
 
     return switch (message) {
       (R result,) => result,
-      // onError sends [error, stack] as strings.
+
       [final Object? error, final Object? stack] => throw RemoteError(
         '$error',
         '$stack',
@@ -41,6 +35,6 @@ Future<R> runWithDeadline<R>(
 
 void _runJob<R>((R Function(), SendPort) job) {
   final (computation, port) = job;
-  // A one-element record, so a null result is told apart from onExit's null.
+
   port.send((computation(),));
 }

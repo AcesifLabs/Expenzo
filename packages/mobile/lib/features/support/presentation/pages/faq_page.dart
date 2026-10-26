@@ -12,8 +12,6 @@ import 'package:expense_tracker/shared/presentation/widgets/app_search_bar.dart'
 
 import '../../domain/faq_entry.dart';
 
-/// Questions with expandable answers and a search field (design frame
-/// `FAQScreen`).
 class FaqPage extends StatefulWidget {
   const FaqPage({super.key});
 
@@ -38,7 +36,7 @@ class _FaqPageState extends State<FaqPage> {
       clipBehavior: Clip.antiAlias,
       child: ExpansionTile(
         key: PageStorageKey(entry.id),
-        // The first answer starts open, as in the design, until a search.
+
         initiallyExpanded: index == 0 && _query.trim().isEmpty,
         shape: const Border(),
         collapsedShape: const Border(),
@@ -70,10 +68,9 @@ class _FaqPageState extends State<FaqPage> {
   Widget build(BuildContext context) {
     final faqT = t.support.faq;
     final query = _query.trim();
-    // Built here, not cached, so a language change shows the new text.
+
     final entries = filterFaqEntries(faqEntries(), query);
 
-    // Pushed above the app shell, so it needs its own themed Scaffold.
     return Scaffold(
       body: AppScaffold(
         title: faqT.title,

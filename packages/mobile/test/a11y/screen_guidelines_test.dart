@@ -11,8 +11,6 @@ import '../support/core_screens.dart';
 import '../support/family_bloc_mock.dart';
 import '../support/pump_localized.dart';
 
-/// Tap targets, labels and text contrast (docs: DESIGN.md, Accessibility)
-/// on every screen, in both themes and both languages.
 void main() {
   setUpAll(() {
     registerFallbackValue(NoParams());

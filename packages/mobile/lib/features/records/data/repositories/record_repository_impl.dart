@@ -337,8 +337,6 @@ class RecordRepositoryImpl implements RecordRepository {
     List<Record> records,
   ) async {
     try {
-      // Ids are set here, not in the datasource, so every row is queued for
-      // sync.
       final withIds = [
         for (final r in records)
           r.id == null ? r.copyWith(id: const Uuid().v4()) : r,
@@ -348,7 +346,6 @@ class RecordRepositoryImpl implements RecordRepository {
       if (syncQueueDao == null || inserted.isEmpty) return const Right(unit);
       await syncQueueDao.enqueueAll([
         for (final r in withIds)
-          // A skipped duplicate must not reach the server as a new record.
           if (r.id case final recordId? when inserted.contains(recordId))
             (
               tableName: 'records',
@@ -418,8 +415,6 @@ class RecordRepositoryImpl implements RecordRepository {
     }
   }
 
-  /// Awaited, so inside a database transaction the queue entry commits or
-  /// rolls back with the change.
   Future<void> _enqueueSync(
     String action,
     String recordId, [

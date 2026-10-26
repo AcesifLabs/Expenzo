@@ -37,8 +37,6 @@ class AuthException implements Exception {
   AuthFailure toFailure() => AuthFailure(message: message);
 }
 
-/// Firebase needs a fresh sign-in before a sensitive step (account delete)
-/// and Google couldn't provide one silently.
 class RequiresRecentLoginException implements Exception {
   final String message;
 
@@ -75,8 +73,6 @@ class NetworkException implements Exception {
   NetworkFailure toFailure() => NetworkFailure(message: message);
 }
 
-/// An export asked for transactions but none fall in the range, so nothing
-/// was written.
 class EmptyExportException implements Exception {
   const EmptyExportException();
 }

@@ -9,8 +9,6 @@ import '../../domain/usecases/complete_onboarding.dart';
 import 'onboarding_event.dart';
 import 'onboarding_state.dart';
 
-/// Holds the draft across the five setup pages and saves it on Finish setup
-/// or Skip (Q24).
 class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
   final CompleteOnboarding completeOnboarding;
   final GetSettings getSettings;
@@ -37,7 +35,7 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
   ) async {
     final loaded = await getSettings(NoParams());
     final income = loaded.fold((_) => null, (s) => s.monthlyIncome);
-    // An income typed while settings loaded is newer; keep it.
+
     if (income == null || state.draft.monthlyIncome != null) return;
     emit(state.copyWith(draft: state.draft.copyWith(monthlyIncome: income)));
   }
@@ -78,7 +76,7 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
 
   void _onGoal(GoalSubmitted event, Emitter<OnboardingState> emit) {
     final previous = state.draft.goal;
-    // Coming back to a goal with the same target keeps its timeline.
+
     final keep = previous?.targetAmount == event.target ? previous : null;
     emit(
       _advance(
@@ -118,7 +116,6 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
     emit(state.copyWith(step: state.step - 1));
   }
 
-  /// Finish setup and Skip: save the draft as it is.
   Future<void> _onSave(
     OnboardingEvent event,
     Emitter<OnboardingState> emit,

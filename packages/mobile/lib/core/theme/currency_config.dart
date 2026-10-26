@@ -1,19 +1,13 @@
 import 'package:expense_tracker/i18n/strings.g.dart';
 
-/// A currency the user can pick in Settings. See docs/adr/0002.
 class CurrencyInfo {
-  /// ISO 4217 code, for example `BDT`.
   final String code;
 
-  /// What is printed before amounts. Letter symbols carry a trailing
-  /// no-break space so amounts don't run into them ("CHF 12.00").
   final String symbol;
 
-  /// English name; also what the AI assistant is told.
   final String name;
   final int decimalDigits;
 
-  /// The name in the current app language.
   String get displayName => t.currencies.names[code] ?? name;
 
   const CurrencyInfo({
@@ -78,7 +72,6 @@ abstract final class CurrencyConfig {
     CurrencyInfo(code: 'ZAR', symbol: 'R ', name: 'South African rand'),
   ];
 
-  // Symbols the old free-text picker offered, plus the old default.
   static const _legacySymbolCodes = {
     '৳': 'BDT',
     '\$': 'USD',
@@ -110,7 +103,6 @@ abstract final class CurrencyConfig {
     return supported.first;
   }
 
-  /// Maps a symbol saved by older app versions to a currency code.
   static String codeForLegacySymbol(String symbol) {
     return _legacySymbolCodes[symbol.trim()] ?? defaultCode;
   }

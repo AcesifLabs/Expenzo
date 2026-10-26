@@ -11,8 +11,6 @@ import '../../domain/entities/message_source.dart';
 import '../../domain/repositories/message_template_repository.dart';
 import '../datasources/message_template_local_datasource.dart';
 
-/// Every write is saved locally and queued for `/sync/push` under
-/// `message_sources` or `expense_templates`.
 class MessageTemplateRepositoryImpl implements MessageTemplateRepository {
   final MessageTemplateLocalDatasource localDatasource;
   final SyncQueueDao? _syncQueueDao;
@@ -145,7 +143,6 @@ class MessageTemplateRepositoryImpl implements MessageTemplateRepository {
     return localDatasource.watchTemplatesForSource(sourceId);
   }
 
-  /// Field names match `MessageSourcesSyncHandler.toSyncPayload`.
   Map<String, dynamic> _sourcePayload(MessageSource source) => {
     'contactId': source.contactId,
     'contactName': source.contactName,
@@ -155,7 +152,6 @@ class MessageTemplateRepositoryImpl implements MessageTemplateRepository {
     'updatedAt': source.updatedAt.toUtc().toIso8601String(),
   };
 
-  /// Field names match `ExpenseTemplatesSyncHandler.toSyncPayload`.
   Map<String, dynamic> _templatePayload(ExpenseTemplate template) => {
     'sourceId': template.sourceId,
     'sampleMessage': template.sampleMessage,

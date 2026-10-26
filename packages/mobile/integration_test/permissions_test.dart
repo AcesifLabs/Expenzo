@@ -13,13 +13,6 @@ import 'package:expense_tracker/i18n/strings.g.dart';
 
 import 'support/app.dart';
 
-/// Android's own permission dialogs, which widget tests can't reach.
-///
-/// Clearing app data between tests keeps permissions, so the order matters:
-/// the camera is refused for good first (nothing later needs it), and SMS
-/// ends granted, as sms_scan_test.dart (which runs after this file) needs.
-/// The permanently-refused SMS screen is a widget test
-/// (test/shared/presentation/widgets/sms_permission_gate_test.dart).
 void main() {
   patrolTest('refusing the camera twice offers Open settings', ($) async {
     await launchOnboarded($);
@@ -67,7 +60,6 @@ void main() {
       final db = di.getIt<AppDatabase>();
       final budget = await db.select(db.budgets).getSingle();
 
-      // 150 spent of 100, then the check the transaction sheet runs.
       await db
           .into(db.records)
           .insert(
@@ -85,7 +77,7 @@ void main() {
 
       await $.platform.mobile.openNotifications();
       final notifications = await $.platform.mobile.getNotifications();
-      // Left open, the shade would hide the next test's permission dialog.
+
       await $.platform.mobile.closeNotifications();
       expect(
         notifications.any(

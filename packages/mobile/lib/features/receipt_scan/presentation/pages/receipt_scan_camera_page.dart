@@ -33,8 +33,6 @@ class ReceiptScanCameraPage extends StatefulWidget {
   State<ReceiptScanCameraPage> createState() => _ReceiptScanCameraPageState();
 }
 
-/// A gallery photo is scaled to fit this many pixels a side: enough to read
-/// a receipt, far less memory than a 12+ MP original.
 const double _maxReceiptSide = 2000;
 const int _receiptJpegQuality = 85;
 
@@ -46,26 +44,16 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
   var _processing = false;
   String? _error;
 
-  /// Camera permission was refused for good: only Settings can turn it on.
   var _permissionBlocked = false;
 
-  /// The camera setup in progress, so a resume during it (the permission
-  /// dialog sends the app to the background and back) doesn't start a
-  /// second one.
   Future<void>? _cameraSetup;
 
-  /// False while the app is in the background: a camera set up then is
-  /// released at once.
   var _inForeground = true;
 
-  /// The user refused the camera. Coming back to the app then only checks
-  /// whether it was allowed in Settings meanwhile: asking again would show
-  /// the dialog the user just answered.
   var _cameraRefused = false;
   File? _previewImage;
   AnimationController? _sparkleController;
 
-  /// Made once: a curve made in build is never disposed.
   CurvedAnimation? _sparkleCurve;
 
   ExtractReceipt get _extractReceipt =>
@@ -84,8 +72,6 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
     unawaited(_recoverLostPick());
   }
 
-  /// Android may kill the app while the gallery is open. The picked image
-  /// is then handed back on the next start instead of to [_pickGallery].
   Future<void> _recoverLostPick() async {
     try {
       final lost = await ImagePicker().retrieveLostData();
@@ -104,7 +90,6 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
     _cameraSetup ??= _initCamera().whenComplete(() => _cameraSetup = null);
   }
 
-  /// Starts the camera if it was allowed in Settings since the user refused.
   Future<void> _startCameraIfAllowed() async {
     if (!(await Permission.camera.status).isGranted || !mounted) return;
     _startCamera();
@@ -159,7 +144,7 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
       );
       final controller = CameraController(
         back,
-        // Plenty for a receipt; high doubles the bitmap memory.
+
         ResolutionPreset.medium,
         enableAudio: false,
         fps: 30,
@@ -227,7 +212,6 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
   Future<void> _pickGallery() async {
     if (_processing) return;
 
-    // A full-size phone photo can be 12+ MP; a receipt reads fine smaller.
     final picked = await ImagePicker().pickImage(
       source: ImageSource.gallery,
       maxWidth: _maxReceiptSide,
@@ -268,8 +252,7 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
       _processing = false;
       _previewImage = null;
     });
-    // The app may have gone to the background while the receipt was read,
-    // which released the camera.
+
     if (_inForeground && _controller == null) _resumeCamera();
   }
 
@@ -355,7 +338,7 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
         child: Image.file(
           preview,
           fit: BoxFit.cover,
-          // Decode at screen size, not the photo's full resolution.
+
           cacheWidth: (media.size.width * media.devicePixelRatio).round(),
         ),
       );
@@ -479,7 +462,7 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
           24,
           16 + MediaQuery.paddingOf(context).bottom,
         ),
-        // The viewfinder stays dark; the toolbar follows the app theme.
+
         color: context.palette.surface,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -551,9 +534,6 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     switch (state) {
-      // The camera is released while the app is in the background, or other
-      // apps can't use it and the preview comes back frozen. Not on
-      // inactive: the notification shade and dialogs cause that too.
       case AppLifecycleState.paused || AppLifecycleState.hidden:
         _inForeground = false;
         final controller = _controller;
@@ -608,7 +588,6 @@ class _RoundIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The tooltip also serves as the screen-reader label.
     return Tooltip(
       message: label,
       child: Material(

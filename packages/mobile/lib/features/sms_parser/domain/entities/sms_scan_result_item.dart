@@ -7,8 +7,6 @@ class SmsScanResultItem extends Equatable {
   final String senderKey;
   final String senderLabel;
 
-  /// The id an inbox scan gave this message before database v20, so a
-  /// message imported back then isn't offered again.
   final String? legacySourceId;
 
   String get sourceId => parsedTransaction.sourceId;
@@ -21,8 +19,6 @@ class SmsScanResultItem extends Equatable {
     legacySourceId,
   ];
 
-  // Only inbox scans have an id from before v20.
-  // ignore: unnecessary-nullable
   const SmsScanResultItem({
     required this.parsedTransaction,
     required this.senderKey,

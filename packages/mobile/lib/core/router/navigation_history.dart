@@ -1,21 +1,12 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
-/// Records the stack of pages on the root navigator.
-///
-/// Dialogs and bottom sheets are ignored; only [PageRoute]s count as
-/// history. Locations are resolved against the router's current match
-/// list, so they stay accurate when a page's query changes (e.g. switching
-/// shell tabs).
 class NavigationHistory extends NavigatorObserver {
   final List<Route<dynamic>> _routes = [];
   GoRouter? _router;
 
-  /// Whether there is a page below the current one to return to.
   bool get canGoBack => _routes.length > 1;
 
-  /// Router locations from bottom to top. Pages pushed directly with
-  /// [Navigator] (outside go_router) have a null location.
   List<String?> get locations => _routes.map(_locationOf).toList();
 
   void bindRouter(GoRouter router) => _router = router;
@@ -65,7 +56,7 @@ class NavigationHistory extends NavigatorObserver {
     for (final match in matchList.matches) {
       if (match.pageKey != settings.key) continue;
       if (match is ImperativeRouteMatch) return match.matches.uri.toString();
-      // The deepest declarative match owns the full URI, query included.
+
       if (identical(match, baseMatches.lastOrNull)) {
         return matchList.uri.toString();
       }

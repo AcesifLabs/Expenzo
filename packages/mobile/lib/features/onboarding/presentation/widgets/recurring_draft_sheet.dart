@@ -12,8 +12,6 @@ import 'package:expense_tracker/i18n/strings.g.dart';
 
 import '../../domain/entities/onboarding_draft.dart';
 
-/// Asks for one recurring payment; null when dismissed. The frequency starts
-/// at the default from Settings → Recurring transactions (B8).
 Future<RecurringDraft?> showRecurringDraftSheet(BuildContext context) {
   final settings = switch (_settingsBloc(context)?.state) {
     SettingsLoaded(:final settings) => settings,
@@ -32,7 +30,6 @@ Future<RecurringDraft?> showRecurringDraftSheet(BuildContext context) {
   );
 }
 
-/// A provided bloc (tests), else the app-wide singleton.
 SettingsBloc? _settingsBloc(BuildContext context) {
   try {
     return context.read<SettingsBloc>();
@@ -146,7 +143,6 @@ class _RecurringDraftSheetState extends State<_RecurringDraftSheet> {
               ),
               const SizedBox(height: AppSpacing.lg),
               ConstrainedBox(
-                // Grows with the label at large text sizes.
                 constraints: const BoxConstraints(minHeight: AppSpacing.xxl),
                 child: ElevatedButton(
                   onPressed: _save,

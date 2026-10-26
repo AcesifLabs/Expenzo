@@ -14,7 +14,6 @@ import 'package:expense_tracker/features/export/presentation/bloc/export_bloc.da
 import 'package:expense_tracker/features/settings/domain/usecases/get_settings.dart';
 import 'package:expense_tracker/shared/services/file_share_service.dart';
 
-/// Needs the DAOs and [GetSettings], so it runs after `initSettingsModule`.
 void initExportModule(GetIt getIt) {
   getIt.registerLazySingleton(() => const ExportCsvBuilder());
 
@@ -36,7 +35,6 @@ void initExportModule(GetIt getIt) {
   getIt.registerLazySingleton(() => ExportData(getIt<ExportRepository>()));
   getIt.registerLazySingleton(() => const FileShareService());
 
-  // One per screen visit, so choices start fresh each time.
   getIt.registerFactory(
     () => ExportBloc(
       exportData: getIt<ExportData>(),
@@ -45,7 +43,6 @@ void initExportModule(GetIt getIt) {
   );
 }
 
-/// The user's currency, or the default when settings can't be read.
 Future<String> _currencyCode(GetSettings getSettings) async {
   final result = await getSettings(NoParams());
 

@@ -9,7 +9,6 @@ import '../../domain/entities/group_role.dart';
 import '../../domain/entities/my_group.dart';
 import '../helpers/member_actions.dart';
 
-/// What the Admin decided in [showMemberActionsSheet].
 sealed class MemberDecision {
   const MemberDecision();
 }
@@ -24,9 +23,6 @@ class MemberRemoveConfirmed extends MemberDecision {
   const MemberRemoveConfirmed();
 }
 
-/// The Admin's actions on one member: change role (check-mark choices,
-/// never radio buttons) or remove from the group, after asking. Null when
-/// the Admin backs out or picks the role the member already has.
 Future<MemberDecision?> showMemberActionsSheet(
   BuildContext context, {
   required GroupMember member,

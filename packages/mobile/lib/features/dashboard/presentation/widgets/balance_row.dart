@@ -28,7 +28,7 @@ class BalanceRow extends StatelessWidget {
       children: [
         Icon(icon, color: color, size: 18),
         const SizedBox(width: AppSpacing.sm),
-        // Large amounts shrink to fit rather than overflow the half-width row.
+
         Flexible(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

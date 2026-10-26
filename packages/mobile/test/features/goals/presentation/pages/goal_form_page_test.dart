@@ -32,7 +32,7 @@ void main() {
       _MockGoalFormBloc(),
       state,
     );
-    // The page fills its fields when the bloc reports ready.
+
     when(() => bloc.stream).thenAnswer((_) => Stream.value(state));
     await tester.binding.setSurfaceSize(const Size(400, 1200));
     addTearDown(() => tester.binding.setSurfaceSize(null));

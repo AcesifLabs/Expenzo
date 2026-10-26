@@ -8,8 +8,6 @@ import '../../domain/entities/search_result.dart';
 import '../../domain/helpers/fts_query_helper.dart';
 
 abstract class SearchLocalDatasource {
-  /// The index follows the records table through triggers
-  /// (`AppDatabase._createFtsTriggers`); nothing writes to it directly.
   Future<List<SearchResult>> searchRecords(SearchFilters filters);
 }
 
@@ -109,8 +107,6 @@ class SearchLocalDatasourceImpl implements SearchLocalDatasource {
     }
   }
 
-  /// Amount filters compare sizes: expenses are stored negative, so a
-  /// 100–500 filter must find an expense of -250.
   void _addAmountConditions(
     SearchFilters filters,
     List<String> conditions,

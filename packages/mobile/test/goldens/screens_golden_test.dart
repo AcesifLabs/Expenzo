@@ -12,10 +12,8 @@ import '../support/all_screens.dart';
 import '../support/core_screens.dart';
 import '../support/family_bloc_mock.dart';
 
-/// Every golden is drawn on this day, so dates on screen never change.
 final _clock = Clock.fixed(DateTime(2026, 10, 15, 10, 30));
 
-/// The core screens, from the screen registry.
 const _screens = {
   'Home': 'home',
   'Activity': 'activity',
@@ -70,7 +68,7 @@ void main() {
         fileName: '${file}_${locale.languageCode}',
         builder: () => withClock(_clock, () {
           LocaleSettings.setLocaleSync(locale);
-          // Built once: builders register their dependencies.
+
           final widget = screen.build();
 
           return TranslationProvider(
@@ -94,7 +92,7 @@ void main() {
         }),
         pumpWidget: (tester, widget) =>
             withClock(_clock, () => tester.pumpWidget(widget)),
-        // Fixed frames: some screens animate forever.
+
         pumpBeforeTest: (tester) => withClock(_clock, () async {
           await tester.pump();
           await tester.pump(const Duration(milliseconds: 500));

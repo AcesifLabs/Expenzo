@@ -3,12 +3,6 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
-/// Rebuilds everything below it when the app language changes.
-///
-/// Widgets read the global `t` (like the static `CurrencyFormatter`), which
-/// they don't subscribe to, so a language change marks every element dirty
-/// once. State (scroll, forms, navigation) is kept because nothing is
-/// recreated. Same approach as `CurrencyScope`.
 class LocaleScope extends StatefulWidget {
   final Widget child;
 

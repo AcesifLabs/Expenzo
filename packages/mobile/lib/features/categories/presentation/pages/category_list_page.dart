@@ -26,15 +26,9 @@ import '../helpers/category_display_name.dart';
 import '../widgets/category_settings_row.dart';
 import '../widgets/delete_category_dialog.dart';
 
-/// Where a delete this page sent is. The shared bloc reports a delete only
-/// through states, so the page waits for the delete's own `CategoryLoading`
-/// before a `CategoryLoaded` counts as its result.
 enum _DeletePhase { idle, dispatched, running }
 
-/// Category settings: expense and income categories with a live
-/// transaction count each. Tap edits, long-press deletes, + adds.
 class CategoryListPage extends StatefulWidget {
-  /// Injected by tests; defaults to the registered use case.
   final GetCategoryRecordCounts? getCounts;
 
   const CategoryListPage({super.key, this.getCounts});
@@ -44,25 +38,16 @@ class CategoryListPage extends StatefulWidget {
 }
 
 class _CategoryListPageState extends State<CategoryListPage> {
-  // Every load here sorts by usage, the same as the bloc's own reload after
-  // a create, update or delete, so rows keep their order across edits.
   static const _load = LoadCategories(sortByUsage: true);
 
-  /// Null while loading or after a failed load: rows then show no count.
   Map<String, int>? _counts;
 
-  /// Bumped per count load so a slower, older result can't overwrite a
-  /// newer one.
   int _countsGeneration = 0;
 
   _DeletePhase _deletePhase = _DeletePhase.idle;
 
-  /// The last unfiltered list, kept on screen while a load, delete or save
-  /// runs or after it fails.
   List<Category>? _lastLoaded;
 
-  /// True after an error triggered a reload; a second error then shows the
-  /// error page with Try again instead of the stale list.
   bool _recovering = false;
 
   GetCategoryRecordCounts get _getCounts =>
@@ -75,7 +60,7 @@ class _CategoryListPageState extends State<CategoryListPage> {
     if (bloc.state case CategoryLoaded(:final categories, type: null)) {
       _lastLoaded = categories;
     }
-    // The shared bloc may hold a type-filtered list left by the sheet.
+
     bloc.add(_load);
     unawaited(_loadCounts());
   }
@@ -91,15 +76,12 @@ class _CategoryListPageState extends State<CategoryListPage> {
   }
 
   Future<void> _reload() async {
-    // A refresh mid-delete would hide the delete's result.
     if (_deletePhase != _DeletePhase.idle) return;
     _recovering = false;
     context.read<CategoryBloc>().add(_load);
     await _loadCounts();
   }
 
-  // Adding or editing a category moves no records, so counts stay valid:
-  // a new category is absent from the map and shows 0.
   void _onAddPressed() => unawaited(context.push('/categories/new'));
 
   void _onCategoryTap(Category category) {
@@ -110,9 +92,6 @@ class _CategoryListPageState extends State<CategoryListPage> {
     );
   }
 
-  /// [id]'s record count from the loaded counts, loading them first when an
-  /// earlier load failed. 0 when they still can't be read, so the dialog
-  /// falls back to its plain confirm text.
   Future<int> _countFor(String id) async {
     if (_counts == null) await _loadCounts();
 
@@ -162,7 +141,6 @@ class _CategoryListPageState extends State<CategoryListPage> {
           unawaited(_loadCounts());
         }
       case CategoryLoaded() || CategorySearchResults():
-        // Another screen filtered or searched the shared bloc.
         context.read<CategoryBloc>().add(_load);
       case CategoryError(:final message):
         _onCategoryError(context, message);
@@ -171,9 +149,6 @@ class _CategoryListPageState extends State<CategoryListPage> {
     }
   }
 
-  /// Errors from a delete here, a save on the form page (which pops before
-  /// the bloc answers) or a reload. With a list on screen, say so and reload;
-  /// if that reload fails too, show the error page with Try again.
   void _onCategoryError(BuildContext context, String message) {
     final wasDeleting = _deletePhase != _DeletePhase.idle;
     _deletePhase = _DeletePhase.idle;
@@ -227,8 +202,6 @@ class _CategoryListPageState extends State<CategoryListPage> {
     return const Center(child: CircularProgressIndicator());
   }
 
-  /// Rows are built lazily: a user can add many categories, and the
-  /// counts rebuild the list whenever they land.
   Widget _buildList(List<Category> categories) {
     final entries = [
       ..._sectionEntries(categories, RecordType.expense),
@@ -261,7 +234,6 @@ class _CategoryListPageState extends State<CategoryListPage> {
     RecordType.income => t.categories.settings.sections.income,
   };
 
-  /// A header plus [type]'s rows; nothing when [type] has no categories.
   List<_ListEntry> _sectionEntries(List<Category> categories, RecordType type) {
     final ofType = [
       for (final category in categories)

@@ -63,7 +63,6 @@ class DashboardPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // AuthBloc comes from ExpenzoApp so sign-in state is shared app-wide.
     return BlocProvider(
       create: (_) => di.getIt<DashboardBloc>(),
       child: DashboardView(
@@ -91,8 +90,7 @@ class _DashboardViewState extends State<DashboardView> {
   Future<DashboardSupplementaryData>? _supplementaryFuture;
   Future<List<DateAmount>>? _trendFuture;
   DateRange? _secondaryDateRange;
-  // Disables the scan banner while its sheet is open; a notifier so only the
-  // banner rebuilds.
+
   final _scanOpening = ValueNotifier<bool>(false);
 
   @override
@@ -176,7 +174,6 @@ class _DashboardViewState extends State<DashboardView> {
         .toList();
   }
 
-  /// Lets the recent activity rows show each record's category tile and name.
   Future<Map<String, cat.Category>> _loadCategoriesById() async {
     if (!di.getIt.isRegistered<GetCategories>()) return const {};
     final result = await di.getIt<GetCategories>()(const GetCategoriesParams());
@@ -228,7 +225,6 @@ class _DashboardViewState extends State<DashboardView> {
     return Future<void>.value();
   }
 
-  /// "Hi, Sam" when we know the name, otherwise today's date.
   String _greeting(String? firstName) => firstName == null
       ? DateFormat('EEEE, d MMMM').format(clock.now())
       : t.dashboard.greeting(name: firstName);
@@ -474,7 +470,7 @@ class _DashboardViewState extends State<DashboardView> {
       ),
       _buildBudgetsSection(),
       const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
-      // Adds its own bottom gap only when shown.
+
       const SliverToBoxAdapter(child: DashboardGoalCard()),
       SliverPadding(
         padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
@@ -817,7 +813,6 @@ class _DashboardViewState extends State<DashboardView> {
     return di.getIt<GetSpendingTrend>();
   }
 
-  // Theme and everything else live in Settings (docs/adr/0006).
   List<PopupMenuEntry<String>> _buildMenuItems(BuildContext context) {
     final isAuth = context.read<AuthBloc>().state is Authenticated;
     final menu = t.dashboard.menu;
@@ -990,7 +985,6 @@ class _BudgetPreviewTile extends StatelessWidget {
 }
 
 class _RecentTile extends StatelessWidget {
-  // Getters, not cached: DateFormat keeps the language it was created in.
   static DateFormat get _timeFormat => DateFormat('h:mm a');
   static DateFormat get _dayFormat => DateFormat('MMM d');
 
@@ -1029,7 +1023,6 @@ class _RecentTile extends StatelessWidget {
       );
     }
 
-    // Uncategorized: a neutral tile so rows still line up.
     return Container(
       width: 40,
       height: 40,

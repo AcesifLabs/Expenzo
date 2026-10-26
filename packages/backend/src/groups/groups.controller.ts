@@ -25,7 +25,7 @@ export class GroupsController {
     return this.groupsService.create(userId, dto);
   }
 
-  // "me" and "join" are declared before any `:id` route so they are never read as an id.
+  
   @Get('me')
   getMine(@CurrentUser('sub') userId: string) {
     return this.groupsService.getMine(userId);
@@ -45,7 +45,7 @@ export class GroupsController {
     return this.groupsService.createInvite(groupId, userId);
   }
 
-  /** Any role may read it (Admin, Member, Viewer). */
+  
   @Get(':id/summary')
   @UseGuards(GroupRoleGuard)
   getSummary(@Param('id') groupId: string, @Query() query: GroupSummaryQueryDto) {
@@ -64,7 +64,7 @@ export class GroupsController {
     return this.groupsService.updateRole(groupId, targetId, dto, callerId);
   }
 
-  /** Leave (your own userId) or, for an Admin, remove someone else. */
+  
   @Delete(':id/members/:userId')
   @UseGuards(GroupRoleGuard)
   @HttpCode(HttpStatus.NO_CONTENT)

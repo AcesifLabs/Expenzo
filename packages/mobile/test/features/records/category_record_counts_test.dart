@@ -72,7 +72,6 @@ void main() {
     test('maps any other error to Left(CacheFailure)', () async {
       when(() => local.getCategoryRecordCounts()).thenThrow(StateError('db'));
 
-      // The repository debugPrints the unexpected error; keep output clean.
       final originalDebugPrint = debugPrint;
       debugPrint = (_, {wrapWidth}) {};
       final Either<CacheFailure, Map<String, int>> result;

@@ -229,7 +229,7 @@ void main() {
     await bloc.close();
 
     expect(pending.hasListener, isFalse);
-    // A listener left behind would add to a closed bloc and throw.
+
     syncing.value = true;
   });
 

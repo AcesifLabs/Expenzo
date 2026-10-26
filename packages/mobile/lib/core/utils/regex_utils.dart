@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:expense_tracker/core/logger/app_logger.dart';
 
-/// Default per-match budget for user-supplied regex patterns.
 const Duration kRegexMatchBudget = Duration(milliseconds: 250);
 
 class TimedRegex {
@@ -72,11 +71,6 @@ class TimedRegex {
   }
 }
 
-/// Runs [regex.firstMatch] on [input] and returns null if it exceeds [budget].
-///
-/// This is a post-hoc guard: the regex still runs to completion, but if it
-/// takes longer than [budget] the result is discarded and a warning is logged.
-/// For true interrupt-based protection, use a separate isolate.
 Match? matchFirstWithBudget(
   RegExp regex,
   String input, [
@@ -98,9 +92,6 @@ Match? matchFirstWithBudget(
   return result;
 }
 
-/// Runs [regex.allMatches] on [input] and returns empty if it exceeds [budget].
-///
-/// Same post-hoc guard as [matchFirstWithBudget].
 List<Match> matchAllWithBudget(
   RegExp regex,
   String input, [

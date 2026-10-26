@@ -4,12 +4,8 @@ import 'package:expense_tracker/core/theme/app_typography.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
-/// The action the user chose in the [ManageTemplateSheet].
 enum ManageTemplateAction { edit, delete }
 
-/// Shows the "Template already exists" management bottom sheet for a
-/// long-pressed matched message. Returns the chosen action, or `null`
-/// if the sheet was dismissed without a selection.
 Future<ManageTemplateAction?> showManageTemplateSheet({
   required BuildContext context,
 }) {

@@ -11,7 +11,7 @@ analyzer:
     - "**/*.gr.dart"
     - build/**
     - android/**
-    # drift_dev schema helpers (dart run drift_dev schema generate).
+
     - test/core/database/generated/**
 
 linter:
@@ -19,7 +19,7 @@ linter:
 
 dart_code_linter:
   rules:
-    # Flutter widget rules (QA hardening, task 45).
+
     - always-remove-listener
     - avoid-unnecessary-setstate
     - use-setstate-synchronously
@@ -46,8 +46,8 @@ dart_code_linter:
     - prefer-extracting-callbacks
     - prefer-first
     - prefer-last
-    # Label lookups keep full `t.` paths: slang analyze only sees full
-    # paths (ADR 0007), so an alias would hide used keys.
+
+
     - prefer-moving-to-variable:
         exclude:
           - lib/core/constants/record_type.dart

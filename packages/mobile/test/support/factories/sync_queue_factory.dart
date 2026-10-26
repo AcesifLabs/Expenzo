@@ -1,5 +1,3 @@
-/// Builds raw sync change maps (the shape passed to _applyRemoteChange / sync push).
-/// Used by sync-engine tests that mock the API response.
 Map<String, dynamic> makeSyncChange({
   String? table,
   String? action,

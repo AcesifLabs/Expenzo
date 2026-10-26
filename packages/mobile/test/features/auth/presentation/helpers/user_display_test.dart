@@ -35,7 +35,6 @@ void main() {
     });
 
     test('keeps a Bangla first letter as one grapheme', () {
-      // 'ক্ষ' is one grapheme cluster built from three code units.
       expect(userInitial(const User(uid: 'u', displayName: 'ক্ষমা')), 'ক্ষ');
     });
   });

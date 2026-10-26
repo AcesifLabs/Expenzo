@@ -8,7 +8,6 @@ import '../../../support/pump_localized.dart';
 
 const _channel = MethodChannel('flutter.baseflow.com/permissions/methods');
 
-/// Permission.sms is 13; PermissionStatus.denied is 0, permanentlyDenied 4.
 void _answerSmsRequestWith(int status) {
   TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
       .setMockMethodCallHandler(

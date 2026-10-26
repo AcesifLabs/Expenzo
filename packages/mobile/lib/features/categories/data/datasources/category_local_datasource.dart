@@ -25,7 +25,6 @@ abstract class CategoryLocalDatasource {
 
   Future<void> incrementUsageCount(String id);
 
-  /// Searches categories by name.
   Future<List<Category>> searchCategories({
     required String query,
     RecordType? type,
@@ -156,8 +155,6 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
     RecordType? type,
   }) async {
     try {
-      // Match the stored name and the name shown in the app language, so a
-      // translated default category is found by what the user sees.
       final needle = query.trim().toLowerCase();
       final categories = await categoryDao.getAllCategories(
         type: type?.dbValue,

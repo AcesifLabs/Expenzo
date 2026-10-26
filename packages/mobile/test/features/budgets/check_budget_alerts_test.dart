@@ -130,7 +130,6 @@ void main() {
     await checkAlerts();
     expectNoAlert();
 
-    // Once the user allows notifications, the alert still goes out.
     when(() => notifications.canNotify()).thenAnswer((_) async => true);
     await checkAlerts();
     expect(alertsSent(), 1);

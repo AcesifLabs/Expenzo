@@ -7,10 +7,6 @@ import 'package:expense_tracker/core/database/app_database.dart';
 
 import 'migrations/v19_tables.dart';
 
-/// Verifies the V17 -> V18 migration (goals table, SAAP-74):
-///  - `goals` is created with its index
-///  - rows in other tables are untouched
-///  - a fresh install (onCreate) has `goals` too
 void main() {
   late File dbFile;
 

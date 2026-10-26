@@ -4,7 +4,6 @@ class AiAssistantConstants {
   static const maxUserPromptLength = 280;
   static const cooldownDuration = Duration(seconds: 4);
 
-  /// Sent to the model only; stays English in every app language.
   static const systemGuardrails = '''
 You are Expenzo AI, a strict in-app personal finance assistant.
 
@@ -69,7 +68,7 @@ Keep answers concise and practical. Mention currency when discussing amounts.
     'transport',
     'shopping',
     'utilities',
-    // Bangla. Matched after normalizing nukta letters (see ValidateAiPrompt).
+
     'বাজেট',
     'খরচ',
     'ব্যয়',
@@ -98,8 +97,7 @@ Keep answers concise and practical. Mention currency when discussing amounts.
     r'\b(api key|token|password|secret|dotenv|env file|environment variable|private key)\b',
     r'\b(act as|pretend to be|roleplay as|jailbreak)\b',
     r'\b(source code|internal code|implementation details)\b',
-    // Bangla. No \b: Dart's word boundary doesn't treat Bangla letters as
-    // word characters. Matched after nukta normalization.
+
     r'(উপেক্ষা|ভুলে যা|বাদ দা|বাদ দি|মানবে না|মেনো না|অমান্য).{0,30}(নির্দেশ|নিয়ম|প্রম্পট|পলিসি)',
     r'(নির্দেশ|নিয়ম|প্রম্পট|পলিসি).{0,30}(উপেক্ষা|ভুলে যা|বাদ দা|বাদ দি|অমান্য|মানবে না|মেনো না)',
     r'(সিস্টেম প্রম্পট|গোপন নির্দেশ|ভেতরের নির্দেশ|লুকানো নির্দেশ|ডেভেলপার মেসেজ)',
@@ -108,7 +106,6 @@ Keep answers concise and practical. Mention currency when discussing amounts.
     r'(ভান কর|অভিনয় কর|হিসেবে আচরণ কর|জেলব্রেক)',
   ];
 
-  // User-facing refusals, in the current app language.
   static String get outOfScopeRefusal => t.aiAssistant.refusals.outOfScope;
   static String get promptInjectionRefusal =>
       t.aiAssistant.refusals.promptInjection;

@@ -3,16 +3,6 @@ import 'package:expense_tracker/core/database/daos/sync_queue_dao.dart';
 
 import '../../domain/entities/my_group.dart';
 
-/// Pull has no tombstones (ADR 0008), so after each `/groups/me` the phone
-/// decides which local Shared Budgets it should still have:
-/// - another member's budget of a group I am no longer in, or one its owner
-///   unshared or deleted: deleted from this phone;
-/// - my own budget after I left or the group was deleted: kept, now
-///   personal (the server already cleared its groupId);
-/// - a budget with changes not yet pushed: left alone until they are.
-///
-/// It writes through [BudgetDao] only, so nothing is queued for sync, and
-/// records keep their budgetId.
 class SharedBudgetCleanup {
   final BudgetDao budgetDao;
   final SyncQueueDao syncQueueDao;
@@ -44,9 +34,6 @@ class SharedBudgetCleanup {
     await budgetDao.clearGroupId(toClear);
   }
 
-  /// An unlisted budget of the current group that may be mine, shared on
-  /// this phone after the group was last fetched: kept for the next fetch.
-  /// One the previous fetch listed as someone else's is not.
   bool _maybeJustShared(
     String id, {
     required MyGroup? previous,

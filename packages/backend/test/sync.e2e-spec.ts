@@ -24,7 +24,7 @@ jest.setTimeout(30000);
 type Row = { id: string; userId: string; [field: string]: unknown };
 type Where = { id: string; userId?: string };
 
-/** Equality, or the TypeORM Not / MoreThan operators the sync pull uses. */
+
 function fieldMatches(value: unknown, condition: unknown): boolean {
   if (condition instanceof FindOperator) {
     if (condition.type === 'not') return value !== condition.value;
@@ -34,7 +34,7 @@ function fieldMatches(value: unknown, condition: unknown): boolean {
   return value === condition;
 }
 
-/** Stores rows in memory and applies the column default for `name` like Postgres would. */
+
 function memoryRepo(defaults: Partial<Row> = {}) {
   const rows = new Map<string, Row>();
   const matches = (where: Where) => {
@@ -77,7 +77,7 @@ type Table = keyof typeof entities;
 let app: INestApplication;
 let repos: Record<Table, ReturnType<typeof memoryRepo>>;
 let currentUser: string;
-/** Group memberships by userId, read by the groupId rule on push. */
+
 let memberships: Map<string, { groupId: string; userId: string; role: GroupRole; joinedAt: Date }>;
 
 beforeEach(async () => {

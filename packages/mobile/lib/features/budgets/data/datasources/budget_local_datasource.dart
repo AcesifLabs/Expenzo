@@ -11,8 +11,6 @@ abstract class BudgetLocalDatasource {
   Future<void> createBudget(domain.Budget budget);
   Future<void> updateBudget(domain.Budget budget);
 
-  /// Deletes the budget and unlinks its records. Returns the unlinked record
-  /// rows so the repository can enqueue them for sync.
   Future<List<Record>> deleteBudget(String id);
   Stream<List<domain.Budget>> watchBudgets();
 }

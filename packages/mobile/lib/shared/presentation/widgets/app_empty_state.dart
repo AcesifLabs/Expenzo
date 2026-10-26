@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'scrollable_center.dart';
 
-/// Says a list is empty and, with [actionLabel] and [onAction], offers the
-/// next step ("No budgets yet" + "New budget").
 class AppEmptyState extends StatelessWidget {
   final IconData icon;
   final String message;

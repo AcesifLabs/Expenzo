@@ -3,26 +3,9 @@ import 'package:expense_tracker/core/api/api_client.dart';
 import 'package:http_mock_adapter/http_mock_adapter.dart';
 import 'package:mocktail/mocktail.dart';
 
-/// An [ApiClient] to hand a [faultyDio].
 class FaultApiClient extends Mock implements ApiClient {}
 
-/// Ways a server or network can fail a request.
-enum NetworkFault {
-  /// HTTP 500 with an error body.
-  serverError,
-
-  /// HTTP 200 with an empty JSON object.
-  emptyBody,
-
-  /// HTTP 200 with an HTML page, as a captive portal sends.
-  html,
-
-  /// No answer before the connection timeout.
-  timeout,
-
-  /// HTTP 401, as when the session expired and can't be renewed.
-  unauthorized,
-}
+enum NetworkFault { serverError, emptyBody, html, timeout, unauthorized }
 
 class _AnyRequest extends HttpRequestMatcher {
   const _AnyRequest();
@@ -31,7 +14,6 @@ class _AnyRequest extends HttpRequestMatcher {
   bool matches(RequestOptions ongoingRequest, Request matcher) => true;
 }
 
-/// A [Dio] whose every request fails with [fault].
 Dio faultyDio(NetworkFault fault) {
   final dio = Dio(BaseOptions(baseUrl: 'https://api.test'));
   DioAdapter(dio: dio, matcher: const _AnyRequest()).onGet('/', (server) {

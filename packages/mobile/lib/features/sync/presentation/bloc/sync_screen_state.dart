@@ -12,10 +12,8 @@ class SyncScreenState extends Equatable {
   final SyncOverview? overview;
   final bool isSyncing;
 
-  /// Failed Sync Changes: rejected 5 times, waiting for the user's Retry.
   final int failedCount;
 
-  /// The last "Sync now" result, shown once; cleared by the next request.
   final SyncRunResult? lastResult;
 
   @override
@@ -35,9 +33,6 @@ class SyncScreenState extends Equatable {
     this.lastResult,
   });
 
-  /// Pass [lastResult] to replace it, including `null` to clear. Leaving it
-  /// out keeps the current value so a pending-count or syncing update does
-  /// not drop the snackbar result.
   SyncScreenState copyWith({
     SyncScreenLoadStatus? loadStatus,
     SyncOverview? overview,

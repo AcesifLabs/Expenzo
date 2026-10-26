@@ -1,9 +1,3 @@
-// Compares the perf run's timeline summaries with perf_baseline.json and
-// prints GitHub warnings. Never fails: emulator frame times are too noisy to
-// gate on (plan Q6).
-//
-//   dart scripts/perf_compare.dart            compare
-//   dart scripts/perf_compare.dart --update   write a new baseline
 import 'dart:convert';
 import 'dart:io';
 
@@ -14,11 +8,9 @@ const _metrics = [
   'missed_frame_build_budget_count',
 ];
 
-/// Over this share of frames missing their budget is a warning.
 const _missedShareLimit = 0.02;
 const _worstFrameLimitMs = 32;
 
-/// A metric this much worse than its baseline is a warning.
 const _regressionLimit = 1.2;
 
 Map<String, dynamic> _summary(String scenario) =>

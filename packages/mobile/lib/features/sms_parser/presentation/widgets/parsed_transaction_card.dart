@@ -59,7 +59,6 @@ class ParsedTransactionCard extends StatelessWidget {
         ? colors.primary
         : colors.onSurface.withAlpha(180);
 
-    // Wraps onto a second line at large text sizes.
     return Wrap(
       spacing: AppSpacing.sm,
       runSpacing: AppSpacing.xs,
@@ -87,8 +86,7 @@ class ParsedTransactionCard extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.only(top: AppSpacing.xs),
-          // The whole card is the tap target and reads as checked; the box
-          // only shows it.
+
           child: ExcludeSemantics(
             child: SizedBox(
               width: 20,

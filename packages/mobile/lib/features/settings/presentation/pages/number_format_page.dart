@@ -24,7 +24,6 @@ class NumberFormatPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // SettingsBloc is an app-wide singleton; `create` would close it on pop.
     return BlocProvider.value(
       value: di.getIt<SettingsBloc>(),
       child: const Scaffold(body: NumberFormatView()),
@@ -32,17 +31,12 @@ class NumberFormatPage extends StatelessWidget {
   }
 }
 
-/// Decimal places and digit grouping for every amount, with a live preview.
-/// Merges the design's NumberFormatScreen and ThousandsSeparatorScreen;
-/// apostrophe and "no separator" were cut (docs/adr/0011).
 class NumberFormatView extends StatelessWidget {
-  /// The sample amount here and in the Settings row subtitle.
   static const previewAmount = 1234.56;
   static const _groupingSample = 123456789.0;
 
   const NumberFormatView({super.key});
 
-  /// An option's sample, through the same code path as real amounts.
   static String _sample(
     double value,
     int decimalPlaces,
@@ -77,8 +71,6 @@ class NumberFormatView extends StatelessWidget {
       title: numberFormatT.sections.decimalPlaces,
       children: [
         for (final places in NumberDisplayFormat.allowedDecimalPlaces)
-          // A currency never gains decimals (yen has none), so more places
-          // than it has would change nothing.
           SettingsChoiceTile(
             title: numberFormatT.places.count(n: places),
             subtitle: places > currency.decimalDigits

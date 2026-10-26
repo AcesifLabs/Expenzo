@@ -52,7 +52,7 @@ void main() {
 
     test('allows finance questions asked in Bangla', () {
       expect(validateAiPrompt('এই মাসে আমার খরচ কত?').isAllowed, isTrue);
-      // য় typed as য + nukta must match the single-letter keyword.
+
       expect(validateAiPrompt('আমার \u0986\u09AF\u09BC কত?').isAllowed, isTrue);
     });
 
@@ -97,8 +97,6 @@ void main() {
     });
 
     test('Bangla keywords match whole words, not parts of words', () {
-      // A prompt with no finance word is refused; suffixed keywords
-      // (বিলের, টাকায়) still count.
       expect(validateAiPrompt('আজ শিল্পকলা নিয়ে গল্প বলো').isAllowed, isFalse);
       expect(validateAiPrompt('আমার বিলের পরিমাণ কত?').isAllowed, isTrue);
       expect(validateAiPrompt('এই মাসে টাকায় কত খরচ হলো?').isAllowed, isTrue);

@@ -30,8 +30,6 @@ abstract class RecordLocalDatasource {
     List<String> sourceIds,
   );
 
-  /// Returns the ids inserted; records of an already-imported message are
-  /// skipped.
   Future<Set<String>> addRecordsBatch(List<rec.Record> records);
   Future<List<rec.Record>> getRecordsByCategoryAndDateRange(
     String categoryId,
@@ -47,7 +45,6 @@ abstract class RecordLocalDatasource {
 
   Future<double> getTotalSpending(DateTime start, DateTime end);
 
-  /// Expense spend per budget over each budget's own [start, end) period.
   Future<Map<String, double>> getSpendingForBudgets(
     Map<String, ({DateTime start, DateTime end})> periods,
   );
@@ -60,10 +57,8 @@ abstract class RecordLocalDatasource {
 
   Stream<List<rec.Record>> watchFilteredRecords(RecordFilter filter);
 
-  /// Returns the number of records that reference [categoryId].
   Future<int> getRecordCountByCategory(String categoryId);
 
-  /// Returns the number of records per category id.
   Future<Map<String, int>> getCategoryRecordCounts();
 }
 

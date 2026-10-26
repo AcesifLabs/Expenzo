@@ -108,7 +108,7 @@ class _AiAssistantContentState extends State<_AiAssistantContent> {
   Widget _buildSuggestionRow() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-      // Scrolls sideways at large text sizes, keeping one line.
+
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(

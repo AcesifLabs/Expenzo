@@ -12,7 +12,6 @@ void main() {
   late _MockRecordRepository repository;
   late GetWeeklySummary getWeeklySummary;
 
-  // Sunday evening; the week started Monday Oct 12.
   final now = DateTime(2026, 10, 18, 20);
   final weekStart = DateTime(2026, 10, 12);
 
@@ -86,7 +85,6 @@ void main() {
   });
 
   test('a Saturday start sums from the last Saturday', () async {
-    // Friday evening, the summary time for a Saturday start.
     final friday = DateTime(2026, 10, 16, 20);
     when(
       () => repository.getTotalSpending(DateTime(2026, 10, 10), friday),

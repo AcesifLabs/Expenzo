@@ -7,8 +7,8 @@ plugins {
     id("com.google.gms.google-services")
 }
 
-// Local signing credentials (git-ignored). CI injects these via environment
-// variables instead, which take precedence over the file.
+
+
 val keystoreProperties = Properties().apply {
     val keystorePropertiesFile = rootProject.file("key.properties")
     if (keystorePropertiesFile.exists()) {
@@ -49,8 +49,8 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         multiDexEnabled = true
-        // Patrol end-to-end tests (integration_test/, `patrol test`). Each
-        // test starts from cleared app data.
+        
+        
         testInstrumentationRunner = "pl.leancode.patrol.PatrolJUnitRunner"
         testInstrumentationRunnerArguments["clearPackageData"] = "true"
     }

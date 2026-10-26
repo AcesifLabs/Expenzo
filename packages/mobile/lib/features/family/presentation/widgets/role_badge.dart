@@ -5,9 +5,6 @@ import 'package:flutter/material.dart';
 import '../../domain/entities/group_role.dart';
 import '../helpers/member_actions.dart';
 
-/// A member's Group Role as a pill; Admin in the accent colour.
-/// (`AppBadge` tints its background from the text colour, so it can't
-/// keep this neutral fill.)
 class RoleBadge extends StatelessWidget {
   final GroupRole role;
 

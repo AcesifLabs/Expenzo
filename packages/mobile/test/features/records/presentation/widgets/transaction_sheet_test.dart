@@ -223,7 +223,7 @@ void main() {
 
     await tester.tap(find.text('Income'));
     await tester.pump();
-    // The real bloc answers LoadCategories(type: income) with income ones.
+
     final incomeOnly = CategoryLoaded([salary], type: RecordType.income);
     when(() => categoryBloc.state).thenReturn(incomeOnly);
     categories.add(incomeOnly);
@@ -409,8 +409,6 @@ void main() {
   });
 
   group('show all budgets', () {
-    // The picker itself is covered in all_budgets_picker_page_test.dart; here
-    // a stand-in page pops what the real one would.
     Future<Object?> pumpSheetWithPicker(
       WidgetTester tester, {
       required String? pickerResult,
@@ -419,7 +417,7 @@ void main() {
       tester.view.devicePixelRatio = 2.625;
       addTearDown(tester.view.reset);
       Object? pickerExtra;
-      // Saving closes the sheet, so it sits on a route above a blank root.
+
       final router = GoRouter(
         initialLocation: '/sheet',
         routes: [
@@ -505,7 +503,6 @@ void main() {
 
     setUp(() => recurring = _MockRecurringRepository());
 
-    // Hosts the sheet on a pushed route so it can close itself.
     Future<void> openSheet(WidgetTester tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 2.625;
@@ -544,7 +541,7 @@ void main() {
       await tester.tap(find.text('1').first);
       await tester.tap(find.text('2').first);
       await tester.enterText(find.byType(TextField).first, 'Internet');
-      // The hint text sits under the dropdown's tap target; tap the dropdown.
+
       await tester.tap(
         find.ancestor(
           of: find.text('Select a category'),
@@ -586,8 +583,7 @@ void main() {
       when(
         () => recurring.createRecurring(any()),
       ).thenAnswer((_) async => const Left(CacheFailure(message: 'db locked')));
-      // The sheet logs the expected failure; keep the test output clean.
-      // Restored in the body: Flutter checks it before tear-downs run.
+
       final originalDebugPrint = debugPrint;
       debugPrint = (_, {wrapWidth}) {};
       try {

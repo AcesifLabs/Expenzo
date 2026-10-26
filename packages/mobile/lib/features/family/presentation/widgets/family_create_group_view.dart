@@ -18,8 +18,6 @@ import '../helpers/family_form_validators.dart';
 import 'family_bottom_button.dart';
 import 'family_icon_header.dart';
 
-/// Frame `FamilyCreateGroup`: shown on Settings → Family group when the
-/// user is in no group. The group's Currency is the user's.
 class FamilyCreateGroupView extends StatefulWidget {
   const FamilyCreateGroupView({super.key});
 
@@ -33,7 +31,6 @@ class _FamilyCreateGroupViewState extends State<FamilyCreateGroupView> {
   final _budget = TextEditingController();
 
   void _onCreated(BuildContext context, FamilyState _) {
-    // The Invite screen makes the first code when it opens.
     context.pushReplacement(FamilyRoute.invite.location);
   }
 
@@ -53,7 +50,6 @@ class _FamilyCreateGroupViewState extends State<FamilyCreateGroupView> {
 
   String? _validateBudget(String? value) => validateMonthlyBudget(value ?? '');
 
-  /// Name and budget fields, the Currency note and the join link.
   List<Widget> _buildFields(BuildContext context) {
     final createT = t.family.create;
     final palette = context.palette;

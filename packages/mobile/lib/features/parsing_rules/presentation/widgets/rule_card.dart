@@ -84,7 +84,7 @@ class RuleCard extends StatelessWidget {
             Text(_getSourceLabel(), style: theme.textTheme.bodySmall),
           ],
         ),
-        // Its own label: a tap on the card opens the rule instead.
+
         trailing: Semantics(
           label: rule.name,
           child: Switch(value: rule.isEnabled, onChanged: onToggle),

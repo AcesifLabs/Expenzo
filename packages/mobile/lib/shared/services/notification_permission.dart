@@ -5,9 +5,6 @@ import 'package:expense_tracker/features/settings/domain/entities/notification_t
 import 'package:expense_tracker/features/settings/presentation/bloc/settings_bloc.dart';
 import 'package:expense_tracker/features/settings/presentation/bloc/settings_state.dart';
 
-/// Budget alerts are on by default, but Android 13+ only shows notifications
-/// once the user allows them. Ask at the moment alerts start to matter (the
-/// first budget is created), and only if Android can still show the prompt.
 Future<void> requestBudgetAlertPermissionIfNeeded() async {
   if (!di.getIt.isRegistered<SettingsBloc>()) return;
   final state = di.getIt<SettingsBloc>().state;
@@ -22,12 +19,10 @@ Future<void> requestBudgetAlertPermissionIfNeeded() async {
     final status = await Permission.notification.status;
     if (status.isDenied) await Permission.notification.request();
   } catch (e, s) {
-    // Best effort: a failed prompt must never break the screen that asked.
     appLogger.error('Notification permission request failed', e, s);
   }
 }
 
-/// Asks Android for permission to post notifications.
 Future<bool> requestNotificationPermission() async =>
     (await Permission.notification.request()).isGranted;
 

@@ -41,7 +41,6 @@ class CategoryDonutChart extends StatelessWidget {
       );
     }
 
-    // Its own layer: scrolling the report doesn't repaint the chart.
     return RepaintBoundary(
       child: SizedBox(
         width: 160,

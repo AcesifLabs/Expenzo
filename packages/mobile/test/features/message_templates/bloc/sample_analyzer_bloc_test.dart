@@ -101,10 +101,6 @@ void main() {
     await Future<void>.delayed(const Duration(milliseconds: 30));
   }
 
-  /// Dispatches `LoadSamples` AND pushes the initial Drift-watcher
-  /// snapshot so the bloc's `await watchTemplatesForSource(...).first`
-  /// resolves and the first `SampleAnalyzerLoaded` state carries the
-  /// seeded `templatesBySample` for `testMessage.body`.
   Future<void> loadSamplesWithTemplates() async {
     bloc.add(const LoadSamples(contactId: 'bKash', sourceId: 'src-1'));
     await pumpBloc();
@@ -180,14 +176,14 @@ void main() {
         await pumpBloc();
 
         final state = bloc.state as SampleAnalyzerLoaded;
-        // Loaded survives — message list and template map intact.
+
         expect(state.messages, [
           nonMatchingMessage,
           matchingMessage,
           testMessage,
         ]);
         expect(state.templatesBySample.containsKey(testMessage.body), isTrue);
-        // PendingDeletion cleared and the failure surfaced via lastError.
+
         expect(state.pendingDeletion, isNull);
         expect(state.lastError, t.messageTemplates.errors.deleteFailed);
       },
@@ -210,11 +206,6 @@ void main() {
         bloc.add(TemplateDeleted(testTemplate));
         await pumpBloc();
 
-        // Simulate the Drift watcher firing the post-delete snapshot
-        // (template removed from the source). Without this tick the
-        // `templatesBySample` map would still hold the deleted entry,
-        // the conflict guard would fire falsely, and the undo would be
-        // dropped.
         watcherController.add(const <ExpenseTemplate>[]);
         await pumpBloc();
 
@@ -232,11 +223,6 @@ void main() {
     test(
       'drops undo silently when a template already covers the sample',
       () async {
-        // Kitchen-sink scenario: delete T1, the Drift watcher fires
-        // with a fresh replacement T2 for the same sampleMessage, then
-        // the user taps Undo on the in-flight SnackBar. Bloc must NOT
-        // call saveTemplate because the conflict guard has already
-        // detected the new entry.
         final replacement = testTemplate.copyWith(
           id: 'tmpl-2',
           sourceId: testTemplate.sourceId,
@@ -284,7 +270,6 @@ void main() {
       bloc.add(TemplateDeleted(testTemplate));
       await pumpBloc();
 
-      // Post-delete watcher tick so the conflict guard doesn't fire.
       watcherController.add(const <ExpenseTemplate>[]);
       await pumpBloc();
 

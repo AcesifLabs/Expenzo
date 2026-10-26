@@ -62,8 +62,6 @@ void main() {
 
   tearDown(() => di.getIt.reset());
 
-  /// The bloc is made here, inside the test's fake-async zone, so its
-  /// stream reaches the widgets.
   Future<void> pumpOnboarding(WidgetTester tester) async {
     final getSettings = _MockGetSettings();
     when(

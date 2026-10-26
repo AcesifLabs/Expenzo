@@ -13,7 +13,7 @@ jobs:
     environment: mobile-internal
 
     env:
-      # Symbol upload is skipped until the SENTRY_AUTH_TOKEN secret exists.
+
       HAS_SENTRY: ${{ secrets.SENTRY_AUTH_TOKEN != '' }}
 
     defaults:
@@ -109,7 +109,7 @@ jobs:
         if: env.HAS_SENTRY == 'true'
         run: |
           set -euo pipefail
-          # Matches the release sentry_flutter reports from package info.
+
           APP_ID="$(sed -n 's/.*applicationId = "\(.*\)".*/\1/p' android/app/build.gradle.kts)"
           SENTRY_RELEASE="$APP_ID@$BUILD_NAME+$BUILD_NUMBER" dart run sentry_dart_plugin
         env:

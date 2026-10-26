@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Fails when line coverage drops below coverage_baseline.txt. Generated code
-# (*.g.dart) and translations (lib/i18n) don't count.
-# Run `flutter test --coverage` first. When coverage passes the baseline by
-# 2 points, raise the baseline in the same PR.
+
+
+
+
 set -euo pipefail
 cd "$(dirname "$0")/.."
 

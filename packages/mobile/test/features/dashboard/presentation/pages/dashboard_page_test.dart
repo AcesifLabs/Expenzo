@@ -96,7 +96,6 @@ void main() {
     when(() => getCategories(any())).thenAnswer((_) async => const Right([]));
 
     di.getIt
-      // Marks feature DI as done so the real modules never load.
       ..registerSingleton<Future<void>>(
         Future<void>.value(),
         instanceName: 'featureReady',

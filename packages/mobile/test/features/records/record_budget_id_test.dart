@@ -53,7 +53,6 @@ void main() {
   test('sync payload round-trips budgetId', () async {
     final handler = RecordsSyncHandler();
 
-    // Insert a row via the sync inbound path carrying a budgetId.
     final companion = handler.fromSyncPayload('sync-r1', {
       'amount': -30.0,
       'description': 'Synced expense',
@@ -67,7 +66,6 @@ void main() {
       db.records,
     )..where((t) => t.id.equals('sync-r1'))).getSingle();
 
-    // Outbound payload preserves the budgetId.
     final payload = handler.toSyncPayload(row);
     expect(payload['budgetId'], 'budget-sync');
   });

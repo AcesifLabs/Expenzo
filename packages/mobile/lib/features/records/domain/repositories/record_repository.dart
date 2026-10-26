@@ -28,19 +28,14 @@ abstract class RecordRepository {
 
   Stream<List<Record>> watchRecords({int? limit, int? offset});
 
-  /// The records matching [filter], sent again whenever the records change.
   Stream<List<Record>> watchFilteredRecords(RecordFilter filter);
 
-  /// Checks if a record exists for the given [sourceId].
-  ///
-  /// Returns [Right(bool)] on success, [Left(CacheFailure)] on failure.
   Future<Either<CacheFailure, bool>> recordExistsBySourceId(String sourceId);
 
   Future<Either<CacheFailure, Set<String>>> getExistingSourceIds(
     List<String> sourceIds,
   );
 
-  /// Absolute amounts of the records stored under each of [sourceIds].
   Future<Either<CacheFailure, Map<String, List<double>>>> getAmountsBySourceIds(
     List<String> sourceIds,
   );
@@ -64,10 +59,6 @@ abstract class RecordRepository {
     DateTime end,
   );
 
-  /// Expense spend per budget id, each over its own half-open [start, end)
-  /// period, read in a single query. Every requested id is in the result.
-  ///
-  /// Returns [Right(Map)] on success, [Left(CacheFailure)] on failure.
   Future<Either<CacheFailure, Map<String, double>>> getSpendingForBudgets(
     Map<String, ({DateTime start, DateTime end})> periods,
   );
@@ -77,14 +68,7 @@ abstract class RecordRepository {
     DateTime end,
   );
 
-  /// Returns the number of records that reference [categoryId].
-  ///
-  /// Returns [Right(int)] on success, [Left(CacheFailure)] on failure.
   Future<Either<CacheFailure, int>> getRecordCountByCategory(String categoryId);
 
-  /// Returns the number of records per category id. Categories with no
-  /// records are absent from the map.
-  ///
-  /// Returns [Right(Map)] on success, [Left(CacheFailure)] on failure.
   Future<Either<CacheFailure, Map<String, int>>> getCategoryRecordCounts();
 }

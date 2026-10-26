@@ -10,8 +10,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../domain/entities/group_summary.dart';
 
-/// "Shared budget progress": each Shared Budget's server spent against its
-/// effective amount this period.
 class SharedBudgetProgressList extends StatelessWidget {
   final GroupSummary summary;
 

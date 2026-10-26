@@ -23,8 +23,6 @@ class LoadReports extends ReportsEvent {
   });
 }
 
-/// Reloads the same length of range, ending now, so records added since the
-/// tab was first opened are included.
 class RefreshReports extends ReportsEvent {
   const RefreshReports();
 }

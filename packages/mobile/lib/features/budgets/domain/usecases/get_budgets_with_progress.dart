@@ -10,8 +10,6 @@ import '../entities/budget.dart';
 import '../repositories/budget_repository.dart';
 import 'get_budget_progress.dart';
 
-/// The server's spent for a Shared Budget in the period starting at
-/// [periodStart], or null when it has none for that period.
 typedef SharedSpentLookup =
     double? Function(String budgetId, DateTime periodStart);
 
@@ -19,12 +17,8 @@ class GetBudgetsWithProgress {
   final BudgetRepository budgetRepository;
   final RecordRepository recordRepository;
 
-  /// Shared Budget progress comes from the server (CONTEXT.md Shared
-  /// Budget): local Records are only this member's share of it.
   final SharedSpentLookup? sharedSpent;
 
-  // Optional: without Family Groups every budget is local.
-  // ignore: unnecessary-nullable
   GetBudgetsWithProgress({
     required this.budgetRepository,
     required this.recordRepository,
@@ -46,14 +40,12 @@ class GetBudgetsWithProgress {
           budget.period,
         ),
     };
-    // One query for every budget's spend, not one per budget: this runs
-    // after every save (budget alerts) and on every budget screen load.
+
     final spentById = await _spending({
       for (final entry in periods.entries)
         entry.key: (start: entry.value.start, end: entry.value.end),
     });
-    // A second query: the spending query keys rows by budget id, so a budget
-    // can't have two periods in one call.
+
     final previous = _previousPeriods(budgets, periods);
     final previousSpentById = previous.isEmpty
         ? const <String, double>{}
@@ -76,8 +68,6 @@ class GetBudgetsWithProgress {
     return Right(results);
   }
 
-  /// The previous period of each budget that can carry money over: local,
-  /// rollover on, and already running then.
   Map<String, ({DateTime start, DateTime end})> _previousPeriods(
     List<Budget> budgets,
     Map<String, DateTimeRange> periods,
@@ -106,8 +96,6 @@ class GetBudgetsWithProgress {
     periods,
   )).fold((_) => const <String, double>{}, (spent) => spent);
 
-  /// [previousSpent] holds only budgets with a previous period to carry
-  /// over from (see [_previousPeriods]).
   BudgetProgress _progress(
     Budget budget,
     DateTimeRange period, {
@@ -120,8 +108,7 @@ class GetBudgetsWithProgress {
         ? localSpent
         : sharedSpent?.call(id, period.start) ?? localSpent;
     final spentBefore = previousSpent[id];
-    // Rollover (CONTEXT.md): what the previous period left unspent, never
-    // less than zero.
+
     final rollover = spentBefore == null
         ? 0.0
         : max(0.0, budget.amount - spentBefore);

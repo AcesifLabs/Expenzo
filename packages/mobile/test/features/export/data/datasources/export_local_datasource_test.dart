@@ -68,8 +68,6 @@ void main() {
     ExportRange range = ExportRange.allTime,
   }) => ExportRequest(range: range, contents: contents);
 
-  /// The CSV rows of [bytes], after checking the UTF-8 BOM. `utf8.decode`
-  /// drops the BOM itself.
   List<String> lines(List<int> bytes) {
     expect(bytes.take(3), [0xEF, 0xBB, 0xBF], reason: 'missing UTF-8 BOM');
 

@@ -4,15 +4,11 @@ import 'package:expense_tracker/core/utils/week_utils.dart';
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
 import '../entities/weekly_summary.dart';
 
-/// Spending from the start of this week to [now], against the same span one
-/// week earlier, so a late summary still compares equal spans.
 class GetWeeklySummary {
   final RecordRepository repository;
 
   GetWeeklySummary(this.repository);
 
-  // Null means the week start from the language.
-  // ignore: unnecessary-nullable
   Future<Either<Failure, WeeklySummary>> call({
     required DateTime now,
     int? firstWeekday,

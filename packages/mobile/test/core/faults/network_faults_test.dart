@@ -13,7 +13,6 @@ import '../../support/factories/family_factory.dart';
 import '../../support/fault_dio.dart';
 import '../sync/sync_engine_harness.dart';
 
-/// What each server or network fault shows, never a crash or a blank.
 void main() {
   final errors = t.common.errors;
 

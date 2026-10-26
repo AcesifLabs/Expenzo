@@ -38,7 +38,7 @@ void main() {
       expect(r.id, 'custom-id');
       expect(r.amount, 99.99);
       expect(r.recordType, RecordType.income);
-      expect(r.description, 'Test expense'); // default preserved
+      expect(r.description, 'Test expense');
     });
 
     test('makeBudget with defaults produces a valid Budget', () {

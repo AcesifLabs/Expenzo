@@ -17,7 +17,6 @@ class MockSyncQueueDao extends Mock implements SyncQueueDao {}
 
 class _BudgetFake extends Fake implements Budget {}
 
-/// Builds a drift Record row (already unlinked) for enqueue assertions.
 db.Record _record(String id) {
   final now = DateTime(2026, 1, 1);
   return db.Record(

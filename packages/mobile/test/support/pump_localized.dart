@@ -5,18 +5,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'connectivity_test_support.dart';
 
-/// Puts the app's translations above an existing [app] (a `MaterialApp` or
-/// `MaterialApp.router`) so widgets can read `context.t`. English only; use
-/// [localizedApp] to render another locale.
 Widget translated(Widget app) {
   LocaleSettings.setLocaleSync(AppLocale.en);
 
   return TranslationProvider(child: app);
 }
 
-/// A [MaterialApp] with the app's translations, for widget tests.
-///
-/// Also switches the global `t` so non-widget code under test matches.
 Widget localizedApp({
   required Widget home,
   AppLocale locale = AppLocale.en,
@@ -35,7 +29,6 @@ Widget localizedApp({
   );
 }
 
-/// Pumps [home] inside [localizedApp]. [wrap] puts providers above the app.
 Future<void> pumpLocalized(
   WidgetTester tester,
   Widget home, {
@@ -47,7 +40,6 @@ Future<void> pumpLocalized(
   final app = localizedApp(home: home, locale: locale, theme: theme);
 
   await tester.pumpWidget(wrap == null ? app : wrap(app));
-  // Let [OfflineGate] finish its async connectivity probe (mock returns
-  // immediately on the next microtask).
+
   await tester.pump();
 }

@@ -1,8 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-/// A server value and when it was fetched. [fromCache] is true when the
-/// fetch failed and this is the copy saved on the device (ADR 0008: show
-/// "last updated" when offline).
 class Cached<T> extends Equatable {
   final T value;
   final DateTime fetchedAt;

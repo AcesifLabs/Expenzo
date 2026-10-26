@@ -19,8 +19,6 @@ class SignOutRequested extends AuthEvent {
   const SignOutRequested();
 }
 
-/// Sync was switched on before the first sync ran: run the first-sync
-/// conflict check now.
 class FirstSyncRequested extends AuthEvent {
   const FirstSyncRequested();
 }

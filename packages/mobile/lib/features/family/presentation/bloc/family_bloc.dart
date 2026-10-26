@@ -22,9 +22,6 @@ import '../../domain/usecases/update_member_role.dart';
 import 'family_event.dart';
 import 'family_state.dart';
 
-/// Drives the Family screens. A factory: each route makes its own, and
-/// each starts from the per-account cache, so every screen opens at once
-/// and shows the same group.
 class FamilyBloc extends Bloc<FamilyEvent, FamilyState> {
   final GetMyGroup getMyGroup;
   final GetGroupSummary getGroupSummary;
@@ -93,7 +90,6 @@ class FamilyBloc extends Bloc<FamilyEvent, FamilyState> {
     }
     final fresh = await getMyGroup(const GetMyGroupParams());
     fresh.fold(
-      // With a cached group on screen, keep showing it.
       (failure) => emit(
         state.group == null
             ? state.copyWith(status: FamilyStatus.failure, failure: failure)
@@ -101,7 +97,7 @@ class FamilyBloc extends Bloc<FamilyEvent, FamilyState> {
       ),
       (group) => _emitGroup(emit, group),
     );
-    // Fresh or cached: the summary falls back to its own cache offline.
+
     final myGroup = state.myGroup;
     if (myGroup != null) await _fetchSummaryFor(myGroup, emit);
   }
@@ -148,7 +144,7 @@ class FamilyBloc extends Bloc<FamilyEvent, FamilyState> {
 
       return;
     }
-    // No invite here: the Invite screen asks for one when it opens.
+
     final result = await createGroup(
       CreateGroupParams(
         name: event.name,
@@ -178,8 +174,7 @@ class FamilyBloc extends Bloc<FamilyEvent, FamilyState> {
 
       return;
     }
-    // Pull the Shared Budgets now; the engine retries on its own if this
-    // run fails.
+
     final sync = await syncNow();
     _afterGroupAction(
       emit,
@@ -285,11 +280,10 @@ class FamilyBloc extends Bloc<FamilyEvent, FamilyState> {
       return;
     }
     emit(state.copyWith(busy: false, lastAction: FamilyAction.removed));
-    // The server may have changed more (a new Admin, Shared Budgets).
+
     await _load(emit, preferCache: false);
   }
 
-  /// Shows [members] at once; the server answer confirms or undoes it.
   void _applyOptimistic(
     Emitter<FamilyState> emit,
     Cached<MyGroup?> previous,
@@ -351,7 +345,6 @@ class FamilyBloc extends Bloc<FamilyEvent, FamilyState> {
     );
   }
 
-  /// NOT_IN_GROUP means the group went away under us; screens then leave.
   void _emitFailure(Emitter<FamilyState> emit, Failure failure) {
     if (_isNotInGroup(failure)) {
       _emitRemoved(emit);

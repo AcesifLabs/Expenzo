@@ -9,20 +9,14 @@ import 'package:expense_tracker/core/sync/sync_table_registry.dart';
 import '../../domain/entities/local_data_summary.dart';
 
 abstract class DataWipeLocalDatasource {
-  /// Throws: [CacheException]
   Future<LocalDataSummary> countData();
 
-  /// Empties every table except the signed-in user, then adds the default
-  /// categories back.
-  ///
-  /// Throws: [CacheException]
   Future<void> wipeLocalData();
 }
 
 class DataWipeLocalDatasourceImpl implements DataWipeLocalDatasource {
   final AppDatabase db;
 
-  /// Counts reuse the sync handlers, which already know every synced table.
   final SyncTableRegistry registry;
 
   const DataWipeLocalDatasourceImpl({required this.db, required this.registry});
@@ -30,8 +24,6 @@ class DataWipeLocalDatasourceImpl implements DataWipeLocalDatasource {
   @override
   Future<LocalDataSummary> countData() async {
     try {
-      // Goals count only while a goals handler is registered; without one
-      // the row stays hidden.
       final goals = registry[SyncTableNames.goals];
       final (
         transactions,
@@ -76,7 +68,6 @@ class DataWipeLocalDatasourceImpl implements DataWipeLocalDatasource {
     }
   }
 
-  /// Rows in [table], through its sync handler; 0 when nothing syncs it.
   Future<int> _count(TableInfo<Table, Object?> table) async =>
       await registry[table.actualTableName]?.countRows(db) ?? 0;
 }

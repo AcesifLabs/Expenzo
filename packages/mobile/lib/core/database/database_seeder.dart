@@ -4,8 +4,6 @@ import '../theme/category_palette.dart';
 import 'app_database.dart';
 
 class DatabaseSeeder {
-  /// Seeded English name per default category id. A default category whose
-  /// stored name still matches is shown translated (`categoryDisplayName`).
   static final Map<String, String> seedNames = {
     for (final (id, name, _) in [..._incomeCategories, ..._expenseCategories])
       id: name,

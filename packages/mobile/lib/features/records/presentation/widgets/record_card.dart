@@ -10,12 +10,6 @@ import 'package:expense_tracker/core/theme/app_spacing.dart';
 import '../../domain/entities/record.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
-/// Interactive record card matching the .pen ActivityScreen design.
-///
-/// Shows: category tile | name, then "category · time" | signed amount.
-/// The Activity list groups cards under day headings, so only the time shows.
-/// Supports dismiss-to-delete and tap-to-edit.
-/// Requires [categoryInfo] to be resolved by the parent widget.
 class RecordCard extends StatelessWidget {
   final Record record;
   final VoidCallback onTap;
@@ -37,7 +31,6 @@ class RecordCard extends StatelessWidget {
       return CategoryTile(colorHex: colorHex, iconKey: iconKey);
     }
 
-    // Uncategorized: a neutral tile so the row still lines up.
     return Container(
       width: 40,
       height: 40,
@@ -79,7 +72,6 @@ class RecordCard extends StatelessWidget {
     );
   }
 
-  /// Stays on one line and shrinks to share the row at large text sizes.
   Widget _buildAmount(AppPalette palette, bool isNegative) {
     return Flexible(
       child: FittedBox(

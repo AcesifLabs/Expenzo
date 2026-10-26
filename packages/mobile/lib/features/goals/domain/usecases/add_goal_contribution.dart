@@ -18,7 +18,6 @@ class AddGoalContributionParams extends Equatable {
   const AddGoalContributionParams({required this.goalId, required this.amount});
 }
 
-/// Raises a goal's saved amount. Creates no Record (ADR 0009).
 class AddGoalContribution {
   final GoalRepository repository;
 

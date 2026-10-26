@@ -65,8 +65,7 @@ void main() {
   test('weekly buckets start on the first day of week', () async {
     WeekStart.current.value = FirstDayOfWeek.saturday;
     addTearDown(() => WeekStart.current.value = FirstDayOfWeek.monday);
-    // Saturday 2026-10-03 and the Friday after share a week; the next
-    // Saturday starts a new one.
+
     await spend('a', 100, DateTime(2026, 10, 3, 9));
     await spend('b', 50, DateTime(2026, 10, 9, 18));
     await spend('c', 30, DateTime(2026, 10, 10, 12));
@@ -78,7 +77,7 @@ void main() {
     );
 
     final trend = result.getOrElse(() => fail('expected a trend'));
-    // Oct 1 is a Thursday, so the first bucket starts Saturday Sep 26.
+
     expect(trend.map((d) => d.date), [
       DateTime(2026, 9, 26),
       DateTime(2026, 10, 3),

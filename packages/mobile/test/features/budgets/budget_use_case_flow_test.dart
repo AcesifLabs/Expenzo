@@ -71,7 +71,6 @@ void main() {
 
     setUpAll(() => registerFallbackValue(testBudget));
 
-    /// After a write the bloc reloads the list.
     void stubReload() {
       when(
         () => mockRepository.getBudgets(),

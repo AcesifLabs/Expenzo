@@ -3,7 +3,7 @@ import { CategoryType } from '../common/enums/category-type.enum';
 import { GroupSummaryService } from './group-summary.service';
 
 describe('GroupSummaryService', () => {
-  // Wednesday 15 April 2026, 12:00 UTC.
+  
   const now = new Date('2026-04-15T12:00:00Z');
   const repo = () => ({ findOne: jest.fn(), find: jest.fn().mockResolvedValue([]), query: jest.fn().mockResolvedValue([]) });
   let groups: ReturnType<typeof repo>;
@@ -97,7 +97,7 @@ describe('GroupSummaryService', () => {
   });
 
   it('should count monthSpent in the caller calendar month', async () => {
-    // A weekly budget started on Monday 13 April, so its window crosses months.
+    
     budgets.find.mockResolvedValue([budget('weekly', { period: BudgetPeriod.WEEKLY, startDate: new Date('2026-03-30T00:00:00Z') })]);
     records.query.mockResolvedValue([row('admin', 'weekly', '2026-04-14T10:00:00Z', '40')]);
 

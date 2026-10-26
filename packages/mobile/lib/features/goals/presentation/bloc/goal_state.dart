@@ -10,8 +10,6 @@ class GoalState extends Equatable {
   final String? errorText;
   final double? lastAdded;
 
-  /// Goes up on each saved contribution, so a listener fires even when the
-  /// same amount is added twice.
   final int contributionCount;
 
   @override
@@ -31,8 +29,6 @@ class GoalState extends Equatable {
     this.contributionCount = 0,
   });
 
-  /// [goal] can be cleared with [clearGoal]; [errorText] is cleared unless
-  /// given.
   GoalState copyWith({
     Goal? goal,
     bool clearGoal = false,

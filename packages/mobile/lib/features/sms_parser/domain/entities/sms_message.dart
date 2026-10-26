@@ -8,11 +8,8 @@ class SmsMessage extends Equatable {
   final String address;
   final String body;
 
-  /// When the phone received it.
   final DateTime date;
 
-  /// The time on the message itself (the inbox's `date_sent`), which a
-  /// live receipt also reports; null when the inbox doesn't have it.
   final DateTime? sentAt;
   final bool read;
   final SmsType type;

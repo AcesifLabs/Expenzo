@@ -1,19 +1,13 @@
 import 'package:flutter/material.dart';
 
-/// A category color the user can pick.
 class CategoryColor {
   final String name;
 
-  /// Stored on the category as `#RRGGBB`.
   final String hex;
 
   const CategoryColor(this.name, this.hex);
 }
 
-/// Category colors (DESIGN.md, "Category palette").
-///
-/// Categories render as a pastel tile behind an icon. These are data colors:
-/// they stay the same in light and dark mode.
 abstract final class CategoryPalette {
   static const lavender = CategoryColor('Lavender', '#D1C4E9');
   static const rose = CategoryColor('Rose', '#F8BBD0');
@@ -26,7 +20,6 @@ abstract final class CategoryPalette {
 
   static const all = [lavender, rose, mint, sky, amber, teal, peach, slate];
 
-  /// Colors for the seeded default categories, by category id.
   static final seedColors = <String, String>{
     'default_in_salary': mint.hex,
     'default_in_freelance': lavender.hex,
@@ -48,9 +41,6 @@ abstract final class CategoryPalette {
     'default_out_general': slate.hex,
   };
 
-  /// Seed colors before schema v17. Migration v17 only recolors a default
-  /// category whose color still equals this value; it is also the rollback
-  /// mapping if the recolor ever has to be undone.
   static const legacySeedColors = <String, String>{
     'default_in_salary': '#A2D3A4',
     'default_in_freelance': '#D1C4E9',
@@ -72,8 +62,6 @@ abstract final class CategoryPalette {
     'default_out_general': '#8E8E93',
   };
 
-  /// Dark icon on light tiles, white icon on dark ones, so colors users
-  /// picked before v17 (some are saturated) stay readable.
   static Color iconOn(Color tile) {
     return tile.computeLuminance() > 0.4
         ? const Color(0xFF1C1C1E)

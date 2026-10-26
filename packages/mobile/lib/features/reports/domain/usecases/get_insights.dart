@@ -93,8 +93,6 @@ class GetInsights {
     }
   }
 
-  /// The cheapest full calendar week (7 daily points from [firstWeekday]),
-  /// or null when [trend] holds none.
   _WeekRange? _findLowestWeek(List<DateAmount> trend, int firstWeekday) {
     if (trend.length < 7) return null;
 

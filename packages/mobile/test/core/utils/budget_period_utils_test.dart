@@ -3,7 +3,6 @@ import 'package:expense_tracker/core/constants/budget_period.dart';
 import 'package:expense_tracker/core/utils/budget_period_utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Every day of [year], at noon.
 Iterable<DateTime> _daysOf(int year) sync* {
   for (
     var d = DateTime(year, 1, 1, 12);

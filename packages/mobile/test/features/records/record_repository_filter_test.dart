@@ -38,8 +38,6 @@ void main() {
     repository = RecordRepositoryImpl(localDatasource: mockLocal);
   });
 
-  // Filtered lists come from this device's database, like every other
-  // list: records not yet synced must show, and guests have no server.
   group('RecordRepositoryImpl.getFilteredRecords', () {
     test('reads the filter, offset included, from this device', () async {
       when(

@@ -7,7 +7,6 @@ sealed class DeleteAccountEvent extends Equatable {
   const DeleteAccountEvent();
 }
 
-/// The user confirmed the Delete account dialog.
 class DeleteAccountRequested extends DeleteAccountEvent {
   const DeleteAccountRequested();
 }

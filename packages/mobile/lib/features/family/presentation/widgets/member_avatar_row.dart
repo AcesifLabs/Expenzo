@@ -10,7 +10,6 @@ import '../../domain/entities/my_group.dart';
 import '../helpers/family_dashboard_helpers.dart';
 import 'member_avatar.dart';
 
-/// Up to five member avatars, then "+N"; Admins also get "+" to invite.
 class MemberAvatarRow extends StatelessWidget {
   final MyGroup group;
 
@@ -65,7 +64,7 @@ class MemberAvatarRow extends StatelessWidget {
             child: InkWell(
               customBorder: const CircleBorder(),
               onTap: () => _openInvite(context),
-              // A 48 dp tap target around the 40 dp circle.
+
               child: SizedBox.square(
                 dimension: AppSpacing.minTapTarget,
                 child: Center(

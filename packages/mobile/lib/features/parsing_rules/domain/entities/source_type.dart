@@ -1,6 +1,5 @@
 import 'package:expense_tracker/i18n/strings.g.dart';
 
-/// Source type filter for parsing rules.
 enum SourceType {
   sms,
   email,

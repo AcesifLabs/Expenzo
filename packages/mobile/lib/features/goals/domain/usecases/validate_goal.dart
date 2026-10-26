@@ -5,11 +5,9 @@ import 'package:expense_tracker/i18n/strings.g.dart';
 
 import '../entities/goal.dart';
 
-/// A localized validation failure for the goal screens.
 Failure goalInputFailure(String message) =>
     CacheFailure(message: message, errorCode: FailureCodes.userMessage);
 
-/// The first problem with [goal], or null when it can be saved.
 Failure? validateGoal(Goal goal) {
   final errors = t.goals.errors;
   final amounts = [goal.targetAmount, goal.savedAmount];

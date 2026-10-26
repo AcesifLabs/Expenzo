@@ -41,7 +41,6 @@ class TokenStorage {
     await _storage.write(key: _isFirstSyncKey, value: 'false');
   }
 
-  /// Also forgets the sync history: a reset sync state has none.
   static Future<void> clearSyncState() async {
     await _storage.delete(key: _lastSyncKey);
     await _storage.delete(key: _isFirstSyncKey);
@@ -52,9 +51,6 @@ class TokenStorage {
     await _storage.deleteAll();
   }
 
-  /// [key]'s value, or null when the platform store can't be read (on
-  /// Android its keys can be lost, after a restore for example): the user is
-  /// then signed out and sync starts over, instead of the app failing.
   static Future<String?> _read(String key) async {
     try {
       return await _storage.read(key: key);

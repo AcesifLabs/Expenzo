@@ -128,7 +128,6 @@ void main() {
     registerFallbackValue(testRule);
     registerFallbackValue(GetRulesParams());
     when(() => mockRepository.createRule(any())).thenAnswer((_) async {
-      // A real write takes a moment; the second tap lands during it.
       await Future<void>.delayed(const Duration(milliseconds: 20));
 
       return Right(testRule);

@@ -75,7 +75,7 @@ class SmsLocalDatasourceImpl implements SmsLocalDatasource {
       address: message.address ?? '',
       body: message.body ?? '',
       date: date,
-      // Some phones store 0 when the network gave no time.
+
       sentAt: sentAt != null && sentAt.millisecondsSinceEpoch > 0
           ? sentAt
           : null,

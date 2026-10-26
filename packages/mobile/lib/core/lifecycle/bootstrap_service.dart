@@ -43,9 +43,6 @@ class BootstrapService {
     unawaited(retry());
   }
 
-  /// Starts the app again in this process: closes the database, drops every
-  /// dependency except this service, and mounts a new root, which runs
-  /// start-up from the beginning.
   Future<void> retry() async {
     await _closeDatabase();
     await GetIt.I.reset().catchError((Object _) => null);
@@ -53,10 +50,6 @@ class BootstrapService {
     await remountRoot();
   }
 
-  /// For a database file that can't be read: moves it aside and starts
-  /// again with an empty one. The sync state goes too, so the next sync
-  /// pulls everything again instead of only what changed since the last
-  /// pull into the old file.
   Future<void> resetLocalData({File? file}) async {
     await _closeDatabase();
     await setDatabaseFileAside(file ?? await databaseFile());

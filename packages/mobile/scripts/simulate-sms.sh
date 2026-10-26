@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Inject dummy bank/payment SMS into a running Android emulator.
-# Groups of messages share the same format; group sizes are random and sum to TOTAL.
-#
-# Usage:
-#   ./scripts/simulate-sms.sh              # 50 messages, auto-detect emulator
-#   ./scripts/simulate-sms.sh 30           # custom count
-#   ./scripts/simulate-sms.sh 50 emulator-5554
-#   DELAY_MS=200 ./scripts/simulate-sms.sh
+
+
+
+
+
+
+
+
 set -euo pipefail
 
 TOTAL="${1:-50}"
@@ -28,8 +28,8 @@ if [ -z "$DEVICE" ]; then
   exit 1
 fi
 
-# Each format: sender|body template with placeholders:
-#   {amt} {bal} {acct} {merchant} {ref} {date}
+
+
 FORMATS=(
   'VX-HDFCBK|HDFC Bank: Rs.{amt} debited from A/c **{acct} on {date} to {merchant}. Avl Bal: Rs.{bal}. Not you? Call 1800111222'
   'VM-ICICIB|ICICI Bank Acct XX{acct} debited for Rs {amt} on {date}; {merchant}. Available Balance: INR {bal}. Ref {ref}'
@@ -64,8 +64,8 @@ rand_pick() {
   echo "${arr[$((RANDOM % ${#arr[@]}))]}"
 }
 
-# Random partition of TOTAL into group sizes in [MIN_GROUP, MAX_GROUP].
-# Last group absorbs the remainder (may be smaller than MIN_GROUP).
+
+
 partition_groups() {
   local remaining=$TOTAL
   local sizes=()
@@ -112,8 +112,8 @@ format_message() {
 
 mapfile -t GROUP_SIZES < <(partition_groups)
 
-# Shuffle format indices so each group gets a distinct template until we wrap.
-FORMAT_COUNT=${#FORMATS[@]}
+
+FORMAT_COUNT=${
 mapfile -t FORMAT_ORDER < <(seq 0 $((FORMAT_COUNT - 1)) | shuf)
 
 echo "device: $DEVICE"
@@ -137,8 +137,8 @@ for size in "${GROUP_SIZES[@]}"; do
   gi=$((gi + 1))
 done
 
-# Shuffle send order so same-format messages are interleaved.
-ORDER=($(seq 0 $((${#MESSAGES[@]} - 1)) | shuf))
+
+ORDER=($(seq 0 $((${
 
 echo
 echo "sending ${#ORDER[@]} SMS..."
@@ -146,7 +146,7 @@ sent=0
 for idx in "${ORDER[@]}"; do
   sender="${SENDERS[$idx]}"
   body="${MESSAGES[$idx]}"
-  # adb emu sms send <from> <text...>
+
   adb -s "$DEVICE" emu sms send "$sender" "$body" >/dev/null
   sent=$((sent + 1))
   printf '\r  %d/%d' "$sent" "${#ORDER[@]}"

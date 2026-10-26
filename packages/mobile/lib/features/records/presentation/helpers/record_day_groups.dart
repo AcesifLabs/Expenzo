@@ -3,7 +3,6 @@ import 'package:intl/intl.dart';
 import '../../domain/entities/record.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
-/// Records that happened on the same calendar day, in list order.
 class RecordDayGroup {
   final DateTime day;
   final List<Record> records;
@@ -11,7 +10,6 @@ class RecordDayGroup {
   const RecordDayGroup(this.day, this.records);
 }
 
-/// Splits an already-sorted list into day groups, keeping the order.
 List<RecordDayGroup> groupRecordsByDay(List<Record> records) {
   final groups = <RecordDayGroup>[];
   for (final record in records) {
@@ -26,12 +24,10 @@ List<RecordDayGroup> groupRecordsByDay(List<Record> records) {
   return groups;
 }
 
-/// "Today", "Yesterday", "Mon, 6 Oct", or "Mon, 6 Oct 2025" for other years.
 String dayHeaderLabel(DateTime day, {DateTime? now}) {
   final current = now ?? clock.now();
   final today = DateTime(current.year, current.month, current.day);
-  // Count calendar days in UTC: local midnights can be 23 or 25 hours
-  // apart across a daylight-saving change.
+
   final difference = DateTime.utc(
     today.year,
     today.month,

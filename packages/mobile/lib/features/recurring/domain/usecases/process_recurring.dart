@@ -10,14 +10,6 @@ class ProcessRecurring {
 
   ProcessRecurring(this.repository);
 
-  ///
-  /// For each due recurring, advances occurrences until the next one is in the
-  /// future (catch-up). Respects [RecurringTransaction.endDate]. Each elapsed
-  /// occurrence produces one entry in the returned list.
-  ///
-  /// With [onlyIncluded] (an automatic run), items whose
-  /// [RecurringTransaction.autoCreateExpense] is false are left untouched:
-  /// neither returned nor advanced, so a manual run still posts them.
   Future<Either<Failure, List<RecurringTransaction>>> call({
     bool onlyIncluded = false,
   }) async {
@@ -60,8 +52,6 @@ class ProcessRecurring {
     );
   }
 
-  /// Advances [recurring] from its current [nextOccurrence] until the next
-  /// occurrence is in the future or exceeds [endDate].
   _CatchUpResult _catchUpRecurring(
     RecurringTransaction recurring,
     DateTime now,
@@ -84,8 +74,7 @@ class ProcessRecurring {
       current = calculateNextOccurrence(
         current,
         recurring.frequency,
-        // Items saved without a day of month keep their start day, so a
-        // short month doesn't move every later date to the 28th.
+
         dayOfMonth: recurring.dayOfMonth ?? recurring.startDate.day,
       );
       count++;
@@ -104,7 +93,6 @@ class ProcessRecurring {
   }
 }
 
-/// Result of catch-up processing for a single recurring transaction.
 class _CatchUpResult {
   final List<RecurringTransaction> processed;
   final RecurringTransaction updated;

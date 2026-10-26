@@ -4,8 +4,6 @@ import '../sync_table_names.dart';
 import '../sync_table_registry.dart';
 import 'sync_parse_helpers.dart';
 
-/// Savings goals (ADR 0009). `savedAmount` is last-write-wins like every
-/// synced field.
 class GoalsSyncHandler extends SyncTableHandler<$GoalsTable, Goal> {
   @override
   String get tableName => SyncTableNames.goals;
@@ -30,7 +28,7 @@ class GoalsSyncHandler extends SyncTableHandler<$GoalsTable, Goal> {
         name: parseSyncString(data['name']),
         targetAmount: parseSyncAmount(data['targetAmount']),
         savedAmount: Value(parseSyncAmount(data['savedAmount'])),
-        // parseSyncDate(null) returns now, so null must stay null here.
+
         targetDate: data['targetDate'] != null
             ? Value(parseSyncDate(data['targetDate']))
             : const Value(null),

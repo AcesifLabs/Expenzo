@@ -57,7 +57,7 @@ void _initParsingInfrastructure(GetIt getIt) {
       syncQueueDao: getIt<SyncQueueDao>(),
     ),
   );
-  // Settings → Matching rules.
+
   getIt.registerLazySingleton(() => GetRules(getIt<ParsingRulesRepository>()));
   getIt.registerLazySingleton(
     () => UpdateRule(getIt<ParsingRulesRepository>()),

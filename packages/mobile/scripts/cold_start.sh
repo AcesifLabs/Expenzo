@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Median cold-start time of an installed build over 10 launches. Warns, never
-# fails: emulator timings are too noisy to gate on.
-# Usage: scripts/cold_start.sh <device> [limit_ms]
+
+
+
 set -euo pipefail
 
 device="${1:?pass the device serial, e.g. emulator-5554}"

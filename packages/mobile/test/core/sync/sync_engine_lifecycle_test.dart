@@ -44,7 +44,6 @@ void main() {
     SyncEventBus().trigger();
     await pumpEventQueue();
 
-    // The restart pulled, and the trigger after it pulled again.
     expect(harness.pullCount(), 2);
   });
 

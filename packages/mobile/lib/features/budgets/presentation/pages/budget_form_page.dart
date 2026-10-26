@@ -56,21 +56,14 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
   BudgetPeriod _selectedPeriod = BudgetPeriod.monthly;
   bool _rolloverEnabled = false;
 
-  /// The budget being edited, once loaded; its groupId and rollover amount
-  /// are kept on save.
   Budget? _budget;
 
-  /// A Shared Budget someone else owns: shown, never saved (ADR 0008).
   var _readOnly = false;
 
-  /// The "Share with family" switch.
   var _shared = false;
 
-  /// The save changed whether the budget is shared.
   var _sharingChanged = false;
 
-  /// An Admin may share; a budget's owner may always unshare (CONTEXT.md
-  /// Shared Budget).
   bool get _showShareRow {
     final access = budgetAccess();
     final budget = _budget;
@@ -85,8 +78,6 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
   String? _amountError;
   String? _nameError;
 
-  /// Set when the budget to edit couldn't load. The form stays hidden,
-  /// so Save can't write blank fields over the real budget.
   String? _loadError;
 
   bool get isEditing => widget.budget != null || widget.budgetId != null;
@@ -155,7 +146,7 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
     _shared = budget?.groupId != null;
     if (budget != null) {
       _amountController.text = CurrencyFormatter.formatInput(budget.amount);
-      // A placeholder is not a name to edit; the user is asked for one.
+
       _nameController.text = isPlaceholderBudgetName(budget.name)
           ? ''
           : budget.name;
@@ -198,7 +189,6 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
       nameError = t.budgets.form.nameRequired;
       valid = false;
     } else if (isPlaceholderBudgetName(name)) {
-      // Sync reads this text as "no name"; see ADR 0012.
       nameError = t.budgets.form.nameReserved;
       valid = false;
     }
@@ -233,7 +223,6 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
     setState(() => _rolloverEnabled = value);
   }
 
-  /// The Family dashboard lists Shared Budgets from `/groups/me`.
   void _refreshGroup() {
     if (!di.getIt.isRegistered<GetMyGroup>()) return;
     unawaited(di.getIt<GetMyGroup>()(const GetMyGroupParams()));
@@ -245,7 +234,7 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
 
       return;
     }
-    // Unsharing a budget members already see asks first.
+
     unawaited(_confirmUnshare());
   }
 
@@ -279,8 +268,6 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
     );
   }
 
-  /// The groupId to save: the switch when it is shown, else unchanged, so
-  /// editing the amount never unshares by accident.
   String? _groupIdToSave() {
     final current = _budget?.groupId;
     if (!_showShareRow) return current;
@@ -342,7 +329,6 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
           _buildLabel(t.budgets.form.amount),
           const SizedBox(height: AppSpacing.sm),
           Container(
-            // Grows with large text.
             constraints: const BoxConstraints(
               minHeight: AppSpacing.fieldHeight,
             ),
@@ -389,7 +375,7 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
                       enabledBorder: InputBorder.none,
                       focusedBorder: InputBorder.none,
                       filled: false,
-                      // Pads the field to a 48 dp tap target.
+
                       contentPadding: const EdgeInsets.symmetric(
                         vertical: AppSpacing.smd,
                       ),
@@ -418,7 +404,6 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
           _buildLabel(strings.name),
           const SizedBox(height: AppSpacing.sm),
           Container(
-            // Grows with large text.
             constraints: const BoxConstraints(
               minHeight: AppSpacing.fieldHeight,
             ),
@@ -448,7 +433,7 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
                 filled: false,
-                // Pads the field to a 48 dp tap target.
+
                 contentPadding: const EdgeInsets.symmetric(
                   vertical: AppSpacing.smd,
                 ),
@@ -477,7 +462,6 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
           _buildLabel(t.budgets.form.period),
           const SizedBox(height: AppSpacing.sm),
           Container(
-            // Grows with large text.
             constraints: const BoxConstraints(
               minHeight: AppSpacing.fieldHeight,
             ),
@@ -490,8 +474,7 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
             alignment: Alignment.centerLeft,
             child: DropdownButtonFormField<BudgetPeriod>(
               initialValue: _selectedPeriod,
-              // Fill the field so a long label ends in an ellipsis instead of
-              // pushing the caret out at large text sizes.
+
               isExpanded: true,
               icon: Icon(
                 PiconsRegular.caretDown,
@@ -503,7 +486,7 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
                 filled: false,
-                // Pads the field to a 48 dp tap target.
+
                 contentPadding: const EdgeInsets.symmetric(
                   vertical: AppSpacing.smd,
                 ),
@@ -602,7 +585,7 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
   Widget _buildShareRow() {
     final strings = t.budgets.form;
     final budget = _budget;
-    // A demoted owner may turn sharing off, not back on.
+
     final canTurnOn = budgetAccess().canShare(budget);
 
     return Padding(
@@ -669,7 +652,7 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
         onTap: isLoading ? null : _submit,
         child: Container(
           width: double.infinity,
-          // Grows with the label at large text sizes.
+
           constraints: const BoxConstraints(minHeight: AppSpacing.fieldHeight),
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
           decoration: BoxDecoration(

@@ -2,9 +2,6 @@ import 'package:drift/native.dart';
 import 'package:expense_tracker/core/database/app_database.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// The queries the app runs most, as the DAOs build them. A full scan of
-/// these tables means a missing or unusable index: it gets slower with
-/// every record the user adds.
 const _hotQueries = {
   'records page (Activity)':
       'SELECT * FROM records WHERE date BETWEEN 0 AND 9 ORDER BY date DESC '
@@ -39,9 +36,6 @@ const _hotQueries = {
       'AND failed_at IS NULL',
 };
 
-/// Any `SCAN` of these tables reads every row (or every index entry). The
-/// exceptions are the partial queue indexes: they hold only the changes
-/// still to push, or the failed ones.
 bool _isFullScan(String detail) =>
     RegExp(r'^SCAN (records|sync_queue)\b').hasMatch(detail) &&
     !detail.contains('idx_sync_queue_pending') &&
@@ -52,7 +46,7 @@ void main() {
 
   setUpAll(() async {
     db = AppDatabase.forTesting(NativeDatabase.memory());
-    // No ANALYZE: phones never run it, so the planner has no statistics.
+
     for (var i = 0; i < 500; i++) {
       await db.customStatement(
         'INSERT INTO records (id, amount, description, date, record_type, '

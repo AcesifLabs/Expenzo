@@ -46,7 +46,6 @@ void main() {
     );
   });
 
-  // Goals are counted (0, not null) now that the goals handler exists.
   test('an empty database gives zeros, goals included', () async {
     final summary = await datasource.countData();
 

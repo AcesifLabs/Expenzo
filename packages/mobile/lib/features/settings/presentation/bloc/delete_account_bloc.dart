@@ -11,8 +11,6 @@ import '../../domain/usecases/delete_account_and_data.dart';
 import 'delete_account_event.dart';
 import 'delete_account_state.dart';
 
-/// Drives Delete account on My Profile: busy while deleting, then deleted
-/// or failed with the text to show.
 class DeleteAccountBloc extends Bloc<DeleteAccountEvent, DeleteAccountState> {
   final DeleteAccountAndData deleteAccountAndData;
 
@@ -31,7 +29,6 @@ class DeleteAccountBloc extends Bloc<DeleteAccountEvent, DeleteAccountState> {
     try {
       result = await deleteAccountAndData(NoParams());
     } catch (e, s) {
-      // The screen blocks leaving while deleting; never stay there.
       appLogger.error('Delete account threw', e, s);
       emit(
         DeleteAccountState(

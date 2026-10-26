@@ -9,7 +9,6 @@ import '../logger/app_logger.dart';
 import '../di/injection_container.dart' as di;
 import 'fault_injection_interceptor.dart';
 
-/// Whether [response] is the 401 for a JWT whose server account was deleted.
 bool isDeletedUserResponse(Response<dynamic>? response) {
   final data = response?.data;
 
@@ -18,8 +17,6 @@ bool isDeletedUserResponse(Response<dynamic>? response) {
       data['message'] == ApiConstants.deletedUserMessage;
 }
 
-/// The server refused to log in again with the Firebase session (401 or
-/// 403 from the login endpoint): the JWT can't be renewed.
 class TokenRefreshRejected implements Exception {
   const TokenRefreshRejected();
 }
@@ -27,8 +24,6 @@ class TokenRefreshRejected implements Exception {
 class ApiClient {
   Dio dio;
 
-  /// Replaces the Firebase re-login in tests. Returns the new JWT or null,
-  /// or throws [TokenRefreshRejected].
   @visibleForTesting
   static Future<String?> Function()? refreshOverride;
 
@@ -70,9 +65,6 @@ class _AuthInterceptor extends Interceptor {
 
   final Dio _dio;
 
-  /// Single-flight guard for token refresh.
-  /// When non-null, concurrent 401s await this future instead of each
-  /// independently triggering a refresh.
   Completer<String?>? _refreshCompleter;
 
   _AuthInterceptor(this._dio);
@@ -97,11 +89,6 @@ class _AuthInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     if (isDeletedUserResponse(err.response)) {
-      // The account was deleted (here or on another device). Logging in
-      // again would re-create it empty. Drop the JWT and the Firebase
-      // session too: a later JWT-less request gets a plain 401, and the
-      // refresh below can only log in while Firebase is signed in. The user
-      // stays signed out until they sign in themselves.
       for (final step in [TokenStorage.clearAll, _signOutFirebase]) {
         try {
           await step();
@@ -114,8 +101,7 @@ class _AuthInterceptor extends Interceptor {
       return;
     }
     final options = err.requestOptions;
-    // A request already retried with a fresh JWT doesn't refresh again: a
-    // server that keeps rejecting new tokens would otherwise loop forever.
+
     if (err.response?.statusCode == 401 && options.extra[_retriedKey] != true) {
       final newJwt = await _refreshWhenOnline(options);
       if (newJwt != null) {
@@ -124,8 +110,6 @@ class _AuthInterceptor extends Interceptor {
         try {
           handler.resolve(await _dio.fetch(options));
         } on DioException catch (retryError) {
-          // The retry's own failure (a 500, a timeout) goes to the caller.
-          // It says nothing about the sign-in, so nothing is cleared.
           handler.next(retryError);
         }
 
@@ -135,9 +119,6 @@ class _AuthInterceptor extends Interceptor {
     handler.next(err);
   }
 
-  /// A JWT to retry [options] with. When another request already replaced
-  /// the token this one was sent with, that token is reused, so a burst of
-  /// 401s costs one login.
   Future<String?> _refreshWhenOnline(RequestOptions options) async {
     try {
       final current = await TokenStorage.getToken();
@@ -158,8 +139,6 @@ class _AuthInterceptor extends Interceptor {
 
   static Future<void> _signOutFirebase() => FirebaseAuth.instance.signOut();
 
-  /// Performs a single-flight token refresh.
-  /// Returns the new JWT string, or null if refresh fails.
   Future<String?> _refreshToken() {
     final existingCompleter = _refreshCompleter;
     if (existingCompleter != null) {
@@ -175,8 +154,6 @@ class _AuthInterceptor extends Interceptor {
           _refreshCompleter = null;
         })
         .catchError((Object e, StackTrace s) async {
-          // Only a refusal ends the sign-in. A timeout or a 5xx keeps the
-          // JWT and the sync state; the next request tries again.
           if (e is TokenRefreshRejected) {
             await TokenStorage.deleteToken();
           } else {
@@ -194,7 +171,7 @@ class _AuthInterceptor extends Interceptor {
     if (firebaseUser == null) return null;
 
     final firebaseToken = await firebaseUser.getIdToken(true);
-    // Short timeouts: every request waiting on a 401 waits for this.
+
     final authDio = Dio(
       BaseOptions(
         baseUrl: ApiConstants.baseUrl,

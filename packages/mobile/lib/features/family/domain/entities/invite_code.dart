@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-/// A code that lets a signed-in user join a Family Group (CONTEXT.md).
 class InviteCode extends Equatable {
   final String code;
   final DateTime expiresAt;

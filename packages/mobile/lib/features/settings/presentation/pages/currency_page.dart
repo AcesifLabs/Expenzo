@@ -24,7 +24,6 @@ class CurrencyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // SettingsBloc is an app-wide singleton; `create` would close it on pop.
     return BlocProvider.value(
       value: di.getIt<SettingsBloc>(),
       child: const Scaffold(body: CurrencyView()),
@@ -32,7 +31,6 @@ class CurrencyPage extends StatelessWidget {
   }
 }
 
-/// Picks the default currency. Amounts are not converted (ADR 0002).
 class CurrencyView extends StatefulWidget {
   const CurrencyView({super.key});
 

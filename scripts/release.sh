@@ -26,7 +26,7 @@ if [[ ${1:-} == "-h" || ${1:-} == "--help" ]]; then
   exit 0
 fi
 
-if [[ $# -lt 2 || $# -gt 4 ]]; then
+if [[ $
   echo "Error: invalid arguments." >&2
   usage
   exit 1
@@ -42,7 +42,7 @@ if [[ "$MODE" != "prepare" && "$MODE" != "publish" ]]; then
   exit 1
 fi
 
-if [[ "$MODE" == "prepare" && $# -eq 4 ]]; then
+if [[ "$MODE" == "prepare" && $
   if [[ "$3" != "--base" ]]; then
     echo "Error: expected optional flag '--base <branch>' for prepare mode." >&2
     usage
@@ -51,13 +51,13 @@ if [[ "$MODE" == "prepare" && $# -eq 4 ]]; then
   BASE_BRANCH="$4"
 fi
 
-if [[ "$MODE" == "prepare" && $# -eq 3 ]]; then
+if [[ "$MODE" == "prepare" && $
   echo "Error: expected '--base <branch>' after third argument." >&2
   usage
   exit 1
 fi
 
-if [[ "$MODE" == "publish" && $# -ne 2 ]]; then
+if [[ "$MODE" == "publish" && $
   echo "Error: publish mode expects exactly 2 arguments." >&2
   usage
   exit 1

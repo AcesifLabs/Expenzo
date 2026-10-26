@@ -10,8 +10,6 @@ import '../../domain/entities/parsing_rule.dart';
 import '../../domain/repositories/parsing_rules_repository.dart';
 import '../datasources/parsing_rules_local_datasource.dart';
 
-/// Every write is saved locally and queued for `/sync/push` under
-/// `parsing_rules`.
 class ParsingRulesRepositoryImpl implements ParsingRulesRepository {
   final ParsingRulesLocalDatasource localDatasource;
   final SyncQueueDao? _syncQueueDao;
@@ -103,8 +101,6 @@ class ParsingRulesRepositoryImpl implements ParsingRulesRepository {
     return localDatasource.watchRules();
   }
 
-  /// Field names match `ParsingRulesSyncHandler.toSyncPayload`.
-  /// `triggerWords` is a JSON string in the DB row the handler syncs.
   Map<String, dynamic> _payload(ParsingRule rule) => {
     'name': rule.name,
     'triggerWords': jsonEncode(rule.triggerWords),

@@ -4,7 +4,6 @@ import 'package:clock/clock.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// The New Transaction sheet's unsaved fields.
 typedef TransactionDraft = ({
   RecordType type,
   String amountText,
@@ -14,13 +13,9 @@ typedef TransactionDraft = ({
   DateTime date,
 });
 
-/// Keeps the New Transaction sheet's fields while the app is in the
-/// background. Android may kill the app then (to free memory, or while the
-/// camera or gallery is open), which would lose what the user typed.
 class TransactionDraftStore {
   static const storageKey = 'new_transaction_draft';
 
-  /// Older drafts are dropped instead of restored.
   static const maxAge = Duration(days: 1);
 
   final SharedPreferences prefs;
@@ -40,8 +35,6 @@ class TransactionDraftStore {
     }),
   );
 
-  /// The saved draft, or null when there is none, it is older than
-  /// [maxAge], or it can't be read.
   TransactionDraft? load() {
     final raw = prefs.getString(storageKey);
     if (raw == null) return null;

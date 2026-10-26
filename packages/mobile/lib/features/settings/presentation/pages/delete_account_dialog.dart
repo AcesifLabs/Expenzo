@@ -33,7 +33,6 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
     final errorColor = Theme.of(context).colorScheme.error;
 
     return AlertDialog(
-      // The list of what goes is long at large text sizes.
       scrollable: true,
       title: Text(dialogT.title),
       content: Column(
@@ -55,7 +54,7 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
           const SizedBox(height: AppSpacing.md),
           Text(dialogT.cannotUndo, style: TextStyle(color: errorColor)),
           const SizedBox(height: AppSpacing.md),
-          // The checkbox is read and tapped together with its text.
+
           CheckboxListTile(
             value: _confirmed,
             onChanged: _onCheckboxChanged,

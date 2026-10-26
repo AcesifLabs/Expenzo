@@ -24,8 +24,6 @@ class RealtimeSmsProcessor {
   Future<void> _processingChain = Future<void>.value();
   bool _isStarted = false;
 
-  // Optional: tests run without budget alerts.
-  // ignore: unnecessary-nullable
   RealtimeSmsProcessor({
     required RealtimeSmsListener listener,
     required EvaluateRulesUseCase evaluateRules,

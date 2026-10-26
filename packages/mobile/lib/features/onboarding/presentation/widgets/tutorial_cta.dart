@@ -7,7 +7,6 @@ import 'package:expense_tracker/i18n/strings.g.dart';
 
 import 'onboarding_page_frame.dart';
 
-/// The last tutorial page (frame `TutorialCTA`).
 class TutorialCta extends StatelessWidget {
   final VoidCallback onStart;
 

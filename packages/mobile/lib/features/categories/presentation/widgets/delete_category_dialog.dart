@@ -5,13 +5,7 @@ import 'package:expense_tracker/core/theme/app_typography.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
-/// A reusable delete-confirmation dialog for categories, matching the
-/// `DeleteCategoryDialog` spec in `expenzo.pen`.
-///
-/// Shows a warning icon, category name, optional transaction count,
-/// and Cancel / Delete buttons.
 class DeleteCategoryDialog extends StatelessWidget {
-  /// Convenience method to show the dialog via [showDialog].
   static Future<bool?> show({
     required BuildContext context,
     required String categoryName,

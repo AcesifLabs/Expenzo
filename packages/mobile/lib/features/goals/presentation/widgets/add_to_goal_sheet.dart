@@ -6,8 +6,6 @@ import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:expense_tracker/core/utils/amount_input.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
-/// Asks how much to add to [goalName]; null when dismissed. Only the goal
-/// changes; no transaction is added (ADR 0009).
 Future<double?> showAddToGoalSheet(
   BuildContext context, {
   required String goalName,
@@ -93,7 +91,6 @@ class _AddToGoalSheetState extends State<_AddToGoalSheet> {
               ),
               const SizedBox(height: AppSpacing.lg),
               ConstrainedBox(
-                // Grows with the label at large text sizes.
                 constraints: const BoxConstraints(minHeight: AppSpacing.xxl),
                 child: ElevatedButton(
                   onPressed: _save,

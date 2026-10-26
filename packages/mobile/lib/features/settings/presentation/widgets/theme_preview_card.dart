@@ -5,8 +5,6 @@ import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:expense_tracker/core/theme/app_theme.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
-/// Describes a theme mode in that mode's own colours, whatever theme the app
-/// is in right now.
 class ThemePreviewCard extends StatelessWidget {
   final Brightness brightness;
 
@@ -62,7 +60,6 @@ class _Swatches extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The frame's PreviewColors order.
     final colors = [
       palette.accent,
       palette.surface,

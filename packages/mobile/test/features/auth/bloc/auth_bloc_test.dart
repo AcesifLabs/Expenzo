@@ -41,8 +41,7 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(NoParams());
-    // FlutterSecureStorage (used by TokenStorage in the auth-success path)
-    // talks over a platform channel that hangs in tests; stub reads to null.
+
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
           const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'),

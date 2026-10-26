@@ -16,13 +16,6 @@ import '../entities/onboarding_draft.dart';
 import '../entities/onboarding_result.dart';
 import '../onboarding_plan.dart';
 
-/// Saves everything onboarding collected. Finish setup and Skip both end
-/// here (Q24: Skip keeps what was confirmed).
-///
-/// Recurring items, budgets and the goal stop at the first failure (logged),
-/// but onboarding is always marked done so a failed item never traps the
-/// user; the result then has `hadErrors`. Only a failed settings write
-/// returns Left, so the user can retry.
 class CompleteOnboarding {
   final RecurringRepository recurringRepository;
   final BudgetRepository budgetRepository;
@@ -70,9 +63,6 @@ class CompleteOnboarding {
     );
   }
 
-  /// How many were saved. Items start next period (Q25), so the app-open
-  /// auto-post finds nothing due (B10). `autoCreateExpense` is on (B8); the
-  /// global Auto-create setting decides whether anything posts.
   Future<int> _saveRecurring(List<RecurringDraft> items, DateTime at) async {
     var saved = 0;
     for (final item in items) {
@@ -92,7 +82,6 @@ class CompleteOnboarding {
     return saved;
   }
 
-  /// True when the three budgets were created.
   Future<bool> _saveBudgets(OnboardingDraft draft, DateTime at) async {
     final split = _split(draft);
     if (!draft.createBudgets || split.isEmpty) return false;
@@ -118,7 +107,6 @@ class CompleteOnboarding {
     return true;
   }
 
-  /// The saved goal's name, or null when it failed.
   Future<String?> _saveGoal(GoalDraft draft, DateTime at) async {
     final custom = draft.customDate;
     final months = custom != null

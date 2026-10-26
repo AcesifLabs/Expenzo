@@ -5,9 +5,6 @@ import '../../domain/entities/my_group.dart';
 
 enum MemberAction { changeRole, remove }
 
-/// What the signed-in user may do to [target]: Admins change anyone's role
-/// (their own included) and remove others; you leave instead of removing
-/// yourself. Members and Viewers do nothing here.
 List<MemberAction> actionsFor({
   required MyGroup group,
   required GroupMember target,
@@ -20,7 +17,6 @@ List<MemberAction> actionsFor({
   ];
 }
 
-/// Leaving as the last member deletes the group.
 bool isLastMember(MyGroup group) => group.members.length == 1;
 
 String roleName(GroupRole role) => switch (role) {

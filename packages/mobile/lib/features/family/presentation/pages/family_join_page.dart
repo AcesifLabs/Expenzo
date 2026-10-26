@@ -21,8 +21,6 @@ import '../helpers/family_form_validators.dart';
 import '../widgets/family_bottom_button.dart';
 import '../widgets/family_icon_header.dart';
 
-/// Join a Family Group with an Invite Code (no design frame; same layout
-/// as Create).
 class FamilyJoinPage extends StatefulWidget {
   const FamilyJoinPage({super.key});
 
@@ -159,7 +157,6 @@ class _FamilyJoinPageState extends State<FamilyJoinPage> {
   }
 }
 
-/// Upper-cases what is typed and drops spaces, so " rf4 xk2" reads RF4XK2.
 class _InviteCodeFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(

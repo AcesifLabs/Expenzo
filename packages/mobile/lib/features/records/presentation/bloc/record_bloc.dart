@@ -24,8 +24,6 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
 
   StreamSubscription<List<Record>>? _recordsSubscription;
 
-  /// How many rows the live query covers: every page loaded so far, so an
-  /// update never shrinks the list back to the first page.
   int _watchedLimit = _pageSize;
 
   RecordBloc({
@@ -121,8 +119,7 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     } else {
       await _loadMoreUnfiltered(currentState, emit);
     }
-    // The live query grows by a page, so it covers the new rows and any
-    // added later without dropping the oldest loaded one.
+
     final loaded = state;
     if (loaded is RecordLoaded) {
       await _watch(_filterOf(loaded, limit: _watchedLimit + _pageSize));
@@ -272,7 +269,6 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     add(const LoadRecords());
   }
 
-  /// [state]'s filters, reading up to [limit] rows.
   RecordFilter _filterOf(RecordLoaded state, {required int limit}) =>
       RecordFilter(
         startDate: state.filterStartDate,
@@ -291,8 +287,6 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
         filter.recordType != null;
   }
 
-  /// Follows the records [filter] selects, replacing the query followed so
-  /// far. Without any filter it follows every record.
   Future<void> _watch(RecordFilter filter) async {
     await _recordsSubscription?.cancel();
     final limit = filter.limit ?? _pageSize;

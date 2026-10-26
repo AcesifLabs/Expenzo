@@ -1,6 +1,5 @@
 import 'package:expense_tracker/i18n/strings.g.dart';
 
-/// Frequency options for recurring transactions.
 enum RecurringFrequency {
   daily,
   weekly,

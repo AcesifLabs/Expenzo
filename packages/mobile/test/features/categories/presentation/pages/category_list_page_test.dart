@@ -66,7 +66,6 @@ void main() {
 
   tearDown(() => states.close());
 
-  /// Moves the mocked bloc to [state] and lets the page react.
   Future<void> emit(WidgetTester tester, CategoryState state) async {
     when(() => bloc.state).thenReturn(state);
     states.add(state);
@@ -207,7 +206,6 @@ void main() {
     await tester.tap(find.text(t.common.delete));
     await tester.pumpAndSettle();
 
-    // A load that finished before the delete started.
     await emit(tester, CategoryLoaded([food, rent]));
     await emit(tester, const CategoryLoading());
     await emit(tester, const CategoryError('x'));

@@ -31,9 +31,6 @@ class ConnectivityService {
     }
   }
 
-  /// True when the device reports any link (Wi‑Fi, mobile, …). Does not ping
-  /// the backend — use this for "you're offline" UI on features that need
-  /// the public internet (sign-in, Ask AI, Receipt Scan).
   Future<bool> hasNetworkLink() async {
     try {
       final results = await _connectivity.checkConnectivity();
@@ -67,8 +64,7 @@ class ConnectivityService {
             options: Options(validateStatus: (_) => true),
           )
           .timeout(const Duration(seconds: 5));
-      // Only our backend's answer counts: a captive portal or a proxy also
-      // returns 200, with its own page.
+
       _isOnline = _isHealthy(response);
 
       return _isOnline;

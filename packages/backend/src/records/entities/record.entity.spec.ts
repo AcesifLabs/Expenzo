@@ -21,7 +21,7 @@ describe('Record entity', () => {
 
 });
 
-// Kept out of src/migrations: the TypeORM CLI loads every file there as a migration.
+
 describe('AddRecordBudgetId migration', () => {
   const run = async (step: 'up' | 'down') => {
     const query = jest.fn();

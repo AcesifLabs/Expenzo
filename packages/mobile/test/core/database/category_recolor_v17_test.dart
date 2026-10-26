@@ -9,10 +9,6 @@ import 'package:expense_tracker/core/theme/category_palette.dart';
 
 import 'migrations/v19_tables.dart';
 
-/// Verifies the V16 -> V17 migration (category palette recolor):
-///  - untouched default categories move to the new palette
-///  - defaults the user recolored, and custom categories, keep their color
-///  - every recolor is queued for sync with the full category payload
 void main() {
   late File dbFile;
 
@@ -53,7 +49,7 @@ void main() {
         synced_at INTEGER
       )
     ''', const []);
-    // Every v16 install has budgets; later steps (v19) alter it.
+
     await raw.runCustom('''
       CREATE TABLE budgets (
         id TEXT NOT NULL PRIMARY KEY,
@@ -69,19 +65,19 @@ void main() {
         updated_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
       )
     ''', const []);
-    // Untouched default (old Bills gold), lower-case hex to check matching.
+
     await raw.runCustom(
       "INSERT INTO categories (id, name, emoji, color, is_default) "
       "VALUES ('default_out_bills', 'Bills & Utilities', 'lightning', '#ffd700', 1)",
       const [],
     );
-    // Default the user recolored: must keep the user's choice.
+
     await raw.runCustom(
       "INSERT INTO categories (id, name, emoji, color, is_default) "
       "VALUES ('default_out_food', 'Food & Dining', 'forkKnife', '#123456', 1)",
       const [],
     );
-    // A custom category that happens to use an old seed color.
+
     await raw.runCustom(
       "INSERT INTO categories (id, name, emoji, color, is_default) "
       "VALUES ('custom-1', 'Pets', 'pawPrint', '#FFD700', 0)",

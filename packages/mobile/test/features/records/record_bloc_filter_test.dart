@@ -56,7 +56,7 @@ void main() {
   late MockUpdateRecord mockUpdateRecord;
   late MockDeleteRecord mockDeleteRecord;
   late RecordBloc bloc;
-  // Live queries that send when the test says, like drift's watch().
+
   late StreamController<List<Record>> allRecords;
   late StreamController<List<Record>> filteredRecords;
 

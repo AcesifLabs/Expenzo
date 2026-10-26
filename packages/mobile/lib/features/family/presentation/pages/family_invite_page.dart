@@ -24,10 +24,7 @@ import '../helpers/family_failure_listener.dart';
 import '../helpers/invite_share_text.dart';
 import '../widgets/family_icon_header.dart';
 
-/// Frame `FamilyInviteMembers`: the Admin's current Invite Code, shared as
-/// text (no QR code, ADR 0011), or regenerated.
 class FamilyInvitePage extends StatefulWidget {
-  /// The time now, replaced in tests.
   final DateTime Function() clock;
 
   const FamilyInvitePage({super.key, this.clock = DateTime.now});
@@ -37,7 +34,6 @@ class FamilyInvitePage extends StatefulWidget {
 }
 
 class _FamilyInvitePageState extends State<FamilyInvitePage> {
-  /// Asking for a code failed (offline) and nothing valid is cached.
   var _failed = false;
 
   String get _locale => LocaleSettings.currentLocale.languageCode;
@@ -50,7 +46,6 @@ class _FamilyInvitePageState extends State<FamilyInvitePage> {
   bool _groupArrived(FamilyState previous, FamilyState current) =>
       previous.myGroup == null && current.myGroup != null;
 
-  /// Only Admins may invite; the bloc reuses a live code before making one.
   void _onGroup(BuildContext context, FamilyState state) {
     if (!(state.myGroup?.myRole.isAdmin ?? false)) {
       context.pop();
@@ -142,7 +137,6 @@ class _FamilyInvitePageState extends State<FamilyInvitePage> {
         _buildCodeCard(context, state, invite),
         const SizedBox(height: AppSpacing.lg),
         ConstrainedBox(
-          // Grows with the label at large text sizes.
           constraints: const BoxConstraints(
             minWidth: double.infinity,
             minHeight: AppSpacing.xxl,
@@ -165,7 +159,6 @@ class _FamilyInvitePageState extends State<FamilyInvitePage> {
         ),
         const SizedBox(height: AppSpacing.md),
         ConstrainedBox(
-          // Grows with the label at large text sizes.
           constraints: const BoxConstraints(
             minWidth: double.infinity,
             minHeight: AppSpacing.xxl,

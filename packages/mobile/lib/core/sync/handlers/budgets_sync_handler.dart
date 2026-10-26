@@ -7,13 +7,8 @@ import '../sync_table_registry.dart';
 import 'sync_parse_helpers.dart';
 
 class BudgetsSyncHandler extends SyncTableHandler<$BudgetsTable, Budget> {
-  /// While true, a pulled default name does not replace a real local one.
-  /// The server dropped names until it had a column for them, so its old
-  /// rows read [AppConstants.defaultBudgetName] until the one-time name repair succeeds.
   final bool Function() keepLocalNames;
 
-  /// Local names of the budgets in the pull being applied, loaded once by
-  /// [beforeApplyingPull]; null outside a pull or once the repair is done.
   Map<String, String>? _localNames;
 
   @override
@@ -55,8 +50,7 @@ class BudgetsSyncHandler extends SyncTableHandler<$BudgetsTable, Budget> {
         isEnabled: data['isEnabled'] != null
             ? Value(data['isEnabled'] == true)
             : const Value.absent(),
-        // Always written, null included: a budget unshared on the server,
-        // or a share the server refused, must clear the local groupId.
+
         groupId: Value(data['groupId']?.toString()),
         createdAt: data['createdAt'] != null
             ? Value(parseSyncDate(data['createdAt']))

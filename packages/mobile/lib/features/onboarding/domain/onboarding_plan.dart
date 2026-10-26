@@ -4,11 +4,9 @@ import 'package:expense_tracker/features/recurring/domain/helpers/next_occurrenc
 
 import 'entities/onboarding_draft.dart';
 
-/// The recurring items' total per month.
 double recurringMonthlyTotal(List<RecurringDraft> items) =>
     items.fold(0, (sum, item) => sum + item.monthlyAmount);
 
-/// Income left after recurring payments, split 50/30/20.
 class BudgetSplit extends Equatable {
   static const empty = BudgetSplit(base: 0, needs: 0, wants: 0, savings: 0);
 
@@ -30,9 +28,6 @@ class BudgetSplit extends Equatable {
   });
 }
 
-/// The empty split when income was skipped or recurring payments use all of
-/// it; never negative. Shares are rounded to cents, with any remainder given
-/// to Needs so the three add up to [BudgetSplit.base].
 BudgetSplit budgetSplitFor({
   required double? monthlyIncome,
   required double recurringTotal,
@@ -54,7 +49,6 @@ BudgetSplit budgetSplitFor({
 
 double _cents(double amount) => (amount * 100).roundToDouble() / 100;
 
-/// ✓ affordable, ✗ more than the monthly savings, ⚠ affordable but slow.
 enum TimelineFit { affordable, tooExpensive, slow }
 
 class TimelineOption extends Equatable {
@@ -72,8 +66,6 @@ class TimelineOption extends Equatable {
   });
 }
 
-/// One option per [AppConstants.goalTimelineMonths]. With no savings (an
-/// empty split) every option counts as affordable and no marks are shown.
 List<TimelineOption> timelineOptions({
   required double target,
   required double savingsPerMonth,
@@ -82,7 +74,6 @@ List<TimelineOption> timelineOptions({
     _option(target: target, months: months, savingsPerMonth: savingsPerMonth),
 ];
 
-/// The shortest affordable option, for "You can afford it in N months".
 int? fastestAffordableMonths(List<TimelineOption> options) {
   for (final option in options) {
     if (option.fit != TimelineFit.tooExpensive) return option.months;
@@ -91,8 +82,6 @@ int? fastestAffordableMonths(List<TimelineOption> options) {
   return null;
 }
 
-/// The option for a picked [date]: whole calendar months from [from], at
-/// least 1.
 TimelineOption customTimeline({
   required double target,
   required DateTime from,
@@ -109,7 +98,6 @@ TimelineOption customTimeline({
   );
 }
 
-/// The same day [months] later, clamped to the end of that month.
 DateTime targetDateFor(DateTime from, int months) => addMonths(from, months);
 
 TimelineOption _option({

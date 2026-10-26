@@ -2,8 +2,6 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-/// Centres [child] when it fits and scrolls it when it doesn't, as on a
-/// small phone at the largest text size.
 class ScrollableCenter extends StatelessWidget {
   final Widget child;
   final EdgeInsets padding;

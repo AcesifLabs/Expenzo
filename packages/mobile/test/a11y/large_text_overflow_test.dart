@@ -9,9 +9,6 @@ import '../support/all_screens.dart';
 import '../support/core_screens.dart';
 import '../support/family_bloc_mock.dart';
 
-/// Every screen at the largest text the app allows
-/// (`AppConstants.maxTextScale`) on a small phone, a large phone and a
-/// tablet: no overflow and no clipped text (SAAP-66).
 void main() {
   setUp(registerScreenTestDependencies);
   tearDown(() => di.getIt.reset());

@@ -22,8 +22,6 @@ const _monthNames = [
 
 String _two(int n) => n.toString().padLeft(2, '0');
 
-/// [date] written the ways rules see dates, read in [order] where it
-/// matters.
 List<String> _renderings(DateTime date, DateOrder order) {
   final day = _two(date.day);
   final month = _two(date.month);

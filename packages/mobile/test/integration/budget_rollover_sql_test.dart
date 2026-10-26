@@ -15,8 +15,6 @@ import '../support/factories/budget_factory.dart';
 
 class _MockBudgets extends Mock implements BudgetRepository {}
 
-/// Rollover against the real spending query: the use case and the DAO must
-/// agree on how a previous period is asked for.
 void main() {
   late db.AppDatabase database;
   late _MockBudgets budgets;

@@ -4,7 +4,6 @@ import 'package:expense_tracker/core/constants/first_day_of_week.dart';
 import 'package:expense_tracker/core/router/app_root_tab.dart';
 import 'package:expense_tracker/features/settings/domain/entities/user_settings.dart';
 
-/// Creates a [UserSettings] for tests. All params optional with deterministic defaults.
 UserSettings makeUserSettings({
   int? id,
   String? currencyCode,

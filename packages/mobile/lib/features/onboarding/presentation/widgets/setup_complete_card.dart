@@ -9,8 +9,6 @@ import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
 import '../../domain/entities/onboarding_draft.dart';
 import '../../domain/onboarding_plan.dart';
 
-/// "Setup complete!" (frame `OnboardingSavingsTimeline`): what Finish setup
-/// will save, with icons instead of the design's emoji.
 class SetupCompleteCard extends StatelessWidget {
   final OnboardingDraft draft;
 

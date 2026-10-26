@@ -23,7 +23,6 @@ class SmsScannerBloc extends Bloc<SmsScannerEvent, SmsScannerState> {
   final CreateRecordsFromParsedList createRecordsFromParsedList;
   final GetBudgetsWithProgress getBudgetsWithProgress;
 
-  /// Amounts within half a cent are the same money (ADR-0014).
   static const _amountTolerance = 0.005;
 
   SmsScannerBloc({
@@ -300,9 +299,6 @@ class SmsScannerBloc extends Bloc<SmsScannerEvent, SmsScannerState> {
     );
   }
 
-  /// [transactions] without the messages already imported. A failed
-  /// lookup is an error: showing every message as new would let the user
-  /// import them all again.
   Future<Either<Failure, List<SmsScanResultItem>>> _filterDuplicates(
     List<SmsScanResultItem> transactions,
     bool filterDuplicates,
@@ -319,9 +315,6 @@ class SmsScannerBloc extends Bloc<SmsScannerEvent, SmsScannerState> {
     return unseen.fold((failure) async => Left(failure), _withoutLegacyImports);
   }
 
-  /// [transactions] without messages imported before database v20 under
-  /// their old scan id. That id is a 30-bit hash other messages can share,
-  /// so the stored record must also have the same amount.
   Future<Either<Failure, List<SmsScanResultItem>>> _withoutLegacyImports(
     List<SmsScanResultItem> transactions,
   ) async {

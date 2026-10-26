@@ -56,13 +56,6 @@ import 'factories/budget_factory.dart';
 import 'factories/record_factory.dart';
 import 'pump_localized.dart';
 
-/// Whole screens with mocked blocs, shared by the accessibility guideline
-/// test and the large-text overflow test.
-///
-/// Call [registerScreenTestDependencies] in `setUp` and `di.getIt.reset()`
-/// in `tearDown`; each builder registers the extra GetIt entries its screen
-/// needs, so call it inside the test body.
-
 class MockRecordBloc extends Mock implements RecordBloc {}
 
 class MockCategoryBloc extends Mock implements CategoryBloc {}
@@ -79,15 +72,11 @@ class MockGetBudgets extends Mock implements GetBudgets {}
 
 class MockSettingsBloc extends Mock implements SettingsBloc {}
 
-/// Phone sizes the screen tests run at.
 enum TestPhone {
-  /// About 411×914 logical pixels.
   large(Size(1080, 2400), 2.625),
 
-  /// About 360×640 logical pixels, the harder case.
   small(Size(720, 1280), 2.0),
 
-  /// 800×1280 logical pixels: portrait-only phones layouts must still fit.
   tablet(Size(1600, 2560), 2.0);
 
   final Size physicalSize;
@@ -96,15 +85,12 @@ enum TestPhone {
   const TestPhone(this.physicalSize, this.devicePixelRatio);
 }
 
-/// Points a mocked bloc at one fixed state.
 void stubBloc<S>(BlocBase<S> bloc, S state) {
   when(() => bloc.state).thenReturn(state);
   when(() => bloc.stream).thenAnswer((_) => Stream<S>.empty());
   when(() => bloc.close()).thenAnswer((_) async {});
-  // Unstubbed `add` calls are no-ops on a mocktail mock.
 }
 
-/// A mocked bloc stuck in [state].
 B mockBloc<B extends BlocBase<S>, S>(B bloc, S state) {
   stubBloc<S>(bloc, state);
 
@@ -117,8 +103,6 @@ const _permissionChannel = MethodChannel(
   'flutter.baseflow.com/permissions/methods',
 );
 
-/// Skips the real feature start-up (database, network) in widget tests,
-/// and answers permission checks with "not granted yet".
 void registerScreenTestDependencies() {
   di.getIt.registerSingleton<Future<void>>(
     Future<void>.value(),
@@ -128,7 +112,7 @@ void registerScreenTestDependencies() {
   registerNoGoalBloc();
   final messenger =
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
-  // PermissionStatus.denied is 0.
+
   messenger.setMockMethodCallHandler(
     _permissionChannel,
     (call) async => call.method == 'checkPermissionStatus' ? 0 : null,
@@ -138,7 +122,6 @@ void registerScreenTestDependencies() {
   );
 }
 
-/// The dashboard goal card with no goal (it then shows "Set a savings goal").
 void registerNoGoalBloc() {
   di.getIt.registerFactory<GoalBloc>(
     () => mockBloc<MockGoalBloc, GoalState>(
@@ -148,7 +131,6 @@ void registerNoGoalBloc() {
   );
 }
 
-/// One expense and one income, as Home and Activity show them.
 List<Record> get sampleRecords => [
   makeRecord(id: 'r1', amount: -122, description: 'Lunch'),
   makeRecord(
@@ -159,8 +141,6 @@ List<Record> get sampleRecords => [
   ),
 ];
 
-/// Home's dashboard with this month's income, spending and two records,
-/// or [state].
 DashboardBloc _loadedDashboardBloc([DashboardState? state]) {
   return mockBloc<MockDashboardBloc, DashboardState>(
     MockDashboardBloc(),
@@ -179,7 +159,6 @@ DashboardBloc _loadedDashboardBloc([DashboardState? state]) {
   );
 }
 
-/// A month with nothing recorded.
 const emptyDashboardSummary = DashboardSummary(
   totalIncome: 0,
   totalExpense: 0,
@@ -196,7 +175,6 @@ AuthBloc _signedOutAuthBloc() {
   );
 }
 
-/// The auto-import setup card on Home reads the app-wide settings.
 void _registerHomeSettings() {
   di.getIt.registerSingleton<SettingsBloc>(
     mockBloc<MockSettingsBloc, SettingsState>(
@@ -218,8 +196,6 @@ Widget homeScreen({DashboardState? state}) {
   );
 }
 
-/// The app shell on its Home tab, with the bottom navigation bar. Only the
-/// selected tab is built, so Home's blocs are all it needs.
 Widget appShellScreen() {
   _registerHomeSettings();
   final dashboard = _loadedDashboardBloc();
@@ -255,7 +231,6 @@ Widget activityScreen({RecordState? state}) {
   );
 }
 
-/// One Food budget, 85% spent this month.
 BudgetProgress sampleBudgetProgress() {
   final now = clock.now();
 
@@ -292,7 +267,6 @@ Widget budgetsScreen({BudgetState? state}) {
   );
 }
 
-/// The Food budget's details, with its two transactions loaded.
 Widget budgetDetailsScreen() {
   final budget = makeBudget(id: 'b1', name: 'Food', amount: 1000);
   final progress = sampleBudgetProgress();
@@ -311,7 +285,6 @@ Widget budgetDetailsScreen() {
   );
 }
 
-/// Editing the Food budget, so every field is filled.
 Widget budgetFormScreen() {
   final budget = makeBudget(id: 'b1', name: 'Food', amount: 1000);
 
@@ -383,19 +356,12 @@ Widget transactionSheetScreen() {
   );
 }
 
-/// Sizes the test view to [phone]; reset when the test ends.
 void useTestPhone(WidgetTester tester, TestPhone phone) {
   tester.view.physicalSize = phone.physicalSize;
   tester.view.devicePixelRatio = phone.devicePixelRatio;
   addTearDown(tester.view.reset);
 }
 
-/// Pumps [screen] at the largest text the app allows and fails on any
-/// overflow or clipped text.
-///
-/// The device scale is 2.0 and Font size is Extra large, so the real
-/// [AppTextScale] clamp brings text to exactly `AppConstants.maxTextScale`.
-/// [wrap] puts providers above the app, as settings page tests need.
 Future<void> pumpAtMaxScale(
   WidgetTester tester,
   Widget screen, {
@@ -423,10 +389,9 @@ Future<void> pumpAtMaxScale(
   expectLayoutFits(tester);
 }
 
-/// No overflow was reported and no text on screen is clipped.
 void expectLayoutFits(WidgetTester tester) {
   final error = tester.takeException();
-  // The full error names the widget that overflowed.
+
   expect(
     error,
     isNull,
@@ -435,17 +400,12 @@ void expectLayoutFits(WidgetTester tester) {
   expectNoClippedText(tester);
 }
 
-/// Texts on screen laid out shorter than they need: a fixed-height box cut
-/// them off. Deliberate `maxLines` + ellipsis is not clipping, since the
-/// intrinsic height respects `maxLines`.
 List<String> clippedTexts(WidgetTester tester) {
   final clipped = <String>[];
   for (final element in find.byType(RichText).evaluate()) {
     final paragraph = element.renderObject;
     if (paragraph is! RenderParagraph || !paragraph.hasSize) continue;
-    // Flutter fixes the calendar's day cells, and the test font's square
-    // glyphs make two-digit days look twice as wide as a real font does.
-    // The preview clamps its own text; it is checked on a device.
+
     if (element.findAncestorWidgetOfExactType<CalendarMonthPreview>() != null) {
       continue;
     }
@@ -466,7 +426,6 @@ void expectNoClippedText(WidgetTester tester) {
   expect(clippedTexts(tester), isEmpty, reason: 'Text is clipped');
 }
 
-/// [finder] can be scrolled to and tapped: nothing covers it.
 Future<void> expectReachable(WidgetTester tester, Finder finder) async {
   await tester.ensureVisible(finder);
   await tester.pumpAndSettle();

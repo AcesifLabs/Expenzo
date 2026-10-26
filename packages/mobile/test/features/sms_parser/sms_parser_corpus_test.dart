@@ -37,8 +37,6 @@ void main() {
       ).thenAnswer((_) async => const Right([]));
       useCase = EvaluateRulesUseCase(rulesRepo, templatesRepo);
 
-      // Pre-load the parse context once so the loop below doesn't
-      // pay 4500 context rebuilds.
       context = await useCase.loadContext();
     });
 
@@ -59,9 +57,6 @@ void main() {
 
     test('every fixture has a non-empty body and a sane row count', () {
       for (final wb in corpus) {
-        // the loader should yield one fixture per data row whose
-        // body came back non-empty. tableRowCount includes the
-        // header so we expect ≤ tableRowCount - 1.
         expect(
           wb.fixtures.length,
           lessThanOrEqualTo(wb.tableRowCount - 1),
@@ -112,16 +107,6 @@ void main() {
 
     test('try/catch wrapper produces "<file> row N threw ..." on '
         'per-row failure (simulated)', () {
-      // Note: RuleEvaluator already has its own internal try/catch
-      // around `_evaluateRule` / `_evaluateTemplate`, so the per-row
-      // catch above *should* never fire under normal operation.
-      // This test pins down the exact shape of the fail() message
-      // that the loop would surface IF a future change ever let an
-      // exception escape that inner guard — so a regression that
-      // mangles the message format is caught.
-      //
-      // Deterministic target: the second fixture of the last
-      // workbook (every workbook in the corpus has ≥ 2 fixtures).
       final wb = corpus.last;
       if (wb.fixtures.length < 2) {
         fail('corpus too small for the simulated-throw shape test');
@@ -155,12 +140,6 @@ void main() {
 
     test('catastrophic-backtracking amountPattern does not escape '
         'as a per-row throw across a corpus slice', () async {
-      // Use the classic ReDoS pattern (.*)* as the amountPattern.
-      // The integration test (`regexTimeout_flow`) proved this is
-      // fenced by RuleEvaluator's internal try/catch (returns
-      // parseFailed: true). Here we re-verify under the corpus
-      // loop specifically: even on the worst fixture, the per-row
-      // catch in the bulk test should never fire.
       final evilRepo = MockRulesRepo();
       final evilTemplatesRepo = MockTemplatesRepo();
       when(
@@ -175,9 +154,6 @@ void main() {
       final evilUseCase = EvaluateRulesUseCase(evilRepo, evilTemplatesRepo);
       final evilContext = await evilUseCase.loadContext();
 
-      // Slice to the first 3 fixtures per workbook so the
-      // catastrophic regex can't drive the runtime past the
-      // global test budget even if the guard ever regresses.
       var processed = 0;
       for (final wb in corpus) {
         for (final f in wb.fixtures.take(3)) {
@@ -202,7 +178,7 @@ void main() {
           processed += 1;
         }
       }
-      // 7 workbooks × up-to-3 fixtures each.
+
       expect(processed, equals(21));
     }, timeout: const Timeout(Duration(minutes: 2)));
 
@@ -235,9 +211,6 @@ void main() {
       ];
 
       for (final c in positiveCases) {
-        // Locate the SMS in the corpus so we exercise the same
-        // evaluateWithPreloadedContext codepath used by the bulk
-        // pipeline test.
         SmsCorpusFixture? match;
         for (final wb in corpus) {
           for (final f in wb.fixtures) {
@@ -277,16 +250,6 @@ void main() {
         );
       }
 
-      // Negative-subset: trigger word present, NO decimal numbers
-      // in the body. The parser must NOT extract an amount. This
-      // catches the regression class where the pipeline starts
-      // always returning a non-null amount (e.g. if someone adds a
-      // catch-all fallback in RuleEvaluator that fabricates a
-      // value).
-      //
-      // Bodies are synthetic (not in the corpus) — they exist
-      // precisely so that the regression guard doesn't depend on
-      // the corpus continuing to contain or not contain them.
       final negativeCases = <({String body, String trigger})>[
         (
           body:
@@ -359,9 +322,6 @@ List<ParsingRule> corpusRules() {
   ];
 }
 
-/// Classic catastrophic-backtracking regex used by the resilience
-/// test. Syntactically valid (parsed without throwing) but a known
-/// ReDoS pattern — RuleEvaluator's internal fence must absorb it.
 ParsingRule catastrophicRule() {
   final ts = DateTime.utc(2026, 1, 1);
   return ParsingRule(

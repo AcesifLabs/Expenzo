@@ -12,7 +12,6 @@ import 'generators.dart';
 void main() {
   late AppDatabase db;
 
-  /// Spending in a past range: (cents, day offset, is income).
   final entries = list(
     combine3(everydayCents(), integer(min: 0, max: 400), boolean()),
     maxLength: 40,

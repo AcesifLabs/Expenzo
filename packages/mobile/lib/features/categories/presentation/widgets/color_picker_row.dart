@@ -6,7 +6,6 @@ import 'package:expense_tracker/core/theme/category_palette.dart';
 import 'package:expense_tracker/core/utils/color_utils.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
-/// Picks one of the [CategoryPalette] colors.
 class ColorPickerRow extends StatelessWidget {
   final String selectedColor;
   final ValueChanged<String> onColorSelected;
@@ -67,7 +66,6 @@ class _ColorSwatch extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = ColorUtils.fromHex(option.hex);
 
-    // 36dp swatch inside a 48dp tap target.
     return Semantics(
       label: t.categories.colors[option.name] ?? option.name,
       selected: isSelected,

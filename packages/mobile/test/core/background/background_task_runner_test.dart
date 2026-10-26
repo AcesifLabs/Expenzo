@@ -190,8 +190,6 @@ void main() {
   });
 
   test('weekly task uses the effective first day of week', () async {
-    // Sunday start: the summary is due Saturday 20:00 and covers the week
-    // from Sunday 2026-10-11. The clock is Saturday 21:00.
     runner = BackgroundTaskRunner(
       deps: BackgroundTaskDeps(
         getSettings: getSettings,
@@ -222,8 +220,7 @@ void main() {
   test('weekly task with the day unset follows the Bangla default', () async {
     LocaleSettings.setLocaleSync(AppLocale.bn);
     addTearDown(() => LocaleSettings.setLocaleSync(AppLocale.en));
-    // Saturday start: the summary is due Friday 20:00. The clock is Friday
-    // 21:00.
+
     runner = BackgroundTaskRunner(
       deps: BackgroundTaskDeps(
         getSettings: getSettings,

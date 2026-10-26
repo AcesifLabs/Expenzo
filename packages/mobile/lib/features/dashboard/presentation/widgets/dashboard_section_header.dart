@@ -4,7 +4,6 @@ import 'package:expense_tracker/i18n/strings.g.dart';
 class DashboardSectionHeader extends StatelessWidget {
   final String title;
 
-  /// Defaults to "See all" in the app language.
   final String? trailingLabel;
   final VoidCallback? onTrailingTap;
 

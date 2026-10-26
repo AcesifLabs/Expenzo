@@ -29,11 +29,7 @@ export class AuthService {
     return { accessToken, user: this.toUserProfile(user) };
   }
 
-  /**
-   * Removes the user and, by cascade, every row they own. Leaves their Family
-   * Group first with the same rules as tapping Leave, so the group keeps an
-   * Admin or is deleted when they were its last member.
-   */
+  
   async deleteAccount(userId: string): Promise<DeleteAccountResponse> {
     const user = await this.findUserOrFail(userId);
     await this.dataSource.transaction(async (manager) => {
@@ -62,8 +58,8 @@ export class AuthService {
     }
   }
 
-  // Unsigned `dev-` tokens let anyone sign in as any uid, so they only work
-  // when explicitly switched on outside production.
+  
+  
   private devTokensAllowed(): boolean {
     return this.config.get<string>('ALLOW_DEV_TOKENS') === 'true' && this.config.get<string>('NODE_ENV') !== 'production';
   }

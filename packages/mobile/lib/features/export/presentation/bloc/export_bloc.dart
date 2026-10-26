@@ -10,7 +10,6 @@ import '../../domain/usecases/export_data.dart';
 import 'export_event.dart';
 import 'export_state.dart';
 
-/// Holds the Export data screen's choices and runs export, then share.
 class ExportBloc extends Bloc<ExportEvent, ExportState> {
   final ExportData exportData;
   final FileShareService shareService;
@@ -78,7 +77,6 @@ class ExportBloc extends Bloc<ExportEvent, ExportState> {
       ),
       (file) async {
         try {
-          // Either outcome ends the same way: the file was produced.
           await shareService.shareFile(
             file.path,
             mimeType: file.mimeType,

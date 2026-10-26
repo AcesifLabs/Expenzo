@@ -11,7 +11,6 @@ abstract class GoalLocalDatasource {
   Stream<domain.Goal?> watchActiveGoal();
   Future<domain.Goal?> getGoalById(String id);
 
-  /// [goal] must have an id.
   Future<void> createGoal(domain.Goal goal);
   Future<void> updateGoal(domain.Goal goal);
   Future<void> deleteGoal(String id);
@@ -49,7 +48,7 @@ class GoalLocalDatasourceImpl implements GoalLocalDatasource {
     if (stored == null) {
       throw CacheException(message: 'Goal ${goal.id} not found');
     }
-    // Only updatedAt moves; createdAt keeps the goal's place as "active".
+
     await goalsDao.updateGoal(
       _toCompanion(
         goal,
@@ -93,7 +92,6 @@ class GoalLocalDatasourceImpl implements GoalLocalDatasource {
     );
   }
 
-  /// Drift errors become [CacheException], which the repository maps.
   Future<T> _guard<T>(Future<T> Function() action) async {
     try {
       return await action();

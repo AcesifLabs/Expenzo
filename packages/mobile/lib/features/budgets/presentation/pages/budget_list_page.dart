@@ -45,8 +45,6 @@ class BudgetListView extends StatefulWidget {
 class _BudgetListViewState extends State<BudgetListView> {
   AppPalette get _palette => context.palette;
 
-  /// Ask for notification permission at most once per app run, and only
-  /// once there is a budget to be alerted about.
   static bool _askedForAlertPermission = false;
 
   @override
@@ -55,9 +53,6 @@ class _BudgetListViewState extends State<BudgetListView> {
     unawaited(_refreshSharedProgress());
   }
 
-  /// Shared Budget cards show the server's spent (CONTEXT.md Shared
-  /// Budget); a fresh summary each time the tab opens keeps them current.
-  /// A failure leaves the cached or local numbers in place.
   Future<void> _refreshSharedProgress() async {
     if (!di.getIt.isRegistered<FamilyRepository>()) return;
     final group = di.getIt<FamilyRepository>().cachedGroup;
@@ -95,7 +90,6 @@ class _BudgetListViewState extends State<BudgetListView> {
       title: t.budgets.title,
       subtitle: t.budgets.subtitle,
       actions: [
-        // Labelled so it isn't confused with the add-transaction button.
         TextButton.icon(
           icon: const Icon(PiconsRegular.plus, size: 18),
           label: Text(t.common.newBudget),

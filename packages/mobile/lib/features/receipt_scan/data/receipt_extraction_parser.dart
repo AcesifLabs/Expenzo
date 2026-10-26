@@ -6,7 +6,6 @@ import 'package:expense_tracker/core/utils/money.dart';
 
 import '../domain/entities/receipt_extraction.dart';
 
-/// Parses the JSON payload returned by the multimodal receipt prompt.
 class ReceiptExtractionParser {
   const ReceiptExtractionParser();
 
@@ -43,8 +42,6 @@ class ReceiptExtractionParser {
   }
 
   Map<String, Object?> _decodeJsonObject(String text) {
-    // Prefer the last balanced {...} that decodes as a Map — models often
-    // echo example JSON before the final answer.
     for (final candidate in _jsonObjectCandidates(text)) {
       try {
         final decoded = jsonDecode(candidate);
@@ -52,20 +49,15 @@ class ReceiptExtractionParser {
           return Map<String, Object?>.from(decoded);
         }
       } on FormatException {
-        // Not JSON; try the next candidate.
+        continue;
       }
     }
 
-    // The reply itself stays out of the message: it holds the receipt.
     throw FormatException(
       'Receipt extraction response is not JSON (${text.length} chars)',
     );
   }
 
-  /// Every balanced `{...}` in [text]: whole objects first, the latest
-  /// first, then the objects nested in them, so an inner object never wins
-  /// over the object around it. Found in one pass, and each candidate is cut
-  /// out only when tried: a reply of thousands of braces stays fast.
   Iterable<String> _jsonObjectCandidates(String text) sync* {
     final outer = <(int, int)>[];
     final nested = <(int, int)>[];
@@ -102,10 +94,6 @@ class ReceiptExtractionParser {
     return (inString: true, escaped: false);
   }
 
-  /// A positive amount up to [AppConstants.maxAmount], rounded to 2
-  /// decimals. Strings may use either decimal mark: in `1.234,50` the last
-  /// mark is the decimal one, and a lone comma before exactly 2 digits
-  /// (`45,90`) is a decimal comma.
   double _parseAmount(Object? value) {
     final amount = switch (value) {
       num() => value.toDouble(),
@@ -115,7 +103,7 @@ class ReceiptExtractionParser {
     if (amount == null || !amount.isFinite) {
       throw const FormatException('Invalid receipt amount');
     }
-    // Checked after rounding: 0.004 would otherwise be saved as 0.00.
+
     final rounded = roundMoney(amount);
     if (rounded <= 0 || rounded > AppConstants.maxAmount) {
       throw const FormatException('Receipt amount is out of range');
@@ -153,8 +141,6 @@ class ReceiptExtractionParser {
     return text;
   }
 
-  /// The day of an ISO-style date (`2026-07-15`, `2026/7/15`, with or
-  /// without a time), or null when there is none or it does not exist.
   DateTime? _parseDate(Object? value) {
     if (value == null) return null;
     final match = RegExp(

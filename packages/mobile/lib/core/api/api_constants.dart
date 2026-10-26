@@ -5,15 +5,11 @@ class ApiConstants {
   static const String login = '/auth/login';
   static const String deleteAccount = '/auth/account';
 
-  /// The 401 message the backend's `JwtStrategy.validate` gives a JWT whose
-  /// user was deleted (packages/backend/src/auth/strategies/jwt.strategy.ts).
   static const String deletedUserMessage = 'User no longer exists';
 
-  /// `GET /health` answers `{"status": "ok", ...}` (backend AppController).
   static const String healthStatusKey = 'status';
   static const String healthOk = 'ok';
 
-  /// One-shot repair POST after sync (not a list GET).
   static const String recordBudgetLinks = '/records/budget-links';
   static const String budgetNames = '/budgets/names';
   static const String syncPush = '/sync/push';
@@ -25,11 +21,6 @@ class ApiConstants {
   static const String groupsMe = '/groups/me';
   static const String groupsJoin = '/groups/join';
 
-  /// Returns the configured backend base URL.
-  ///
-  /// In debug mode, falls back to localhost if BACKEND_URL is missing.
-  /// In release/profile builds, throws a [StateError] if BACKEND_URL is
-  /// missing or not HTTPS, to prevent silent misconfiguration.
   static String get baseUrl {
     final value = dotenv.env['BACKEND_URL'];
     if (value == null || value.isEmpty || value == 'TBD') {
@@ -42,8 +33,6 @@ class ApiConstants {
       );
     }
 
-    // Release only: profile builds load .env.dev (load_env.dart), which
-    // points at a local server.
     if (kReleaseMode && !value.startsWith('https://')) {
       throw StateError(
         'BACKEND_URL must use HTTPS in release builds. '

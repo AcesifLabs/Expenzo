@@ -58,7 +58,7 @@ void main() {
     await tester.pumpWidget(
       BlocProvider<AuthBloc>.value(
         value: authBloc,
-        // Wired as in ExpenzoApp.
+
         child: RefreshOnAuthChange(
           enabled: true,
           onAuthChanged: router.refresh,

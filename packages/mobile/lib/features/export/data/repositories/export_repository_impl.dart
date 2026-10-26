@@ -11,7 +11,6 @@ import '../datasources/export_local_datasource.dart';
 class ExportRepositoryImpl implements ExportRepository {
   final ExportLocalDatasource localDatasource;
 
-  /// The time the range is resolved against.
   final DateTime Function() clock;
 
   const ExportRepositoryImpl({

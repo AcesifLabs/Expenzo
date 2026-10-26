@@ -209,7 +209,6 @@ void main() {
         () => mockGetRecurringList(any()),
       ).thenAnswer((_) async => const Right([]));
 
-      // The list reloads after a failure too, so it shows the real dates.
       expectLater(
         bloc.stream,
         emitsInOrder([

@@ -1,6 +1,5 @@
 import 'package:expense_tracker/features/sms_parser/domain/entities/sms_message.dart';
 
-/// Creates an [SmsMessage] for tests. All params optional with deterministic defaults.
 SmsMessage makeSmsMessage({
   String? id,
   String? address,

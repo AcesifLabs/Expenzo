@@ -42,11 +42,6 @@ class _MockDeleteCategory extends Mock implements DeleteCategory {}
 
 class _MockSearchCategories extends Mock implements SearchCategories {}
 
-/// Stands in for the real bloc: swallows the loads the page fires on build,
-/// and applies [DeleteRecordEvent] synchronously so the dismissed card leaves
-/// the tree in the same frame (the app gets this from the Drift watch stream;
-/// without it Flutter throws "A dismissed Dismissible widget is still part of
-/// the tree").
 class _TestRecordBloc extends RecordBloc {
   _TestRecordBloc(this._records)
     : super(
@@ -99,9 +94,6 @@ class _TestCategoryBloc extends CategoryBloc {
 }
 
 Widget _wrap(RecordBloc recordBloc, CategoryBloc categoryBloc) {
-  // RecordListView (not RecordListPage) because the page resolves its blocs
-  // from getIt. The outer Scaffold is required: showSnackBar asserts a
-  // registered Scaffold, and AppScaffold is a Material, not a Scaffold.
   return translated(
     MaterialApp(
       home: Scaffold(
@@ -117,16 +109,11 @@ Widget _wrap(RecordBloc recordBloc, CategoryBloc categoryBloc) {
   );
 }
 
-/// Swipes a card away and lets the dismiss animation finish, which is what
-/// actually fires `onDismissed` -> `_handleDelete`.
 Future<void> _swipeAway(WidgetTester tester, String id) async {
   await tester.drag(find.byKey(Key('record_$id')), const Offset(-600, 0));
   await tester.pumpAndSettle();
 }
 
-/// Dismisses the visible SnackBar the way a user does — a downward swipe
-/// ([DismissDirection.down] is the SnackBar default). This is the gesture that
-/// exposed the bug: dismissing the top toast revealed the next queued one.
 Future<void> _dismissSnackBar(WidgetTester tester) async {
   await tester.drag(find.byType(SnackBar), const Offset(0, 100));
   await tester.pumpAndSettle();
@@ -149,17 +136,11 @@ void main() {
       bloc.seed();
       await tester.pump();
 
-      // Second delete lands while the first toast is still on screen.
       await _swipeAway(tester, 'rec-1');
       await _swipeAway(tester, 'rec-2');
 
       expect(find.text('Record deleted'), findsOneWidget);
 
-      // The reported symptom: dismissing the visible toast must not reveal a
-      // second one queued behind it. This toast carries an Undo action, and a
-      // SnackBar with an action defaults to `persist: true` (Flutter's
-      // SnackBar ctor: `persist = persist ?? action != null`), so a queued
-      // toast never times out on its own — it waits for the user.
       await _dismissSnackBar(tester);
 
       expect(find.byType(SnackBar), findsNothing);

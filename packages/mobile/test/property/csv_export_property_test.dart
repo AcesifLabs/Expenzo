@@ -52,7 +52,7 @@ void main() {
 
         final body = decoded.skip(1).toList();
         expect(body, hasLength(rows.length));
-        // Compared with the stored text: SQLite drops a leading U+FEFF.
+
         for (final (i, (_, cents)) in rows.indexed) {
           expect(body[i][6], safe(records[i].description));
           expect(body[i][2], centsText(cents));

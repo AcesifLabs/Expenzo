@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Compares the arm64 app bundle size with size_baseline.json; fails on growth
-# over 5% or 1 MB. Run after:
-#   flutter build appbundle --analyze-size --target-platform android-arm64
-# Write a new baseline with: scripts/size_diff.sh --update
+
+
+
+
 set -euo pipefail
 cd "$(dirname "$0")/.."
 

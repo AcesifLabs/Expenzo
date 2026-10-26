@@ -8,11 +8,8 @@ part 'sync_queue_dao.g.dart';
 @DriftAccessor(tables: [SyncQueue])
 class SyncQueueDao extends DatabaseAccessor<AppDatabase>
     with _$SyncQueueDaoMixin {
-  /// Pushes the server may reject before a change is set aside as a
-  /// Failed Sync Change (CONTEXT.md).
   static const maxAttempts = 5;
 
-  /// How long sent changes are kept; older ones only grow the table.
   static const keepSent = Duration(days: 30);
 
   SyncQueueDao(super.db);
@@ -34,7 +31,6 @@ class SyncQueueDao extends DatabaseAccessor<AppDatabase>
     );
   }
 
-  /// Queues every change in [changes] in one batch.
   Future<void> enqueueAll(
     List<({String tableName, String recordId, String action, String payload})>
     changes,
@@ -55,8 +51,6 @@ class SyncQueueDao extends DatabaseAccessor<AppDatabase>
     );
   }
 
-  /// Changes waiting to be pushed, oldest first. Failed Sync Changes are
-  /// left out until the user retries them.
   Future<List<SyncQueueData>> getUnsynced() {
     return (select(syncQueue)
           ..where((t) => t.syncedAt.isNull() & t.failedAt.isNull())
@@ -64,7 +58,6 @@ class SyncQueueDao extends DatabaseAccessor<AppDatabase>
         .get();
   }
 
-  /// Deletes changes sent more than [keepSent] before [now].
   Future<int> deleteSentBefore(DateTime now) =>
       (delete(syncQueue)..where(
             (t) =>
@@ -72,8 +65,6 @@ class SyncQueueDao extends DatabaseAccessor<AppDatabase>
           ))
           .go();
 
-  /// "table/recordId" of every change waiting to be pushed. Reads no
-  /// payloads.
   Future<Set<String>> pendingKeys() async {
     final rows =
         await (selectOnly(syncQueue, distinct: true)
@@ -89,8 +80,6 @@ class SyncQueueDao extends DatabaseAccessor<AppDatabase>
     };
   }
 
-  /// Counts one more rejection for each of [ids]; the [maxAttempts]th makes
-  /// it a Failed Sync Change.
   Future<void> recordRejected(List<int> ids) async {
     if (ids.isEmpty) return;
     await customUpdate(
@@ -106,7 +95,6 @@ class SyncQueueDao extends DatabaseAccessor<AppDatabase>
     );
   }
 
-  /// Failed Sync Changes, updated on every queue change.
   Stream<int> watchFailedCount() {
     final c = countAll();
 
@@ -117,10 +105,6 @@ class SyncQueueDao extends DatabaseAccessor<AppDatabase>
         .map((row) => row.read(c) ?? 0);
   }
 
-  /// Puts the Failed Sync Changes back in the queue with a fresh count.
-  /// One that a newer change of the same row has replaced (an edit, or a
-  /// delete) is dropped instead: sending it now would bring back an old
-  /// version, or a row deleted since.
   Future<void> retryFailed() => transaction(() async {
     await customUpdate(
       'DELETE FROM sync_queue AS failed '
@@ -128,8 +112,6 @@ class SyncQueueDao extends DatabaseAccessor<AppDatabase>
       'AND EXISTS (SELECT 1 FROM sync_queue AS newer '
       'WHERE newer.entity_table = failed.entity_table '
       'AND newer.record_id = failed.record_id AND newer.id > failed.id '
-      // A usage-count bump carries no data, and an edit can't stand in for
-      // an insert the server never got.
       "AND (newer.action = 'delete' OR (newer.payload <> '' "
       "AND failed.action <> 'insert')))",
       updates: {syncQueue},
@@ -142,7 +124,6 @@ class SyncQueueDao extends DatabaseAccessor<AppDatabase>
     );
   });
 
-  /// Ids of [table] rows with changes not yet pushed.
   Future<Set<String>> pendingRecordIds(String table) async {
     final rows =
         await (selectOnly(syncQueue, distinct: true)
@@ -170,7 +151,6 @@ class SyncQueueDao extends DatabaseAccessor<AppDatabase>
     return (await _unsyncedCountQuery(c).getSingle()).read(c) ?? 0;
   }
 
-  /// [getUnsyncedCount], updated on every queue change.
   Stream<int> watchUnsyncedCount() {
     final c = countAll();
 

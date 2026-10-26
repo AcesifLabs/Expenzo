@@ -17,10 +17,10 @@ import { GroupMemberView, InviteView, MyGroupResponse, SharedBudgetRef } from '.
 
 const NO_GROUP: MyGroupResponse = { group: null, me: null, members: [], sharedBudgets: [], invite: null };
 
-/** Postgres unique_violation. */
+
 const UNIQUE_VIOLATION = '23505';
 
-/** New codes tried when a generated one is already taken. */
+
 const INVITE_CODE_ATTEMPTS = 5;
 
 const HOUR_MS = 60 * 60 * 1000;
@@ -36,7 +36,7 @@ export class GroupsService {
     @InjectRepository(User) private readonly userRepo: Repository<User>,
   ) {}
 
-  /** Makes a Family Group with the caller as its only member and Admin. */
+  
   async create(userId: string, dto: CreateGroupDto): Promise<MyGroupResponse> {
     try {
       await this.dataSource.transaction(async (manager) => {
@@ -52,17 +52,14 @@ export class GroupsService {
         await manager.save(manager.create(GroupMember, { groupId: group.id, userId, role: GroupRole.ADMIN }));
       });
     } catch (error) {
-      // Two creates at once: the unique index on group_members.userId wins.
+      
       if (isUniqueViolation(error)) throw groupErrors.alreadyInGroup();
       throw error;
     }
     return this.getMine(userId);
   }
 
-  /**
-   * Makes a new Invite Code for the group and deletes its old ones, so the
-   * previous code stops working (CONTEXT.md Invite Code).
-   */
+  
   async createInvite(groupId: string, userId: string): Promise<InviteView> {
     for (let attempt = 1; ; attempt++) {
       const invite = { code: generateInviteCode(), groupId, createdBy: userId };
@@ -74,42 +71,42 @@ export class GroupsService {
         });
         return { code: invite.code, expiresAt: expiresAt.toISOString() };
       } catch (error) {
-        // Another group holds this code; try a new one.
+        
         if (!isUniqueViolation(error) || attempt >= INVITE_CODE_ATTEMPTS) throw error;
       }
     }
   }
 
-  /** Adds the caller to the group behind [dto.code] as a Member. */
+  
   async join(userId: string, dto: JoinGroupDto): Promise<MyGroupResponse> {
     try {
       await this.dataSource.transaction((manager) => this.joinIn(manager, userId, dto));
     } catch (error) {
-      // Two joins by the same user at once: the unique index on userId wins.
+      
       if (isUniqueViolation(error)) throw groupErrors.alreadyInGroup();
       throw error;
     }
     return this.getMine(userId);
   }
 
-  /** The checks run in this order, so the caller hears the first that fails. */
+  
   private async joinIn(manager: EntityManager, userId: string, dto: JoinGroupDto): Promise<void> {
     if (await manager.exists(GroupMember, { where: { userId } })) throw groupErrors.alreadyInGroup();
     const invite = await manager.findOne(GroupInvite, { where: { code: dto.code } });
     if (!invite) throw groupErrors.inviteNotFound();
     if (invite.expiresAt.getTime() <= Date.now()) throw groupErrors.inviteExpired();
-    // Locks the group row so two joins at once cannot both pass the cap.
+    
     const group = await manager.findOne(Group, { where: { id: invite.groupId }, lock: { mode: 'pessimistic_write' } });
     if (!group) throw groupErrors.inviteNotFound();
     if (group.currencyCode !== dto.currencyCode) throw groupErrors.currencyMismatch(group.currencyCode);
     if ((await manager.count(GroupMember, { where: { groupId: group.id } })) >= GROUP_MAX_MEMBERS) {
       throw groupErrors.groupFull();
     }
-    // The invite stays: codes are reusable until they expire.
+    
     await manager.insert(GroupMember, { groupId: group.id, userId, role: GroupRole.MEMBER });
   }
 
-  /** Changes a member's role. The group must keep at least one Admin. */
+  
   async updateRole(groupId: string, targetId: string, dto: UpdateMemberRoleDto, callerId: string): Promise<MyGroupResponse> {
     await this.dataSource.transaction(async (manager) => {
       const target = await manager.findOne(GroupMember, { where: { groupId, userId: targetId } });
@@ -124,10 +121,7 @@ export class GroupsService {
     return this.getMine(callerId);
   }
 
-  /**
-   * Removes [targetId] from the group: a member leaving (caller == target) or
-   * an Admin removing someone. Runs the leave rules (see [applyLeaveRules]).
-   */
+  
   async removeMember(groupId: string, targetId: string, caller: GroupMember): Promise<void> {
     if (caller.userId !== targetId && caller.role !== GroupRole.ADMIN) {
       throw new ForbiddenException('Only an admin can remove other members');
@@ -138,21 +132,12 @@ export class GroupsService {
     });
   }
 
-  /**
-   * Deletes the group. Its Shared Budgets become personal budgets of their
-   * owner (ADR 0008); members and invites go with the group.
-   */
+  
   async deleteGroup(groupId: string): Promise<void> {
     await this.dataSource.transaction((manager) => this.deleteGroupRows(manager, groupId));
   }
 
-  /**
-   * What happens when [userId] leaves [groupId], by choice, by removal or by
-   * deleting their account (AuthService). Does nothing for a non-member.
-   * - the leaver's Shared Budgets in the group become personal again;
-   * - no members left: the group is deleted;
-   * - no Admin left: the longest-standing member becomes Admin.
-   */
+  
   async applyLeaveRules(manager: EntityManager, groupId: string, userId: string): Promise<void> {
     const deleted = await manager.delete(GroupMember, { groupId, userId });
     if (!deleted.affected) return;
@@ -166,11 +151,7 @@ export class GroupsService {
     }
   }
 
-  /**
-   * Clears groupId on Shared Budgets, of one owner or all. Bumping updatedAt
-   * makes the owner's devices pull the budget again as personal; other
-   * members' phones drop it after their next `/groups/me`.
-   */
+  
   private async detachBudgets(manager: EntityManager, groupId: string, ownerId?: string): Promise<void> {
     const params: string[] = ownerId ? [groupId, ownerId] : [groupId];
     await manager.query(
@@ -180,8 +161,8 @@ export class GroupsService {
   }
 
   private async deleteGroupRows(manager: EntityManager, groupId: string): Promise<void> {
-    // Not left to ON DELETE SET NULL: that would not bump updatedAt, so
-    // devices would never pull the change.
+    
+    
     await this.detachBudgets(manager, groupId);
     await manager.delete(Group, { id: groupId });
   }
@@ -193,7 +174,7 @@ export class GroupsService {
     await manager.save(oldest);
   }
 
-  /** The caller's group, members, Shared Budgets and (for Admins) invite. */
+  
   async getMine(userId: string): Promise<MyGroupResponse> {
     const me = await this.memberRepo.findOne({ where: { userId } });
     if (!me) return NO_GROUP;
@@ -242,7 +223,7 @@ export class GroupsService {
   }
 }
 
-/** A Postgres unique_violation, as thrown by TypeORM (QueryFailedError). */
+
 export function isUniqueViolation(error: unknown): boolean {
   const e = error as { code?: string; driverError?: { code?: string } } | null;
   return e?.code === UNIQUE_VIOLATION || e?.driverError?.code === UNIQUE_VIOLATION;

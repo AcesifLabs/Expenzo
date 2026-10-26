@@ -28,7 +28,6 @@ class RecurringFormPage extends StatefulWidget {
   final RecurringTransaction? recurring;
   final String? recurringId;
 
-  /// Preselected for a new item; an edited item keeps its own frequency.
   final RecurringFrequency defaultFrequency;
 
   const RecurringFormPage({
@@ -54,13 +53,9 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
   var _isActive = true;
   var _isLoading = false;
 
-  /// Set when the item to edit couldn't load; see [CategoryFormPage].
   String? _loadError;
   String? _categoryId;
 
-  /// The recurring transaction being edited, once loaded. Its schedule
-  /// (nextOccurrence) must survive the edit, or processing backfills
-  /// occurrences that were already created.
   RecurringTransaction? _original;
 
   bool get _isEditing => widget.recurring != null || widget.recurringId != null;
@@ -175,8 +170,6 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
     setState(() => _isActive = value);
   }
 
-  /// Monthly and yearly items repeat on the start date's day. Other
-  /// frequencies keep what was stored.
   int? _dayOfMonthFor(RecurringFrequency frequency) => switch (frequency) {
     RecurringFrequency.monthly || RecurringFrequency.yearly => _startDate.day,
     RecurringFrequency.daily || RecurringFrequency.weekly => _dayOfMonth,

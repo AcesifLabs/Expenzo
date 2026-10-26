@@ -1,5 +1,3 @@
-// ignore_for_file: unused_import, unused_local_variable
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 import 'package:mocktail/mocktail.dart';
@@ -7,7 +5,6 @@ import 'package:expense_tracker/features/message_templates/presentation/bloc/con
 import 'package:expense_tracker/features/message_templates/presentation/bloc/contact_selector_event.dart';
 import 'package:expense_tracker/features/message_templates/presentation/bloc/contact_selector_state.dart';
 import 'package:expense_tracker/features/sms_parser/data/datasources/sms_local_datasource.dart';
-import 'package:expense_tracker/features/sms_parser/domain/entities/sms_message.dart';
 
 class MockSmsLocalDatasource extends Mock implements SmsLocalDatasource {}
 

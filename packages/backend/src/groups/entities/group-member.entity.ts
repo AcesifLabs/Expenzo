@@ -4,7 +4,7 @@ import { GroupRole } from '../groups.constants';
 import { Group } from './group.entity';
 
 @Entity('group_members')
-// One group per user.
+
 @Index(['userId'], { unique: true })
 @Check('CHK_group_members_role', `"role" IN ('admin', 'member', 'viewer')`)
 export class GroupMember {

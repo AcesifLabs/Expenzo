@@ -1,9 +1,6 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/record.dart';
 
-/// Sentinel value used to distinguish "not provided" from "set to null"
-/// in [RecordLoaded.copyWith]. Do not compare to this directly; use
-/// [RecordLoaded._isSentinel] instead.
 class _Sentinel {
   const _Sentinel();
 }
@@ -78,13 +75,6 @@ class RecordLoaded extends RecordState {
     this.filterRecordType,
   });
 
-  /// Creates a copy with updated fields.
-  ///
-  /// Nullable filter fields ([filterStartDate], [filterEndDate],
-  /// [filterCategoryIds], [filterRecordType]) use a sentinel pattern:
-  /// - Omitted or `const _sentinel()` → field is preserved unchanged.
-  /// - Explicitly passed `null` → field is cleared to `null`.
-  /// - Any other value → field is set to that value.
   RecordLoaded copyWith({
     List<Record>? records,
     int? total,

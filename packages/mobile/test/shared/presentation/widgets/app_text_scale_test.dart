@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  /// What a child of [AppTextScale] sees for a 14 px font.
   Future<double> scaled14(WidgetTester tester, double factor) async {
     late double result;
     await tester.pumpWidget(

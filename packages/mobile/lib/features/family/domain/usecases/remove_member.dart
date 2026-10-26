@@ -14,7 +14,6 @@ class RemoveMemberParams extends Params {
   const RemoveMemberParams({required this.groupId, required this.userId});
 }
 
-/// An Admin removing another member.
 class RemoveMember extends UseCase<Unit, RemoveMemberParams> {
   final FamilyRepository repository;
 

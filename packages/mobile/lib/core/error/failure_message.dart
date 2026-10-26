@@ -2,19 +2,14 @@ import 'package:expense_tracker/i18n/strings.g.dart';
 
 import 'failures.dart';
 
-/// Error codes with their own user-facing text (see [failureText]).
 abstract final class FailureCodes {
   static const notFound = 'NOT_FOUND';
   static const smsScan = 'SMS_SCAN_ERROR';
 
-  /// Firebase wants a fresh sign-in before deleting the account.
   static const requiresRecentLogin = 'REQUIRES_RECENT_LOGIN';
 
-  /// [Failure.message] is already user-facing text in the app language.
   static const userMessage = 'USER_MESSAGE';
 
-  // Family Group errors: the `code` in the server's error body
-  // (packages/backend/src/groups/groups.types.ts GroupErrorCode).
   static const alreadyInGroup = 'ALREADY_IN_GROUP';
   static const currencyMismatch = 'CURRENCY_MISMATCH';
   static const groupFull = 'GROUP_FULL';
@@ -24,10 +19,6 @@ abstract final class FailureCodes {
   static const notInGroup = 'NOT_IN_GROUP';
 }
 
-/// The localized text a user sees for [failure].
-///
-/// `Failure.message` is diagnostic text for logs and is never shown, unless
-/// the code is [FailureCodes.userMessage].
 String failureText(Failure failure) {
   final errors = t.common.errors;
   final family = t.family.errors;

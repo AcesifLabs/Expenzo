@@ -37,8 +37,6 @@ class _AppShellState extends State<AppShell> {
     return ScaleTransition(scale: animation, child: child);
   }
 
-  // The selected tab is driven by the `tab` query on `/` so other screens
-  // can navigate straight to a root tab (see [AppRootTab]).
   int get _currentIndex =>
       AppRootTab.fromUri(GoRouterState.of(context).uri).index;
 
@@ -116,8 +114,7 @@ class _AppShellState extends State<AppShell> {
                 ),
               ),
               const SizedBox(height: AppSpacing.xs),
-              // The bar keeps its height and FAB dock; at large text sizes
-              // the label shrinks to fit.
+
               Flexible(
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
@@ -140,7 +137,7 @@ class _AppShellState extends State<AppShell> {
 
   void _switchToTab(int index) {
     if (!mounted || _currentIndex == index) return;
-    // Reports stays alive in the tab stack; refresh it each time it is shown.
+
     if (AppRootTab.values[index] == AppRootTab.reports) {
       _reportsRefreshTick.value++;
     }
@@ -173,7 +170,7 @@ class _AppShellState extends State<AppShell> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final keyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
-    // One add button on every tab: it always adds a transaction.
+
     final showFab = !keyboardOpen;
 
     return Scaffold(

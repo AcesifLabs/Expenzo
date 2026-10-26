@@ -17,8 +17,6 @@ class _MockDio extends Mock implements Dio {}
 
 class _MockConnectivity extends Mock implements ConnectivityService {}
 
-/// A [SyncEngine] over an in-memory database with a mocked server and
-/// connectivity, signed in and past the first sync unless told otherwise.
 class SyncEngineHarness {
   final AppDatabase db = AppDatabase.forTesting(NativeDatabase.memory());
   final Dio dio = _MockDio();
@@ -97,7 +95,6 @@ class SyncEngineHarness {
     () => dio.post<Object?>(any(), data: any(named: 'data')),
   ).thenThrow(Exception('server down'));
 
-  /// Queues one change so a push sends something.
   Future<void> queueChange([String id = 'r1']) => queue.enqueue(
     tableName: 'records',
     recordId: id,

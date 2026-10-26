@@ -11,8 +11,6 @@ import '../../domain/usecases/sync_now.dart';
 import 'sync_screen_event.dart';
 import 'sync_screen_state.dart';
 
-/// Drives the Sync screen: status, live pending count and syncing flag, and
-/// "Sync now".
 class SyncScreenBloc extends Bloc<SyncScreenEvent, SyncScreenState> {
   final GetSyncOverview getOverview;
   final SyncNow syncNow;
@@ -36,8 +34,7 @@ class SyncScreenBloc extends Bloc<SyncScreenEvent, SyncScreenState> {
       transformer: droppable(),
     );
     on<_SyncingChanged>(_onSyncingChanged);
-    // A newer read replaces one in flight, so an older overview never lands
-    // last.
+
     on<_ReloadRequested>(_onReloadRequested, transformer: restartable());
   }
 
@@ -89,15 +86,12 @@ class SyncScreenBloc extends Bloc<SyncScreenEvent, SyncScreenState> {
     );
   }
 
-  /// A background cycle that ends changes "last synced" and the failure
-  /// state, so the overview is read again.
   void _onSyncingChanged(_SyncingChanged event, Emitter<SyncScreenState> emit) {
     final finished = state.isSyncing && !event.syncing;
     emit(state.copyWith(isSyncing: event.syncing));
     if (finished) add(const _ReloadRequested());
   }
 
-  /// Subscribes once, on the first start.
   void _listen() {
     _pendingSub ??= repository.watchPendingCount().listen(
       (count) => add(_PendingCountChanged(count)),

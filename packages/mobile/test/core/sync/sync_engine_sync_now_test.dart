@@ -160,7 +160,7 @@ void main() {
 
     expect(await first, SyncRunResult.success);
     expect(await second, SyncRunResult.success);
-    // start, the held cycle and one more pass for the joined request.
+
     expect(harness.pullCount(), lessThanOrEqualTo(3));
   });
 

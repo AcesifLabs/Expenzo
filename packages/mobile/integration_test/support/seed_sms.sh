@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Puts bank messages in an emulator's inbox for integration_test/sms_scan_test.dart.
-# Usage: integration_test/support/seed_sms.sh emulator-5560
+
+
 set -euo pipefail
 
 device="${1:?pass the emulator serial, e.g. emulator-5560}"

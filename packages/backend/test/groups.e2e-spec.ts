@@ -34,7 +34,7 @@ describe('GroupsController (e2e)', () => {
     deleteGroup: jest.fn(),
   };
   const summaryService = { getSummary: jest.fn() };
-  // The real GroupRoleGuard reads the caller's membership from this repo.
+  
   const memberRepo = { findOne: jest.fn() };
 
   beforeEach(async () => {

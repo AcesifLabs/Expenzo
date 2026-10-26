@@ -25,9 +25,6 @@ import '../widgets/member_actions_sheet.dart';
 import '../widgets/member_avatar.dart';
 import '../widgets/role_badge.dart';
 
-/// Frame `FamilyMemberManagement`: members and their roles. Admins change
-/// roles, remove members, invite more and delete the group; everyone can
-/// leave.
 class FamilyMembersPage extends StatelessWidget {
   const FamilyMembersPage({super.key});
 
@@ -147,7 +144,6 @@ class _MembersBody extends StatelessWidget {
     );
   }
 
-  /// Asks with [copy] and sends [event] when the user confirms.
   Future<void> _confirm(
     BuildContext context, {
     required ({String title, String body, String action}) copy,
@@ -223,7 +219,6 @@ class _MembersBody extends StatelessWidget {
   }
 }
 
-/// The members in one card, oldest first, with dividers.
 class _MemberCard extends StatelessWidget {
   final MyGroup group;
   final bool busy;

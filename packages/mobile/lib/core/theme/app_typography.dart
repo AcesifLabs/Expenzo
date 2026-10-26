@@ -1,24 +1,10 @@
 import 'package:flutter/material.dart';
 
-/// Lato, six sizes, two weights (docs/adr/0005).
-///
-/// | Size | Slots | Use |
-/// |---|---|---|
-/// | 32 | display*, headlineLarge | key figures |
-/// | 24 | headlineMedium, headlineSmall | page titles |
-/// | 18 | titleLarge | section titles |
-/// | 16 | titleMedium, bodyLarge | body |
-/// | 14 | titleSmall, bodyMedium, labelLarge | secondary text, buttons |
-/// | 12 | bodySmall, labelMedium, labelSmall | captions, nav labels |
-///
-/// Widgets read these through `Theme.of(context).textTheme`.
 abstract final class AppTypography {
   static const fontFamily = 'Lato';
 
-  /// Lato has no Bangla glyphs; Bangla text falls back to Noto Sans Bengali.
   static const fontFamilyFallback = ['NotoSansBengali'];
 
-  /// Digits of equal width so amounts line up in lists and columns.
   static const tabularFigures = [FontFeature.tabularFigures()];
 
   static final TextStyle displayLarge = _bold.copyWith(
@@ -58,7 +44,6 @@ abstract final class AppTypography {
     letterSpacing: 0.2,
   );
 
-  /// Money amounts: bold with tabular figures.
   static final TextStyle currency = _bold.copyWith(
     fontSize: 18,
     fontFeatures: tabularFigures,

@@ -57,7 +57,6 @@ void main() {
           .map((tile) => (tile.title! as Text).data)
           .toList();
 
-      // English and বাংলা are never translated.
       expect(titles, [t.settings.language.matchDevice, 'English', 'বাংলা']);
     });
   }

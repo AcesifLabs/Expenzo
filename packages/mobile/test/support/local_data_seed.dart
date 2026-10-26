@@ -1,7 +1,5 @@
 import 'package:expense_tracker/core/database/app_database.dart';
 
-/// Rows the delete-all-data tests count and wipe: [count] of each kind plus
-/// one signed-in user and one queued sync change.
 Future<void> seedLocalData(
   AppDatabase db, {
   int records = 1,

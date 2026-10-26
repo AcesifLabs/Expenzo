@@ -1,19 +1,14 @@
 import 'package:equatable/equatable.dart';
 
-/// What the Sync screen shows besides the on/off switch, which comes from
-/// the settings.
 class SyncOverview extends Equatable {
   final bool isSignedIn;
   final DateTime? lastSuccessfulSyncAt;
 
-  /// Cleared by the next success, so a stored failure is the latest outcome.
   final DateTime? lastFailedSyncAt;
   final int consecutiveFailures;
 
-  /// Changes waiting in the sync queue.
   final int pendingCount;
 
-  /// Failed syncs in a row before the screen warns that Sync isn't working.
   static const failureBannerThreshold = 3;
 
   @override

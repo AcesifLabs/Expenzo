@@ -120,7 +120,6 @@ void main() {
   });
 
   test('a scanned message gets the id a live import gave it', () async {
-    // The network's time on the message; the phone got it 3 s later.
     final sent = DateTime(2024, 6, 15, 14, 30);
     final message = makeSmsMessage(
       address: 'BANK',
@@ -283,7 +282,6 @@ void main() {
   });
 }
 
-/// The id the scan gives a message; the body defaults to the factory's.
 String _sourceIdFor(
   String address,
   DateTime date, [

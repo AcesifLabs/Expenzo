@@ -27,7 +27,6 @@ class UpdateSettingsEvent extends SettingsEvent {
 }
 
 class UpdateCurrency extends SettingsEvent {
-  /// ISO 4217 code.
   final String currencyCode;
 
   @override
@@ -54,7 +53,6 @@ class UpdateNotificationsEnabled extends SettingsEvent {
   const UpdateNotificationsEnabled(this.enabled);
 }
 
-/// One of the per-kind toggles under the master switch.
 class UpdateNotificationToggle extends SettingsEvent {
   final NotificationToggle toggle;
   final bool enabled;
@@ -75,7 +73,6 @@ class UpdateTheme extends SettingsEvent {
 }
 
 class UpdateLanguage extends SettingsEvent {
-  /// 'system' or a locale code ('en', 'bn').
   final String languageCode;
 
   @override
@@ -85,7 +82,6 @@ class UpdateLanguage extends SettingsEvent {
 }
 
 class UpdateDefaultRecurringFrequency extends SettingsEvent {
-  /// 'weekly', 'monthly' or 'yearly'.
   final String frequency;
 
   @override
@@ -112,7 +108,6 @@ class UpdateRecurringAutoCreate extends SettingsEvent {
   const UpdateRecurringAutoCreate(this.enabled);
 }
 
-/// Changes only the fields that are given.
 class UpdateNumberFormat extends SettingsEvent {
   final int? decimalPlaces;
   final DigitGrouping? digitGrouping;
@@ -132,7 +127,6 @@ class UpdateFontSize extends SettingsEvent {
   const UpdateFontSize(this.fontSize);
 }
 
-/// Stores the choice, so it no longer follows the app language.
 class UpdateFirstDayOfWeek extends SettingsEvent {
   final FirstDayOfWeek firstDayOfWeek;
 
@@ -142,7 +136,6 @@ class UpdateFirstDayOfWeek extends SettingsEvent {
   const UpdateFirstDayOfWeek(this.firstDayOfWeek);
 }
 
-/// Takes effect at the next cold start.
 class UpdateHomeTab extends SettingsEvent {
   final AppRootTab homeTab;
 
@@ -152,7 +145,6 @@ class UpdateHomeTab extends SettingsEvent {
   const UpdateHomeTab(this.homeTab);
 }
 
-/// Applied to the sync engine by `ExpenzoApp` when the setting changes.
 class UpdateSyncEnabled extends SettingsEvent {
   final bool enabled;
 

@@ -121,7 +121,7 @@ void main() {
                 },
               );
       });
-      // Offline pushes: no answer, so no rejection is counted.
+
       when(
         () => harness.dio.post<Object?>(any(), data: any(named: 'data')),
       ).thenThrow(

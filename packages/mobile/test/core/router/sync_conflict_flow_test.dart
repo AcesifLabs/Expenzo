@@ -14,8 +14,6 @@ import '../../support/pump_localized.dart';
 
 class _MockAuthBloc extends Mock implements AuthBloc {}
 
-/// Runs the real redirect and refresh wiring end to end, so timing between
-/// auth changes and navigation is covered, not just the redirect decision.
 void main() {
   testWidgets('a sync conflict opens its page and leaves it once resolved', (
     tester,
@@ -63,7 +61,6 @@ void main() {
     await emit(const AuthSyncConflictPending(user));
     expect(find.text('conflict'), findsOneWidget);
 
-    // SyncConflictPage re-checks auth once the user picks an option.
     await emit(const AuthLoading());
     expect(find.text('conflict'), findsOneWidget);
 

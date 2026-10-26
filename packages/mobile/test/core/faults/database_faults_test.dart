@@ -98,7 +98,7 @@ void main() {
         expect(remounts, 1);
         expect(GetIt.I.isRegistered<AppDatabase>(), isFalse);
         expect(GetIt.I<BootstrapService>(), same(bootstrap));
-        // The empty database pulls everything again, not just recent changes.
+
         expect(await TokenStorage.getLastSyncAt(), isNull);
         expect(await TokenStorage.isFirstSync(), isTrue);
       },

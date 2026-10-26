@@ -25,7 +25,7 @@ void main() {
   test('messages without a usable amount never become 0 records', () async {
     final result = await CreateRecordsFromParsedList(repository)([
       makeParsedTransaction(sourceId: 'a', amount: 250),
-      // The factory fills a missing amount, so build this one by hand.
+
       const ParsedTransaction(
         rawMessage: 'Your balance is low',
         sourceType: 'sms',

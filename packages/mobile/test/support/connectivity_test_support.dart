@@ -4,8 +4,6 @@ import 'package:mocktail/mocktail.dart';
 
 class MockConnectivityService extends Mock implements ConnectivityService {}
 
-/// Registers a permissive [ConnectivityService] for widget tests that mount
-/// [OfflineGate] or receipt extraction. Safe to call more than once.
 void registerTestConnectivity() {
   if (di.getIt.isRegistered<ConnectivityService>()) return;
 

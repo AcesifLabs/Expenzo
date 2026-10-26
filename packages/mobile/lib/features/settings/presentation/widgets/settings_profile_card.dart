@@ -13,8 +13,6 @@ import 'package:expense_tracker/features/auth/presentation/widgets/user_avatar.d
 import 'package:expense_tracker/i18n/strings.g.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
 
-/// The account at the top of Settings: opens My profile when signed in, or
-/// Sign in as a guest.
 class SettingsProfileCard extends StatelessWidget {
   const SettingsProfileCard({super.key});
 

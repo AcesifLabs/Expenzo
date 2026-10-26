@@ -8,8 +8,6 @@ import 'onboarding_page_frame.dart';
 import 'onboarding_step_dots.dart';
 import 'tutorial_cta.dart';
 
-/// One tutorial page: a real-app screenshot for each theme (Q25, captured
-/// signed out, English) and its text.
 class TutorialPageData {
   final String lightAsset;
   final String darkAsset;
@@ -31,7 +29,6 @@ String _addBody() => t.onboarding.tutorial.addTransaction.body;
 String _reportsTitle() => t.onboarding.tutorial.reports.title;
 String _reportsBody() => t.onboarding.tutorial.reports.body;
 
-/// The three screenshot pages, in order.
 @visibleForTesting
 const tutorialPages = [
   TutorialPageData(
@@ -54,8 +51,6 @@ const tutorialPages = [
   ),
 ];
 
-/// Three swipeable screenshot pages and the CTA (replaces the design's intro
-/// video). Used at the end of onboarding and from Help → Watch tutorial.
 class TutorialPages extends StatefulWidget {
   final VoidCallback onDone;
 
@@ -180,7 +175,7 @@ class _TutorialPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          // Scrolls when large text needs more room than the image leaves.
+
           Flexible(
             child: SingleChildScrollView(
               child: ListBody(

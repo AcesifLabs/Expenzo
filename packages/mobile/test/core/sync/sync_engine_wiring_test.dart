@@ -277,7 +277,7 @@ void main() {
 
       expect(ran, isFalse);
       verifyNever(() => dio.post<Object?>(any(), data: any(named: 'data')));
-      // The interrupted start gave up instead of listening for triggers.
+
       verifyNever(() => connectivity.onlineStream);
     });
 

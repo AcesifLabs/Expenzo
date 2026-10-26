@@ -67,8 +67,6 @@ void main() {
     );
   }
 
-  /// Settings inside a router whose `/settings` route has one child page,
-  /// so a row's `context.push('/settings/<child>')` can be checked.
   Future<void> pumpSettingsRouter(
     WidgetTester tester, {
     required String child,
@@ -101,7 +99,6 @@ void main() {
   testWidgets('the notifications row shows Off when the master is off', (
     tester,
   ) async {
-    // Tall enough that the list builds the Notifications row.
     await tester.binding.setSurfaceSize(const Size(400, 3000));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await pumpSettings(tester);
@@ -130,7 +127,7 @@ void main() {
     await pumpSettingsRouter(tester, child: 'notifications');
 
     await tester.scrollUntilVisible(find.text('Notifications'), 200);
-    // Fully on screen: scrollUntilVisible stops once the row's edge shows.
+
     await tester.ensureVisible(find.text('Notifications'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Notifications'));
@@ -200,7 +197,7 @@ void main() {
     await pumpSettingsRouter(tester, child: 'font-size');
 
     await tester.scrollUntilVisible(find.text('Font size'), 200);
-    // Fully on screen: scrollUntilVisible stops once the row's edge shows.
+
     await tester.ensureVisible(find.text('Font size'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Font size'));
@@ -240,7 +237,7 @@ void main() {
     await pumpSettingsRouter(tester, child: 'calendar');
 
     await tester.scrollUntilVisible(find.text('Calendar'), 200);
-    // Fully on screen: scrollUntilVisible stops once the row's edge shows.
+
     await tester.ensureVisible(find.text('Calendar'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Calendar'));
@@ -253,7 +250,7 @@ void main() {
     await pumpSettingsRouter(tester, child: 'language');
 
     await tester.scrollUntilVisible(find.text(t.settings.language.title), 200);
-    // Fully on screen: scrollUntilVisible stops once the row's edge shows.
+
     await tester.ensureVisible(find.text(t.settings.language.title));
     await tester.pumpAndSettle();
     await tester.tap(find.text(t.settings.language.title));
@@ -291,7 +288,7 @@ void main() {
     await pumpSettingsRouter(tester, child: 'home-page');
 
     await tester.scrollUntilVisible(find.text('Home page'), 200);
-    // Fully on screen: scrollUntilVisible stops once the row's edge shows.
+
     await tester.ensureVisible(find.text('Home page'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Home page'));
@@ -309,7 +306,6 @@ void main() {
 
     double top(String text) => tester.getTopLeft(find.text(text)).dy;
 
-    // Signed out, the Sign in row shares this subtitle.
     expect(find.text('Keep your data on all your devices'), findsNWidgets(2));
     expect(top('Sync'), greaterThan(top('Recurring transactions')));
     expect(top('Sync'), lessThan(top('Export data')));
@@ -409,7 +405,7 @@ void main() {
     await pumpSettingsRouter(tester, child: 'categories');
 
     await tester.scrollUntilVisible(find.text('Category settings'), 200);
-    // Fully on screen: scrollUntilVisible stops once the row's edge shows.
+
     await tester.ensureVisible(find.text('Category settings'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Category settings'));
@@ -421,7 +417,6 @@ void main() {
   testWidgets('rows under every section are reachable', (tester) async {
     await pumpSettings(tester);
 
-    // Lower rows sit below the fold on a small screen.
     for (final label in [
       'Sign in',
       'Recurring transactions',

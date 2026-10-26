@@ -4,12 +4,6 @@ import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
 
-/// A section header plus one grouped card of rows.
-///
-/// Store [title] in sentence case; this widget upper-cases it. A null
-/// [title] gives a card with no header (the Sign out row). A section with
-/// no visible rows renders nothing. Hide a row with collection-if in
-/// `children`; never add a placeholder row.
 class SettingsSection extends StatelessWidget {
   final String? title;
   final List<Widget> children;
@@ -54,8 +48,6 @@ class SettingsSection extends StatelessWidget {
   }
 }
 
-/// A [SettingsSection] header on its own, for lists that build their rows
-/// lazily with [SettingsSectionSlot].
 class SettingsSectionHeader extends StatelessWidget {
   final String title;
 
@@ -83,10 +75,6 @@ class SettingsSectionHeader extends StatelessWidget {
   }
 }
 
-/// One row's slice of a [SettingsSection] card, so a long section can be
-/// built lazily in a `ListView.builder` and still look like one card: only
-/// the first and last rows round their corners, and every row after the
-/// first starts with the section divider.
 class SettingsSectionSlot extends StatelessWidget {
   final bool isFirst;
   final bool isLast;

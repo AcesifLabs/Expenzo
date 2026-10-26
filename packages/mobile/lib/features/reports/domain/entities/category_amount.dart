@@ -7,7 +7,6 @@ class CategoryAmount extends Equatable {
   final double amount;
   final double percentage;
 
-  /// The category's own color (hex), or null for uncategorized spending.
   final String? colorHex;
 
   @override

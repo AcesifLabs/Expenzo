@@ -19,8 +19,6 @@ import '../helpers/family_failure_listener.dart';
 import '../widgets/family_create_group_view.dart';
 import '../widgets/family_dashboard_view.dart';
 
-/// Settings → Family group: the create view when not in a group, else the
-/// family dashboard.
 class FamilyHomePage extends StatelessWidget {
   const FamilyHomePage({super.key});
 
@@ -82,7 +80,6 @@ Widget _buildBody(
     );
   }
 
-  // Create / join need the server; show offline clearly instead of a dead form.
   return const OfflineGate(child: FamilyCreateGroupView());
 }
 

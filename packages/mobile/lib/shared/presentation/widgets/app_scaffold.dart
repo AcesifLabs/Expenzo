@@ -7,14 +7,11 @@ class AppScaffold extends StatelessWidget {
   final String? subtitle;
   final List<Widget>? actions;
 
-  /// Forwarded to [AppPageHeader], e.g. an `AppBackButton` on nested screens.
   final Widget? leading;
   final RefreshCallback? onRefresh;
   final Widget? _body;
   final bool _isSlivers;
 
-  // A page may have no title.
-  // ignore: unnecessary-nullable
   const AppScaffold({
     super.key,
     required this.title,

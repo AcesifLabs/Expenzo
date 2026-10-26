@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-/// Structured values proposed from a receipt image for the New Transaction sheet.
 class ReceiptExtraction extends Equatable {
   final double amount;
   final String description;

@@ -108,8 +108,7 @@ class RecurringRepositoryImpl implements RecurringRepository {
   ) async {
     try {
       await localDatasource.updateRecurringBatch(transactions);
-      // ProcessRecurring moves nextOccurrence here; other devices must see it
-      // or they post the same occurrence again.
+
       for (final recurring in transactions) {
         final id = recurring.id;
         if (id != null) await _enqueueSync('update', id, _toPayload(recurring));
@@ -161,8 +160,6 @@ class RecurringRepositoryImpl implements RecurringRepository {
     }
   }
 
-  /// Same fields as `RecurringTransactionsSyncHandler.toSyncPayload` without
-  /// `id`, `createdAt` and `updatedAt`, which the server sets itself.
   Map<String, dynamic> _toPayload(RecurringTransaction r) => {
     'description': r.description,
     'amount': r.amount,
@@ -176,8 +173,6 @@ class RecurringRepositoryImpl implements RecurringRepository {
     'dayOfMonth': r.dayOfMonth,
   };
 
-  /// Awaited, so inside a database transaction the queue entry commits or
-  /// rolls back with the change.
   Future<void> _enqueueSync(
     String action,
     String id, [

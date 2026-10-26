@@ -1,15 +1,11 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-/// Device-time last-cycle outcome. Separate from [TokenStorage.last_sync_at],
-/// which is the server's pull cursor and is written even when push fails.
 class SyncOutcomeStore {
   static const _successKey = 'last_successful_sync_at';
   static const _failureKey = 'last_failed_sync_at';
   static const _failureCountKey = 'consecutive_sync_failures';
   static final _storage = FlutterSecureStorage();
 
-  /// Drops the failure record, so a stored failure is always the latest
-  /// outcome.
   static Future<void> recordSyncSuccess(DateTime time) async {
     await _storage.write(
       key: _successKey,
@@ -33,7 +29,6 @@ class SyncOutcomeStore {
 
   static Future<DateTime?> getLastFailedSyncAt() => _readTime(_failureKey);
 
-  /// Failed cycles since the last success.
   static Future<int> getConsecutiveSyncFailures() async {
     final raw = await _storage.read(key: _failureCountKey);
 

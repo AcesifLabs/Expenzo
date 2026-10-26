@@ -9,7 +9,6 @@ import 'package:expense_tracker/i18n/strings.g.dart';
 class BudgetTransactionList extends StatelessWidget {
   final List<Record> records;
 
-  /// Defaults to "No transactions in this period" in the app language.
   final String? emptyMessage;
 
   const BudgetTransactionList({

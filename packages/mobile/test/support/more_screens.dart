@@ -83,10 +83,6 @@ import 'factories/sms_scan_result_item_factory.dart';
 import 'family_bloc_mock.dart';
 import 'receipt_camera.dart';
 
-/// The screens `core_screens.dart` and `settings_screens.dart` don't build,
-/// each with mocked blocs. Same contract: call the builders inside the test
-/// body.
-
 class MockAiAssistantBloc extends Mock implements AiAssistantBloc {}
 
 class MockGoalFormBloc extends Mock implements GoalFormBloc {}
@@ -146,7 +142,6 @@ final _sms = makeSmsMessage(
       'Balance Tk 12,340.00',
 );
 
-/// The group as its admin sees it, with a live invite code.
 FamilyState _familyReady() {
   final now = clock.now();
 
@@ -238,7 +233,6 @@ Widget allCategoriesPickerScreen() => BlocProvider<CategoryBloc>.value(
 
 Widget familyHomeScreen() => _withFamily(const FamilyHomePage());
 
-/// No group yet: Home offers to create or join one.
 Widget familyHomeNoGroupScreen() => _withFamily(
   const FamilyHomePage(),
   FamilyState(
@@ -323,7 +317,6 @@ Widget onboardingScreen() => BlocProvider<OnboardingBloc>.value(
   child: const OnboardingPage(),
 );
 
-/// The five setup steps, each on its own.
 Map<String, Widget Function()> get onboardingSteps => {
   'Onboarding / income': () => _onboardingStep(const OnboardingIncomePage()),
   'Onboarding / recurring': () =>
@@ -338,8 +331,6 @@ Map<String, Widget Function()> get onboardingSteps => {
 
 Widget tutorialScreen() => const TutorialPage();
 
-/// The camera permission is refused, so the page shows its message and
-/// never opens the camera plugin.
 Widget receiptCameraScreen() {
   mockCameraPermissionDenied();
   addTearDown(clearCameraPermissionMock);

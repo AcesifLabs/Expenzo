@@ -31,19 +31,15 @@ class BudgetDao extends DatabaseAccessor<AppDatabase> with _$BudgetDaoMixin {
     await update(budgets).replace(budget);
   }
 
-  /// Shared Budgets: every budget with a Family Group id.
   Future<List<Budget>> getBudgetsWithGroup() {
     return (select(budgets)..where((b) => b.groupId.isNotNull())).get();
   }
 
-  /// Deletes budgets on this device only: nothing is queued for sync and
-  /// records keep their budgetId.
   Future<void> deleteBudgetsByIds(List<String> ids) async {
     if (ids.isEmpty) return;
     await (delete(budgets)..where((b) => b.id.isIn(ids))).go();
   }
 
-  /// Makes budgets personal on this device only; nothing is queued.
   Future<void> clearGroupId(List<String> ids) async {
     if (ids.isEmpty) return;
     await (update(budgets)..where((b) => b.id.isIn(ids))).write(
@@ -55,9 +51,6 @@ class BudgetDao extends DatabaseAccessor<AppDatabase> with _$BudgetDaoMixin {
     await (delete(budgets)..where((b) => b.id.equals(id))).go();
   }
 
-  /// Deletes the budget and unlinks any records pointing at it (sets their
-  /// budget_id to null), all in one transaction. Returns the affected records
-  /// (already unlinked) so callers can enqueue them for sync.
   Future<List<Record>> deleteBudgetAndUnlinkRecords(String id) async {
     return transaction(() async {
       final affectedIds =

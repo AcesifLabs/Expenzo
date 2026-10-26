@@ -100,10 +100,6 @@ class AppTheme {
     labelSmall: AppTypography.labelSmall,
   );
 
-  // Every color below comes from AppPalette (docs/adr/0003): primary is the
-  // mint brand, secondary the lavender accent. Only Material-only roles
-  // (containers, outlines) are spelled out here.
-  // Built once and cached; ThemeData is immutable.
   static final ThemeData _lightTheme = _buildTheme(
     _ThemeColors(
       brightness: Brightness.light,
@@ -139,8 +135,7 @@ class AppTheme {
       appBarFg: _light.textPrimary,
       cardColor: _light.surface,
       cardShadow: Colors.black.withAlpha(10),
-      // Theme-styled fields mostly sit on white cards and dialogs, so they
-      // take the page background as fill (form pages use palette.inputFill).
+
       inputFill: _light.bg,
       inputBorder: _light.inputStroke,
       inputFocused: _light.brand,
@@ -357,16 +352,11 @@ class AppTheme {
         backgroundColor: c.fabBg,
         foregroundColor: c.fabFg,
         elevation: 0,
-        // Stadium, not circle: a square FAB still renders as a circle, and an
-        // extended FAB ("Ask AI") becomes a pill as wide as its label.
+
         shape: const StadiumBorder(),
         extendedPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md + AppSpacing.xs,
         ),
-        // No extendedTextStyle: the default (textTheme.labelLarge) is already
-        // Lato bold. A raw AppTypography style here has inherit: true, and
-        // the FAB animates between label styles, which throws when the two
-        // styles disagree on inherit.
       );
 
   static DialogThemeData _dialogTheme(_ThemeColors c) => DialogThemeData(

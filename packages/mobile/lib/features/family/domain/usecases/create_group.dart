@@ -8,7 +8,6 @@ import '../repositories/family_repository.dart';
 class CreateGroupParams extends Params {
   final String name;
 
-  /// The creator's Currency becomes the group's (CONTEXT.md Family Group).
   final String currencyCode;
   final double? monthlyBudget;
 

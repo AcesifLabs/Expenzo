@@ -1,6 +1,5 @@
 import 'package:drift/drift.dart';
 
-/// Savings goals (ADR 0009). Mirrors the backend `goals` table.
 @TableIndex(name: 'idx_goals_user_id', columns: {#userId})
 class Goals extends Table {
   TextColumn get id => text()();

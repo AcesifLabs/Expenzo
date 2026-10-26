@@ -16,8 +16,6 @@ class BudgetProgressCard extends StatelessWidget {
   final BudgetProgress progress;
   final VoidCallback onTap;
 
-  /// Null hides the action, as for a Shared Budget someone else owns; with
-  /// both null a long press does nothing.
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
 
@@ -171,7 +169,6 @@ class BudgetProgressCard extends StatelessWidget {
   }
 }
 
-/// Budget name, the Shared badge and the days left.
 class _CardHeader extends StatelessWidget {
   final String name;
   final bool isShared;
@@ -206,8 +203,7 @@ class _CardHeader extends StatelessWidget {
           ),
         ],
         const SizedBox(width: AppSpacing.sm),
-        // Wraps rather than truncates at large text sizes, so the number of
-        // days stays readable.
+
         Flexible(
           child: Text(
             daysLeft,

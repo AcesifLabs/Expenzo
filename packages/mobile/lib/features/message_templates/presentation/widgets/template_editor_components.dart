@@ -4,14 +4,8 @@ import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:expense_tracker/core/theme/app_typography.dart';
 
-/// Step state for the progress indicator.
 enum _StepDotState { completed, active, inactive }
 
-/// A horizontal step progress indicator with dots connected by lines.
-///
-/// [currentStep] is 1-based. Steps before [currentStep] are shown as
-/// completed (green), the current step is active (purple), and steps
-/// after are inactive (dimmed).
 class StepProgressIndicator extends StatelessWidget {
   final int currentStep;
   final int totalSteps;
@@ -98,7 +92,6 @@ class _StepLine extends StatelessWidget {
   }
 }
 
-/// A dark card that displays a message preview with sender name and body.
 class MessagePreviewCard extends StatelessWidget {
   final String senderName;
   final String messageBody;
@@ -143,10 +136,6 @@ class MessagePreviewCard extends StatelessWidget {
   }
 }
 
-/// A tappable chip for selecting a trigger word from an SMS message.
-///
-/// Displays [word] with two visual states: default (dark background) and
-/// selected (purple-tinted background with a purple border).
 class TriggerWordChip extends StatelessWidget {
   final String word;
   final bool isSelected;
@@ -201,7 +190,6 @@ class TriggerWordChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.palette;
 
-    // Compact chip, full 48dp touch area.
     return Semantics(
       button: true,
       selected: isSelected,
@@ -217,10 +205,6 @@ class TriggerWordChip extends StatelessWidget {
   }
 }
 
-/// A full-width row for selecting an amount, styled as a card with a radio
-/// button and the amount value.
-///
-/// Matches the TemplateStep2Screen design from the .pen file.
 class AmountRow extends StatelessWidget {
   final String amount;
   final bool isSelected;

@@ -43,10 +43,6 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // SettingsBloc is an app-wide singleton (ExpenzoApp listens to it for the
-    // theme), so provide it by value: `create` would close it when this page
-    // is popped and break every later settings change.
-    // Pushed above the app shell, so it needs its own themed Scaffold.
     return BlocProvider.value(
       value: di.getIt<SettingsBloc>(),
       child: const Scaffold(body: SettingsView()),
@@ -54,31 +50,9 @@ class SettingsPage extends StatelessWidget {
   }
 }
 
-/// The main Settings list. Sections and rows, top to bottom (SAAP-60 README,
-/// "Settings row order"):
-///
-/// | Section (builder) | Rows now | Rows later tickets add, in final order |
-/// |---|---|---|
-/// | none (`SettingsProfileCard`) | Profile card: My profile (signed in) / Sign in (signed out) | none |
-/// | Profile & account (`_accountSection`) | Sign in (signed out) / My profile, Family group (signed in) | none |
-/// | Preferences (`_preferencesSection`) | Default currency, Number format, Font size, Appearance, Calendar | none |
-/// | Notifications (`_notificationsSection`) | Notifications | none |
-/// | Data & budget (`_dataSection`) | Recurring transactions, Sync, Export data, Delete all data | Recurring transactions, Sync (SAAP-71), Export data (SAAP-69), Delete all data (SAAP-70) |
-/// | Automation (`_automationSection`) | Auto-import from SMS, Matching rules | none |
-/// | General (`_generalSection`) | Language, Home page, Category settings | none |
-/// | Support (`_supportSection`) | Help & Support, Send crash reports | none |
-/// | none (`_signOutRow`) | Sign out (signed in only), always last | none |
-/// | Developer (`kDebugMode` only) | Database inspector | none |
-///
-/// Rows follow this order inside a section. A new row goes into an existing
-/// section. Hide a row (signed out, debug) with collection-if; a section with
-/// no visible rows disappears. No "coming soon" rows (ADR 0011). The Sync row
-/// reads "Sync" / "Keep your data on all your devices"; the UI never says
-/// "backup".
 class SettingsView extends StatelessWidget {
   const SettingsView({super.key});
 
-  /// "Off", or how many of the four kinds are on.
   static String _notificationsSummary(UserSettings? settings) {
     final notificationsT = t.settings.notifications;
     if (settings == null || !settings.notificationsEnabled) {
@@ -136,7 +110,6 @@ class SettingsView extends StatelessWidget {
     );
   }
 
-  /// The signed-in user's group, from the last `/groups/me`.
   String? _cachedGroupName() => di.getIt.isRegistered<FamilyRepository>()
       ? di.getIt<FamilyRepository>().cachedGroup?.group.name
       : null;
@@ -198,7 +171,7 @@ class SettingsView extends StatelessWidget {
         SettingsTile(
           icon: PiconsRegular.hash,
           title: settingsT.numberFormat.title,
-          // A live sample shows the current format at a glance.
+
           subtitle: CurrencyFormatter.format(NumberFormatView.previewAmount),
           onTap: () => _openNumberFormat(context),
         ),
@@ -359,7 +332,6 @@ class SettingsView extends StatelessWidget {
     );
   }
 
-  /// Sign out sits alone below every section, with no header.
   Widget _signOutRow(BuildContext context) {
     final isSignedIn = context.watch<AuthBloc>().state is Authenticated;
     if (!isSignedIn) return const SizedBox.shrink();
@@ -399,7 +371,6 @@ class SettingsView extends StatelessWidget {
         listenWhen: (_, s) => s is SettingsError,
         listener: SettingsStateView.showSaveFailed,
         child: BlocBuilder<SettingsBloc, SettingsState>(
-          // A save's SettingsLoading must not blank the subtitles.
           buildWhen: (previous, current) =>
               current is SettingsLoaded || previous is SettingsInitial,
           builder: (context, settingsState) {

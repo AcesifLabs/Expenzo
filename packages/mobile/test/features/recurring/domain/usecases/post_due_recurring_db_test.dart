@@ -24,8 +24,6 @@ class _MockCategoryRepository extends Mock implements CategoryRepository {}
 
 class _MockGetCategories extends Mock implements GetCategories {}
 
-/// Writes the Records, then reports a failure, as a disk error after the
-/// insert would.
 class _FailingRecordRepository extends RecordRepositoryImpl {
   _FailingRecordRepository({
     required super.localDatasource,
@@ -114,7 +112,7 @@ void main() {
     expect(created, greaterThanOrEqualTo(2));
     expect(await db.select(db.records).get(), hasLength(created));
     expect((await nextOccurrence()).isAfter(today), isTrue);
-    // Every Record is queued for sync, plus the item's insert and update.
+
     final queued = await queuedTables();
     expect(queued.where((t) => t == 'records'), hasLength(created));
     expect(queued.where((t) => t == 'recurring_transactions'), hasLength(2));

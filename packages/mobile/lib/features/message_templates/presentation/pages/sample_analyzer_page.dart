@@ -48,31 +48,6 @@ class SampleAnalyzerView extends StatefulWidget {
   State<SampleAnalyzerView> createState() => _SampleAnalyzerViewState();
 }
 
-/// Owns the transient SnackBar surface for `SampleAnalyzerPage`.
-///
-/// **SnackBar eviction policy:** this class intentionally maintains
-/// an *asymmetric* relationship between the two SnackBar channels:
-///
-///   - `_showUndoSnackBar` (driven by `pendingDeletion`) is **primary**:
-///     it calls `messenger.clearSnackBars()` before showing so a fresh
-///     delete always replaces the prior undo SnackBar. This guarantees
-///     the visible Undo action always targets the bloc's current
-///     `pendingDeletion` — the bloc's single-slot model would otherwise
-///     leave a "stale" Undo that silently no-ops because the
-///     handler's id-equality guard fails.
-///
-///   - `_showErrorSnackBar` (driven by `lastError`) is **secondary**:
-///     it does NOT call `clearSnackBars()` so error notifications
-///     queue behind an active undo SnackBar instead of evicting it.
-///     A future emit that carries both `pendingDeletion` and
-///     `lastError` simultaneously will surface both, the undo on top
-///     (because undo is the primary channel) and the error behind.
-///
-/// Do NOT flip this asymmetry without also revisiting the bloc's
-/// `pendingDeletion` model — for example, if `pendingDeletion` becomes
-/// a list of pending undos, both SnackBar channels can share the
-/// queueing rule and the `clearSnackBars()` calls can be removed
-/// from `_showUndoSnackBar` as well.
 class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
   final ScrollController _scrollController = ScrollController();
   Timer? _undoTimer;
@@ -140,10 +115,6 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
     );
   }
 
-  /// Returns the loaded [SmsMessage] whose body matches the template's
-  /// original `sampleMessage` so the editor pre-fills correctly. Falls
-  /// back to [fallback] (the long-pressed message) when that original
-  /// sample is not currently loaded.
   SmsMessage _resolveEditSample(ExpenseTemplate template, SmsMessage fallback) {
     final state = context.read<SampleAnalyzerBloc>().state;
     if (state is SampleAnalyzerLoaded) {
@@ -186,9 +157,7 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
 
   void _onUndoTimerExpired(ExpenseTemplate template) {
     if (!mounted) return;
-    // Clear stale pendingDeletion only if it's still this template,
-    // so the bloc isn't re-entered for an already-undone or
-    // already-replaced entry.
+
     final state = context.read<SampleAnalyzerBloc>().state;
     if (state is SampleAnalyzerLoaded &&
         state.pendingDeletion?.id == template.id) {
@@ -198,11 +167,6 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
   }
 
   void _showErrorSnackBar(String message) {
-    // No `clearSnackBars()` here: the undo SnackBar (driven by
-    // `pendingDeletion`) and the error SnackBar (driven by
-    // `lastError`) are both transient, and queueing them is preferable
-    // to evicting one with the other — e.g. when a future failure
-    // emit carries both signals at once.
     final theme = Theme.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -217,12 +181,6 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
       ),
     );
 
-    // Auto-dismiss the error after the SnackBar window so `lastError`
-    // does not linger in Loaded state forever. The timer is canceled
-    // on dispose and on every refire (new error message) to keep
-    // closure discipline. Guarded on string equality so a fresh
-    // `lastError` that arrived mid-window isn't cleared by an older
-    // timer.
     _lastErrorTimer?.cancel();
     _lastErrorTimer = Timer(
       _errorWindowDuration,
@@ -329,7 +287,7 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
 
     return GestureDetector(
       onTap: () => _onMessageTap(msg),
-      // A 48 dp tap area around the button.
+
       behavior: HitTestBehavior.opaque,
       child: ConstrainedBox(
         constraints: const BoxConstraints(minHeight: AppSpacing.minTapTarget),
@@ -365,11 +323,6 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
   Widget _buildTemplatedChip(ExpenseTemplate _) {
     final palette = context.palette;
 
-    // Painted via `Ink` (not an opaque `Container`) so the chip's grey fill
-    // shares the card's InkWell material canvas. This lets the card's
-    // long-press highlight overlay the chip too, instead of the chip's fill
-    // blocking the ink. The chip has no gesture handlers of its own — the
-    // parent card `InkWell` still owns the long-press.
     return Ink(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.smd,
@@ -505,9 +458,6 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
       appBar: _buildTopBar(),
       body: MultiBlocListener(
         listeners: [
-          // Undo SnackBar — fires when `pendingDeletion` transitions
-          // to a NEW non-null template id. Cleared on Undo/expire
-          // don't refire, so duplicate deletes aren't double-shown.
           BlocListener<SampleAnalyzerBloc, SampleAnalyzerState>(
             listenWhen: (prev, curr) =>
                 curr is SampleAnalyzerLoaded &&
@@ -516,10 +466,7 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
                     prev.pendingDeletion?.id != curr.pendingDeletion?.id),
             listener: _onPendingDeletionChanged,
           ),
-          // Transient error SnackBar — fires when `lastError`
-          // transitions to a NEW non-null message; Dismiss dispatches
-          // `LastErrorDismissed` to clear it so the same message
-          // doesn't refire on subsequent state updates.
+
           BlocListener<SampleAnalyzerBloc, SampleAnalyzerState>(
             listenWhen: (prev, curr) =>
                 curr is SampleAnalyzerLoaded &&
@@ -540,8 +487,7 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: AppSpacing.smd),
-                // At large text sizes the banner scrolls in up to a third
-                // of the height, leaving the rest to the messages.
+
                 Flexible(
                   child: SingleChildScrollView(child: _buildInfoBanner()),
                 ),

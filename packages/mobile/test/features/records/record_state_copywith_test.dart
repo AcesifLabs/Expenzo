@@ -31,7 +31,7 @@ void main() {
     test('explicitly passing null clears filterStartDate', () {
       final copy = base.copyWith(filterStartDate: null);
       expect(copy.filterStartDate, isNull);
-      // other filters unchanged
+
       expect(copy.filterEndDate, base.filterEndDate);
       expect(copy.filterCategoryIds, base.filterCategoryIds);
       expect(copy.filterRecordType, base.filterRecordType);
@@ -71,7 +71,7 @@ void main() {
       expect(copy.records.first.id, 'new-rec');
       expect(copy.total, 99);
       expect(copy.searchQuery, 'search');
-      // filters unchanged
+
       expect(copy.filterStartDate, base.filterStartDate);
     });
 

@@ -4,7 +4,6 @@ import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 
-/// A Settings row that opens another page.
 class SettingsTile extends StatelessWidget {
   final IconData icon;
   final String title;

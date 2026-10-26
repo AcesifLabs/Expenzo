@@ -7,9 +7,6 @@ import 'package:expense_tracker/core/database/app_database.dart';
 
 import 'migrations/v19_tables.dart';
 
-/// Verifies the V18 -> V19 migration (budgets.group_id, SAAP-75):
-///  - existing budgets survive with group_id NULL
-///  - a fresh install (onCreate) has the column too
 void main() {
   late File dbFile;
 

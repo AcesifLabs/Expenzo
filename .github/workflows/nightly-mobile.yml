@@ -1,21 +1,21 @@
 name: Nightly mobile
 
-# The slow checks the PR workflow (ci.yml) leaves out: end-to-end tests on an
-# emulator, frame timings, a monkey run, cold start, app size and mutation
-# testing. Emulator timings only warn (QA plan Q6); size, crashes and
-# mutation score fail.
+
+
+
+
 on:
   schedule:
-    - cron: '0 20 * * *' # 02:00 in Dhaka
+    - cron: '0 20 * * *'
   workflow_dispatch:
 
 env:
   API_LEVEL: 34
-  # The emulator the runner starts; every adb and Flutter command targets it.
+
   DEVICE: emulator-5554
   EMULATOR_OPTIONS: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-  # A release build signed with a throwaway key: these APKs are never
-  # distributed.
+
+
   KEY_ALIAS: upload
   KEY_PASSWORD: nightly-only
   KEY_STORE_PASSWORD: nightly-only
@@ -36,8 +36,8 @@ jobs:
         run: |
           cp .env.dev.example .env.dev
           cp .env.prod.example .env.prod
-          # Release builds need an HTTPS server address to start; nothing
-          # here talks to it.
+
+
           sed -i 's#^BACKEND_URL=.*#BACKEND_URL=https://nightly.invalid/api#' .env.prod
       - &flutter-version
         name: Read the Flutter version
@@ -199,7 +199,7 @@ jobs:
       - run: flutter pub get
       - name: Property tests at 2000 examples
         run: flutter test test/property --dart-define=PROPERTY_TRIALS=2000
-      # Coverage lets mutation testing skip lines no test reaches.
+
       - name: Whole suite with leak tracking
         run: flutter test --coverage --dart-define=LEAK_TRACKING=true
       - name: Mutation testing

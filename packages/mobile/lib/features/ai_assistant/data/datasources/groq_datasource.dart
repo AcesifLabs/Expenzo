@@ -60,7 +60,6 @@ class GroqDataSource {
         .transform(_parseSseLines());
   }
 
-  /// Non-streaming multimodal completion for receipt images.
   Future<String> completeWithImage(GroqVisionRequest request) async {
     final apiKey = _requireApiKey();
     appLogger.info(
@@ -95,9 +94,7 @@ class GroqDataSource {
         'model': request.model,
         'temperature': 0.1,
         'max_completion_tokens': 1024,
-        // Avoid response_format=json_object for vision: Groq often returns
-        // json_validate_failed with empty failed_generation on image inputs.
-        // Disable Qwen thinking tokens so the reply is plain JSON.
+
         'reasoning_effort': 'none',
       }),
     );
@@ -156,7 +153,6 @@ class GroqDataSource {
         sink.add(content);
       }
     } catch (e) {
-      // One bad chunk loses a few words, not the answer.
       appLogger.warning('Skipped an unreadable AI stream line', e);
     }
   }

@@ -19,8 +19,6 @@ void main() {
         expect(parseSyncAmount('75.25'), 75.25);
       });
 
-      // A made-up 0.0 would be saved for good; a throw skips the row so
-      // the next pull can try again.
       for (final value in <Object?>['invalid', null, true, 'NaN']) {
         test('throws for $value', () {
           expect(() => parseSyncAmount(value), throwsFormatException);

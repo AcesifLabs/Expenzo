@@ -1,13 +1,10 @@
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:flutter/material.dart';
 
-/// The full-width primary button under a Family form, like the goal form's.
-/// Shows a spinner and ignores taps while [busy].
 class FamilyBottomButton extends StatelessWidget {
   final String label;
   final bool busy;
 
-  /// Null disables the button.
   final VoidCallback? onPressed;
 
   const FamilyBottomButton({
@@ -27,7 +24,6 @@ class FamilyBottomButton extends StatelessWidget {
         AppSpacing.md,
       ),
       child: ConstrainedBox(
-        // Grows with the label at large text sizes.
         constraints: const BoxConstraints(
           minWidth: double.infinity,
           minHeight: AppSpacing.xxl,

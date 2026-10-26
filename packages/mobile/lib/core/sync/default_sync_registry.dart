@@ -9,10 +9,6 @@ import 'handlers/parsing_rules_sync_handler.dart';
 import 'handlers/recurring_transactions_sync_handler.dart';
 import 'handlers/pending_recurring_sync_handler.dart';
 
-// Optional: tests build the registry without the repair checks.
-// ignore: unnecessary-nullable
-/// [keepLocalBudgetNames]: see [BudgetsSyncHandler.keepLocalNames].
-/// [keepLocalRecordBudgetLinks]: see [RecordsSyncHandler.keepLocalBudgetLinks].
 SyncTableRegistry createDefaultSyncRegistry({
   bool Function()? keepLocalBudgetNames,
   bool Function()? keepLocalRecordBudgetLinks,

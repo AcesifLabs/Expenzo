@@ -34,7 +34,7 @@ class GetDashboardSummary implements UseCase<DashboardSummary, DateRange> {
 
       final totalIncome = _calculateByType(currentRecords, RecordType.income);
       final totalExpense = _calculateByType(currentRecords, RecordType.expense);
-      // "Spent" is expense-only — income is tracked separately
+
       final totalSpent = totalExpense;
       final previousPeriodTotal = _calculateByType(
         previousRecords,
@@ -51,9 +51,6 @@ class GetDashboardSummary implements UseCase<DashboardSummary, DateRange> {
         currentRecords,
       );
 
-      // Recent Activity = newest transactions inside the dashboard range, so
-      // the list agrees with the totals shown above it. [currentRecords] is
-      // already ordered by transaction date descending.
       final recentTransactions = currentRecords.take(5).toList();
 
       return Right(

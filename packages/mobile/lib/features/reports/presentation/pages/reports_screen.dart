@@ -28,17 +28,9 @@ import 'package:expense_tracker/shared/presentation/widgets/app_error_state.dart
 import 'package:expense_tracker/shared/presentation/widgets/app_empty_state.dart';
 import 'package:picons/picons.dart';
 
-/// Single parent screen for Trend / Categories / Insights.
-///
-/// Uses a [TabController] to swap content in-place — tab changes
-/// never push a new route.
 class ReportsScreen extends StatelessWidget {
-  /// True when shown as a tab in the app shell: no back button, and the
-  /// content stops above the floating navigation bar.
   final bool isTab;
 
-  /// Bumped by the app shell when the Reports tab is shown again, so the
-  /// figures include records added in the meantime.
   final ValueListenable<int>? refreshTick;
 
   const ReportsScreen({super.key, this.isTab = false, this.refreshTick});
@@ -136,7 +128,7 @@ Widget _buildReportsTrendContent(
       top: AppSpacing.lg,
       left: reportsContentInnerInset,
       right: reportsContentInnerInset,
-      // Room for the AI button floating over the bottom of the list.
+
       bottom: 96,
     ),
     child: Column(
@@ -198,7 +190,7 @@ Widget _buildReportsCategoriesContent(
       top: AppSpacing.lg,
       left: reportsContentInnerInset,
       right: reportsContentInnerInset,
-      // Room for the AI button floating over the bottom of the list.
+
       bottom: 96,
     ),
     child: Column(

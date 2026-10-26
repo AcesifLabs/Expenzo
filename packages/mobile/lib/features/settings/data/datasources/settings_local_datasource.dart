@@ -15,9 +15,6 @@ abstract class SettingsLocalDatasource {
   Future<UserSettings> getSettings();
   Future<UserSettings> updateSettings(UserSettings settings);
 
-  /// Replaces the stored settings with the first-run defaults.
-  ///
-  /// Throws: [CacheException]
   Future<UserSettings> resetSettings();
 }
 
@@ -64,8 +61,6 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
       throw CacheException(message: e.toString());
     }
 
-    // With no stored settings, getSettings writes the defaults. Delete all
-    // data keeps onboarding done (ADR 0010, SAAP-74).
     final defaults = await getSettings();
 
     return updateSettings(defaults.copyWith(onboardingCompleted: true));
@@ -144,7 +139,7 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
       ),
       homeTab: AppRootTab.fromName(json['homeTab'] as String?),
       syncEnabled: json['syncEnabled'] as bool? ?? true,
-      // A missing key stays null on purpose: ResolveOnboardingStatus decides.
+
       onboardingCompleted: json['onboardingCompleted'] as bool?,
       crashReportsEnabled: json['crashReportsEnabled'] as bool? ?? true,
       monthlyIncome: (json['monthlyIncome'] as num?)?.toDouble(),
@@ -153,7 +148,6 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
     );
   }
 
-  // Older versions stored only a free-text symbol (default '\$').
   String _currencyCodeFrom(Map<String, dynamic> json) {
     final code = json['currencyCode'];
     if (code is String) return code;
@@ -165,8 +159,6 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
     return CurrencyConfig.defaultCode;
   }
 
-  // Missing before SAAP-65; anything outside the allowed values reads as the
-  // default.
   int _decimalPlacesFrom(Map<String, dynamic> json) {
     final places = json['decimalPlaces'];
     if (places is int &&

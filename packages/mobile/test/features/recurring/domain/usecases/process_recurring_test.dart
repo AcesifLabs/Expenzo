@@ -84,7 +84,6 @@ void main() {
 
     final result = await processRecurring();
 
-    // start, start+1, start+2, start+3 (today at midnight) are all due.
     final dates = result.getOrElse(() => []).map((r) => r.nextOccurrence);
     expect(dates, [
       for (var i = 0; i < 4; i++)

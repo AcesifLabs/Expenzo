@@ -18,7 +18,6 @@ import '../../../support/receipt_camera.dart';
 
 class _MockExtractReceipt extends Mock implements ExtractReceipt {}
 
-/// Returns [path] for every gallery pick.
 class _FakeImagePicker extends ImagePickerPlatform
     with MockPlatformInterfaceMixin {
   final String path;
@@ -67,7 +66,6 @@ void main() {
   });
 
   testWidgets('coming back after refusing does not ask again', (tester) async {
-    // Android's dialog makes the app inactive, then resumed when answered.
     var requests = 0;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
@@ -125,7 +123,7 @@ void main() {
 
     await pumpLocalized(tester, ReceiptScanCameraPage(extractReceipt: extract));
     await pumpPastTransitions(tester);
-    // Reading the picked file is real I/O.
+
     await tester.runAsync(() async {
       await tester.tap(find.text('Choose from gallery'));
       while (!started) {

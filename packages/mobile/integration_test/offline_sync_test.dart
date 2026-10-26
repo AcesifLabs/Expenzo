@@ -12,15 +12,12 @@ import 'package:expense_tracker/core/constants/record_type.dart';
 import 'support/app.dart';
 import 'support/fake_server.dart';
 
-/// A record made with no connection is kept and shown, and is sent once the
-/// connection is back. The server is a fake: no backend or sign-in needed.
 void main() {
   patrolTest('a record made offline syncs when back online', ($) async {
-    // Signed in, past the first sync.
     await TokenStorage.saveToken('e2e-token');
     await TokenStorage.markFirstSyncDone();
     await launchOnboarded($);
-    // After start-up: the API client reads the server address from the env.
+
     final dio = ApiClient().dio;
     final offline = FaultInjectionInterceptor(errorRate: 1, status: 0);
     final server = FakeSyncServer();

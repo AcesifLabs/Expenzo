@@ -6,7 +6,6 @@ import 'package:expense_tracker/i18n/strings.g.dart';
 import '../../../../support/pump_localized.dart';
 
 void main() {
-  /// Opens the sheet; returns a getter for what it popped with.
   Future<double? Function()> openSheet(WidgetTester tester) async {
     double? result;
     await pumpLocalized(

@@ -1,10 +1,10 @@
 import { BudgetPeriod } from '../common/enums/budget-period.enum';
 import { currentMonth, currentPeriod } from './budget-period';
 
-// Expected values match mobile BudgetPeriodUtils.calculateCurrentPeriod for
-// the same inputs (checked against the Dart code on 3,000 random dates).
+
+
 const DHAKA = 360;
-/** A Dhaka wall-clock time as a UTC instant. */
+
 const dhaka = (iso: string) => new Date(new Date(`${iso}Z`).getTime() - DHAKA * 60_000);
 const period = (start: string, kind: BudgetPeriod, now: string, offset = DHAKA) =>
   currentPeriod(dhaka(start), kind, dhaka(now), offset);
@@ -56,7 +56,7 @@ describe('currentPeriod', () => {
     const startDate = new Date('2026-01-01T06:00:00Z');
     const now = new Date('2026-01-31T23:30:00Z');
 
-    // 23:30 UTC on 31 January is already 1 February in Dhaka (+06:00).
+    
     expect(currentPeriod(startDate, BudgetPeriod.MONTHLY, now, 0).start.toISOString()).toBe('2026-01-01T00:00:00.000Z');
     expect(currentPeriod(startDate, BudgetPeriod.MONTHLY, now, DHAKA).start.toISOString()).toBe('2026-01-31T18:00:00.000Z');
   });
@@ -64,7 +64,7 @@ describe('currentPeriod', () => {
 
 describe('currentMonth', () => {
   it('should return the calendar month in the caller time zone', () => {
-    // 02:00 UTC on 1 March is still 28 February in New York (−05:00).
+    
     expect(currentMonth(new Date('2026-03-01T02:00:00Z'), -300)).toEqual({
       start: new Date('2026-02-01T05:00:00Z'),
       end: new Date('2026-03-01T05:00:00Z'),

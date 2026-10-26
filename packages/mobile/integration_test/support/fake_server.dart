@@ -1,10 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:expense_tracker/core/api/api_constants.dart';
 
-/// Answers the sync endpoints and the health check as a working server
-/// would, so end-to-end tests don't need the backend or a sign-in.
 class FakeSyncServer extends Interceptor {
-  /// Changes the app pushed, in order.
   final List<Map<String, dynamic>> pushed = [];
 
   @override

@@ -48,7 +48,6 @@ void main() {
       characterSet: CharacterSet.fromCharacters(
         'abcdefghijklmnopqrstuvwxyz0123456789টাকাবাজার',
       ),
-      // A vowel sign (া) joins the letter before it; it can't start a word.
     ).filter((word) => !word.startsWith('া'));
 
     forAll(

@@ -7,8 +7,6 @@ class AppBadge extends StatelessWidget {
   final Color? color;
   final AppBadgeSize size;
 
-  // Null uses the theme's colour.
-  // ignore: unnecessary-nullable
   const AppBadge({
     super.key,
     required this.label,

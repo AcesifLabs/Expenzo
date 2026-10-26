@@ -11,8 +11,6 @@ import 'package:expense_tracker/core/lifecycle/bootstrap_service.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 import 'package:expense_tracker/main.dart' as app;
 
-/// Marks onboarding done before `app.main()`, so a test that is not about
-/// onboarding starts on Home (SAAP-74 redirects a fresh install).
 Future<void> markOnboarded() async {
   final prefs = await SharedPreferences.getInstance();
   final stored = prefs.getString('user_settings');
@@ -31,23 +29,16 @@ Future<void> markOnboarded() async {
   await prefs.setString('user_settings', jsonEncode(settings));
 }
 
-/// Pumps fixed frames for [seconds]: the app has endless animations, so
-/// `pumpAndSettle` would time out.
 Future<void> settle(WidgetTester tester, [double seconds = 2]) async {
   for (var i = 0; i < seconds * 10; i++) {
     await tester.pump(const Duration(milliseconds: 100));
   }
 }
 
-/// Starts the app and waits for start-up. `app.main()` replaces
-/// [FlutterError.onError] and [ErrorWidget.builder] with the app's own;
-/// putting the test's back lets a failed `expect` report normally and keeps
-/// the binding's end-of-test check happy.
 Future<void> startApp(WidgetTester tester, {int seconds = 20}) async {
   final testHandler = FlutterError.onError;
   final testErrorWidget = ErrorWidget.builder;
-  // A second start in the same test run is a relaunch: main() registers
-  // BootstrapService itself; the rest of DI is idempotent.
+
   if (di.getIt.isRegistered<BootstrapService>()) {
     await di.getIt.unregister<BootstrapService>();
   }
@@ -58,27 +49,22 @@ Future<void> startApp(WidgetTester tester, {int seconds = 20}) async {
   LocaleSettings.setLocaleSync(AppLocale.en);
 }
 
-/// Starts an onboarded app on Home.
 Future<void> launchOnboarded(PatrolIntegrationTester $) async {
   await markOnboarded();
   await startApp($.tester);
 }
 
-/// Opens [location] through the app's router, as a tap on its row would.
 Future<void> openRoute(PatrolIntegrationTester $, String location) async {
   final context = $.tester.element(find.byType(Navigator).first);
   unawaited(GoRouter.of(context).push(location));
   await settle($.tester);
 }
 
-/// Closes the soft keyboard: on a device it covers the bottom of the
-/// screen, and a tap there would miss.
 Future<void> hideKeyboard(WidgetTester tester) async {
   FocusManager.instance.primaryFocus?.unfocus();
   await settle(tester, 1);
 }
 
-/// Taps [text] (the last match: dialogs sit above pages).
 Future<void> tapText(PatrolIntegrationTester $, String text) async {
   await hideKeyboard($.tester);
   final target = find.text(text).last;
@@ -88,8 +74,6 @@ Future<void> tapText(PatrolIntegrationTester $, String text) async {
   await settle($.tester);
 }
 
-/// Taps the lowest [text] on screen: a page's submit button often repeats
-/// its title ("Add budget").
 Future<void> tapLowest(PatrolIntegrationTester $, String text) async {
   await hideKeyboard($.tester);
   double top(Element e) =>
@@ -101,13 +85,11 @@ Future<void> tapLowest(PatrolIntegrationTester $, String text) async {
   await settle($.tester);
 }
 
-/// The app's own back button (AppBackButton), which `pageBack` doesn't know.
 Future<void> goBack(PatrolIntegrationTester $) async {
   await $.tester.tap(find.byTooltip(t.common.back).last);
   await settle($.tester);
 }
 
-/// Waits for Android's permission dialog; false if none came.
 Future<bool> permissionDialogShown(PatrolIntegrationTester $) => $
     .platform
     .mobile

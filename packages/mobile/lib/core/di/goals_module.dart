@@ -13,7 +13,6 @@ import 'package:expense_tracker/features/goals/domain/usecases/watch_active_goal
 import 'package:expense_tracker/features/goals/presentation/bloc/goal_bloc.dart';
 import 'package:expense_tracker/features/goals/presentation/bloc/goal_form_bloc.dart';
 
-/// Feature dependency: callers await `featureDependenciesReady` first.
 void initGoalsModule(GetIt getIt) {
   getIt.registerLazySingleton<GoalLocalDatasource>(
     () => GoalLocalDatasourceImpl(goalsDao: getIt<GoalsDao>()),

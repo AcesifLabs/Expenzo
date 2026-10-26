@@ -10,15 +10,11 @@ import { groupErrors } from '../group-errors';
 export interface GroupRequest {
   params: { id?: string };
   user?: { sub?: string };
-  /** The caller's membership of `:id`, set by [GroupRoleGuard]. */
+  
   groupMember?: GroupMember;
 }
 
-/**
- * Lets a request through only when the caller is a member of `:id`, and,
- * with `@GroupRoles`, has one of those roles. A non-member gets 404, not 403,
- * so the route does not reveal that a group exists.
- */
+
 @Injectable()
 export class GroupRoleGuard implements CanActivate {
   constructor(

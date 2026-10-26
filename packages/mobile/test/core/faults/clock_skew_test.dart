@@ -6,8 +6,6 @@ import 'package:mocktail/mocktail.dart';
 
 import '../sync/sync_engine_harness.dart';
 
-/// The server keeps the newer of two edits by time, so a phone clock set
-/// days wrong must not decide which edit wins.
 void main() {
   late SyncEngineHarness harness;
   final serverNow = DateTime.utc(2026, 10, 15, 10);

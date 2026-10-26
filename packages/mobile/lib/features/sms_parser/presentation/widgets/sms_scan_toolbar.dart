@@ -28,7 +28,7 @@ class SmsScanToolbar extends StatelessWidget {
       key: const Key('sender_mode_chip'),
       onTap: onToggleViewMode,
       borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-      // A 48 dp tap area around the pill.
+
       child: ConstrainedBox(
         constraints: const BoxConstraints(minHeight: AppSpacing.minTapTarget),
         child: Center(
@@ -65,7 +65,6 @@ class SmsScanToolbar extends StatelessWidget {
   Widget _buildRangeChip(ColorScheme colors) {
     final chipFg = colors.onSurface.withAlpha(170);
 
-    // Shows the scanned range; it has no action of its own.
     return Container(
       key: const Key('date_range_chip'),
       child: Container(
@@ -99,7 +98,7 @@ class SmsScanToolbar extends StatelessWidget {
       key: const Key('clear_selection_chip'),
       onTap: onClearSelection,
       borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-      // A 48 dp tap area around the pill.
+
       child: ConstrainedBox(
         constraints: const BoxConstraints(minHeight: AppSpacing.minTapTarget),
         child: Center(

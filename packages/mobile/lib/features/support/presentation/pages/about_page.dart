@@ -8,9 +8,7 @@ import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
 
 import '../../domain/app_version.dart';
 
-/// About Expenzo: logo, name, installed version and a short description.
 class AboutPage extends StatefulWidget {
-  /// Tests pass a fake; the app reads the installed package.
   final PackageInfoLoader? loadInfo;
 
   const AboutPage({super.key, this.loadInfo});
@@ -29,8 +27,6 @@ class _AboutPageState extends State<AboutPage> {
     _version = load == null ? loadAppVersion() : loadAppVersion(load: load);
   }
 
-  /// No line while loading or when the version is unknown: it resolves in
-  /// milliseconds, so no spinner.
   Widget _versionLine(BuildContext context, AsyncSnapshot<AppVersion> snap) {
     final version = snap.data;
     if (version == null || version.isUnknown) return const SizedBox.shrink();
@@ -50,7 +46,6 @@ class _AboutPageState extends State<AboutPage> {
     final textTheme = Theme.of(context).textTheme;
     final secondary = context.palette.textSecondary;
 
-    // Pushed above the app shell, so it needs its own themed Scaffold.
     return Scaffold(
       body: AppScaffold(
         title: aboutT.title,

@@ -21,8 +21,6 @@ import '../bloc/goal_form_bloc.dart';
 import '../bloc/goal_form_event.dart';
 import '../bloc/goal_form_state.dart';
 
-/// Edits the goal with [goalId], or creates one when it is null (Task 22b).
-/// Manual values only (ADR 0009).
 class GoalFormPage extends StatefulWidget {
   final String? goalId;
 
@@ -45,7 +43,7 @@ class _GoalFormPageState extends State<GoalFormPage> {
   @override
   void initState() {
     super.initState();
-    // The bloc may already be ready when the page mounts.
+
     final state = context.read<GoalFormBloc>().state;
     final goal = state.goal;
     if (state.status == GoalFormStatus.ready && goal != null) _fill(goal);
@@ -105,7 +103,6 @@ class _GoalFormPageState extends State<GoalFormPage> {
     return amount == null || amount <= 0 ? t.goals.errors.targetPositive : null;
   }
 
-  /// Saved so far and monthly may be empty (0 / none).
   String? _validateOptional(String? value) {
     final text = (value ?? '').trim();
     if (text.isEmpty) return null;
@@ -125,7 +122,7 @@ class _GoalFormPageState extends State<GoalFormPage> {
       firstDate: AppConstants.pickerFirstDate,
       lastDate: DateTime(now.year + 10, now.month, now.day),
     );
-    // Cancel keeps the previous date.
+
     if (picked != null && mounted) setState(() => _date = picked);
   }
 
@@ -219,7 +216,6 @@ class _GoalFormPageState extends State<GoalFormPage> {
             AppSpacing.md,
           ),
           child: ConstrainedBox(
-            // Grows with the label at large text sizes.
             constraints: const BoxConstraints(
               minWidth: double.infinity,
               minHeight: AppSpacing.xxl,
@@ -290,7 +286,7 @@ class _GoalFormPageState extends State<GoalFormPage> {
             onTap: () => unawaited(_pickDate()),
           ),
           const SizedBox(height: AppSpacing.sm),
-          // The suggestion follows the target and saved amounts as typed.
+
           ListenableBuilder(
             listenable: Listenable.merge([_target, _saved]),
             builder: (context, _) => TextFormField(

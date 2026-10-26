@@ -1,14 +1,11 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/check_budget_alerts.dart';
 
-/// Stores sent budget alert keys on the device.
 class SharedPrefsBudgetAlertLog implements BudgetAlertLog {
   final SharedPreferences prefs;
 
-  /// Cleared by `LocalDataPrefs` when local data is wiped.
   static const storageKey = 'budget_alerts_sent';
 
-  /// Old keys only matter for their own budget period; keep the log small.
   static const _maxEntries = 200;
 
   SharedPrefsBudgetAlertLog(this.prefs);

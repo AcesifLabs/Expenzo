@@ -11,7 +11,6 @@ void main() {
     test('startOfWeek without an argument follows WeekStart.current', () {
       WeekStart.current.value = FirstDayOfWeek.sunday;
 
-      // 2026-10-14 is a Wednesday; its Sunday-start week began Oct 11.
       expect(startOfWeek(DateTime(2026, 10, 14, 10)), DateTime(2026, 10, 11));
     });
 
@@ -33,7 +32,6 @@ void main() {
       final unset = makeUserSettings();
       final sunday = makeUserSettings(firstDayOfWeek: FirstDayOfWeek.sunday);
 
-      // What ExpenzoApp does when the app language changes.
       expect(WeekStart.apply(unset.effectiveFirstDayOfWeek('en')), isFalse);
       expect(WeekStart.apply(unset.effectiveFirstDayOfWeek('bn')), isTrue);
       expect(WeekStart.current.value, FirstDayOfWeek.saturday);
@@ -46,7 +44,6 @@ void main() {
 
   group('startOfWeek', () {
     test('Monday start: every day Mon–Sun maps to Monday midnight', () {
-      // 2026-10-12 is a Monday.
       for (var day = 12; day <= 18; day++) {
         expect(
           startOfWeek(DateTime(2026, 10, day, 15, 30)),
@@ -57,12 +54,10 @@ void main() {
     });
 
     test('crosses a month start', () {
-      // 2026-11-01 is a Sunday; its week starts Monday Oct 26.
       expect(startOfWeek(DateTime(2026, 11, 1, 9)), DateTime(2026, 10, 26));
     });
 
     test('lands on midnight in a DST change week', () {
-      // EU clocks change on 2026-03-29 (Sunday), US on 2026-03-08.
       final start = startOfWeek(DateTime(2026, 3, 29, 12));
 
       expect(start, DateTime(2026, 3, 23));

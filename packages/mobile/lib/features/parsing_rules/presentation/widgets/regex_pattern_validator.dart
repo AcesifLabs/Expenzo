@@ -71,8 +71,6 @@ class _RegexValidatorIndicatorState extends State<RegexValidatorIndicator> {
     _validatePattern();
   }
 
-  /// Called from initState and didUpdateWidget, which both build next, so
-  /// it only sets the fields.
   void _validatePattern() {
     if (widget.pattern.isEmpty) {
       _isValid = true;

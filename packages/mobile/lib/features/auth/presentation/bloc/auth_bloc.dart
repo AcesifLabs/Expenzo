@@ -111,14 +111,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     await _onAuthSuccess(current.user, emit);
   }
 
-  /// With Sync off the conflict check is skipped: it talks to the server.
-  /// The engine stays idle. Turning Sync on later runs this path
-  /// ([FirstSyncRequested] from [SyncEngine.firstSyncNeeded]).
-  ///
-  /// When the check can't reach the server, the user is signed in but sync
-  /// stays stopped: starting it would merge this phone's data into the
-  /// account without asking. The check runs again on the next start, and
-  /// when the user taps Sync now.
   Future<void> _onAuthSuccess(User user, Emitter<AuthState> emit) async {
     if (await TokenStorage.isFirstSync() &&
         await _authRepository.isSyncEnabled()) {

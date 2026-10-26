@@ -50,7 +50,6 @@ void main() {
     expect(find.byType(InlineErrorPlaceholder), findsOneWidget);
     expect(find.textContaining('Something went wrong'), findsOneWidget);
 
-    // The old full-screen error closed the app after 3 seconds.
     await tester.pump(const Duration(seconds: 5));
     expect(platformCalls, isNot(contains('SystemNavigator.pop')));
   });

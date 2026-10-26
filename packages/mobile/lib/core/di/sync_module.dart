@@ -10,7 +10,6 @@ import 'package:expense_tracker/features/sync/domain/usecases/get_sync_overview.
 import 'package:expense_tracker/features/sync/domain/usecases/sync_now.dart';
 import 'package:expense_tracker/features/sync/presentation/bloc/sync_screen_bloc.dart';
 
-/// Needs the sync engine and queue from the critical dependencies.
 void initSyncModule(GetIt getIt) {
   getIt.registerLazySingleton<SyncOverviewRepository>(
     () => SyncOverviewRepositoryImpl(

@@ -173,7 +173,7 @@ void main() {
           ),
         ),
       );
-      // A range opened a day ago: 30 days ending yesterday.
+
       final openedEnd = DateTime.now().subtract(const Duration(days: 1));
       final openedStart = openedEnd.subtract(const Duration(days: 30));
       bloc = ReportsBloc(

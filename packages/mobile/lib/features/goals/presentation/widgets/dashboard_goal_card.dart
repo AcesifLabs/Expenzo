@@ -17,8 +17,6 @@ import '../bloc/goal_event.dart';
 import '../bloc/goal_state.dart';
 import 'add_to_goal_sheet.dart';
 
-/// The dashboard's active goal with "Add to goal" (ADR 0009), or a prompt to
-/// set one. It owns its data; the dashboard only places it.
 class DashboardGoalCard extends StatelessWidget {
   const DashboardGoalCard({super.key});
 
@@ -100,7 +98,6 @@ class _GoalCardView extends StatelessWidget {
   }
 }
 
-/// No goal yet (Task 22b): always shown, no dismiss.
 class _SetGoalPrompt extends StatelessWidget {
   const _SetGoalPrompt();
 

@@ -47,10 +47,6 @@ import 'factories/category_factory.dart';
 import 'factories/recurring_factory.dart';
 import 'factories/user_settings_factory.dart';
 
-/// The Settings list and every page it opens that the large-text overflow
-/// test covers, each with mocked blocs. Same contract as `core_screens.dart`:
-/// call the builders inside the test body.
-
 class MockRecurringBloc extends Mock implements RecurringBloc {}
 
 class MockAutoPoster extends Mock implements RecurringAutoPoster {}
@@ -73,7 +69,6 @@ SettingsBloc _loadedSettingsBloc() {
   );
 }
 
-/// A settings page that only reads the app-wide SettingsBloc.
 Widget _withSettings(Widget view) {
   return BlocProvider<SettingsBloc>.value(
     value: _loadedSettingsBloc(),
@@ -81,7 +76,6 @@ Widget _withSettings(Widget view) {
   );
 }
 
-/// The named Settings pages, in Settings row order.
 Map<String, Widget Function()> get settingsScreens => {
   'Settings list': _settingsListScreen,
   'Default currency': () => _withSettings(const CurrencyView()),
@@ -100,7 +94,6 @@ Map<String, Widget Function()> get settingsScreens => {
   'Categories': _categoriesScreen,
 };
 
-/// The page file under `lib/features/` each of [settingsScreens] renders.
 const settingsPages = {
   'Settings list': 'settings/presentation/pages/settings_page.dart',
   'Default currency': 'settings/presentation/pages/currency_page.dart',
@@ -121,7 +114,6 @@ const settingsPages = {
   'Categories': 'categories/presentation/pages/category_list_page.dart',
 };
 
-/// The busiest state: signed in, the last sync failed, banner showing.
 Widget _syncScreen() {
   return MultiBlocProvider(
     providers: [

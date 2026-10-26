@@ -1,5 +1,5 @@
-# Local development database. Production uses docker-compose.yml with a hosted Postgres.
-# Usage: docker compose -f docker-compose.dev.yml up -d
+
+
 services:
   db:
     image: postgres:16

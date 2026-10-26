@@ -79,9 +79,7 @@ void main() {
               tokens.add(content);
             }
           }
-        } catch (_) {
-          // Skip malformed JSON
-        }
+        } catch (_) {}
       }
 
       expect(tokens, ['ok']);

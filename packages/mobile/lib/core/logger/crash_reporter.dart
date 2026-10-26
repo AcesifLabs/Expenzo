@@ -7,19 +7,13 @@ import 'package:talker/talker.dart';
 
 import 'crash_scrubber.dart';
 
-/// Starts Sentry; replaced in tests.
 typedef SentryStarter =
     Future<void> Function(
       FlutterOptionsConfiguration configure, {
       AppRunner? appRunner,
     });
 
-/// Sends Crash Reports to Sentry (ADR 0013). Nothing is sent without a DSN
-/// or while the user has turned reports off: then Sentry isn't started at
-/// all, so native crash, ANR and session reports stay off too.
 class CrashReporter {
-  /// The user's choice, kept in its own key so it can be read before the
-  /// settings load (they need the app running).
   static const prefsKey = 'crash_reports_enabled';
 
   final SentryStarter _startSentry;
@@ -30,7 +24,6 @@ class CrashReporter {
   String _dsn = '';
   SharedPreferences? _prefs;
 
-  /// True when a reported error would be sent.
   bool get isActive => _started && _enabled;
 
   CrashReporter({
@@ -39,9 +32,6 @@ class CrashReporter {
   }) : _startSentry = startSentry ?? SentryFlutter.init,
        _closeSentry = closeSentry ?? Sentry.close;
 
-  /// Runs [appRunner], inside Sentry when there is a [dsn] and the choice
-  /// saved in [prefs] allows it. An empty [dsn] (local builds, CI) only runs
-  /// the app.
   Future<void> start({
     required String dsn,
     required SharedPreferences prefs,
@@ -62,8 +52,6 @@ class CrashReporter {
     );
   }
 
-  /// Follows the user's Settings choice at once: off closes Sentry, on
-  /// starts it if the app began with reports off.
   Future<void> setEnabled({required bool enabled}) async {
     if (enabled == _enabled) return;
     _enabled = enabled;
@@ -77,8 +65,6 @@ class CrashReporter {
     }
   }
 
-  /// Reports a caught [error]. [reference] is the id the error screen shows
-  /// the user, so support can find the event.
   Future<void> capture(
     Object error,
     StackTrace? stackTrace, {
@@ -94,7 +80,6 @@ class CrashReporter {
     );
   }
 
-  /// Scrubbed [event], or null while reports are off.
   SentryEvent? beforeSend(SentryEvent event, Hint _) =>
       _enabled ? scrubEvent(event) : null;
 
@@ -107,7 +92,6 @@ class CrashReporter {
       ..attachScreenshot = false
       ..enablePrintBreadcrumbs = false
       ..enableUserInteractionBreadcrumbs = false
-      // Native breadcrumbs skip the Dart scrubber.
       ..enableAutoNativeBreadcrumbs = false
       ..anrEnabled = true
       ..beforeSend = beforeSend
@@ -117,8 +101,6 @@ class CrashReporter {
 
 final crashReporter = CrashReporter();
 
-/// Sends `appLogger` errors that carry an exception to [crashReporter].
-/// Uncaught errors reach Sentry through its own Flutter integrations.
 class CrashReportingTalkerObserver extends TalkerObserver {
   final CrashReporter reporter;
 

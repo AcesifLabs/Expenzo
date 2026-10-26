@@ -70,7 +70,7 @@ void main() {
 
     await tester.tap(shareSwitch());
     await tester.pump();
-    // The page title reads the same; the button is in the scrolling body.
+
     final submit = find.descendant(
       of: find.byType(SingleChildScrollView),
       matching: find.text(t.budgets.form.add),
@@ -104,7 +104,6 @@ void main() {
   testWidgets('a demoted owner can switch sharing off but not on', (
     tester,
   ) async {
-    // user-1 owns bud-1 but is now a Viewer.
     group = makeMyGroup(myRole: GroupRole.viewer);
     await pumpForm(
       tester,
@@ -126,7 +125,6 @@ void main() {
   testWidgets('saving an owner edit keeps the groupId when the row is hidden', (
     tester,
   ) async {
-    // A Viewer who owns nothing listed: no row, groupId stays.
     group = makeMyGroup(myRole: GroupRole.viewer, sharedBudgets: const []);
     final budget = makeBudget(id: 'own', name: 'Fuel', groupId: null);
     await pumpForm(tester, budget: budget);

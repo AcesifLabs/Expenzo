@@ -1,6 +1,5 @@
 import 'package:expense_tracker/features/recurring/domain/entities/recurring_transaction.dart';
 
-/// Creates a [RecurringTransaction] for tests. All params optional with deterministic defaults.
 RecurringTransaction makeRecurring({
   String? id,
   String? description,

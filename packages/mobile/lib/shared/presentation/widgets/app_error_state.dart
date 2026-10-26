@@ -3,8 +3,6 @@ import 'package:expense_tracker/i18n/strings.g.dart';
 import 'package:flutter/material.dart';
 import 'package:picons/picons.dart';
 
-/// A screen whose data couldn't load: what went wrong and Try again.
-/// The empty-list counterpart is `AppEmptyState`.
 class AppErrorState extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;

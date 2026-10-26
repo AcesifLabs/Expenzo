@@ -10,23 +10,17 @@ import 'package:expense_tracker/shared/services/notification_service.dart';
 import '../entities/recurring_transaction.dart';
 import 'get_recurring_list.dart';
 
-/// Remembers which recurring reminders were already sent.
 abstract class RecurringReminderLog {
   Future<bool> wasSent(String key);
   Future<void> markSent(String key);
 }
 
-/// Reminds the user the day before a recurring transaction is due, from
-/// [AppConstants.recurringReminderHour] until the due day starts. Runs on
-/// app open (after auto-post) and from background work.
 class SendRecurringReminders {
   final GetRecurringList getRecurringList;
   final GetSettings getSettings;
   final NotificationService notificationService;
   final RecurringReminderLog log;
 
-  /// The previous run, so overlapping calls (app open and resume) run one
-  /// after another instead of both sending the same reminder.
   Future<void> _previous = Future.value();
 
   SendRecurringReminders({
@@ -36,7 +30,6 @@ class SendRecurringReminders {
     required this.log,
   });
 
-  /// When the reminder for an occurrence due on [dueDate] may go out.
   static DateTime reminderAt(DateTime dueDate) => DateTime(
     dueDate.year,
     dueDate.month,
@@ -44,7 +37,6 @@ class SendRecurringReminders {
     AppConstants.recurringReminderHour,
   );
 
-  /// Returns how many reminders were sent.
   Future<Either<Failure, int>> call({required DateTime now}) {
     final result = _previous.then((_) => _send(now));
     _previous = result.then(_ignore, onError: _ignore);
@@ -61,7 +53,7 @@ class SendRecurringReminders {
           !settings.isEnabled(NotificationToggle.recurringReminders)) {
         return const Right(0);
       }
-      // Android drops notifications without permission; don't log those.
+
       if (!await notificationService.canNotify()) return const Right(0);
 
       final list = await getRecurringList(NoParams());
@@ -98,8 +90,6 @@ class SendRecurringReminders {
     return true;
   }
 
-  /// From the reminder time until the due day starts; on the due day the
-  /// item is due, not upcoming.
   static bool _inWindow(RecurringTransaction item, DateTime now) {
     final due = item.nextOccurrence.toLocal();
     final dueDayStart = DateTime(due.year, due.month, due.day);

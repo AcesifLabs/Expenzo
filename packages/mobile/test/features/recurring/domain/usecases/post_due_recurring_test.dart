@@ -25,8 +25,6 @@ class _MockCategoryRepository extends Mock implements CategoryRepository {}
 
 class _MockGetCategories extends Mock implements GetCategories {}
 
-/// Runs the work directly; rollback itself is covered by
-/// post_due_recurring_db_test.dart.
 class _DirectRunner implements TransactionRunner {
   var runs = 0;
 

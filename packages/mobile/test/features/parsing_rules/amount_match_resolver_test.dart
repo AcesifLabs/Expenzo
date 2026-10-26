@@ -107,8 +107,6 @@ void main() {
       sms,
     )?.group(0);
 
-    // Each message has two plain numbers; one clue alone decides. Without
-    // it the scores tie and the first number would win.
     const cases = {
       'Card **1234 used for 500': '500',
       'Card XX1234 used for 500': '500',

@@ -36,8 +36,6 @@ void main() {
     registerFallbackValue(<String, ({DateTime start, DateTime end})>{});
   });
 
-  /// Stubs budget-scoped spend keyed by budgetId so different budgets can
-  /// report different spend within the same period.
   void stubSpendByBudget(Map<String, double> spendById) {
     when(() => mockRecordRepository.getSpendingForBudgets(any())).thenAnswer((
       invocation,
@@ -168,12 +166,9 @@ void main() {
     });
 
     group('rollover', () {
-      // Mid-June: the current monthly period is June, the previous is May.
       final june15 = Clock.fixed(DateTime(2026, 6, 15));
       final june = DateTime(2026, 6, 1);
 
-      /// Answers each spending query by period: June gets [current], any
-      /// earlier period gets [previous].
       Future<BudgetProgress> progressFor(
         Budget budget, {
         required double current,

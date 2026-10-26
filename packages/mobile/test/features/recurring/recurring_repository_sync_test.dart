@@ -44,7 +44,6 @@ void main() {
     );
   });
 
-  /// Each queued row as (action, recordId, payload).
   List<(String, String, String)> queued() {
     final captured = verify(
       () => queue.enqueue(

@@ -21,7 +21,6 @@ import 'package:expense_tracker/features/data_wipe/presentation/bloc/delete_all_
 import 'package:expense_tracker/features/settings/domain/repositories/settings_repository.dart';
 import 'package:expense_tracker/shared/services/notification_service.dart';
 
-/// Needs the settings repository, so it runs after `initSettingsModule`.
 void initDataWipeModule(GetIt getIt) {
   getIt.registerLazySingleton<DataWipeLocalDatasource>(
     () => DataWipeLocalDatasourceImpl(
@@ -69,8 +68,6 @@ void initDataWipeModule(GetIt getIt) {
   );
 }
 
-/// Both live in feature deps, which may not be ready yet; resolved at call
-/// time.
 @visibleForTesting
 Future<void> cancelScheduledWork(GetIt getIt) async {
   if (getIt.isRegistered<NotificationService>()) {

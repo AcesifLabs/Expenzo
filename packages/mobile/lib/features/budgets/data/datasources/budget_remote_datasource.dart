@@ -5,9 +5,6 @@ import 'package:expense_tracker/core/error/exceptions.dart';
 typedef BudgetNameEntry = ({String id, String name});
 
 abstract class BudgetRemoteDatasource {
-  /// Fills names on server budgets that still hold the default name.
-  ///
-  /// Throws: [ServerException] if the API request fails.
   Future<void> fillMissingNames(List<BudgetNameEntry> names);
 }
 

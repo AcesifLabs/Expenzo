@@ -1,7 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:expense_tracker/core/database/app_database.dart';
 
-/// Inserts a budget row, shared into [groupId] when given.
 Future<void> insertBudgetRow(AppDatabase db, String id, {String? groupId}) => db
     .into(db.budgets)
     .insert(

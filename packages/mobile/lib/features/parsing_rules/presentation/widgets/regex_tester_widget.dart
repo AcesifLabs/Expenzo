@@ -275,8 +275,6 @@ class _RegexTesterWidgetState extends State<RegexTesterWidget> {
 
     return Row(
       children: [
-        // Full precision, not the display format: rule authors need to see
-        // whether the pattern captured the cents.
         _buildFieldResult(testerT.amount, switch (result.amount) {
           final amount? => CurrencyFormatter.formatInput(amount),
           _ => null,

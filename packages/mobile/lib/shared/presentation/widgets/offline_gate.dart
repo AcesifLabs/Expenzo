@@ -6,16 +6,11 @@ import 'package:expense_tracker/i18n/strings.g.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_error_state.dart';
 import 'package:flutter/material.dart';
 
-/// Blocks [child] while the device has no network link, with a clear
-/// offline message and Try again. Same shape as [SmsPermissionGate].
 class OfflineGate extends StatefulWidget {
   final Widget child;
 
-  /// Override for tests; defaults to [ConnectivityService.hasNetworkLink].
   final Future<bool> Function()? checkOnline;
 
-  // Optional: production uses ConnectivityService from GetIt.
-  // ignore: unnecessary-nullable
   const OfflineGate({super.key, required this.child, this.checkOnline});
 
   @override

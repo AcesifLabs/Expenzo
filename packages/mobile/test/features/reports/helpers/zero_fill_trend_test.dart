@@ -42,7 +42,6 @@ void main() {
     expect(months.map((d) => d.date.month), [1, 2, 3]);
     expect(months[1].amount, 5);
 
-    // 2026-10-07 is a Wednesday; weeks start on Monday 2026-10-05.
     final weeks = zeroFillTrend(
       totals: const {},
       range: (start: DateTime(2026, 10, 7), end: DateTime(2026, 10, 20)),
@@ -53,7 +52,6 @@ void main() {
   });
 
   group('weekly buckets start on the first day of week', () {
-    // 2026-10-07 is a Wednesday.
     tearDown(() => WeekStart.current.value = FirstDayOfWeek.monday);
 
     List<int> weekStarts(FirstDayOfWeek day) {

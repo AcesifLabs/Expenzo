@@ -251,9 +251,6 @@ class ScanSmsUseCase implements UseCase<SmsScanPage, ScanSmsParams> {
     return DateTime(date.year, date.month, date.day, 23, 59, 59, 999, 999);
   }
 
-  /// The time on the message, as a live receipt reports it
-  /// (SmsBroadcastReceiver), so both give the same id; the receive time
-  /// only when the inbox has no sent time.
   String _generateSourceId(SmsMessage message) => smsSourceId(
     address: message.address,
     at: message.sentAt ?? message.date,
@@ -261,7 +258,6 @@ class ScanSmsUseCase implements UseCase<SmsScanPage, ScanSmsParams> {
   );
 }
 
-/// Messages per scan page when the caller doesn't say.
 const _defaultScanLimit = 10;
 
 class ScanSmsParams {

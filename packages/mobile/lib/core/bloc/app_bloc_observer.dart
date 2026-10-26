@@ -2,8 +2,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../logger/app_logger.dart';
 
-/// Logs errors blocs report with `addError`, which otherwise go nowhere.
-/// Errors thrown out of event handlers already reach the zone handler.
 class AppBlocObserver extends BlocObserver {
   const AppBlocObserver();
 

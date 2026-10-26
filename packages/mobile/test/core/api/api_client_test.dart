@@ -14,7 +14,6 @@ import 'package:expense_tracker/core/sync/connectivity_service.dart';
 
 class _MockConnectivity extends Mock implements ConnectivityService {}
 
-/// Answers every request with a 401 carrying [message].
 class _Unauthorized implements HttpClientAdapter {
   final String message;
 
@@ -37,7 +36,6 @@ class _Unauthorized implements HttpClientAdapter {
   void close({bool force = false}) {}
 }
 
-/// Answers each request with what [reply] returns for its auth header.
 class _Scripted implements HttpClientAdapter {
   final (int, Object) Function(String? authorization) reply;
   int requests = 0;
@@ -79,7 +77,7 @@ void main() {
   setUp(() {
     FlutterSecureStorage.setMockInitialValues({'jwt_access_token': 'jwt'});
     connectivity = _MockConnectivity();
-    // Offline, so a refresh attempt stops right after the check.
+
     when(() => connectivity.checkNow()).thenAnswer((_) async => false);
     di.getIt.registerSingleton<ConnectivityService>(connectivity);
     originalAdapter = dio.httpClientAdapter;

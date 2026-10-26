@@ -21,15 +21,10 @@ class AppErrorFallback extends StatelessWidget {
   final VoidCallback? onRetry;
   final VoidCallback? onRestart;
 
-  /// Set when the database file can't be read: offers to start again with
-  /// an empty one.
   final VoidCallback? onResetLocalData;
 
-  /// Shows the Send feedback action when set.
   final VoidCallback? onSendFeedback;
 
-  // Each fallback context offers different actions.
-  // ignore: unnecessary-nullable
   const AppErrorFallback({
     super.key,
     required this.fallbackContext,
@@ -187,9 +182,6 @@ class AppErrorFallback extends StatelessWidget {
 
 enum AppFallbackContext { build, framework, async, init }
 
-/// Reset local data, asking first: the first tap explains what goes and
-/// shows the button that does it. The fallback has no Navigator above it,
-/// so this can't be a dialog.
 class _ResetLocalDataButton extends StatefulWidget {
   final VoidCallback onConfirmed;
 

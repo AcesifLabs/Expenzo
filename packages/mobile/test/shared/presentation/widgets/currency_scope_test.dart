@@ -8,7 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 class _Amount extends StatelessWidget {
   const _Amount();
 
-  // Reads the static formatter, like the app's widgets.
   @override
   Widget build(BuildContext context) => Text(CurrencyFormatter.format(1234.5));
 }

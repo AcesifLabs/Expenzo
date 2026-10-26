@@ -33,16 +33,11 @@ class ExportDataPage extends StatelessWidget {
   }
 }
 
-/// Exports transactions, budgets and categories as CSV and opens the share
-/// sheet. The design's FORMAT section is cut: CSV is the only format
-/// (docs/adr/0011).
 class ExportDataView extends StatelessWidget {
-  /// Replaceable in tests, to pin the range subtitles and picker bounds.
   final DateTime Function() clock;
 
   const ExportDataView({super.key, this.clock = DateTime.now});
 
-  /// A getter, as a `DateFormat` keeps the language it was created in.
   static DateFormat get _dateFormat => DateFormat.yMMMd();
 
   IconData _contentIcon(ExportContent content) => switch (content) {
@@ -171,8 +166,6 @@ class ExportDataView extends StatelessWidget {
     };
   }
 
-  /// The first day a preset range covers, from the same maths the export
-  /// uses.
   DateTime _presetStart(ExportRange range) {
     final now = clock();
     final request = ExportRequest(
@@ -192,8 +185,6 @@ class ExportDataView extends StatelessWidget {
     context.read<ExportBloc>().add(ExportRangeSelected(range));
   }
 
-  /// Custom is only selected once the user confirms a range; cancelling
-  /// keeps the previous choice. Tapping it again re-opens the picker.
   Future<void> _pickCustomRange(BuildContext context, ExportState state) async {
     final bloc = context.read<ExportBloc>();
     final now = clock();
@@ -278,8 +269,6 @@ class _InfoCard extends StatelessWidget {
   }
 }
 
-/// The Export button, pinned under the list, with the empty-range and
-/// nothing-selected messages.
 class _ExportFooter extends StatelessWidget {
   final ExportState state;
   final VoidCallback onExport;

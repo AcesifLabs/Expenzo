@@ -2,19 +2,14 @@ import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/core/constants/budget_period.dart';
 
-/// Budget periods: half-open [start, end) date ranges anchored on the
-/// budget's start date. A monthly budget from the 31st runs to the next
-/// month's 31st, or its last day when it is shorter (Feb 28, then Mar 31).
 class BudgetPeriodUtils {
   BudgetPeriodUtils._();
 
-  /// The period that holds today ([clock] in tests).
   static DateTimeRange calculateCurrentPeriod(
     DateTime startDate,
     BudgetPeriod period,
   ) => calculatePeriodAt(startDate, period, clock.now());
 
-  /// The period that holds [at].
   static DateTimeRange calculatePeriodAt(
     DateTime startDate,
     BudgetPeriod period,
@@ -30,7 +25,6 @@ class BudgetPeriodUtils {
     }
   }
 
-  /// The period just before [current], which ends where [current] starts.
   static DateTimeRange previousPeriod(
     DateTime startDate,
     BudgetPeriod period,
@@ -45,8 +39,6 @@ class BudgetPeriodUtils {
     );
   }
 
-  /// Calendar days, not 24-hour blocks, so a clock change can't shift the
-  /// week.
   static DateTimeRange _weeklyPeriod(DateTime startDate, DateTime at) {
     final days = DateTime.utc(at.year, at.month, at.day)
         .difference(
@@ -63,7 +55,6 @@ class BudgetPeriodUtils {
 
   static DateTimeRange _monthlyPeriod(DateTime startDate, DateTime at) {
     DateTime anchor(int year, int month) {
-      // DateTime normalises month 0 and 13 into the next or previous year.
       final first = DateTime(year, month);
 
       return DateTime(
@@ -97,7 +88,6 @@ class BudgetPeriodUtils {
     return DateTimeRange(start: start, end: anchor(start.year + 1));
   }
 
-  /// [day], or the last day of [year]-[month] when that month is shorter.
   static int _clampDay(int day, int year, int month) {
     final lastDay = DateTime(year, month + 1, 0).day;
 

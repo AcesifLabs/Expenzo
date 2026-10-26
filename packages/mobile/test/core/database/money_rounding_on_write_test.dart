@@ -15,8 +15,6 @@ import '../../support/factories/budget_factory.dart';
 import '../../support/factories/record_factory.dart';
 import '../../support/factories/recurring_factory.dart';
 
-/// ADR 0014: every stored amount keeps 2 decimals, whatever the caller
-/// passes in.
 void main() {
   late db.AppDatabase database;
 

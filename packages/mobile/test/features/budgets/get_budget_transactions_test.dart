@@ -71,14 +71,14 @@ void main() {
             amount: 20,
             budgetId: 'b1',
           ),
-          // Linked to a different budget -> excluded.
+
           makeRecord(
             id: 'e3',
             recordType: RecordType.expense,
             amount: 15,
             budgetId: 'b2',
           ),
-          // Unlinked expense -> excluded.
+
           makeRecord(id: 'e4', recordType: RecordType.expense, amount: 5),
         ]),
       );

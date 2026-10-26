@@ -4,7 +4,6 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 
 import '../../features/sms_parser/sms_corpus_loader.dart';
 
-/// Money or an account number left in scrubbed text.
 final _leak = RegExp(
   r'[\d০-৯][\d০-৯,]*\.[\d০-৯]|[\d০-৯](?:[ ,.\-]?[\d০-৯]){3,}',
 );

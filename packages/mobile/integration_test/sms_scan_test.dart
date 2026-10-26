@@ -12,8 +12,6 @@ import 'package:expense_tracker/i18n/strings.g.dart';
 
 import 'support/app.dart';
 
-/// The sender `integration_test/support/seed_sms.sh` writes to the
-/// emulator's inbox before the run.
 const _sender = '16216';
 
 Future<void> _watchSender() async {
@@ -57,8 +55,6 @@ Future<int> _importedCount() async {
   )..where((r) => r.sourceId.isNotNull())).get()).length;
 }
 
-/// Reads real messages from the inbox (seeded with `adb emu sms send`),
-/// imports them, and offers none of them again on a second scan.
 void main() {
   patrolTest('scanned messages become records once', ($) async {
     await launchOnboarded($);
@@ -79,7 +75,6 @@ void main() {
     final imported = await _importedCount();
     expect(imported, greaterThan(0));
 
-    // Adding closes the results and returns to Auto import.
     await _scanAllTime($);
     await $.takeNativeScreenshot('second_scan');
     expect(find.text(t.smsParser.results.empty), findsOneWidget);

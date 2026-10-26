@@ -92,8 +92,6 @@ class ReportsTabBar extends StatelessWidget {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                // The bar keeps its 48 dp height; at large
-                                // text sizes the label shrinks to fit.
                                 Flexible(
                                   child: FittedBox(
                                     fit: BoxFit.scaleDown,

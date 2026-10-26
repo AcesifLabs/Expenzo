@@ -8,8 +8,6 @@ import '../../domain/usecases/watch_active_goal.dart';
 import 'goal_event.dart';
 import 'goal_state.dart';
 
-/// The dashboard goal card: the active goal as a live stream, and "Add to
-/// goal".
 class GoalBloc extends Bloc<GoalEvent, GoalState> {
   final WatchActiveGoal watchActiveGoal;
   final AddGoalContribution addGoalContribution;
@@ -54,7 +52,7 @@ class GoalBloc extends Bloc<GoalEvent, GoalState> {
           status: GoalStatus.ready,
           errorText: failureText(failure),
         ),
-        // The stream delivers the updated goal.
+
         (_) => state.copyWith(
           status: GoalStatus.ready,
           lastAdded: event.amount,

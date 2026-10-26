@@ -21,10 +21,6 @@ import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:expense_tracker/features/categories/presentation/helpers/category_display_name.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
-/// Full-screen category picker matching the .pen design.
-///
-/// Returns the selected [Category] via [Navigator.pop] when a category
-/// is tapped, or `null` if the user presses the close button.
 class AllCategoriesPickerPage extends StatefulWidget {
   final RecordType type;
   final String? selectedId;
@@ -150,7 +146,6 @@ class _AllCategoriesPickerPageState extends State<AllCategoriesPickerPage> {
             ),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
-              // The whole 48 dp row is the field's tap target.
               child: ConstrainedBox(
                 constraints: const BoxConstraints(
                   minHeight: AppSpacing.minTapTarget,

@@ -3,11 +3,6 @@ import 'package:flutter/widgets.dart';
 import 'package:expense_tracker/core/constants/app_constants.dart';
 import 'package:expense_tracker/core/theme/scaled_text_scaler.dart';
 
-/// Applies the Font size [factor] on top of the device text scale for
-/// everything below it, capped at [AppConstants.maxTextScale].
-///
-/// Always wraps, also at factor 1.0, so a device scale above the cap is
-/// capped too. Only text scales; icons and fixed sizes don't.
 class AppTextScale extends StatelessWidget {
   final double factor;
   final Widget child;

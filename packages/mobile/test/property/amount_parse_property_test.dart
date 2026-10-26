@@ -5,7 +5,6 @@ import 'package:kiri_check/kiri_check.dart';
 
 import 'generators.dart';
 
-/// How banks write an amount: currency mark, grouping, digits, decimals.
 typedef _Rendering = ({
   int cents,
   String prefix,

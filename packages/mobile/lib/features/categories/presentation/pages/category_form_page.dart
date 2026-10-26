@@ -45,15 +45,12 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
   AppPalette get _palette => context.palette;
   final _nameController = TextEditingController();
 
-  /// The category being edited, as stored.
   Category? _original;
   String _selectedIcon = 'shoppingCart';
   String _selectedColor = '#D1C4E9';
   RecordType _type = RecordType.expense;
   var _isLoading = false;
 
-  /// Set when the category to edit couldn't load. The form stays hidden,
-  /// so Save can't write blank fields over the real category.
   String? _loadError;
 
   bool get _isEditing => widget.category != null || widget.categoryId != null;
@@ -128,8 +125,7 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
     final now = DateTime.now().toUtc();
     final id = widget.category?.id ?? widget.categoryId ?? const Uuid().v4();
     final existing = _original ?? widget.category;
-    // An untouched default shows its translated name; saving it unchanged
-    // must keep the English seed name so it stays translatable.
+
     final storedName = existing != null && name == existing.displayName
         ? existing.name
         : name;
@@ -177,7 +173,6 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
           ),
           const SizedBox(height: AppSpacing.sm),
           Container(
-            // Grows with large text.
             constraints: const BoxConstraints(
               minHeight: AppSpacing.minTapTarget,
             ),
@@ -216,7 +211,6 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
         AppSpacing.lg,
       ),
       child: ConstrainedBox(
-        // Grows with the label at large text sizes.
         constraints: const BoxConstraints(
           minWidth: double.infinity,
           minHeight: AppSpacing.fieldHeight,

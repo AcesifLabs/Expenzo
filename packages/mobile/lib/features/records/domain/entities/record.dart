@@ -2,8 +2,6 @@ import 'package:equatable/equatable.dart';
 import "package:expense_tracker/core/constants/source_types.dart";
 import "package:expense_tracker/core/constants/record_type.dart";
 
-/// Distinguishes "not passed" from "set to null" in [Record.copyWith], the
-/// same way [RecurringTransaction.copyWith] does.
 class _RecordSentinel {
   const _RecordSentinel();
 }
@@ -54,8 +52,6 @@ class Record extends Equatable {
     required this.updatedAt,
   });
 
-  /// Passing null for [categoryId], [budgetId] or [sourceId] clears it;
-  /// leaving them out keeps the current value.
   Record copyWith({
     String? id,
     double? amount,

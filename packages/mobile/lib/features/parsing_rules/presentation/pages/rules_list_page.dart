@@ -515,7 +515,6 @@ class _RuleEditorPageState extends State<RuleEditorPage> {
 class AddTemplatesPage extends StatelessWidget {
   const AddTemplatesPage({super.key});
 
-  /// Translation key for a built-in template ("HDFC Bank SMS" → hdfc_bank_sms).
   static String _templateKey(String name) => name
       .toLowerCase()
       .replaceAll(RegExp(r'[^a-z0-9]+'), '_')

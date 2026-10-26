@@ -13,8 +13,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../integration_test/support/app.dart';
 
-/// Frame timings for the nightly perf job (`flutter drive --profile`, see
-/// test_driver/perf_driver.dart). Each scenario is one timeline report.
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -55,7 +53,7 @@ void main() {
 
     go(tester, AppRootTab.home.location);
     await settle(tester, 3);
-    // The Home page setting changes the range; this is the rebuild it causes.
+
     final dashboard = tester
         .element(find.byType(DashboardView))
         .read<DashboardBloc>();

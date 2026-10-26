@@ -49,7 +49,6 @@ void main() {
       history.didReplace(newRoute: replacement, oldRoute: a);
       history.didPop(b, replacement);
 
-      // Only the replacement is left, so `a` really was swapped out.
       expect(history.locations, hasLength(1));
       history.didPop(replacement, null);
       expect(history.locations, isEmpty);

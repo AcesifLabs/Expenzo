@@ -3,9 +3,6 @@ import 'package:drift/native.dart';
 
 import '../generated/schema_v19.dart' as v19;
 
-/// Creates the v19 tables that the database behind [raw] lacks, except
-/// [except]. Older migration tests seed only the tables their step
-/// touches; a real install has the rest, and the v20 step needs them.
 Future<void> addMissingV19Tables(
   QueryExecutor raw, {
   Set<String> except = const {},

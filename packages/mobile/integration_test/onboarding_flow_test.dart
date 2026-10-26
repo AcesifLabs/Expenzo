@@ -13,7 +13,6 @@ import 'package:expense_tracker/i18n/strings.g.dart';
 
 import 'support/app.dart';
 
-/// A device keeps app data between runs: start from a fresh install.
 Future<void> _freshInstall() async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.clear();
@@ -50,13 +49,11 @@ void main() {
     LocaleSettings.setLocaleSync(AppLocale.en);
     await _settle(tester);
 
-    // 1. Income.
     expect(find.text(t.onboarding.income.title), findsOneWidget);
     await tester.enterText(find.byType(TextField), '5000');
     await _settle(tester, 1);
     await _continue(tester);
 
-    // 2. Recurring: add Rent, see the total.
     await _tapText(tester, t.onboarding.recurring.addFirst);
     final fields = find.byType(TextFormField);
     await tester.enterText(fields.at(0), 'Rent');
@@ -64,7 +61,6 @@ void main() {
     await _tapText(tester, t.common.add);
     expect(find.text(t.onboarding.recurring.total), findsOneWidget);
 
-    // 2a. Back keeps the income; Continue twice returns to the plan.
     await tester.tap(find.byTooltip(t.common.back));
     await _settle(tester);
     expect(find.text(t.onboarding.income.title), findsOneWidget);
@@ -72,21 +68,18 @@ void main() {
     await _continue(tester);
     await _continue(tester);
 
-    // 3. Plan: budgets on.
     expect(find.text(t.onboarding.plan.title), findsOneWidget);
     await _continue(tester);
 
-    // 4. Goal.
     final goalFields = find.byType(TextField);
     await tester.enterText(goalFields.at(0), 'Laptop');
     await tester.enterText(goalFields.at(1), '1999');
     await _settle(tester, 1);
     await _continue(tester);
 
-    // 5. Timeline, then Finish setup.
     final threeMonths = t.onboarding.timeline.months(n: 3);
     await _tapText(tester, threeMonths);
-    // The summary card sits below the options, off screen on a phone.
+
     await tester.scrollUntilVisible(
       find.text(t.onboarding.complete.title),
       200,
@@ -101,7 +94,6 @@ void main() {
     await _tapText(tester, t.onboarding.complete.finish);
     await _settle(tester, 3);
 
-    // 6. Tutorial: Skip to Home.
     await _tapText(tester, t.onboarding.common.skip);
     await _settle(tester, 3);
 
@@ -124,8 +116,6 @@ void main() {
     expect(settings['onboardingCompleted'], isTrue);
     expect(settings['monthlyIncome'], 5000.0);
 
-    // A relaunch opens Home, not onboarding again. (Each Patrol test starts
-    // from cleared data, so this can't be a test of its own.)
     await startApp(tester);
     expect(find.text(t.onboarding.income.title), findsNothing);
     await tester.scrollUntilVisible(find.text('Laptop'), 200);

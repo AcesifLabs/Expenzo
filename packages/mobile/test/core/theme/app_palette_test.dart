@@ -113,7 +113,7 @@ void main() {
             );
           }
         }
-        // Warning is used for icons and short labels on cards.
+
         expect(ratio(p.warning, p.surface), greaterThanOrEqualTo(4.5));
       });
 

@@ -59,14 +59,12 @@ class DateRange extends Equatable {
     DateRangePreset.thisYear => t.dashboard.range.thisYear,
   };
 
-  /// "Net this month", for the balance row.
   String get netLabel => switch (preset) {
     DateRangePreset.thisMonth => t.dashboard.range.net.thisMonth,
     DateRangePreset.lastMonth => t.dashboard.range.net.lastMonth,
     DateRangePreset.thisYear => t.dashboard.range.net.thisYear,
   };
 
-  /// How the previous period reads in a sentence ("vs last month").
   String get previousPeriodNoun => switch (preset) {
     DateRangePreset.thisMonth => t.dashboard.range.previous.thisMonth,
     DateRangePreset.lastMonth => t.dashboard.range.previous.lastMonth,

@@ -8,9 +8,6 @@ import 'package:flutter/material.dart';
 
 import '../../domain/entities/group_summary.dart';
 
-/// The frame's "Combined Balance" card, as "Spent of planned": only
-/// transactions in Shared Budgets count, and there is no income figure
-/// (CONTEXT.md Net, Shared Budget).
 class SpentOfPlannedCard extends StatelessWidget {
   final GroupSummary summary;
 

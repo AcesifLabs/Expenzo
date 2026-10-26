@@ -25,7 +25,7 @@ void main() {
     });
 
     test('endDate is null by default and stays null when omitted', () {
-      final base = makeRecurring(); // endDate defaults to null
+      final base = makeRecurring();
       final copy = base.copyWith(amount: 99.99);
       expect(copy.endDate, isNull);
     });
@@ -49,7 +49,7 @@ void main() {
     });
 
     test('dayOfMonth is null by default and stays null when omitted', () {
-      final base = makeRecurring(); // dayOfMonth defaults to null
+      final base = makeRecurring();
       final copy = base.copyWith(amount: 99.99);
       expect(copy.dayOfMonth, isNull);
     });
@@ -67,10 +67,10 @@ void main() {
       expect(copy.description, 'updated');
       expect(copy.amount, 100.0);
       expect(copy.frequency, RecurringFrequency.weekly);
-      // sentinel fields unchanged
+
       expect(copy.endDate, DateTime(2025, 12, 31));
       expect(copy.dayOfMonth, 15);
-      // other non-sentinel fields preserved
+
       expect(copy.id, base.id);
       expect(copy.startDate, base.startDate);
     });

@@ -34,7 +34,7 @@ void main() {
       await record('first', sourceId: 'sms-1', desc: 'Groceries at Agora');
       await record('copy', sourceId: 'sms-1', desc: 'Groceries at Agora');
       await record('other', sourceId: 'sms-2', desc: 'Taxi home');
-      // A different message whose (hashed) id collided with 'other'.
+
       await record('collision', sourceId: 'sms-2', desc: 'Rent');
       await record('manual-a', desc: 'Lunch');
       await record('manual-b', desc: 'Lunch');

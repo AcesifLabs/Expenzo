@@ -4,10 +4,6 @@ import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'settings_icon_tile.dart';
 
-/// One option in a single-choice list; the selected row shows a check mark.
-///
-/// The only widget for single-choice lists in Settings (SAAP-60 README,
-/// check-mark rule). Never use RadioListTile.
 class SettingsChoiceTile extends StatelessWidget {
   final String title;
   final String? subtitle;
@@ -36,7 +32,6 @@ class SettingsChoiceTile extends StatelessWidget {
         : palette.textTertiary;
     final localIcon = icon;
 
-    // Merged so the group flag lands on the ListTile's own node.
     return MergeSemantics(
       child: Semantics(
         selected: selected,

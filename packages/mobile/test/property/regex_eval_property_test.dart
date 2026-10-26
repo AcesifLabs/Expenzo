@@ -18,7 +18,7 @@ void main() {
     templates: const [],
     sources: const [],
   );
-  // Messages that pass the trigger words, so every pattern runs.
+
   final triggers = DefaultRulesTemplates.templates
       .expand((t) => t.triggerWords)
       .join(' ');

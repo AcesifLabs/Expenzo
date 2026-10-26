@@ -59,7 +59,6 @@ class ChatInput extends StatelessWidget {
         children: [
           Expanded(
             child: ConstrainedBox(
-              // A 48 dp tap target that grows with large text.
               constraints: const BoxConstraints(
                 minHeight: AppSpacing.minTapTarget,
               ),

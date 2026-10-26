@@ -2,7 +2,6 @@ import 'package:expense_tracker/features/recurring/domain/entities/recurring_fre
 import 'package:expense_tracker/features/recurring/domain/helpers/next_occurrence.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// [count] steps of [frequency] from [start], anchored to [dayOfMonth].
 List<DateTime> _steps(
   DateTime start,
   RecurringFrequency frequency,

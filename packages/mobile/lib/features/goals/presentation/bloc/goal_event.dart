@@ -7,12 +7,10 @@ sealed class GoalEvent extends Equatable {
   const GoalEvent();
 }
 
-/// Follows the active goal (a goal pulled from another device included).
 class GoalWatchStarted extends GoalEvent {
   const GoalWatchStarted();
 }
 
-/// "Add to goal" with [amount]. Creates no Record (ADR 0009).
 class GoalContributionSubmitted extends GoalEvent {
   final double amount;
 

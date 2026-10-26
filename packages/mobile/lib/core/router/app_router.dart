@@ -5,10 +5,6 @@ import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'app_routes.dart';
 import 'navigation_history.dart';
 
-/// Wires the route tree and the auth redirect into a single [GoRouter].
-///
-/// Route definitions live in [buildAppRoutes]; the redirect lives in
-/// [authRedirect] — see `app_routes.dart`.
 class AppRouter {
   final GoRouter config;
   final NavigationHistory history;
@@ -30,7 +26,6 @@ class AppRouter {
     return AppRouter._(config, history);
   }
 
-  // The app root can be remounted, so replace any previous instance.
   static void _registerHistory(NavigationHistory history) {
     if (di.getIt.isRegistered<NavigationHistory>()) {
       di.getIt.unregister<NavigationHistory>();

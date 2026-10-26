@@ -15,7 +15,6 @@ class ParsingRule extends Equatable {
   final bool isEnabled;
   final int priority;
 
-  /// How all-numeric dates in this rule's messages are read.
   final DateOrder dateOrder;
   final DateTime createdAt;
   final DateTime updatedAt;

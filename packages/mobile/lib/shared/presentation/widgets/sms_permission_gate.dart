@@ -15,8 +15,6 @@ class SmsPermissionGate extends StatefulWidget {
   final Widget child;
   final ValueChanged<bool>? onPermissionChanged;
 
-  // Optional: most screens only need the gate.
-  // ignore: unnecessary-nullable
   const SmsPermissionGate({
     super.key,
     required this.child,

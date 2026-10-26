@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Mutation testing (QA hardening task 42); see mutation/README.md. -->
+
 <mutations version="1.1">
   <directories>
     <directory recursive="true">lib/features/parsing_rules/domain</directory>
   </directories>
   <exclude>
-    <!-- Logging, comments and imports: mutating them proves nothing. -->
+    
     <regex pattern="appLogger\.[a-z]+\([^;]*;" dotAll="true"/>
     <regex pattern="catch \([a-z, ]+\) \{\s*appLogger\.[a-z]+\([^;]*;" dotAll="true"/>
     <regex pattern="//[^\n]*"/>
     <regex pattern="import [^;]*;"/>
-    <!-- Value classes and one-line use cases: equality and delegation,
-         covered by the bloc and repository tests, not worth mutating. -->
+    
     <directory>lib/features/parsing_rules/domain/entities/**</directory>
     <directory>lib/features/parsing_rules/domain/usecases/**</directory>
   </exclude>

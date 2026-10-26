@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-// The entities declared these (userId, updatedAt) pull indexes and the
-// recurring frequency default, but no earlier migration created them.
+
+
 export class AddMissingSyncIndexes1792792459541 implements MigrationInterface {
     name = 'AddMissingSyncIndexes1792792459541'
 

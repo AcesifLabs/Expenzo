@@ -41,8 +41,6 @@ void registerOnboardingFallbacks() {
   registerFallbackValue(NoParams());
 }
 
-/// A real [OnboardingBloc] on a mocked [CompleteOnboarding], made inside the
-/// test zone so its stream reaches the widgets. [events] set the draft up.
 Future<OnboardingBloc> pumpOnboardingWidget(
   WidgetTester tester,
   Widget page, {

@@ -1,10 +1,5 @@
 import 'sms_sender_normalizer.dart';
 
-/// A record's `source_id` for an SMS: sender, time and a hash of the text,
-/// so two different messages never share it. Used by live imports and inbox
-/// scans alike, so [at] must be the same moment on both: the time on the
-/// message itself (the PDU timestamp, the inbox's `date_sent`), not when
-/// the phone received it.
 String smsSourceId({
   required String address,
   required DateTime at,
@@ -15,9 +10,6 @@ String smsSourceId({
   return '${SmsSenderNormalizer.normalize(address)}:$timestamp:${_fnv1a32(body)}';
 }
 
-/// The id inbox scans gave records before database v20: a 30-bit hash of
-/// sender and time, which different messages can share. Only for finding
-/// messages imported back then.
 String legacyScanSourceId({required String address, required DateTime at}) =>
     '${address}_${at.toIso8601String()}'.hashCode.abs().toString();
 

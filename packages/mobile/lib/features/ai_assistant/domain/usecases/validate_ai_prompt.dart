@@ -63,8 +63,6 @@ class ValidateAiPrompt {
     for (final raw in AiAssistantConstants.financeKeywords) {
       final keyword = _composeBanglaNukta(raw);
       if (_bangla.hasMatch(keyword)) {
-        // Bangla adds case endings to the word (খরচের, টাকায়), so a keyword
-        // must start a word rather than sit inside one.
         if (words.any((word) => word.startsWith(keyword))) return true;
       } else if (lower.contains(keyword)) {
         return true;
@@ -74,8 +72,6 @@ class ValidateAiPrompt {
     return false;
   }
 
-  /// Keyboards type য়, ড় and ঢ় either as one letter or as a letter plus
-  /// nukta (়); compare them in one form.
   static String _composeBanglaNukta(String input) => input
       .replaceAll('\u09AF\u09BC', '\u09DF')
       .replaceAll('\u09A1\u09BC', '\u09DC')

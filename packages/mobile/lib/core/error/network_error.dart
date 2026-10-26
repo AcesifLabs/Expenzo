@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'failures.dart';
 
-/// True for transport failures (no route, DNS, timeout), not HTTP 4xx/5xx.
 bool isNetworkError(Object error) {
   if (error is SocketException || error is TimeoutException) return true;
   final text = error.toString().toLowerCase();

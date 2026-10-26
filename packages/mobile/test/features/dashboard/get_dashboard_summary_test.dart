@@ -39,9 +39,6 @@ void main() {
     );
   }
 
-  /// Receipt-prefilled date in the previous month, but saved just now. Recent
-  /// Activity must not surface it — the section is scoped to the dashboard
-  /// month so it agrees with the totals shown above it.
   final receiptSave = buildRecord(
     id: 'receipt-1',
     date: thisMonth.startDate.subtract(const Duration(days: 5)),
@@ -55,8 +52,6 @@ void main() {
 
   final inMonthOlder = buildRecord(id: 'in-1', date: thisMonth.startDate);
 
-  /// Mirrors the repository contract: [getRecords] returns only the records
-  /// falling in the requested range, ordered by transaction date descending.
   void stubGetRecords(List<Record> currentMonth) {
     when(
       () => records.getRecords(dateRange: any(named: 'dateRange')),
@@ -93,8 +88,6 @@ void main() {
       'even when it is the most recent save', () async {
     stubGetRecords([inMonthNewer, inMonthOlder]);
 
-    // Sanity: the receipt was saved after every in-month record, so a
-    // save-time-ordered query would have put it first.
     expect(receiptSave.createdAt.isAfter(inMonthNewer.createdAt), isTrue);
     expect(receiptSave.date.isBefore(thisMonth.startDate), isTrue);
 
@@ -104,7 +97,7 @@ void main() {
       () => throw StateError('expected summary'),
     );
     expect(summary.recentTransactions.map((r) => r.id), ['in-2', 'in-1']);
-    expect(summary.totalExpense, 20); // only in-month records count
+    expect(summary.totalExpense, 20);
   });
 
   test('Recent Activity is capped at 5 records', () async {
@@ -132,7 +125,6 @@ void main() {
   });
 
   test('percent change compares with last month\'s spending', () async {
-    // Previous month holds one 10 expense (receiptSave); this month 20.
     stubGetRecords([inMonthNewer, inMonthOlder]);
 
     final summary = (await useCase(

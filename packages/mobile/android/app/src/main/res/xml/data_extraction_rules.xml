@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Android 12+ (API 31) backup and device transfer. Backs up the database
-     (Flutter's documents directory) and shared preferences. Leaves out the
-     flutter_secure_storage files: their keys live in the Android Keystore,
-     which is never restored, so restored copies can't be decrypted and get
-     wiped. After a restore the user signs in again. -->
+
 <data-extraction-rules>
     <cloud-backup>
         <include domain="root" path="app_flutter/" />

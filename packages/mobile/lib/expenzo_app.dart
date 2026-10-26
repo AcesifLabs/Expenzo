@@ -53,8 +53,6 @@ import 'features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
 import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'shared/presentation/widgets/app_error_fallback.dart';
 
-/// App-open work, run in order: auto-post due recurring items (SAAP-63),
-/// then recurring reminders, so reminders see the advanced dates.
 Future<void> _runRecurringAppOpenWork() async {
   try {
     if (di.getIt.isRegistered<RecurringAutoPoster>()) {
@@ -78,7 +76,7 @@ class ExpenzoApp extends StatefulWidget {
 class _ExpenzoAppState extends State<ExpenzoApp> {
   final _navigatorKey = GlobalKey<NavigatorState>();
   final _themeModeNotifier = ValueNotifier<ThemeMode>(ThemeMode.system);
-  // Keeps the last value while settings reload, so text doesn't jump.
+
   final _fontScaleNotifier = ValueNotifier<double>(
     AppFontSize.defaultSize.scale,
   );
@@ -88,9 +86,6 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
         di.getIt<SyncEngine>().applyEnabled(enabled: enabled),
   );
 
-  // Keeps DateFormat and the language-default first day of week in step
-  // with `t`, including when slang follows an OS language change on its own
-  // in "Match device" mode.
   StreamSubscription<AppLocale>? _localeSubscription;
 
   @override
@@ -108,39 +103,27 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
   bool _error = false;
   String _errorRefId = '';
 
-  /// The start-up error was a database file that can't be read.
   bool _databaseUnreadable = false;
 
-  /// False until the first settings after a cold start re-arm background
-  /// work with fresh delays.
   bool _backgroundArmed = false;
 
-  /// The last settings applied, so a language change can recompute the
-  /// first day of week while it is unset.
   UserSettings? _lastSettings;
 
   Future<void> _startInitialization() async {
     try {
-      // Firebase starts while the database and DI set up; both finish before
-      // anything can resolve FirebaseAuth.
       final firebase = _initFirebase();
       await di.initCriticalDependencies();
-      // Opens the database now, so a file that can't be read stops start-up
-      // here, where the user can reset it, not on every screen later.
+
       await di.getIt<AppDatabase>().customSelect('SELECT 1').get();
       await firebase;
       if (!mounted) return;
-      // Before the first settings load, so it already sees the resolved
-      // onboarding flag. A failure leaves it null, which never redirects.
+
       await di.getIt<ResolveOnboardingStatus>()();
 
       if (kDebugMode) {
         await _startDriftDebugServer();
       }
 
-      // Settings live in SharedPreferences, so they load while the
-      // database seeds. The splash stays up until both finish, so the home
-      // tab is the first screen shown.
       final firstLoaded = _initSettingsWhenReady();
       await di.getIt<BootstrapService>().seedInitialData();
       _applyHomeTab(await firstLoaded);
@@ -154,8 +137,6 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
 
       unawaited(_tryStartRealtimeSmsProcessing());
 
-      // Feature deps no longer need the 500ms delay — the
-      // `featureDependenciesReady` getter is self-healing.
       await di.initFeatureDependencies();
       unawaited(_runRecurringAppOpenWork());
     } catch (e, stack) {
@@ -206,8 +187,6 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
     }
   }
 
-  /// Loads settings and keeps applying them. Returns the first loaded
-  /// settings, or null if they failed or took too long.
   Future<UserSettings?> _initSettingsWhenReady() async {
     await di.criticalDependenciesReady;
     if (!mounted) return null;
@@ -223,11 +202,6 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
     return firstSettings(bloc.stream);
   }
 
-  /// Opens the chosen home tab. Called once per start, before the splash
-  /// ends; the settings listener above never navigates, so later changes
-  /// don't move the user. The router isn't mounted yet, so this reads and
-  /// sets the location it will open on (a deep link if the app was opened
-  /// from one).
   void _applyHomeTab(UserSettings? settings) {
     final router = _appRouter?.config;
     if (settings == null || router == null) return;
@@ -242,8 +216,7 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
     final onboardingChanged =
         _lastSettings?.onboardingCompleted != settings.onboardingCompleted;
     _lastSettings = settings;
-    // The router has no refresh listenable: re-run the onboarding redirect
-    // when the flag is first known or changes, as RefreshOnAuthChange does.
+
     if (onboardingChanged) _appRouter?.config.refresh();
     _themeModeNotifier.value = _themeModeFromString(settings.theme);
     _fontScaleNotifier.value = settings.fontSize.scale;
@@ -261,8 +234,6 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
     unawaited(crashReporter.setEnabled(enabled: settings.crashReportsEnabled));
   }
 
-  /// Sets [WeekStart] from the last settings and the current app language.
-  /// Returns true when the day changed.
   bool _applyWeekStart() {
     final settings = _lastSettings;
     if (settings == null) return false;
@@ -277,7 +248,7 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
   void _onLocaleChanged(AppLocale locale) {
     Intl.defaultLocale = locale.languageTag;
     final settings = _lastSettings;
-    // The weekly summary day follows the first day of week.
+
     if (_applyWeekStart() && settings != null) {
       unawaited(_applyBackgroundWork(settings));
     }
@@ -365,8 +336,7 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
                   create: (_) => di.getIt<SmsScannerBloc>(),
                 ),
               ],
-              // Re-run router redirects (sync conflict, login) when the
-              // signed-in state changes; AuthBloc exists only after init.
+
               child: RefreshOnAuthChange(
                 enabled: _initialized,
                 onAuthChanged: () => _appRouter?.config.refresh(),
@@ -395,10 +365,7 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
       onGenerateTitle: (context) => t.common.appName,
       locale: TranslationProvider.of(context).flutterLocale,
       supportedLocales: AppLocaleUtils.supportedLocales,
-      // Date pickers start their weeks on the first day of week. Set at the
-      // root on purpose: showDatePicker reads the navigator's localizations,
-      // so a narrower override wouldn't reach it. A change reloads them app
-      // wide, which is fine for a rarely changed setting.
+
       localizationsDelegates: [
         FirstDayMaterialLocalizationsDelegate(firstDay),
         ...GlobalMaterialLocalizations.delegates,
@@ -480,7 +447,6 @@ class _AppContentState extends State<_AppContent> with WidgetsBindingObserver {
     }
   }
 
-  /// Runs start-up again from the beginning.
   void _handleRetry() => unawaited(di.getIt<BootstrapService>().retry());
 
   void _handleResetLocalData() =>

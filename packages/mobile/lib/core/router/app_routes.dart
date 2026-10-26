@@ -67,10 +67,6 @@ import 'package:expense_tracker/features/parsing_rules/presentation/pages/rules_
 import '../../features/auth/presentation/bloc/auth_state.dart';
 import 'auth_aware_app_shell.dart';
 
-/// Builds the full route tree for the app.
-///
-/// The auth-aware root layout is mounted at `/` so the redirect can
-/// intercept login/sync-conflict states before any nested route renders.
 List<RouteBase> buildAppRoutes() {
   return [
     GoRoute(
@@ -94,7 +90,7 @@ List<RouteBase> _buildNestedRoutes() {
     GoRoute(path: 'ai-assistant', builder: (_, _) => const AiAssistantPage()),
     GoRoute(path: 'onboarding', builder: (_, _) => const OnboardingRoute()),
     GoRoute(path: 'tutorial', builder: (_, _) => const TutorialPage()),
-    // Before 'goals/:id/edit' so "new" is never read as an id.
+
     GoRoute(
       path: 'goals/new',
       builder: (_, _) => BlocProvider(
@@ -117,7 +113,6 @@ List<RouteBase> _buildNestedRoutes() {
   ];
 }
 
-/// Settings and every screen it opens, at `/settings/<SettingsRoute.path>`.
 GoRoute _buildSettingsRoute() {
   return GoRoute(
     path: SettingsRoute.rootPath,
@@ -146,12 +141,11 @@ GoRoute _buildSettingsRoute() {
       ),
       GoRoute(
         path: SettingsRoute.recurring.path,
-        // create:, not a bloc built in the builder: go_router rebuilds
-        // this route when pages are pushed on top of it.
+
         builder: (_, _) => MultiBlocProvider(
           providers: [
             BlocProvider(create: (_) => di.getIt<RecurringBloc>()),
-            // The app-wide singleton; `create` would close it on pop.
+
             BlocProvider.value(value: di.getIt<SettingsBloc>()),
           ],
           child: const RecurringListView(),
@@ -166,14 +160,9 @@ GoRoute _buildSettingsRoute() {
   );
 }
 
-/// A settings screen with no bloc of its own.
 GoRoute _settingsPage(SettingsRoute route, Widget page) =>
     GoRoute(path: route.path, builder: (_, _) => page);
 
-/// Family group and its screens, at `/settings/family/<FamilyRoute.path>`.
-/// Each page gets its own FamilyBloc with `create:` (a factory): child
-/// pages are pushed as siblings, so a provider here would not reach them.
-/// Every bloc starts from the per-account cache, so all show one group.
 GoRoute _buildFamilyRoute() {
   Widget withBloc(Widget page) => BlocProvider(
     create: (_) => di.getIt<FamilyBloc>()..add(const FamilyLoadRequested()),
@@ -200,7 +189,6 @@ GoRoute _buildFamilyRoute() {
   );
 }
 
-/// Help & Support and its screens, at `/settings/help/<HelpRoute.path>`.
 GoRoute _buildHelpRoute() {
   return GoRoute(
     path: SettingsRoute.help.path,
@@ -218,7 +206,6 @@ GoRoute _buildHelpRoute() {
 
 List<RouteBase> _buildBudgetRoutes() {
   return [
-    // Before 'budgets/:id', which would otherwise match "picker" as an id.
     GoRoute(
       path: 'budgets/picker',
       pageBuilder: (context, state) {
@@ -271,16 +258,12 @@ List<RouteBase> _buildRecurringRoutes() {
   ];
 }
 
-/// The Recurring screen's default frequency, including a change still
-/// being saved; monthly until settings load.
 RecurringFrequency _storedDefaultFrequency() {
   return defaultFrequencyFrom(
     di.getIt<SettingsBloc>().latestSettings?.defaultRecurringFrequency,
   );
 }
 
-/// Choosing or adding a category is a short task opened from a form, so it
-/// opens as a full-screen dialog with a close button (see AppBackButton).
 Page<Object?> _dialogPage(GoRouterState state, Widget child) {
   return MaterialPage<Object?>(
     key: state.pageKey,
@@ -348,16 +331,6 @@ Widget _buildScanResultsRoute(BuildContext _, GoRouterState state) {
   );
 }
 
-/// Redirects the user to /sync-conflict while a sync conflict is pending and
-/// back out of it once it is resolved. Returns null to let the requested
-/// route resolve normally.
-///
-/// Leaving /login after signing in is LoginPage's job: it pops back to the
-/// screen that opened it. Redirecting here too would race that pop.
-///
-/// Then sends a user who hasn't done onboarding to /onboarding (SAAP-74). A
-/// pending sync conflict wins: onboarding waits until it is resolved, or the
-/// two redirects would bounce between each other.
 String? authRedirect(BuildContext context, GoRouterState state) => redirectFor(
   context.read<AuthBloc>().state,
   _loadedSettings(),
@@ -378,7 +351,6 @@ String? redirectFor(
   return onboardingRedirectFor(settings, location);
 }
 
-/// The app-wide settings once loaded, else null (no redirect yet).
 UserSettings? _loadedSettings() {
   if (!di.getIt.isRegistered<SettingsBloc>()) return null;
 
@@ -389,8 +361,6 @@ UserSettings? _loadedSettings() {
   };
 }
 
-/// Onboarding opens by itself while [UserSettings.onboardingCompleted] is
-/// false. A finished user may still open /onboarding (Replay setup).
 @visibleForTesting
 String? onboardingRedirectFor(UserSettings? settings, String location) {
   if (settings?.onboardingCompleted != false) return null;
@@ -409,11 +379,8 @@ String? authRedirectFor(AuthState authState, String location) {
 
   if (isConflictPending && !isConflictRoute) return '/sync-conflict';
 
-  // The conflict page has no way out of its own (it blocks back), so leave
-  // it as soon as the conflict is resolved.
   if (!isConflictPending && isConflictRoute) return '/';
 
-  // Family group needs an account (ADR 0008).
   if (authState is Unauthenticated &&
       location.startsWith(SettingsRoute.family.location)) {
     return SettingsRoute.rootLocation;

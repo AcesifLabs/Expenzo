@@ -20,7 +20,7 @@ void main() {
       maxExamples: propertyTrials,
       (v) {
         final (start, frequency) = v;
-        // The form stores the start day for monthly and yearly items.
+
         final dayOfMonth = start.day;
         var current = start;
         for (var i = 0; i < 50; i++) {

@@ -29,7 +29,6 @@ void main() {
     await tester.enterText(find.byType(TextField), 'Paid Tk 1,234.5 at shop');
     await tester.pump(const Duration(milliseconds: 600));
 
-    // Not "৳1.235": the author must see the captured cents.
     expect(find.text('1234.5'), findsOneWidget);
   });
 }

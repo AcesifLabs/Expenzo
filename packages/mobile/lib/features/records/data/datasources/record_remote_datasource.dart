@@ -5,9 +5,6 @@ import 'package:expense_tracker/core/error/exceptions.dart';
 typedef RecordBudgetLink = ({String id, String budgetId});
 
 abstract class RecordRemoteDatasource {
-  /// Fills budget links on server records that have none.
-  ///
-  /// Throws: [ServerException] if the API request fails.
   Future<void> fillMissingBudgetLinks(List<RecordBudgetLink> links);
 }
 

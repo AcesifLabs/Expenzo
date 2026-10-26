@@ -61,13 +61,13 @@ jobs:
       - name: Check translations
         run: bash scripts/check_i18n.sh
 
-      # Includes the golden tests (tag `golden`) and the property tests.
+
       - name: Run tests with coverage
         run: flutter test --coverage
 
       - name: Coverage gate
         run: bash scripts/coverage_gate.sh
 
-      # Fails a widget test that leaves a controller or notifier undisposed.
+
       - name: Run widget tests with leak tracking
         run: flutter test --dart-define=LEAK_TRACKING=true test/features test/shared test/a11y

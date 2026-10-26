@@ -5,8 +5,6 @@ import 'package:flutter_secure_storage_platform_interface/flutter_secure_storage
 import 'package:flutter_secure_storage/test/test_flutter_secure_storage_platform.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Secure storage whose keys were lost: every read fails, as Android's
-/// keystore does after some restores.
 class _UnreadableStorage extends TestFlutterSecureStoragePlatform {
   _UnreadableStorage() : super({'jwt_access_token': 'token'});
 

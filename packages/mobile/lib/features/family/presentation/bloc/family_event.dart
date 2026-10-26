@@ -9,8 +9,6 @@ sealed class FamilyEvent extends Equatable {
   const FamilyEvent();
 }
 
-/// Opens a Family screen: the cached group first when [preferCache], then
-/// `/groups/me` and the summary.
 class FamilyLoadRequested extends FamilyEvent {
   final bool preferCache;
 
@@ -20,7 +18,6 @@ class FamilyLoadRequested extends FamilyEvent {
   const FamilyLoadRequested({this.preferCache = true});
 }
 
-/// Pull to refresh: always asks the server.
 class FamilyRefreshRequested extends FamilyEvent {
   const FamilyRefreshRequested();
 }
@@ -44,8 +41,6 @@ class FamilyJoinRequested extends FamilyEvent {
   const FamilyJoinRequested(this.code);
 }
 
-/// Shows the active Invite Code, making one only when there is none; with
-/// [regenerate] a new code replaces the old.
 class FamilyInviteRequested extends FamilyEvent {
   final bool regenerate;
 
@@ -82,7 +77,6 @@ class FamilyDeleteRequested extends FamilyEvent {
   const FamilyDeleteRequested();
 }
 
-/// The screen has shown [FamilyState.failure].
 class FamilyFailureCleared extends FamilyEvent {
   const FamilyFailureCleared();
 }

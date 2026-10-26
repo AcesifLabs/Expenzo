@@ -53,7 +53,7 @@ void main() {
     registerFallbackValue(
       fb.GoogleAuthProvider.credential(accessToken: 'a', idToken: 'i'),
     );
-    // TokenStorage uses FlutterSecureStorage, whose channel hangs in tests.
+
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
           const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'),
@@ -109,7 +109,6 @@ void main() {
     });
 
     test('404 is a ServerException, not "already deleted"', () {
-      // A deleted user gets 401 from the JWT check; 404 is a wrong route.
       deleteThrows(_error(DioExceptionType.badResponse, status: 404));
 
       expect(datasource.deleteServerAccount(), throwsA(isA<ServerException>()));

@@ -15,9 +15,6 @@ import 'package:expense_tracker/features/settings/presentation/bloc/settings_sta
 import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
-/// One-time Home card pointing to Settings → Auto-import (docs/adr/0006).
-///
-/// Shown until the user dismisses it or grants SMS access.
 class AutoImportPromptCard extends StatefulWidget {
   const AutoImportPromptCard({super.key});
 

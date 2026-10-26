@@ -5,8 +5,6 @@ import 'package:expense_tracker/core/error/usecase.dart';
 import '../repositories/family_repository.dart';
 import 'get_group_summary.dart';
 
-/// Deletes the group; its Shared Budgets become personal budgets of their
-/// owner (ADR 0008).
 class DeleteGroup extends UseCase<Unit, GroupIdParams> {
   final FamilyRepository repository;
 

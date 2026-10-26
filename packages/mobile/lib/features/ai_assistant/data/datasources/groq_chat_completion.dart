@@ -1,4 +1,3 @@
-/// Typed Groq chat.completions JSON (non-streaming and SSE delta payloads).
 class GroqChatCompletion {
   final List<GroqChoice> choices;
 

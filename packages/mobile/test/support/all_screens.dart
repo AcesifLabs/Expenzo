@@ -15,21 +15,14 @@ import 'core_screens.dart';
 import 'more_screens.dart';
 import 'settings_screens.dart';
 
-/// One screen in one state, for the accessibility, large-text and keyboard
-/// tests.
 class ScreenCase {
   final String name;
   final Widget Function() build;
 
-  /// The page file under `lib/features/` this case renders, for the check
-  /// that every page is covered.
   final String? page;
 
-  /// The button that submits the form, for forms.
   final Finder Function()? submit;
 
-  /// Repeats an animation forever, so the tests pump fixed frames instead of
-  /// settling.
   final bool animates;
 
   const ScreenCase(
@@ -41,18 +34,13 @@ class ScreenCase {
   });
 }
 
-/// Page files that are not screens users see.
 const pagesWithoutCase = {
-  // Debug builds only, behind a developer setting.
   'settings/presentation/pages/debug_db_inspector_page.dart',
 };
 
 const _error = 'Something went wrong';
 
-/// Every screen of the app, plus the empty, loading and error states of the
-/// list screens.
 List<ScreenCase> get allScreens => [
-  // Tabs.
   const ScreenCase(
     'Home',
     homeScreen,
@@ -151,7 +139,7 @@ List<ScreenCase> get allScreens => [
     transactionSheetScreen,
     submit: () => find.text(t.common.addExpense),
   ),
-  // Settings.
+
   for (final MapEntry(key: name, value: build) in settingsScreens.entries)
     ScreenCase('Settings / $name', build, page: settingsPages[name]),
   ScreenCase(
@@ -170,7 +158,7 @@ List<ScreenCase> get allScreens => [
     'Settings / Matching rules (error)',
     () => matchingRulesScreen(state: const ParsingRulesError(message: _error)),
   ),
-  // Everything else.
+
   const ScreenCase(
     'Sign in',
     loginScreen,

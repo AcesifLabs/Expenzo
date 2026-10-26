@@ -146,7 +146,6 @@ void main() {
         () => mockTemplateRepository.getMessageSources(),
       ).thenAnswer((_) async => const Right([]));
 
-      // Both rules' trigger words are in it, so the order decides.
       const sampleSms = 'UPI payment Rs. 500 credited to your bank';
 
       final result = await evaluateRulesUseCase(
@@ -310,7 +309,6 @@ void main() {
         () => mockRepository.updateRule(any()),
       ).thenAnswer((_) async => Right(toggledRule));
 
-      // The toggle finds the rule in the loaded list.
       parsingRulesBloc.add(LoadRules());
       await Future<void>.delayed(const Duration(milliseconds: 50));
       parsingRulesBloc.add(

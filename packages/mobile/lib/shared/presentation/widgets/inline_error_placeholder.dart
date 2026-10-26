@@ -5,12 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:picons/picons.dart';
 
-/// Stands in for one widget that threw while building (the app's
-/// `ErrorWidget.builder`). The rest of the screen keeps working; the error
-/// itself goes to `FlutterError.onError`.
-///
-/// It can be built anywhere, even above `MaterialApp`, so it brings its own
-/// text direction and reads colors from the nearest theme or the default.
 class InlineErrorPlaceholder extends StatelessWidget {
   final FlutterErrorDetails details;
 
@@ -33,7 +27,6 @@ class InlineErrorPlaceholder extends StatelessWidget {
               const SizedBox(width: AppSpacing.sm),
               Flexible(
                 child: Text(
-                  // Release builds never show the exception text.
                   kDebugMode ? '$title: ${details.exceptionAsString()}' : title,
                   style: AppTypography.bodySmall.copyWith(
                     color: scheme.onSurface,

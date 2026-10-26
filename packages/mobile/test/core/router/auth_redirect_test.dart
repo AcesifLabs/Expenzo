@@ -27,7 +27,6 @@ void main() {
   });
 
   test('sign-in is left to the login page, not redirected', () {
-    // LoginPage pops itself on success; a redirect here would race it.
     expect(authRedirectFor(const Authenticated(user), '/login'), isNull);
     expect(authRedirectFor(const Unauthenticated(), '/login'), isNull);
   });

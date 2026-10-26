@@ -26,7 +26,7 @@ void initRecordModule(GetIt getIt) {
   getIt.registerLazySingleton<RecordRemoteDatasource>(
     () => RecordRemoteDatasourceImpl(apiClient: getIt<ApiClient>()),
   );
-  // Run by SyncEngine after each sync cycle (see injection_container).
+
   getIt.registerLazySingleton<RecordBudgetLinkRepair>(
     () => RecordBudgetLinkRepair(
       recordDao: getIt<RecordDao>(),

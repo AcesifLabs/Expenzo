@@ -3,12 +3,9 @@ import 'package:picons/picons.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_back_button.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_page_header.dart';
 
-/// The Reports header: the shared page header plus a labelled date-range
-/// button.
 class ReportsTopBar extends StatelessWidget {
   final String title;
 
-  /// The current range, shown on the date-range button ("Last 30 days").
   final String rangeLabel;
 
   final ValueChanged<BuildContext> onCalendar;

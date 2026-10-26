@@ -3,10 +3,6 @@ import 'dart:async';
 import '../../domain/entities/user_settings.dart';
 import '../bloc/settings_state.dart';
 
-/// The settings from the first [SettingsLoaded] on [states], or null when a
-/// [SettingsError] comes first, [timeout] passes or the stream closes.
-///
-/// The start-up splash waits on this, so it must never hang.
 Future<UserSettings?> firstSettings(
   Stream<SettingsState> states, {
   Duration timeout = const Duration(seconds: 2),

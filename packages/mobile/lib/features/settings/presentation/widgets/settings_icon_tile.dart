@@ -3,16 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 
-/// The rounded square at the start of a Settings option row. [child] (an
-/// icon or a short text such as a currency symbol) takes its colour from
-/// the tile, so pass it without one.
 class SettingsIconTile extends StatelessWidget {
   final Widget child;
   final bool selected;
   final bool enabled;
 
-  /// Colour of [child] when enabled and not selected; defaults to
-  /// `palette.textSecondary`.
   final Color? idleForeground;
 
   const SettingsIconTile({
