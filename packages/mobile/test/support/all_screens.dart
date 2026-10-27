@@ -1,9 +1,10 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:expense_tracker/features/goals/presentation/bloc/goal_state.dart';
 import 'package:expense_tracker/features/budgets/presentation/bloc/budget_state.dart';
 import 'package:expense_tracker/features/dashboard/domain/entities/date_range.dart';
 import 'package:expense_tracker/features/dashboard/presentation/bloc/dashboard_state.dart';
-import 'package:expense_tracker/features/parsing_rules/presentation/bloc/parsing_rules_state.dart';
+import 'package:expense_tracker/features/message_templates/presentation/bloc/sms_watchlist_state.dart';
 import 'package:expense_tracker/features/records/presentation/bloc/record_state.dart';
 import 'package:expense_tracker/features/recurring/presentation/bloc/recurring_state.dart';
 import 'package:expense_tracker/features/reports/domain/entities/granularity.dart';
@@ -151,12 +152,12 @@ List<ScreenCase> get allScreens => [
     () => recurringScreen(state: const RecurringError(_error)),
   ),
   ScreenCase(
-    'Settings / Matching rules (empty)',
-    () => matchingRulesScreen(state: const ParsingRulesLoaded(rules: [])),
+    'Settings / SMS Watchlist (empty)',
+    () => smsWatchlistScreen(state: const SmsWatchlistReady(senders: [])),
   ),
   ScreenCase(
-    'Settings / Matching rules (error)',
-    () => matchingRulesScreen(state: const ParsingRulesError(message: _error)),
+    'Settings / SMS Watchlist (error)',
+    () => smsWatchlistScreen(state: const SmsWatchlistError(message: _error)),
   ),
 
   const ScreenCase(
@@ -212,6 +213,15 @@ List<ScreenCase> get allScreens => [
     'Family members',
     familyMembersScreen,
     page: 'family/presentation/pages/family_members_page.dart',
+  ),
+  const ScreenCase(
+    'Goals',
+    goalsScreen,
+    page: 'goals/presentation/pages/goals_page.dart',
+  ),
+  ScreenCase(
+    'Goals empty',
+    () => goalsScreen(state: const GoalState(status: GoalStatus.ready)),
   ),
   ScreenCase(
     'Goal form',

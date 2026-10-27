@@ -79,27 +79,21 @@ class _TutorialPagesState extends State<TutorialPages> {
         AppSpacing.pageGutter,
         AppSpacing.md,
       ),
-      child: Row(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Flexible(
-            child: TextButton(
-              style: TextButton.styleFrom(
-                minimumSize: const Size(0, AppSpacing.minTapTarget),
-              ),
-              onPressed: widget.onDone,
-              child: Text(
-                t.onboarding.common.skip,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: context.palette.textSecondary,
-                ),
-              ),
+          OnboardingPrimaryButton(label: t.common.next, onPressed: _next),
+          const SizedBox(height: AppSpacing.xs),
+          TextButton(
+            style: TextButton.styleFrom(
+              minimumSize: const Size(0, AppSpacing.minTapTarget),
             ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: OnboardingPrimaryButton(
-              label: t.common.next,
-              onPressed: _next,
+            onPressed: widget.onDone,
+            child: Text(
+              t.onboarding.common.skip,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: context.palette.textSecondary,
+              ),
             ),
           ),
         ],
@@ -150,6 +144,8 @@ class _TutorialPagesState extends State<TutorialPages> {
 }
 
 class _TutorialPage extends StatelessWidget {
+  static const _maxTextShare = 0.45;
+
   final TutorialPageData page;
 
   const _TutorialPage({required this.page});
@@ -162,42 +158,51 @@ class _TutorialPage extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.pageGutter),
-      child: Column(
-        children: [
-          Flexible(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-              child: Image.asset(
-                dark ? page.darkAsset : page.lightAsset,
-                semanticLabel: title,
-                fit: BoxFit.contain,
+      child: LayoutBuilder(
+        builder: (context, constraints) => Column(
+          children: [
+            // The screenshot takes whatever height the text leaves.
+            Expanded(
+              child: Center(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+                  child: Image.asset(
+                    dark ? page.darkAsset : page.lightAsset,
+                    semanticLabel: title,
+                    fit: BoxFit.contain,
+                  ),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-
-          Flexible(
-            child: SingleChildScrollView(
-              child: ListBody(
-                children: [
-                  Text(
-                    title,
-                    textAlign: TextAlign.center,
-                    style: textTheme.headlineMedium,
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    page.body(),
-                    textAlign: TextAlign.center,
-                    style: textTheme.bodyLarge?.copyWith(
-                      color: context.palette.textSecondary,
+            const SizedBox(height: AppSpacing.lg),
+            // Capped so very large text scrolls instead of hiding the
+            // screenshot.
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: constraints.maxHeight * _maxTextShare,
+              ),
+              child: SingleChildScrollView(
+                child: ListBody(
+                  children: [
+                    Text(
+                      title,
+                      textAlign: TextAlign.center,
+                      style: textTheme.headlineMedium,
                     ),
-                  ),
-                ],
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      page.body(),
+                      textAlign: TextAlign.center,
+                      style: textTheme.bodyLarge?.copyWith(
+                        color: context.palette.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -266,10 +266,10 @@ class SettingsView extends StatelessWidget {
           onTap: () => context.push(SettingsRoute.autoImport.location),
         ),
         SettingsTile(
-          icon: PiconsRegular.funnel,
-          title: commonT.matchingRules,
-          subtitle: settingsT.matchingRulesSubtitle,
-          onTap: () => context.push(SettingsRoute.matchingRules.location),
+          icon: PiconsRegular.eye,
+          title: settingsT.smsWatchlist,
+          subtitle: settingsT.smsWatchlistSubtitle,
+          onTap: () => context.push(SettingsRoute.smsWatchlist.location),
         ),
       ],
     );

@@ -25,20 +25,12 @@ class DataWipeLocalDatasourceImpl implements DataWipeLocalDatasource {
   Future<LocalDataSummary> countData() async {
     try {
       final goals = registry[SyncTableNames.goals];
-      final (
-        transactions,
-        budgets,
-        categories,
-        recurring,
-        templates,
-        rules,
-      ) = await (
+      final (transactions, budgets, categories, recurring, templates) = await (
         _count(db.records),
         _count(db.budgets),
         _count(db.categories),
         _count(db.recurringTransactions),
         _count(db.expenseTemplates),
-        _count(db.parsingRules),
       ).wait;
 
       return LocalDataSummary(
@@ -46,7 +38,7 @@ class DataWipeLocalDatasourceImpl implements DataWipeLocalDatasource {
         budgets: budgets,
         categories: categories,
         recurring: recurring,
-        smsRules: templates + rules,
+        smsRules: templates,
         goals: goals == null ? null : await goals.countRows(db),
       );
     } catch (e, s) {

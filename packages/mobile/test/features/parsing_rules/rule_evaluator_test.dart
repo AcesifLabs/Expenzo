@@ -1,9 +1,4 @@
 import 'package:expense_tracker/features/parsing_rules/domain/services/rule_evaluator.dart';
-import 'package:expense_tracker/core/constants/source_types.dart';
-import 'package:expense_tracker/features/parsing_rules/domain/entities/date_order.dart';
-import 'package:expense_tracker/features/parsing_rules/domain/entities/evaluate_rules_params.dart';
-import 'package:expense_tracker/features/parsing_rules/domain/entities/parsing_context.dart';
-import 'package:expense_tracker/features/parsing_rules/domain/entities/parsing_rule.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 final _broadAmountPattern = RegExp(r'\d[\d,]*\.?\d*');
@@ -136,43 +131,6 @@ void main() {
       final result = RuleEvaluator.resolveAmountMatch(matches, null, sms);
       expect(result, isNotNull);
       expect(result!.group(0), equals('1234'));
-    });
-  });
-
-  group('a rule reads dates in its Date Order', () {
-    DateTime? dateWith(DateOrder order) => RuleEvaluator.evaluateWithContext(
-      ParsingContext(
-        rules: [
-          ParsingRule(
-            id: 'bank',
-            name: 'Bank',
-            triggerWords: const ['debited'],
-            amountPattern: r'BDT ([\d,.]+)',
-            datePattern: r'\d{2}/\d{2}/\d{4}',
-            sourceType: SourceType.sms,
-            isEnabled: true,
-            priority: 0,
-            dateOrder: order,
-            createdAt: DateTime(2026),
-            updatedAt: DateTime(2026),
-          ),
-        ],
-        templates: const [],
-        sources: const [],
-      ),
-      const EvaluateRulesParams(
-        rawMessage: 'A/C debited BDT 230.00 on 05/10/2026',
-        sourceType: AppSourceType.sms,
-        sourceId: 'sms-1',
-      ),
-    )?.date;
-
-    test('day/month by default', () {
-      expect(dateWith(DateOrder.dmy), DateTime(2026, 10, 5));
-    });
-
-    test('month/day when the rule says so', () {
-      expect(dateWith(DateOrder.mdy), DateTime(2026, 5, 10));
     });
   });
 }

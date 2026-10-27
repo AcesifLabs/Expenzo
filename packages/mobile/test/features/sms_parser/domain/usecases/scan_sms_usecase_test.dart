@@ -34,16 +34,13 @@ void main() {
   );
 
   final context = ParsingContext(
-    rules: const [],
     templates: const [],
     sources: [monitoredSource],
   );
 
   setUpAll(() {
     registerFallbackValue(const <ParseMessageInput>[]);
-    registerFallbackValue(
-      const ParsingContext(rules: [], templates: [], sources: []),
-    );
+    registerFallbackValue(const ParsingContext(templates: [], sources: []));
   });
 
   setUp(() {

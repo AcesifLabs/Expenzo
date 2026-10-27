@@ -54,7 +54,6 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$messageTemplates$en messageTemplates = Translations$messageTemplates$en.internal(_root);
 	late final Translations$notifications$en notifications = Translations$notifications$en.internal(_root);
 	late final Translations$onboarding$en onboarding = Translations$onboarding$en.internal(_root);
-	late final Translations$parsingRules$en parsingRules = Translations$parsingRules$en.internal(_root);
 	late final Translations$receiptScan$en receiptScan = Translations$receiptScan$en.internal(_root);
 	late final Translations$records$en records = Translations$records$en.internal(_root);
 	late final Translations$recurring$en recurring = Translations$recurring$en.internal(_root);
@@ -272,9 +271,6 @@ class Translations$common$en {
 	/// en: 'Auto-import from SMS'
 	String get autoImport => 'Auto-import from SMS';
 
-	/// en: 'Matching rules'
-	String get matchingRules => 'Matching rules';
-
 	late final Translations$common$errors$en errors = Translations$common$errors$en.internal(_root);
 	late final Translations$common$dates$en dates = Translations$common$dates$en.internal(_root);
 	late final Translations$common$a11y$en a11y = Translations$common$a11y$en.internal(_root);
@@ -422,6 +418,7 @@ class Translations$goals$en {
 	/// en: 'Added {amount} to {name}'
 	String added({required Object amount, required Object name}) => 'Added ${amount} to ${name}';
 
+	late final Translations$goals$list$en list = Translations$goals$list$en.internal(_root);
 	late final Translations$goals$form$en form = Translations$goals$form$en.internal(_root);
 }
 
@@ -456,6 +453,8 @@ class Translations$messageTemplates$en {
 
 	/// en: 'New SMS format'
 	String get create => 'New SMS format';
+
+	late final Translations$messageTemplates$watchlist$en watchlist = Translations$messageTemplates$watchlist$en.internal(_root);
 }
 
 // Path: notifications
@@ -489,55 +488,6 @@ class Translations$onboarding$en {
 	late final Translations$onboarding$timeline$en timeline = Translations$onboarding$timeline$en.internal(_root);
 	late final Translations$onboarding$complete$en complete = Translations$onboarding$complete$en.internal(_root);
 	late final Translations$onboarding$tutorial$en tutorial = Translations$onboarding$tutorial$en.internal(_root);
-}
-
-// Path: parsingRules
-class Translations$parsingRules$en {
-	Translations$parsingRules$en.internal(this._root);
-
-	final Translations _root; // ignore: unused_field
-
-	// Translations
-
-	/// en: 'Add rules from SMS formats'
-	String get addFromFormats => 'Add rules from SMS formats';
-
-	/// en: 'New rule'
-	String get newRule => 'New rule';
-
-	/// en: 'Edit rule'
-	String get editRule => 'Edit rule';
-
-	/// en: 'Add'
-	String get add => 'Add';
-
-	/// en: 'Added "{name}"'
-	String added({required Object name}) => 'Added "${name}"';
-
-	late final Translations$parsingRules$empty$en empty = Translations$parsingRules$empty$en.internal(_root);
-
-	/// en: 'Rule created'
-	String get created => 'Rule created';
-
-	/// en: 'Rule updated'
-	String get updated => 'Rule updated';
-
-	late final Translations$parsingRules$delete$en delete = Translations$parsingRules$delete$en.internal(_root);
-	late final Translations$parsingRules$validation$en validation = Translations$parsingRules$validation$en.internal(_root);
-	late final Translations$parsingRules$form$en form = Translations$parsingRules$form$en.internal(_root);
-	late final Translations$parsingRules$tester$en tester = Translations$parsingRules$tester$en.internal(_root);
-	Map<String, String> get templates => {
-		'hdfc_bank_sms': 'Parses debit notifications from HDFC Bank',
-		'icici_bank_sms': 'Parses debit notifications from ICICI Bank',
-		'sbi_sms': 'Parses debit notifications from State Bank of India',
-		'upi_payment_sms': 'Parses UPI payment notifications (PhonePe, Google Pay, Paytm)',
-		'amazon_order_sms': 'Parses Amazon order confirmation and delivery SMS',
-		'amazon_order_email': 'Parses Amazon order emails',
-		'swiggy_order_email': 'Parses Swiggy order confirmation emails',
-		'zomato_order_email': 'Parses Zomato order confirmation emails',
-		'flipkart_order_email': 'Parses Flipkart order emails',
-		'generic_payment_email': 'Parses generic payment confirmation emails',
-	};
 }
 
 // Path: receiptScan
@@ -713,8 +663,11 @@ class Translations$settings$en {
 	/// en: 'Turn bank and payment messages into transactions'
 	String get autoImportSubtitle => 'Turn bank and payment messages into transactions';
 
-	/// en: 'Patterns for messages auto-import can't read yet'
-	String get matchingRulesSubtitle => 'Patterns for messages auto-import can\'t read yet';
+	/// en: 'SMS Watchlist'
+	String get smsWatchlist => 'SMS Watchlist';
+
+	/// en: 'Senders Expenzo reads'
+	String get smsWatchlistSubtitle => 'Senders Expenzo reads';
 
 	late final Translations$settings$recurring$en recurring = Translations$settings$recurring$en.internal(_root);
 	late final Translations$settings$help$en help = Translations$settings$help$en.internal(_root);
@@ -1433,11 +1386,11 @@ class Translations$dashboard$sections$en {
 	/// en: 'Budgets'
 	String get budgets => 'Budgets';
 
-	/// en: 'Recent activity'
-	String get recentActivity => 'Recent activity';
+	/// en: 'Recent Activity'
+	String get recentActivity => 'Recent Activity';
 
-	/// en: 'Spending patterns'
-	String get spendingPatterns => 'Spending patterns';
+	/// en: 'Spending Patterns'
+	String get spendingPatterns => 'Spending Patterns';
 
 	/// en: 'See all'
 	String get seeAll => 'See all';
@@ -1956,8 +1909,8 @@ class Translations$goals$card$en {
 
 	// Translations
 
-	/// en: 'Savings goal'
-	String get section => 'Savings goal';
+	/// en: 'Savings Goal'
+	String get section => 'Savings Goal';
 
 	/// en: '{saved} of {target}'
 	String progress({required Object saved, required Object target}) => '${saved} of ${target}';
@@ -1979,6 +1932,9 @@ class Translations$goals$card$en {
 
 	/// en: 'Add to goal'
 	String get addToGoal => 'Add to goal';
+
+	/// en: 'New goal'
+	String get newGoal => 'New goal';
 
 	/// en: 'Edit goal'
 	String get edit => 'Edit goal';
@@ -2003,6 +1959,27 @@ class Translations$goals$addSheet$en {
 
 	/// en: 'This only updates the goal. It does not add a transaction.'
 	String get note => 'This only updates the goal. It does not add a transaction.';
+}
+
+// Path: goals.list
+class Translations$goals$list$en {
+	Translations$goals$list$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Goals'
+	String get title => 'Goals';
+
+	/// en: 'Newest first. Tap a goal to edit it.'
+	String get subtitle => 'Newest first. Tap a goal to edit it.';
+
+	/// en: 'No savings goals yet.'
+	String get empty => 'No savings goals yet.';
+
+	/// en: 'Couldn't load your goals. Try again.'
+	String get loadFailed => 'Couldn\'t load your goals. Try again.';
 }
 
 // Path: goals.form
@@ -2198,6 +2175,42 @@ class Translations$messageTemplates$contacts$en {
 
 	/// en: 'No senders match "{query}".'
 	String noMatch({required Object query}) => 'No senders match "${query}".';
+}
+
+// Path: messageTemplates.watchlist
+class Translations$messageTemplates$watchlist$en {
+	Translations$messageTemplates$watchlist$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'SMS Watchlist'
+	String get title => 'SMS Watchlist';
+
+	/// en: 'Messages from these senders become transactions. Pause a sender to ignore it.'
+	String get subtitle => 'Messages from these senders become transactions. Pause a sender to ignore it.';
+
+	/// en: '(one) {{n} SMS format} (other) {{n} SMS formats}'
+	String formats({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: '${n} SMS format',
+		other: '${n} SMS formats',
+	);
+
+	/// en: 'Paused'
+	String get paused => 'Paused';
+
+	/// en: 'Read messages from {name}'
+	String toggle({required Object name}) => 'Read messages from ${name}';
+
+	/// en: 'No senders yet. Add one from Auto-import by teaching Expenzo a sample message.'
+	String get empty => 'No senders yet. Add one from Auto-import by teaching Expenzo a sample message.';
+
+	/// en: 'Choose senders'
+	String get addSender => 'Choose senders';
+
+	/// en: 'Couldn't load the watchlist. Try again.'
+	String get loadFailed => 'Couldn\'t load the watchlist. Try again.';
 }
 
 // Path: notifications.channel
@@ -2545,171 +2558,6 @@ class Translations$onboarding$tutorial$en {
 	String pageOf({required Object current, required Object total}) => 'Page ${current} of ${total}';
 
 	late final Translations$onboarding$tutorial$cta$en cta = Translations$onboarding$tutorial$cta$en.internal(_root);
-}
-
-// Path: parsingRules.empty
-class Translations$parsingRules$empty$en {
-	Translations$parsingRules$empty$en.internal(this._root);
-
-	final Translations _root; // ignore: unused_field
-
-	// Translations
-
-	/// en: 'No rules yet'
-	String get title => 'No rules yet';
-
-	/// en: 'Add a rule to turn matching SMS and emails into records.'
-	String get body => 'Add a rule to turn matching SMS and emails into records.';
-
-	/// en: 'Add rule'
-	String get add => 'Add rule';
-}
-
-// Path: parsingRules.delete
-class Translations$parsingRules$delete$en {
-	Translations$parsingRules$delete$en.internal(this._root);
-
-	final Translations _root; // ignore: unused_field
-
-	// Translations
-
-	/// en: 'Delete rule'
-	String get title => 'Delete rule';
-
-	/// en: 'Are you sure you want to delete "{name}"?'
-	String confirm({required Object name}) => 'Are you sure you want to delete "${name}"?';
-}
-
-// Path: parsingRules.validation
-class Translations$parsingRules$validation$en {
-	Translations$parsingRules$validation$en.internal(this._root);
-
-	final Translations _root; // ignore: unused_field
-
-	// Translations
-
-	/// en: 'Name is required'
-	String get nameRequired => 'Name is required';
-
-	/// en: 'At least one key word is required'
-	String get triggerRequired => 'At least one key word is required';
-
-	/// en: 'Amount pattern is required'
-	String get amountRequired => 'Amount pattern is required';
-
-	/// en: 'Invalid regex pattern'
-	String get invalidRegex => 'Invalid regex pattern';
-
-	/// en: 'Invalid regex: {detail}'
-	String invalidRegexDetail({required Object detail}) => 'Invalid regex: ${detail}';
-
-	/// en: 'Valid pattern'
-	String get valid => 'Valid pattern';
-}
-
-// Path: parsingRules.form
-class Translations$parsingRules$form$en {
-	Translations$parsingRules$form$en.internal(this._root);
-
-	final Translations _root; // ignore: unused_field
-
-	// Translations
-
-	/// en: 'Name *'
-	String get name => 'Name *';
-
-	/// en: 'e.g., HDFC Bank SMS'
-	String get nameHint => 'e.g., HDFC Bank SMS';
-
-	/// en: 'Key words *'
-	String get keyWords => 'Key words *';
-
-	/// en: 'HDFC, debit, account (comma-separated)'
-	String get keyWordsHint => 'HDFC, debit, account (comma-separated)';
-
-	/// en: 'Words that indicate this rule should be tried'
-	String get keyWordsHelper => 'Words that indicate this rule should be tried';
-
-	/// en: 'Amount pattern (regex) *'
-	String get amountPattern => 'Amount pattern (regex) *';
-
-	/// en: 'Amount regex'
-	String get amountRegex => 'Amount regex';
-
-	/// en: 'Date pattern (optional)'
-	String get datePattern => 'Date pattern (optional)';
-
-	/// en: 'Date regex (optional)'
-	String get dateRegex => 'Date regex (optional)';
-
-	/// en: 'Leave empty if date is not needed'
-	String get dateHelper => 'Leave empty if date is not needed';
-
-	/// en: 'Dates like 05/10/2026'
-	String get dateOrder => 'Dates like 05/10/2026';
-
-	/// en: 'Day first'
-	String get dayFirst => 'Day first';
-
-	/// en: 'Month first'
-	String get monthFirst => 'Month first';
-
-	/// en: 'Source'
-	String get source => 'Source';
-
-	/// en: 'Priority'
-	String get priority => 'Priority';
-
-	/// en: 'Higher priority rules are tried first'
-	String get priorityHelper => 'Higher priority rules are tried first';
-
-	/// en: 'Enabled'
-	String get enabled => 'Enabled';
-
-	/// en: 'Use this rule when reading messages'
-	String get enabledDetail => 'Use this rule when reading messages';
-}
-
-// Path: parsingRules.tester
-class Translations$parsingRules$tester$en {
-	Translations$parsingRules$tester$en.internal(this._root);
-
-	final Translations _root; // ignore: unused_field
-
-	// Translations
-
-	/// en: 'Timed out: the pattern took more than 2 seconds'
-	String get timeout => 'Timed out: the pattern took more than 2 seconds';
-
-	/// en: 'Error'
-	String get error => 'Error';
-
-	/// en: 'Match found'
-	String get match => 'Match found';
-
-	/// en: 'No match'
-	String get noMatch => 'No match';
-
-	/// en: '{ms} ms'
-	String elapsed({required Object ms}) => '${ms} ms';
-
-	/// en: 'Amount'
-	String get amount => 'Amount';
-
-	/// en: 'Date'
-	String get date => 'Date';
-
-	/// en: '{percent}% confidence'
-	String confidence({required Object percent}) => '${percent}% confidence';
-
-	/// en: 'Sample message to test'
-	String get sample => 'Sample message to test';
-
-	/// en: 'Enter a sample SMS or email text'
-	String get sampleHint => 'Enter a sample SMS or email text';
-
-	/// en: 'Enter a sample message above to test the pattern'
-	String get enterSample => 'Enter a sample message above to test the pattern';
 }
 
 // Path: records.filter
@@ -5111,7 +4959,6 @@ extension on Translations {
 			'common.newBudget' => 'New budget',
 			'common.sendFeedback' => 'Send feedback',
 			'common.autoImport' => 'Auto-import from SMS',
-			'common.matchingRules' => 'Matching rules',
 			'common.errors.generic' => 'Something went wrong. Try again.',
 			'common.errors.storage' => 'Couldn\'t read or save your data. Try again.',
 			'common.errors.network' => 'You\'re offline. Check your connection and try again.',
@@ -5189,8 +5036,8 @@ extension on Translations {
 			'dashboard.income' => 'Income',
 			'dashboard.expense' => 'Expense',
 			'dashboard.sections.budgets' => 'Budgets',
-			'dashboard.sections.recentActivity' => 'Recent activity',
-			'dashboard.sections.spendingPatterns' => 'Spending patterns',
+			'dashboard.sections.recentActivity' => 'Recent Activity',
+			'dashboard.sections.spendingPatterns' => 'Spending Patterns',
 			'dashboard.sections.seeAll' => 'See all',
 			'dashboard.noBudgets' => 'No budgets yet',
 			'dashboard.noTransactions' => 'No transactions yet',
@@ -5315,19 +5162,24 @@ extension on Translations {
 			'goals.errors.targetPositive' => 'Enter a target amount above zero.',
 			'goals.errors.amountPositive' => 'Enter an amount above zero.',
 			'goals.errors.amountTooLarge' => 'Enter an amount up to 9,999,999,999.99.',
-			'goals.card.section' => 'Savings goal',
+			'goals.card.section' => 'Savings Goal',
 			'goals.card.progress' => ({required Object saved, required Object target}) => '${saved} of ${target}',
 			'goals.card.monthsLeft' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} month left', other: '${n} months left', ), 
 			'goals.card.dueThisMonth' => 'Due this month',
 			'goals.card.reached' => 'Goal reached',
 			'goals.card.plan' => ({required Object amount}) => 'Plan: ${amount}/month',
 			'goals.card.addToGoal' => 'Add to goal',
+			'goals.card.newGoal' => 'New goal',
 			'goals.card.edit' => 'Edit goal',
 			'goals.card.setGoal' => 'Set a savings goal',
 			'goals.addSheet.title' => ({required Object name}) => 'Add to ${name}',
 			'goals.addSheet.amount' => 'Amount',
 			'goals.addSheet.note' => 'This only updates the goal. It does not add a transaction.',
 			'goals.added' => ({required Object amount, required Object name}) => 'Added ${amount} to ${name}',
+			'goals.list.title' => 'Goals',
+			'goals.list.subtitle' => 'Newest first. Tap a goal to edit it.',
+			'goals.list.empty' => 'No savings goals yet.',
+			'goals.list.loadFailed' => 'Couldn\'t load your goals. Try again.',
 			'goals.form.title' => 'Edit goal',
 			'goals.form.createTitle' => 'New savings goal',
 			'goals.form.name' => 'Goal name',
@@ -5381,6 +5233,14 @@ extension on Translations {
 			'messageTemplates.contacts.empty' => 'No text messages on this phone yet. Senders show up here once you receive SMS.',
 			'messageTemplates.contacts.noMatch' => ({required Object query}) => 'No senders match "${query}".',
 			'messageTemplates.create' => 'New SMS format',
+			'messageTemplates.watchlist.title' => 'SMS Watchlist',
+			'messageTemplates.watchlist.subtitle' => 'Messages from these senders become transactions. Pause a sender to ignore it.',
+			'messageTemplates.watchlist.formats' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} SMS format', other: '${n} SMS formats', ), 
+			'messageTemplates.watchlist.paused' => 'Paused',
+			'messageTemplates.watchlist.toggle' => ({required Object name}) => 'Read messages from ${name}',
+			'messageTemplates.watchlist.empty' => 'No senders yet. Add one from Auto-import by teaching Expenzo a sample message.',
+			'messageTemplates.watchlist.addSender' => 'Choose senders',
+			'messageTemplates.watchlist.loadFailed' => 'Couldn\'t load the watchlist. Try again.',
 			'notifications.channel.name' => 'App notifications',
 			'notifications.channel.description' => 'Budget alerts, weekly summary, recurring reminders and scan results',
 			'notifications.budget.title' => 'Budget alert',
@@ -5434,6 +5294,8 @@ extension on Translations {
 			'onboarding.goal.title' => 'What are you saving for?',
 			'onboarding.goal.subtitle' => 'Set a savings goal and we\'ll help you track progress.',
 			'onboarding.goal.nameLabel' => 'Goal name',
+			_ => null,
+		} ?? switch (path) {
 			'onboarding.goal.nameHint' => 'e.g. New laptop',
 			'onboarding.goal.amountLabel' => 'Target amount',
 			'onboarding.goal.notNow' => 'No goal for now',
@@ -5446,8 +5308,6 @@ extension on Translations {
 			'onboarding.timeline.customHint' => 'Set your own',
 			'onboarding.timeline.fit.affordable' => 'Fits your savings',
 			'onboarding.timeline.fit.tooExpensive' => 'More than your savings',
-			_ => null,
-		} ?? switch (path) {
 			'onboarding.timeline.fit.slow' => 'Takes a long time',
 			'onboarding.complete.title' => 'Setup complete!',
 			'onboarding.complete.budgets' => 'Budget created',
@@ -5467,63 +5327,6 @@ extension on Translations {
 			'onboarding.tutorial.cta.title' => 'You\'re all set!',
 			'onboarding.tutorial.cta.body' => 'You now know the basics. Let\'s start tracking your finances!',
 			'onboarding.tutorial.cta.start' => 'Let\'s get started!',
-			'parsingRules.addFromFormats' => 'Add rules from SMS formats',
-			'parsingRules.newRule' => 'New rule',
-			'parsingRules.editRule' => 'Edit rule',
-			'parsingRules.add' => 'Add',
-			'parsingRules.added' => ({required Object name}) => 'Added "${name}"',
-			'parsingRules.empty.title' => 'No rules yet',
-			'parsingRules.empty.body' => 'Add a rule to turn matching SMS and emails into records.',
-			'parsingRules.empty.add' => 'Add rule',
-			'parsingRules.created' => 'Rule created',
-			'parsingRules.updated' => 'Rule updated',
-			'parsingRules.delete.title' => 'Delete rule',
-			'parsingRules.delete.confirm' => ({required Object name}) => 'Are you sure you want to delete "${name}"?',
-			'parsingRules.validation.nameRequired' => 'Name is required',
-			'parsingRules.validation.triggerRequired' => 'At least one key word is required',
-			'parsingRules.validation.amountRequired' => 'Amount pattern is required',
-			'parsingRules.validation.invalidRegex' => 'Invalid regex pattern',
-			'parsingRules.validation.invalidRegexDetail' => ({required Object detail}) => 'Invalid regex: ${detail}',
-			'parsingRules.validation.valid' => 'Valid pattern',
-			'parsingRules.form.name' => 'Name *',
-			'parsingRules.form.nameHint' => 'e.g., HDFC Bank SMS',
-			'parsingRules.form.keyWords' => 'Key words *',
-			'parsingRules.form.keyWordsHint' => 'HDFC, debit, account (comma-separated)',
-			'parsingRules.form.keyWordsHelper' => 'Words that indicate this rule should be tried',
-			'parsingRules.form.amountPattern' => 'Amount pattern (regex) *',
-			'parsingRules.form.amountRegex' => 'Amount regex',
-			'parsingRules.form.datePattern' => 'Date pattern (optional)',
-			'parsingRules.form.dateRegex' => 'Date regex (optional)',
-			'parsingRules.form.dateHelper' => 'Leave empty if date is not needed',
-			'parsingRules.form.dateOrder' => 'Dates like 05/10/2026',
-			'parsingRules.form.dayFirst' => 'Day first',
-			'parsingRules.form.monthFirst' => 'Month first',
-			'parsingRules.form.source' => 'Source',
-			'parsingRules.form.priority' => 'Priority',
-			'parsingRules.form.priorityHelper' => 'Higher priority rules are tried first',
-			'parsingRules.form.enabled' => 'Enabled',
-			'parsingRules.form.enabledDetail' => 'Use this rule when reading messages',
-			'parsingRules.tester.timeout' => 'Timed out: the pattern took more than 2 seconds',
-			'parsingRules.tester.error' => 'Error',
-			'parsingRules.tester.match' => 'Match found',
-			'parsingRules.tester.noMatch' => 'No match',
-			'parsingRules.tester.elapsed' => ({required Object ms}) => '${ms} ms',
-			'parsingRules.tester.amount' => 'Amount',
-			'parsingRules.tester.date' => 'Date',
-			'parsingRules.tester.confidence' => ({required Object percent}) => '${percent}% confidence',
-			'parsingRules.tester.sample' => 'Sample message to test',
-			'parsingRules.tester.sampleHint' => 'Enter a sample SMS or email text',
-			'parsingRules.tester.enterSample' => 'Enter a sample message above to test the pattern',
-			'parsingRules.templates.hdfc_bank_sms' => 'Parses debit notifications from HDFC Bank',
-			'parsingRules.templates.icici_bank_sms' => 'Parses debit notifications from ICICI Bank',
-			'parsingRules.templates.sbi_sms' => 'Parses debit notifications from State Bank of India',
-			'parsingRules.templates.upi_payment_sms' => 'Parses UPI payment notifications (PhonePe, Google Pay, Paytm)',
-			'parsingRules.templates.amazon_order_sms' => 'Parses Amazon order confirmation and delivery SMS',
-			'parsingRules.templates.amazon_order_email' => 'Parses Amazon order emails',
-			'parsingRules.templates.swiggy_order_email' => 'Parses Swiggy order confirmation emails',
-			'parsingRules.templates.zomato_order_email' => 'Parses Zomato order confirmation emails',
-			'parsingRules.templates.flipkart_order_email' => 'Parses Flipkart order emails',
-			'parsingRules.templates.generic_payment_email' => 'Parses generic payment confirmation emails',
 			'receiptScan.permissionRequired' => 'Camera permission is required to scan receipts.',
 			'receiptScan.permissionBlocked' => 'Camera access is off for Expenzo. Turn it on in Settings to scan receipts.',
 			'receiptScan.noCamera' => 'No camera available on this device.',
@@ -5694,7 +5497,8 @@ extension on Translations {
 			'settings.notifications.reminders.title' => 'Reminder alerts',
 			'settings.notifications.reminders.subtitle' => 'Get reminded a day before recurring transactions',
 			'settings.autoImportSubtitle' => 'Turn bank and payment messages into transactions',
-			'settings.matchingRulesSubtitle' => 'Patterns for messages auto-import can\'t read yet',
+			'settings.smsWatchlist' => 'SMS Watchlist',
+			'settings.smsWatchlistSubtitle' => 'Senders Expenzo reads',
 			'settings.recurring.title' => 'Recurring transactions',
 			'settings.recurring.subtitle' => 'Bills and income that repeat',
 			'settings.help.title' => 'Help & Support',

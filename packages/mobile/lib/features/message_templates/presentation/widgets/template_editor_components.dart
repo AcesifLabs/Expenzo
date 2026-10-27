@@ -111,7 +111,7 @@ class MessagePreviewCard extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: palette.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -245,7 +245,7 @@ class AmountRow extends StatelessWidget {
             ),
             decoration: BoxDecoration(
               color: palette.surface,
-              borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
               border: Border.all(
                 color: isSelected ? palette.brand : Colors.transparent,
                 width: 1,

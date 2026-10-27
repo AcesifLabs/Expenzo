@@ -161,7 +161,7 @@ class DashboardTrendCard extends StatelessWidget {
     final changeColor = _changeColor(context.palette);
 
     return AppCard(
-      borderRadius: AppSpacing.radiusControl,
+      borderRadius: AppSpacing.radiusCard,
       padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

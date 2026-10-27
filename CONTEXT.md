@@ -89,7 +89,7 @@ The direction of money on a Record. Income is shown in teal with a "+" sign, exp
 
 ## Auto-import
 
-Everything that turns SMS messages into Records: SMS permission, choosing senders, scanning past messages, SMS formats and matching rules. Lives under Settings.
+Everything that turns SMS messages into Records: SMS permission, choosing senders, scanning past messages and SMS formats. Lives under Settings.
 
 _Avoid_: Scan (as a tab or feature name), SMS scan
 
@@ -99,11 +99,11 @@ A learned pattern for one sender's messages (trigger word plus amount position) 
 
 _Avoid_: template (in user-facing text)
 
-## Matching Rule
+## SMS Watchlist
 
-A user-defined pattern (regular expression) that extracts transactions from SMS when no SMS Format applies. Stored as a parsing rule.
+The senders whose SMS the app reads to create Records: every sender with at least one SMS Format. Each sender is active or paused; a paused sender's messages are ignored until it is switched back on or gets a new SMS Format. Shown under Settings.
 
-_Avoid_: parsing rule (in user-facing text)
+_Avoid_: listeners, monitored sources (in user-facing text)
 
 ## Transaction Sheet
 
@@ -137,7 +137,11 @@ _Avoid_: savings budget, wishlist item
 
 ## Goal Contribution
 
-An amount the user adds to a Goal's saved amount from the dashboard goal card. It updates the Goal only and creates no Record.
+An amount the user adds to a Goal's saved amount from the Goals page. It updates the Goal only and creates no Record.
+
+## Goals Page
+
+The list of every Goal, newest first, reached from "See all" on the dashboard goal card. Each Goal shows its progress; one not yet reached can take a Goal Contribution.
 
 ## Onboarding
 
@@ -170,12 +174,6 @@ A 6-character code (A–Z, 2–9, no lookalikes) that lets a signed-in user join
 A queued local change the server rejected 5 times. It stays in the sync queue with a failed time set and is not retried automatically. The user retries it from Sync settings.
 
 _Avoid_: dead letter, stuck row
-
-## Date Order
-
-How a parsing rule reads an all-numeric date: day/month (`dmy`, the default) or month/day (`mdy`). Dates with a month name do not use it (ADR 0015).
-
-_Avoid_: date format
 
 ## Crash Report
 

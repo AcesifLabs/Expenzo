@@ -19,8 +19,8 @@
   "expense": "Expense",
   "sections": {
     "budgets": "Budgets",
-    "recentActivity": "Recent activity",
-    "spendingPatterns": "Spending patterns",
+    "recentActivity": "Recent Activity",
+    "spendingPatterns": "Spending Patterns",
     "seeAll": "See all"
   },
   "noBudgets": "No budgets yet",

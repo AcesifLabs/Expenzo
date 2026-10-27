@@ -89,17 +89,17 @@ void main() {
     );
   });
 
-  test('watchActiveGoal emits the mapped goal', () async {
+  test('watchGoals emits the mapped goals', () async {
     final saved = await created(targetDate: date);
 
-    final active = await repository.watchActiveGoal().first;
+    final active = (await repository.watchGoals().first).single;
 
-    expect(active?.id, saved.id);
-    expect(active?.name, 'Laptop');
-    expect(active?.targetAmount, 1999);
-    expect(active?.savedAmount, 250);
-    expect(active?.targetDate?.isAtSameMomentAs(date), isTrue);
-    expect(active?.monthlyContribution, 583.17);
+    expect(active.id, saved.id);
+    expect(active.name, 'Laptop');
+    expect(active.targetAmount, 1999);
+    expect(active.savedAmount, 250);
+    expect(active.targetDate?.isAtSameMomentAs(date), isTrue);
+    expect(active.monthlyContribution, 583.17);
   });
 
   test('a null targetDate round-trips as null', () async {

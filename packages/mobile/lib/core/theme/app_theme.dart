@@ -72,6 +72,9 @@ class AppTheme {
   static const _controlBorderRadius = BorderRadius.all(
     Radius.circular(AppSpacing.radiusControl),
   );
+  static const _sheetBorderRadius = BorderRadius.all(
+    Radius.circular(AppSpacing.radiusSheet),
+  );
   static const _pillBorderRadius = BorderRadius.all(
     Radius.circular(AppSpacing.radiusPill),
   );
@@ -245,15 +248,7 @@ class AppTheme {
       dialogTheme: _dialogTheme(c),
       snackBarTheme: _snackBarTheme(c),
       chipTheme: _chipTheme(c),
-      switchTheme: SwitchThemeData(
-        thumbColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) {
-            return scheme.primary;
-          }
-
-          return null;
-        }),
-      ),
+      switchTheme: _switchTheme(c),
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: scheme.primary,
         linearTrackColor: primaryWithAlpha40,
@@ -273,7 +268,7 @@ class AppTheme {
         dragHandleColor: scheme.onSurface.withAlpha(60),
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
-            top: Radius.circular(AppSpacing.radiusCard),
+            top: Radius.circular(AppSpacing.radiusSheet),
           ),
         ),
       ),
@@ -282,6 +277,34 @@ class AppTheme {
         textColor: scheme.onSurface,
       ),
       extensions: [c.palette],
+    );
+  }
+
+  // Solid brand thumb on a faint brand track, so the on state has contrast.
+  // Disabled switches keep Material's defaults.
+  static SwitchThemeData _switchTheme(_ThemeColors c) {
+    final palette = c.palette;
+
+    return SwitchThemeData(
+      thumbColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.disabled)) return null;
+
+        return states.contains(WidgetState.selected)
+            ? palette.brand
+            : palette.toggleKnob;
+      }),
+      trackColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.disabled)) return null;
+
+        return states.contains(WidgetState.selected)
+            ? palette.brand.withAlpha(0x40)
+            : palette.toggleTrack;
+      }),
+      trackOutlineColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) return Colors.transparent;
+
+        return null;
+      }),
     );
   }
 
@@ -361,7 +384,7 @@ class AppTheme {
 
   static DialogThemeData _dialogTheme(_ThemeColors c) => DialogThemeData(
     backgroundColor: c.dialogBg,
-    shape: const RoundedRectangleBorder(borderRadius: _cardBorderRadius),
+    shape: const RoundedRectangleBorder(borderRadius: _sheetBorderRadius),
   );
 
   static SnackBarThemeData _snackBarTheme(_ThemeColors c) => SnackBarThemeData(

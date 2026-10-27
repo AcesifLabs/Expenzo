@@ -107,14 +107,14 @@ class DeleteCategoryDialog extends StatelessWidget {
       backgroundColor: palette.bg,
       insetPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusSheet),
       ),
       child: Container(
         width: 312,
         padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
           color: surfaceColor,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusSheet),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,

@@ -16,7 +16,6 @@
   "newBudget": "New budget",
   "sendFeedback": "Send feedback",
   "autoImport": "Auto-import from SMS",
-  "matchingRules": "Matching rules",
   "errors": {
     "generic": "Something went wrong. Try again.",
     "storage": "Couldn't read or save your data. Try again.",

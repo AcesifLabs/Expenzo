@@ -17,10 +17,11 @@ import 'package:expense_tracker/features/data_wipe/presentation/pages/delete_all
 import 'package:expense_tracker/features/export/presentation/bloc/export_bloc.dart';
 import 'package:expense_tracker/features/export/presentation/bloc/export_state.dart';
 import 'package:expense_tracker/features/export/presentation/pages/export_data_page.dart';
-import 'package:expense_tracker/features/parsing_rules/domain/entities/parsing_rule.dart';
-import 'package:expense_tracker/features/parsing_rules/presentation/bloc/parsing_rules_bloc.dart';
-import 'package:expense_tracker/features/parsing_rules/presentation/bloc/parsing_rules_state.dart';
-import 'package:expense_tracker/features/parsing_rules/presentation/pages/rules_list_page.dart';
+import 'package:expense_tracker/features/message_templates/domain/entities/message_source.dart';
+import 'package:expense_tracker/features/message_templates/domain/entities/watched_sender.dart';
+import 'package:expense_tracker/features/message_templates/presentation/bloc/sms_watchlist_bloc.dart';
+import 'package:expense_tracker/features/message_templates/presentation/bloc/sms_watchlist_state.dart';
+import 'package:expense_tracker/features/message_templates/presentation/pages/sms_watchlist_page.dart';
 import 'package:expense_tracker/features/records/domain/usecases/get_category_record_counts.dart';
 import 'package:expense_tracker/features/recurring/application/recurring_auto_poster.dart';
 import 'package:expense_tracker/features/recurring/presentation/bloc/recurring_bloc.dart';
@@ -54,7 +55,7 @@ class MockAutoPoster extends Mock implements RecurringAutoPoster {}
 class MockGetCategoryRecordCounts extends Mock
     implements GetCategoryRecordCounts {}
 
-class MockParsingRulesBloc extends Mock implements ParsingRulesBloc {}
+class MockSmsWatchlistBloc extends Mock implements SmsWatchlistBloc {}
 
 class MockExportBloc extends Mock implements ExportBloc {}
 
@@ -89,7 +90,7 @@ Map<String, Widget Function()> get settingsScreens => {
   'Sync': _syncScreen,
   'Export data': _exportScreen,
   'Delete all data': _deleteDataScreen,
-  'Matching rules': matchingRulesScreen,
+  'SMS Watchlist': smsWatchlistScreen,
   'Language': () => _withSettings(const LanguageView()),
   'Categories': _categoriesScreen,
 };
@@ -109,7 +110,8 @@ const settingsPages = {
   'Sync': 'sync/presentation/pages/sync_settings_page.dart',
   'Export data': 'export/presentation/pages/export_data_page.dart',
   'Delete all data': 'data_wipe/presentation/pages/delete_all_data_page.dart',
-  'Matching rules': 'parsing_rules/presentation/pages/rules_list_page.dart',
+  'SMS Watchlist':
+      'message_templates/presentation/pages/sms_watchlist_page.dart',
   'Language': 'settings/presentation/pages/language_page.dart',
   'Categories': 'categories/presentation/pages/category_list_page.dart',
 };
@@ -236,29 +238,32 @@ Widget _categoriesScreen() {
   );
 }
 
-Widget matchingRulesScreen({ParsingRulesState? state}) {
+Widget smsWatchlistScreen({SmsWatchlistState? state}) {
   final now = DateTime(2026);
+  MessageSource source(String id, String name, {bool monitored = true}) =>
+      MessageSource(
+        id: id,
+        contactId: id.toUpperCase(),
+        contactName: name,
+        isMonitored: monitored,
+        createdAt: now,
+        updatedAt: now,
+      );
 
-  return BlocProvider<ParsingRulesBloc>.value(
-    value: mockBloc<MockParsingRulesBloc, ParsingRulesState>(
-      MockParsingRulesBloc(),
+  return BlocProvider<SmsWatchlistBloc>.value(
+    value: mockBloc<MockSmsWatchlistBloc, SmsWatchlistState>(
+      MockSmsWatchlistBloc(),
       state ??
-          ParsingRulesLoaded(
-            rules: [
-              ParsingRule(
-                id: 'rule-1',
-                name: 'Bank debit alerts',
-                triggerWords: const ['debited'],
-                amountPattern: r'Tk ([\d,.]+)',
-                sourceType: SourceType.sms,
-                isEnabled: true,
-                priority: 1,
-                createdAt: now,
-                updatedAt: now,
+          SmsWatchlistReady(
+            senders: [
+              WatchedSender(source: source('bkash', 'bKash'), formatCount: 2),
+              WatchedSender(
+                source: source('citybank', 'City Bank', monitored: false),
+                formatCount: 1,
               ),
             ],
           ),
     ),
-    child: const RulesListPage(),
+    child: const Scaffold(body: SmsWatchlistView()),
   );
 }

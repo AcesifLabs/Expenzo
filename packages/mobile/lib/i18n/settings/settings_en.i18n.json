@@ -59,7 +59,8 @@
     }
   },
   "autoImportSubtitle": "Turn bank and payment messages into transactions",
-  "matchingRulesSubtitle": "Patterns for messages auto-import can't read yet",
+  "smsWatchlist": "SMS Watchlist",
+  "smsWatchlistSubtitle": "Senders Expenzo reads",
   "recurring": {
     "title": "Recurring transactions",
     "subtitle": "Bills and income that repeat"

@@ -6,7 +6,6 @@ import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
-import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/features/dashboard/presentation/widgets/dashboard_section_header.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
@@ -15,7 +14,7 @@ import '../../domain/entities/goal.dart';
 import '../bloc/goal_bloc.dart';
 import '../bloc/goal_event.dart';
 import '../bloc/goal_state.dart';
-import 'add_to_goal_sheet.dart';
+import 'goal_progress_body.dart';
 
 class DashboardGoalCard extends StatelessWidget {
   const DashboardGoalCard({super.key});
@@ -42,38 +41,12 @@ class DashboardGoalCard extends StatelessWidget {
 class _GoalCardView extends StatelessWidget {
   const _GoalCardView();
 
-  void _onStateChanged(BuildContext context, GoalState state) {
-    final messenger = ScaffoldMessenger.of(context)..clearSnackBars();
-    final error = state.errorText;
-    if (error != null) {
-      messenger.showSnackBar(SnackBar(content: Text(error)));
-
-      return;
-    }
-    final goal = state.goal;
-    final added = state.lastAdded;
-    if (goal == null || added == null) return;
-    messenger.showSnackBar(
-      SnackBar(
-        content: Text(
-          t.goals.added(
-            amount: CurrencyFormatter.format(added),
-            name: goal.name,
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<GoalBloc, GoalState>(
-      listenWhen: (a, b) =>
-          a.contributionCount != b.contributionCount ||
-          (b.errorText != null && a.errorText != b.errorText),
-      listener: _onStateChanged,
+    return BlocBuilder<GoalBloc, GoalState>(
+      buildWhen: (a, b) => a.newest != b.newest || a.status != b.status,
       builder: (context, state) {
-        final goal = state.goal;
+        final goal = state.newest;
         if (state.status == GoalStatus.loading ||
             state.status == GoalStatus.error) {
           return const SizedBox.shrink();
@@ -86,12 +59,7 @@ class _GoalCardView extends StatelessWidget {
             AppSpacing.pageGutter,
             AppSpacing.lg,
           ),
-          child: goal == null
-              ? const _SetGoalPrompt()
-              : _GoalCard(
-                  goal: goal,
-                  saving: state.status == GoalStatus.saving,
-                ),
+          child: goal == null ? const _SetGoalPrompt() : _GoalCard(goal: goal),
         );
       },
     );
@@ -132,40 +100,22 @@ class _SetGoalPrompt extends StatelessWidget {
 
 class _GoalCard extends StatelessWidget {
   final Goal goal;
-  final bool saving;
 
-  const _GoalCard({required this.goal, required this.saving});
-
-  Future<void> _onAddTapped(BuildContext context) async {
-    final bloc = context.read<GoalBloc>();
-    final amount = await showAddToGoalSheet(context, goalName: goal.name);
-    if (amount != null) bloc.add(GoalContributionSubmitted(amount));
-  }
-
-  String? _status() {
-    final cardT = t.goals.card;
-    if (goal.isReached) return cardT.reached;
-    final months = goal.monthsLeft(DateTime.now());
-    if (months == null) return null;
-
-    return months > 0 ? cardT.monthsLeft(n: months) : cardT.dueThisMonth;
-  }
+  const _GoalCard({required this.goal});
 
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    final textTheme = Theme.of(context).textTheme;
     final cardT = t.goals.card;
-    final status = _status();
-    final monthly = goal.monthlyContribution;
-    final secondary = textTheme.bodySmall?.copyWith(
-      color: palette.textSecondary,
-    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        DashboardSectionHeader(title: cardT.section),
+        DashboardSectionHeader(
+          title: cardT.section,
+          onTrailingTap: () => context.push('/goals'),
+        ),
+        const SizedBox(height: AppSpacing.sm),
         Semantics(
           hint: cardT.edit,
           child: AppCard(
@@ -174,74 +124,20 @@ class _GoalCard extends StatelessWidget {
             padding: AppSpacing.paddingMd,
             onTap: () => context.push('/goals/${goal.id}/edit'),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(goal.name, style: textTheme.titleMedium),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  cardT.progress(
-                    saved: CurrencyFormatter.format(goal.savedAmount),
-                    target: CurrencyFormatter.format(goal.targetAmount),
-                  ),
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: palette.textSecondary,
-                  ),
+                GoalProgressBody(goal: goal),
+                const SizedBox(height: AppSpacing.md),
+                OutlinedButton.icon(
+                  onPressed: () => context.push('/goals/new'),
+                  icon: const Icon(PiconsRegular.plus),
+                  label: Text(cardT.newGoal),
                 ),
-                const SizedBox(height: AppSpacing.sm),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
-                  child: LinearProgressIndicator(
-                    value: goal.progress,
-                    color: palette.brand,
-                    backgroundColor: palette.progressTrack,
-                  ),
-                ),
-                if (status != null) ...[
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    status,
-                    style: goal.isReached
-                        ? textTheme.bodySmall?.copyWith(color: palette.brand)
-                        : textTheme.bodySmall,
-                  ),
-                ],
-                if (monthly != null && !goal.isReached)
-                  Text(
-                    cardT.plan(amount: CurrencyFormatter.format(monthly)),
-                    style: secondary,
-                  ),
-                if (!goal.isReached) ...[
-                  const SizedBox(height: AppSpacing.md),
-                  _AddButton(
-                    saving: saving,
-                    onPressed: () => _onAddTapped(context),
-                  ),
-                ],
               ],
             ),
           ),
         ),
       ],
-    );
-  }
-}
-
-class _AddButton extends StatelessWidget {
-  final bool saving;
-  final VoidCallback onPressed;
-
-  const _AddButton({required this.saving, required this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: saving ? null : onPressed,
-      child: saving
-          ? const SizedBox.square(
-              dimension: AppSpacing.md,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
-          : Text(t.goals.card.addToGoal),
     );
   }
 }

@@ -89,7 +89,7 @@ void main() {
             budgets: 1,
             categories: 3,
             recurring: 1,
-            smsRules: 2,
+            smsRules: 1,
             goals: 0,
           ),
         ),

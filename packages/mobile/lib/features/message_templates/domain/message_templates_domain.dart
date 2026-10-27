@@ -5,3 +5,5 @@ export 'usecases/get_message_sources.dart';
 export 'usecases/get_templates_for_source.dart';
 export 'usecases/save_message_source.dart';
 export 'usecases/save_template.dart';
+export 'entities/watched_sender.dart';
+export 'usecases/get_sms_watchlist.dart';

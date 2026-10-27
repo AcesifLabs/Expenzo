@@ -52,7 +52,6 @@ class TranslationsBn extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$messageTemplates$bn messageTemplates = _Translations$messageTemplates$bn._(_root);
 	@override late final _Translations$notifications$bn notifications = _Translations$notifications$bn._(_root);
 	@override late final _Translations$onboarding$bn onboarding = _Translations$onboarding$bn._(_root);
-	@override late final _Translations$parsingRules$bn parsingRules = _Translations$parsingRules$bn._(_root);
 	@override late final _Translations$receiptScan$bn receiptScan = _Translations$receiptScan$bn._(_root);
 	@override late final _Translations$records$bn records = _Translations$records$bn._(_root);
 	@override late final _Translations$recurring$bn recurring = _Translations$recurring$bn._(_root);
@@ -198,7 +197,6 @@ class _Translations$common$bn extends Translations$common$en {
 	@override String get newBudget => 'নতুন বাজেট';
 	@override String get sendFeedback => 'মতামত পাঠান';
 	@override String get autoImport => 'SMS থেকে স্বয়ংক্রিয় ইমপোর্ট';
-	@override String get matchingRules => 'মিলানোর নিয়ম';
 	@override late final _Translations$common$errors$bn errors = _Translations$common$errors$bn._(_root);
 	@override late final _Translations$common$dates$bn dates = _Translations$common$dates$bn._(_root);
 	@override late final _Translations$common$a11y$bn a11y = _Translations$common$a11y$bn._(_root);
@@ -316,6 +314,7 @@ class _Translations$goals$bn extends Translations$goals$en {
 	@override late final _Translations$goals$card$bn card = _Translations$goals$card$bn._(_root);
 	@override late final _Translations$goals$addSheet$bn addSheet = _Translations$goals$addSheet$bn._(_root);
 	@override String added({required Object name, required Object amount}) => '${name}-এ ${amount} যোগ হয়েছে';
+	@override late final _Translations$goals$list$bn list = _Translations$goals$list$bn._(_root);
 	@override late final _Translations$goals$form$bn form = _Translations$goals$form$bn._(_root);
 }
 
@@ -337,6 +336,7 @@ class _Translations$messageTemplates$bn extends Translations$messageTemplates$en
 	@override late final _Translations$messageTemplates$analyzer$bn analyzer = _Translations$messageTemplates$analyzer$bn._(_root);
 	@override late final _Translations$messageTemplates$contacts$bn contacts = _Translations$messageTemplates$contacts$bn._(_root);
 	@override String get create => 'নতুন SMS ফরম্যাট';
+	@override late final _Translations$messageTemplates$watchlist$bn watchlist = _Translations$messageTemplates$watchlist$bn._(_root);
 }
 
 // Path: notifications
@@ -370,39 +370,6 @@ class _Translations$onboarding$bn extends Translations$onboarding$en {
 	@override late final _Translations$onboarding$timeline$bn timeline = _Translations$onboarding$timeline$bn._(_root);
 	@override late final _Translations$onboarding$complete$bn complete = _Translations$onboarding$complete$bn._(_root);
 	@override late final _Translations$onboarding$tutorial$bn tutorial = _Translations$onboarding$tutorial$bn._(_root);
-}
-
-// Path: parsingRules
-class _Translations$parsingRules$bn extends Translations$parsingRules$en {
-	_Translations$parsingRules$bn._(TranslationsBn root) : this._root = root, super.internal(root);
-
-	final TranslationsBn _root; // ignore: unused_field
-
-	// Translations
-	@override String get addFromFormats => 'SMS ফরম্যাট থেকে নিয়ম যোগ করুন';
-	@override String get newRule => 'নতুন নিয়ম';
-	@override String get editRule => 'নিয়ম সম্পাদনা';
-	@override String get add => 'যোগ করুন';
-	@override String added({required Object name}) => '"${name}" যোগ হয়েছে';
-	@override late final _Translations$parsingRules$empty$bn empty = _Translations$parsingRules$empty$bn._(_root);
-	@override String get created => 'নিয়ম তৈরি হয়েছে';
-	@override String get updated => 'নিয়ম আপডেট হয়েছে';
-	@override late final _Translations$parsingRules$delete$bn delete = _Translations$parsingRules$delete$bn._(_root);
-	@override late final _Translations$parsingRules$validation$bn validation = _Translations$parsingRules$validation$bn._(_root);
-	@override late final _Translations$parsingRules$form$bn form = _Translations$parsingRules$form$bn._(_root);
-	@override late final _Translations$parsingRules$tester$bn tester = _Translations$parsingRules$tester$bn._(_root);
-	@override Map<String, String> get templates => {
-		'hdfc_bank_sms': 'HDFC ব্যাংকের ডেবিট নোটিফিকেশন পড়ে',
-		'icici_bank_sms': 'ICICI ব্যাংকের ডেবিট নোটিফিকেশন পড়ে',
-		'sbi_sms': 'স্টেট ব্যাংক অব ইন্ডিয়ার ডেবিট নোটিফিকেশন পড়ে',
-		'upi_payment_sms': 'UPI পেমেন্টের নোটিফিকেশন পড়ে (PhonePe, Google Pay, Paytm)',
-		'amazon_order_sms': 'Amazon অর্ডার কনফার্মেশন ও ডেলিভারির SMS পড়ে',
-		'amazon_order_email': 'Amazon অর্ডারের ইমেইল পড়ে',
-		'swiggy_order_email': 'Swiggy অর্ডার কনফার্মেশনের ইমেইল পড়ে',
-		'zomato_order_email': 'Zomato অর্ডার কনফার্মেশনের ইমেইল পড়ে',
-		'flipkart_order_email': 'Flipkart অর্ডারের ইমেইল পড়ে',
-		'generic_payment_email': 'সাধারণ পেমেন্ট কনফার্মেশনের ইমেইল পড়ে',
-	};
 }
 
 // Path: receiptScan
@@ -501,7 +468,8 @@ class _Translations$settings$bn extends Translations$settings$en {
 	@override late final _Translations$settings$sections$bn sections = _Translations$settings$sections$bn._(_root);
 	@override late final _Translations$settings$notifications$bn notifications = _Translations$settings$notifications$bn._(_root);
 	@override String get autoImportSubtitle => 'ব্যাংক ও পেমেন্টের মেসেজ থেকে লেনদেন তৈরি করুন';
-	@override String get matchingRulesSubtitle => 'যেসব মেসেজ অটো-ইমপোর্ট এখনো পড়তে পারে না, সেগুলোর প্যাটার্ন';
+	@override String get smsWatchlist => 'SMS ওয়াচলিস্ট';
+	@override String get smsWatchlistSubtitle => 'যেসব প্রেরকের মেসেজ Expenzo পড়ে';
 	@override late final _Translations$settings$recurring$bn recurring = _Translations$settings$recurring$bn._(_root);
 	@override late final _Translations$settings$help$bn help = _Translations$settings$help$bn._(_root);
 	@override late final _Translations$settings$crashReports$bn crashReports = _Translations$settings$crashReports$bn._(_root);
@@ -1238,6 +1206,7 @@ class _Translations$goals$card$bn extends Translations$goals$card$en {
 	@override String get reached => 'লক্ষ্য পূরণ হয়েছে';
 	@override String plan({required Object amount}) => 'পরিকল্পনা: মাসে ${amount}';
 	@override String get addToGoal => 'লক্ষ্যে যোগ করুন';
+	@override String get newGoal => 'নতুন লক্ষ্য';
 	@override String get edit => 'লক্ষ্য সম্পাদনা';
 	@override String get setGoal => 'একটি সঞ্চয়ের লক্ষ্য ঠিক করুন';
 }
@@ -1252,6 +1221,19 @@ class _Translations$goals$addSheet$bn extends Translations$goals$addSheet$en {
 	@override String title({required Object name}) => '${name}-এ যোগ করুন';
 	@override String get amount => 'পরিমাণ';
 	@override String get note => 'এটি শুধু লক্ষ্য আপডেট করে, কোনো লেনদেন যোগ করে না।';
+}
+
+// Path: goals.list
+class _Translations$goals$list$bn extends Translations$goals$list$en {
+	_Translations$goals$list$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'লক্ষ্যসমূহ';
+	@override String get subtitle => 'নতুনগুলো আগে। সম্পাদনা করতে কোনো লক্ষ্যে ট্যাপ করুন।';
+	@override String get empty => 'এখনো কোনো সঞ্চয়ের লক্ষ্য নেই।';
+	@override String get loadFailed => 'আপনার লক্ষ্যগুলো লোড করা যায়নি। আবার চেষ্টা করুন।';
 }
 
 // Path: goals.form
@@ -1353,6 +1335,26 @@ class _Translations$messageTemplates$contacts$bn extends Translations$messageTem
 	@override String get active => 'চালু';
 	@override String get empty => 'এই ফোনে এখনো কোনো মেসেজ নেই। SMS এলে প্রেরকেরা এখানে দেখা যাবে।';
 	@override String noMatch({required Object query}) => '"${query}" এর সাথে মেলে এমন কোনো প্রেরক নেই।';
+}
+
+// Path: messageTemplates.watchlist
+class _Translations$messageTemplates$watchlist$bn extends Translations$messageTemplates$watchlist$en {
+	_Translations$messageTemplates$watchlist$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'SMS ওয়াচলিস্ট';
+	@override String get subtitle => 'এই প্রেরকদের মেসেজ লেনদেন হিসেবে যোগ হয়। কোনো প্রেরককে উপেক্ষা করতে বিরতি দিন।';
+	@override String formats({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n,
+		one: '${n}টি SMS ফরম্যাট',
+		other: '${n}টি SMS ফরম্যাট',
+	);
+	@override String get paused => 'বিরতিতে';
+	@override String toggle({required Object name}) => '${name} এর মেসেজ পড়ুন';
+	@override String get empty => 'এখনো কোনো প্রেরক নেই। অটো-ইমপোর্ট থেকে একটি নমুনা মেসেজ দেখিয়ে প্রেরক যোগ করুন।';
+	@override String get addSender => 'প্রেরক বেছে নিন';
+	@override String get loadFailed => 'ওয়াচলিস্ট লোড করা যায়নি। আবার চেষ্টা করুন।';
 }
 
 // Path: notifications.channel
@@ -1568,91 +1570,6 @@ class _Translations$onboarding$tutorial$bn extends Translations$onboarding$tutor
 	@override late final _Translations$onboarding$tutorial$reports$bn reports = _Translations$onboarding$tutorial$reports$bn._(_root);
 	@override String pageOf({required Object current, required Object total}) => 'পৃষ্ঠা ${current}/${total}';
 	@override late final _Translations$onboarding$tutorial$cta$bn cta = _Translations$onboarding$tutorial$cta$bn._(_root);
-}
-
-// Path: parsingRules.empty
-class _Translations$parsingRules$empty$bn extends Translations$parsingRules$empty$en {
-	_Translations$parsingRules$empty$bn._(TranslationsBn root) : this._root = root, super.internal(root);
-
-	final TranslationsBn _root; // ignore: unused_field
-
-	// Translations
-	@override String get title => 'এখনো কোনো নিয়ম নেই';
-	@override String get body => 'মিলে যাওয়া SMS ও ইমেইলকে রেকর্ডে বদলাতে একটি নিয়ম যোগ করুন।';
-	@override String get add => 'নিয়ম যোগ করুন';
-}
-
-// Path: parsingRules.delete
-class _Translations$parsingRules$delete$bn extends Translations$parsingRules$delete$en {
-	_Translations$parsingRules$delete$bn._(TranslationsBn root) : this._root = root, super.internal(root);
-
-	final TranslationsBn _root; // ignore: unused_field
-
-	// Translations
-	@override String get title => 'নিয়ম মুছুন';
-	@override String confirm({required Object name}) => 'আপনি কি নিশ্চিত যে "${name}" মুছতে চান?';
-}
-
-// Path: parsingRules.validation
-class _Translations$parsingRules$validation$bn extends Translations$parsingRules$validation$en {
-	_Translations$parsingRules$validation$bn._(TranslationsBn root) : this._root = root, super.internal(root);
-
-	final TranslationsBn _root; // ignore: unused_field
-
-	// Translations
-	@override String get nameRequired => 'নাম দিতে হবে';
-	@override String get triggerRequired => 'অন্তত একটি মূল শব্দ দিতে হবে';
-	@override String get amountRequired => 'পরিমাণের প্যাটার্ন দিতে হবে';
-	@override String get invalidRegex => 'রেগুলার এক্সপ্রেশন সঠিক নয়';
-	@override String invalidRegexDetail({required Object detail}) => 'রেগুলার এক্সপ্রেশন সঠিক নয়: ${detail}';
-	@override String get valid => 'প্যাটার্ন সঠিক';
-}
-
-// Path: parsingRules.form
-class _Translations$parsingRules$form$bn extends Translations$parsingRules$form$en {
-	_Translations$parsingRules$form$bn._(TranslationsBn root) : this._root = root, super.internal(root);
-
-	final TranslationsBn _root; // ignore: unused_field
-
-	// Translations
-	@override String get name => 'নাম *';
-	@override String get nameHint => 'যেমন: HDFC Bank SMS';
-	@override String get keyWords => 'মূল শব্দ *';
-	@override String get keyWordsHint => 'HDFC, debit, account (কমা দিয়ে আলাদা করুন)';
-	@override String get keyWordsHelper => 'যেসব শব্দ থাকলে এই নিয়মটি চেষ্টা করা হবে';
-	@override String get amountPattern => 'পরিমাণের প্যাটার্ন (regex) *';
-	@override String get amountRegex => 'পরিমাণের regex';
-	@override String get datePattern => 'তারিখের প্যাটার্ন (ঐচ্ছিক)';
-	@override String get dateRegex => 'তারিখের regex (ঐচ্ছিক)';
-	@override String get dateHelper => 'তারিখ না লাগলে খালি রাখুন';
-	@override String get dateOrder => '05/10/2026-এর মতো তারিখ';
-	@override String get dayFirst => 'আগে দিন';
-	@override String get monthFirst => 'আগে মাস';
-	@override String get source => 'উৎস';
-	@override String get priority => 'অগ্রাধিকার';
-	@override String get priorityHelper => 'বেশি অগ্রাধিকারের নিয়ম আগে চেষ্টা করা হয়';
-	@override String get enabled => 'চালু';
-	@override String get enabledDetail => 'মেসেজ পড়ার সময় এই নিয়মটি ব্যবহার করুন';
-}
-
-// Path: parsingRules.tester
-class _Translations$parsingRules$tester$bn extends Translations$parsingRules$tester$en {
-	_Translations$parsingRules$tester$bn._(TranslationsBn root) : this._root = root, super.internal(root);
-
-	final TranslationsBn _root; // ignore: unused_field
-
-	// Translations
-	@override String get timeout => 'সময় শেষ: প্যাটার্নটি 2 সেকেন্ডের বেশি সময় নিয়েছে';
-	@override String get error => 'সমস্যা';
-	@override String get match => 'মিল পাওয়া গেছে';
-	@override String get noMatch => 'মিল নেই';
-	@override String elapsed({required Object ms}) => '${ms} ms';
-	@override String get amount => 'পরিমাণ';
-	@override String get date => 'তারিখ';
-	@override String confidence({required Object percent}) => '${percent}% নিশ্চয়তা';
-	@override String get sample => 'পরীক্ষার জন্য নমুনা মেসেজ';
-	@override String get sampleHint => 'একটি নমুনা SMS বা ইমেইলের লেখা দিন';
-	@override String get enterSample => 'প্যাটার্ন পরীক্ষা করতে ওপরে একটি নমুনা মেসেজ দিন';
 }
 
 // Path: records.filter
@@ -3250,7 +3167,6 @@ extension on TranslationsBn {
 			'common.newBudget' => 'নতুন বাজেট',
 			'common.sendFeedback' => 'মতামত পাঠান',
 			'common.autoImport' => 'SMS থেকে স্বয়ংক্রিয় ইমপোর্ট',
-			'common.matchingRules' => 'মিলানোর নিয়ম',
 			'common.errors.generic' => 'কিছু একটা ভুল হয়েছে। আবার চেষ্টা করুন।',
 			'common.errors.storage' => 'আপনার ডেটা পড়া বা সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।',
 			'common.errors.network' => 'আপনি অফলাইনে আছেন। সংযোগ দেখে আবার চেষ্টা করুন।',
@@ -3461,12 +3377,17 @@ extension on TranslationsBn {
 			'goals.card.reached' => 'লক্ষ্য পূরণ হয়েছে',
 			'goals.card.plan' => ({required Object amount}) => 'পরিকল্পনা: মাসে ${amount}',
 			'goals.card.addToGoal' => 'লক্ষ্যে যোগ করুন',
+			'goals.card.newGoal' => 'নতুন লক্ষ্য',
 			'goals.card.edit' => 'লক্ষ্য সম্পাদনা',
 			'goals.card.setGoal' => 'একটি সঞ্চয়ের লক্ষ্য ঠিক করুন',
 			'goals.addSheet.title' => ({required Object name}) => '${name}-এ যোগ করুন',
 			'goals.addSheet.amount' => 'পরিমাণ',
 			'goals.addSheet.note' => 'এটি শুধু লক্ষ্য আপডেট করে, কোনো লেনদেন যোগ করে না।',
 			'goals.added' => ({required Object name, required Object amount}) => '${name}-এ ${amount} যোগ হয়েছে',
+			'goals.list.title' => 'লক্ষ্যসমূহ',
+			'goals.list.subtitle' => 'নতুনগুলো আগে। সম্পাদনা করতে কোনো লক্ষ্যে ট্যাপ করুন।',
+			'goals.list.empty' => 'এখনো কোনো সঞ্চয়ের লক্ষ্য নেই।',
+			'goals.list.loadFailed' => 'আপনার লক্ষ্যগুলো লোড করা যায়নি। আবার চেষ্টা করুন।',
 			'goals.form.title' => 'লক্ষ্য সম্পাদনা',
 			'goals.form.createTitle' => 'নতুন সঞ্চয়ের লক্ষ্য',
 			'goals.form.name' => 'লক্ষ্যের নাম',
@@ -3520,6 +3441,14 @@ extension on TranslationsBn {
 			'messageTemplates.contacts.empty' => 'এই ফোনে এখনো কোনো মেসেজ নেই। SMS এলে প্রেরকেরা এখানে দেখা যাবে।',
 			'messageTemplates.contacts.noMatch' => ({required Object query}) => '"${query}" এর সাথে মেলে এমন কোনো প্রেরক নেই।',
 			'messageTemplates.create' => 'নতুন SMS ফরম্যাট',
+			'messageTemplates.watchlist.title' => 'SMS ওয়াচলিস্ট',
+			'messageTemplates.watchlist.subtitle' => 'এই প্রেরকদের মেসেজ লেনদেন হিসেবে যোগ হয়। কোনো প্রেরককে উপেক্ষা করতে বিরতি দিন।',
+			'messageTemplates.watchlist.formats' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n, one: '${n}টি SMS ফরম্যাট', other: '${n}টি SMS ফরম্যাট', ), 
+			'messageTemplates.watchlist.paused' => 'বিরতিতে',
+			'messageTemplates.watchlist.toggle' => ({required Object name}) => '${name} এর মেসেজ পড়ুন',
+			'messageTemplates.watchlist.empty' => 'এখনো কোনো প্রেরক নেই। অটো-ইমপোর্ট থেকে একটি নমুনা মেসেজ দেখিয়ে প্রেরক যোগ করুন।',
+			'messageTemplates.watchlist.addSender' => 'প্রেরক বেছে নিন',
+			'messageTemplates.watchlist.loadFailed' => 'ওয়াচলিস্ট লোড করা যায়নি। আবার চেষ্টা করুন।',
 			'notifications.channel.name' => 'অ্যাপের নোটিফিকেশন',
 			'notifications.channel.description' => 'বাজেট সতর্কতা, সাপ্তাহিক সারাংশ, পুনরাবৃত্ত রিমাইন্ডার ও স্ক্যানের ফলাফল',
 			'notifications.budget.title' => 'বাজেট সতর্কতা',
@@ -3573,6 +3502,8 @@ extension on TranslationsBn {
 			'onboarding.goal.title' => 'আপনি কীসের জন্য সঞ্চয় করছেন?',
 			'onboarding.goal.subtitle' => 'একটি সঞ্চয়ের লক্ষ্য ঠিক করুন, আমরা অগ্রগতি দেখতে সাহায্য করব।',
 			'onboarding.goal.nameLabel' => 'লক্ষ্যের নাম',
+			_ => null,
+		} ?? switch (path) {
 			'onboarding.goal.nameHint' => 'যেমন: নতুন ল্যাপটপ',
 			'onboarding.goal.amountLabel' => 'লক্ষ্য পরিমাণ',
 			'onboarding.goal.notNow' => 'এখন কোনো লক্ষ্য নয়',
@@ -3585,8 +3516,6 @@ extension on TranslationsBn {
 			'onboarding.timeline.customHint' => 'নিজে ঠিক করুন',
 			'onboarding.timeline.fit.affordable' => 'আপনার সঞ্চয়ে হবে',
 			'onboarding.timeline.fit.tooExpensive' => 'আপনার সঞ্চয়ের চেয়ে বেশি',
-			_ => null,
-		} ?? switch (path) {
 			'onboarding.timeline.fit.slow' => 'অনেক সময় লাগবে',
 			'onboarding.complete.title' => 'সেটআপ সম্পন্ন!',
 			'onboarding.complete.budgets' => 'বাজেট তৈরি হয়েছে',
@@ -3606,63 +3535,6 @@ extension on TranslationsBn {
 			'onboarding.tutorial.cta.title' => 'সব প্রস্তুত!',
 			'onboarding.tutorial.cta.body' => 'আপনি এখন মূল বিষয়গুলো জানেন। চলুন আপনার আর্থিক হিসাব রাখা শুরু করি!',
 			'onboarding.tutorial.cta.start' => 'চলুন শুরু করি!',
-			'parsingRules.addFromFormats' => 'SMS ফরম্যাট থেকে নিয়ম যোগ করুন',
-			'parsingRules.newRule' => 'নতুন নিয়ম',
-			'parsingRules.editRule' => 'নিয়ম সম্পাদনা',
-			'parsingRules.add' => 'যোগ করুন',
-			'parsingRules.added' => ({required Object name}) => '"${name}" যোগ হয়েছে',
-			'parsingRules.empty.title' => 'এখনো কোনো নিয়ম নেই',
-			'parsingRules.empty.body' => 'মিলে যাওয়া SMS ও ইমেইলকে রেকর্ডে বদলাতে একটি নিয়ম যোগ করুন।',
-			'parsingRules.empty.add' => 'নিয়ম যোগ করুন',
-			'parsingRules.created' => 'নিয়ম তৈরি হয়েছে',
-			'parsingRules.updated' => 'নিয়ম আপডেট হয়েছে',
-			'parsingRules.delete.title' => 'নিয়ম মুছুন',
-			'parsingRules.delete.confirm' => ({required Object name}) => 'আপনি কি নিশ্চিত যে "${name}" মুছতে চান?',
-			'parsingRules.validation.nameRequired' => 'নাম দিতে হবে',
-			'parsingRules.validation.triggerRequired' => 'অন্তত একটি মূল শব্দ দিতে হবে',
-			'parsingRules.validation.amountRequired' => 'পরিমাণের প্যাটার্ন দিতে হবে',
-			'parsingRules.validation.invalidRegex' => 'রেগুলার এক্সপ্রেশন সঠিক নয়',
-			'parsingRules.validation.invalidRegexDetail' => ({required Object detail}) => 'রেগুলার এক্সপ্রেশন সঠিক নয়: ${detail}',
-			'parsingRules.validation.valid' => 'প্যাটার্ন সঠিক',
-			'parsingRules.form.name' => 'নাম *',
-			'parsingRules.form.nameHint' => 'যেমন: HDFC Bank SMS',
-			'parsingRules.form.keyWords' => 'মূল শব্দ *',
-			'parsingRules.form.keyWordsHint' => 'HDFC, debit, account (কমা দিয়ে আলাদা করুন)',
-			'parsingRules.form.keyWordsHelper' => 'যেসব শব্দ থাকলে এই নিয়মটি চেষ্টা করা হবে',
-			'parsingRules.form.amountPattern' => 'পরিমাণের প্যাটার্ন (regex) *',
-			'parsingRules.form.amountRegex' => 'পরিমাণের regex',
-			'parsingRules.form.datePattern' => 'তারিখের প্যাটার্ন (ঐচ্ছিক)',
-			'parsingRules.form.dateRegex' => 'তারিখের regex (ঐচ্ছিক)',
-			'parsingRules.form.dateHelper' => 'তারিখ না লাগলে খালি রাখুন',
-			'parsingRules.form.dateOrder' => '05/10/2026-এর মতো তারিখ',
-			'parsingRules.form.dayFirst' => 'আগে দিন',
-			'parsingRules.form.monthFirst' => 'আগে মাস',
-			'parsingRules.form.source' => 'উৎস',
-			'parsingRules.form.priority' => 'অগ্রাধিকার',
-			'parsingRules.form.priorityHelper' => 'বেশি অগ্রাধিকারের নিয়ম আগে চেষ্টা করা হয়',
-			'parsingRules.form.enabled' => 'চালু',
-			'parsingRules.form.enabledDetail' => 'মেসেজ পড়ার সময় এই নিয়মটি ব্যবহার করুন',
-			'parsingRules.tester.timeout' => 'সময় শেষ: প্যাটার্নটি 2 সেকেন্ডের বেশি সময় নিয়েছে',
-			'parsingRules.tester.error' => 'সমস্যা',
-			'parsingRules.tester.match' => 'মিল পাওয়া গেছে',
-			'parsingRules.tester.noMatch' => 'মিল নেই',
-			'parsingRules.tester.elapsed' => ({required Object ms}) => '${ms} ms',
-			'parsingRules.tester.amount' => 'পরিমাণ',
-			'parsingRules.tester.date' => 'তারিখ',
-			'parsingRules.tester.confidence' => ({required Object percent}) => '${percent}% নিশ্চয়তা',
-			'parsingRules.tester.sample' => 'পরীক্ষার জন্য নমুনা মেসেজ',
-			'parsingRules.tester.sampleHint' => 'একটি নমুনা SMS বা ইমেইলের লেখা দিন',
-			'parsingRules.tester.enterSample' => 'প্যাটার্ন পরীক্ষা করতে ওপরে একটি নমুনা মেসেজ দিন',
-			'parsingRules.templates.hdfc_bank_sms' => 'HDFC ব্যাংকের ডেবিট নোটিফিকেশন পড়ে',
-			'parsingRules.templates.icici_bank_sms' => 'ICICI ব্যাংকের ডেবিট নোটিফিকেশন পড়ে',
-			'parsingRules.templates.sbi_sms' => 'স্টেট ব্যাংক অব ইন্ডিয়ার ডেবিট নোটিফিকেশন পড়ে',
-			'parsingRules.templates.upi_payment_sms' => 'UPI পেমেন্টের নোটিফিকেশন পড়ে (PhonePe, Google Pay, Paytm)',
-			'parsingRules.templates.amazon_order_sms' => 'Amazon অর্ডার কনফার্মেশন ও ডেলিভারির SMS পড়ে',
-			'parsingRules.templates.amazon_order_email' => 'Amazon অর্ডারের ইমেইল পড়ে',
-			'parsingRules.templates.swiggy_order_email' => 'Swiggy অর্ডার কনফার্মেশনের ইমেইল পড়ে',
-			'parsingRules.templates.zomato_order_email' => 'Zomato অর্ডার কনফার্মেশনের ইমেইল পড়ে',
-			'parsingRules.templates.flipkart_order_email' => 'Flipkart অর্ডারের ইমেইল পড়ে',
-			'parsingRules.templates.generic_payment_email' => 'সাধারণ পেমেন্ট কনফার্মেশনের ইমেইল পড়ে',
 			'receiptScan.permissionRequired' => 'রসিদ স্ক্যান করতে ক্যামেরার অনুমতি দরকার।',
 			'receiptScan.permissionBlocked' => 'Expenzo-র জন্য ক্যামেরা বন্ধ আছে। রসিদ স্ক্যান করতে সেটিংসে চালু করুন।',
 			'receiptScan.noCamera' => 'এই ডিভাইসে কোনো ক্যামেরা নেই।',
@@ -3833,7 +3705,8 @@ extension on TranslationsBn {
 			'settings.notifications.reminders.title' => 'রিমাইন্ডার',
 			'settings.notifications.reminders.subtitle' => 'পুনরাবৃত্ত লেনদেনের এক দিন আগে মনে করিয়ে দিন',
 			'settings.autoImportSubtitle' => 'ব্যাংক ও পেমেন্টের মেসেজ থেকে লেনদেন তৈরি করুন',
-			'settings.matchingRulesSubtitle' => 'যেসব মেসেজ অটো-ইমপোর্ট এখনো পড়তে পারে না, সেগুলোর প্যাটার্ন',
+			'settings.smsWatchlist' => 'SMS ওয়াচলিস্ট',
+			'settings.smsWatchlistSubtitle' => 'যেসব প্রেরকের মেসেজ Expenzo পড়ে',
 			'settings.recurring.title' => 'পুনরাবৃত্ত লেনদেন',
 			'settings.recurring.subtitle' => 'নিয়মিত আসা বিল ও আয়',
 			'settings.help.title' => 'সাহায্য ও সহায়তা',

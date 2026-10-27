@@ -7,7 +7,6 @@ Future<void> seedLocalData(
   int categories = 1,
   int recurring = 1,
   int templates = 1,
-  int rules = 1,
   int goals = 0,
 }) async {
   final day = DateTime(2026, 3, 1);
@@ -97,19 +96,6 @@ Future<void> seedLocalData(
             sampleMessage: 'Paid 10',
             triggerWord: 'Paid',
             amountPattern: r'\d+',
-          ),
-        );
-  }
-  for (var i = 0; i < rules; i++) {
-    await db
-        .into(db.parsingRules)
-        .insert(
-          ParsingRulesCompanion.insert(
-            id: 'p$i',
-            name: 'Rule $i',
-            triggerWords: 'Paid',
-            amountPattern: r'\d+',
-            sourceType: 'sms',
           ),
         );
   }

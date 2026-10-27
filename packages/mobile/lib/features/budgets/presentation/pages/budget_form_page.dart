@@ -570,10 +570,6 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
               child: Switch(
                 value: _rolloverEnabled,
                 onChanged: _readOnly ? null : _onRolloverChanged,
-                activeThumbColor: _palette.brand,
-                activeTrackColor: _palette.brand.withAlpha(0x40),
-                inactiveThumbColor: _palette.toggleKnob,
-                inactiveTrackColor: _palette.toggleTrack,
               ),
             ),
           ],
@@ -630,10 +626,6 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
               child: Switch(
                 value: _shared,
                 onChanged: _shared || canTurnOn ? _onShareChanged : null,
-                activeThumbColor: _palette.brand,
-                activeTrackColor: _palette.brand.withAlpha(0x40),
-                inactiveThumbColor: _palette.toggleKnob,
-                inactiveTrackColor: _palette.toggleTrack,
               ),
             ),
           ],

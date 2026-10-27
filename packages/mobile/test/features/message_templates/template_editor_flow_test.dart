@@ -182,6 +182,49 @@ void main() {
       expect(event.source.isMonitored, isTrue);
     });
 
+    testWidgets('editing a paused sender\'s format keeps it paused', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        translated(
+          MaterialApp(
+            home: MultiBlocProvider(
+              providers: [
+                BlocProvider<TemplateEditorBloc>.value(value: mockEditorBloc),
+                BlocProvider<MessageSourcesBloc>.value(value: mockSourcesBloc),
+              ],
+              child: InteractiveTemplateBuilder(
+                source: testSource.copyWith(isMonitored: false),
+                sampleMessage: testSms,
+                existingTemplate: ExpenseTemplate(
+                  id: 'tmpl-1',
+                  sourceId: 'src-1',
+                  sampleMessage: testSms.body,
+                  triggerWord: 'debited',
+                  amountPattern: r'(\d+)',
+                  selectedAmount: '500.00',
+                  createdAt: DateTime(2026, 1, 1),
+                  updatedAt: DateTime(2026, 1, 1),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.widgetWithText(ElevatedButton, 'Save'));
+      await tester.pump();
+
+      final event =
+          verify(
+                () => mockEditorBloc.add(captureAny<TemplateEditorEvent>()),
+              ).captured.last
+              as SaveTemplateEvent;
+      expect(event.template.id, 'tmpl-1');
+      expect(event.source.isMonitored, isFalse);
+    });
+
     testWidgets('back navigation works from Step 2 to Step 1', (tester) async {
       await tester.pumpWidget(buildTestWidget());
       await tester.pumpAndSettle();

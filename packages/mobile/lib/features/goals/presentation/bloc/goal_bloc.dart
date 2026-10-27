@@ -4,15 +4,15 @@ import 'package:expense_tracker/core/error/failure_message.dart';
 import 'package:expense_tracker/core/logger/app_logger.dart';
 
 import '../../domain/usecases/add_goal_contribution.dart';
-import '../../domain/usecases/watch_active_goal.dart';
+import '../../domain/usecases/watch_goals.dart';
 import 'goal_event.dart';
 import 'goal_state.dart';
 
 class GoalBloc extends Bloc<GoalEvent, GoalState> {
-  final WatchActiveGoal watchActiveGoal;
+  final WatchGoals watchGoals;
   final AddGoalContribution addGoalContribution;
 
-  GoalBloc({required this.watchActiveGoal, required this.addGoalContribution})
+  GoalBloc({required this.watchGoals, required this.addGoalContribution})
     : super(const GoalState()) {
     on<GoalWatchStarted>(_onWatch, transformer: restartable());
     on<GoalContributionSubmitted>(_onContribution, transformer: droppable());
@@ -20,10 +20,9 @@ class GoalBloc extends Bloc<GoalEvent, GoalState> {
 
   Future<void> _onWatch(GoalWatchStarted event, Emitter<GoalState> emit) {
     return emit.forEach(
-      watchActiveGoal(),
-      onData: (goal) => state.copyWith(
-        goal: goal,
-        clearGoal: goal == null,
+      watchGoals(),
+      onData: (goals) => state.copyWith(
+        goals: goals,
         status: state.status == GoalStatus.saving
             ? GoalStatus.saving
             : GoalStatus.ready,
@@ -40,11 +39,10 @@ class GoalBloc extends Bloc<GoalEvent, GoalState> {
     GoalContributionSubmitted event,
     Emitter<GoalState> emit,
   ) async {
-    final goalId = state.goal?.id;
-    if (goalId == null || state.status == GoalStatus.saving) return;
+    if (state.status == GoalStatus.saving) return;
     emit(state.copyWith(status: GoalStatus.saving));
     final result = await addGoalContribution(
-      AddGoalContributionParams(goalId: goalId, amount: event.amount),
+      AddGoalContributionParams(goalId: event.goalId, amount: event.amount),
     );
     emit(
       result.fold(
@@ -53,9 +51,10 @@ class GoalBloc extends Bloc<GoalEvent, GoalState> {
           errorText: failureText(failure),
         ),
 
-        (_) => state.copyWith(
+        (goal) => state.copyWith(
           status: GoalStatus.ready,
           lastAdded: event.amount,
+          lastAddedTo: goal,
           contributionCount: state.contributionCount + 1,
         ),
       ),

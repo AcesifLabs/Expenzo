@@ -17,9 +17,11 @@ abstract final class AppSpacing {
   static const EdgeInsets paddingMd = EdgeInsets.all(md);
   static const EdgeInsets paddingLg = EdgeInsets.all(lg);
 
-  static const double radiusCard = 24;
+  static const double radiusCard = 12;
 
-  static const double radiusControl = 16;
+  static const double radiusSheet = 24;
+
+  static const double radiusControl = 8;
 
   static const double radiusPill = 999;
 

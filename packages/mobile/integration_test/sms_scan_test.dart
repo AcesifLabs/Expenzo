@@ -4,10 +4,9 @@ import 'package:expense_tracker/core/database/app_database.dart'
     show AppDatabase;
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/core/router/settings_route.dart';
+import 'package:expense_tracker/features/message_templates/domain/entities/expense_template.dart';
 import 'package:expense_tracker/features/message_templates/domain/entities/message_source.dart';
 import 'package:expense_tracker/features/message_templates/domain/repositories/message_template_repository.dart';
-import 'package:expense_tracker/features/parsing_rules/domain/entities/parsing_rule.dart';
-import 'package:expense_tracker/features/parsing_rules/domain/repositories/parsing_rules_repository.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
 import 'support/app.dart';
@@ -26,15 +25,13 @@ Future<void> _watchSender() async {
       updatedAt: now,
     ),
   );
-  await di.getIt<ParsingRulesRepository>().createRule(
-    ParsingRule(
-      id: 'e2e-rule',
-      name: 'Bank debits',
-      triggerWords: const ['debited'],
+  await di.getIt<MessageTemplateRepository>().saveTemplate(
+    ExpenseTemplate(
+      id: 'e2e-format',
+      sourceId: 'e2e-source',
+      sampleMessage: 'Tk 100.00 debited',
+      triggerWord: 'debited',
       amountPattern: r'Tk\.?\s*([\d,]+\.?\d*)',
-      sourceType: SourceType.sms,
-      isEnabled: true,
-      priority: 1,
       createdAt: now,
       updatedAt: now,
     ),

@@ -8,7 +8,6 @@ import { Category } from '../categories/entities/category.entity';
 import { Budget } from '../budgets/entities/budget.entity';
 import { MessageSource } from '../message-sources/entities/message-source.entity';
 import { ExpenseTemplate } from '../expense-templates/entities/expense-template.entity';
-import { ParsingRule } from '../parsing-rules/entities/parsing-rule.entity';
 import { RecurringTransaction } from '../recurring-transactions/entities/recurring-transaction.entity';
 import { PendingRecurring } from '../recurring-transactions/entities/pending-recurring.entity';
 import { Goal } from '../goals/entities/goal.entity';
@@ -33,7 +32,6 @@ export class SyncService {
     @InjectRepository(Budget) private readonly budgetRepo: Repository<Budget>,
     @InjectRepository(MessageSource) msgRepo: Repository<MessageSource>,
     @InjectRepository(ExpenseTemplate) tmplRepo: Repository<ExpenseTemplate>,
-    @InjectRepository(ParsingRule) ruleRepo: Repository<ParsingRule>,
     @InjectRepository(RecurringTransaction) recRepo: Repository<RecurringTransaction>,
     @InjectRepository(PendingRecurring) pendRepo: Repository<PendingRecurring>,
     @InjectRepository(Goal) goalRepo: Repository<Goal>,
@@ -45,7 +43,6 @@ export class SyncService {
     this.repoMap.set(SyncTable.BUDGETS, budgetRepo);
     this.repoMap.set(SyncTable.MESSAGE_SOURCES, msgRepo);
     this.repoMap.set(SyncTable.EXPENSE_TEMPLATES, tmplRepo);
-    this.repoMap.set(SyncTable.PARSING_RULES, ruleRepo);
     this.repoMap.set(SyncTable.RECURRING_TRANSACTIONS, recRepo);
     this.repoMap.set(SyncTable.PENDING_RECURRING, pendRepo);
     
@@ -226,7 +223,6 @@ export class SyncService {
       SyncTable.PENDING_RECURRING,
       SyncTable.RECURRING_TRANSACTIONS,
       SyncTable.EXPENSE_TEMPLATES,
-      SyncTable.PARSING_RULES,
       SyncTable.MESSAGE_SOURCES,
       SyncTable.GOALS,
       SyncTable.BUDGETS,

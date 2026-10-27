@@ -8,7 +8,7 @@ import '../../domain/entities/goal.dart' as domain;
 
 abstract class GoalLocalDatasource {
   Future<domain.Goal?> getActiveGoal();
-  Stream<domain.Goal?> watchActiveGoal();
+  Stream<List<domain.Goal>> watchGoals();
   Future<domain.Goal?> getGoalById(String id);
 
   Future<void> createGoal(domain.Goal goal);
@@ -26,8 +26,8 @@ class GoalLocalDatasourceImpl implements GoalLocalDatasource {
       _guard(() async => _toEntityOrNull(await goalsDao.getActiveGoal()));
 
   @override
-  Stream<domain.Goal?> watchActiveGoal() =>
-      goalsDao.watchActiveGoal().map(_toEntityOrNull);
+  Stream<List<domain.Goal>> watchGoals() =>
+      goalsDao.watchGoals().map((rows) => rows.map(_toEntity).toList());
 
   @override
   Future<domain.Goal?> getGoalById(String id) =>
@@ -78,9 +78,10 @@ class GoalLocalDatasourceImpl implements GoalLocalDatasource {
     );
   }
 
-  domain.Goal? _toEntityOrNull(Goal? row) {
-    if (row == null) return null;
+  domain.Goal? _toEntityOrNull(Goal? row) =>
+      row == null ? null : _toEntity(row);
 
+  domain.Goal _toEntity(Goal row) {
     return domain.Goal(
       id: row.id,
       name: row.name,

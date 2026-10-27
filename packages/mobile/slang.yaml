@@ -15,4 +15,3 @@ maps:
   - categories.defaults
   - categories.icons
   - categories.colors
-  - parsingRules.templates

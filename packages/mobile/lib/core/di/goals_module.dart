@@ -9,7 +9,7 @@ import 'package:expense_tracker/features/goals/domain/usecases/create_goal.dart'
 import 'package:expense_tracker/features/goals/domain/usecases/delete_goal.dart';
 import 'package:expense_tracker/features/goals/domain/usecases/get_active_goal.dart';
 import 'package:expense_tracker/features/goals/domain/usecases/update_goal.dart';
-import 'package:expense_tracker/features/goals/domain/usecases/watch_active_goal.dart';
+import 'package:expense_tracker/features/goals/domain/usecases/watch_goals.dart';
 import 'package:expense_tracker/features/goals/presentation/bloc/goal_bloc.dart';
 import 'package:expense_tracker/features/goals/presentation/bloc/goal_form_bloc.dart';
 
@@ -36,14 +36,14 @@ void initGoalsModule(GetIt getIt) {
     () => GetActiveGoal(repository: getIt<GoalRepository>()),
   );
   getIt.registerLazySingleton(
-    () => WatchActiveGoal(repository: getIt<GoalRepository>()),
+    () => WatchGoals(repository: getIt<GoalRepository>()),
   );
   getIt.registerLazySingleton(
     () => DeleteGoal(repository: getIt<GoalRepository>()),
   );
   getIt.registerFactory(
     () => GoalBloc(
-      watchActiveGoal: getIt<WatchActiveGoal>(),
+      watchGoals: getIt<WatchGoals>(),
       addGoalContribution: getIt<AddGoalContribution>(),
     ),
   );

@@ -11,7 +11,6 @@ import { BudgetsModule } from './budgets/budgets.module';
 import { GroupsModule } from './groups/groups.module';
 import { MessageSourcesModule } from './message-sources/message-sources.module';
 import { ExpenseTemplatesModule } from './expense-templates/expense-templates.module';
-import { ParsingRulesModule } from './parsing-rules/parsing-rules.module';
 import { RecurringTransactionsModule } from './recurring-transactions/recurring-transactions.module';
 import { GoalsModule } from './goals/goals.module';
 import { SyncModule } from './sync/sync.module';
@@ -52,7 +51,6 @@ import { getDatabaseSslConfig } from './config/database-ssl';
     GroupsModule,
     MessageSourcesModule,
     ExpenseTemplatesModule,
-    ParsingRulesModule,
     RecurringTransactionsModule,
     GoalsModule,
     SyncModule,

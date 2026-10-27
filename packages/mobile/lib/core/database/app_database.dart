@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'tables/records_table.dart';
 import 'tables/categories_table.dart';
 import 'tables/pending_recurring_table.dart';
-import 'tables/parsing_rules_table.dart';
 import 'tables/message_sources_table.dart';
 import 'tables/expense_templates_table.dart';
 import 'tables/budgets_table.dart';
@@ -20,7 +19,6 @@ import 'daos/category_dao.dart';
 import 'daos/recurring_dao.dart';
 import 'daos/budget_dao.dart';
 import 'daos/pending_recurring_dao.dart';
-import 'daos/parsing_rule_dao.dart';
 import 'daos/message_template_dao.dart';
 import 'daos/user_dao.dart';
 import 'daos/sync_queue_dao.dart';
@@ -35,7 +33,6 @@ part 'app_database.g.dart';
     Records,
     Categories,
     PendingRecurring,
-    ParsingRules,
     MessageSources,
     ExpenseTemplates,
     Budgets,
@@ -51,7 +48,6 @@ part 'app_database.g.dart';
     RecurringDao,
     BudgetDao,
     PendingRecurringDao,
-    ParsingRuleDao,
     MessageTemplateDao,
     UserDao,
     SyncQueueDao,
@@ -62,7 +58,7 @@ class AppDatabase extends _$AppDatabase {
   Future<String>? _dbPathFuture;
 
   @override
-  int get schemaVersion => 20;
+  int get schemaVersion => 21;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -125,6 +121,7 @@ class AppDatabase extends _$AppDatabase {
       _MigrationStep(18, () => _migrateV18(m)),
       _MigrationStep(19, () => _migrateV19(m)),
       _MigrationStep(20, () => _migrateV20(m)),
+      _MigrationStep(21, _migrateV21),
     ];
 
     for (final step in steps) {
@@ -393,10 +390,19 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
+  // Matching rules were removed (ADR 0017): drop their table and any rule
+  // changes still waiting to sync.
+  Future<void> _migrateV21() async {
+    await customStatement(
+      "DELETE FROM sync_queue WHERE entity_table = 'parsing_rules'",
+    );
+    await customStatement('DROP INDEX IF EXISTS idx_parsing_rules_cat_id');
+    await customStatement('DROP TABLE IF EXISTS parsing_rules');
+  }
+
   Future<void> _migrateV20(Migrator m) async {
     await m.addColumn(syncQueue, syncQueue.attemptCount);
     await m.addColumn(syncQueue, syncQueue.failedAt);
-    await m.addColumn(parsingRules, parsingRules.dateOrder);
 
     await customStatement('DROP TRIGGER IF EXISTS records_ai');
     await customStatement('DROP TRIGGER IF EXISTS records_ad');

@@ -60,7 +60,8 @@
     }
   },
   "autoImportSubtitle": "ব্যাংক ও পেমেন্টের মেসেজ থেকে লেনদেন তৈরি করুন",
-  "matchingRulesSubtitle": "যেসব মেসেজ অটো-ইমপোর্ট এখনো পড়তে পারে না, সেগুলোর প্যাটার্ন",
+  "smsWatchlist": "SMS ওয়াচলিস্ট",
+  "smsWatchlistSubtitle": "যেসব প্রেরকের মেসেজ Expenzo পড়ে",
   "recurring": {
     "title": "পুনরাবৃত্ত লেনদেন",
     "subtitle": "নিয়মিত আসা বিল ও আয়"

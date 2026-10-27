@@ -15,7 +15,7 @@ import '../widgets/parsed_transaction_card.dart';
 import '../widgets/sms_scan_sender_section.dart';
 import '../widgets/sms_scan_summary_card.dart';
 import '../widgets/sms_scan_toolbar.dart';
-import '../../../parsing_rules/presentation/widgets/transaction_list_skeleton.dart';
+import 'package:expense_tracker/shared/presentation/widgets/transaction_list_skeleton.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
 class SmsScanResultsPage extends StatefulWidget {

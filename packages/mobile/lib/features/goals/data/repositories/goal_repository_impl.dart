@@ -28,7 +28,7 @@ class GoalRepositoryImpl implements GoalRepository {
       _run(localDatasource.getActiveGoal);
 
   @override
-  Stream<Goal?> watchActiveGoal() => localDatasource.watchActiveGoal();
+  Stream<List<Goal>> watchGoals() => localDatasource.watchGoals();
 
   @override
   Future<Either<Failure, Goal>> getGoalById(String id) async {

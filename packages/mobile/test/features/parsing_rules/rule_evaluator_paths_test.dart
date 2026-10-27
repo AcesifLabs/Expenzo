@@ -4,7 +4,6 @@ import 'package:expense_tracker/features/message_templates/domain/entities/messa
 import 'package:expense_tracker/features/parsing_rules/domain/entities/evaluate_rules_params.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/entities/parsed_transaction.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/entities/parsing_context.dart';
-import 'package:expense_tracker/features/parsing_rules/domain/entities/parsing_rule.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/services/rule_evaluator.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -30,29 +29,13 @@ ExpenseTemplate _template(String id, String trigger, String pattern) =>
       updatedAt: _at,
     );
 
-ParsingRule _rule({
-  SourceType sourceType = SourceType.sms,
-  String? datePattern,
-}) => ParsingRule(
-  id: 'rule-${sourceType.name}',
-  name: 'Debits',
-  triggerWords: const ['debited'],
-  amountPattern: r'Tk ([\d,.]+)',
-  datePattern: datePattern,
-  sourceType: sourceType,
-  isEnabled: true,
-  priority: 1,
-  createdAt: _at,
-  updatedAt: _at,
-);
-
 ParsedTransaction? _evaluate(
   String message, {
-  List<ParsingRule> rules = const [],
   List<ExpenseTemplate> templates = const [],
+  List<MessageSource>? sources,
   String sourceType = AppSourceType.sms,
 }) => RuleEvaluator.evaluateWithContext(
-  ParsingContext(rules: rules, templates: templates, sources: [_bank]),
+  ParsingContext(templates: templates, sources: sources ?? [_bank]),
   EvaluateRulesParams(
     rawMessage: message,
     sourceType: sourceType,
@@ -89,40 +72,24 @@ void main() {
     });
   });
 
-  group('rules', () {
-    test('an SMS rule ignores email; an email rule reads only email', () {
-      const message = 'Tk 500.00 debited';
+  group('SMS Formats only', () {
+    test('a paused sender\'s formats are ignored', () {
+      final parsed = _evaluate(
+        'Tk 450.00 debited from A/C',
+        templates: [_template('t-tk', 'debited', r'Tk ([\d,.]+)')],
+        sources: [_bank.copyWith(isMonitored: false)],
+      );
 
-      expect(_evaluate(message, rules: [_rule()]), isNotNull);
-      expect(
-        _evaluate(message, rules: [_rule()], sourceType: AppSourceType.email),
-        isNull,
-      );
-      expect(
-        _evaluate(message, rules: [_rule(sourceType: SourceType.email)]),
-        isNull,
-      );
-      expect(
-        _evaluate(
-          message,
-          rules: [_rule(sourceType: SourceType.email)],
-          sourceType: AppSourceType.email,
-        )?.amount,
-        500,
-      );
+      expect(parsed, isNull);
     });
 
-    test('a rule that finds the date is surer than one that doesn\'t', () {
-      const message = 'Tk 500.00 debited on 05/10/2026';
-
-      expect(_evaluate(message, rules: [_rule()])?.confidenceScore, 0.9);
-      expect(
-        _evaluate(
-          message,
-          rules: [_rule(datePattern: r'\d{2}/\d{2}/\d{4}')],
-        )?.confidenceScore,
-        1.0,
+    test('a message no format matches is no transaction', () {
+      final parsed = _evaluate(
+        'Tk 450.00 credited to A/C',
+        templates: [_template('t-tk', 'debited', r'Tk ([\d,.]+)')],
       );
+
+      expect(parsed, isNull);
     });
   });
 }

@@ -11,7 +11,7 @@ enum SettingsRoute {
   notifications('notifications'),
   categories('categories'),
   autoImport('auto-import'),
-  matchingRules('matching-rules'),
+  smsWatchlist('sms-watchlist'),
   recurring('recurring'),
   sync('sync'),
   export('export'),

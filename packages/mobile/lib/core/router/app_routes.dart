@@ -48,6 +48,7 @@ import 'package:expense_tracker/features/settings/domain/entities/user_settings.
 import 'package:expense_tracker/features/goals/presentation/bloc/goal_form_bloc.dart';
 import 'package:expense_tracker/features/goals/presentation/bloc/goal_form_event.dart';
 import 'package:expense_tracker/features/goals/presentation/pages/goal_form_page.dart';
+import 'package:expense_tracker/features/goals/presentation/pages/goals_page.dart';
 import 'package:expense_tracker/features/onboarding/presentation/pages/onboarding_page.dart';
 import 'package:expense_tracker/features/onboarding/presentation/pages/tutorial_page.dart';
 import 'package:expense_tracker/features/settings/presentation/pages/settings_page.dart';
@@ -55,14 +56,12 @@ import 'package:expense_tracker/features/support/presentation/pages/about_page.d
 import 'package:expense_tracker/features/support/presentation/pages/faq_page.dart';
 import 'package:expense_tracker/features/support/presentation/pages/help_page.dart';
 import 'package:expense_tracker/features/support/presentation/pages/rate_app_page.dart';
+import 'package:expense_tracker/features/message_templates/presentation/pages/sms_watchlist_page.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/pages/sms_scan_results_page.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/pages/auto_import_page.dart';
 import 'package:expense_tracker/features/sync/presentation/pages/sync_settings_page.dart';
 import 'package:expense_tracker/features/recurring/presentation/pages/recurring_list_page.dart';
-import 'package:expense_tracker/features/parsing_rules/presentation/bloc/parsing_rules_bloc.dart';
-import 'package:expense_tracker/features/parsing_rules/presentation/bloc/parsing_rules_event.dart';
-import 'package:expense_tracker/features/parsing_rules/presentation/pages/rules_list_page.dart';
 
 import '../../features/auth/presentation/bloc/auth_state.dart';
 import 'auth_aware_app_shell.dart';
@@ -91,6 +90,7 @@ List<RouteBase> _buildNestedRoutes() {
     GoRoute(path: 'onboarding', builder: (_, _) => const OnboardingRoute()),
     GoRoute(path: 'tutorial', builder: (_, _) => const TutorialPage()),
 
+    GoRoute(path: 'goals', builder: (_, _) => const GoalsPage()),
     GoRoute(
       path: 'goals/new',
       builder: (_, _) => BlocProvider(
@@ -132,13 +132,7 @@ GoRoute _buildSettingsRoute() {
       ),
       _settingsPage(SettingsRoute.categories, const CategoryListPage()),
       _settingsPage(SettingsRoute.autoImport, const AutoImportPage()),
-      GoRoute(
-        path: SettingsRoute.matchingRules.path,
-        builder: (_, _) => BlocProvider(
-          create: (_) => di.getIt<ParsingRulesBloc>()..add(LoadRules()),
-          child: const RulesListPage(),
-        ),
-      ),
+      _settingsPage(SettingsRoute.smsWatchlist, const SmsWatchlistPage()),
       GoRoute(
         path: SettingsRoute.recurring.path,
 

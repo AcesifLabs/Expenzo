@@ -12,3 +12,7 @@ export 'pages/contact_selector_page.dart';
 export 'pages/sample_analyzer_page.dart';
 export 'pages/template_editor_page.dart';
 export 'widgets/retroactive_scan_dialog.dart';
+export 'bloc/sms_watchlist_bloc.dart';
+export 'bloc/sms_watchlist_event.dart';
+export 'bloc/sms_watchlist_state.dart';
+export 'pages/sms_watchlist_page.dart';

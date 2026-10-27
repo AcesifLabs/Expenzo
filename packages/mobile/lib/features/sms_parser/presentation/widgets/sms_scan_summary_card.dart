@@ -56,7 +56,7 @@ class SmsScanSummaryCard extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.smd),
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
       ),
       child: Row(
         children: [

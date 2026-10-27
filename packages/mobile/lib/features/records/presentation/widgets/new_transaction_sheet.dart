@@ -1201,7 +1201,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
           decoration: BoxDecoration(
             color: colors.surface,
             borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(AppSpacing.radiusCard),
+              top: Radius.circular(AppSpacing.radiusSheet),
             ),
           ),
           child: SingleChildScrollView(

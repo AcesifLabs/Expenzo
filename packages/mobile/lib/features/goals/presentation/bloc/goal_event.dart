@@ -12,10 +12,11 @@ class GoalWatchStarted extends GoalEvent {
 }
 
 class GoalContributionSubmitted extends GoalEvent {
+  final String goalId;
   final double amount;
 
   @override
-  List<Object?> get props => [amount];
+  List<Object?> get props => [goalId, amount];
 
-  const GoalContributionSubmitted(this.amount);
+  const GoalContributionSubmitted({required this.goalId, required this.amount});
 }

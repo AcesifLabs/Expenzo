@@ -6,4 +6,4 @@ export 'usecases/delete_goal.dart';
 export 'usecases/get_active_goal.dart';
 export 'usecases/update_goal.dart';
 export 'usecases/validate_goal.dart';
-export 'usecases/watch_active_goal.dart';
+export 'usecases/watch_goals.dart';

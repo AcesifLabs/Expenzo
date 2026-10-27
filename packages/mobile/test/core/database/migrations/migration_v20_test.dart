@@ -12,12 +12,15 @@ void main() {
 
   setUpAll(() => verifier = SchemaVerifier(GeneratedHelper()));
 
-  test('v19 upgrades to exactly the schema a fresh install gets', () async {
-    final db = AppDatabase.forTesting(await verifier.startAt(19));
-    addTearDown(db.close);
+  test(
+    'v19 upgrades to exactly the schema a fresh install gets (v21)',
+    () async {
+      final db = AppDatabase.forTesting(await verifier.startAt(19));
+      addTearDown(db.close);
 
-    await verifier.migrateAndValidate(db, 20);
-  });
+      await verifier.migrateAndValidate(db, 21);
+    },
+  );
 
   group('v19 data', () {
     late InitializedSchema schema;
@@ -52,7 +55,7 @@ void main() {
     Future<AppDatabase> migrated() async {
       final db = AppDatabase.forTesting(schema.newConnection());
       addTearDown(db.close);
-      await verifier.migrateAndValidate(db, 20);
+      await verifier.migrateAndValidate(db, 21);
 
       return db;
     }
@@ -116,12 +119,6 @@ void main() {
           .getSingle();
 
       expect(row.data, {'attempt_count': 0, 'failed_at': null});
-    });
-
-    test('existing rules read dates as day/month', () async {
-      final db = await migrated();
-
-      expect(await ids(db, 'SELECT date_order FROM parsing_rules'), ['dmy']);
     });
 
     test('search finds old records, and follows edits and deletes', () async {

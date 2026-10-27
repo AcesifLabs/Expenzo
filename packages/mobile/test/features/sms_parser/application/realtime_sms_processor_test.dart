@@ -31,9 +31,7 @@ class MockCheckBudgetAlerts extends Mock implements CheckBudgetAlerts {}
 
 void main() {
   setUpAll(() {
-    registerFallbackValue(
-      const ParsingContext(rules: [], templates: [], sources: []),
-    );
+    registerFallbackValue(const ParsingContext(templates: [], sources: []));
   });
 
   late MockRealtimeSmsListener listener;
@@ -86,7 +84,7 @@ void main() {
       if (!contextLoaded.isCompleted) {
         contextLoaded.complete();
       }
-      return ParsingContext(rules: [], templates: [], sources: []);
+      return ParsingContext(templates: [], sources: []);
     });
 
     await processor.start();
@@ -131,8 +129,7 @@ void main() {
     );
 
     when(() => evaluateRules.loadContext()).thenAnswer(
-      (_) async =>
-          ParsingContext(rules: [], templates: [], sources: [monitoredSource]),
+      (_) async => ParsingContext(templates: [], sources: [monitoredSource]),
     );
     when(
       () => parsingIsolateService.parseMessages(
@@ -188,8 +185,7 @@ void main() {
     );
 
     when(() => evaluateRules.loadContext()).thenAnswer(
-      (_) async =>
-          ParsingContext(rules: [], templates: [], sources: [monitoredSource]),
+      (_) async => ParsingContext(templates: [], sources: [monitoredSource]),
     );
     when(
       () => parsingIsolateService.parseMessages(
@@ -224,8 +220,7 @@ void main() {
     );
 
     when(() => evaluateRules.loadContext()).thenAnswer(
-      (_) async =>
-          ParsingContext(rules: [], templates: [], sources: [monitoredSource]),
+      (_) async => ParsingContext(templates: [], sources: [monitoredSource]),
     );
     ParseMessageInput? capturedInput;
     when(
@@ -289,8 +284,7 @@ void main() {
     );
 
     when(() => evaluateRules.loadContext()).thenAnswer(
-      (_) async =>
-          ParsingContext(rules: [], templates: [], sources: [monitoredSource]),
+      (_) async => ParsingContext(templates: [], sources: [monitoredSource]),
     );
     when(
       () => parsingIsolateService.parseMessages(
@@ -350,8 +344,7 @@ void main() {
     );
 
     when(() => evaluateRules.loadContext()).thenAnswer(
-      (_) async =>
-          ParsingContext(rules: [], templates: [], sources: [monitoredSource]),
+      (_) async => ParsingContext(templates: [], sources: [monitoredSource]),
     );
 
     var callCount = 0;
@@ -424,8 +417,7 @@ void main() {
     final createCalled = Completer<void>();
 
     when(() => evaluateRules.loadContext()).thenAnswer(
-      (_) async =>
-          ParsingContext(rules: [], templates: [], sources: [monitoredSource]),
+      (_) async => ParsingContext(templates: [], sources: [monitoredSource]),
     );
     when(
       () => parsingIsolateService.parseMessages(
@@ -467,8 +459,7 @@ void main() {
     );
 
     when(() => evaluateRules.loadContext()).thenAnswer(
-      (_) async =>
-          ParsingContext(rules: [], templates: [], sources: [monitoredSource]),
+      (_) async => ParsingContext(templates: [], sources: [monitoredSource]),
     );
     when(
       () => parsingIsolateService.parseMessages(
@@ -512,8 +503,7 @@ void main() {
     );
 
     when(() => evaluateRules.loadContext()).thenAnswer(
-      (_) async =>
-          ParsingContext(rules: [], templates: [], sources: [monitoredSource]),
+      (_) async => ParsingContext(templates: [], sources: [monitoredSource]),
     );
     when(
       () => parsingIsolateService.parseMessages(
@@ -590,11 +580,7 @@ void main() {
         checkBudgetAlerts: checkBudgetAlerts,
       );
       when(() => evaluateRules.loadContext()).thenAnswer(
-        (_) async => ParsingContext(
-          rules: [],
-          templates: [],
-          sources: [monitoredSource],
-        ),
+        (_) async => ParsingContext(templates: [], sources: [monitoredSource]),
       );
       when(
         () => parsingIsolateService.parseMessages(

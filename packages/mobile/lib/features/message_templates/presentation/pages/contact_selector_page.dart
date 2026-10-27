@@ -18,7 +18,7 @@ import 'package:expense_tracker/shared/presentation/widgets/app_page_header.dart
 import 'package:expense_tracker/shared/presentation/widgets/app_empty_state.dart';
 import 'package:expense_tracker/core/theme/app_typography.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
-import '../../../parsing_rules/presentation/widgets/transaction_list_skeleton.dart';
+import 'package:expense_tracker/shared/presentation/widgets/transaction_list_skeleton.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
 bool keyboardJustCollapsed({
@@ -159,15 +159,15 @@ class _ContactSelectorViewState extends State<ContactSelectorView>
 
   Widget _buildContactItem(
     DeviceContact contact,
-    List<MessageSource> monitoredSources,
+    List<MessageSource> knownSources,
     ThemeData theme,
   ) {
     final colors = theme.colorScheme;
-    final existingSource = monitoredSources.cast<MessageSource?>().firstWhere(
+    final existingSource = knownSources.cast<MessageSource?>().firstWhere(
       (s) => s?.contactId == contact.address,
       orElse: () => null,
     );
-    final isMonitored = existingSource != null;
+    final isMonitored = existingSource?.isMonitored ?? false;
 
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -281,7 +281,7 @@ class _ContactSelectorViewState extends State<ContactSelectorView>
 
   Widget _buildContactList(
     List<DeviceContact> contacts,
-    List<MessageSource> monitoredSources,
+    List<MessageSource> knownSources,
     ThemeData theme, {
     required bool isLoadingMore,
   }) {
@@ -320,11 +320,7 @@ class _ContactSelectorViewState extends State<ContactSelectorView>
           );
         }
 
-        return _buildContactItem(
-          filteredContacts[index],
-          monitoredSources,
-          theme,
-        );
+        return _buildContactItem(filteredContacts[index], knownSources, theme);
       },
     );
   }
@@ -372,8 +368,10 @@ class _ContactSelectorViewState extends State<ContactSelectorView>
           Expanded(
             child: BlocBuilder<MessageSourcesBloc, MessageSourcesState>(
               builder: (context, sourcesState) {
-                final monitoredSources = sourcesState is MessageSourcesLoaded
-                    ? sourcesState.sources.where((s) => s.isMonitored).toList()
+                // Paused sources count too, so tapping a paused sender reuses
+                // its source instead of creating a duplicate.
+                final knownSources = sourcesState is MessageSourcesLoaded
+                    ? sourcesState.sources
                     : <MessageSource>[];
 
                 return BlocBuilder<ContactSelectorBloc, ContactSelectorState>(
@@ -391,7 +389,7 @@ class _ContactSelectorViewState extends State<ContactSelectorView>
                       ) =>
                         _buildContactList(
                           contacts,
-                          monitoredSources,
+                          knownSources,
                           theme,
                           isLoadingMore: isLoadingMore,
                         ),

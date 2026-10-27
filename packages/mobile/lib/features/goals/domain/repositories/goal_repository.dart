@@ -6,7 +6,8 @@ import '../entities/goal.dart';
 abstract class GoalRepository {
   Future<Either<Failure, Goal?>> getActiveGoal();
 
-  Stream<Goal?> watchActiveGoal();
+  /// Every goal, newest first.
+  Stream<List<Goal>> watchGoals();
 
   Future<Either<Failure, Goal>> getGoalById(String id);
 

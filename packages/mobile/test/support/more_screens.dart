@@ -33,7 +33,11 @@ import 'package:expense_tracker/features/family/presentation/pages/family_join_p
 import 'package:expense_tracker/features/family/presentation/pages/family_members_page.dart';
 import 'package:expense_tracker/features/goals/presentation/bloc/goal_form_bloc.dart';
 import 'package:expense_tracker/features/goals/presentation/bloc/goal_form_state.dart';
+import 'package:expense_tracker/features/goals/domain/entities/goal.dart';
+import 'package:expense_tracker/features/goals/presentation/bloc/goal_bloc.dart';
+import 'package:expense_tracker/features/goals/presentation/bloc/goal_state.dart';
 import 'package:expense_tracker/features/goals/presentation/pages/goal_form_page.dart';
+import 'package:expense_tracker/features/goals/presentation/pages/goals_page.dart';
 import 'package:expense_tracker/features/message_templates/domain/entities/message_source.dart';
 import 'package:expense_tracker/features/message_templates/presentation/bloc/contact_selector_bloc.dart';
 import 'package:expense_tracker/features/message_templates/presentation/bloc/contact_selector_state.dart';
@@ -253,6 +257,26 @@ Widget goalFormScreen() => BlocProvider<GoalFormBloc>.value(
     const GoalFormState(status: GoalFormStatus.ready),
   ),
   child: const GoalFormPage(),
+);
+
+Widget goalsScreen({GoalState? state}) => BlocProvider<GoalBloc>.value(
+  value: mockBloc<MockGoalBloc, GoalState>(
+    MockGoalBloc(),
+    state ??
+        const GoalState(
+          status: GoalStatus.ready,
+          goals: [
+            Goal(
+              id: 'g-1',
+              name: 'New laptop',
+              targetAmount: 2000,
+              savedAmount: 500,
+            ),
+            Goal(id: 'g-0', name: 'Trip', targetAmount: 300, savedAmount: 300),
+          ],
+        ),
+  ),
+  child: const GoalsView(),
 );
 
 Widget contactSelectorScreen() => MultiBlocProvider(

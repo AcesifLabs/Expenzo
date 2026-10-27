@@ -139,7 +139,7 @@ class ParsedTransactionCard extends StatelessWidget {
             ? colors.primary.withAlpha(30)
             : colors.surface,
         borderColor: isSelected ? colors.primary : null,
-        borderRadius: AppSpacing.radiusControl,
+        borderRadius: AppSpacing.radiusCard,
         child: _buildCardContent(theme, currencyFormat),
       ),
     );

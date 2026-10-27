@@ -11,7 +11,6 @@ import { Category } from '../src/categories/entities/category.entity';
 import { Budget } from '../src/budgets/entities/budget.entity';
 import { MessageSource } from '../src/message-sources/entities/message-source.entity';
 import { ExpenseTemplate } from '../src/expense-templates/entities/expense-template.entity';
-import { ParsingRule } from '../src/parsing-rules/entities/parsing-rule.entity';
 import { RecurringTransaction } from '../src/recurring-transactions/entities/recurring-transaction.entity';
 import { PendingRecurring } from '../src/recurring-transactions/entities/pending-recurring.entity';
 import { Goal } from '../src/goals/entities/goal.entity';
@@ -67,7 +66,6 @@ const entities = {
   budgets: Budget,
   message_sources: MessageSource,
   expense_templates: ExpenseTemplate,
-  parsing_rules: ParsingRule,
   recurring_transactions: RecurringTransaction,
   pending_recurring: PendingRecurring,
   goals: Goal,

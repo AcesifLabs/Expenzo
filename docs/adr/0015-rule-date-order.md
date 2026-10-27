@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Superseded by ADR 0017: matching rules, and their Date Order, were removed.
 
 ## Context
 

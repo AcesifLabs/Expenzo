@@ -262,16 +262,14 @@ class _DashboardViewState extends State<DashboardView> {
         _horizontalPadding,
         AppSpacing.sm,
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
+          Row(
+            children: [
+              Expanded(
+                child: Text(
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -279,19 +277,19 @@ class _DashboardViewState extends State<DashboardView> {
                     color: colors.onSurface,
                   ),
                 ),
-                ValueListenableBuilder<bool>(
-                  valueListenable: _scanOpening,
-                  builder: (_, opening, _) =>
-                      ReceiptScanBanner(onTap: opening ? null : _onScanTapped),
-                ),
-              ],
-            ),
+              ),
+              IconButton(
+                onPressed: () => context.push(SettingsRoute.rootLocation),
+                tooltip: t.dashboard.settings,
+                padding: EdgeInsets.zero,
+                icon: avatar,
+              ),
+            ],
           ),
-          IconButton(
-            onPressed: () => context.push(SettingsRoute.rootLocation),
-            tooltip: t.dashboard.settings,
-            padding: EdgeInsets.zero,
-            icon: avatar,
+          ValueListenableBuilder<bool>(
+            valueListenable: _scanOpening,
+            builder: (_, opening, _) =>
+                ReceiptScanBanner(onTap: opening ? null : _onScanTapped),
           ),
         ],
       ),
@@ -508,7 +506,7 @@ class _DashboardViewState extends State<DashboardView> {
                 horizontal: _horizontalPadding,
               ),
               child: AppCard(
-                borderRadius: AppSpacing.radiusControl,
+                borderRadius: AppSpacing.radiusCard,
                 padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
                 child: AppEmptyState(
                   icon: PiconsRegular.wallet,
@@ -523,7 +521,7 @@ class _DashboardViewState extends State<DashboardView> {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
             child: AppCard(
-              borderRadius: AppSpacing.radiusControl,
+              borderRadius: AppSpacing.radiusCard,
               padding: const EdgeInsets.all(AppSpacing.md),
               child: Column(
                 children: [
@@ -565,7 +563,7 @@ class _DashboardViewState extends State<DashboardView> {
                 horizontal: _horizontalPadding,
               ),
               child: AppCard(
-                borderRadius: AppSpacing.radiusControl,
+                borderRadius: AppSpacing.radiusCard,
                 padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
                 child: AppEmptyState(
                   icon: PiconsRegular.receipt,
@@ -605,7 +603,7 @@ class _DashboardViewState extends State<DashboardView> {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
             child: AppCard(
-              borderRadius: AppSpacing.radiusControl,
+              borderRadius: AppSpacing.radiusCard,
               clipBehavior: Clip.antiAlias,
               child: Column(children: children),
             ),

@@ -183,10 +183,12 @@ class _InteractiveTemplateBuilderState
 
     final saved = _savedTemplate;
     if (saved == null) return;
-    final monitoredSource = widget.source.copyWith(isMonitored: true);
-    context.read<TemplateEditorBloc>().add(
-      SaveTemplateEvent(saved, monitoredSource),
-    );
+    // A new format turns the sender on; editing one keeps a paused sender
+    // paused.
+    final source = existing == null
+        ? widget.source.copyWith(isMonitored: true)
+        : widget.source;
+    context.read<TemplateEditorBloc>().add(SaveTemplateEvent(saved, source));
   }
 
   Widget _buildStepScaffold({
