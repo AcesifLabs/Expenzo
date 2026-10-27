@@ -165,6 +165,156 @@ void main() {
       );
     });
 
+    group('when the reply stream', () {
+      Future<List<AiAssistantState>> sendWith(
+        Stream<Either<Failure, String>> stream,
+      ) async {
+        when(
+          () => harness().validatePrompt(any()),
+        ).thenReturn(const PromptValidationResult.allow('How is my budget?'));
+        when(
+          () => harness().buildContext(),
+        ).thenAnswer((_) async => const Right('finance context'));
+        when(
+          () => harness().sendMessage(
+            message: any(named: 'message'),
+            context: any(named: 'context'),
+          ),
+        ).thenAnswer((_) => stream);
+
+        final states = <AiAssistantState>[];
+        final subscription = harness().bloc.stream.listen(states.add);
+        harness().bloc.add(const SendMessage('How is my budget?'));
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        await subscription.cancel();
+
+        return states;
+      }
+
+      test('fails, it drops the empty reply and reports the error', () async {
+        final states = await sendWith(
+          Stream.value(const Left(ServerFailure(message: 'No response'))),
+        );
+
+        expect(states.any((s) => s.error != null), isTrue);
+        expect(states.last.messages, hasLength(1));
+        expect(states.last.messages.single.role, ChatRole.user);
+        expect(states.last.isComposing, isFalse);
+      });
+
+      test('ends without tokens, it drops the empty reply', () async {
+        final states = await sendWith(const Stream.empty());
+
+        expect(states.last.messages, hasLength(1));
+        expect(states.last.messages.single.role, ChatRole.user);
+        expect(states.last.isComposing, isFalse);
+      });
+
+      test('fails mid-reply, it keeps the partial text', () async {
+        final states = await sendWith(
+          Stream.fromIterable(const [
+            Right('Partial'),
+            Left(ServerFailure(message: 'Dropped')),
+          ]),
+        );
+
+        expect(states.any((s) => s.error != null), isTrue);
+        expect(states.last.messages, hasLength(2));
+        expect(states.last.messages.last.content, 'Partial');
+      });
+    });
+
+    group('RetryLastMessage', () {
+      test(
+        're-sends the failed prompt without a duplicate user message',
+        () async {
+          final replies = [
+            Stream<Either<Failure, String>>.value(
+              const Left(ServerFailure(message: 'No response')),
+            ),
+            Stream<Either<Failure, String>>.value(const Right('All good')),
+          ];
+          when(
+            () => harness().validatePrompt(any()),
+          ).thenReturn(const PromptValidationResult.allow('How is my budget?'));
+          when(
+            () => harness().buildContext(),
+          ).thenAnswer((_) async => const Right('finance context'));
+          when(
+            () => harness().sendMessage(
+              message: any(named: 'message'),
+              context: any(named: 'context'),
+            ),
+          ).thenAnswer((_) => replies.removeAt(0));
+
+          harness().bloc.add(const SendMessage('How is my budget?'));
+          await Future<void>.delayed(const Duration(milliseconds: 10));
+          expect(harness().bloc.state.failedPrompt, 'How is my budget?');
+
+          harness().bloc.add(const RetryLastMessage());
+          await Future<void>.delayed(const Duration(milliseconds: 10));
+
+          final state = harness().bloc.state;
+          expect(state.messages.map((m) => m.role), [
+            ChatRole.user,
+            ChatRole.assistant,
+          ]);
+          expect(state.messages.last.content, 'All good');
+          expect(state.failedPrompt, isNull);
+          verify(
+            () => harness().sendMessage(
+              message: 'How is my budget?',
+              context: 'finance context',
+            ),
+          ).called(2);
+        },
+      );
+
+      test('drops a partial reply before retrying', () async {
+        final replies = [
+          Stream<Either<Failure, String>>.fromIterable(const [
+            Right('Half'),
+            Left(ServerFailure(message: 'Dropped')),
+          ]),
+          Stream<Either<Failure, String>>.value(const Right('Whole')),
+        ];
+        when(
+          () => harness().validatePrompt(any()),
+        ).thenReturn(const PromptValidationResult.allow('How is my budget?'));
+        when(
+          () => harness().buildContext(),
+        ).thenAnswer((_) async => const Right('finance context'));
+        when(
+          () => harness().sendMessage(
+            message: any(named: 'message'),
+            context: any(named: 'context'),
+          ),
+        ).thenAnswer((_) => replies.removeAt(0));
+
+        harness().bloc.add(const SendMessage('How is my budget?'));
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        harness().bloc.add(const RetryLastMessage());
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+
+        final state = harness().bloc.state;
+        expect(state.messages, hasLength(2));
+        expect(state.messages.last.content, 'Whole');
+      });
+
+      test('does nothing when no reply has failed', () async {
+        harness().bloc.add(const RetryLastMessage());
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+
+        expect(harness().bloc.state.messages, isEmpty);
+        verifyNever(
+          () => harness().sendMessage(
+            message: any(named: 'message'),
+            context: any(named: 'context'),
+          ),
+        );
+      });
+    });
+
     test('SendMessage rate limits rapid repeated prompts', () async {
       var currentTime = DateTime(2026, 1, 1, 12, 0, 0);
       final buildContext = MockBuildFinancialContext();

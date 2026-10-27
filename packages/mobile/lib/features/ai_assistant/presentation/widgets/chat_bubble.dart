@@ -24,7 +24,7 @@ class ChatBubble extends StatelessWidget {
             topLeft: Radius.circular(AppSpacing.radiusControl),
             topRight: Radius.circular(AppSpacing.radiusControl),
             bottomLeft: Radius.circular(AppSpacing.radiusControl),
-            bottomRight: Radius.circular(AppSpacing.radiusPill),
+            bottomRight: Radius.circular(AppSpacing.xs),
           ),
         ),
         child: Text(
@@ -64,10 +64,10 @@ class ChatBubble extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: palette.surface,
                   borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(AppSpacing.radiusControl),
+                    topLeft: Radius.circular(AppSpacing.xs),
                     topRight: Radius.circular(AppSpacing.radiusControl),
                     bottomLeft: Radius.circular(AppSpacing.radiusControl),
-                    bottomRight: Radius.circular(AppSpacing.radiusPill),
+                    bottomRight: Radius.circular(AppSpacing.radiusControl),
                   ),
                 ),
                 child: MarkdownBody(

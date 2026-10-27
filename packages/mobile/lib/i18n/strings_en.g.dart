@@ -73,8 +73,8 @@ class Translations$aiAssistant$en {
 
 	// Translations
 
-	/// en: 'AI assistant'
-	String get title => 'AI assistant';
+	/// en: 'Expie'
+	String get title => 'Expie';
 
 	/// en: 'Ask about your spending'
 	String get inputHint => 'Ask about your spending';
@@ -82,8 +82,8 @@ class Translations$aiAssistant$en {
 	/// en: 'Send message'
 	String get send => 'Send message';
 
-	/// en: 'Expenzo AI provides suggestions based on your data. It is not a licensed financial advisor.'
-	String get disclaimer => 'Expenzo AI provides suggestions based on your data. It is not a licensed financial advisor.';
+	/// en: 'Expie provides suggestions based on your data. It is not a licensed financial advisor.'
+	String get disclaimer => 'Expie provides suggestions based on your data. It is not a licensed financial advisor.';
 
 	late final Translations$aiAssistant$suggestions$en suggestions = Translations$aiAssistant$suggestions$en.internal(_root);
 	late final Translations$aiAssistant$refusals$en refusals = Translations$aiAssistant$refusals$en.internal(_root);
@@ -344,9 +344,6 @@ class Translations$dashboard$en {
 	// Translations
 	late final Translations$dashboard$range$en range = Translations$dashboard$range$en.internal(_root);
 
-	/// en: 'Hi, {name}'
-	String greeting({required Object name}) => 'Hi, ${name}';
-
 	/// en: 'User'
 	String get userFallback => 'User';
 
@@ -364,7 +361,8 @@ class Translations$dashboard$en {
 	/// en: 'No transactions yet'
 	String get noTransactions => 'No transactions yet';
 
-	late final Translations$dashboard$menu$en menu = Translations$dashboard$menu$en.internal(_root);
+	/// en: 'Settings'
+	String get settings => 'Settings';
 
 	/// en: '{spent} of {total}'
 	String budgetSpentOf({required Object spent, required Object total}) => '${spent} of ${total}';
@@ -655,8 +653,8 @@ class Translations$reports$en {
 	/// en: 'Reports'
 	String get title => 'Reports';
 
-	/// en: 'Ask AI'
-	String get askAi => 'Ask AI';
+	/// en: 'Ask Expie'
+	String get askAi => 'Ask Expie';
 
 	/// en: 'Last 7 days'
 	String get last7Days => 'Last 7 days';
@@ -1443,27 +1441,6 @@ class Translations$dashboard$sections$en {
 
 	/// en: 'See all'
 	String get seeAll => 'See all';
-}
-
-// Path: dashboard.menu
-class Translations$dashboard$menu$en {
-	Translations$dashboard$menu$en.internal(this._root);
-
-	final Translations _root; // ignore: unused_field
-
-	// Translations
-
-	/// en: 'Profile'
-	String get profile => 'Profile';
-
-	/// en: 'Sign in'
-	String get signIn => 'Sign in';
-
-	/// en: 'Settings'
-	String get settings => 'Settings';
-
-	/// en: 'Sign out'
-	String get signOut => 'Sign out';
 }
 
 // Path: dashboard.trend
@@ -4867,11 +4844,11 @@ class Translations$support$faq$aiAssistant$en {
 
 	// Translations
 
-	/// en: 'How does the AI assistant work?'
-	String get q => 'How does the AI assistant work?';
+	/// en: 'How does Expie work?'
+	String get q => 'How does Expie work?';
 
-	/// en: 'Tap Ask AI on the Reports tab and ask about your spending, budgets or income. The assistant answers from a summary of this month's data, with personal details such as emails and phone numbers removed, sent to our AI provider, Groq. It gives suggestions, not financial advice.'
-	String get a => 'Tap Ask AI on the Reports tab and ask about your spending, budgets or income. The assistant answers from a summary of this month\'s data, with personal details such as emails and phone numbers removed, sent to our AI provider, Groq. It gives suggestions, not financial advice.';
+	/// en: 'Tap the robot button on the Reports tab and ask Expie about your spending, budgets or income. Expie answers from a summary of this month's data, with personal details such as emails and phone numbers removed, sent to our AI provider, Groq. It gives suggestions, not financial advice.'
+	String get a => 'Tap the robot button on the Reports tab and ask Expie about your spending, budgets or income. Expie answers from a summary of this month\'s data, with personal details such as emails and phone numbers removed, sent to our AI provider, Groq. It gives suggestions, not financial advice.';
 }
 
 // Path: support.faq.currency
@@ -4957,10 +4934,10 @@ class Translations$settings$homePage$options$reports$en {
 extension on Translations {
 	dynamic _flatMapFunction(String path) {
 		return switch (path) {
-			'aiAssistant.title' => 'AI assistant',
+			'aiAssistant.title' => 'Expie',
 			'aiAssistant.inputHint' => 'Ask about your spending',
 			'aiAssistant.send' => 'Send message',
-			'aiAssistant.disclaimer' => 'Expenzo AI provides suggestions based on your data. It is not a licensed financial advisor.',
+			'aiAssistant.disclaimer' => 'Expie provides suggestions based on your data. It is not a licensed financial advisor.',
 			'aiAssistant.suggestions.topExpenses' => 'Top expenses',
 			'aiAssistant.suggestions.budget' => 'How\'s my budget?',
 			'aiAssistant.refusals.outOfScope' => 'I can only help with your Expenzo finances: spending, budgets, categories, income, balance, savings, transactions, reports and recurring bills. Ask a question about your own data.',
@@ -5208,7 +5185,6 @@ extension on Translations {
 			'dashboard.range.previous.thisMonth' => 'last month',
 			'dashboard.range.previous.lastMonth' => 'the month before',
 			'dashboard.range.previous.thisYear' => 'last year',
-			'dashboard.greeting' => ({required Object name}) => 'Hi, ${name}',
 			'dashboard.userFallback' => 'User',
 			'dashboard.income' => 'Income',
 			'dashboard.expense' => 'Expense',
@@ -5218,10 +5194,7 @@ extension on Translations {
 			'dashboard.sections.seeAll' => 'See all',
 			'dashboard.noBudgets' => 'No budgets yet',
 			'dashboard.noTransactions' => 'No transactions yet',
-			'dashboard.menu.profile' => 'Profile',
-			'dashboard.menu.signIn' => 'Sign in',
-			'dashboard.menu.settings' => 'Settings',
-			'dashboard.menu.signOut' => 'Sign out',
+			'dashboard.settings' => 'Settings',
 			'dashboard.budgetSpentOf' => ({required Object spent, required Object total}) => '${spent} of ${total}',
 			'dashboard.trend.noPrevious' => ({required Object period}) => 'No spending ${period} to compare',
 			'dashboard.trend.same' => ({required Object period}) => 'Same as ${period}',
@@ -5469,12 +5442,12 @@ extension on Translations {
 			'onboarding.timeline.cannotAfford' => ({required Object amount}) => 'Your savings of ${amount}/month don\'t cover these. Pick a later custom date.',
 			'onboarding.timeline.months' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} month', other: '${n} months', ), 
 			'onboarding.timeline.perMonth' => ({required Object amount}) => '${amount}/mo',
-			_ => null,
-		} ?? switch (path) {
 			'onboarding.timeline.custom' => 'Custom',
 			'onboarding.timeline.customHint' => 'Set your own',
 			'onboarding.timeline.fit.affordable' => 'Fits your savings',
 			'onboarding.timeline.fit.tooExpensive' => 'More than your savings',
+			_ => null,
+		} ?? switch (path) {
 			'onboarding.timeline.fit.slow' => 'Takes a long time',
 			'onboarding.complete.title' => 'Setup complete!',
 			'onboarding.complete.budgets' => 'Budget created',
@@ -5672,7 +5645,7 @@ extension on Translations {
 			'reports.insights.budgets.title' => 'Budget status',
 			'reports.insights.budgets.description' => 'Review your budgets to stay on track this month.',
 			'reports.title' => 'Reports',
-			'reports.askAi' => 'Ask AI',
+			'reports.askAi' => 'Ask Expie',
 			'reports.last7Days' => 'Last 7 days',
 			'reports.last30Days' => 'Last 30 days',
 			'reports.noCategoryData' => 'No category data',
@@ -5947,8 +5920,8 @@ extension on Translations {
 			'support.faq.export.a' => 'Yes. Go to Settings → Export data, pick a date range and what to include (transactions, budgets, categories). One type is shared as a CSV file; several come as a ZIP of CSV files.',
 			'support.faq.sync.q' => 'Is my data safe if I lose my phone?',
 			'support.faq.sync.a' => 'If you sign in with Google and Sync is on (it is on by default), your transactions, budgets, categories, recurring transactions, and auto-import senders and rules are kept in your account. Sign in on your new phone to get them back. App settings stay on each phone. Without signing in, your data stays only on this phone.',
-			'support.faq.aiAssistant.q' => 'How does the AI assistant work?',
-			'support.faq.aiAssistant.a' => 'Tap Ask AI on the Reports tab and ask about your spending, budgets or income. The assistant answers from a summary of this month\'s data, with personal details such as emails and phone numbers removed, sent to our AI provider, Groq. It gives suggestions, not financial advice.',
+			'support.faq.aiAssistant.q' => 'How does Expie work?',
+			'support.faq.aiAssistant.a' => 'Tap the robot button on the Reports tab and ask Expie about your spending, budgets or income. Expie answers from a summary of this month\'s data, with personal details such as emails and phone numbers removed, sent to our AI provider, Groq. It gives suggestions, not financial advice.',
 			'support.faq.currency.q' => 'How do I change the currency?',
 			'support.faq.currency.a' => 'Go to Settings → Default currency. Amounts are not converted; only the symbol and format change.',
 			'support.rate.title' => 'Love Expenzo?',

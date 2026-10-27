@@ -486,8 +486,8 @@ class _ReportsScreenContentState extends State<_ReportsScreenContent>
                 ),
               ),
               Positioned(
-                right: 16,
-                bottom: 16,
+                right: AppSpacing.md,
+                bottom: AppSpacing.xl,
                 child: AIChatFAB(
                   onPressed: () => context.push('/ai-assistant'),
                 ),

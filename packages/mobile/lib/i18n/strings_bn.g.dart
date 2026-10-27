@@ -70,10 +70,10 @@ class _Translations$aiAssistant$bn extends Translations$aiAssistant$en {
 	final TranslationsBn _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'AI সহকারী';
+	@override String get title => 'Expie';
 	@override String get inputHint => 'আপনার খরচ নিয়ে জিজ্ঞেস করুন';
 	@override String get send => 'মেসেজ পাঠান';
-	@override String get disclaimer => 'Expenzo AI আপনার ডেটা দেখে পরামর্শ দেয়। এটি কোনো লাইসেন্সপ্রাপ্ত আর্থিক উপদেষ্টা নয়।';
+	@override String get disclaimer => 'Expie আপনার ডেটা দেখে পরামর্শ দেয়। এটি কোনো লাইসেন্সপ্রাপ্ত আর্থিক উপদেষ্টা নয়।';
 	@override late final _Translations$aiAssistant$suggestions$bn suggestions = _Translations$aiAssistant$suggestions$bn._(_root);
 	@override late final _Translations$aiAssistant$refusals$bn refusals = _Translations$aiAssistant$refusals$bn._(_root);
 	@override late final _Translations$aiAssistant$errors$bn errors = _Translations$aiAssistant$errors$bn._(_root);
@@ -258,14 +258,13 @@ class _Translations$dashboard$bn extends Translations$dashboard$en {
 
 	// Translations
 	@override late final _Translations$dashboard$range$bn range = _Translations$dashboard$range$bn._(_root);
-	@override String greeting({required Object name}) => 'হ্যালো, ${name}';
 	@override String get userFallback => 'ব্যবহারকারী';
 	@override String get income => 'আয়';
 	@override String get expense => 'খরচ';
 	@override late final _Translations$dashboard$sections$bn sections = _Translations$dashboard$sections$bn._(_root);
 	@override String get noBudgets => 'এখনো কোনো বাজেট নেই';
 	@override String get noTransactions => 'এখনো কোনো লেনদেন নেই';
-	@override late final _Translations$dashboard$menu$bn menu = _Translations$dashboard$menu$bn._(_root);
+	@override String get settings => 'সেটিংস';
 	@override String budgetSpentOf({required Object total, required Object spent}) => '${total}-এর মধ্যে ${spent}';
 	@override late final _Translations$dashboard$trend$bn trend = _Translations$dashboard$trend$bn._(_root);
 	@override late final _Translations$dashboard$autoImport$bn autoImport = _Translations$dashboard$autoImport$bn._(_root);
@@ -474,7 +473,7 @@ class _Translations$reports$bn extends Translations$reports$en {
 	// Translations
 	@override late final _Translations$reports$insights$bn insights = _Translations$reports$insights$bn._(_root);
 	@override String get title => 'রিপোর্ট';
-	@override String get askAi => 'AI-কে জিজ্ঞেস করুন';
+	@override String get askAi => 'Expie-কে জিজ্ঞেস করুন';
 	@override String get last7Days => 'গত 7 দিন';
 	@override String get last30Days => 'গত 30 দিন';
 	@override String get noCategoryData => 'ক্যাটাগরির কোনো ডেটা নেই';
@@ -935,19 +934,6 @@ class _Translations$dashboard$sections$bn extends Translations$dashboard$section
 	@override String get recentActivity => 'সাম্প্রতিক লেনদেন';
 	@override String get spendingPatterns => 'খরচের ধরন';
 	@override String get seeAll => 'সব দেখুন';
-}
-
-// Path: dashboard.menu
-class _Translations$dashboard$menu$bn extends Translations$dashboard$menu$en {
-	_Translations$dashboard$menu$bn._(TranslationsBn root) : this._root = root, super.internal(root);
-
-	final TranslationsBn _root; // ignore: unused_field
-
-	// Translations
-	@override String get profile => 'প্রোফাইল';
-	@override String get signIn => 'সাইন ইন';
-	@override String get settings => 'সেটিংস';
-	@override String get signOut => 'সাইন আউট';
 }
 
 // Path: dashboard.trend
@@ -3020,8 +3006,8 @@ class _Translations$support$faq$aiAssistant$bn extends Translations$support$faq$
 	final TranslationsBn _root; // ignore: unused_field
 
 	// Translations
-	@override String get q => 'AI সহকারী কীভাবে কাজ করে?';
-	@override String get a => 'রিপোর্ট ট্যাবে AI-কে জিজ্ঞেস করুন-এ ট্যাপ করে আপনার খরচ, বাজেট বা আয় নিয়ে প্রশ্ন করুন। সহকারী এই মাসের ডেটার একটি সারাংশ থেকে উত্তর দেয়; ইমেইল ও ফোন নম্বরের মতো ব্যক্তিগত তথ্য বাদ দিয়ে সারাংশটি আমাদের AI প্রদানকারী Groq-এ পাঠানো হয়। এটি পরামর্শ দেয়, আর্থিক উপদেশ নয়।';
+	@override String get q => 'Expie কীভাবে কাজ করে?';
+	@override String get a => 'রিপোর্ট ট্যাবে রোবট বাটনে ট্যাপ করে Expie-কে আপনার খরচ, বাজেট বা আয় নিয়ে প্রশ্ন করুন। Expie এই মাসের ডেটার একটি সারাংশ থেকে উত্তর দেয়; ইমেইল ও ফোন নম্বরের মতো ব্যক্তিগত তথ্য বাদ দিয়ে সারাংশটি আমাদের AI প্রদানকারী Groq-এ পাঠানো হয়। এটি পরামর্শ দেয়, আর্থিক উপদেশ নয়।';
 }
 
 // Path: support.faq.currency
@@ -3087,10 +3073,10 @@ class _Translations$settings$homePage$options$reports$bn extends Translations$se
 extension on TranslationsBn {
 	dynamic _flatMapFunction(String path) {
 		return switch (path) {
-			'aiAssistant.title' => 'AI সহকারী',
+			'aiAssistant.title' => 'Expie',
 			'aiAssistant.inputHint' => 'আপনার খরচ নিয়ে জিজ্ঞেস করুন',
 			'aiAssistant.send' => 'মেসেজ পাঠান',
-			'aiAssistant.disclaimer' => 'Expenzo AI আপনার ডেটা দেখে পরামর্শ দেয়। এটি কোনো লাইসেন্সপ্রাপ্ত আর্থিক উপদেষ্টা নয়।',
+			'aiAssistant.disclaimer' => 'Expie আপনার ডেটা দেখে পরামর্শ দেয়। এটি কোনো লাইসেন্সপ্রাপ্ত আর্থিক উপদেষ্টা নয়।',
 			'aiAssistant.suggestions.topExpenses' => 'সবচেয়ে বড় খরচ',
 			'aiAssistant.suggestions.budget' => 'আমার বাজেট কেমন চলছে?',
 			'aiAssistant.refusals.outOfScope' => 'আমি শুধু আপনার Expenzo-র হিসাব নিয়ে সাহায্য করতে পারি: খরচ, বাজেট, ক্যাটাগরি, আয়, ব্যালেন্স, সঞ্চয়, লেনদেন, রিপোর্ট ও পুনরাবৃত্ত বিল। আপনার নিজের ডেটা নিয়ে প্রশ্ন করুন।',
@@ -3338,7 +3324,6 @@ extension on TranslationsBn {
 			'dashboard.range.previous.thisMonth' => 'গত মাস',
 			'dashboard.range.previous.lastMonth' => 'তার আগের মাস',
 			'dashboard.range.previous.thisYear' => 'গত বছর',
-			'dashboard.greeting' => ({required Object name}) => 'হ্যালো, ${name}',
 			'dashboard.userFallback' => 'ব্যবহারকারী',
 			'dashboard.income' => 'আয়',
 			'dashboard.expense' => 'খরচ',
@@ -3348,10 +3333,7 @@ extension on TranslationsBn {
 			'dashboard.sections.seeAll' => 'সব দেখুন',
 			'dashboard.noBudgets' => 'এখনো কোনো বাজেট নেই',
 			'dashboard.noTransactions' => 'এখনো কোনো লেনদেন নেই',
-			'dashboard.menu.profile' => 'প্রোফাইল',
-			'dashboard.menu.signIn' => 'সাইন ইন',
-			'dashboard.menu.settings' => 'সেটিংস',
-			'dashboard.menu.signOut' => 'সাইন আউট',
+			'dashboard.settings' => 'সেটিংস',
 			'dashboard.budgetSpentOf' => ({required Object total, required Object spent}) => '${total}-এর মধ্যে ${spent}',
 			'dashboard.trend.noPrevious' => ({required Object period}) => '${period}-এর সাথে তুলনা করার মতো খরচ নেই',
 			'dashboard.trend.same' => ({required Object period}) => '${period}-এর সমান',
@@ -3599,12 +3581,12 @@ extension on TranslationsBn {
 			'onboarding.timeline.cannotAfford' => ({required Object amount}) => 'মাসে ${amount} সঞ্চয় দিয়ে এগুলো হবে না। আরও পরের একটি নিজস্ব তারিখ বাছুন।',
 			'onboarding.timeline.months' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n, one: '${n} মাস', other: '${n} মাস', ), 
 			'onboarding.timeline.perMonth' => ({required Object amount}) => '${amount}/মাস',
-			_ => null,
-		} ?? switch (path) {
 			'onboarding.timeline.custom' => 'নিজস্ব',
 			'onboarding.timeline.customHint' => 'নিজে ঠিক করুন',
 			'onboarding.timeline.fit.affordable' => 'আপনার সঞ্চয়ে হবে',
 			'onboarding.timeline.fit.tooExpensive' => 'আপনার সঞ্চয়ের চেয়ে বেশি',
+			_ => null,
+		} ?? switch (path) {
 			'onboarding.timeline.fit.slow' => 'অনেক সময় লাগবে',
 			'onboarding.complete.title' => 'সেটআপ সম্পন্ন!',
 			'onboarding.complete.budgets' => 'বাজেট তৈরি হয়েছে',
@@ -3802,7 +3784,7 @@ extension on TranslationsBn {
 			'reports.insights.budgets.title' => 'বাজেটের অবস্থা',
 			'reports.insights.budgets.description' => 'এই মাসে ঠিক পথে থাকতে আপনার বাজেটগুলো দেখুন।',
 			'reports.title' => 'রিপোর্ট',
-			'reports.askAi' => 'AI-কে জিজ্ঞেস করুন',
+			'reports.askAi' => 'Expie-কে জিজ্ঞেস করুন',
 			'reports.last7Days' => 'গত 7 দিন',
 			'reports.last30Days' => 'গত 30 দিন',
 			'reports.noCategoryData' => 'ক্যাটাগরির কোনো ডেটা নেই',
@@ -4077,8 +4059,8 @@ extension on TranslationsBn {
 			'support.faq.export.a' => 'হ্যাঁ। সেটিংস → ডেটা এক্সপোর্ট-এ গিয়ে তারিখের পরিসর এবং কী কী রাখবেন (লেনদেন, বাজেট, ক্যাটাগরি) বেছে নিন। একটি ধরন হলে CSV ফাইল হিসেবে, একাধিক হলে CSV ফাইলের একটি ZIP হিসেবে শেয়ার হয়।',
 			'support.faq.sync.q' => 'ফোন হারালে কি আমার ডেটা নিরাপদ থাকবে?',
 			'support.faq.sync.a' => 'Google দিয়ে সাইন ইন করা থাকলে এবং সিঙ্ক চালু থাকলে (এটি ডিফল্টভাবে চালু), আপনার লেনদেন, বাজেট, ক্যাটাগরি, পুনরাবৃত্ত লেনদেন এবং স্বয়ংক্রিয় ইমপোর্টের প্রেরক ও নিয়ম আপনার অ্যাকাউন্টে থাকে। নতুন ফোনে সাইন ইন করলে সেগুলো ফিরে পাবেন। অ্যাপের সেটিংস প্রতিটি ফোনে আলাদা থাকে। সাইন ইন না করলে ডেটা শুধু এই ফোনেই থাকে।',
-			'support.faq.aiAssistant.q' => 'AI সহকারী কীভাবে কাজ করে?',
-			'support.faq.aiAssistant.a' => 'রিপোর্ট ট্যাবে AI-কে জিজ্ঞেস করুন-এ ট্যাপ করে আপনার খরচ, বাজেট বা আয় নিয়ে প্রশ্ন করুন। সহকারী এই মাসের ডেটার একটি সারাংশ থেকে উত্তর দেয়; ইমেইল ও ফোন নম্বরের মতো ব্যক্তিগত তথ্য বাদ দিয়ে সারাংশটি আমাদের AI প্রদানকারী Groq-এ পাঠানো হয়। এটি পরামর্শ দেয়, আর্থিক উপদেশ নয়।',
+			'support.faq.aiAssistant.q' => 'Expie কীভাবে কাজ করে?',
+			'support.faq.aiAssistant.a' => 'রিপোর্ট ট্যাবে রোবট বাটনে ট্যাপ করে Expie-কে আপনার খরচ, বাজেট বা আয় নিয়ে প্রশ্ন করুন। Expie এই মাসের ডেটার একটি সারাংশ থেকে উত্তর দেয়; ইমেইল ও ফোন নম্বরের মতো ব্যক্তিগত তথ্য বাদ দিয়ে সারাংশটি আমাদের AI প্রদানকারী Groq-এ পাঠানো হয়। এটি পরামর্শ দেয়, আর্থিক উপদেশ নয়।',
 			'support.faq.currency.q' => 'কীভাবে মুদ্রা বদলাব?',
 			'support.faq.currency.a' => 'সেটিংস → ডিফল্ট মুদ্রা-তে যান। পরিমাণ রূপান্তর হয় না; শুধু চিহ্ন ও ফরম্যাট বদলায়।',
 			'support.rate.title' => 'Expenzo ভালো লাগছে?',

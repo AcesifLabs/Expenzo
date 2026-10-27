@@ -5,7 +5,7 @@ class AiAssistantConstants {
   static const cooldownDuration = Duration(seconds: 4);
 
   static const systemGuardrails = '''
-You are Expenzo AI, a strict in-app personal finance assistant.
+You are Expie, Expenzo's strict in-app personal finance assistant.
 
 ## Data Schema
 

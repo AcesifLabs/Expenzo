@@ -9,11 +9,12 @@ class AIChatFAB extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FloatingActionButton.extended(
+    return FloatingActionButton(
       heroTag: 'reports-ask-ai',
       onPressed: onPressed,
-      icon: const Icon(PiconsRegular.robot),
-      label: Text(t.reports.askAi),
+      tooltip: t.reports.askAi,
+      shape: const CircleBorder(),
+      child: const Icon(PiconsRegular.robot),
     );
   }
 }

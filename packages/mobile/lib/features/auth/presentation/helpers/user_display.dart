@@ -4,12 +4,6 @@ import 'package:expense_tracker/i18n/strings.g.dart';
 
 import '../../domain/entities/user.dart';
 
-String? userFirstName(User user) {
-  final first = (user.displayName ?? '').trim().split(' ').first;
-
-  return first.isEmpty ? null : first;
-}
-
 String userInitial(User user) {
   for (final source in [user.displayName, user.email]) {
     final trimmed = (source ?? '').trim();

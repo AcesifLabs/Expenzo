@@ -13,9 +13,7 @@ import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/core/utils/money_format.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:expense_tracker/features/goals/presentation/widgets/dashboard_goal_card.dart';
-import 'package:expense_tracker/features/auth/presentation/bloc/auth_event.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_state.dart';
-import 'package:expense_tracker/features/auth/presentation/helpers/user_display.dart';
 import 'package:expense_tracker/features/auth/presentation/widgets/user_avatar.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budget_progress.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets_with_progress.dart';
@@ -25,7 +23,6 @@ import 'package:expense_tracker/features/dashboard/presentation/models/dashboard
 import 'package:expense_tracker/features/dashboard/presentation/widgets/balance_row.dart';
 import 'package:expense_tracker/features/dashboard/presentation/widgets/dashboard_section_header.dart';
 import 'package:expense_tracker/features/dashboard/presentation/widgets/dashboard_trend_card.dart';
-import 'package:expense_tracker/features/dashboard/presentation/widgets/menu_row.dart';
 import 'package:expense_tracker/features/dashboard/presentation/widgets/receipt_scan_banner.dart';
 import 'package:expense_tracker/features/records/domain/entities/record.dart';
 import 'package:expense_tracker/features/reports/domain/entities/date_amount.dart';
@@ -225,9 +222,7 @@ class _DashboardViewState extends State<DashboardView> {
     return Future<void>.value();
   }
 
-  String _greeting(String? firstName) => firstName == null
-      ? DateFormat('EEEE, d MMMM').format(clock.now())
-      : t.dashboard.greeting(name: firstName);
+  String _todayLabel() => DateFormat('EEEE, d MMMM').format(clock.now());
 
   Widget _buildAvatarWidget(BuildContext context, AuthState authState) {
     final colors = Theme.of(context).colorScheme;
@@ -255,7 +250,7 @@ class _DashboardViewState extends State<DashboardView> {
 
   Widget _buildHeader(
     BuildContext context, {
-    required String greeting,
+    required String title,
     required Widget avatar,
   }) {
     final colors = Theme.of(context).colorScheme;
@@ -277,7 +272,7 @@ class _DashboardViewState extends State<DashboardView> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  greeting,
+                  title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.headlineSmall.copyWith(
@@ -292,13 +287,9 @@ class _DashboardViewState extends State<DashboardView> {
               ],
             ),
           ),
-          PopupMenuButton<String>(
-            offset: const Offset(0, 48),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
-            ),
-            onSelected: (value) => _handleMenuAction(context, value),
-            itemBuilder: (context) => _buildMenuItems(context),
+          IconButton(
+            onPressed: () => context.push(SettingsRoute.rootLocation),
+            tooltip: t.dashboard.settings,
             padding: EdgeInsets.zero,
             icon: avatar,
           ),
@@ -813,48 +804,6 @@ class _DashboardViewState extends State<DashboardView> {
     return di.getIt<GetSpendingTrend>();
   }
 
-  List<PopupMenuEntry<String>> _buildMenuItems(BuildContext context) {
-    final isAuth = context.read<AuthBloc>().state is Authenticated;
-    final menu = t.dashboard.menu;
-
-    return [
-      if (isAuth)
-        PopupMenuItem(
-          value: 'profile',
-          child: MenuRow(icon: PiconsRegular.user, text: menu.profile),
-        )
-      else
-        PopupMenuItem(
-          value: 'sign_in',
-          child: MenuRow(icon: PiconsRegular.signIn, text: menu.signIn),
-        ),
-      PopupMenuItem(
-        value: 'settings',
-        child: MenuRow(icon: PiconsRegular.gear, text: menu.settings),
-      ),
-      if (isAuth) ...[
-        const PopupMenuDivider(),
-        PopupMenuItem(
-          value: 'sign_out',
-          child: MenuRow(icon: PiconsRegular.signOut, text: menu.signOut),
-        ),
-      ],
-    ];
-  }
-
-  void _handleMenuAction(BuildContext context, String value) {
-    switch (value) {
-      case 'profile':
-        context.push(SettingsRoute.profile.location);
-      case 'settings':
-        context.push(SettingsRoute.rootLocation);
-      case 'sign_in':
-        context.push('/login');
-      case 'sign_out':
-        context.read<AuthBloc>().add(const SignOutRequested());
-    }
-  }
-
   List<Widget> _buildContent(
     BuildContext context,
     DashboardState state,
@@ -879,10 +828,6 @@ class _DashboardViewState extends State<DashboardView> {
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, authState) {
-        final firstName = authState is Authenticated
-            ? userFirstName(authState.user)
-            : null;
-
         return BlocBuilder<DashboardBloc, DashboardState>(
           builder: (context, state) {
             final dateRange = state.dateRange ?? DateRange.thisMonth();
@@ -898,7 +843,7 @@ class _DashboardViewState extends State<DashboardView> {
                     SliverToBoxAdapter(
                       child: _buildHeader(
                         context,
-                        greeting: _greeting(firstName),
+                        title: _todayLabel(),
                         avatar: _buildAvatarWidget(context, authState),
                       ),
                     ),

@@ -70,6 +70,15 @@ class _AiAssistantContentState extends State<_AiAssistantContent> {
           SnackBar(
             content: Text(error),
             backgroundColor: context.palette.expense,
+            action: state.failedPrompt == null
+                ? null
+                : SnackBarAction(
+                    label: t.common.tryAgain,
+                    textColor: context.palette.onBrandFill,
+                    onPressed: () => context.read<AiAssistantBloc>().add(
+                      const RetryLastMessage(),
+                    ),
+                  ),
           ),
         );
     }
@@ -96,9 +105,12 @@ class _AiAssistantContentState extends State<_AiAssistantContent> {
             );
           }
 
+          final message = state.messages[index];
+          if (message.isPendingReply) return const SizedBox.shrink();
+
           return Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.smd),
-            child: ChatBubble(message: state.messages[index]),
+            child: ChatBubble(message: message),
           );
         },
       ),

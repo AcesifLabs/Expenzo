@@ -51,8 +51,8 @@
       "a": "If you sign in with Google and Sync is on (it is on by default), your transactions, budgets, categories, recurring transactions, and auto-import senders and rules are kept in your account. Sign in on your new phone to get them back. App settings stay on each phone. Without signing in, your data stays only on this phone."
     },
     "aiAssistant": {
-      "q": "How does the AI assistant work?",
-      "a": "Tap Ask AI on the Reports tab and ask about your spending, budgets or income. The assistant answers from a summary of this month's data, with personal details such as emails and phone numbers removed, sent to our AI provider, Groq. It gives suggestions, not financial advice."
+      "q": "How does Expie work?",
+      "a": "Tap the robot button on the Reports tab and ask Expie about your spending, budgets or income. Expie answers from a summary of this month's data, with personal details such as emails and phone numbers removed, sent to our AI provider, Groq. It gives suggestions, not financial advice."
     },
     "currency": {
       "q": "How do I change the currency?",

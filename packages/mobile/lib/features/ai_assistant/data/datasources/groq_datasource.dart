@@ -9,7 +9,7 @@ import 'groq_vision_request.dart';
 class GroqDataSource {
   static const visionModel = GroqVisionRequest.defaultModel;
   static const _endpoint = 'https://api.groq.com/openai/v1/chat/completions';
-  static const _model = 'llama-3.1-8b-instant';
+  static const _model = 'openai/gpt-oss-20b';
 
   final http.Client _client;
 
@@ -38,8 +38,9 @@ class GroqDataSource {
       ],
       'model': _model,
       'temperature': 1,
-      'max_completion_tokens': 1024,
+      'max_completion_tokens': 2048,
       'top_p': 1,
+      'reasoning_effort': 'low',
       'stream': true,
     });
 
