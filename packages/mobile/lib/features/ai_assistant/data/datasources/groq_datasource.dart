@@ -2,12 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'groq_chat_completion.dart';
 import 'groq_vision_request.dart';
 
 class GroqDataSource {
-  static const visionModel = GroqVisionRequest.defaultModel;
   static const _endpoint = 'https://api.groq.com/openai/v1/chat/completions';
   static const _model = 'openai/gpt-oss-20b';
 
@@ -95,7 +95,7 @@ class GroqDataSource {
         'model': request.model,
         'temperature': 0.1,
         'max_completion_tokens': 1024,
-
+        'response_format': {'type': 'json_object'},
         'reasoning_effort': 'none',
       }),
     );
@@ -105,8 +105,9 @@ class GroqDataSource {
         'Groq vision API error status=${response.statusCode} '
         'model=${request.model} body=${response.body}',
       );
-      throw Exception(
-        'Groq API error ${response.statusCode}: ${response.body}',
+      throw ServerException(
+        message: 'Groq API error: ${response.body}',
+        statusCode: response.statusCode,
       );
     }
 

@@ -516,6 +516,12 @@ class Translations$receiptScan$en {
 	/// en: 'Couldn't read the receipt. Try again or add it by hand.'
 	String get readFailed => 'Couldn\'t read the receipt. Try again or add it by hand.';
 
+	/// en: 'Couldn't find the total on this receipt. Try a clearer photo.'
+	String get totalUnreadable => 'Couldn\'t find the total on this receipt. Try a clearer photo.';
+
+	/// en: 'Receipt reading isn't available right now. Add it by hand.'
+	String get serviceUnavailable => 'Receipt reading isn\'t available right now. Add it by hand.';
+
 	/// en: 'Choose from gallery'
 	String get chooseFromGallery => 'Choose from gallery';
 
@@ -5333,6 +5339,8 @@ extension on Translations {
 			'receiptScan.cameraFailed' => 'Couldn\'t open the camera.',
 			'receiptScan.captureFailed' => 'Couldn\'t take the photo. Try again.',
 			'receiptScan.readFailed' => 'Couldn\'t read the receipt. Try again or add it by hand.',
+			'receiptScan.totalUnreadable' => 'Couldn\'t find the total on this receipt. Try a clearer photo.',
+			'receiptScan.serviceUnavailable' => 'Receipt reading isn\'t available right now. Add it by hand.',
 			'receiptScan.chooseFromGallery' => 'Choose from gallery',
 			'receiptScan.flashOff' => 'Turn flash off',
 			'receiptScan.flashOn' => 'Turn flash on',

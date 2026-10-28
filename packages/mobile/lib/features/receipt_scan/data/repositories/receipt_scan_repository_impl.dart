@@ -2,12 +2,14 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dartz/dartz.dart';
+import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/error/network_error.dart';
 import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/features/ai_assistant/data/datasources/groq_datasource.dart';
 import 'package:expense_tracker/features/ai_assistant/data/datasources/groq_vision_request.dart';
 import '../../domain/entities/receipt_extraction.dart';
+import '../../domain/usecases/extract_receipt.dart';
 import '../../domain/repositories/receipt_scan_repository.dart';
 import '../receipt_extraction_parser.dart';
 
@@ -52,6 +54,7 @@ No markdown, no commentary.
           userMessage: _userMessage,
           imageBase64: base64Encode(imageBytes),
           mimeType: mimeType,
+          model: GroqVisionRequest.configuredModel,
         ),
       );
 
@@ -63,14 +66,31 @@ No markdown, no commentary.
       );
 
       return Right(extraction);
+    } on ReceiptTotalUnreadableException catch (e) {
+      appLogger.warning('ReceiptScan total unreadable', e);
+
+      return const Left(ReceiptTotalUnreadableFailure());
     } on FormatException catch (e, s) {
       appLogger.error('ReceiptScan parse failed: ${e.message}', e, s);
 
       return Left(ServerFailure(message: e.message));
+    } on ServerException catch (e, s) {
+      appLogger.error('ReceiptScan API error', e, s);
+
+      return Left(
+        e.statusCode == 400
+            ? ServerFailure(message: e.message, statusCode: 400)
+            : ReceiptServiceUnavailableFailure(message: e.message),
+      );
     } catch (e, s) {
       appLogger.error('ReceiptScan extract failed', e, s);
+      final failure = failureFromNetworkOrServer(e);
 
-      return Left(failureFromNetworkOrServer(e));
+      return Left(
+        failure is NetworkFailure
+            ? failure
+            : ReceiptServiceUnavailableFailure(message: failure.message),
+      );
     }
   }
 
@@ -83,7 +103,7 @@ No markdown, no commentary.
     return '''
 You are a receipt field extractor.
 Output one JSON object with keys:
-amount (number, total due; 0 if unreadable),
+amount (number, the total due; null if you cannot read it),
 description (short purchase summary, max 8 words),
 date (YYYY-MM-DD from the receipt, or null if unreadable),
 $categoryInstruction.

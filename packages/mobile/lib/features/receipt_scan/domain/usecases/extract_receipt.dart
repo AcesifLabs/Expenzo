@@ -35,3 +35,17 @@ class ExtractReceiptParams extends Params {
     this.categoryNames = const [],
   });
 }
+
+class ReceiptTotalUnreadableFailure extends Failure {
+  const ReceiptTotalUnreadableFailure({
+    super.message = 'Receipt total is unreadable',
+    super.errorCode = 'RECEIPT_TOTAL_UNREADABLE',
+  });
+}
+
+class ReceiptServiceUnavailableFailure extends Failure {
+  const ReceiptServiceUnavailableFailure({
+    required super.message,
+    super.errorCode = 'RECEIPT_SERVICE_UNAVAILABLE',
+  });
+}

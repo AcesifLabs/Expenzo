@@ -49,6 +49,8 @@ class SampleAnalyzerView extends StatefulWidget {
 }
 
 class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
+  static const _maxBannerShare = 0.3;
+
   final ScrollController _scrollController = ScrollController();
   Timer? _undoTimer;
   Timer? _lastErrorTimer;
@@ -487,12 +489,15 @@ class _SampleAnalyzerViewState extends State<SampleAnalyzerView> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: AppSpacing.smd),
-
-                Flexible(
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight:
+                        MediaQuery.sizeOf(context).height * _maxBannerShare,
+                  ),
                   child: SingleChildScrollView(child: _buildInfoBanner()),
                 ),
                 const SizedBox(height: AppSpacing.smd),
-                Expanded(flex: 2, child: _buildContent()),
+                Expanded(child: _buildContent()),
               ],
             ),
           ),

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/features/receipt_scan/data/receipt_extraction_parser.dart';
 
 void main() {
@@ -66,6 +67,24 @@ Construct JSON: `{"amount": 1, "description": "Wrong"}`.
         () => parser.parse('{"amount": 0, "description": "Shop"}'),
         throwsFormatException,
       );
+    });
+
+    test('a missing or zero total is unreadable, not malformed', () {
+      for (final amount in [
+        'null',
+        '0',
+        '"0"',
+        '"0.00"',
+        '"null"',
+        '"N/A"',
+        '""',
+        '0.004',
+      ]) {
+        expect(
+          () => parser.parse('{"amount": $amount, "description": "Shop"}'),
+          throwsA(isA<ReceiptTotalUnreadableException>()),
+        );
+      }
     });
 
     test('rejects empty description', () {

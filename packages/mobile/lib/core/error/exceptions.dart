@@ -76,3 +76,8 @@ class NetworkException implements Exception {
 class EmptyExportException implements Exception {
   const EmptyExportException();
 }
+
+class ReceiptTotalUnreadableException extends FormatException {
+  const ReceiptTotalUnreadableException()
+    : super('Receipt total is unreadable');
+}

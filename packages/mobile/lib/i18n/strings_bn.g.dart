@@ -385,6 +385,8 @@ class _Translations$receiptScan$bn extends Translations$receiptScan$en {
 	@override String get cameraFailed => 'ক্যামেরা চালু করা যায়নি।';
 	@override String get captureFailed => 'ছবি তোলা যায়নি। আবার চেষ্টা করুন।';
 	@override String get readFailed => 'রসিদটি পড়া যায়নি। আবার চেষ্টা করুন অথবা নিজে যোগ করুন।';
+	@override String get totalUnreadable => 'এই রসিদে মোট পরিমাণ খুঁজে পাওয়া যায়নি। আরও পরিষ্কার একটি ছবি তুলুন।';
+	@override String get serviceUnavailable => 'এখন রসিদ পড়া যাচ্ছে না। নিজে যোগ করুন।';
 	@override String get chooseFromGallery => 'গ্যালারি থেকে বেছে নিন';
 	@override String get flashOff => 'ফ্ল্যাশ বন্ধ করুন';
 	@override String get flashOn => 'ফ্ল্যাশ চালু করুন';
@@ -3541,6 +3543,8 @@ extension on TranslationsBn {
 			'receiptScan.cameraFailed' => 'ক্যামেরা চালু করা যায়নি।',
 			'receiptScan.captureFailed' => 'ছবি তোলা যায়নি। আবার চেষ্টা করুন।',
 			'receiptScan.readFailed' => 'রসিদটি পড়া যায়নি। আবার চেষ্টা করুন অথবা নিজে যোগ করুন।',
+			'receiptScan.totalUnreadable' => 'এই রসিদে মোট পরিমাণ খুঁজে পাওয়া যায়নি। আরও পরিষ্কার একটি ছবি তুলুন।',
+			'receiptScan.serviceUnavailable' => 'এখন রসিদ পড়া যাচ্ছে না। নিজে যোগ করুন।',
 			'receiptScan.chooseFromGallery' => 'গ্যালারি থেকে বেছে নিন',
 			'receiptScan.flashOff' => 'ফ্ল্যাশ বন্ধ করুন',
 			'receiptScan.flashOn' => 'ফ্ল্যাশ চালু করুন',

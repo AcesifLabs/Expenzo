@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:expense_tracker/core/constants/app_constants.dart';
+import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/utils/strict_date.dart';
 import 'package:expense_tracker/core/utils/money.dart';
 
@@ -96,8 +97,11 @@ class ReceiptExtractionParser {
 
   double _parseAmount(Object? value) {
     final amount = switch (value) {
+      null => throw const ReceiptTotalUnreadableException(),
       num() => value.toDouble(),
-      String() => _amountFromText(value),
+      String() =>
+        _amountFromText(value) ??
+            (throw const ReceiptTotalUnreadableException()),
       _ => null,
     };
     if (amount == null || !amount.isFinite) {
@@ -105,7 +109,8 @@ class ReceiptExtractionParser {
     }
 
     final rounded = roundMoney(amount);
-    if (rounded <= 0 || rounded > AppConstants.maxAmount) {
+    if (rounded == 0) throw const ReceiptTotalUnreadableException();
+    if (rounded < 0 || rounded > AppConstants.maxAmount) {
       throw const FormatException('Receipt amount is out of range');
     }
 

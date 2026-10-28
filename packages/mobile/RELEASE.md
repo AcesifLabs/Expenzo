@@ -193,6 +193,17 @@ flutter test --tags golden --update-goldens
 
 Open every changed image in `test/goldens/goldens/ci/` before committing it. To also see the screens with real text on your machine, run with `GOLDENS_PLATFORM=true`; those images are local only and not committed.
 
+## Tutorial screenshots
+
+The onboarding tutorial shows six screenshots in `assets/images/onboarding/` (Home, the add sheet and Reports, light and dark). Regenerate them after any visible change to those screens:
+
+```bash
+~/Android/Sdk/emulator/emulator -avd expenzo_test &   # 720x1440 at 2x
+scripts/tutorial_screenshots.sh                      # optional: device id
+```
+
+The script reinstalls the app, fills it with made-up demo data (`screenshots/demo_seed.dart`) and writes the PNGs over the old ones. Check all six by eye before committing.
+
 ## Play policy checks
 
 Check these before each production promotion, and whenever a permission or SDK changes.

@@ -242,9 +242,13 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
 
   void _showExtractFailure([Failure? failure]) {
     if (!mounted) return;
-    final message = failure is NetworkFailure
-        ? failureText(failure)
-        : t.receiptScan.readFailed;
+    final strings = t.receiptScan;
+    final message = switch (failure) {
+      NetworkFailure() => failureText(failure),
+      ReceiptTotalUnreadableFailure() => strings.totalUnreadable,
+      ReceiptServiceUnavailableFailure() => strings.serviceUnavailable,
+      _ => strings.readFailed,
+    };
     ScaffoldMessenger.of(context)
       ..clearSnackBars()
       ..showSnackBar(SnackBar(content: Text(message)));

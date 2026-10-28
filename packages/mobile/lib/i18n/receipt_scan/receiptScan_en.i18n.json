@@ -5,6 +5,8 @@
   "cameraFailed": "Couldn't open the camera.",
   "captureFailed": "Couldn't take the photo. Try again.",
   "readFailed": "Couldn't read the receipt. Try again or add it by hand.",
+  "totalUnreadable": "Couldn't find the total on this receipt. Try a clearer photo.",
+  "serviceUnavailable": "Receipt reading isn't available right now. Add it by hand.",
   "chooseFromGallery": "Choose from gallery",
   "flashOff": "Turn flash off",
   "flashOn": "Turn flash on",
