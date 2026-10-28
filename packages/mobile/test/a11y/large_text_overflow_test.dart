@@ -5,11 +5,10 @@ import 'package:expense_tracker/core/error/usecase.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/i18n/strings.g.dart';
 
+import '../support/all_screens.dart';
 import '../support/core_screens.dart';
-import '../support/settings_screens.dart';
+import '../support/family_bloc_mock.dart';
 
-/// Every main screen at the largest text the app allows
-/// (`AppConstants.maxTextScale`): no overflow and no clipped text (SAAP-66).
 void main() {
   setUp(registerScreenTestDependencies);
   tearDown(() => di.getIt.reset());
@@ -55,43 +54,31 @@ void main() {
     });
   });
 
-  for (final phone in TestPhone.values) {
-    testWidgets(
-      'Home on a ${phone.name} phone',
-      (tester) => pumpAtMaxScale(tester, homeScreen(), phone: phone),
-    );
+  setUpAll(() {
+    registerFallbackValue(NoParams());
+    registerFamilyEventFallback();
+  });
 
+  for (final screen in allScreens) {
+    for (final phone in TestPhone.values) {
+      testWidgets(
+        '${screen.name} on a ${phone.name} screen',
+        (tester) => pumpAtMaxScale(tester, screen.build(), phone: phone),
+      );
+    }
     testWidgets(
-      'Activity on a ${phone.name} phone',
-      (tester) => pumpAtMaxScale(tester, activityScreen(), phone: phone),
+      '${screen.name} in Bangla on a small phone',
+      (tester) => pumpAtMaxScale(
+        tester,
+        screen.build(),
+        phone: TestPhone.small,
+        locale: AppLocale.bn,
+      ),
     );
   }
 
   for (final phone in TestPhone.values) {
-    testWidgets(
-      'Budgets list on a ${phone.name} phone',
-      (tester) => pumpAtMaxScale(tester, budgetsScreen(), phone: phone),
-    );
-
-    testWidgets(
-      'Budgets details on a ${phone.name} phone',
-      (tester) => pumpAtMaxScale(tester, budgetDetailsScreen(), phone: phone),
-    );
-
-    testWidgets('Budgets form on a ${phone.name} phone', (tester) async {
-      await pumpAtMaxScale(tester, budgetFormScreen(), phone: phone);
-
-      await expectReachable(tester, find.text('Save'));
-    });
-  }
-
-  testWidgets(
-    'Budgets list in Bangla',
-    (tester) => pumpAtMaxScale(tester, budgetsScreen(), locale: AppLocale.bn),
-  );
-
-  for (final phone in TestPhone.values) {
-    testWidgets('Reports tabs on a ${phone.name} phone', (tester) async {
+    testWidgets('Reports tabs on a ${phone.name} screen', (tester) async {
       await pumpAtMaxScale(tester, reportsScreen(), phone: phone);
 
       for (final tab in ['Categories', 'Insights']) {
@@ -100,55 +87,5 @@ void main() {
         expectLayoutFits(tester);
       }
     });
-
-    testWidgets('Transaction sheet on a ${phone.name} phone', (tester) async {
-      await pumpAtMaxScale(tester, transactionSheetScreen(), phone: phone);
-
-      await expectReachable(tester, find.text('Add expense'));
-    });
-
-    testWidgets(
-      'Bottom navigation on a ${phone.name} phone',
-      (tester) => pumpAtMaxScale(tester, appShellScreen(), phone: phone),
-    );
   }
-
-  testWidgets(
-    'Reports in Bangla',
-    (tester) => pumpAtMaxScale(tester, reportsScreen(), locale: AppLocale.bn),
-  );
-
-  testWidgets(
-    'Transaction sheet in Bangla',
-    (tester) =>
-        pumpAtMaxScale(tester, transactionSheetScreen(), locale: AppLocale.bn),
-  );
-
-  testWidgets(
-    'Bottom navigation in Bangla',
-    (tester) => pumpAtMaxScale(tester, appShellScreen(), locale: AppLocale.bn),
-  );
-
-  testWidgets(
-    'Home in Bangla',
-    (tester) => pumpAtMaxScale(tester, homeScreen(), locale: AppLocale.bn),
-  );
-
-  group('Settings', () {
-    setUpAll(() => registerFallbackValue(NoParams()));
-
-    for (final MapEntry(key: name, value: screen) in settingsScreens.entries) {
-      for (final locale in [AppLocale.en, AppLocale.bn]) {
-        testWidgets(
-          'Settings / $name in ${locale.languageCode} on a small phone',
-          (tester) => pumpAtMaxScale(
-            tester,
-            screen(),
-            phone: TestPhone.small,
-            locale: locale,
-          ),
-        );
-      }
-    }
-  });
 }

@@ -13,10 +13,6 @@ import 'package:expense_tracker/features/sms_parser/presentation/widgets/sms_sca
 import 'package:expense_tracker/shared/presentation/widgets/sms_permission_gate.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
-/// Settings → Auto-import from SMS (docs/adr/0006).
-///
-/// Asks for SMS permission, lists the senders to learn from, and offers a
-/// one-off scan of past messages.
 class AutoImportPage extends StatefulWidget {
   const AutoImportPage({super.key});
 

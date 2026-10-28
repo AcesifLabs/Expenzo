@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Fails when a Bangla translation is missing or an English key is unused.
-# Run from packages/mobile: scripts/check_i18n.sh
+
+
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -17,9 +17,9 @@ out, lib = sys.argv[1], pathlib.Path(sys.argv[2])
 missing = json.load(open(f"{out}/_missing_translations.json"))
 unused = json.load(open(f"{out}/_unused_translations.json"))
 
-# slang analyze only sees direct `t.a.b` reads. Code also reads through
-# local aliases (`final strings = t.auth.syncConflict;` then
-# `strings.title`), so collect every key path the code reaches either way.
+
+
+
 PATH = r"[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*"
 ALIAS = re.compile(rf"\b([A-Za-z_]\w*)\s*(?:=|=>)\s*(?:context\.)?({PATH})\s*;")
 DIRECT = re.compile(rf"(?<![\w.])(?:context\.)?t\.({PATH})")
@@ -30,7 +30,7 @@ for file in lib.rglob("*.dart"):
         continue
     src = file.read_text(encoding="utf-8")
     alias_spans, aliases = set(), {}
-    # Resolve aliases, including aliases of aliases, until nothing changes.
+
     changed = True
     while changed:
         changed = False
@@ -48,7 +48,7 @@ for file in lib.rglob("*.dart"):
             if bases:
                 alias_spans.add(m.span(2))
     for m in DIRECT.finditer(src):
-        # An alias definition is not a read of its whole subtree.
+
         if not any(s <= m.start() < e for s, e in alias_spans):
             reached.add(m.group(1))
     for name, bases in aliases.items():
@@ -56,8 +56,8 @@ for file in lib.rglob("*.dart"):
             reached.update(f"{b}.{m.group(1)}" for b in bases)
 
 def is_reached(key):
-    # Reading `a.b` covers `a.b.one` (plurals, maps, a subtree passed on);
-    # reading `a.b.c.length` covers `a.b.c`.
+
+
     return any(key == p or key.startswith(p + ".") or p.startswith(key + ".")
                for p in reached)
 
@@ -75,8 +75,8 @@ def prune(node, prefix=""):
             kept[k] = v
     return kept
 
-# Under <en>: keys the code never reads. Under other locales: keys with no
-# <en> counterpart.
+
+
 problems = {
     "missing in bn": {k: v for k, v in missing.items() if not k.startswith("@@") and v},
     "unused or extra": {

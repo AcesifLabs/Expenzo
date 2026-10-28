@@ -1,12 +1,15 @@
-import 'dart:isolate';
 import 'dart:developer' show log;
+
+import 'package:expense_tracker/core/utils/isolate_deadline.dart';
 import '../entities/parsed_transaction.dart';
-import '../entities/parsing_rule.dart';
 import '../entities/evaluate_rules_params.dart';
 import '../entities/parsing_context.dart';
 import '../../../message_templates/domain/entities/expense_template.dart';
 import '../../../message_templates/domain/entities/message_source.dart';
 import '../services/rule_evaluator.dart';
+
+Duration parseDeadline(int messageCount) =>
+    Duration(seconds: 10, milliseconds: 20 * messageCount);
 
 class ParsingIsolateService {
   Future<List<ParsedTransaction>> parseMessages({
@@ -18,13 +21,15 @@ class ParsingIsolateService {
 
     final payload = _IsolatePayload(
       messages: messages,
-      rules: context.rules,
       templates: context.templates,
       sources: context.sources,
       sourceType: sourceType,
     );
 
-    return Isolate.run(() => _parseInIsolate(payload));
+    return runWithDeadline(
+      () => _parseInIsolate(payload),
+      parseDeadline(messages.length),
+    );
   }
 }
 
@@ -44,14 +49,12 @@ class ParseMessageInput {
 
 class _IsolatePayload {
   final List<ParseMessageInput> messages;
-  final List<ParsingRule> rules;
   final List<ExpenseTemplate> templates;
   final List<MessageSource> sources;
   final String sourceType;
 
   const _IsolatePayload({
     required this.messages,
-    required this.rules,
     required this.templates,
     required this.sources,
     required this.sourceType,
@@ -64,7 +67,6 @@ void _isolateLog(String message) {
 
 List<ParsedTransaction> _parseInIsolate(_IsolatePayload payload) {
   final context = ParsingContext(
-    rules: payload.rules,
     templates: payload.templates,
     sources: payload.sources,
   ).withPrecompiledRegex();

@@ -23,10 +23,12 @@ import 'package:expense_tracker/core/theme/app_spacing.dart';
 import '../../domain/entities/notification_toggle.dart';
 import '../../domain/entities/user_settings.dart';
 import '../bloc/settings_bloc.dart';
+import '../bloc/settings_event.dart';
 import '../bloc/settings_state.dart';
 import '../widgets/settings_profile_card.dart';
 import '../widgets/settings_section.dart';
 import '../widgets/settings_state_view.dart';
+import '../widgets/settings_switch_tile.dart';
 import '../widgets/settings_tile.dart';
 import 'package:expense_tracker/features/family/domain/repositories/family_repository.dart';
 import 'debug_db_inspector_page.dart';
@@ -41,10 +43,6 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // SettingsBloc is an app-wide singleton (ExpenzoApp listens to it for the
-    // theme), so provide it by value: `create` would close it when this page
-    // is popped and break every later settings change.
-    // Pushed above the app shell, so it needs its own themed Scaffold.
     return BlocProvider.value(
       value: di.getIt<SettingsBloc>(),
       child: const Scaffold(body: SettingsView()),
@@ -52,31 +50,9 @@ class SettingsPage extends StatelessWidget {
   }
 }
 
-/// The main Settings list. Sections and rows, top to bottom (SAAP-60 README,
-/// "Settings row order"):
-///
-/// | Section (builder) | Rows now | Rows later tickets add, in final order |
-/// |---|---|---|
-/// | none (`SettingsProfileCard`) | Profile card: My profile (signed in) / Sign in (signed out) | none |
-/// | Profile & account (`_accountSection`) | Sign in (signed out) / My profile, Family group (signed in) | none |
-/// | Preferences (`_preferencesSection`) | Default currency, Number format, Font size, Appearance, Calendar | none |
-/// | Notifications (`_notificationsSection`) | Notifications | none |
-/// | Data & budget (`_dataSection`) | Recurring transactions, Sync, Export data, Delete all data | Recurring transactions, Sync (SAAP-71), Export data (SAAP-69), Delete all data (SAAP-70) |
-/// | Automation (`_automationSection`) | Auto-import from SMS, Matching rules | none |
-/// | General (`_generalSection`) | Language, Home page, Category settings | none |
-/// | Support (`_supportSection`) | Help & Support | none |
-/// | none (`_signOutRow`) | Sign out (signed in only), always last | none |
-/// | Developer (`kDebugMode` only) | Database inspector | none |
-///
-/// Rows follow this order inside a section. A new row goes into an existing
-/// section. Hide a row (signed out, debug) with collection-if; a section with
-/// no visible rows disappears. No "coming soon" rows (ADR 0011). The Sync row
-/// reads "Sync" / "Keep your data on all your devices"; the UI never says
-/// "backup".
 class SettingsView extends StatelessWidget {
   const SettingsView({super.key});
 
-  /// "Off", or how many of the four kinds are on.
   static String _notificationsSummary(UserSettings? settings) {
     final notificationsT = t.settings.notifications;
     if (settings == null || !settings.notificationsEnabled) {
@@ -134,7 +110,6 @@ class SettingsView extends StatelessWidget {
     );
   }
 
-  /// The signed-in user's group, from the last `/groups/me`.
   String? _cachedGroupName() => di.getIt.isRegistered<FamilyRepository>()
       ? di.getIt<FamilyRepository>().cachedGroup?.group.name
       : null;
@@ -196,7 +171,7 @@ class SettingsView extends StatelessWidget {
         SettingsTile(
           icon: PiconsRegular.hash,
           title: settingsT.numberFormat.title,
-          // A live sample shows the current format at a glance.
+
           subtitle: CurrencyFormatter.format(NumberFormatView.previewAmount),
           onTap: () => _openNumberFormat(context),
         ),
@@ -291,10 +266,10 @@ class SettingsView extends StatelessWidget {
           onTap: () => context.push(SettingsRoute.autoImport.location),
         ),
         SettingsTile(
-          icon: PiconsRegular.funnel,
-          title: commonT.matchingRules,
-          subtitle: settingsT.matchingRulesSubtitle,
-          onTap: () => context.push(SettingsRoute.matchingRules.location),
+          icon: PiconsRegular.eye,
+          title: settingsT.smsWatchlist,
+          subtitle: settingsT.smsWatchlistSubtitle,
+          onTap: () => context.push(SettingsRoute.smsWatchlist.location),
         ),
       ],
     );
@@ -331,8 +306,9 @@ class SettingsView extends StatelessWidget {
     );
   }
 
-  Widget _supportSection(BuildContext context) {
+  Widget _supportSection(BuildContext context, UserSettings? settings) {
     final settingsT = t.settings;
+    final bloc = context.read<SettingsBloc>();
 
     return SettingsSection(
       title: settingsT.sections.support,
@@ -343,11 +319,19 @@ class SettingsView extends StatelessWidget {
           subtitle: settingsT.help.rowSubtitle,
           onTap: () => context.push(SettingsRoute.help.location),
         ),
+        SettingsSwitchTile(
+          icon: PiconsRegular.bug,
+          title: settingsT.crashReports.title,
+          subtitle: settingsT.crashReports.subtitle,
+          value: settings?.crashReportsEnabled ?? true,
+          onChanged: settings == null
+              ? null
+              : (enabled) => bloc.add(UpdateCrashReportsEnabled(enabled)),
+        ),
       ],
     );
   }
 
-  /// Sign out sits alone below every section, with no header.
   Widget _signOutRow(BuildContext context) {
     final isSignedIn = context.watch<AuthBloc>().state is Authenticated;
     if (!isSignedIn) return const SizedBox.shrink();
@@ -387,7 +371,6 @@ class SettingsView extends StatelessWidget {
         listenWhen: (_, s) => s is SettingsError,
         listener: SettingsStateView.showSaveFailed,
         child: BlocBuilder<SettingsBloc, SettingsState>(
-          // A save's SettingsLoading must not blank the subtitles.
           buildWhen: (previous, current) =>
               current is SettingsLoaded || previous is SettingsInitial,
           builder: (context, settingsState) {
@@ -408,7 +391,7 @@ class SettingsView extends StatelessWidget {
                 _dataSection(context),
                 _automationSection(context),
                 _generalSection(context, settings),
-                _supportSection(context),
+                _supportSection(context, settings),
                 _signOutRow(context),
                 if (kDebugMode) _developerSection(context),
               ],

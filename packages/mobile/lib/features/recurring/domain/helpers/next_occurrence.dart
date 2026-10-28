@@ -1,14 +1,7 @@
 import '../entities/recurring_frequency.dart';
 
-/// Maximum number of catch-up occurrences to process in a single call.
-/// Prevents unbounded loops if the app hasn't been opened for a very long time.
 const int kMaxCatchUpOccurrences = 365;
 
-/// Calculates the next occurrence date after [current] for the given [frequency].
-///
-/// For monthly/yearly frequencies, clamps the day to the target month's last day
-/// to handle month-end dates (e.g. Jan 31 → Feb 28).
-/// If [dayOfMonth] is provided, uses it instead of [current]'s day.
 DateTime calculateNextOccurrence(
   DateTime current,
   RecurringFrequency frequency, {
@@ -16,40 +9,42 @@ DateTime calculateNextOccurrence(
 }) {
   switch (frequency) {
     case RecurringFrequency.daily:
-      return current.add(const Duration(days: 1));
+      return _withDate(current, current.year, current.month, current.day + 1);
     case RecurringFrequency.weekly:
-      return current.add(const Duration(days: 7));
+      return _withDate(current, current.year, current.month, current.day + 7);
     case RecurringFrequency.monthly:
       return addMonths(current, 1, dayOfMonth: dayOfMonth);
     case RecurringFrequency.yearly:
-      return _addYears(current, 1, dayOfMonth: dayOfMonth);
+      return addMonths(current, 12, dayOfMonth: dayOfMonth);
   }
 }
 
-/// Adds [months] months to [date], clamping the day to the target month's
-/// last day if the original day exceeds the target month's days. Also used
-/// by the onboarding goal timeline.
 DateTime addMonths(DateTime date, int months, {int? dayOfMonth}) {
-  final targetMonth = date.month + months;
-  final targetYear = date.year + ((targetMonth - 1) ~/ 12);
-  final normalizedMonth = ((targetMonth - 1) % 12) + 1;
+  final monthIndex = date.year * 12 + (date.month - 1) + months;
+  final year = (monthIndex / 12).floor();
+  final month = monthIndex - year * 12 + 1;
   final day = dayOfMonth ?? date.day;
-  final lastDayOfMonth = _lastDayOfMonth(targetYear, normalizedMonth);
-  final clampedDay = day > lastDayOfMonth ? lastDayOfMonth : day;
+  final lastDay = _lastDayOfMonth(year, month);
+  final build = date.isUtc ? DateTime.utc : DateTime.new;
 
-  return DateTime(targetYear, normalizedMonth, clampedDay);
+  return build(year, month, day > lastDay ? lastDay : day);
 }
 
-DateTime _addYears(DateTime date, int years, {int? dayOfMonth}) {
-  final targetYear = date.year + years;
-  final day = dayOfMonth ?? date.day;
-  final lastDayOfMonth = _lastDayOfMonth(targetYear, date.month);
-  final clampedDay = day > lastDayOfMonth ? lastDayOfMonth : day;
+DateTime _withDate(DateTime source, int year, int month, int day) {
+  final build = source.isUtc ? DateTime.utc : DateTime.new;
 
-  return DateTime(targetYear, date.month, clampedDay);
+  return build(
+    year,
+    month,
+    day,
+    source.hour,
+    source.minute,
+    source.second,
+    source.millisecond,
+    source.microsecond,
+  );
 }
 
-/// Returns the last day of the given month/year.
 int _lastDayOfMonth(int year, int month) {
   return DateTime(year, month + 1, 0).day;
 }

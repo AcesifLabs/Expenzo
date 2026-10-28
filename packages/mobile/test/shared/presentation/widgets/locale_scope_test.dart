@@ -6,7 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 class _Label extends StatelessWidget {
   const _Label();
 
-  // Reads the global `t`, not context.t, like the app's widgets.
   @override
   Widget build(BuildContext context) => Text(t.settings.language.title);
 }

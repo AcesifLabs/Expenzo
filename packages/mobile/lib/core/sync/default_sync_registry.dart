@@ -5,15 +5,16 @@ import 'handlers/budgets_sync_handler.dart';
 import 'handlers/goals_sync_handler.dart';
 import 'handlers/message_sources_sync_handler.dart';
 import 'handlers/expense_templates_sync_handler.dart';
-import 'handlers/parsing_rules_sync_handler.dart';
 import 'handlers/recurring_transactions_sync_handler.dart';
 import 'handlers/pending_recurring_sync_handler.dart';
 
-/// [keepLocalBudgetNames]: see [BudgetsSyncHandler.keepLocalNames].
-/// [keepLocalRecordBudgetLinks]: see [RecordsSyncHandler.keepLocalBudgetLinks].
+bool _never() => false;
+
+bool _always() => true;
+
 SyncTableRegistry createDefaultSyncRegistry({
-  bool Function()? keepLocalBudgetNames,
-  bool Function()? keepLocalRecordBudgetLinks,
+  bool Function() keepLocalBudgetNames = _never,
+  bool Function() keepLocalRecordBudgetLinks = _always,
 }) {
   final registry = SyncTableRegistry();
   registry.register(
@@ -24,7 +25,6 @@ SyncTableRegistry createDefaultSyncRegistry({
   registry.register(GoalsSyncHandler());
   registry.register(MessageSourcesSyncHandler());
   registry.register(ExpenseTemplatesSyncHandler());
-  registry.register(ParsingRulesSyncHandler());
   registry.register(RecurringTransactionsSyncHandler());
   registry.register(PendingRecurringSyncHandler());
 

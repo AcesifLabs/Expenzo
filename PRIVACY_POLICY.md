@@ -1,6 +1,6 @@
 # Privacy Policy for Expenzo
 
-**Last updated: October 24, 2026**
+**Last updated: October 25, 2026**
 
 ## Introduction
 
@@ -20,6 +20,7 @@ This Privacy Policy describes how **Acesif Labs** ("we", "us", or "our") collect
 
 - **SMS Messages**: With your explicit permission, the App reads SMS messages on your device to automatically detect and parse transaction-related messages. SMS data is processed **locally on your device** and is not transmitted to our servers.
 - **Device Storage**: Financial data is stored locally on your device using encrypted local storage (flutter_secure_storage) and a local SQLite database (Drift). It stays on your device unless you sign in with Google and Sync is on (Sync is on by default after you sign in). Then your transactions, categories, budgets, recurring transactions and pending recurring items, SMS senders, matching rules and expense templates are stored on our server so you can restore them on your other devices. App settings and preferences stay on each device.
+- **Crash Reports**: When the App hits an error, it sends a crash report to Sentry so we can fix it: the error type, where in the code it happened, the app version, and the device model and Android version. Before sending, the App removes amounts, account and phone numbers, and any text you entered or received. SMS content is never included. You can turn crash reports off in Settings, under Support.
 
 ### Information We Do NOT Collect
 
@@ -55,6 +56,7 @@ The App uses the following third-party services:
 | Firebase (Google) | Authentication infrastructure | [Firebase Privacy](https://firebase.google.com/policies/analytics) |
 | Expenzo server (Acesif Labs) | Sync, if you sign in and Sync is on | This policy |
 | Groq | AI assistant answers and Receipt Scan | [Groq Privacy Policy](https://groq.com/privacy-policy) |
+| Sentry (Functional Software, Inc.) | Crash reports, unless you turn them off | [Sentry Privacy Policy](https://sentry.io/privacy/) |
 
 These services may collect information as described in their respective privacy policies. We do not share your personal data with any other third parties.
 

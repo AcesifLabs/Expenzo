@@ -1,3 +1,4 @@
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:picons/picons.dart';
@@ -36,8 +37,6 @@ class _AppShellState extends State<AppShell> {
     return ScaleTransition(scale: animation, child: child);
   }
 
-  // The selected tab is driven by the `tab` query on `/` so other screens
-  // can navigate straight to a root tab (see [AppRootTab]).
   int get _currentIndex =>
       AppRootTab.fromUri(GoRouterState.of(context).uri).index;
 
@@ -91,7 +90,7 @@ class _AppShellState extends State<AppShell> {
 
   Widget _navItem(int i, ColorScheme colors) {
     final sel = _currentIndex == i;
-    final mutedColor = colors.onSurface.withAlpha(120);
+    final mutedColor = colors.onSurfaceVariant;
 
     return Expanded(
       child: GestureDetector(
@@ -115,8 +114,7 @@ class _AppShellState extends State<AppShell> {
                 ),
               ),
               const SizedBox(height: AppSpacing.xs),
-              // The bar keeps its height and FAB dock; at large text sizes
-              // the label shrinks to fit.
+
               Flexible(
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
@@ -139,7 +137,7 @@ class _AppShellState extends State<AppShell> {
 
   void _switchToTab(int index) {
     if (!mounted || _currentIndex == index) return;
-    // Reports stays alive in the tab stack; refresh it each time it is shown.
+
     if (AppRootTab.values[index] == AppRootTab.reports) {
       _reportsRefreshTick.value++;
     }
@@ -147,7 +145,7 @@ class _AppShellState extends State<AppShell> {
   }
 
   void _onFabPressed(BuildContext context) async {
-    final now = DateTime.now();
+    final now = clock.now();
     final lastPress = _lastFabPress;
     if (lastPress != null &&
         now.difference(lastPress) < const Duration(seconds: 1)) {
@@ -172,7 +170,7 @@ class _AppShellState extends State<AppShell> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final keyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
-    // One add button on every tab: it always adds a transaction.
+
     final showFab = !keyboardOpen;
 
     return Scaffold(

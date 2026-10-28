@@ -21,7 +21,7 @@ void main() {
 
     expect(body, contains('Device: android 14'));
     expect(body, contains('Error reference: ABC123'));
-    // Spaces must stay spaces in mail apps, not "+".
+
     expect(uri.toString(), isNot(contains('+')));
   });
 }

@@ -1,8 +1,8 @@
 {
-  "title": "AI assistant",
+  "title": "Expie",
   "inputHint": "Ask about your spending",
   "send": "Send message",
-  "disclaimer": "Expenzo AI provides suggestions based on your data. It is not a licensed financial advisor.",
+  "disclaimer": "Expie provides suggestions based on your data. It is not a licensed financial advisor.",
   "suggestions": {
     "topExpenses": "Top expenses",
     "budget": "How's my budget?"

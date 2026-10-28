@@ -1,13 +1,11 @@
 import 'package:equatable/equatable.dart';
 import 'package:expense_tracker/features/recurring/domain/entities/recurring_frequency.dart';
 
-/// A fixed expense typed on the recurring onboarding page.
 class RecurringDraft extends Equatable {
   final String description;
   final double amount;
   final RecurringFrequency frequency;
 
-  /// [amount] as a monthly amount.
   double get monthlyAmount => switch (frequency) {
     RecurringFrequency.daily => amount * 365 / 12,
     RecurringFrequency.weekly => amount * 52 / 12,
@@ -25,8 +23,6 @@ class RecurringDraft extends Equatable {
   });
 }
 
-/// The savings goal typed during onboarding. [months] or [customDate] is the
-/// chosen timeline (null until the user picks one).
 class GoalDraft extends Equatable {
   final String name;
   final double targetAmount;
@@ -43,8 +39,6 @@ class GoalDraft extends Equatable {
     this.customDate,
   });
 
-  /// A timeline choice replaces the other kind: months clear the custom date
-  /// and the other way round.
   GoalDraft withTimeline({int? months, DateTime? customDate}) => GoalDraft(
     name: name,
     targetAmount: targetAmount,
@@ -53,8 +47,6 @@ class GoalDraft extends Equatable {
   );
 }
 
-/// What onboarding has collected. Each field is set only when the user taps
-/// Continue on its page.
 class OnboardingDraft extends Equatable {
   final double? monthlyIncome;
   final List<RecurringDraft> recurring;
@@ -71,7 +63,6 @@ class OnboardingDraft extends Equatable {
     this.goal,
   });
 
-  /// [goal] can be cleared by passing [clearGoal].
   OnboardingDraft copyWith({
     double? monthlyIncome,
     List<RecurringDraft>? recurring,

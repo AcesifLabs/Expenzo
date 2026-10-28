@@ -10,7 +10,7 @@ Onboarding adds a savings Goal. Progress could be derived from a savings budget,
 
 ## Decision
 
-A Goal stores `savedAmount`. The user raises it with "Add to goal" on the dashboard card. Goals never read Records or Budgets, and a Goal Contribution creates no Record. Goals sync like Budgets.
+A Goal stores `savedAmount`. The user raises it with "Add to goal" on the Goals page, which the dashboard goal card links to with "See all". A user can have several Goals; the dashboard card shows the newest. Goals never read Records or Budgets, and a Goal Contribution creates no Record. Goals sync like Budgets.
 
 ## Consequences
 

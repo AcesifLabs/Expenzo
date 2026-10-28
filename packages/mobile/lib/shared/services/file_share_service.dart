@@ -4,15 +4,13 @@ import 'package:expense_tracker/core/logger/app_logger.dart';
 
 enum ShareOutcome { shared, dismissed }
 
-/// Opens the system share sheet for files the app wrote, or for text.
 class FileShareService {
   const FileShareService();
 
-  /// Shares the file at [path]. Platform errors are logged and rethrown.
   Future<ShareOutcome> shareFile(
     String path, {
     required String mimeType,
-    String? subject,
+    required String subject,
   }) async {
     try {
       final result = await Share.shareXFiles([
@@ -26,8 +24,6 @@ class FileShareService {
     }
   }
 
-  /// Shares plain [text], such as a Family invite. Platform errors are
-  /// logged and rethrown.
   Future<ShareOutcome> shareText(String text) async {
     try {
       final result = await Share.share(text);
@@ -39,8 +35,6 @@ class FileShareService {
     }
   }
 
-  /// [ShareResultStatus.unavailable] means the sheet was shown but the
-  /// platform can't report what the user did, so it counts as shared.
   @visibleForTesting
   static ShareOutcome outcomeFor(ShareResultStatus status) => switch (status) {
     ShareResultStatus.dismissed => ShareOutcome.dismissed,

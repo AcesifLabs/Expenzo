@@ -65,7 +65,6 @@ void main() {
     ).thenAnswer((_) async => Right(budgets));
   }
 
-  /// Opens the picker from a launcher page and records what it pops.
   Future<List<String?>> openPicker(
     WidgetTester tester, {
     String? selectedId,

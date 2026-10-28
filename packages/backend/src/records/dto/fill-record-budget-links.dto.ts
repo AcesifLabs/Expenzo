@@ -8,7 +8,7 @@ export class RecordBudgetLinkItem {
 }
 
 export class FillRecordBudgetLinksDto {
-  // Unique ids: with duplicates, Postgres UPDATE ... FROM picks one source row arbitrarily.
+  
   @IsArray()
   @ArrayMaxSize(FILL_RECORD_BUDGET_LINKS_MAX_ITEMS)
   @ArrayUnique((link: RecordBudgetLinkItem) => link.id)

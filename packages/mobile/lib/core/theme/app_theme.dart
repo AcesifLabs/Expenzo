@@ -72,6 +72,9 @@ class AppTheme {
   static const _controlBorderRadius = BorderRadius.all(
     Radius.circular(AppSpacing.radiusControl),
   );
+  static const _sheetBorderRadius = BorderRadius.all(
+    Radius.circular(AppSpacing.radiusSheet),
+  );
   static const _pillBorderRadius = BorderRadius.all(
     Radius.circular(AppSpacing.radiusPill),
   );
@@ -100,10 +103,6 @@ class AppTheme {
     labelSmall: AppTypography.labelSmall,
   );
 
-  // Every color below comes from AppPalette (docs/adr/0003): primary is the
-  // mint brand, secondary the lavender accent. Only Material-only roles
-  // (containers, outlines) are spelled out here.
-  // Built once and cached; ThemeData is immutable.
   static final ThemeData _lightTheme = _buildTheme(
     _ThemeColors(
       brightness: Brightness.light,
@@ -139,8 +138,7 @@ class AppTheme {
       appBarFg: _light.textPrimary,
       cardColor: _light.surface,
       cardShadow: Colors.black.withAlpha(10),
-      // Theme-styled fields mostly sit on white cards and dialogs, so they
-      // take the page background as fill (form pages use palette.inputFill).
+
       inputFill: _light.bg,
       inputBorder: _light.inputStroke,
       inputFocused: _light.brand,
@@ -250,15 +248,7 @@ class AppTheme {
       dialogTheme: _dialogTheme(c),
       snackBarTheme: _snackBarTheme(c),
       chipTheme: _chipTheme(c),
-      switchTheme: SwitchThemeData(
-        thumbColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) {
-            return scheme.primary;
-          }
-
-          return null;
-        }),
-      ),
+      switchTheme: _switchTheme(c),
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: scheme.primary,
         linearTrackColor: primaryWithAlpha40,
@@ -278,7 +268,7 @@ class AppTheme {
         dragHandleColor: scheme.onSurface.withAlpha(60),
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
-            top: Radius.circular(AppSpacing.radiusCard),
+            top: Radius.circular(AppSpacing.radiusSheet),
           ),
         ),
       ),
@@ -287,6 +277,34 @@ class AppTheme {
         textColor: scheme.onSurface,
       ),
       extensions: [c.palette],
+    );
+  }
+
+  // Solid brand thumb on a faint brand track, so the on state has contrast.
+  // Disabled switches keep Material's defaults.
+  static SwitchThemeData _switchTheme(_ThemeColors c) {
+    final palette = c.palette;
+
+    return SwitchThemeData(
+      thumbColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.disabled)) return null;
+
+        return states.contains(WidgetState.selected)
+            ? palette.brand
+            : palette.toggleKnob;
+      }),
+      trackColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.disabled)) return null;
+
+        return states.contains(WidgetState.selected)
+            ? palette.brand.withAlpha(0x40)
+            : palette.toggleTrack;
+      }),
+      trackOutlineColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) return Colors.transparent;
+
+        return null;
+      }),
     );
   }
 
@@ -357,21 +375,16 @@ class AppTheme {
         backgroundColor: c.fabBg,
         foregroundColor: c.fabFg,
         elevation: 0,
-        // Stadium, not circle: a square FAB still renders as a circle, and an
-        // extended FAB ("Ask AI") becomes a pill as wide as its label.
+
         shape: const StadiumBorder(),
         extendedPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md + AppSpacing.xs,
         ),
-        // No extendedTextStyle: the default (textTheme.labelLarge) is already
-        // Lato bold. A raw AppTypography style here has inherit: true, and
-        // the FAB animates between label styles, which throws when the two
-        // styles disagree on inherit.
       );
 
   static DialogThemeData _dialogTheme(_ThemeColors c) => DialogThemeData(
     backgroundColor: c.dialogBg,
-    shape: const RoundedRectangleBorder(borderRadius: _cardBorderRadius),
+    shape: const RoundedRectangleBorder(borderRadius: _sheetBorderRadius),
   );
 
   static SnackBarThemeData _snackBarTheme(_ThemeColors c) => SnackBarThemeData(

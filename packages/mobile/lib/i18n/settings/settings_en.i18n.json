@@ -59,7 +59,8 @@
     }
   },
   "autoImportSubtitle": "Turn bank and payment messages into transactions",
-  "matchingRulesSubtitle": "Patterns for messages auto-import can't read yet",
+  "smsWatchlist": "SMS Watchlist",
+  "smsWatchlistSubtitle": "Senders Expenzo reads",
   "recurring": {
     "title": "Recurring transactions",
     "subtitle": "Bills and income that repeat"
@@ -67,6 +68,10 @@
   "help": {
     "title": "Help & Support",
     "rowSubtitle": "FAQ, contact us, rate the app, legal"
+  },
+  "crashReports": {
+    "title": "Send crash reports",
+    "subtitle": "Error details only. Amounts, numbers and SMS text are removed."
   },
   "signOut": "Sign out",
   "deleteAccount": "Delete account",
@@ -191,6 +196,10 @@
       "other": "{n} changes waiting to send"
     },
     "allSent": "All changes sent",
+    "failed": {
+      "one": "{n} change couldn't sync",
+      "other": "{n} changes couldn't sync"
+    },
     "sections": {
       "device": "This device"
     },

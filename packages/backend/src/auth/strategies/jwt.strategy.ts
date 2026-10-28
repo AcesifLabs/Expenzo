@@ -7,8 +7,8 @@ import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { JwtPayload } from '../dto/jwtpayload.dto';
 
-// The mobile app matches this text: on it, it drops the JWT instead of
-// logging in again (which would re-create the deleted account).
+
+
 export const DELETED_USER_MESSAGE = 'User no longer exists';
 
 @Injectable()

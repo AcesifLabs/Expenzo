@@ -17,14 +17,11 @@ import 'package:expense_tracker/shared/services/notification_service.dart';
 import 'background_task_runner.dart';
 import 'background_work.dart';
 
-/// Workmanager's entry point, run in its own isolate.
 @pragma('vm:entry-point')
 void backgroundTaskDispatcher() {
   Workmanager().executeTask(_runInBackground);
 }
 
-/// Matches the app's language, currency and number format so text and
-/// amounts read the same as in the app, and the same first day of week.
 void applyBackgroundSettings(UserSettings settings) {
   final languageCode = settings.languageCode;
   final locale = languageCode == 'system'
@@ -41,11 +38,7 @@ void applyBackgroundSettings(UserSettings settings) {
   WeekStart.apply(settings.effectiveFirstDayOfWeek(locale.languageCode));
 }
 
-// This isolate opens its own AppDatabase and only reads from it (plus the
-// reminder log); Drift stream updates don't cross isolates, which is fine.
 Future<bool> _runInBackground(String task, Map<String, dynamic>? _) async {
-  // Returning false asks Workmanager to retry; a throw would end the chain,
-  // since only a finished run re-arms the next one.
   try {
     registerPluralResolvers();
     await initializeDateFormatting();

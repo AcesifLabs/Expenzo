@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:expense_tracker/features/settings/presentation/widgets/settings_choice_tile.dart';
@@ -11,15 +9,25 @@ import '../../domain/entities/group_role.dart';
 import '../../domain/entities/my_group.dart';
 import '../helpers/member_actions.dart';
 
-/// The Admin's actions on one member: change role (check-mark choices,
-/// never radio buttons) or remove from the group, after asking.
-Future<void> showMemberActionsSheet(
+sealed class MemberDecision {
+  const MemberDecision();
+}
+
+class MemberRoleChosen extends MemberDecision {
+  final GroupRole role;
+
+  const MemberRoleChosen(this.role);
+}
+
+class MemberRemoveConfirmed extends MemberDecision {
+  const MemberRemoveConfirmed();
+}
+
+Future<MemberDecision?> showMemberActionsSheet(
   BuildContext context, {
   required GroupMember member,
   required String memberName,
   required List<MemberAction> actions,
-  required ValueChanged<GroupRole> onRoleChosen,
-  required VoidCallback onRemove,
 }) async {
   final surface = context.palette.surface;
   final action = await showModalBottomSheet<MemberAction>(
@@ -27,7 +35,7 @@ Future<void> showMemberActionsSheet(
     backgroundColor: surface,
     builder: (sheetContext) => _ActionList(actions: actions),
   );
-  if (!context.mounted) return;
+  if (!context.mounted) return null;
   switch (action) {
     case MemberAction.changeRole:
       final role = await showModalBottomSheet<GroupRole>(
@@ -35,15 +43,19 @@ Future<void> showMemberActionsSheet(
         backgroundColor: surface,
         builder: (sheetContext) => _RoleChoices(current: member.role),
       );
-      if (role != null && role != member.role) onRoleChosen(role);
+
+      return role == null || role == member.role
+          ? null
+          : MemberRoleChosen(role);
     case MemberAction.remove:
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (dialogContext) => _RemoveDialog(name: memberName),
       );
-      if (confirmed == true) onRemove();
+
+      return confirmed == true ? const MemberRemoveConfirmed() : null;
     case null:
-      break;
+      return null;
   }
 }
 
@@ -142,22 +154,3 @@ class _RemoveDialog extends StatelessWidget {
     );
   }
 }
-
-/// Runs [showMemberActionsSheet] without awaiting it, for tap callbacks.
-void openMemberActions(
-  BuildContext context, {
-  required GroupMember member,
-  required String memberName,
-  required List<MemberAction> actions,
-  required ValueChanged<GroupRole> onRoleChosen,
-  required VoidCallback onRemove,
-}) => unawaited(
-  showMemberActionsSheet(
-    context,
-    member: member,
-    memberName: memberName,
-    actions: actions,
-    onRoleChosen: onRoleChosen,
-    onRemove: onRemove,
-  ),
-);

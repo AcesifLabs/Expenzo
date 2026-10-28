@@ -1,3 +1,4 @@
+import 'package:expense_tracker/features/sms_parser/domain/entities/incoming_sms_event.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
@@ -9,6 +10,7 @@ import 'package:expense_tracker/features/sms_parser/data/datasources/sms_local_d
 import 'package:expense_tracker/features/sms_parser/domain/usecases/scan_sms_usecase.dart';
 import '../../../../support/factories/parsed_transaction_factory.dart';
 import '../../../../support/factories/sms_message_factory.dart';
+import 'package:expense_tracker/features/sms_parser/domain/services/sms_source_id.dart';
 
 class MockSmsLocalDatasource extends Mock implements SmsLocalDatasource {}
 
@@ -32,16 +34,13 @@ void main() {
   );
 
   final context = ParsingContext(
-    rules: const [],
     templates: const [],
     sources: [monitoredSource],
   );
 
   setUpAll(() {
     registerFallbackValue(const <ParseMessageInput>[]);
-    registerFallbackValue(
-      const ParsingContext(rules: [], templates: [], sources: []),
-    );
+    registerFallbackValue(const ParsingContext(templates: [], sources: []));
   });
 
   setUp(() {
@@ -84,7 +83,11 @@ void main() {
         ).thenAnswer(
           (_) async => [
             makeParsedTransaction(
-              sourceId: _sourceIdFor('BANK', DateTime(2024, 6, 15, 14, 30)),
+              sourceId: _sourceIdFor(
+                'BANK',
+                DateTime(2024, 6, 15, 14, 30),
+                'bank debit 250',
+              ),
             ),
           ],
         );
@@ -111,6 +114,43 @@ void main() {
         expect(capturedInputs.map((input) => input.address), ['BANK']);
       },
     );
+  });
+
+  test('a scanned message gets the id a live import gave it', () async {
+    final sent = DateTime(2024, 6, 15, 14, 30);
+    final message = makeSmsMessage(
+      address: 'BANK',
+      body: 'bank debit 250',
+      date: sent.add(const Duration(seconds: 3)),
+    ).copyWith(sentAt: sent);
+    when(
+      () => mockSmsLocalDatasource.getSmsBatched(start: 0, count: 50),
+    ).thenAnswer((_) async => [message]);
+    when(
+      () => mockParsingIsolateService.parseMessages(
+        messages: any(named: 'messages'),
+        context: any(named: 'context'),
+        sourceType: any(named: 'sourceType'),
+      ),
+    ).thenAnswer((_) async => []);
+
+    await useCase(ScanSmsParams(limit: 10));
+
+    final inputs =
+        verify(
+              () => mockParsingIsolateService.parseMessages(
+                messages: captureAny(named: 'messages'),
+                context: context,
+                sourceType: AppSourceType.sms,
+              ),
+            ).captured.single
+            as List<ParseMessageInput>;
+    final live = IncomingSmsEvent(
+      address: 'BANK',
+      body: 'bank debit 250',
+      receivedAt: sent,
+    );
+    expect(inputs.single.sourceId, live.sourceId);
   });
 
   group('inclusive date range filtering', () {
@@ -239,8 +279,8 @@ void main() {
   });
 }
 
-String _sourceIdFor(String address, DateTime date) {
-  final combined = '${address}_${date.toIso8601String()}';
-
-  return combined.hashCode.abs().toString();
-}
+String _sourceIdFor(
+  String address,
+  DateTime date, [
+  String body = 'Your account was debited \$50.00',
+]) => smsSourceId(address: address, at: date, body: body);

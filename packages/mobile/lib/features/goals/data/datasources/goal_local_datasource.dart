@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:expense_tracker/core/utils/money.dart';
 import 'package:expense_tracker/core/database/app_database.dart';
 import 'package:expense_tracker/core/database/daos/goals_dao.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
@@ -7,10 +8,9 @@ import '../../domain/entities/goal.dart' as domain;
 
 abstract class GoalLocalDatasource {
   Future<domain.Goal?> getActiveGoal();
-  Stream<domain.Goal?> watchActiveGoal();
+  Stream<List<domain.Goal>> watchGoals();
   Future<domain.Goal?> getGoalById(String id);
 
-  /// [goal] must have an id.
   Future<void> createGoal(domain.Goal goal);
   Future<void> updateGoal(domain.Goal goal);
   Future<void> deleteGoal(String id);
@@ -26,8 +26,8 @@ class GoalLocalDatasourceImpl implements GoalLocalDatasource {
       _guard(() async => _toEntityOrNull(await goalsDao.getActiveGoal()));
 
   @override
-  Stream<domain.Goal?> watchActiveGoal() =>
-      goalsDao.watchActiveGoal().map(_toEntityOrNull);
+  Stream<List<domain.Goal>> watchGoals() =>
+      goalsDao.watchGoals().map((rows) => rows.map(_toEntity).toList());
 
   @override
   Future<domain.Goal?> getGoalById(String id) =>
@@ -48,7 +48,7 @@ class GoalLocalDatasourceImpl implements GoalLocalDatasource {
     if (stored == null) {
       throw CacheException(message: 'Goal ${goal.id} not found');
     }
-    // Only updatedAt moves; createdAt keeps the goal's place as "active".
+
     await goalsDao.updateGoal(
       _toCompanion(
         goal,
@@ -69,8 +69,8 @@ class GoalLocalDatasourceImpl implements GoalLocalDatasource {
     return GoalsCompanion(
       id: Value(goal.id ?? ''),
       name: Value(goal.name),
-      targetAmount: Value(goal.targetAmount),
-      savedAmount: Value(goal.savedAmount),
+      targetAmount: Value(roundMoney(goal.targetAmount)),
+      savedAmount: Value(roundMoney(goal.savedAmount)),
       targetDate: Value(goal.targetDate),
       monthlyContribution: Value(goal.monthlyContribution),
       createdAt: Value(createdAt),
@@ -78,9 +78,10 @@ class GoalLocalDatasourceImpl implements GoalLocalDatasource {
     );
   }
 
-  domain.Goal? _toEntityOrNull(Goal? row) {
-    if (row == null) return null;
+  domain.Goal? _toEntityOrNull(Goal? row) =>
+      row == null ? null : _toEntity(row);
 
+  domain.Goal _toEntity(Goal row) {
     return domain.Goal(
       id: row.id,
       name: row.name,
@@ -92,7 +93,6 @@ class GoalLocalDatasourceImpl implements GoalLocalDatasource {
     );
   }
 
-  /// Drift errors become [CacheException], which the repository maps.
   Future<T> _guard<T>(Future<T> Function() action) async {
     try {
       return await action();

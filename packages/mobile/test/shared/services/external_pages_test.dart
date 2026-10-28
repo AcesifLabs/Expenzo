@@ -8,7 +8,6 @@ import '../../support/pump_localized.dart';
 void main() {
   final page = Uri.parse('https://example.com/privacy');
 
-  /// Pumps a button that opens [page] with [launch]; returns the result.
   Future<bool?> tapOpen(WidgetTester tester, PageLauncher launch) async {
     bool? result;
     await pumpLocalized(

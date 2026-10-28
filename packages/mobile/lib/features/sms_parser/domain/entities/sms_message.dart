@@ -7,18 +7,22 @@ class SmsMessage extends Equatable {
   final String id;
   final String address;
   final String body;
+
   final DateTime date;
+
+  final DateTime? sentAt;
   final bool read;
   final SmsType type;
 
   @override
-  List<Object?> get props => [id, address, body, date, read, type];
+  List<Object?> get props => [id, address, body, date, sentAt, read, type];
 
   const SmsMessage({
     required this.id,
     required this.address,
     required this.body,
     required this.date,
+    this.sentAt,
     required this.read,
     required this.type,
   });
@@ -28,6 +32,7 @@ class SmsMessage extends Equatable {
     String? address,
     String? body,
     DateTime? date,
+    DateTime? sentAt,
     bool? read,
     SmsType? type,
   }) {
@@ -36,6 +41,7 @@ class SmsMessage extends Equatable {
       address: address ?? this.address,
       body: body ?? this.body,
       date: date ?? this.date,
+      sentAt: sentAt ?? this.sentAt,
       read: read ?? this.read,
       type: type ?? this.type,
     );

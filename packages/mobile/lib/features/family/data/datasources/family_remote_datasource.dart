@@ -9,13 +9,7 @@ import '../../domain/entities/invite_code.dart';
 import '../../domain/entities/my_group.dart';
 import '../models/family_json.dart';
 
-/// The `/groups` endpoints (packages/backend/src/groups).
-///
-/// Every method throws [ServerException] on failure, with the HTTP status in
-/// `statusCode` (null when the server was not reached) and the server's
-/// error `code` (`FailureCodes`) as `message` when it sent one.
 abstract class FamilyRemoteDatasource {
-  /// Null when the caller is in no group.
   Future<MyGroup?> getMyGroup();
 
   Future<MyGroup> createGroup({
@@ -37,7 +31,6 @@ abstract class FamilyRemoteDatasource {
     required GroupRole role,
   });
 
-  /// Leaving is removing yourself.
   Future<void> removeMember({required String groupId, required String userId});
 
   Future<void> deleteGroup(String groupId);
@@ -152,15 +145,12 @@ class FamilyRemoteDatasourceImpl implements FamilyRemoteDatasource {
     if (data is! Json) {
       throw ServerException(
         message: 'Unexpected response shape: ${data.runtimeType}',
-        statusCode: response.statusCode,
       );
     }
 
     return data;
   }
 
-  /// Unlike other remote datasources this keeps the status and the server
-  /// error `code`: the repository needs both to pick the right failure.
   Future<T> _call<T>(Future<T> Function() request) async {
     try {
       return await request();
@@ -174,7 +164,7 @@ class FamilyRemoteDatasourceImpl implements FamilyRemoteDatasource {
     } on ServerException {
       rethrow;
     } catch (e) {
-      throw ServerException(message: e.toString());
+      throw ServerException(message: e.toString(), statusCode: 502);
     }
   }
 }

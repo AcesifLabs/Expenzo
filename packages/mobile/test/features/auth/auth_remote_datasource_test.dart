@@ -53,7 +53,7 @@ void main() {
     registerFallbackValue(
       fb.GoogleAuthProvider.credential(accessToken: 'a', idToken: 'i'),
     );
-    // TokenStorage uses FlutterSecureStorage, whose channel hangs in tests.
+
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
           const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'),
@@ -92,10 +92,10 @@ void main() {
 
   group('deleteServerAccount', () {
     void deleteThrows(Object error) =>
-        when(() => dio.delete<dynamic>(any())).thenThrow(error);
+        when(() => dio.delete<Object?>(any())).thenThrow(error);
 
     test('calls DELETE /auth/account', () async {
-      when(() => dio.delete<dynamic>(any())).thenAnswer(
+      when(() => dio.delete<Object?>(any())).thenAnswer(
         (_) async => Response(
           requestOptions: RequestOptions(path: ApiConstants.deleteAccount),
           statusCode: 200,
@@ -104,12 +104,11 @@ void main() {
 
       await datasource.deleteServerAccount();
 
-      verify(() => dio.delete<dynamic>(ApiConstants.deleteAccount)).called(1);
+      verify(() => dio.delete<Object?>(ApiConstants.deleteAccount)).called(1);
       expect(secureStorageCalls, contains('deleteAll'));
     });
 
     test('404 is a ServerException, not "already deleted"', () {
-      // A deleted user gets 401 from the JWT check; 404 is a wrong route.
       deleteThrows(_error(DioExceptionType.badResponse, status: 404));
 
       expect(datasource.deleteServerAccount(), throwsA(isA<ServerException>()));

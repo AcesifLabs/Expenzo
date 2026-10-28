@@ -20,7 +20,7 @@ void main() {
   SyncEngine engine() => harness.engine(isEnabled: () async => enabled);
 
   void expectNoPull() => verifyNever(
-    () => harness.dio.get<dynamic>(
+    () => harness.dio.get<Object?>(
       any(),
       queryParameters: any(named: 'queryParameters'),
     ),
@@ -76,7 +76,7 @@ void main() {
 
     expectNoPull();
     verifyNever(
-      () => harness.dio.post<dynamic>(any(), data: any(named: 'data')),
+      () => harness.dio.post<Object?>(any(), data: any(named: 'data')),
     );
   });
 

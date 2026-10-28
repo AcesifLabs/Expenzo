@@ -15,7 +15,8 @@
     "selected": "Selected"
   },
   "card": {
-    "rule": "Rule: {id}"
+    "rule": "Rule: {id}",
+    "noAmount": "No amount"
   },
   "options": {
     "title": "Scan past SMS for records"

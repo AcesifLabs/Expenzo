@@ -6,7 +6,7 @@ EventTransformer<T> sequential<T>() {
 }
 
 EventTransformer<T> restartable<T>() {
-  StreamSubscription? subscription;
+  StreamSubscription<T>? subscription;
 
   return (events, mapper) {
     return events.transform(
@@ -15,7 +15,7 @@ EventTransformer<T> restartable<T>() {
           subscription?.cancel();
           subscription = mapper(event).listen(
             (data) => sink.add(data),
-            onError: (e, st) => sink.addError(e, st),
+            onError: (Object e, StackTrace st) => sink.addError(e, st),
             onDone: () => subscription = null,
             cancelOnError: false,
           );
@@ -40,7 +40,7 @@ EventTransformer<T> droppable<T>() {
             running = true;
             mapper(event).listen(
               (data) => sink.add(data),
-              onError: (e, st) => sink.addError(e, st),
+              onError: (Object e, StackTrace st) => sink.addError(e, st),
               onDone: () => running = false,
               cancelOnError: false,
             );

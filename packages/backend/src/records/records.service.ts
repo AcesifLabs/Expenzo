@@ -60,19 +60,6 @@ export class RecordsService {
     if (result.affected === 0) throw new NotFoundException(`Record ${id} not found`);
   }
 
-  /**
-   * Restores budget links the server dropped before records had a budgetId
-   * column. Only rows of this user without a link are touched; nothing is
-   * created and no other field changes. The budget is not checked against the
-   * user's budgets: Family members link Records to an Admin's Shared Budget.
-   *
-   * `updatedAt` is left alone on purpose: bumping it would make sync reject
-   * edits other devices queued earlier as conflicts (ADR 0012).
-   *
-   * One raw statement fills every row at once; the repository API would need
-   * a query per link. The table and column names below mirror the Record
-   * entity mapping and must change with it.
-   */
   async fillMissingBudgetLinks(userId: string, links: RecordBudgetLinkItem[]): Promise<FillRecordBudgetLinksResult> {
     if (links.length === 0) return { updated: 0 };
 
@@ -83,7 +70,6 @@ export class RecordsService {
         WHERE r."id" = v."id" AND r."userId" = $3 AND r."budgetId" IS NULL`,
       [links.map((l) => l.id), links.map((l) => l.budgetId), userId],
     );
-    // pg returns [rows, rowCount] for UPDATE through TypeORM's query().
     const updated = Array.isArray(result) && typeof result[1] === 'number' ? result[1] : 0;
     return { updated };
   }

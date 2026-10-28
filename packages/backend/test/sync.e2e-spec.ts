@@ -11,7 +11,6 @@ import { Category } from '../src/categories/entities/category.entity';
 import { Budget } from '../src/budgets/entities/budget.entity';
 import { MessageSource } from '../src/message-sources/entities/message-source.entity';
 import { ExpenseTemplate } from '../src/expense-templates/entities/expense-template.entity';
-import { ParsingRule } from '../src/parsing-rules/entities/parsing-rule.entity';
 import { RecurringTransaction } from '../src/recurring-transactions/entities/recurring-transaction.entity';
 import { PendingRecurring } from '../src/recurring-transactions/entities/pending-recurring.entity';
 import { Goal } from '../src/goals/entities/goal.entity';
@@ -24,7 +23,7 @@ jest.setTimeout(30000);
 type Row = { id: string; userId: string; [field: string]: unknown };
 type Where = { id: string; userId?: string };
 
-/** Equality, or the TypeORM Not / MoreThan operators the sync pull uses. */
+
 function fieldMatches(value: unknown, condition: unknown): boolean {
   if (condition instanceof FindOperator) {
     if (condition.type === 'not') return value !== condition.value;
@@ -34,7 +33,7 @@ function fieldMatches(value: unknown, condition: unknown): boolean {
   return value === condition;
 }
 
-/** Stores rows in memory and applies the column default for `name` like Postgres would. */
+
 function memoryRepo(defaults: Partial<Row> = {}) {
   const rows = new Map<string, Row>();
   const matches = (where: Where) => {
@@ -67,7 +66,6 @@ const entities = {
   budgets: Budget,
   message_sources: MessageSource,
   expense_templates: ExpenseTemplate,
-  parsing_rules: ParsingRule,
   recurring_transactions: RecurringTransaction,
   pending_recurring: PendingRecurring,
   goals: Goal,
@@ -77,7 +75,7 @@ type Table = keyof typeof entities;
 let app: INestApplication;
 let repos: Record<Table, ReturnType<typeof memoryRepo>>;
 let currentUser: string;
-/** Group memberships by userId, read by the groupId rule on push. */
+
 let memberships: Map<string, { groupId: string; userId: string; role: GroupRole; joinedAt: Date }>;
 
 beforeEach(async () => {

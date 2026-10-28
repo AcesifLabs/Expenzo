@@ -25,8 +25,6 @@ class _MockCategoryRepository extends Mock implements CategoryRepository {}
 
 class _MockGetCategories extends Mock implements GetCategories {}
 
-/// Runs the work directly; rollback itself is covered by
-/// post_due_recurring_db_test.dart.
 class _DirectRunner implements TransactionRunner {
   var runs = 0;
 
@@ -97,7 +95,7 @@ void main() {
   test('nothing due adds nothing', () async {
     due([]);
 
-    expect(await postDueRecurring(), const Right(0));
+    expect(await postDueRecurring(), const Right<Failure, int>(0));
     verifyNever(() => recordRepository.addRecordsBatch(any()));
   });
 
@@ -109,7 +107,7 @@ void main() {
       makeRecurring(categoryId: 'food', nextOccurrence: second),
     ]);
 
-    expect(await postDueRecurring(), const Right(2));
+    expect(await postDueRecurring(), const Right<Failure, int>(2));
 
     final records = postedRecords();
     expect(records.map((r) => r.date), [first, second]);
@@ -169,7 +167,7 @@ void main() {
       () => recordRepository.addRecordsBatch(any()),
     ).thenAnswer((_) async => const Left(failure));
 
-    expect(await postDueRecurring(), const Left(failure));
+    expect(await postDueRecurring(), const Left<Failure, int>(failure));
     verifyNever(() => categoryRepository.incrementUsageCount(any()));
   });
 
@@ -179,7 +177,7 @@ void main() {
       () => getCategories(any()),
     ).thenAnswer((_) async => const Left(failure));
 
-    expect(await postDueRecurring(), const Left(failure));
+    expect(await postDueRecurring(), const Left<Failure, int>(failure));
     verifyNever(
       () => processRecurring(onlyIncluded: any(named: 'onlyIncluded')),
     );
@@ -191,7 +189,7 @@ void main() {
       () => processRecurring(onlyIncluded: any(named: 'onlyIncluded')),
     ).thenAnswer((_) async => const Left(failure));
 
-    expect(await postDueRecurring(), const Left(failure));
+    expect(await postDueRecurring(), const Left<Failure, int>(failure));
     verifyNever(() => recordRepository.addRecordsBatch(any()));
   });
 
@@ -215,8 +213,8 @@ void main() {
       final second = postDueRecurring(automatic: true);
       gate.complete(Right([makeRecurring()]));
 
-      expect(await first, const Right(1));
-      expect(await second, const Right(1));
+      expect(await first, const Right<Failure, int>(1));
+      expect(await second, const Right<Failure, int>(1));
       verifyProcessed(1);
     });
 
@@ -234,8 +232,8 @@ void main() {
       final manual = postDueRecurring();
       gate.complete(Right([makeRecurring()]));
 
-      expect(await automatic, const Right(1));
-      expect(await manual, const Right(0));
+      expect(await automatic, const Right<Failure, int>(1));
+      expect(await manual, const Right<Failure, int>(0));
       verifyInOrder([
         () => processRecurring(onlyIncluded: true),
         () => processRecurring(onlyIncluded: false),

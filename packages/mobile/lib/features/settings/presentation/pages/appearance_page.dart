@@ -21,7 +21,6 @@ class AppearancePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // SettingsBloc is an app-wide singleton; `create` would close it on pop.
     return BlocProvider.value(
       value: di.getIt<SettingsBloc>(),
       child: const Scaffold(body: AppearanceView()),
@@ -29,12 +28,9 @@ class AppearancePage extends StatelessWidget {
   }
 }
 
-/// Light, Dark and Match device, with a preview of the chosen mode.
 class AppearanceView extends StatelessWidget {
   const AppearanceView({super.key});
 
-  /// The theme modes as (value, label, icon), in design order. Also read by
-  /// the Settings row subtitle.
   static List<(String, String, IconData)> get options {
     final themeT = t.enums.theme;
 
@@ -45,7 +41,6 @@ class AppearanceView extends StatelessWidget {
     ];
   }
 
-  /// The label for [theme]; Match device for anything unknown.
   static String labelFor(String theme) {
     for (final (value, label, _) in options) {
       if (value == theme) return label;

@@ -7,14 +7,10 @@ class DashboardSummary extends Equatable {
   final double totalSpent;
   final double previousPeriodTotal;
 
-  /// Expense change vs the previous period, in percent. Null when the
-  /// previous period had no expenses, so there is nothing to compare to.
   final double? percentChange;
   final List<CategoryAmount> categoryBreakdown;
   final List<Record> recentTransactions;
 
-  /// Income minus expense for the period. Not a balance: the app has no
-  /// accounts or opening balance (see CONTEXT.md, "Net").
   double get net => totalIncome - totalExpense;
 
   @override

@@ -6,15 +6,12 @@ import '../../domain/entities/onboarding_result.dart';
 enum OnboardingStatus { editing, saving, done, failure }
 
 class OnboardingState extends Equatable {
-  /// The five setup pages.
   static const stepCount = 5;
 
   final OnboardingDraft draft;
 
-  /// 0 to [stepCount] - 1.
   final int step;
 
-  /// Rows on the recurring page before Continue copies them to [draft].
   final List<RecurringDraft> pendingRecurring;
   final OnboardingStatus status;
   final OnboardingResult? result;
@@ -41,7 +38,6 @@ class OnboardingState extends Equatable {
     this.errorText,
   });
 
-  /// [errorText] is cleared unless given.
   OnboardingState copyWith({
     OnboardingDraft? draft,
     int? step,

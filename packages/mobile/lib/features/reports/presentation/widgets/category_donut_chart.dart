@@ -41,14 +41,16 @@ class CategoryDonutChart extends StatelessWidget {
       );
     }
 
-    return SizedBox(
-      width: 160,
-      height: 160,
-      child: PieChart(
-        PieChartData(
-          centerSpaceRadius: 48,
-          sectionsSpace: 2,
-          sections: _buildSections(context.palette),
+    return RepaintBoundary(
+      child: SizedBox(
+        width: 160,
+        height: 160,
+        child: PieChart(
+          PieChartData(
+            centerSpaceRadius: 48,
+            sectionsSpace: 2,
+            sections: _buildSections(context.palette),
+          ),
         ),
       ),
     );

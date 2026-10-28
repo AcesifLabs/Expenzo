@@ -13,18 +13,10 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   final GetSettings getSettings;
   final UpdateSettings updateSettings;
 
-  /// The newest settings: the last loaded ones plus any change still being
-  /// saved. Derived events build on this, not on `state is SettingsLoaded`,
-  /// so a change made while a save runs is not dropped. Null until the first
-  /// load, and again after a failed save until the reload finishes.
   UserSettings? _lastLoaded;
 
-  /// Saves still running. Saves run concurrently, so an older save's result
-  /// must not replace [_lastLoaded] while a newer one built on it is pending.
   var _pendingSaves = 0;
 
-  /// [_lastLoaded] for readers outside the bloc: unlike [state], it keeps
-  /// the newest values while a save runs.
   UserSettings? get latestSettings => _lastLoaded;
 
   SettingsBloc({required this.getSettings, required this.updateSettings})
@@ -52,6 +44,10 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     );
     on<UpdateRecurringAutoCreate>(
       _onUpdateRecurringAutoCreate,
+      transformer: concurrent(),
+    );
+    on<UpdateCrashReportsEnabled>(
+      _onUpdateCrashReportsEnabled,
       transformer: concurrent(),
     );
     on<UpdateNumberFormat>(_onUpdateNumberFormat, transformer: concurrent());
@@ -89,7 +85,6 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     final result = await updateSettings(event.settings);
     _pendingSaves--;
     result.fold((failure) {
-      // The cached change was never stored; forget it until the reload.
       _lastLoaded = null;
       emit(SettingsError(failureText(failure)));
       add(const LoadSettings());
@@ -152,6 +147,13 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     _updateFromLast((s) => s.copyWith(recurringAutoCreate: event.enabled));
   }
 
+  void _onUpdateCrashReportsEnabled(
+    UpdateCrashReportsEnabled event,
+    Emitter<SettingsState> emit,
+  ) {
+    _updateFromLast((s) => s.copyWith(crashReportsEnabled: event.enabled));
+  }
+
   void _onUpdateNumberFormat(
     UpdateNumberFormat event,
     Emitter<SettingsState> emit,
@@ -189,16 +191,12 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     _updateFromLast((s) => s.copyWith(syncEnabled: event.enabled));
   }
 
-  /// Emits [settings] once no newer save is pending, so the UI never steps
-  /// back to an older value.
   void _emitLoaded(Emitter<SettingsState> emit, UserSettings settings) {
     if (_pendingSaves > 0) return;
     _lastLoaded = settings;
     emit(SettingsLoaded(settings));
   }
 
-  /// Saves [change] applied to the newest settings. Does nothing before the
-  /// first load.
   void _updateFromLast(UserSettings Function(UserSettings) change) {
     final last = _lastLoaded;
     if (last == null) return;

@@ -19,8 +19,6 @@ void main() {
 
   group('criticalDependenciesReady', () {
     setUp(() async {
-      // initCriticalDependencies eagerly awaits SharedPreferences.getInstance();
-      // mock it so the test doesn't require platform channels.
       SharedPreferences.setMockInitialValues(<String, Object>{});
       di.criticalInitRunCount = 0;
     });
@@ -65,10 +63,6 @@ void main() {
           instanceName: 'criticalReady',
         );
 
-        // The getter must NOT re-call initCriticalDependencies; if it did,
-        // GetIt would throw on the duplicate instanceName registration.
-        // The counter assertion makes the run-once contract explicit: the
-        // warm path must leave the counter at 0.
         await di.criticalDependenciesReady;
         expect(
           di.criticalInitRunCount,
@@ -79,7 +73,6 @@ void main() {
     );
 
     test('re-initializes after GetIt.I.reset() (counter bumps to 2)', () async {
-      // First call: counter goes 0 → 1, completer is registered.
       await di.criticalDependenciesReady.timeout(const Duration(seconds: 5));
       expect(
         di.getIt.isRegistered<Future<void>>(instanceName: 'criticalReady'),
@@ -91,7 +84,6 @@ void main() {
         reason: 'first call should have run init',
       );
 
-      // Reset wipes the completer from GetIt (but not the counter).
       await GetIt.I.reset();
       expect(
         di.getIt.isRegistered<Future<void>>(instanceName: 'criticalReady'),
@@ -104,7 +96,6 @@ void main() {
         reason: 'precondition: GetIt reset does not reset the counter',
       );
 
-      // Second call: counter goes 1 → 2, completer is re-registered.
       await di.criticalDependenciesReady.timeout(const Duration(seconds: 5));
       expect(
         di.getIt.isRegistered<Future<void>>(instanceName: 'criticalReady'),
@@ -165,7 +156,6 @@ void main() {
     });
 
     test('is run-once: subsequent calls do not re-run init', () async {
-      // First call runs init and increments the counter to 1.
       await di.featureDependenciesReady.timeout(const Duration(seconds: 2));
       expect(
         di.featureInitRunCount,
@@ -173,7 +163,6 @@ void main() {
         reason: 'first call should have run init',
       );
 
-      // Second call must NOT re-run init — the counter stays at 1.
       await di.featureDependenciesReady.timeout(const Duration(seconds: 2));
       expect(
         di.featureInitRunCount,

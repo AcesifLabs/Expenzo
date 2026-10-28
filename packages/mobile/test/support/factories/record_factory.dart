@@ -2,7 +2,6 @@ import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
 import 'package:expense_tracker/features/records/domain/entities/record.dart';
 
-/// Creates a [Record] for tests. All params optional with deterministic defaults.
 Record makeRecord({
   String? id,
   double? amount,

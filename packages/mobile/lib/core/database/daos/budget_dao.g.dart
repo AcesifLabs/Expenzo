@@ -6,4 +6,14 @@ part of 'budget_dao.dart';
 mixin _$BudgetDaoMixin on DatabaseAccessor<AppDatabase> {
   $BudgetsTable get budgets => attachedDatabase.budgets;
   $RecordsTable get records => attachedDatabase.records;
+  BudgetDaoManager get managers => BudgetDaoManager(this);
+}
+
+class BudgetDaoManager {
+  final _$BudgetDaoMixin _db;
+  BudgetDaoManager(this._db);
+  $$BudgetsTableTableManager get budgets =>
+      $$BudgetsTableTableManager(_db.attachedDatabase, _db.budgets);
+  $$RecordsTableTableManager get records =>
+      $$RecordsTableTableManager(_db.attachedDatabase, _db.records);
 }

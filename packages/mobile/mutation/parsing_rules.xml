@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mutations version="1.1">
+  <directories>
+    <directory recursive="true">lib/features/parsing_rules/domain</directory>
+  </directories>
+  <exclude>
+    
+    <regex pattern="appLogger\.[a-z]+\([^;]*;" dotAll="true"/>
+    <regex pattern="catch \([a-z, ]+\) \{\s*appLogger\.[a-z]+\([^;]*;" dotAll="true"/>
+    <regex pattern="//[^\n]*"/>
+    <regex pattern="import [^;]*;"/>
+    
+    <directory>lib/features/parsing_rules/domain/entities/**</directory>
+    <directory>lib/features/parsing_rules/domain/usecases/**</directory>
+  </exclude>
+  <commands>
+    <command group="test" expected-return="0" working-directory="." timeout="300">flutter test test/features/parsing_rules test/property/amount_parse_property_test.dart test/property/rule_date_property_test.dart test/property/regex_eval_property_test.dart</command>
+  </commands>
+  <threshold failure="80">
+    <rating over="90" name="A"/>
+    <rating over="80" name="B"/>
+    <rating over="60" name="C"/>
+    <rating over="0" name="F"/>
+  </threshold>
+</mutations>

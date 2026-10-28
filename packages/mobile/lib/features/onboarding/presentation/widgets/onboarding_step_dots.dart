@@ -4,13 +4,10 @@ import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
-/// Dots joined by short lines (design frame `StepRow`): done steps in accent,
-/// the current one in the brand colour, the rest faded.
 class OnboardingStepDots extends StatelessWidget {
   static const _dot = 8.0;
   static const _line = Size(24, 2);
 
-  /// 0-based.
   final int current;
   final int total;
 

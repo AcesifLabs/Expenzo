@@ -11,6 +11,7 @@ import 'package:expense_tracker/features/auth/domain/entities/user.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_state.dart';
 import 'package:expense_tracker/features/auth/presentation/pages/login_page.dart';
+import '../../../support/connectivity_test_support.dart';
 import '../../../support/pump_localized.dart';
 
 class _MockAuthBloc extends Mock implements AuthBloc {}
@@ -26,6 +27,8 @@ void main() {
     when(() => authBloc.state).thenAnswer((_) => current);
     when(() => authBloc.stream).thenAnswer((_) => states.stream);
     when(() => authBloc.close()).thenAnswer((_) async {});
+
+    registerTestConnectivity();
 
     final router = GoRouter(
       initialLocation: '/',
@@ -55,7 +58,7 @@ void main() {
     await tester.pumpWidget(
       BlocProvider<AuthBloc>.value(
         value: authBloc,
-        // Wired as in ExpenzoApp.
+
         child: RefreshOnAuthChange(
           enabled: true,
           onAuthChanged: router.refresh,

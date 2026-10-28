@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:expense_tracker/core/constants/first_day_of_week.dart';
 import 'package:expense_tracker/core/theme/first_day_material_localizations.dart';
 
-/// October 2026: the 1st is a Thursday.
 final _month = DateTime(2026, 10);
 
 Future<BuildContext> _pumpPicker(
@@ -42,9 +41,7 @@ Future<BuildContext> _pumpPicker(
   return pickerContext;
 }
 
-/// Weekdays of the dates drawn in the picker's leftmost column.
 Set<int> _firstColumnWeekdays(WidgetTester tester, BuildContext context) {
-  // Day numbers use the locale's digits (Bangla digits in bn).
   final localizations = MaterialLocalizations.of(context);
   final xs = <int, double>{
     for (var d = 1; d <= 31; d++)

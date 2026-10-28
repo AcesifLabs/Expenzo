@@ -97,12 +97,12 @@ class ReportsRepositoryImpl implements ReportsRepository {
         59,
         999,
       );
-      final records = await recordDao.getRecordsByDateRange(
+      final expenses = await recordDao.getExpensesByDateRange(
         startDate,
         inclusiveEnd,
       );
 
-      if (records.isEmpty) {
+      if (expenses.isEmpty) {
         return const Right(
           SpendingInsights(
             highestDayAmount: 0,
@@ -114,11 +114,11 @@ class ReportsRepositoryImpl implements ReportsRepository {
       }
 
       double totalSpent = 0;
-      for (final record in records) {
+      for (final record in expenses) {
         totalSpent += record.amount.abs();
       }
 
-      final dailyTotals = _computeDailyTotals(records);
+      final dailyTotals = _computeDailyTotals(expenses);
 
       final highestResult = _findHighestDay(dailyTotals);
 
@@ -130,7 +130,7 @@ class ReportsRepositoryImpl implements ReportsRepository {
           highestDayDate: highestResult.date,
           highestDayAmount: highestResult.amount,
           avgDailySpending: avgDaily,
-          totalTransactionCount: records.length,
+          totalTransactionCount: expenses.length,
           totalSpent: totalSpent,
         ),
       );
@@ -141,16 +141,9 @@ class ReportsRepositoryImpl implements ReportsRepository {
     }
   }
 
-  List<MapEntry<String, double>> _computeCategoryTotals(List<dynamic> results) {
-    final List<MapEntry<String, double>> totals = [];
-    for (final row in results) {
-      final catId = row.read(recordDao.records.categoryId)?.toString() ?? '';
-      final amount = row.read(recordDao.records.amount.sum()) ?? 0.0;
-      totals.add(MapEntry(catId, amount.abs()));
-    }
-
-    return totals;
-  }
+  List<MapEntry<String, double>> _computeCategoryTotals(
+    List<({String? categoryId, double total})> results,
+  ) => [for (final row in results) MapEntry(row.categoryId ?? '', row.total)];
 
   List<CategoryAmount> _buildBreakdown(
     List<MapEntry<String, double>> totals,

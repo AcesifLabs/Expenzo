@@ -5,10 +5,8 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:expense_tracker/core/database/app_database.dart';
 
-/// Verifies the V15 -> V16 migration:
-///  - budgets: category_id dropped, NOT NULL name added (legacy rows -> '')
-///  - records: budget_id column added (nullable; legacy rows -> null)
-///  - idx_budgets_category_id removed, idx_records_budget_id created
+import 'migrations/v19_tables.dart';
+
 void main() {
   late File dbFile;
 
@@ -23,11 +21,9 @@ void main() {
     }
   });
 
-  /// Seeds a physical SQLite file with the V15-shaped budgets/records schema
-  /// and sets user_version = 15 so reopening as AppDatabase triggers onUpgrade.
   Future<void> seedV15Schema() async {
     final raw = NativeDatabase(dbFile);
-    // Minimal V15 shapes for the two tables the migration touches.
+
     await raw.ensureOpen(_NoOpUser());
     await raw.runCustom('''
       CREATE TABLE budgets (
@@ -72,8 +68,7 @@ void main() {
       "INSERT INTO records (id, amount, description, date, record_type) VALUES ('r1', -20.0, 'Old expense', 0, 'OUT')",
       const [],
     );
-    // Later steps (v17 category recolor) read these tables; every real V15
-    // database has them.
+
     await raw.runCustom('''
       CREATE TABLE categories (
         id TEXT NOT NULL PRIMARY KEY,
@@ -99,6 +94,7 @@ void main() {
         synced_at INTEGER
       )
     ''', const []);
+    await addMissingV19Tables(raw, except: {'goals'});
     await raw.runCustom('PRAGMA user_version = 15', const []);
     await raw.close();
   }
@@ -117,7 +113,7 @@ void main() {
     await seedV15Schema();
 
     final db = AppDatabase.forTesting(NativeDatabase(dbFile));
-    // Force the migration to run by touching the DB.
+
     await db.customSelect('SELECT 1').get();
 
     final budgetCols = await tableColumns(db, 'budgets');
@@ -133,7 +129,6 @@ void main() {
     final recordIdxs = await indexNames(db, 'records');
     expect(recordIdxs, contains('idx_records_budget_id'));
 
-    // Legacy rows survive: budget name backfilled to '', record budget_id null.
     final budgetRow = await db
         .customSelect("SELECT name FROM budgets WHERE id = 'b1'")
         .getSingle();

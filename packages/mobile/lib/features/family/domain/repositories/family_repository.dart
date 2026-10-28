@@ -7,18 +7,11 @@ import '../entities/group_summary.dart';
 import '../entities/invite_code.dart';
 import '../entities/my_group.dart';
 
-/// The signed-in user's Family Group (ADR 0008). Reads fall back to the
-/// per-account cache when the server cannot be reached.
 abstract class FamilyRepository {
-  /// The last cached group, read without waiting; null when not in a group
-  /// or nothing is cached. Budget screens, the Settings row and Delete all
-  /// data read it.
   MyGroup? get cachedGroup;
 
-  /// The last cached summary of [cachedGroup], read without waiting.
   GroupSummary? get cachedSummary;
 
-  /// With [preferCache], a cached value is returned without a request.
   Future<Either<Failure, Cached<MyGroup?>>> getMyGroup({
     bool preferCache = false,
   });
@@ -44,7 +37,6 @@ abstract class FamilyRepository {
     required GroupRole role,
   });
 
-  /// An Admin removing someone else. Leaving is [leaveGroup].
   Future<Either<Failure, Unit>> removeMember({
     required String groupId,
     required String userId,

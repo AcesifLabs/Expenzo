@@ -7,7 +7,6 @@ import { Category } from './categories/entities/category.entity';
 import { Budget } from './budgets/entities/budget.entity';
 import { MessageSource } from './message-sources/entities/message-source.entity';
 import { ExpenseTemplate } from './expense-templates/entities/expense-template.entity';
-import { ParsingRule } from './parsing-rules/entities/parsing-rule.entity';
 import { RecurringTransaction } from './recurring-transactions/entities/recurring-transaction.entity';
 import { PendingRecurring } from './recurring-transactions/entities/pending-recurring.entity';
 import { Goal } from './goals/entities/goal.entity';
@@ -22,6 +21,6 @@ export default new DataSource({
   type: 'postgres',
   url: process.env.DATABASE_URL,
   ssl: getDatabaseSslConfig(process.env.DATABASE_URL, process.env.DATABASE_SSL),
-  entities: [User, Record, Category, Budget, MessageSource, ExpenseTemplate, ParsingRule, RecurringTransaction, PendingRecurring, Goal, Group, GroupMember, GroupInvite],
+  entities: [User, Record, Category, Budget, MessageSource, ExpenseTemplate, RecurringTransaction, PendingRecurring, Goal, Group, GroupMember, GroupInvite],
   migrations: [__dirname + '/migrations/**/*{.ts,.js}'],
 });

@@ -1,17 +1,11 @@
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
-/// App-wide color roles that the Material [ColorScheme] has no slot for.
-///
-/// Registered on both [ThemeData]s in `app_theme.dart`; read it with
-/// `context.palette` so screens follow the light/dark setting. Values are
-/// documented in DESIGN.md ("Dark palette" / "Light palette").
 @immutable
 class AppPalette extends ThemeExtension<AppPalette> {
   final Color bg;
   final Color surface;
 
-  /// Raised fills on top of [surface]: chips, keypad keys, icon tiles.
   final Color surfaceHigh;
   final Color inputFill;
   final Color inputStroke;
@@ -20,17 +14,13 @@ class AppPalette extends ThemeExtension<AppPalette> {
   final Color textSecondary;
   final Color textTertiary;
 
-  /// Brand mint for text and icons: links, selected tab, focus.
   final Color brand;
 
-  /// Brand mint for filled surfaces: primary buttons, the add button.
   final Color brandFill;
   final Color onBrandFill;
 
-  /// Secondary lavender for text and icons: chart highlights, tags.
   final Color accent;
 
-  /// Secondary lavender for filled backgrounds: chips, info tiles.
   final Color accentFill;
   final Color onAccentFill;
   final Color expense;
@@ -66,7 +56,6 @@ class AppPalette extends ThemeExtension<AppPalette> {
     toggleKnob: Color(0xFF8E8E93),
   );
 
-  // Text roles reach at least 4.5:1 on both bg and surface.
   static const AppPalette light = AppPalette(
     bg: AppColors.backgroundLight,
     surface: AppColors.surfaceLight,
@@ -92,13 +81,10 @@ class AppPalette extends ThemeExtension<AppPalette> {
     toggleKnob: Color(0xFF8E8E93),
   );
 
-  /// Error text and icons share the expense rose.
   Color get error => expense;
 
-  /// A faint expense rose behind destructive warnings.
   Color get expenseTint => expense.withValues(alpha: 0.12);
 
-  /// A faint warning amber behind warning banners.
   Color get warningTint => warning.withValues(alpha: 0.12);
 
   const AppPalette({
@@ -210,8 +196,6 @@ class AppPalette extends ThemeExtension<AppPalette> {
 }
 
 extension AppPaletteContext on BuildContext {
-  /// The [AppPalette] for the active theme. Falls back to [AppPalette.dark]
-  /// when no app theme is above this context (e.g. a bare test widget).
   AppPalette get palette =>
       Theme.of(this).extension<AppPalette>() ?? AppPalette.dark;
 }

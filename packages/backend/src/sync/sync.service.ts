@@ -8,7 +8,6 @@ import { Category } from '../categories/entities/category.entity';
 import { Budget } from '../budgets/entities/budget.entity';
 import { MessageSource } from '../message-sources/entities/message-source.entity';
 import { ExpenseTemplate } from '../expense-templates/entities/expense-template.entity';
-import { ParsingRule } from '../parsing-rules/entities/parsing-rule.entity';
 import { RecurringTransaction } from '../recurring-transactions/entities/recurring-transaction.entity';
 import { PendingRecurring } from '../recurring-transactions/entities/pending-recurring.entity';
 import { Goal } from '../goals/entities/goal.entity';
@@ -17,12 +16,7 @@ import { DEFAULT_BUDGET_NAME } from '../budgets/budgets.constants';
 import { GroupMember } from '../groups/entities/group-member.entity';
 import { GroupRole } from '../groups/groups.constants';
 
-/**
- * Required fields a client may send without a real value: null, blank or the
- * default itself. On create they get the default; on update they are dropped
- * so the stored value is kept (a device that only ever saw the default must
- * not overwrite a repaired name, ADR 0012).
- */
+
 const REQUIRED_FIELD_DEFAULTS: Partial<Record<SyncTable, Record<string, unknown>>> = {
   [SyncTable.BUDGETS]: { name: DEFAULT_BUDGET_NAME },
 };
@@ -38,11 +32,10 @@ export class SyncService {
     @InjectRepository(Budget) private readonly budgetRepo: Repository<Budget>,
     @InjectRepository(MessageSource) msgRepo: Repository<MessageSource>,
     @InjectRepository(ExpenseTemplate) tmplRepo: Repository<ExpenseTemplate>,
-    @InjectRepository(ParsingRule) ruleRepo: Repository<ParsingRule>,
     @InjectRepository(RecurringTransaction) recRepo: Repository<RecurringTransaction>,
     @InjectRepository(PendingRecurring) pendRepo: Repository<PendingRecurring>,
     @InjectRepository(Goal) goalRepo: Repository<Goal>,
-    // Not a synced table: read to check who may share a budget.
+    
     @InjectRepository(GroupMember) private readonly memberRepo: Repository<GroupMember>,
   ) {
     this.repoMap.set(SyncTable.RECORDS, recordRepo);
@@ -50,11 +43,10 @@ export class SyncService {
     this.repoMap.set(SyncTable.BUDGETS, budgetRepo);
     this.repoMap.set(SyncTable.MESSAGE_SOURCES, msgRepo);
     this.repoMap.set(SyncTable.EXPENSE_TEMPLATES, tmplRepo);
-    this.repoMap.set(SyncTable.PARSING_RULES, ruleRepo);
     this.repoMap.set(SyncTable.RECURRING_TRANSACTIONS, recRepo);
     this.repoMap.set(SyncTable.PENDING_RECURRING, pendRepo);
-    // savedAmount is last-write-wins like every synced field: two devices
-    // adding to the same goal offline keep only the later total.
+    
+    
     this.repoMap.set(SyncTable.GOALS, goalRepo);
   }
 
@@ -122,23 +114,13 @@ export class SyncService {
     return { id: change.id, status: SyncStatus.SUCCESS, serverId: existing.id };
   }
 
-  /**
-   * Only an Admin may share a budget, and only into their own group; the
-   * owner may always unshare it (CONTEXT.md Shared Budget). Runs after the
-   * owner check, so [existing] is the caller's own row.
-   *
-   * A groupId the caller may not set is dropped, not refused: the device only
-   * marks success and conflict as synced, so an error would be retried
-   * forever. On update the stored value stays; on insert it is NULL. Either
-   * way updatedAt moves, so the next pull puts the server value back on the
-   * device. This covers an Admin who shared offline and was demoted since.
-   */
+  
   private async withAllowedGroupId(
     change: SyncChangeItem,
     existing: SyncableEntity | null,
     userId: string,
   ): Promise<SyncChangeItem> {
-    // Old app versions never send the key; the stored value stays.
+    
     if (change.table !== SyncTable.BUDGETS || !change.data || !('groupId' in change.data)) return change;
     const next = change.data.groupId ?? null;
     const current = (existing as Budget | null)?.groupId ?? null;
@@ -182,11 +164,7 @@ export class SyncService {
     return { id: change.id, status: SyncStatus.SUCCESS };
   }
 
-  /**
-   * Called after a lookup scoped to the caller found nothing. A row with this
-   * id that belongs to another user is never read, changed or deleted; the
-   * push gets a conflict so the device drops it instead of retrying forever.
-   */
+  
   private async notOwner(repo: Repository<SyncableEntity>, change: SyncChangeItem): Promise<SyncConflictResult | null> {
     if (!(await repo.exists({ where: { id: change.id } }))) return null;
     return { id: change.id, status: SyncStatus.CONFLICT, serverId: change.id, message: 'Not the owner' };
@@ -205,13 +183,7 @@ export class SyncService {
     return { changes, serverTime: new Date().toISOString() };
   }
 
-  /**
-   * Other members' Shared Budgets in the caller's group, read-only on the
-   * device (ADR 0008). Pull filters by updatedAt, so a member who joined
-   * after a budget was shared gets the whole set once on their first pull
-   * after joining. There are no tombstones: the device drops unshared and
-   * deleted ones after its next `/groups/me`.
-   */
+  
   private async pullSharedBudgets(userId: string, since: Date): Promise<Budget[]> {
     const member = await this.memberRepo.findOne({ where: { userId } });
     if (!member) return [];
@@ -226,7 +198,7 @@ export class SyncService {
   }
 
   private toPullChange(table: SyncTable, entity: SyncableEntity): PullChange {
-    // Relations are not eager; stripped in case one is ever loaded.
+    
     const { userId: _userId, user: _user, group: _group, ...data } = entity as SyncableEntity & {
       user?: unknown;
       group?: unknown;
@@ -245,17 +217,12 @@ export class SyncService {
     return { totalCount, tables };
   }
 
-  /**
-   * Deletes the caller's rows only, their own Shared Budgets included. Group
-   * tables and other members' rows are not touched; members drop the
-   * cleared budgets from their phones after their next `/groups/me`.
-   */
+  
   async clearUserData(userId: string): Promise<void> {
     const deletionOrder: SyncTable[] = [
       SyncTable.PENDING_RECURRING,
       SyncTable.RECURRING_TRANSACTIONS,
       SyncTable.EXPENSE_TEMPLATES,
-      SyncTable.PARSING_RULES,
       SyncTable.MESSAGE_SOURCES,
       SyncTable.GOALS,
       SyncTable.BUDGETS,

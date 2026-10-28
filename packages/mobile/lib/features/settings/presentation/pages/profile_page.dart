@@ -31,7 +31,6 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Pushed above the app shell, so it needs its own themed Scaffold.
     return BlocProvider(
       create: (_) => di.getIt<DeleteAccountBloc>(),
       child: const Scaffold(body: ProfileView()),
@@ -39,8 +38,6 @@ class ProfilePage extends StatelessWidget {
   }
 }
 
-/// My profile: the Google account read-only, Sign out and Delete account.
-/// Name and photo come from Google, so nothing here is editable.
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
 
@@ -50,7 +47,6 @@ class ProfileView extends StatelessWidget {
           current.status == DeleteAccountStatus.failed);
 
   void _onDeleteAccountState(BuildContext context, DeleteAccountState state) {
-    // Captured first: the refresh leaves this page.
     final messenger = ScaffoldMessenger.of(context);
     if (state.status == DeleteAccountStatus.deleted) {
       context.read<AuthBloc>().add(const SignOutRequested());
@@ -69,7 +65,6 @@ class ProfileView extends StatelessWidget {
     final authState = context.watch<AuthBloc>().state;
     final deleting = deleteState.status == DeleteAccountStatus.deleting;
 
-    // Leaving mid-delete is blocked: no back button, and system back is off.
     return PopScope(
       canPop: !deleting,
       child: AppScaffold(
@@ -175,7 +170,6 @@ class _SignedInContent extends StatelessWidget {
   }
 }
 
-/// Avatar, name, email and the "Signed in with Google" mark.
 class _ProfileHeader extends StatelessWidget {
   final User user;
 
@@ -226,7 +220,6 @@ class _ProfileHeader extends StatelessWidget {
   }
 }
 
-/// Name and email as read-only rows: no arrow, no tap.
 class _AccountCard extends StatelessWidget {
   final User user;
 
@@ -267,7 +260,6 @@ class _AccountCard extends StatelessWidget {
   }
 }
 
-/// Shown when the page is opened signed out, or after signing out here.
 class _SignedOutContent extends StatelessWidget {
   const _SignedOutContent();
 

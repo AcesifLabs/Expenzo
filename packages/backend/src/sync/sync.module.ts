@@ -7,14 +7,13 @@ import { Category } from '../categories/entities/category.entity';
 import { Budget } from '../budgets/entities/budget.entity';
 import { MessageSource } from '../message-sources/entities/message-source.entity';
 import { ExpenseTemplate } from '../expense-templates/entities/expense-template.entity';
-import { ParsingRule } from '../parsing-rules/entities/parsing-rule.entity';
 import { RecurringTransaction } from '../recurring-transactions/entities/recurring-transaction.entity';
 import { PendingRecurring } from '../recurring-transactions/entities/pending-recurring.entity';
 import { Goal } from '../goals/entities/goal.entity';
 import { GroupMember } from '../groups/entities/group-member.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Record, Category, Budget, MessageSource, ExpenseTemplate, ParsingRule, RecurringTransaction, PendingRecurring, Goal, GroupMember])],
+  imports: [TypeOrmModule.forFeature([Record, Category, Budget, MessageSource, ExpenseTemplate, RecurringTransaction, PendingRecurring, Goal, GroupMember])],
   controllers: [SyncController],
   providers: [SyncService],
 })

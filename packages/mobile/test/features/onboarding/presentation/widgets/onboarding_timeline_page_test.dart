@@ -19,7 +19,6 @@ import 'onboarding_test_harness.dart';
 void main() {
   setUpAll(registerOnboardingFallbacks);
 
-  // Income 5000, recurring 1225 -> savings 755; goal 1999.
   const draftEvents = [
     IncomeSubmitted(5000, IncomeFrequency.monthly),
     RecurringItemAdded(
@@ -86,7 +85,7 @@ void main() {
 
     await tester.tap(find.text(t.onboarding.timeline.custom));
     await tester.pumpAndSettle();
-    // Stand in for the picker: the page only reacts to the picked date.
+
     Navigator.of(tester.element(find.byType(DatePickerDialog))).pop(date);
     await tester.pumpAndSettle();
 

@@ -139,8 +139,6 @@ class BudgetRepositoryImpl implements BudgetRepository {
     return localDatasource.watchBudgets();
   }
 
-  /// Enqueues a records-table sync update for each record that was unlinked by
-  /// a budget deletion, so the null budget link propagates to other devices.
   void _enqueueUnlinkedRecords(List<Record> records) {
     final syncQueueDao = _syncQueueDao;
     if (syncQueueDao == null || records.isEmpty) return;

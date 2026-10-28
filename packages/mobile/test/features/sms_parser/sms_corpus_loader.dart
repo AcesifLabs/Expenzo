@@ -3,16 +3,8 @@ import 'dart:io';
 import 'package:excel/excel.dart';
 import 'package:path/path.dart' as p;
 
-/// Direction encoded in the corpus workbook filename, e.g. `debit535` or
-/// `credit121`. Used by tests to verify corpus integrity and to assert
-/// per-row behaviour.
 enum CorpusDirection { debit, credit }
 
-/// One row from one workbook. [body] is the SMS text fed to the parser;
-/// [dateSerial] is the workbook's column-E Excel serial retained as a
-/// raw double — [date] resolves it into a UTC [DateTime] using the
-/// standard 1899-12-30 base (the base that correctly compensates for
-/// Excel's phantom 1900-feb-29 so serials ≥ 61 land on the right day).
 class SmsCorpusFixture {
   final String workbook;
   final int rowIndex;
@@ -39,14 +31,9 @@ class SmsCorpusFixture {
     ).add(Duration(milliseconds: (s * 86400000).round()));
   }
 
-  /// Stable id suitable for `sourceId` in [EvaluateRulesParams].
   String get sourceId => '$workbook#$rowIndex';
 }
 
-/// One workbook's worth of corpus rows. [tableRowCount] is the
-/// authoritative size for cross-checks: the number of `sheetData/row`
-/// elements in the file (including the header). [fixtures] excludes
-/// the header and any rows whose SMS body came back empty.
 class CorpusWorkbook {
   final String filename;
   final CorpusDirection direction;
@@ -61,20 +48,6 @@ class CorpusWorkbook {
   });
 }
 
-/// Reads every `*.xlsx` file under `<package>/test/data/` and decodes
-/// them as one [CorpusWorkbook] per file, sorted ascending by
-/// filename.
-///
-/// Resolves the corpus directory by walking up from `Platform.script`
-/// until `test/data` is found — this keeps the test independent of
-/// the cwd `flutter test` happens to be launched from.
-///
-/// Relies on header names (not fixed column indices) so the
-/// quirky c↔d column slice between header and data rows in the
-/// on-disk workbooks doesn't shift our indices. Schema variants
-/// currently recognised: header columns named one of `sms|message|body`
-/// for the SMS text, one of `cardholders|sender|contact_id` for the
-/// sender, one of `date|received_at` for the Excel serial date.
 Future<List<CorpusWorkbook>> loadSmsCorpus() async {
   final dataDir = _resolveDataDir();
   final dir = Directory(dataDir);
@@ -98,8 +71,6 @@ Future<List<CorpusWorkbook>> loadSmsCorpus() async {
 }
 
 String _resolveDataDir() {
-  // Prefer walking up from Platform.script so the loader works
-  // regardless of where flutter test is invoked from.
   final script = Platform.script.toFilePath();
   var dir = p.dirname(script);
   for (var i = 0; i < 8; i++) {
@@ -110,8 +81,6 @@ String _resolveDataDir() {
     dir = parent;
   }
 
-  // Fallback to cwd-relative. Works for `flutter test` from the
-  // package root which is the standard invocation.
   return 'test/data';
 }
 
@@ -119,10 +88,6 @@ Future<CorpusWorkbook> _decodeOne(File file) async {
   final bytes = await file.readAsBytes();
   final filename = file.uri.pathSegments.last;
 
-  // Filename encoding also has a trailing number
-  // (`01 - debit535 1896.xlsx`) but it is **not** a guaranteed row
-  // count — the corpus's upstream tooling stamps its own metric, so
-  // we deliberately do not encode it on the struct.
   final stem = filename.substring(0, filename.length - '.xlsx'.length);
   final direction = stem.toLowerCase().contains('debit')
       ? CorpusDirection.debit
@@ -198,8 +163,6 @@ String? stringOf(List<Data?> row, int? idx) {
   if (v == null) return null;
 
   return switch (v) {
-    // TextSpan.toString() flattens text + nested children, which
-    // covers the simple "string in a cell" case the corpus uses.
     TextCellValue() => v.value.toString(),
     IntCellValue() => v.value.toString(),
     DoubleCellValue() => v.value.toString(),

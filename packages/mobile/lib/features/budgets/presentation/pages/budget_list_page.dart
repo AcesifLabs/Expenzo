@@ -21,6 +21,7 @@ import 'package:expense_tracker/features/budgets/presentation/helpers/budget_dis
 import 'package:expense_tracker/features/budgets/presentation/helpers/budget_access_lookup.dart';
 import 'package:expense_tracker/features/family/domain/repositories/family_repository.dart';
 import 'package:expense_tracker/features/family/domain/usecases/get_group_summary.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_error_state.dart';
 
 class BudgetListPage extends StatelessWidget {
   const BudgetListPage({super.key});
@@ -44,8 +45,6 @@ class BudgetListView extends StatefulWidget {
 class _BudgetListViewState extends State<BudgetListView> {
   AppPalette get _palette => context.palette;
 
-  /// Ask for notification permission at most once per app run, and only
-  /// once there is a budget to be alerted about.
   static bool _askedForAlertPermission = false;
 
   @override
@@ -54,9 +53,6 @@ class _BudgetListViewState extends State<BudgetListView> {
     unawaited(_refreshSharedProgress());
   }
 
-  /// Shared Budget cards show the server's spent (CONTEXT.md Shared
-  /// Budget); a fresh summary each time the tab opens keeps them current.
-  /// A failure leaves the cached or local numbers in place.
   Future<void> _refreshSharedProgress() async {
     if (!di.getIt.isRegistered<FamilyRepository>()) return;
     final group = di.getIt<FamilyRepository>().cachedGroup;
@@ -94,7 +90,6 @@ class _BudgetListViewState extends State<BudgetListView> {
       title: t.budgets.title,
       subtitle: t.budgets.subtitle,
       actions: [
-        // Labelled so it isn't confused with the add-transaction button.
         TextButton.icon(
           icon: const Icon(PiconsRegular.plus, size: 18),
           label: Text(t.common.newBudget),
@@ -237,7 +232,7 @@ class _BudgetListViewState extends State<BudgetListView> {
 
   void _confirmDelete(BuildContext context, Budget budget) {
     final strings = t.budgets.delete;
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(strings.title),
@@ -277,7 +272,10 @@ class _BudgetListViewState extends State<BudgetListView> {
           ),
           BudgetError(:final message) => Scaffold(
             backgroundColor: _palette.bg,
-            body: Center(child: Text(message)),
+            body: AppErrorState(
+              message: message,
+              onRetry: () => context.read<BudgetBloc>().add(LoadBudgets()),
+            ),
           ),
           BudgetLoaded() => _buildLoadedState(context, state),
           _ => Scaffold(

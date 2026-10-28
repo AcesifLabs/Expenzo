@@ -65,8 +65,7 @@ void main() {
   test('weekly buckets start on the first day of week', () async {
     WeekStart.current.value = FirstDayOfWeek.saturday;
     addTearDown(() => WeekStart.current.value = FirstDayOfWeek.monday);
-    // Saturday 2026-10-03 and the Friday after share a week; the next
-    // Saturday starts a new one.
+
     await spend('a', 100, DateTime(2026, 10, 3, 9));
     await spend('b', 50, DateTime(2026, 10, 9, 18));
     await spend('c', 30, DateTime(2026, 10, 10, 12));
@@ -78,7 +77,7 @@ void main() {
     );
 
     final trend = result.getOrElse(() => fail('expected a trend'));
-    // Oct 1 is a Thursday, so the first bucket starts Saturday Sep 26.
+
     expect(trend.map((d) => d.date), [
       DateTime(2026, 9, 26),
       DateTime(2026, 10, 3),
@@ -103,5 +102,47 @@ void main() {
     expect(byName['Food']?.colorHex, '#F8BBD0');
     expect(byName['Food']?.amount, 75);
     expect(byName['Uncategorized']?.colorHex, isNull);
+  });
+
+  group('income is not spending', () {
+    Future<void> earn(String id, double amount, DateTime date) =>
+        records.insertRecord(
+          RecordsCompanion.insert(
+            id: id,
+            amount: amount,
+            description: id,
+            date: date,
+            recordType: 'IN',
+            categoryId: const Value('cat-salary'),
+          ),
+        );
+
+    setUp(() async {
+      await spend('lunch', 200, DateTime(2026, 10, 2, 13), cat: 'cat-food');
+      await earn('salary', 5000, DateTime(2026, 10, 1, 9));
+    });
+
+    test('total spent counts expenses only', () async {
+      final result = await repository.getSpendingInsights(
+        startDate: DateTime(2026, 10, 1),
+        endDate: DateTime(2026, 10, 31),
+      );
+      final insights = result.getOrElse(() => throw StateError('failed'));
+
+      expect(insights.totalSpent, 200);
+      expect(insights.totalTransactionCount, 1);
+      expect(insights.highestDayAmount, 200);
+    });
+
+    test('the category breakdown leaves income categories out', () async {
+      final result = await repository.getCategoryBreakdown(
+        startDate: DateTime(2026, 10, 1),
+        endDate: DateTime(2026, 10, 31),
+      );
+      final breakdown = result.getOrElse(() => throw StateError('failed'));
+
+      expect(breakdown.map((c) => c.categoryId), ['cat-food']);
+      expect(breakdown.single.amount, 200);
+    });
   });
 }

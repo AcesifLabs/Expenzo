@@ -9,8 +9,6 @@ sealed class ExportEvent extends Equatable {
   const ExportEvent();
 }
 
-/// A preset range. [ExportRange.custom] is ignored: the screen opens the
-/// picker and sends [ExportCustomRangePicked] instead.
 class ExportRangeSelected extends ExportEvent {
   final ExportRange range;
 
@@ -20,7 +18,6 @@ class ExportRangeSelected extends ExportEvent {
   const ExportRangeSelected(this.range);
 }
 
-/// A confirmed custom range; both days are included.
 class ExportCustomRangePicked extends ExportEvent {
   final DateTime start;
   final DateTime end;

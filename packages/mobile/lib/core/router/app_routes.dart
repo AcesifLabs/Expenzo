@@ -48,6 +48,7 @@ import 'package:expense_tracker/features/settings/domain/entities/user_settings.
 import 'package:expense_tracker/features/goals/presentation/bloc/goal_form_bloc.dart';
 import 'package:expense_tracker/features/goals/presentation/bloc/goal_form_event.dart';
 import 'package:expense_tracker/features/goals/presentation/pages/goal_form_page.dart';
+import 'package:expense_tracker/features/goals/presentation/pages/goals_page.dart';
 import 'package:expense_tracker/features/onboarding/presentation/pages/onboarding_page.dart';
 import 'package:expense_tracker/features/onboarding/presentation/pages/tutorial_page.dart';
 import 'package:expense_tracker/features/settings/presentation/pages/settings_page.dart';
@@ -55,22 +56,16 @@ import 'package:expense_tracker/features/support/presentation/pages/about_page.d
 import 'package:expense_tracker/features/support/presentation/pages/faq_page.dart';
 import 'package:expense_tracker/features/support/presentation/pages/help_page.dart';
 import 'package:expense_tracker/features/support/presentation/pages/rate_app_page.dart';
+import 'package:expense_tracker/features/message_templates/presentation/pages/sms_watchlist_page.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/pages/sms_scan_results_page.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/pages/auto_import_page.dart';
 import 'package:expense_tracker/features/sync/presentation/pages/sync_settings_page.dart';
 import 'package:expense_tracker/features/recurring/presentation/pages/recurring_list_page.dart';
-import 'package:expense_tracker/features/parsing_rules/presentation/bloc/parsing_rules_bloc.dart';
-import 'package:expense_tracker/features/parsing_rules/presentation/bloc/parsing_rules_event.dart';
-import 'package:expense_tracker/features/parsing_rules/presentation/pages/rules_list_page.dart';
 
 import '../../features/auth/presentation/bloc/auth_state.dart';
 import 'auth_aware_app_shell.dart';
 
-/// Builds the full route tree for the app.
-///
-/// The auth-aware root layout is mounted at `/` so the redirect can
-/// intercept login/sync-conflict states before any nested route renders.
 List<RouteBase> buildAppRoutes() {
   return [
     GoRoute(
@@ -94,7 +89,8 @@ List<RouteBase> _buildNestedRoutes() {
     GoRoute(path: 'ai-assistant', builder: (_, _) => const AiAssistantPage()),
     GoRoute(path: 'onboarding', builder: (_, _) => const OnboardingRoute()),
     GoRoute(path: 'tutorial', builder: (_, _) => const TutorialPage()),
-    // Before 'goals/:id/edit' so "new" is never read as an id.
+
+    GoRoute(path: 'goals', builder: (_, _) => const GoalsPage()),
     GoRoute(
       path: 'goals/new',
       builder: (_, _) => BlocProvider(
@@ -117,98 +113,50 @@ List<RouteBase> _buildNestedRoutes() {
   ];
 }
 
-/// Settings and every screen it opens, at `/settings/<SettingsRoute.path>`.
 GoRoute _buildSettingsRoute() {
   return GoRoute(
     path: SettingsRoute.rootPath,
     builder: (_, _) => const SettingsPage(),
     routes: [
-      GoRoute(
-        path: SettingsRoute.profile.path,
-        builder: (_, _) => const ProfilePage(),
+      _settingsPage(SettingsRoute.profile, const ProfilePage()),
+      _settingsPage(SettingsRoute.appearance, const AppearancePage()),
+      _settingsPage(SettingsRoute.currency, const CurrencyPage()),
+      _settingsPage(SettingsRoute.language, const LanguagePage()),
+      _settingsPage(SettingsRoute.numberFormat, const NumberFormatPage()),
+      _settingsPage(SettingsRoute.fontSize, const FontSizePage()),
+      _settingsPage(SettingsRoute.calendar, const CalendarPage()),
+      _settingsPage(SettingsRoute.homePage, const HomePageSettingsPage()),
+      _settingsPage(
+        SettingsRoute.notifications,
+        const NotificationSettingsPage(),
       ),
-      GoRoute(
-        path: SettingsRoute.appearance.path,
-        builder: (_, _) => const AppearancePage(),
-      ),
-      GoRoute(
-        path: SettingsRoute.currency.path,
-        builder: (_, _) => const CurrencyPage(),
-      ),
-      GoRoute(
-        path: SettingsRoute.language.path,
-        builder: (_, _) => const LanguagePage(),
-      ),
-      GoRoute(
-        path: SettingsRoute.numberFormat.path,
-        builder: (_, _) => const NumberFormatPage(),
-      ),
-      GoRoute(
-        path: SettingsRoute.fontSize.path,
-        builder: (_, _) => const FontSizePage(),
-      ),
-      GoRoute(
-        path: SettingsRoute.calendar.path,
-        builder: (_, _) => const CalendarPage(),
-      ),
-      GoRoute(
-        path: SettingsRoute.homePage.path,
-        builder: (_, _) => const HomePageSettingsPage(),
-      ),
-      GoRoute(
-        path: SettingsRoute.notifications.path,
-        builder: (_, _) => const NotificationSettingsPage(),
-      ),
-      GoRoute(
-        path: SettingsRoute.categories.path,
-        builder: (_, _) => const CategoryListPage(),
-      ),
-      GoRoute(
-        path: SettingsRoute.autoImport.path,
-        builder: (_, _) => const AutoImportPage(),
-      ),
-      GoRoute(
-        path: SettingsRoute.matchingRules.path,
-        builder: (_, _) => BlocProvider(
-          create: (_) => di.getIt<ParsingRulesBloc>()..add(LoadRules()),
-          child: const RulesListPage(),
-        ),
-      ),
+      _settingsPage(SettingsRoute.categories, const CategoryListPage()),
+      _settingsPage(SettingsRoute.autoImport, const AutoImportPage()),
+      _settingsPage(SettingsRoute.smsWatchlist, const SmsWatchlistPage()),
       GoRoute(
         path: SettingsRoute.recurring.path,
-        // create:, not a bloc built in the builder: go_router rebuilds
-        // this route when pages are pushed on top of it.
+
         builder: (_, _) => MultiBlocProvider(
           providers: [
             BlocProvider(create: (_) => di.getIt<RecurringBloc>()),
-            // The app-wide singleton; `create` would close it on pop.
+
             BlocProvider.value(value: di.getIt<SettingsBloc>()),
           ],
           child: const RecurringListView(),
         ),
       ),
-      GoRoute(
-        path: SettingsRoute.sync.path,
-        builder: (_, _) => const SyncSettingsPage(),
-      ),
-      GoRoute(
-        path: SettingsRoute.export.path,
-        builder: (_, _) => const ExportDataPage(),
-      ),
-      GoRoute(
-        path: SettingsRoute.deleteData.path,
-        builder: (_, _) => const DeleteAllDataPage(),
-      ),
+      _settingsPage(SettingsRoute.sync, const SyncSettingsPage()),
+      _settingsPage(SettingsRoute.export, const ExportDataPage()),
+      _settingsPage(SettingsRoute.deleteData, const DeleteAllDataPage()),
       _buildHelpRoute(),
       _buildFamilyRoute(),
     ],
   );
 }
 
-/// Family group and its screens, at `/settings/family/<FamilyRoute.path>`.
-/// Each page gets its own FamilyBloc with `create:` (a factory): child
-/// pages are pushed as siblings, so a provider here would not reach them.
-/// Every bloc starts from the per-account cache, so all show one group.
+GoRoute _settingsPage(SettingsRoute route, Widget page) =>
+    GoRoute(path: route.path, builder: (_, _) => page);
+
 GoRoute _buildFamilyRoute() {
   Widget withBloc(Widget page) => BlocProvider(
     create: (_) => di.getIt<FamilyBloc>()..add(const FamilyLoadRequested()),
@@ -235,7 +183,6 @@ GoRoute _buildFamilyRoute() {
   );
 }
 
-/// Help & Support and its screens, at `/settings/help/<HelpRoute.path>`.
 GoRoute _buildHelpRoute() {
   return GoRoute(
     path: SettingsRoute.help.path,
@@ -253,7 +200,6 @@ GoRoute _buildHelpRoute() {
 
 List<RouteBase> _buildBudgetRoutes() {
   return [
-    // Before 'budgets/:id', which would otherwise match "picker" as an id.
     GoRoute(
       path: 'budgets/picker',
       pageBuilder: (context, state) {
@@ -306,16 +252,12 @@ List<RouteBase> _buildRecurringRoutes() {
   ];
 }
 
-/// The Recurring screen's default frequency, including a change still
-/// being saved; monthly until settings load.
 RecurringFrequency _storedDefaultFrequency() {
   return defaultFrequencyFrom(
     di.getIt<SettingsBloc>().latestSettings?.defaultRecurringFrequency,
   );
 }
 
-/// Choosing or adding a category is a short task opened from a form, so it
-/// opens as a full-screen dialog with a close button (see AppBackButton).
 Page<Object?> _dialogPage(GoRouterState state, Widget child) {
   return MaterialPage<Object?>(
     key: state.pageKey,
@@ -383,16 +325,6 @@ Widget _buildScanResultsRoute(BuildContext _, GoRouterState state) {
   );
 }
 
-/// Redirects the user to /sync-conflict while a sync conflict is pending and
-/// back out of it once it is resolved. Returns null to let the requested
-/// route resolve normally.
-///
-/// Leaving /login after signing in is LoginPage's job: it pops back to the
-/// screen that opened it. Redirecting here too would race that pop.
-///
-/// Then sends a user who hasn't done onboarding to /onboarding (SAAP-74). A
-/// pending sync conflict wins: onboarding waits until it is resolved, or the
-/// two redirects would bounce between each other.
 String? authRedirect(BuildContext context, GoRouterState state) => redirectFor(
   context.read<AuthBloc>().state,
   _loadedSettings(),
@@ -413,7 +345,6 @@ String? redirectFor(
   return onboardingRedirectFor(settings, location);
 }
 
-/// The app-wide settings once loaded, else null (no redirect yet).
 UserSettings? _loadedSettings() {
   if (!di.getIt.isRegistered<SettingsBloc>()) return null;
 
@@ -424,8 +355,6 @@ UserSettings? _loadedSettings() {
   };
 }
 
-/// Onboarding opens by itself while [UserSettings.onboardingCompleted] is
-/// false. A finished user may still open /onboarding (Replay setup).
 @visibleForTesting
 String? onboardingRedirectFor(UserSettings? settings, String location) {
   if (settings?.onboardingCompleted != false) return null;
@@ -444,11 +373,8 @@ String? authRedirectFor(AuthState authState, String location) {
 
   if (isConflictPending && !isConflictRoute) return '/sync-conflict';
 
-  // The conflict page has no way out of its own (it blocks back), so leave
-  // it as soon as the conflict is resolved.
   if (!isConflictPending && isConflictRoute) return '/';
 
-  // Family group needs an account (ADR 0008).
   if (authState is Unauthenticated &&
       location.startsWith(SettingsRoute.family.location)) {
     return SettingsRoute.rootLocation;

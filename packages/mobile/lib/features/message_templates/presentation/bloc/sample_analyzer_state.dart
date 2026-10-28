@@ -18,27 +18,12 @@ class SampleAnalyzerLoaded extends SampleAnalyzerState {
   final bool hasReachedMax;
   final bool isLoadingMore;
 
-  /// Indexed by `ExpenseTemplate.sampleMessage` so per-message lookup is O(1):
-  /// `templatesBySample.containsKey(msg.body)` answers "is this message
-  /// templated?" without scanning the list.
   final Map<String, ExpenseTemplate> templatesBySample;
 
-  /// Indexed by visible SMS body so the page can surface sender-wide template
-  /// matches while preserving exact sample-message semantics elsewhere.
   final Map<String, ExpenseTemplate> matchedTemplatesByMessageBody;
 
-  /// Held between a `TemplateDeleted` event and either a successful
-  /// `TemplateDeletionUndone` or a `TemplateDeletionExpired`.
-  /// The Page listens for [pendingDeletion] becoming non-null to show a
-  /// SnackBar with an Undo action.
   final ExpenseTemplate? pendingDeletion;
 
-  /// Transient message surfaced when a save/restore/delete call fails
-  /// while this Loaded state was alive. The Page shows it via a
-  /// SnackBar with a Dismiss action (which dispatches
-  /// `LastErrorDismissed` to clear this field); the Loaded state is
-  /// preserved so the user is not kicked back into a global error
-  /// screen.
   final String? lastError;
 
   @override
@@ -89,10 +74,6 @@ class SampleAnalyzerLoaded extends SampleAnalyzerState {
 }
 
 class SampleAnalyzerError extends SampleAnalyzerState {
-  // Kept for first-load failures where there is no Loaded state to
-  // fall back to. Save/restore/delete failures that occur while a
-  // Loaded state is alive stay inside `SampleAnalyzerLoaded.lastError`
-  // so the user remains on the page and can retry.
   final String message;
 
   @override

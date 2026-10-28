@@ -1,7 +1,7 @@
 import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn, Index, Check } from 'typeorm';
 import { User } from '../../auth/entities/user.entity';
 
-/** A savings target. Progress (`savedAmount`) is entered by hand (ADR 0009). */
+
 @Entity('goals')
 @Index(['userId', 'updatedAt'])
 @Check('CHK_goals_target_positive', '"targetAmount" > 0')

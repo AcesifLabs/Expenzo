@@ -30,10 +30,13 @@ jobs:
           cp .env.dev.example .env.dev
           cp .env.prod.example .env.prod
 
+      - name: Read the Flutter version
+        run: echo "FLUTTER_VERSION=$(jq -r .flutter .fvmrc)" >> "$GITHUB_ENV"
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.41.7'
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: 'stable'
           cache: true
 
@@ -52,5 +55,19 @@ jobs:
       - name: Check unused code
         run: dart run dart_code_linter:metrics check-unused-code lib
 
-      - name: Run tests
-        run: flutter test
+      - name: Check unnecessary nullable parameters
+        run: dart run dart_code_linter:metrics check-unnecessary-nullable lib
+
+      - name: Check translations
+        run: bash scripts/check_i18n.sh
+
+
+      - name: Run tests with coverage
+        run: flutter test --coverage
+
+      - name: Coverage gate
+        run: bash scripts/coverage_gate.sh
+
+
+      - name: Run widget tests with leak tracking
+        run: flutter test --dart-define=LEAK_TRACKING=true test/features test/shared test/a11y

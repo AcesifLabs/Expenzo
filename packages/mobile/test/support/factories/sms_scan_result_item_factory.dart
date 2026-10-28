@@ -14,6 +14,7 @@ extension SmsScanResultItemFactoryCopy on SmsScanResultItem {
       ),
       senderKey: senderKey ?? this.senderKey,
       senderLabel: senderLabel ?? this.senderLabel,
+      legacySourceId: legacySourceId,
     );
   }
 }
@@ -29,5 +30,6 @@ SmsScanResultItem makeSmsScanResultItem({
     parsedTransaction: parsedTransaction,
     senderKey: senderKey ?? '+8801700000000',
     senderLabel: senderLabel ?? 'Test Bank',
+    legacySourceId: 'legacy-${parsedTransaction.sourceId}',
   );
 }

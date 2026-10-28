@@ -1,9 +1,9 @@
 {
   "@@i18n-review": "Machine-drafted Bangla. Needs native review before release.",
-  "title": "AI সহকারী",
+  "title": "Expie",
   "inputHint": "আপনার খরচ নিয়ে জিজ্ঞেস করুন",
   "send": "মেসেজ পাঠান",
-  "disclaimer": "Expenzo AI আপনার ডেটা দেখে পরামর্শ দেয়। এটি কোনো লাইসেন্সপ্রাপ্ত আর্থিক উপদেষ্টা নয়।",
+  "disclaimer": "Expie আপনার ডেটা দেখে পরামর্শ দেয়। এটি কোনো লাইসেন্সপ্রাপ্ত আর্থিক উপদেষ্টা নয়।",
   "suggestions": {
     "topExpenses": "সবচেয়ে বড় খরচ",
     "budget": "আমার বাজেট কেমন চলছে?"

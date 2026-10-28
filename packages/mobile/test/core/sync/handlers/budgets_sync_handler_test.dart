@@ -153,7 +153,7 @@ void main() {
       final pending = BudgetsSyncHandler(keepLocalNames: () => true);
       await db.into(db.budgets).insert(budget());
       await pending.beforeApplyingPull(db, ['bud-1']);
-      // The row is gone, so a fresh lookup would find nothing.
+
       await db.delete(db.budgets).go();
 
       final merged =

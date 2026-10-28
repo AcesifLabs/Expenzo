@@ -10,7 +10,6 @@ class GetSyncOverview implements UseCase<SyncOverview, NoParams> {
 
   const GetSyncOverview(this.repository);
 
-  /// Returns [Right(T)] on success, [Left(Failure)] on failure.
   @override
   Future<Either<Failure, SyncOverview>> call(NoParams params) {
     return repository.getOverview();

@@ -20,7 +20,6 @@ void main() {
     LocaleSettings.setLocaleSync(AppLocale.en);
   });
 
-  // intl puts a narrow no-break space (U+202F) before AM/PM.
   final now = DateTime(2026, 10, 15, 18);
 
   test('the same day reads Today', () {

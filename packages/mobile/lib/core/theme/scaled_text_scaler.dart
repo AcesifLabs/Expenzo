@@ -1,20 +1,12 @@
 import 'package:flutter/painting.dart';
 
-/// The device's text scaler times the user's Font size factor (SAAP-66).
-///
-/// Multiplies [base] rather than replacing it, so the device's own curve
-/// (Android 14 scales large text non-linearly) is kept.
 class ScaledTextScaler extends TextScaler {
   final TextScaler base;
   final double factor;
 
   @override
-  // Must be implemented; only legacy readers use it.
-  // ignore: deprecated_member_use
-  double get textScaleFactor => base.textScaleFactor * factor;
+  double get textScaleFactor => base.scale(1) * factor;
 
-  // Equal scalers compare equal, so MediaQuery doesn't notify dependents
-  // when nothing changed.
   @override
   int get hashCode => Object.hash(base, factor);
 

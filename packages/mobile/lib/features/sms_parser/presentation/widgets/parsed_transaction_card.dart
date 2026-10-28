@@ -31,11 +31,15 @@ class ParsedTransactionCard extends StatelessWidget {
 
     return Row(
       children: [
-        Text(
-          hasAmount ? currencyFormat.format(amount) : 'N/A',
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: hasAmount ? amountColor : Colors.grey,
+        Flexible(
+          child: Text(
+            hasAmount
+                ? currencyFormat.format(amount)
+                : t.smsParser.card.noAmount,
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: hasAmount ? amountColor : colors.onSurfaceVariant,
+            ),
           ),
         ),
         const SizedBox(width: AppSpacing.sm),
@@ -55,16 +59,16 @@ class ParsedTransactionCard extends StatelessWidget {
         ? colors.primary
         : colors.onSurface.withAlpha(180);
 
-    return Row(
+    return Wrap(
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.xs,
       children: [
-        if (transaction.matchedRuleId != null) ...[
+        if (transaction.matchedRuleId != null)
           AppBadge(
             label: t.smsParser.card.rule(id: transaction.matchedRuleId ?? ''),
             size: AppBadgeSize.small,
             color: colors.primary,
           ),
-          const SizedBox(width: AppSpacing.sm),
-        ],
         AppBadge(
           label: '${(transaction.confidenceScore * 100).toInt()}%',
           size: AppBadgeSize.small,
@@ -82,12 +86,15 @@ class ParsedTransactionCard extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.only(top: AppSpacing.xs),
-          child: SizedBox(
-            width: 20,
-            height: 20,
-            child: Checkbox(
-              value: isSelected,
-              onChanged: (value) => onSelectionChanged(value ?? false),
+
+          child: ExcludeSemantics(
+            child: SizedBox(
+              width: 20,
+              height: 20,
+              child: Checkbox(
+                value: isSelected,
+                onChanged: (value) => onSelectionChanged(value ?? false),
+              ),
             ),
           ),
         ),
@@ -119,19 +126,22 @@ class ParsedTransactionCard extends StatelessWidget {
     final currencyFormat = CurrencyFormatter.getFormatter();
     final colors = theme.colorScheme;
 
-    return AppCard(
-      onTap: () => onSelectionChanged(!isSelected),
-      margin: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.xs,
+    return Semantics(
+      checked: isSelected,
+      child: AppCard(
+        onTap: () => onSelectionChanged(!isSelected),
+        margin: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.xs,
+        ),
+        padding: const EdgeInsets.all(AppSpacing.smd),
+        backgroundColor: isSelected
+            ? colors.primary.withAlpha(30)
+            : colors.surface,
+        borderColor: isSelected ? colors.primary : null,
+        borderRadius: AppSpacing.radiusCard,
+        child: _buildCardContent(theme, currencyFormat),
       ),
-      padding: const EdgeInsets.all(AppSpacing.smd),
-      backgroundColor: isSelected
-          ? colors.primary.withAlpha(30)
-          : colors.surface,
-      borderColor: isSelected ? colors.primary : null,
-      borderRadius: AppSpacing.radiusControl,
-      child: _buildCardContent(theme, currencyFormat),
     );
   }
 }

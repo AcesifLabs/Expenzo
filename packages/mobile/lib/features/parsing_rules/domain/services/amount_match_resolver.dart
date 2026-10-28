@@ -1,5 +1,19 @@
-String normalizeResolvedAmount(String amount) =>
-    amount.replaceAll(RegExp(r'[^\d.]'), '');
+import 'package:expense_tracker/core/constants/app_constants.dart';
+import 'package:expense_tracker/core/utils/amount_input.dart';
+import 'package:expense_tracker/core/utils/money.dart';
+
+String normalizeResolvedAmount(String amount) => latinDigits(
+  amount,
+).replaceAll(RegExp(r'[^\d.]'), '').replaceAll(RegExp(r'^\.+|\.+$'), '');
+
+double? parseResolvedAmount(String text) {
+  final value = double.tryParse(normalizeResolvedAmount(text));
+  if (value == null) return null;
+
+  final rounded = roundMoney(value);
+
+  return rounded == 0 || rounded > AppConstants.maxAmount ? null : rounded;
+}
 
 Match? resolveAmountMatch(
   List<Match> allMatches,

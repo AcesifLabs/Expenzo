@@ -15,7 +15,7 @@ import '../widgets/parsed_transaction_card.dart';
 import '../widgets/sms_scan_sender_section.dart';
 import '../widgets/sms_scan_summary_card.dart';
 import '../widgets/sms_scan_toolbar.dart';
-import '../../../parsing_rules/presentation/widgets/transaction_list_skeleton.dart';
+import 'package:expense_tracker/shared/presentation/widgets/transaction_list_skeleton.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
 class SmsScanResultsPage extends StatefulWidget {
@@ -235,9 +235,12 @@ class _SmsScanResultsPageState extends State<SmsScanResultsPage> {
 
     return Column(
       children: [
-        _buildHeaderSection(state),
+        Flexible(
+          child: SingleChildScrollView(child: _buildHeaderSection(state)),
+        ),
         const SizedBox(height: AppSpacing.smd),
         Expanded(
+          flex: 2,
           child: state.viewMode == SmsScannerViewMode.groupedBySender
               ? _buildGroupedResults(state)
               : _buildFlatResultsList(state),

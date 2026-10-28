@@ -11,7 +11,6 @@ import 'package:expense_tracker/features/onboarding/domain/usecases/resolve_onbo
 import 'package:expense_tracker/features/settings/domain/usecases/get_settings.dart';
 import 'package:expense_tracker/features/settings/domain/usecases/update_settings.dart';
 
-/// The parts that only need critical dependencies (run on every start).
 void initOnboardingCoreModule(GetIt getIt) {
   getIt.registerLazySingleton(
     () => OnboardingLocalDatasource(db: getIt<AppDatabase>()),
@@ -25,8 +24,6 @@ void initOnboardingCoreModule(GetIt getIt) {
   );
 }
 
-/// Needs the budget, recurring and goals feature modules, so it runs in
-/// `initFeatureDependencies`.
 void initOnboardingFeatureModule(GetIt getIt) {
   getIt.registerLazySingleton(
     () => CompleteOnboarding(

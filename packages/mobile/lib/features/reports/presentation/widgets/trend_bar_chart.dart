@@ -19,7 +19,6 @@ class TrendBarChart extends StatelessWidget {
       return List<double>.filled(amounts.length, 0.2);
     }
 
-    // Empty days keep a hairline so the timeline still reads.
     return amounts
         .map(
           (amount) => amount == 0 ? 0.0 : (amount / maxAmount).clamp(0.14, 1.0),
@@ -27,7 +26,6 @@ class TrendBarChart extends StatelessWidget {
         .toList();
   }
 
-  // The peak day matches the "Highest day" figure; the latest bar is marked.
   Color _barColor(AppPalette palette, int index, int length, double height) {
     if (height == 1.0) return palette.expense;
     if (index == length - 1) return palette.accent;
@@ -48,7 +46,7 @@ class TrendBarChart extends StatelessWidget {
           child: Text(
             t.reports.noTrendData,
             style: AppTypography.bodySmall.copyWith(
-              color: palette.textPrimary.withAlpha(0x80),
+              color: palette.textSecondary,
             ),
           ),
         ),

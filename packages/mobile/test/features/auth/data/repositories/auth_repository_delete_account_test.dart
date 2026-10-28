@@ -26,7 +26,10 @@ void main() {
     test('success is Right', () async {
       when(() => remote.deleteServerAccount()).thenAnswer((_) async {});
 
-      expect(await repository.deleteServerAccount(), const Right(unit));
+      expect(
+        await repository.deleteServerAccount(),
+        const Right<Failure, Unit>(unit),
+      );
     });
 
     test('offline is a NetworkFailure', () async {

@@ -27,6 +27,7 @@ class AiAssistantBloc extends Bloc<AiAssistantEvent, AiAssistantState> {
        super(const AiAssistantState()) {
     on<LoadContext>(_onLoadContext);
     on<SendMessage>(_onSendMessage);
+    on<RetryLastMessage>(_onRetryLastMessage);
     on<StreamTokenReceived>(_onStreamTokenReceived);
     on<StreamCompleted>(_onStreamCompleted);
     on<CooldownExpired>(_onCooldownExpired);
@@ -67,7 +68,12 @@ class AiAssistantBloc extends Bloc<AiAssistantEvent, AiAssistantState> {
     final now = nowProvider();
     final cooldownUntil = state.cooldownUntil;
     if (cooldownUntil != null && now.isBefore(cooldownUntil)) {
-      emit(state.copyWith(error: AiAssistantConstants.cooldownRefusal));
+      emit(
+        state.copyWith(
+          error: AiAssistantConstants.cooldownRefusal,
+          failedPrompt: null,
+        ),
+      );
 
       return;
     }
@@ -85,6 +91,7 @@ class AiAssistantBloc extends Bloc<AiAssistantEvent, AiAssistantState> {
           messages: [...state.messages, userMessage, refusal],
           isComposing: false,
           error: null,
+          failedPrompt: null,
           cooldownUntil: _startCooldown(),
         ),
       );
@@ -92,9 +99,44 @@ class AiAssistantBloc extends Bloc<AiAssistantEvent, AiAssistantState> {
       return;
     }
 
+    await _requestReply(
+      emit,
+      history: [...state.messages, userMessage],
+      prompt: validation.normalizedPrompt,
+    );
+  }
+
+  Future<void> _onRetryLastMessage(
+    RetryLastMessage event,
+    Emitter<AiAssistantState> emit,
+  ) async {
+    final prompt = state.failedPrompt;
+    if (prompt == null || state.isComposing) return;
+
+    final history = List<ChatMessage>.from(state.messages);
+    while (history.isNotEmpty && history.last.role == ChatRole.assistant) {
+      history.removeLast();
+    }
+
+    await _requestReply(emit, history: history, prompt: prompt);
+  }
+
+  /// [history] must already end with the user's message.
+  Future<void> _requestReply(
+    Emitter<AiAssistantState> emit, {
+    required List<ChatMessage> history,
+    required String prompt,
+  }) async {
     var financialContext = state.financialContext;
     if (financialContext.isEmpty) {
-      emit(state.copyWith(isLoadingContext: true, error: null));
+      emit(
+        state.copyWith(
+          messages: history,
+          isLoadingContext: true,
+          error: null,
+          failedPrompt: null,
+        ),
+      );
 
       final contextResult = await buildFinancialContext();
       final contextValue = contextResult.fold<String?>((failure) {
@@ -103,7 +145,7 @@ class AiAssistantBloc extends Bloc<AiAssistantEvent, AiAssistantState> {
         );
         emit(
           state.copyWith(
-            messages: [...state.messages, userMessage, refusal],
+            messages: [...history, refusal],
             isLoadingContext: false,
             isComposing: false,
             error: null,
@@ -127,27 +169,24 @@ class AiAssistantBloc extends Bloc<AiAssistantEvent, AiAssistantState> {
       );
     }
 
-    final assistantMessage = ChatMessage.assistant('');
-
     emit(
       state.copyWith(
-        messages: [...state.messages, userMessage, assistantMessage],
+        messages: [...history, ChatMessage.assistant('')],
         isComposing: true,
         error: null,
+        failedPrompt: null,
         cooldownUntil: _startCooldown(),
       ),
     );
 
-    sendMessageStream(
-      message: validation.normalizedPrompt,
-      context: financialContext,
-    ).listen(
+    sendMessageStream(message: prompt, context: financialContext).listen(
       (either) => either.fold(
-        (failure) => add(StreamError(failureText(failure))),
+        (failure) => add(StreamError(failureText(failure), prompt: prompt)),
         (token) => add(StreamTokenReceived(token)),
       ),
       onDone: () => add(const StreamCompleted()),
-      onError: (error) => add(StreamError(error.toString())),
+      onError: (Object error) =>
+          add(StreamError(error.toString(), prompt: prompt)),
     );
   }
 
@@ -178,7 +217,12 @@ class AiAssistantBloc extends Bloc<AiAssistantEvent, AiAssistantState> {
     StreamCompleted event,
     Emitter<AiAssistantState> emit,
   ) {
-    emit(state.copyWith(isComposing: false));
+    emit(
+      state.copyWith(
+        messages: _withoutPendingReply(state.messages),
+        isComposing: false,
+      ),
+    );
   }
 
   void _onCooldownExpired(
@@ -191,11 +235,19 @@ class AiAssistantBloc extends Bloc<AiAssistantEvent, AiAssistantState> {
   void _onStreamError(StreamError event, Emitter<AiAssistantState> emit) {
     emit(
       state.copyWith(
+        messages: _withoutPendingReply(state.messages),
         isComposing: false,
         isLoadingContext: false,
         error: event.message,
+        failedPrompt: event.prompt,
       ),
     );
+  }
+
+  List<ChatMessage> _withoutPendingReply(List<ChatMessage> messages) {
+    if (messages.isEmpty || !messages.last.isPendingReply) return messages;
+
+    return messages.sublist(0, messages.length - 1);
   }
 
   DateTime _startCooldown() {

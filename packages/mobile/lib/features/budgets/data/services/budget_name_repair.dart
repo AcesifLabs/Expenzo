@@ -3,32 +3,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:expense_tracker/core/constants/app_constants.dart';
 import 'package:expense_tracker/core/utils/budget_name.dart';
 import 'package:expense_tracker/core/database/daos/budget_dao.dart';
-import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/features/budgets/data/datasources/budget_remote_datasource.dart';
 
-/// Sends this device's budget names to the server once per account.
-///
-/// The server dropped budget names until it had a column for them, so its
-/// older rows read [AppConstants.defaultBudgetName]. The server fills a name only where it
-/// still has the default: it never creates a budget or changes any other
-/// field (ADR 0012). The repair counts as done for the signed-in account only
-/// after every batch is accepted.
 class BudgetNameRepair {
   final BudgetDao budgetDao;
   final BudgetRemoteDatasource remote;
   final SharedPreferences prefs;
 
-  /// The signed-in account, or null when signed out.
   final String? Function() currentUserId;
 
-  /// Followed by the user id; `LocalDataPrefs` wipes every account's
-  /// flag.
   static const doneKeyPrefix = 'budget_names_repaired_';
 
   Future<void>? _running;
 
-  /// True until the signed-in account's names have been sent. Signed out it
-  /// stays true, so local names are kept until someone can send them.
   bool get isPending {
     final userId = currentUserId();
 
@@ -42,9 +29,6 @@ class BudgetNameRepair {
     required this.currentUserId,
   });
 
-  /// Throws [ServerException] when a batch is rejected or the server cannot be
-  /// reached; the repair then stays pending and runs after the next sync.
-  /// Calls made while a run is in progress wait for that run.
   Future<void> runOnce() =>
       _running ??= _run().whenComplete(() => _running = null);
 
@@ -53,8 +37,7 @@ class BudgetNameRepair {
     if (userId == null || !isPending) return;
 
     final budgets = await budgetDao.getAllBudgets();
-    // Names the server would reject are skipped so one of them cannot block
-    // the rest; that budget keeps the default on the server until edited.
+
     final names = [
       for (final budget in budgets)
         if (!isPlaceholderBudgetName(budget.name) &&

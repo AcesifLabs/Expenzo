@@ -37,9 +37,6 @@ class DataWipeRepositoryImpl implements DataWipeRepository {
   @override
   Future<bool> isSignedIn() => hooks.isSignedIn();
 
-  /// Fails only when the database wipe fails. The steps after it run even if
-  /// one of them throws: the data is gone by then, so the delete counts as
-  /// done and the app must refresh.
   @override
   Future<Either<Failure, Unit>> wipeLocalData() async {
     try {
@@ -59,9 +56,7 @@ class DataWipeRepositoryImpl implements DataWipeRepository {
     var serverCleared = false;
     try {
       final signedIn = await hooks.isSignedIn();
-      // Waits for a running cycle and keeps sync off until the end, so
-      // nothing pulled or pushed lands after the server or the database is
-      // cleared.
+
       await hooks.pauseSync();
       if (signedIn) {
         await remoteDatasource.clearSyncedData();
@@ -82,11 +77,6 @@ class DataWipeRepositoryImpl implements DataWipeRepository {
     }
   }
 
-  /// Once the server was cleared, the next start pushes everything on this
-  /// device: the re-added defaults after a wipe, or all of it again if the
-  /// wipe failed, so the two copies match and the user can retry. Sync
-  /// resumes in the background (signed out it stays idle); the delete
-  /// doesn't wait for a full sync.
   Future<void> _resumeSync({required bool serverCleared}) async {
     if (serverCleared) {
       await _bestEffort('Resetting sync state', hooks.resetSyncState);
@@ -94,7 +84,6 @@ class DataWipeRepositoryImpl implements DataWipeRepository {
     unawaited(_bestEffort('Resuming sync', hooks.resumeSync));
   }
 
-  /// Throws when the reset failed, so [_bestEffort] logs it.
   Future<void> _resetSettings() async {
     final result = await settingsRepository.resetSettings();
     final failure = result.fold((f) => f, (_) => null);

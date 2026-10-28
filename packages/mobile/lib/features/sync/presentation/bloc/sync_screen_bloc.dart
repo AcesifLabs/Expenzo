@@ -11,14 +11,13 @@ import '../../domain/usecases/sync_now.dart';
 import 'sync_screen_event.dart';
 import 'sync_screen_state.dart';
 
-/// Drives the Sync screen: status, live pending count and syncing flag, and
-/// "Sync now".
 class SyncScreenBloc extends Bloc<SyncScreenEvent, SyncScreenState> {
   final GetSyncOverview getOverview;
   final SyncNow syncNow;
   final SyncOverviewRepository repository;
 
   StreamSubscription<int>? _pendingSub;
+  StreamSubscription<int>? _failedSub;
   bool _listeningToSyncing = false;
 
   SyncScreenBloc({
@@ -29,15 +28,20 @@ class SyncScreenBloc extends Bloc<SyncScreenEvent, SyncScreenState> {
     on<SyncScreenStarted>(_onStarted);
     on<SyncNowRequested>(_onSyncNowRequested, transformer: droppable());
     on<_PendingCountChanged>(_onPendingCountChanged);
+    on<_FailedCountChanged>(_onFailedCountChanged);
+    on<FailedChangesRetryRequested>(
+      _onFailedRetryRequested,
+      transformer: droppable(),
+    );
     on<_SyncingChanged>(_onSyncingChanged);
-    // A newer read replaces one in flight, so an older overview never lands
-    // last.
+
     on<_ReloadRequested>(_onReloadRequested, transformer: restartable());
   }
 
   @override
   Future<void> close() async {
     await _pendingSub?.cancel();
+    await _failedSub?.cancel();
     if (_listeningToSyncing) repository.isSyncing.removeListener(_onSyncing);
 
     return super.close();
@@ -58,6 +62,19 @@ class SyncScreenBloc extends Bloc<SyncScreenEvent, SyncScreenState> {
     add(_ReloadRequested(lastResult: result));
   }
 
+  void _onFailedCountChanged(
+    _FailedCountChanged event,
+    Emitter<SyncScreenState> emit,
+  ) => emit(state.copyWith(failedCount: event.count));
+
+  Future<void> _onFailedRetryRequested(
+    FailedChangesRetryRequested event,
+    Emitter<SyncScreenState> emit,
+  ) async {
+    await repository.retryFailed();
+    add(const SyncNowRequested());
+  }
+
   void _onPendingCountChanged(
     _PendingCountChanged event,
     Emitter<SyncScreenState> emit,
@@ -69,18 +86,18 @@ class SyncScreenBloc extends Bloc<SyncScreenEvent, SyncScreenState> {
     );
   }
 
-  /// A background cycle that ends changes "last synced" and the failure
-  /// state, so the overview is read again.
   void _onSyncingChanged(_SyncingChanged event, Emitter<SyncScreenState> emit) {
     final finished = state.isSyncing && !event.syncing;
     emit(state.copyWith(isSyncing: event.syncing));
     if (finished) add(const _ReloadRequested());
   }
 
-  /// Subscribes once, on the first start.
   void _listen() {
     _pendingSub ??= repository.watchPendingCount().listen(
       (count) => add(_PendingCountChanged(count)),
+    );
+    _failedSub ??= repository.watchFailedCount().listen(
+      (count) => add(_FailedCountChanged(count)),
     );
     if (_listeningToSyncing) return;
     _listeningToSyncing = true;
@@ -119,6 +136,15 @@ class SyncScreenBloc extends Bloc<SyncScreenEvent, SyncScreenState> {
       ),
     );
   }
+}
+
+class _FailedCountChanged extends SyncScreenEvent {
+  final int count;
+
+  @override
+  List<Object?> get props => [count];
+
+  const _FailedCountChanged(this.count);
 }
 
 class _PendingCountChanged extends SyncScreenEvent {

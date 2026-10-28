@@ -21,7 +21,6 @@ void main() {
     when(() => review.requestReview()).thenAnswer((_) async {});
     di.getIt
       ..registerSingleton<AppReviewService>(review)
-      // Feature dependencies count as ready: no real modules in this test.
       ..registerSingleton<Future<void>>(
         Future<void>.value(),
         instanceName: 'featureReady',
@@ -30,7 +29,6 @@ void main() {
 
   tearDown(() => di.getIt.reset());
 
-  /// Rate the app pushed on top of a home page, so it can pop.
   Future<void> pumpRate(WidgetTester tester) async {
     final router = GoRouter(
       initialLocation: '/rate',

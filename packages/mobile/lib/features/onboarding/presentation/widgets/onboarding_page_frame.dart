@@ -4,18 +4,16 @@ import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
-/// The layout every setup page shares: title, subtitle, a scrolling body and
-/// a Continue button kept above the keyboard. [onContinue] null disables it.
 class OnboardingPageFrame extends StatelessWidget {
   final String title;
-  final String? subtitle;
+  final String subtitle;
   final List<Widget> body;
   final VoidCallback? onContinue;
 
   const OnboardingPageFrame({
     super.key,
     required this.title,
-    this.subtitle,
+    required this.subtitle,
     required this.body,
     this.onContinue,
   });
@@ -34,8 +32,6 @@ class OnboardingPageFrame extends StatelessWidget {
   }
 }
 
-/// [OnboardingPageFrame] with any [bottom] widget (the last page puts Finish
-/// setup there).
 class OnboardingPageLayout extends StatelessWidget {
   final String title;
   final String? subtitle;
@@ -95,7 +91,6 @@ class OnboardingPageLayout extends StatelessWidget {
   }
 }
 
-/// Full-width themed primary button.
 class OnboardingPrimaryButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
@@ -108,12 +103,18 @@ class OnboardingPrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      height: AppSpacing.xxl,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(
+        minWidth: double.infinity,
+        minHeight: AppSpacing.xxl,
+      ),
       child: ElevatedButton(
         onPressed: onPressed,
-        child: Text(label, style: Theme.of(context).textTheme.titleMedium),
+
+        style: ElevatedButton.styleFrom(
+          textStyle: Theme.of(context).textTheme.titleMedium,
+        ),
+        child: Text(label),
       ),
     );
   }

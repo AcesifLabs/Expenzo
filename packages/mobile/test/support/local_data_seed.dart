@@ -1,7 +1,5 @@
 import 'package:expense_tracker/core/database/app_database.dart';
 
-/// Rows the delete-all-data tests count and wipe: [count] of each kind plus
-/// one signed-in user and one queued sync change.
 Future<void> seedLocalData(
   AppDatabase db, {
   int records = 1,
@@ -9,7 +7,6 @@ Future<void> seedLocalData(
   int categories = 1,
   int recurring = 1,
   int templates = 1,
-  int rules = 1,
   int goals = 0,
 }) async {
   final day = DateTime(2026, 3, 1);
@@ -99,19 +96,6 @@ Future<void> seedLocalData(
             sampleMessage: 'Paid 10',
             triggerWord: 'Paid',
             amountPattern: r'\d+',
-          ),
-        );
-  }
-  for (var i = 0; i < rules; i++) {
-    await db
-        .into(db.parsingRules)
-        .insert(
-          ParsingRulesCompanion.insert(
-            id: 'p$i',
-            name: 'Rule $i',
-            triggerWords: 'Paid',
-            amountPattern: r'\d+',
-            sourceType: 'sms',
           ),
         );
   }

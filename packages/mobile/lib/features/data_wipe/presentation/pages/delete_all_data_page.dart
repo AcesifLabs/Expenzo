@@ -33,8 +33,6 @@ class DeleteAllDataPage extends StatelessWidget {
   }
 }
 
-/// Delete all data: what will go, a typed DELETE, then the delete. The
-/// design's checkbox is replaced by typing the word.
 class DeleteAllDataView extends StatelessWidget {
   const DeleteAllDataView({super.key});
 
@@ -42,7 +40,6 @@ class DeleteAllDataView extends StatelessWidget {
     final deleteDataT = t.settings.deleteData;
     final deleting = state.status == DeleteAllDataStatus.deleting;
 
-    // Leaving mid-delete is blocked: no back button, and system back is off.
     return PopScope(
       canPop: !deleting,
       child: AppScaffold(
@@ -105,7 +102,6 @@ class DeleteAllDataView extends StatelessWidget {
           current.status == DeleteAllDataStatus.done);
 
   void _onOutcome(BuildContext context, DeleteAllDataState state) {
-    // Captured first: the refresh leaves this page.
     final messenger = ScaffoldMessenger.of(context);
     if (state.status == DeleteAllDataStatus.done) {
       refreshAfterLocalWipe(context);
@@ -132,8 +128,6 @@ class DeleteAllDataView extends StatelessWidget {
 class _WarningCard extends StatelessWidget {
   final bool isSignedIn;
 
-  /// Adds that their Shared Budgets go for the family too (Q20); the
-  /// delete is never blocked.
   final bool isFamilyAdmin;
 
   const _WarningCard({required this.isSignedIn, required this.isFamilyAdmin});
@@ -184,8 +178,6 @@ class _WarningCard extends StatelessWidget {
   }
 }
 
-/// What will be deleted. Without a [summary] (counting failed) the rows show
-/// no counts; the delete still runs.
 class _SummarySection extends StatelessWidget {
   final LocalDataSummary? summary;
 

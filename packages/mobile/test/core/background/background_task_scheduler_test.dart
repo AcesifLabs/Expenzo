@@ -32,7 +32,7 @@ class _FakeBackgroundWork implements BackgroundWork {
 void main() {
   const weekly = BackgroundTaskNames.weeklySummary;
   const recurring = BackgroundTaskNames.recurringReminders;
-  // Wednesday 08:00: next summary Sunday 20:00, next reminder run 09:00.
+
   final now = DateTime(2026, 10, 14, 8);
 
   late _FakeBackgroundWork work;

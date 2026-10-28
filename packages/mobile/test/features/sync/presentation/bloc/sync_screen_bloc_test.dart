@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:bloc_test/bloc_test.dart';
+
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -47,6 +49,8 @@ void main() {
   late ValueNotifier<bool> syncing;
   late SyncScreenBloc bloc;
 
+  late StreamController<int> failedCounts;
+
   setUpAll(() => registerFallbackValue(NoParams()));
 
   setUp(() {
@@ -58,6 +62,11 @@ void main() {
     when(
       () => repository.watchPendingCount(),
     ).thenAnswer((_) => pending.stream);
+    failedCounts = StreamController<int>.broadcast();
+    when(
+      () => repository.watchFailedCount(),
+    ).thenAnswer((_) => failedCounts.stream);
+    when(() => repository.retryFailed()).thenAnswer((_) async {});
     when(() => repository.isSyncing).thenReturn(syncing);
     when(
       () => getOverview(any()),
@@ -220,7 +229,35 @@ void main() {
     await bloc.close();
 
     expect(pending.hasListener, isFalse);
-    // A listener left behind would add to a closed bloc and throw.
+
     syncing.value = true;
   });
+
+  blocTest<SyncScreenBloc, SyncScreenState>(
+    'the failed count follows the queue',
+    build: () => bloc,
+    act: (bloc) async {
+      bloc.add(const SyncScreenStarted());
+      await pumpEventQueue();
+      failedCounts.add(2);
+    },
+    skip: 2,
+    expect: () => [
+      isA<SyncScreenState>().having((s) => s.failedCount, 'failedCount', 2),
+    ],
+  );
+
+  blocTest<SyncScreenBloc, SyncScreenState>(
+    'Retry on failed changes queues them again, then syncs',
+    setUp: () =>
+        when(() => syncNow()).thenAnswer((_) async => SyncRunResult.success),
+    build: () => bloc,
+    act: (bloc) async {
+      bloc.add(const SyncScreenStarted());
+      await pumpEventQueue();
+      bloc.add(const FailedChangesRetryRequested());
+    },
+    verify: (_) =>
+        verifyInOrder([() => repository.retryFailed(), () => syncNow()]),
+  );
 }

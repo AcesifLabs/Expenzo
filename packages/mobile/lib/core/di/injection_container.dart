@@ -10,7 +10,6 @@ import 'package:expense_tracker/core/database/database_seeder.dart';
 import 'package:expense_tracker/core/database/transaction_runner.dart';
 import 'package:expense_tracker/core/database/daos/record_dao.dart';
 import 'package:expense_tracker/core/database/daos/category_dao.dart';
-import 'package:expense_tracker/core/database/daos/pending_recurring_dao.dart';
 import 'package:expense_tracker/core/database/daos/message_template_dao.dart';
 import 'package:expense_tracker/core/database/daos/user_dao.dart';
 import 'package:expense_tracker/core/database/daos/budget_dao.dart';
@@ -51,36 +50,21 @@ import 'support_module.dart';
 
 final getIt = GetIt.instance;
 
-/// Returns the future registered for [name], running [init] first if the
-/// future has not yet been registered. This makes the dependent getter
-/// safe to `await` from any caller regardless of whether the init has
-/// been scheduled yet — the underlying init function is idempotent and
-/// will only run once.
 Future<void> _ensureReady(String name, Future<void> Function() init) async {
   await init();
 
   return getIt.get<Future<void>>(instanceName: name);
 }
 
-/// Safe to `await` from anywhere. If [initCriticalDependencies] has not
-/// been run yet, this getter runs it (and awaits the result) before
-/// returning the future.
 Future<void> get criticalDependenciesReady =>
     _ensureReady('criticalReady', initCriticalDependencies);
 
-/// Safe to `await` from any widget, regardless of when
-/// [initFeatureDependencies] was scheduled. The underlying
-/// [initFeatureDependencies] is idempotent and will be run on the first
-/// call if it has not been run yet.
 Future<void> get featureDependenciesReady =>
     _ensureReady('featureReady', initFeatureDependencies);
 
 void _registerDaoFactories() {
   getIt.registerFactory<RecordDao>(() => RecordDao(getIt<AppDatabase>()));
   getIt.registerFactory<CategoryDao>(() => CategoryDao(getIt<AppDatabase>()));
-  getIt.registerFactory<PendingRecurringDao>(
-    () => PendingRecurringDao(getIt<AppDatabase>()),
-  );
   getIt.registerFactory<MessageTemplateDao>(
     () => MessageTemplateDao(getIt<AppDatabase>()),
   );
@@ -93,8 +77,6 @@ void _registerDaoFactories() {
   );
 }
 
-/// Auto-create waits for the pull so it never posts an occurrence another
-/// device already moved past. Registered by initRecurringModule.
 Future<void> _autoPostRecurringAfterSync() async {
   if (!getIt.isRegistered<RecurringAutoPoster>()) return;
   await getIt<RecurringAutoPoster>().runAfterSync(
@@ -102,7 +84,6 @@ Future<void> _autoPostRecurringAfterSync() async {
   );
 }
 
-/// Sign-out: the next account must pull before auto-create posts.
 Future<void> _resetRecurringAutoPost() {
   if (getIt.isRegistered<RecurringAutoPoster>()) {
     getIt<RecurringAutoPoster>().resetSession();
@@ -128,7 +109,11 @@ Future<void> initCriticalDependencies() async {
   getIt.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
   getIt.registerLazySingleton<http.Client>(() => http.Client());
   getIt.registerLazySingleton<AppDatabase>(() => AppDatabase());
-  getIt.registerLazySingleton<LocalDataEpoch>(LocalDataEpoch.new);
+  getIt.registerLazySingleton<LocalDataEpoch>(
+    LocalDataEpoch.new,
+
+    dispose: (epoch) => epoch.dispose(),
+  );
 
   _registerDaoFactories();
 
@@ -139,7 +124,7 @@ Future<void> initCriticalDependencies() async {
       keepLocalBudgetNames: () =>
           getIt.isRegistered<BudgetNameRepair>() &&
           getIt<BudgetNameRepair>().isPending,
-      // Unregistered means the repair has not run: keep local links.
+
       keepLocalRecordBudgetLinks: () =>
           !getIt.isRegistered<RecordBudgetLinkRepair>() ||
           getIt<RecordBudgetLinkRepair>().isPending,
@@ -151,8 +136,7 @@ Future<void> initCriticalDependencies() async {
       apiClient: getIt<ApiClient>(),
       connectivity: getIt<ConnectivityService>(),
       registry: getIt<SyncTableRegistry>(),
-      // Registered by initBudgetModule and initRecordModule; resolved when
-      // the task runs.
+
       afterSyncTasks: [
         () async {
           if (getIt.isRegistered<BudgetNameRepair>()) {
@@ -164,7 +148,7 @@ Future<void> initCriticalDependencies() async {
             await getIt<RecordBudgetLinkRepair>().runOnce();
           }
         },
-        // Drops Shared Budgets the phone should no longer have (SAAP-75).
+
         () async {
           if (getIt.isRegistered<GroupRefreshPolicy>()) {
             await getIt<GroupRefreshPolicy>().refreshIfDue();
@@ -172,13 +156,13 @@ Future<void> initCriticalDependencies() async {
         },
         _autoPostRecurringAfterSync,
       ],
-      // No guard: if a repair cannot run, the wipe must not happen.
+
       beforeLocalWipeTasks: [
         () => getIt<BudgetNameRepair>().runOnce(),
         () => getIt<RecordBudgetLinkRepair>().runOnce(),
       ],
       stopTasks: [_resetRecurringAutoPost],
-      // Registered later in this function; resolved when sync starts.
+
       isEnabled: () async =>
           !getIt.isRegistered<SettingsLocalDatasource>() ||
           (await getIt<SettingsLocalDatasource>().getSettings()).syncEnabled,
@@ -215,20 +199,9 @@ Future<void> resetDatabaseInstance() async {
   await TokenStorage.clearSyncState();
 }
 
-/// Counts the number of times [initCriticalDependencies] has actually
-/// run (i.e. the `isRegistered` guard did not short-circuit). Tests
-/// reset this in `setUp` and assert it bumps after `GetIt.I.reset()`,
-/// which pins the "run-once per GetIt registration" contract the
-/// dartdoc on [criticalDependenciesReady] promises — the guard
-/// short-circuits as long as the completer stays registered.
 @visibleForTesting
 int criticalInitRunCount = 0;
 
-/// Counts the number of times [initFeatureDependencies] has actually
-/// run the module inits (i.e. the `isRegistered` guard did not
-/// short-circuit). Tests reset this in `setUp` and assert it stays at
-/// 1 after multiple getter calls, which pins the run-once contract the
-/// dartdoc on [featureDependenciesReady] promises.
 @visibleForTesting
 int featureInitRunCount = 0;
 

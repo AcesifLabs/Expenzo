@@ -12,6 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     environment: mobile-internal
 
+    env:
+
+      HAS_SENTRY: ${{ secrets.SENTRY_AUTH_TOKEN != '' }}
+
     defaults:
       run:
         working-directory: packages/mobile
@@ -47,10 +51,13 @@ jobs:
             exit 1
           fi
 
+      - name: Read the Flutter version
+        run: echo "FLUTTER_VERSION=$(jq -r .flutter .fvmrc)" >> "$GITHUB_ENV"
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.41.7'
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: 'stable'
           cache: true
 
@@ -98,9 +105,33 @@ jobs:
           KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
           PLAY_STORE_JSON_KEY: ${{ secrets.PLAY_STORE_JSON_KEY }}
 
+      - name: Upload Dart symbols to Sentry
+        if: env.HAS_SENTRY == 'true'
+        run: |
+          set -euo pipefail
+
+          APP_ID="$(sed -n 's/.*applicationId = "\(.*\)".*/\1/p' android/app/build.gradle.kts)"
+          SENTRY_RELEASE="$APP_ID@$BUILD_NAME+$BUILD_NUMBER" dart run sentry_dart_plugin
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
+          BUILD_NAME: ${{ steps.version.outputs.build_name }}
+          BUILD_NUMBER: ${{ steps.version.outputs.build_number }}
+          SENTRY_DIST: ${{ steps.version.outputs.build_number }}
+
       - name: Upload release AAB artifact
         uses: actions/upload-artifact@v4
         with:
           name: expenzo-android-${{ github.ref_name }}
           path: packages/mobile/build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+
+      - name: Upload symbols and R8 mapping artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: expenzo-android-symbols-${{ github.ref_name }}
+          path: |
+            packages/mobile/build/symbols
+            packages/mobile/build/app/outputs/mapping/release/mapping.txt
           if-no-files-found: error

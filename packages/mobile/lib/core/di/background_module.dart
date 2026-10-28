@@ -7,8 +7,6 @@ import 'package:expense_tracker/features/reports/domain/usecases/get_weekly_summ
 import 'package:expense_tracker/features/settings/domain/usecases/get_settings.dart';
 import 'package:expense_tracker/shared/services/notification_service.dart';
 
-/// `--dart-define=EXPENZO_BG_TEST_DELAY=true` runs background work after one
-/// minute, for the manual device check. Never ship with it.
 const Duration? _debugDelay = bool.fromEnvironment('EXPENZO_BG_TEST_DELAY')
     ? Duration(minutes: 1)
     : null;

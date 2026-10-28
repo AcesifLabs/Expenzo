@@ -1,5 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
+
+import 'package:dio/dio.dart';
+import 'package:clock/clock.dart';
 import 'package:flutter/foundation.dart';
 import '../api/api_client.dart';
 import '../database/app_database.dart';
@@ -7,6 +10,7 @@ import '../api/api_constants.dart';
 import '../api/token_storage.dart';
 import '../database/daos/sync_queue_dao.dart';
 import '../di/injection_container.dart' as di;
+import '../logger/app_logger.dart';
 import 'connectivity_service.dart';
 import 'sync_event.dart';
 import 'sync_mode.dart';
@@ -18,7 +22,6 @@ import 'sync_table_registry.dart';
 export 'sync_mode.dart';
 export 'sync_run_result.dart';
 
-/// A unit of work the engine runs around syncing, e.g. a one-time repair.
 typedef SyncTask = Future<void> Function();
 
 class SyncEngine {
@@ -32,6 +35,9 @@ class SyncEngine {
     Duration(seconds: 45),
     Duration(minutes: 2),
     Duration(minutes: 5),
+    Duration(minutes: 15),
+    Duration(minutes: 30),
+    Duration(hours: 1),
   ];
 
   final ApiClient _apiClient;
@@ -42,66 +48,58 @@ class SyncEngine {
   final List<SyncTask> _beforeLocalWipeTasks;
   final List<SyncTask> _stopTasks;
   final Future<bool> Function() _isEnabled;
-  StreamSubscription? _connectivitySub;
-  StreamSubscription? _syncEventSub;
+  StreamSubscription<bool>? _connectivitySub;
+  StreamSubscription<SyncTriggered>? _syncEventSub;
   bool _initialized = false;
   bool _lastPullSucceeded = false;
   int _retryCount = 0;
+  Duration? _scheduledRetryDelay;
   Timer? _retryTimer;
 
-  /// Single-flight lock for sync operations.
-  /// When non-null, a sync cycle is in progress. Concurrent triggers
-  /// are coalesced: exactly one more cycle will run after the current completes.
+  final Map<String, int> _pullFailures = {};
+  static const _maxPullAttempts = 5;
+
+  static const _epochCursor = '1970-01-01T00:00:00.000Z';
+
+  Duration _clockSkew = Duration.zero;
+
+  final Map<String, Map<String, dynamic>> _heldPulls = {};
+
   Completer<void>? _syncLock;
   bool _hasPendingTrigger = false;
 
-  /// True from [start] until [stop]. A cycle only runs while active, so an
-  /// event handler or retry that fires after [stop] does nothing, and a
-  /// running cycle ends after its current pull or push chunk.
   bool _active = false;
 
-  /// Bumped by [stop], so a [start] still in its first cycle gives up and
-  /// push or migration loops end after their current chunk.
   int _stopCount = 0;
 
-  /// The first-sync migration [start] runs outside the cycle lock; [stop]
-  /// waits for it too.
-  Future<void>? _migrationRun;
+  Future<bool>? _migrationRun;
 
-  /// Set by [pause]: [start] does nothing until [resume].
   bool _paused = false;
 
   final ValueNotifier<bool> _isSyncing = ValueNotifier(false);
 
-  /// Set by the last pull/push pass: a request threw, or it was skipped
-  /// because the device was offline.
   bool _cycleErrored = false;
   bool _cycleSkippedOffline = false;
 
-  /// The last queued [start] or [stop]. Each runs after the one before it
-  /// finishes, so a start can't overlap a stop that is still tearing down.
   Future<void> _lifecycle = Future<void>.value();
 
   final StreamController<void> _firstSyncNeeded =
       StreamController<void>.broadcast();
 
-  /// True when the latest pull reached the server and was applied. After-sync
-  /// tasks run even when it failed, so tasks that need fresh data check this.
   bool get lastPullSucceeded => _lastPullSucceeded;
 
-  /// True while a sync cycle runs.
   ValueListenable<bool> get isSyncing => _isSyncing;
 
-  /// Whether the last cycle's pull or push threw. Rejected rows in a pushed
-  /// batch don't count.
   bool get lastCycleErrored => _cycleErrored;
 
-  /// Whether the last cycle skipped a pull or push because it was offline.
   bool get lastCycleSkippedOffline => _cycleSkippedOffline;
 
-  /// Fires when Sync is switched on before the first sync ran (signed in
-  /// with Sync off). `AuthBloc` then runs its first-sync conflict check,
-  /// which starts sync.
+  @visibleForTesting
+  bool get hasPendingRetry => _retryTimer?.isActive ?? false;
+
+  @visibleForTesting
+  Duration? get scheduledRetryDelay => _scheduledRetryDelay;
+
   Stream<void> get firstSyncNeeded => _firstSyncNeeded.stream;
 
   AppDatabase get _db => di.getIt<AppDatabase>();
@@ -112,18 +110,13 @@ class SyncEngine {
     required ConnectivityService connectivity,
     required SyncTableRegistry registry,
 
-    /// Run after every sync cycle while online; failures are logged and
-    /// retried after the next cycle.
     List<SyncTask> afterSyncTasks = const [],
 
-    /// Run by [prepareForLocalWipe] before local data is replaced.
     List<SyncTask> beforeLocalWipeTasks = const [],
 
-    /// Run by [stop] (sign-out), so per-session state is cleared.
     List<SyncTask> stopTasks = const [],
 
-    /// Whether Sync is switched on for this device; defaults to always on.
-    Future<bool> Function()? isEnabled,
+    Future<bool> Function() isEnabled = _alwaysOn,
   }) : _syncQueueDao = syncQueueDao,
        _apiClient = apiClient,
        _connectivity = connectivity,
@@ -131,35 +124,23 @@ class SyncEngine {
        _afterSyncTasks = afterSyncTasks,
        _beforeLocalWipeTasks = beforeLocalWipeTasks,
        _stopTasks = stopTasks,
-       _isEnabled = isEnabled ?? _alwaysOn;
+       _isEnabled = isEnabled;
 
-  /// Starts syncing: one cycle, the first-sync migration when due, then
-  /// listening for changes. Runs after any start or stop still in progress;
-  /// a second start finds it running and does nothing.
   Future<void> start() => _queued(_start);
 
-  /// Stops sync and keeps it off, even if something calls [start], until
-  /// [resume]. Delete all data holds it across the server clear and the local
-  /// wipe.
   Future<void> pause() async {
     _paused = true;
     await stop();
   }
 
-  /// Lifts [pause] and starts again; without a token [start] does nothing.
   Future<void> resume() {
     _paused = false;
 
     return start();
   }
 
-  /// Whether Sync is switched on for this device.
   Future<bool> isEnabled() => _isEnabled();
 
-  /// Applies the device's Sync switch: off stops sync in both directions.
-  /// On starts it, except before the first sync: the engine stays idle and
-  /// asks [firstSyncNeeded] so [AuthBloc] can run the conflict check, then
-  /// start. The switch must not migrate or push.
   Future<void> applyEnabled({required bool enabled}) async {
     if (!enabled) return stop();
     if (await TokenStorage.isFirstSync()) {
@@ -170,20 +151,20 @@ class SyncEngine {
     await start();
   }
 
-  /// Runs a cycle now and reports how it went. Never runs before the
-  /// first-sync conflict check, so it can't push into an account the user
-  /// hasn't chosen to merge with. Starts the engine if it isn't running;
-  /// joins a running cycle instead of starting another.
+  @visibleForTesting
+  Future<void> runScheduledRetry() {
+    _retryTimer?.cancel();
+
+    return _retrySync();
+  }
+
   Future<SyncRunResult> syncNow() async {
     if (!await TokenStorage.hasToken()) return SyncRunResult.signedOut;
-    if (await TokenStorage.isFirstSync()) {
-      return SyncRunResult.firstSyncPending;
-    }
+    if (!await _firstSyncDone()) return SyncRunResult.firstSyncPending;
     if (_paused || !await _isEnabled()) return SyncRunResult.disabled;
     if (!await _connectivity.checkNow()) return SyncRunResult.offline;
     final lock = _syncLock;
     if (lock != null) {
-      // The running cycle loops once more for this trigger.
       _hasPendingTrigger = true;
       await lock.future;
     } else if (_initialized) {
@@ -198,13 +179,7 @@ class SyncEngine {
     );
   }
 
-  /// Stops syncing and waits for a running cycle or first-sync migration to
-  /// reach its next checkpoint (at most one push chunk), so nothing it pulls
-  /// or pushes lands after this returns: Delete all data clears the server
-  /// and the database next. Never call it from inside a cycle or an
-  /// after-sync task: it would wait for itself.
   Future<void> stop() {
-    // At once, so a start or cycle in progress gives up at its next check.
     _active = false;
     _stopCount++;
     _retryTimer?.cancel();
@@ -221,14 +196,12 @@ class SyncEngine {
       localCount += await handler.countRows(_db);
     }
 
-    int cloudCount = 0;
-    try {
-      final response = await _apiClient.dio.get(ApiConstants.syncSummary);
-      cloudCount = response.data['totalCount'] ?? 0;
-    } catch (e, s) {
-      debugPrint('Error: $e\n$s');
-      debugPrint('SyncEngine: Failed to fetch cloud summary: $e');
-      cloudCount = 0;
+    final response = await _apiClient.dio.get<Object?>(
+      ApiConstants.syncSummary,
+    );
+    final cloudCount = _json(response)['totalCount'];
+    if (cloudCount is! int) {
+      throw const FormatException('Sync summary has no totalCount');
     }
 
     if (localCount > 0 && cloudCount > 0) return SyncConflictType.conflict;
@@ -238,10 +211,6 @@ class SyncEngine {
     return SyncConflictType.none;
   }
 
-  /// Saves to the server anything that exists only on this device, before
-  /// local data is wiped (e.g. replacing it with the account copy).
-  ///
-  /// Throws when a task fails; the caller must not wipe local data then.
   Future<void> prepareForLocalWipe() async {
     for (final task in _beforeLocalWipeTasks) {
       await task();
@@ -251,15 +220,15 @@ class SyncEngine {
   Future<void> executeDecision(SyncMode mode) async {
     switch (mode) {
       case SyncMode.localWins:
-        await _apiClient.dio.delete(ApiConstants.syncClear);
-        await _migrateExistingData();
+        await _apiClient.dio.delete<Object?>(ApiConstants.syncClear);
+        await _uploadExistingData();
         await _safePushChanges();
         break;
       case SyncMode.cloudWins:
         await _safePullChanges();
         break;
       case SyncMode.merge:
-        await _migrateExistingData();
+        await _uploadExistingData();
         await _safePushChanges();
         await _safePullChanges();
         break;
@@ -267,10 +236,15 @@ class SyncEngine {
     await TokenStorage.markFirstSyncDone();
   }
 
-  /// Runs [operation] after the last queued start or stop.
+  Future<void> _uploadExistingData() async {
+    if (!await _migrateExistingData()) {
+      throw StateError('Part of the first-sync upload failed');
+    }
+  }
+
   Future<void> _queued(Future<void> Function() operation) {
     final run = _lifecycle.then((_) => operation());
-    // A failure stays with this caller; the next operation still runs.
+
     _lifecycle = run.catchError(
       (Object e) => debugPrint('SyncEngine: lifecycle step failed: $e'),
     );
@@ -279,7 +253,6 @@ class SyncEngine {
   }
 
   Future<void> _finishStop() async {
-    // A start queued before this stop may have turned sync back on.
     _active = false;
     _retryTimer?.cancel();
     _retryTimer = null;
@@ -294,8 +267,8 @@ class SyncEngine {
     for (final task in _stopTasks) {
       try {
         await task();
-      } catch (e) {
-        debugPrint('SyncEngine: Stop task failed: ${e.runtimeType}');
+      } catch (e, s) {
+        appLogger.error('SyncEngine: Stop task failed', e, s);
       }
     }
   }
@@ -314,7 +287,7 @@ class SyncEngine {
 
         return;
       }
-      // Off on this device: also keeps resume() from starting it.
+
       if (!await _isEnabled()) {
         debugPrint('SyncEngine: Off on this device');
         _active = false;
@@ -324,32 +297,27 @@ class SyncEngine {
       if (stopCount != _stopCount) return;
       await _runSyncCycle();
       if (stopCount != _stopCount) return;
-      if (await TokenStorage.isFirstSync()) {
-        final migration = _migrationRun = _migrateExistingData();
-        await migration;
-        _migrationRun = null;
-      }
+      if (await TokenStorage.isFirstSync()) await _migrateOnce();
       if (stopCount != _stopCount) return;
       _connectivitySub = _connectivity.onlineStream.listen(
         (online) {
           unawaited(_onConnectivityChange(online));
         },
-        onError: (e) {
-          debugPrint('Connectivity stream error: $e');
+        onError: (Object e, StackTrace s) {
+          appLogger.error('Connectivity stream error', e, s);
         },
       );
       _syncEventSub = SyncEventBus().events.listen(
         (_) {
           unawaited(_onSyncEvent());
         },
-        onError: (e) {
-          debugPrint('SyncEventBus listener error: $e');
+        onError: (Object e, StackTrace s) {
+          appLogger.error('SyncEventBus listener error', e, s);
         },
       );
       _initialized = true;
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
-      debugPrint('SyncEngine start failed: $e');
+      appLogger.error('SyncEngine start failed', e, s);
       _initialized = false;
     }
   }
@@ -367,9 +335,6 @@ class SyncEngine {
     }
   }
 
-  /// Runs a full sync cycle (pull then push) with single-flight protection.
-  /// Concurrent triggers are coalesced: if a cycle is already running,
-  /// exactly one more cycle will run after it completes.
   Future<void> _runSyncCycle() async {
     if (!_active) return;
     if (_syncLock != null) {
@@ -382,9 +347,6 @@ class SyncEngine {
     _isSyncing.value = true;
 
     try {
-      // Run cycles until no more pending triggers. After-sync tasks run once
-      // the queue is drained; a trigger that arrives while they run starts
-      // another pull/push pass instead of being dropped.
       do {
         do {
           _hasPendingTrigger = false;
@@ -394,7 +356,7 @@ class SyncEngine {
           if (!_active) return;
           await _safePushChanges();
         } while (_hasPendingTrigger && _active);
-        // A stopped cycle is neither a success nor a failure.
+
         if (!_active) return;
         await _recordCycleOutcome();
         await _runAfterSyncTasks();
@@ -420,11 +382,11 @@ class SyncEngine {
     return skippedOffline ? SyncRunResult.offline : SyncRunResult.success;
   }
 
-  /// Offline is neither a success nor a failure, so it records nothing.
   Future<void> _recordCycleOutcome() async {
     if (_cycleErrored) {
       await SyncOutcomeStore.recordSyncFailure(DateTime.now());
     } else if (!_cycleSkippedOffline) {
+      _retryCount = 0;
       await SyncOutcomeStore.recordSyncSuccess(DateTime.now());
     }
   }
@@ -440,9 +402,8 @@ class SyncEngine {
       if (queue.isEmpty) return;
 
       await _processPushQueue(queue);
-      _retryCount = 0;
-    } catch (e) {
-      debugPrint('SyncEngine push failed: ${e.runtimeType}');
+    } catch (e, s) {
+      appLogger.error('SyncEngine push failed', e, s);
       _cycleErrored = true;
       _scheduleRetry();
     }
@@ -453,7 +414,6 @@ class SyncEngine {
     final total = queue.length;
     final stopCount = _stopCount;
 
-    // A stop ends the push after the current chunk; the rest stays queued.
     while (processed < total && stopCount == _stopCount) {
       final end = processed + chunkSize > total ? total : processed + chunkSize;
       final batch = queue.sublist(processed, end);
@@ -476,41 +436,81 @@ class SyncEngine {
             'action': item.action,
             'id': item.recordId,
             'data': item.payload.isNotEmpty ? jsonDecode(item.payload) : null,
-            'updatedAt': item.createdAt.toUtc().toIso8601String(),
+            'updatedAt': item.createdAt
+                .add(_clockSkew)
+                .toUtc()
+                .toIso8601String(),
           },
         )
         .toList();
 
-    final response = await _apiClient.dio.post(
+    final response = await _apiClient.dio.post<Object?>(
       ApiConstants.syncPush,
       data: {'changes': changes},
     );
-    final results = response.data['results'] as List;
+    final results = (_json(response)['results']! as List<Object?>)
+        .cast<Map<String, dynamic>>();
+    await _applyHeldPullsThatLost(batch, results);
+
     final syncedIds = <int>[];
-
-    final batchByRecordId = <String, int>{};
-    for (int i = 0; i < batch.length; i++) {
-      batchByRecordId[batch[i].recordId] = batch[i].id;
-    }
-
-    for (int i = 0; i < results.length; i++) {
-      final result = results[i] as Map<String, dynamic>;
-      final status = SyncStatus.fromString(result['status'] as String);
-      if (status == SyncStatus.success || status == SyncStatus.conflict) {
-        final resultId = result['id']?.toString();
-        int? queueId;
-        if (resultId != null) {
-          queueId = batchByRecordId[resultId];
-        } else if (i < batch.length) {
-          queueId = batch[i].id;
-        }
-
-        if (queueId != null) {
-          syncedIds.add(queueId);
-        }
+    final rejectedIds = <int>[];
+    for (final (result, queueIds) in _matchResults(batch, results)) {
+      switch (SyncStatus.fromString(result['status'] as String)) {
+        case SyncStatus.success:
+          syncedIds.addAll(queueIds);
+        case SyncStatus.conflict:
+          appLogger.info('SyncEngine: Push conflict on ${result['id']}');
+          syncedIds.addAll(queueIds);
+        case SyncStatus.error:
+          rejectedIds.addAll(queueIds);
       }
     }
-    if (syncedIds.isNotEmpty) await _syncQueueDao.markSynced(syncedIds);
+    await _syncQueueDao.markSynced(syncedIds);
+    await _syncQueueDao.recordRejected(rejectedIds);
+  }
+
+  static List<(Map<String, dynamic>, List<int>)> _matchResults(
+    List<SyncQueueData> batch,
+    List<Map<String, dynamic>> results,
+  ) {
+    if (results.length == batch.length) {
+      return [
+        for (var i = 0; i < batch.length; i++) (results[i], [batch[i].id]),
+      ];
+    }
+    final idsByRecord = <String, List<int>>{};
+    for (final item in batch) {
+      idsByRecord.putIfAbsent(item.recordId, () => []).add(item.id);
+    }
+
+    return [
+      for (final result in results)
+        (result, idsByRecord[result['id']?.toString()] ?? const <int>[]),
+    ];
+  }
+
+  Future<void> _applyHeldPullsThatLost(
+    List<SyncQueueData> batch,
+    List<Map<String, dynamic>> results,
+  ) async {
+    final tableById = {
+      for (final item in batch) item.recordId: item.entityTable,
+    };
+    await _db.transaction(() async {
+      for (final result in results) {
+        if (SyncStatus.fromString(result['status'] as String) !=
+            SyncStatus.conflict) {
+          continue;
+        }
+        final id = result['id']?.toString();
+        final held = _heldPulls.remove('${tableById[id]}/$id');
+        if (held == null) continue;
+        appLogger.info(
+          'SyncEngine: Server kept its copy of ${tableById[id]}/$id',
+        );
+        await _applyRemoteChange(held);
+      }
+    });
   }
 
   Future<void> _safePullChanges() async {
@@ -522,42 +522,103 @@ class SyncEngine {
         return;
       }
       final lastSync = await TokenStorage.getLastSyncAt();
-      final response = await _apiClient.dio.get(
+      final response = await _apiClient.dio.get<Object?>(
         ApiConstants.syncPull,
-        queryParameters: {'since': lastSync ?? '1970-01-01T00:00:00.000Z'},
+        queryParameters: {'since': lastSync ?? _epochCursor},
       );
-      final serverTime = response.data['serverTime'] as String;
-      final changes = response.data['changes'] as List;
+      final body = _json(response);
+      final serverTime = body['serverTime']! as String;
+      final changes = body['changes']! as List<Object?>;
+      _measureClockSkew(serverTime);
       debugPrint('SyncEngine: Pulled ${changes.length} changes');
-      await _db.transaction(
+      final failed = await _db.transaction(
         () => _applyPulledChanges(changes.cast<Map<String, dynamic>>()),
       );
-      await TokenStorage.saveLastSyncAt(serverTime);
+      await TokenStorage.saveLastSyncAt(_nextPullCursor(serverTime, failed));
       _lastPullSucceeded = true;
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
-      debugPrint('SyncEngine pull failed: $e');
+      appLogger.error('SyncEngine pull failed', e, s);
       _cycleErrored = true;
+      _scheduleRetry();
     }
   }
 
-  Future<void> _applyPulledChanges(List<Map<String, dynamic>> pulled) async {
+  static Map<String, Object?> _json(Response<Object?> response) {
+    final data = response.data;
+    if (data is Map<String, Object?>) return data;
+
+    throw FormatException('Expected a JSON object, got ${data.runtimeType}');
+  }
+
+  void _measureClockSkew(String serverTime) {
+    final server = DateTime.tryParse(serverTime);
+    if (server != null) _clockSkew = server.difference(clock.now());
+  }
+
+  Future<List<Map<String, dynamic>>> _applyPulledChanges(
+    List<Map<String, dynamic>> pulled,
+  ) async {
     final handlers = _handlersWithIds(pulled);
     for (final MapEntry(key: handler, value: ids) in handlers.entries) {
       await handler.beforeApplyingPull(_db, ids);
     }
+    final waitingToPush = await _syncQueueDao.pendingKeys();
+
+    _heldPulls.removeWhere((key, _) => !waitingToPush.contains(key));
+    final failed = <Map<String, dynamic>>[];
     try {
       for (final change in pulled) {
-        await _applyRemoteChange(change);
+        final key = '${change['table']}/${change['id']}';
+        if (waitingToPush.contains(key)) {
+          _heldPulls[key] = change;
+          if (_keepPulling(key)) failed.add(change);
+          continue;
+        }
+        if (await _applyRemoteChange(change)) {
+          _pullFailures.remove(key);
+          continue;
+        }
+        if (_keepPulling(key)) failed.add(change);
       }
     } finally {
       for (final handler in handlers.keys) {
         await handler.afterApplyingPull();
       }
     }
+
+    return failed;
   }
 
-  /// The pulled ids per handler, for [SyncTableHandler.beforeApplyingPull].
+  bool _keepPulling(String key) {
+    final attempts = (_pullFailures[key] ?? 0) + 1;
+    if (attempts < _maxPullAttempts) {
+      _pullFailures[key] = attempts;
+
+      return true;
+    }
+    _pullFailures.remove(key);
+    appLogger.warning('SyncEngine: Stopped pulling $key again');
+
+    return false;
+  }
+
+  static String _nextPullCursor(
+    String serverTime,
+    List<Map<String, dynamic>> failed,
+  ) {
+    final times = [
+      for (final change in failed)
+        ?DateTime.tryParse(change['updatedAt']?.toString() ?? ''),
+    ];
+    if (times.isEmpty) return serverTime;
+    final earliest = times.reduce((a, b) => a.isBefore(b) ? a : b);
+
+    return earliest
+        .subtract(const Duration(milliseconds: 1))
+        .toUtc()
+        .toIso8601String();
+  }
+
   Map<SyncTableHandler, List<String>> _handlersWithIds(
     List<Map<String, dynamic>> changes,
   ) {
@@ -577,13 +638,33 @@ class SyncEngine {
     for (final task in _afterSyncTasks) {
       try {
         await task();
-      } catch (e) {
-        debugPrint('SyncEngine: After-sync task failed: ${e.runtimeType}');
+      } catch (e, s) {
+        appLogger.error('SyncEngine: After-sync task failed', e, s);
       }
     }
   }
 
-  Future<void> _migrateExistingData() async {
+  Future<bool> _firstSyncDone() async {
+    if (!await TokenStorage.isFirstSync()) return true;
+
+    if (!_active && _migrationRun == null) _firstSyncNeeded.add(null);
+    if (!_initialized || !_active) return false;
+
+    return _migrateOnce();
+  }
+
+  Future<bool> _migrateOnce() async {
+    final running = _migrationRun;
+    if (running != null) return running;
+    final migration = _migrationRun = _migrateExistingData();
+    try {
+      return await migration;
+    } finally {
+      _migrationRun = null;
+    }
+  }
+
+  Future<bool> _migrateExistingData() async {
     debugPrint('SyncEngine: Starting one-time data migration');
     try {
       final changes = await _collectAllChanges();
@@ -592,7 +673,7 @@ class SyncEngine {
         debugPrint('SyncEngine: No data to migrate');
         await TokenStorage.markFirstSyncDone();
 
-        return;
+        return true;
       }
 
       final allSucceeded = await _pushMigrationChunks(changes);
@@ -603,8 +684,12 @@ class SyncEngine {
       } else {
         debugPrint('SyncEngine: Migration partially failed, will retry');
       }
+
+      return allSucceeded;
     } catch (e, stackTrace) {
-      debugPrint('SyncEngine: Migration failed: $e\n$stackTrace');
+      appLogger.error('SyncEngine: Migration failed', e, stackTrace);
+
+      return false;
     }
   }
 
@@ -633,7 +718,6 @@ class SyncEngine {
     var allSucceeded = true;
     final stopCount = _stopCount;
     for (var i = 0; i < changes.length; i += chunkSize) {
-      // Stopped: unfinished, so the next start migrates again.
       if (stopCount != _stopCount) return false;
       final end = i + chunkSize > changes.length
           ? changes.length
@@ -656,25 +740,29 @@ class SyncEngine {
     List<Map<String, dynamic>> batch,
   ) async {
     try {
-      final response = await _apiClient.dio.post(
+      final response = await _apiClient.dio.post<Object?>(
         ApiConstants.syncPush,
         data: {'changes': batch},
       );
 
-      return _validateMigrationResults(response.data['results'] as List?);
-    } catch (e) {
-      debugPrint('SyncEngine: Migration chunk failed: ${e.runtimeType}');
+      return _validateMigrationResults(
+        _json(response)['results'] as List<Object?>?,
+      );
+    } catch (e, s) {
+      appLogger.error('SyncEngine: Migration chunk failed', e, s);
 
       return false;
     }
   }
 
-  bool _validateMigrationResults(List? results) {
+  bool _validateMigrationResults(List<Object?>? results) {
     if (results == null) return true;
 
     var allOk = true;
     for (final result in results) {
-      final status = result['status']?.toString();
+      final status = result is Map<String, Object?>
+          ? result['status']?.toString()
+          : null;
       if (status != 'success' && status != 'conflict') {
         debugPrint('SyncEngine: Migration item failed: $status');
         allOk = false;
@@ -686,15 +774,14 @@ class SyncEngine {
 
   void _scheduleRetry() {
     if (!_active) return;
-    if (_retryCount >= _backoffDelays.length) {
-      _retryCount = 0;
-
-      return;
-    }
-    final delay = _backoffDelays[_retryCount];
+    final delay =
+        _backoffDelays[_retryCount < _backoffDelays.length
+            ? _retryCount
+            : _backoffDelays.length - 1];
     debugPrint(
       'SyncEngine: Retrying in ${delay.inSeconds}s (attempt ${_retryCount + 1})',
     );
+    _scheduledRetryDelay = delay;
     _retryTimer?.cancel();
     _retryTimer = Timer(delay, () {
       unawaited(_retrySync());
@@ -706,7 +793,7 @@ class SyncEngine {
     await _runSyncCycle();
   }
 
-  Future<void> _applyRemoteChange(Map<String, dynamic> change) async {
+  Future<bool> _applyRemoteChange(Map<String, dynamic> change) async {
     final tableName = change['table']?.toString();
     final id = change['id']?.toString();
     final rawData = change['data'];
@@ -714,7 +801,7 @@ class SyncEngine {
     if (tableName == null || id == null) {
       debugPrint('SyncEngine: Malformed remote change (missing table or id)');
 
-      return;
+      return true;
     }
 
     final data = rawData is Map<String, dynamic> ? rawData : null;
@@ -723,32 +810,26 @@ class SyncEngine {
     if (handler == null) {
       debugPrint('SyncEngine: Unknown table in remote change: $tableName');
 
-      return;
-    }
-
-    if (data == null) {
-      try {
-        await handler.deleteById(_db, id);
-      } catch (e) {
-        debugPrint(
-          'SyncEngine: Error deleting from $tableName: ${e.runtimeType}',
-        );
-      }
-
-      return;
+      return true;
     }
 
     try {
-      final companion = await handler.keepLocalValues(
-        _db,
-        id,
-        handler.fromSyncPayload(id, data),
-      );
-      await _db.into(handler.tableRef(_db)).insertOnConflictUpdate(companion);
-    } catch (e) {
-      debugPrint(
-        'SyncEngine: Error applying change to $tableName: ${e.runtimeType}',
-      );
+      if (data == null) {
+        await handler.deleteById(_db, id);
+      } else {
+        final companion = await handler.keepLocalValues(
+          _db,
+          id,
+          handler.fromSyncPayload(id, data),
+        );
+        await _db.into(handler.tableRef(_db)).insertOnConflictUpdate(companion);
+      }
+
+      return true;
+    } catch (e, s) {
+      appLogger.error('SyncEngine: Could not apply $tableName/$id', e, s);
+
+      return false;
     }
   }
 }

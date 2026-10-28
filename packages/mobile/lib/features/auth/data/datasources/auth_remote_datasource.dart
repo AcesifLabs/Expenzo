@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
-import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../../../../core/database/app_database.dart' show UsersCompanion;
 import '../../../../core/database/daos/user_dao.dart';
@@ -10,6 +9,7 @@ import '../../../../core/api/api_constants.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
 import '../../../../core/api/token_storage.dart';
 import '../../domain/entities/user.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
 abstract class AuthRemoteDatasource {
@@ -18,27 +18,10 @@ abstract class AuthRemoteDatasource {
   Future<User?> getCurrentUser();
   Future<bool> isSignedIn();
 
-  /// Signs in to Google again silently and refreshes the Firebase session,
-  /// so a later account delete can't fail with `requires-recent-login`.
-  ///
-  /// Throws: [RequiresRecentLoginException] when there is no Firebase user or
-  /// Google needs the user to pick the account again; Firebase or platform
-  /// errors otherwise.
   Future<void> reauthenticate();
 
-  /// Deletes the account and everything synced to it on the server
-  /// (`DELETE /auth/account`), then drops the JWT. Completes normally when
-  /// an earlier attempt already deleted it (a lost response).
-  ///
-  /// Throws: [AuthException] on 401, [NetworkException] when the server
-  /// can't be reached, [ServerException] otherwise.
   Future<void> deleteServerAccount();
 
-  /// Deletes the Firebase user, then signs out of Google and Firebase and
-  /// clears tokens and the local user, even when the delete fails.
-  ///
-  /// Throws: [RequiresRecentLoginException] when Firebase still wants a
-  /// fresh sign-in; Firebase errors otherwise.
   Future<void> deleteAccount();
 }
 
@@ -118,8 +101,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
   @override
   Future<void> reauthenticate() async {
     final user = firebaseAuth.currentUser;
-    // Without a Firebase session the delete can't finish, so stop before the
-    // server step rather than leave a Firebase user behind.
+
     if (user == null) {
       throw const RequiresRecentLoginException(
         message: 'No Firebase user to re-authenticate',
@@ -131,17 +113,13 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
   @override
   Future<void> deleteServerAccount() async {
     try {
-      await apiClient.dio.delete(ApiConstants.deleteAccount);
+      await apiClient.dio.delete<Object?>(ApiConstants.deleteAccount);
     } on DioException catch (e) {
-      // A retry after a lost response: the JWT's user is already gone.
-      // No 404 shortcut: a deleted user gets this 401 from the JWT check, so
-      // a 404 means a wrong route or an old backend.
       if (!isDeletedUserResponse(e.response)) throw _exceptionFor(e);
     } catch (e) {
       throw ServerException(message: e.toString());
     }
-    // Drop the JWT now, not after the local wipe: nothing may use it against
-    // the deleted account in between.
+
     await _bestEffort(TokenStorage.clearAll);
   }
 
@@ -150,9 +128,6 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
     try {
       await _deleteFirebaseUser();
     } finally {
-      // Tokens first: a JWT left behind lets sync's 401 refresh log in again
-      // and re-create the deleted server account. Each step runs even if an
-      // earlier one throws, and never hides the delete's own error.
       await _bestEffort(TokenStorage.clearAll);
       await _bestEffort(userDao.clearUser);
       await _bestEffort(googleSignIn.signOut);
@@ -166,7 +141,6 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
     try {
       await user.delete();
     } on fb.FirebaseAuthException catch (e) {
-      // [reauthenticate] runs first, so this is only a safety net.
       if (e.code != 'requires-recent-login') rethrow;
       await _reauthenticate(user);
       await user.delete();
@@ -176,8 +150,8 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
   static Future<void> _bestEffort(Future<Object?> Function() step) async {
     try {
       await step();
-    } catch (e) {
-      debugPrint('AuthRemoteDatasource: Cleanup step failed: ${e.runtimeType}');
+    } catch (e, s) {
+      appLogger.error('AuthRemoteDatasource: Cleanup step failed', e, s);
     }
   }
 
@@ -229,20 +203,25 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
           lastLoginAt: Value(now),
         ),
       );
-    } catch (e) {
-      debugPrint(
-        'AuthRemoteDatasource: Failed to sync user to local DB: ${e.runtimeType}',
+    } catch (e, s) {
+      appLogger.error(
+        'AuthRemoteDatasource: Failed to sync user to local DB',
+        e,
+        s,
       );
     }
   }
 
   Future<void> _obtainJwtToken(fb.User firebaseUser) async {
     final firebaseToken = await firebaseUser.getIdToken(true);
-    final response = await apiClient.dio.post(
+    final response = await apiClient.dio.post<Object?>(
       ApiConstants.login,
       data: {'firebaseToken': firebaseToken},
     );
-    final accessToken = response.data['accessToken'];
+    final data = response.data;
+    final accessToken = data is Map<String, Object?>
+        ? data['accessToken']
+        : null;
     if (accessToken is! String || accessToken.isEmpty) {
       throw ServerException(
         message: 'Invalid access token received from server.',

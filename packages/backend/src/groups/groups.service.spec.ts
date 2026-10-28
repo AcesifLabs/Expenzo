@@ -19,7 +19,7 @@ const repo = () => ({
   query: jest.fn(),
 });
 
-/** An EntityManager double: create returns its input, calls are recorded. */
+
 const fakeManager = () => ({
   exists: jest.fn().mockResolvedValue(false),
   create: jest.fn((_entity: unknown, data: object) => ({ ...data })),

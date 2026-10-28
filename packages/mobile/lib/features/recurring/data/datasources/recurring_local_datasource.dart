@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:expense_tracker/core/utils/money.dart';
 import 'package:expense_tracker/core/database/app_database.dart';
 import 'package:expense_tracker/core/database/daos/recurring_dao.dart';
 import '../../domain/entities/recurring_transaction.dart' as domain;
@@ -45,7 +46,7 @@ class RecurringLocalDatasourceImpl implements RecurringLocalDatasource {
           recurring.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
         ),
         description: Value(recurring.description),
-        amount: Value(recurring.amount),
+        amount: Value(roundMoney(recurring.amount)),
         categoryId: Value(recurring.categoryId),
         frequency: Value(recurring.frequency.name),
         startDate: Value(recurring.startDate),
@@ -103,7 +104,7 @@ class RecurringLocalDatasourceImpl implements RecurringLocalDatasource {
     return RecurringTransactionsCompanion(
       id: Value(id),
       description: Value(recurring.description),
-      amount: Value(recurring.amount),
+      amount: Value(roundMoney(recurring.amount)),
       categoryId: Value(recurring.categoryId),
       frequency: Value(recurring.frequency.name),
       startDate: Value(recurring.startDate),

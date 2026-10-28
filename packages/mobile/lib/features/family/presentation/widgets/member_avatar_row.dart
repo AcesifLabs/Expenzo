@@ -10,7 +10,6 @@ import '../../domain/entities/my_group.dart';
 import '../helpers/family_dashboard_helpers.dart';
 import 'member_avatar.dart';
 
-/// Up to five member avatars, then "+N"; Admins also get "+" to invite.
 class MemberAvatarRow extends StatelessWidget {
   final MyGroup group;
 
@@ -37,6 +36,7 @@ class MemberAvatarRow extends StatelessWidget {
       children: [
         for (final (index, member) in slice.shown.indexed)
           Semantics(
+            container: true,
             label: memberLabel(
               userId: member.userId,
               displayName: member.displayName,
@@ -58,14 +58,21 @@ class MemberAvatarRow extends StatelessWidget {
           ),
         if (group.myRole.isAdmin)
           Semantics(
+            container: true,
             button: true,
             label: t.family.invite.title,
             child: InkWell(
               customBorder: const CircleBorder(),
               onTap: () => _openInvite(context),
-              child: _circle(
-                context,
-                Icon(PiconsRegular.userPlus, color: context.palette.accent),
+
+              child: SizedBox.square(
+                dimension: AppSpacing.minTapTarget,
+                child: Center(
+                  child: _circle(
+                    context,
+                    Icon(PiconsRegular.userPlus, color: context.palette.accent),
+                  ),
+                ),
               ),
             ),
           ),

@@ -15,10 +15,6 @@ import 'package:expense_tracker/shared/presentation/widgets/budget_progress_indi
 import 'package:expense_tracker/features/budgets/presentation/helpers/budget_display_name.dart';
 import 'package:expense_tracker/features/budgets/presentation/helpers/budget_access_lookup.dart';
 
-/// Full-screen budget picker (`AllBudgetsPicker` in expenzo.pen).
-///
-/// Pops the chosen budget's id, an empty string for "No budget", or `null`
-/// when the user closes the page without choosing.
 class AllBudgetsPickerPage extends StatefulWidget {
   final String? selectedId;
 
@@ -95,8 +91,7 @@ class _AllBudgetsPickerPageState extends State<AllBudgetsPickerPage> {
 
     final pickerT = t.budgets.picker;
     final selectedId = widget.selectedId;
-    // An edited record can point at a budget that has since been disabled or
-    // deleted. Show it as selected so the page doesn't read as "No budget".
+
     final hasInactiveLink =
         selectedId != null && !_budgets.any((b) => b.budgetId == selectedId);
 

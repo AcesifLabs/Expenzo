@@ -18,16 +18,9 @@ import '../../domain/entities/export_request.dart';
 import '../services/export_csv_builder.dart';
 
 abstract class ExportLocalDatasource {
-  /// Writes the requested CSV files to a fresh temp folder: one CSV as-is,
-  /// several zipped together.
-  ///
-  /// Throws [EmptyExportException] when transactions are requested and none
-  /// fall in the range, and [CacheException] on any read or write error.
   Future<ExportFile> export(ExportRequest request, DateTime now);
 }
 
-/// The CSV text and zip are built in memory, in a background isolate,
-/// which is fine at personal-finance volumes.
 class ExportLocalDatasourceImpl implements ExportLocalDatasource {
   final RecordDao recordDao;
   final CategoryDao categoryDao;
@@ -74,7 +67,6 @@ class ExportLocalDatasourceImpl implements ExportLocalDatasource {
     }
   }
 
-  /// The records in range, oldest first; empty when transactions are off.
   Future<List<Record>> _readRecords(ExportRequest request, DateTime now) async {
     if (!request.contents.contains(ExportContent.transactions)) return [];
     final period = resolveExportPeriod(request, now);
@@ -85,13 +77,9 @@ class ExportLocalDatasourceImpl implements ExportLocalDatasource {
     };
     if (rows.isEmpty) throw const EmptyExportException();
 
-    // Both queries return newest first.
     return rows.reversed.toList();
   }
 
-  /// Categories, budgets and the currency, read together and only when a
-  /// selected file needs them; the transactions file looks up names in the
-  /// first two.
   Future<(List<Category>, List<Budget>, String)> _readOthers(
     Set<ExportContent> contents,
   ) {
@@ -110,7 +98,6 @@ class ExportLocalDatasourceImpl implements ExportLocalDatasource {
     ).wait;
   }
 
-  /// An empty folder for this export, after removing older ones.
   Future<Directory> _freshFolder(DateTime now) async {
     final temp = await tempDirectory();
     await _removeOldExports(temp);
@@ -120,8 +107,6 @@ class ExportLocalDatasourceImpl implements ExportLocalDatasource {
     ).create(recursive: true);
   }
 
-  /// Exports stay in temp until the next one, as a share target may still
-  /// be reading the last file.
   static Future<void> _removeOldExports(Directory temp) async {
     await for (final entity in temp.list()) {
       final isExport = p.basename(entity.path).startsWith(_folderPrefix);
@@ -131,11 +116,9 @@ class ExportLocalDatasourceImpl implements ExportLocalDatasource {
     }
   }
 
-  /// `yyyyMMdd`, Latin digits.
   static String _date(DateTime now) =>
       '${_pad(now.year, 4)}${_pad(now.month)}${_pad(now.day)}';
 
-  /// `HHmmss`, Latin digits.
   static String _time(DateTime now) =>
       '${_pad(now.hour)}${_pad(now.minute)}${_pad(now.second)}';
 
@@ -143,7 +126,6 @@ class ExportLocalDatasourceImpl implements ExportLocalDatasource {
       value.toString().padLeft(width, '0');
 }
 
-/// Everything the isolate needs; Drift rows are plain immutable objects.
 class _ExportPayload {
   final List<Record> records;
   final List<Category> categories;
@@ -152,7 +134,6 @@ class _ExportPayload {
   final Set<ExportContent> contents;
   final ExportCsvBuilder builder;
 
-  /// Where the isolate writes the file.
   final String folderPath;
   final String zipName;
 
@@ -168,9 +149,6 @@ class _ExportPayload {
   });
 }
 
-/// Runs in an isolate: builds each selected CSV and writes it, or zips
-/// them when there are several. Writing here keeps the bytes off the UI
-/// isolate; only the path comes back.
 ExportFile _writeFile(_ExportPayload payload) {
   final csvs = {
     for (final content in ExportContent.values)
@@ -186,7 +164,7 @@ ExportFile _writeFile(_ExportPayload payload) {
   for (final MapEntry(key: name, value: bytes) in csvs.entries) {
     archive.addFile(ArchiveFile(name, bytes.length, bytes));
   }
-  // Null only when given an output stream of the wrong type; none is.
+
   final zip = ZipEncoder().encode(archive) ?? const <int>[];
 
   return _save(

@@ -58,6 +58,7 @@
       "monthly": "Monthly budget",
       "yearly": "Yearly budget"
     },
+    "carriedOver": "Includes {amount} carried over",
     "used": "{percent}% used",
     "over": "Over budget",
     "transactionsFailed": "Couldn't load transactions",

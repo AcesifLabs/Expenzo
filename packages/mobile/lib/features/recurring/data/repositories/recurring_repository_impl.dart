@@ -3,9 +3,6 @@ import 'package:dartz/dartz.dart';
 import 'package:uuid/uuid.dart';
 import 'package:expense_tracker/core/database/daos/sync_queue_dao.dart';
 import 'package:expense_tracker/core/sync/sync_event.dart';
-import 'package:expense_tracker/core/database/daos/pending_recurring_dao.dart';
-import 'package:expense_tracker/core/database/app_database.dart'
-    show PendingRecurringData;
 import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/logger/app_logger.dart';
@@ -16,12 +13,10 @@ import 'package:expense_tracker/core/error/failure_message.dart';
 
 class RecurringRepositoryImpl implements RecurringRepository {
   final RecurringLocalDatasource localDatasource;
-  final PendingRecurringDao pendingRecurringDao;
   final SyncQueueDao? _syncQueueDao;
 
   RecurringRepositoryImpl({
     required this.localDatasource,
-    required this.pendingRecurringDao,
     SyncQueueDao? syncQueueDao,
   }) : _syncQueueDao = syncQueueDao;
 
@@ -113,8 +108,7 @@ class RecurringRepositoryImpl implements RecurringRepository {
   ) async {
     try {
       await localDatasource.updateRecurringBatch(transactions);
-      // ProcessRecurring moves nextOccurrence here; other devices must see it
-      // or they post the same occurrence again.
+
       for (final recurring in transactions) {
         final id = recurring.id;
         if (id != null) await _enqueueSync('update', id, _toPayload(recurring));
@@ -166,18 +160,6 @@ class RecurringRepositoryImpl implements RecurringRepository {
     }
   }
 
-  @override
-  Stream<List<PendingRecurringData>> watchPendingRecurring() {
-    return pendingRecurringDao.watchPending();
-  }
-
-  @override
-  Future<void> removePendingRecurring(String id) async {
-    await pendingRecurringDao.removePending(id);
-  }
-
-  /// Same fields as `RecurringTransactionsSyncHandler.toSyncPayload` without
-  /// `id`, `createdAt` and `updatedAt`, which the server sets itself.
   Map<String, dynamic> _toPayload(RecurringTransaction r) => {
     'description': r.description,
     'amount': r.amount,
@@ -191,8 +173,6 @@ class RecurringRepositoryImpl implements RecurringRepository {
     'dayOfMonth': r.dayOfMonth,
   };
 
-  /// Awaited, so inside a database transaction the queue entry commits or
-  /// rolls back with the change.
   Future<void> _enqueueSync(
     String action,
     String id, [

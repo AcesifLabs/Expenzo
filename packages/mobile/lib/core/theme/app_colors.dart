@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 
 abstract final class AppColors {
-  /// Brand color (docs/adr/0003).
   static const Color brandMint = Color(0xFFA2D3A4);
 
-  /// Secondary accent.
   static const Color lavender = Color(0xFFD1C4E9);
   static const Color backgroundLight = Color(0xFFF5F7FA);
   static const Color backgroundDark = Color(0xFF141315);

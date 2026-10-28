@@ -18,8 +18,6 @@ import '../bloc/recurring_state.dart';
 import '../widgets/recurring_defaults_section.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
-/// The recurring defaults and the recurring transactions. Expects a
-/// [RecurringBloc] and a [SettingsBloc] above it.
 class RecurringListView extends StatefulWidget {
   const RecurringListView({super.key});
 
@@ -28,8 +26,6 @@ class RecurringListView extends StatefulWidget {
 }
 
 class _RecurringListViewState extends State<RecurringListView> {
-  /// The last loaded list, kept on screen while a save, delete or processing
-  /// runs so the page does not blank out.
   List<RecurringTransaction>? _lastItems;
 
   @override
@@ -55,7 +51,6 @@ class _RecurringListViewState extends State<RecurringListView> {
     }
   }
 
-  /// Automatic runs (turning Auto-create on) stay silent when nothing is due.
   void _showProcessed(
     BuildContext context,
     int created, {
@@ -126,8 +121,6 @@ class _RecurringListViewState extends State<RecurringListView> {
     );
   }
 
-  /// [interactive] is false while the bloc is busy: a toggle built from the
-  /// shown copy would write back dates that processing just moved forward.
   Widget _buildRecurringItem(
     RecurringTransaction recurring,
     DateFormat dateFormat, {
@@ -166,11 +159,15 @@ class _RecurringListViewState extends State<RecurringListView> {
           ),
         ],
       ),
-      trailing: Switch(
-        value: recurring.isActive,
-        onChanged: interactive
-            ? (value) => _onSwitchChanged(recurring, value)
-            : null,
+
+      trailing: Semantics(
+        label: recurring.description,
+        child: Switch(
+          value: recurring.isActive,
+          onChanged: interactive
+              ? (value) => _onSwitchChanged(recurring, value)
+              : null,
+        ),
       ),
       onTap: interactive ? () => _navigateToForm(context, recurring) : null,
       onLongPress: interactive
@@ -179,8 +176,6 @@ class _RecurringListViewState extends State<RecurringListView> {
     );
   }
 
-  /// One lazy list: the defaults, then ACTIVE RECURRING built row by row
-  /// with [SettingsSectionSlot], so a long list only builds what is visible.
   Widget _buildLoadedState(
     List<RecurringTransaction> items, {
     bool interactive = true,
@@ -193,7 +188,7 @@ class _RecurringListViewState extends State<RecurringListView> {
     ];
     final after = <Widget>[
       if (items.isEmpty) _buildEmptyState(),
-      // Room for the FAB over the last row.
+
       const SizedBox(height: AppSpacing.xxl + AppSpacing.xl),
     ];
 
@@ -232,14 +227,14 @@ class _RecurringListViewState extends State<RecurringListView> {
         ? '/recurring/$recurringId/edit'
         : '/recurring/new';
     final saved = await context.push<bool>(path);
-    // The form saves through its own bloc; refresh this list.
+
     if (saved == true) bloc.add(LoadRecurring());
   }
 
   void _showDeleteDialog(BuildContext context, RecurringTransaction recurring) {
     final deleteT = t.recurring.delete;
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(deleteT.title),
@@ -301,7 +296,7 @@ class _RecurringListViewState extends State<RecurringListView> {
   Widget _buildProcessButton(BuildContext _, RecurringState state) {
     return IconButton(
       icon: const Icon(PiconsRegular.arrowsCounterClockwise),
-      // Disabled while busy: no double taps.
+
       onPressed: state is RecurringLoading ? null : _onProcessPending,
       tooltip: t.recurring.processPending,
     );

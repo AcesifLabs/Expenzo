@@ -8,9 +8,6 @@ void main() {
     });
 
     test('escapes embedded double-quotes by doubling', () {
-      // Input: say "hi"
-      // After escaping: say ""hi""
-      // Wrapped as phrase-prefix: "say ""hi""*
       expect(buildFtsMatchQuery('say "hi"'), '"say ""hi"""*');
     });
 
@@ -27,15 +24,11 @@ void main() {
     });
 
     test('handles FTS operators as literal text', () {
-      // OR, AND, NEAR, NOT should be treated as literal words, not operators
       expect(buildFtsMatchQuery('a OR b'), '"a OR b"*');
       expect(buildFtsMatchQuery('NEAR(a b)'), '"NEAR(a b)"*');
     });
 
     test('handles single double-quote', () {
-      // Input: "
-      // After escaping: ""
-      // Wrapped: """*
       expect(buildFtsMatchQuery('"'), '""""*');
     });
 

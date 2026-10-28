@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:integration_test/integration_test.dart';
+import 'package:patrol/patrol.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -11,9 +11,8 @@ import 'package:expense_tracker/core/database/app_database.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
 import 'package:expense_tracker/i18n/strings.g.dart';
 
-import 'onboarded.dart';
+import 'support/app.dart';
 
-/// A device keeps app data between runs: start from a fresh install.
 Future<void> _freshInstall() async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.clear();
@@ -31,7 +30,11 @@ Future<void> _settle(WidgetTester tester, [int seconds = 2]) async {
 }
 
 Future<void> _tapText(WidgetTester tester, String text) async {
-  await tester.tap(find.text(text).last);
+  await hideKeyboard(tester);
+  final target = find.text(text).last;
+  await tester.ensureVisible(target);
+  await _settle(tester, 1);
+  await tester.tap(target);
   await _settle(tester);
 }
 
@@ -39,23 +42,18 @@ Future<void> _continue(WidgetTester tester) =>
     _tapText(tester, t.onboarding.common.continueLabel);
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-
-  testWidgets('a fresh install goes through onboarding to Home', (
-    tester,
-  ) async {
+  patrolTest('a fresh install goes through onboarding to Home', ($) async {
+    final tester = $.tester;
     await _freshInstall();
     await startApp(tester);
     LocaleSettings.setLocaleSync(AppLocale.en);
     await _settle(tester);
 
-    // 1. Income.
     expect(find.text(t.onboarding.income.title), findsOneWidget);
     await tester.enterText(find.byType(TextField), '5000');
     await _settle(tester, 1);
     await _continue(tester);
 
-    // 2. Recurring: add Rent, see the total.
     await _tapText(tester, t.onboarding.recurring.addFirst);
     final fields = find.byType(TextFormField);
     await tester.enterText(fields.at(0), 'Rent');
@@ -63,7 +61,6 @@ void main() {
     await _tapText(tester, t.common.add);
     expect(find.text(t.onboarding.recurring.total), findsOneWidget);
 
-    // 2a. Back keeps the income; Continue twice returns to the plan.
     await tester.tap(find.byTooltip(t.common.back));
     await _settle(tester);
     expect(find.text(t.onboarding.income.title), findsOneWidget);
@@ -71,21 +68,18 @@ void main() {
     await _continue(tester);
     await _continue(tester);
 
-    // 3. Plan: budgets on.
     expect(find.text(t.onboarding.plan.title), findsOneWidget);
     await _continue(tester);
 
-    // 4. Goal.
     final goalFields = find.byType(TextField);
     await tester.enterText(goalFields.at(0), 'Laptop');
     await tester.enterText(goalFields.at(1), '1999');
     await _settle(tester, 1);
     await _continue(tester);
 
-    // 5. Timeline, then Finish setup.
     final threeMonths = t.onboarding.timeline.months(n: 3);
     await _tapText(tester, threeMonths);
-    // The summary card sits below the options, off screen on a phone.
+
     await tester.scrollUntilVisible(
       find.text(t.onboarding.complete.title),
       200,
@@ -100,7 +94,6 @@ void main() {
     await _tapText(tester, t.onboarding.complete.finish);
     await _settle(tester, 3);
 
-    // 6. Tutorial: Skip to Home.
     await _tapText(tester, t.onboarding.common.skip);
     await _settle(tester, 3);
 
@@ -122,11 +115,8 @@ void main() {
     final settings = jsonDecode(prefs.getString('user_settings')!) as Map;
     expect(settings['onboardingCompleted'], isTrue);
     expect(settings['monthlyIncome'], 5000.0);
-  });
 
-  testWidgets('a relaunch after onboarding opens Home', (tester) async {
     await startApp(tester);
-
     expect(find.text(t.onboarding.income.title), findsNothing);
     await tester.scrollUntilVisible(find.text('Laptop'), 200);
     expect(find.text('Laptop'), findsWidgets);

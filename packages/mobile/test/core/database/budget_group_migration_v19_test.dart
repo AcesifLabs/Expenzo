@@ -5,9 +5,8 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:expense_tracker/core/database/app_database.dart';
 
-/// Verifies the V18 -> V19 migration (budgets.group_id, SAAP-75):
-///  - existing budgets survive with group_id NULL
-///  - a fresh install (onCreate) has the column too
+import 'migrations/v19_tables.dart';
+
 void main() {
   late File dbFile;
 
@@ -43,6 +42,7 @@ void main() {
       "VALUES ('bud-1', 'Groceries', 400, 'monthly', 0)",
       const [],
     );
+    await addMissingV19Tables(raw);
     await raw.runCustom('PRAGMA user_version = 18', const []);
     await raw.close();
   }

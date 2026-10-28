@@ -1,16 +1,13 @@
 import 'package:dartz/dartz.dart';
 import 'package:drift/native.dart';
 import 'package:expense_tracker/core/database/app_database.dart' hide Record;
-import 'package:expense_tracker/core/database/daos/pending_recurring_dao.dart';
 import 'package:expense_tracker/core/database/daos/record_dao.dart';
 import 'package:expense_tracker/core/database/daos/sync_queue_dao.dart';
 import 'package:expense_tracker/core/database/transaction_runner.dart';
 import 'package:expense_tracker/core/error/failures.dart';
-import 'package:expense_tracker/core/sync/connectivity_service.dart';
 import 'package:expense_tracker/features/categories/domain/repositories/category_repository.dart';
 import 'package:expense_tracker/features/categories/domain/usecases/get_categories.dart';
 import 'package:expense_tracker/features/records/data/datasources/record_local_datasource.dart';
-import 'package:expense_tracker/features/records/data/datasources/record_remote_datasource.dart';
 import 'package:expense_tracker/features/records/data/repositories/record_repository_impl.dart';
 import 'package:expense_tracker/features/records/domain/entities/record.dart';
 import 'package:expense_tracker/features/recurring/data/datasources/recurring_local_datasource.dart';
@@ -23,21 +20,13 @@ import 'package:mocktail/mocktail.dart';
 
 import '../../../../support/factories/recurring_factory.dart';
 
-class _MockRemote extends Mock implements RecordRemoteDatasource {}
-
-class _MockConnectivity extends Mock implements ConnectivityService {}
-
 class _MockCategoryRepository extends Mock implements CategoryRepository {}
 
 class _MockGetCategories extends Mock implements GetCategories {}
 
-/// Writes the Records, then reports a failure, as a disk error after the
-/// insert would.
 class _FailingRecordRepository extends RecordRepositoryImpl {
   _FailingRecordRepository({
     required super.localDatasource,
-    required super.remoteDatasource,
-    required super.connectivity,
     super.syncQueueDao,
   });
 
@@ -68,7 +57,6 @@ void main() {
       localDatasource: RecurringLocalDatasourceImpl(
         recurringDao: db.recurringDao,
       ),
-      pendingRecurringDao: PendingRecurringDao(db),
       syncQueueDao: SyncQueueDao(db),
     );
     categoryRepository = _MockCategoryRepository();
@@ -100,14 +88,10 @@ void main() {
     return failing
         ? _FailingRecordRepository(
             localDatasource: local,
-            remoteDatasource: _MockRemote(),
-            connectivity: _MockConnectivity(),
             syncQueueDao: SyncQueueDao(db),
           )
         : RecordRepositoryImpl(
             localDatasource: local,
-            remoteDatasource: _MockRemote(),
-            connectivity: _MockConnectivity(),
             syncQueueDao: SyncQueueDao(db),
           );
   }
@@ -128,7 +112,7 @@ void main() {
     expect(created, greaterThanOrEqualTo(2));
     expect(await db.select(db.records).get(), hasLength(created));
     expect((await nextOccurrence()).isAfter(today), isTrue);
-    // Every Record is queued for sync, plus the item's insert and update.
+
     final queued = await queuedTables();
     expect(queued.where((t) => t == 'records'), hasLength(created));
     expect(queued.where((t) => t == 'recurring_transactions'), hasLength(2));

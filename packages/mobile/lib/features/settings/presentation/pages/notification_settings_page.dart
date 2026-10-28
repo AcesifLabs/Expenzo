@@ -30,7 +30,6 @@ class NotificationSettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // SettingsBloc is an app-wide singleton; `create` would close it on pop.
     return BlocProvider.value(
       value: di.getIt<SettingsBloc>(),
       child: const Scaffold(body: NotificationSettingsView()),
@@ -42,10 +41,7 @@ Future<void> _openAppSettings() async {
   await permissions.openAppSettings();
 }
 
-/// The master switch plus one toggle per notification kind (frame
-/// `NotificationSettingsScreen`, without Push and Email: ADR 0011).
 class NotificationSettingsView extends StatefulWidget {
-  /// Replaceable in tests, like the permission calls below.
   final Future<bool> Function() requestNotificationPermission;
   final Future<bool> Function() notificationPermissionGranted;
   final Future<void> Function() openSystemSettings;
@@ -65,12 +61,10 @@ class NotificationSettingsView extends StatefulWidget {
 }
 
 class _NotificationSettingsViewState extends State<NotificationSettingsView> {
-  /// The day the weekly summary goes out (the day before the first day of
-  /// week), in the app language.
   static String _summaryDayName(UserSettings settings) {
     final locale = LocaleSettings.currentLocale;
     final firstDay = settings.effectiveFirstDayOfWeek(locale.languageCode);
-    // Jan 1, 2024 is a Monday, so day n of that month has weekday n.
+
     final sample = DateTime(
       2024,
       1,
@@ -82,10 +76,8 @@ class _NotificationSettingsViewState extends State<NotificationSettingsView> {
 
   AppLifecycleListener? _lifecycle;
 
-  /// Null until the first check, so the blocked row doesn't flash.
   bool? _permissionGranted;
 
-  /// A permission prompt is open; ignore further taps on the master.
   bool _requesting = false;
 
   @override
@@ -114,7 +106,7 @@ class _NotificationSettingsViewState extends State<NotificationSettingsView> {
       _requesting = false;
       if (!mounted) return;
       setState(() => _permissionGranted = granted);
-      // Turning notifications on is pointless if Android won't show them.
+
       if (!granted) {
         ScaffoldMessenger.of(context)
           ..clearSnackBars()
@@ -136,7 +128,6 @@ class _NotificationSettingsViewState extends State<NotificationSettingsView> {
     widget.openSystemSettings();
   }
 
-  /// Null while the master switch is off, which disables the row.
   ValueChanged<bool>? _toggleHandler(
     UserSettings settings,
     NotificationToggle toggle,
@@ -252,7 +243,6 @@ class _NotificationSettingsViewState extends State<NotificationSettingsView> {
   }
 }
 
-/// Shown while the master switch is on but Android blocks notifications.
 class _BlockedRow extends StatelessWidget {
   final VoidCallback onOpenSettings;
 

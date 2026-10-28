@@ -8,24 +8,4 @@ part 'pending_recurring_dao.g.dart';
 class PendingRecurringDao extends DatabaseAccessor<AppDatabase>
     with _$PendingRecurringDaoMixin {
   PendingRecurringDao(super.db);
-
-  Stream<List<PendingRecurringData>> watchPending() {
-    return (select(
-      pendingRecurring,
-    )..orderBy([(t) => OrderingTerm.asc(t.dueDate)])).watch();
-  }
-
-  Future<List<PendingRecurringData>> getAllPending() {
-    return (select(
-      pendingRecurring,
-    )..orderBy([(t) => OrderingTerm.asc(t.dueDate)])).get();
-  }
-
-  Future<int> addPending(PendingRecurringCompanion pending) {
-    return into(pendingRecurring).insert(pending);
-  }
-
-  Future<int> removePending(String id) {
-    return (delete(pendingRecurring)..where((t) => t.id.equals(id))).go();
-  }
 }

@@ -4,7 +4,6 @@ import 'package:expense_tracker/features/family/domain/entities/group_summary.da
 import 'package:expense_tracker/features/family/domain/entities/invite_code.dart';
 import 'package:expense_tracker/features/family/domain/entities/my_group.dart';
 
-/// `GET /groups/me` body for a group with an Admin (me) and one Member.
 Map<String, Object?> myGroupJson({
   String role = 'admin',
   String myUserId = 'user-1',
@@ -43,7 +42,6 @@ Map<String, Object?> myGroupJson({
   'invite': invite,
 };
 
-/// `GET /groups/:id/summary` body matching [myGroupJson].
 Map<String, Object?> groupSummaryJson() => {
   'groupId': 'group-1',
   'currencyCode': 'BDT',

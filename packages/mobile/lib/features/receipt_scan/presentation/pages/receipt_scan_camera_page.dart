@@ -7,7 +7,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
+import 'package:expense_tracker/core/error/failure_message.dart';
+import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/logger/app_logger.dart';
+import 'package:expense_tracker/core/sync/connectivity_service.dart';
 import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/features/receipt_scan/domain/entities/receipt_extraction.dart';
@@ -30,15 +33,28 @@ class ReceiptScanCameraPage extends StatefulWidget {
   State<ReceiptScanCameraPage> createState() => _ReceiptScanCameraPageState();
 }
 
+const double _maxReceiptSide = 2000;
+const int _receiptJpegQuality = 85;
+
 class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   CameraController? _controller;
   var _initializing = true;
   var _flashOn = false;
   var _processing = false;
   String? _error;
+
+  var _permissionBlocked = false;
+
+  Future<void>? _cameraSetup;
+
+  var _inForeground = true;
+
+  var _cameraRefused = false;
   File? _previewImage;
   AnimationController? _sparkleController;
+
+  CurvedAnimation? _sparkleCurve;
 
   ExtractReceipt get _extractReceipt =>
       widget.extractReceipt ?? di.getIt<ExtractReceipt>();
@@ -46,24 +62,69 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
   @override
   void initState() {
     super.initState();
-    _sparkleController = AnimationController(
+    final sparkle = _sparkleController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 900),
     )..repeat(reverse: true);
-    _initCamera();
+    _sparkleCurve = CurvedAnimation(parent: sparkle, curve: Curves.easeInOut);
+    WidgetsBinding.instance.addObserver(this);
+    _startCamera();
+    unawaited(_recoverLostPick());
+  }
+
+  Future<void> _recoverLostPick() async {
+    try {
+      final lost = await ImagePicker().retrieveLostData();
+      final file = lost.file;
+      if (lost.isEmpty || file == null || !mounted) return;
+      await _beginAnalysis(
+        File(file.path),
+        mimeType: file.mimeType ?? _mimeFromPath(file.path),
+      );
+    } catch (e, s) {
+      appLogger.error('Recovering the picked receipt failed', e, s);
+    }
+  }
+
+  void _startCamera() {
+    _cameraSetup ??= _initCamera().whenComplete(() => _cameraSetup = null);
+  }
+
+  Future<void> _startCameraIfAllowed() async {
+    if (!(await Permission.camera.status).isGranted || !mounted) return;
+    _startCamera();
+  }
+
+  void _resumeCamera() {
+    if (_cameraRefused) {
+      unawaited(_startCameraIfAllowed());
+    } else {
+      _startCamera();
+    }
   }
 
   Future<void> _initCamera() async {
+    if (mounted) {
+      setState(() {
+        _initializing = true;
+        _error = null;
+      });
+    }
     final status = await Permission.camera.request();
+    _cameraRefused = !status.isGranted;
     if (!status.isGranted) {
       if (!mounted) return;
       setState(() {
         _initializing = false;
-        _error = t.receiptScan.permissionRequired;
+        _permissionBlocked = status.isPermanentlyDenied;
+        _error = _permissionBlocked
+            ? t.receiptScan.permissionBlocked
+            : t.receiptScan.permissionRequired;
       });
 
       return;
     }
+    _permissionBlocked = false;
 
     try {
       final cameras = await availableCameras();
@@ -83,7 +144,8 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
       );
       final controller = CameraController(
         back,
-        ResolutionPreset.high,
+
+        ResolutionPreset.medium,
         enableAudio: false,
         fps: 30,
         imageFormatGroup: ImageFormatGroup.jpeg,
@@ -91,8 +153,9 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
       await controller.initialize();
       await controller.setFlashMode(FlashMode.off);
 
-      if (!mounted) {
+      if (!mounted || !_inForeground) {
         await controller.dispose();
+        if (mounted) setState(() => _initializing = false);
 
         return;
       }
@@ -137,7 +200,8 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
     try {
       final file = await controller.takePicture();
       await _beginAnalysis(File(file.path), mimeType: 'image/jpeg');
-    } catch (_) {
+    } catch (e, s) {
+      appLogger.error('Receipt photo capture failed', e, s);
       if (!mounted) return;
       ScaffoldMessenger.of(context)
         ..clearSnackBars()
@@ -150,7 +214,9 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
 
     final picked = await ImagePicker().pickImage(
       source: ImageSource.gallery,
-      imageQuality: 90,
+      maxWidth: _maxReceiptSide,
+      maxHeight: _maxReceiptSide,
+      imageQuality: _receiptJpegQuality,
     );
     if (picked == null) return;
 
@@ -162,6 +228,10 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
     unawaited(_pickGallery());
   }
 
+  void _onOpenSettings() {
+    unawaited(openAppSettings());
+  }
+
   String _mimeFromPath(String path) {
     final lower = path.toLowerCase();
     if (lower.endsWith('.png')) return 'image/png';
@@ -170,19 +240,34 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
     return 'image/jpeg';
   }
 
-  void _showExtractFailure() {
+  void _showExtractFailure([Failure? failure]) {
     if (!mounted) return;
+    final strings = t.receiptScan;
+    final message = switch (failure) {
+      NetworkFailure() => failureText(failure),
+      ReceiptTotalUnreadableFailure() => strings.totalUnreadable,
+      ReceiptServiceUnavailableFailure() => strings.serviceUnavailable,
+      _ => strings.readFailed,
+    };
     ScaffoldMessenger.of(context)
       ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(t.receiptScan.readFailed)));
+      ..showSnackBar(SnackBar(content: Text(message)));
     setState(() {
       _processing = false;
       _previewImage = null;
     });
+
+    if (_inForeground && _controller == null) _resumeCamera();
   }
 
   Future<void> _processFile(File file, {required String mimeType}) async {
     try {
+      if (!await di.getIt<ConnectivityService>().hasNetworkLink()) {
+        _showExtractFailure(const NetworkFailure(message: 'offline'));
+
+        return;
+      }
+
       final bytes = await file.readAsBytes();
       final result = await _extractReceipt(
         ExtractReceiptParams(
@@ -199,7 +284,7 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
           appLogger.error(
             'ReceiptScanCamera extract failure: ${failure.message}',
           );
-          _showExtractFailure();
+          _showExtractFailure(failure);
         },
         (extraction) =>
             Navigator.of(context).pop<ReceiptExtraction>(extraction),
@@ -230,6 +315,11 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
                 style: AppTypography.bodyLarge.copyWith(color: Colors.white),
               ),
               const SizedBox(height: AppSpacing.md),
+              if (_permissionBlocked)
+                TextButton(
+                  onPressed: _onOpenSettings,
+                  child: Text(t.common.openSettings),
+                ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
                 child: Text(t.common.close),
@@ -246,7 +336,16 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
 
     final preview = _previewImage;
     if (preview != null) {
-      return SizedBox.expand(child: Image.file(preview, fit: BoxFit.cover));
+      final media = MediaQuery.of(context);
+
+      return SizedBox.expand(
+        child: Image.file(
+          preview,
+          fit: BoxFit.cover,
+
+          cacheWidth: (media.size.width * media.devicePixelRatio).round(),
+        ),
+      );
     }
 
     final controller = _controller;
@@ -367,7 +466,7 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
           24,
           16 + MediaQuery.paddingOf(context).bottom,
         ),
-        // The viewfinder stays dark; the toolbar follows the app theme.
+
         color: context.palette.surface,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -400,7 +499,7 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
   }
 
   Widget _buildProcessingOverlay() {
-    final sparkle = _sparkleController;
+    final sparkle = _sparkleCurve;
 
     return ColoredBox(
       color: Colors.black54,
@@ -410,9 +509,7 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
           children: [
             if (sparkle != null)
               FadeTransition(
-                opacity: Tween<double>(begin: 0.45, end: 1).animate(
-                  CurvedAnimation(parent: sparkle, curve: Curves.easeInOut),
-                ),
+                opacity: Tween<double>(begin: 0.45, end: 1).animate(sparkle),
                 child: const Icon(
                   PiconsRegular.sparkle,
                   size: 28,
@@ -439,7 +536,27 @@ class _ReceiptScanCameraPageState extends State<ReceiptScanCameraPage>
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.paused || AppLifecycleState.hidden:
+        _inForeground = false;
+        final controller = _controller;
+        if (controller == null) return;
+        setState(() => _controller = null);
+        unawaited(controller.dispose());
+      case AppLifecycleState.resumed:
+        _inForeground = true;
+        if (_controller != null || _processing) return;
+        _resumeCamera();
+      default:
+        break;
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _sparkleCurve?.dispose();
     _sparkleController?.dispose();
     _controller?.dispose();
     super.dispose();
@@ -475,7 +592,6 @@ class _RoundIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The tooltip also serves as the screen-reader label.
     return Tooltip(
       message: label,
       child: Material(

@@ -28,6 +28,7 @@ import '../widgets/record_card.dart';
 import '../widgets/record_filter_modal.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 import 'package:expense_tracker/features/categories/presentation/helpers/category_display_name.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_error_state.dart';
 
 class RecordListPage extends StatelessWidget {
   const RecordListPage({super.key});
@@ -95,6 +96,11 @@ class _RecordListViewState extends State<RecordListView> {
     );
   }
 
+  Widget _buildError(RecordError state) => AppErrorState(
+    message: state.message,
+    onRetry: () => context.read<RecordBloc>().add(const LoadRecords()),
+  );
+
   Widget _buildRecordsList() {
     return BlocBuilder<RecordBloc, RecordState>(
       buildWhen: (previous, current) =>
@@ -104,7 +110,7 @@ class _RecordListViewState extends State<RecordListView> {
           current is RecordLoadingMore,
       builder: (context, state) {
         if (state is RecordLoading) return _buildShimmerList();
-        if (state is RecordError) return Center(child: Text(state.message));
+        if (state is RecordError) return _buildError(state);
 
         final listState = _extractListState(state);
         final records = listState.$1;
@@ -170,7 +176,7 @@ class _RecordListViewState extends State<RecordListView> {
                 ),
               if (hasMore)
                 SliverToBoxAdapter(child: _buildLoadMore(isLoadingMore)),
-              // Room for the last record above the floating nav bar.
+
               SliverToBoxAdapter(
                 child: SizedBox(height: NavBarMetrics.clearance(context)),
               ),
@@ -233,7 +239,7 @@ class _RecordListViewState extends State<RecordListView> {
           : Text(
               t.records.list.scrollForMore,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface.withAlpha(100),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
     );
@@ -253,10 +259,7 @@ class _RecordListViewState extends State<RecordListView> {
     final recordId = record.id;
     if (recordId == null) return;
     bloc.add(DeleteRecordEvent(recordId));
-    // Evict any visible/queued SnackBar so a burst of deletes surfaces one
-    // toast (the newest) rather than a pile the user has to dismiss one by
-    // one. This matters most here: a SnackBar carrying an action defaults to
-    // `persist: true`, so without eviction each queued toast waits forever.
+
     ScaffoldMessenger.of(context)
       ..clearSnackBars()
       ..showSnackBar(
@@ -372,7 +375,7 @@ class _RecordListViewState extends State<RecordListView> {
             child: GestureDetector(
               onTap: () => FocusScope.of(context).unfocus(),
               behavior: HitTestBehavior.translucent,
-              // Dismissing the keyboard isn't an action a screen reader needs.
+
               excludeFromSemantics: true,
               child: Scrollbar(
                 controller: _scrollController,
@@ -386,11 +389,9 @@ class _RecordListViewState extends State<RecordListView> {
   }
 }
 
-/// A pinned date heading ("Today", "Mon, 6 Oct") above each day's records.
 class _DayHeaderDelegate extends SliverPersistentHeaderDelegate {
   final String label;
 
-  /// Grows with the text size: a pinned header can't size itself.
   final double extent;
 
   static const _minExtent = 40.0;
@@ -403,7 +404,6 @@ class _DayHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   const _DayHeaderDelegate(this.label, this.extent);
 
-  /// Sized to fit [label] on one line at [textScaler].
   static _DayHeaderDelegate measured(String label, TextScaler textScaler) {
     final painter = TextPainter(
       text: TextSpan(text: label, style: AppTypography.labelLarge),

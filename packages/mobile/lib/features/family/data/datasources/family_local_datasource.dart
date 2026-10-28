@@ -8,13 +8,9 @@ import '../../domain/entities/group_summary.dart';
 import '../../domain/entities/my_group.dart';
 import '../models/family_json.dart';
 
-/// The last `/groups/me` and summary responses, stored per signed-in
-/// account so a second account on the phone never sees the first one's
-/// group and sign-out needs no cleanup.
 class FamilyLocalDatasource {
   final SharedPreferences prefs;
 
-  /// The signed-in Firebase uid, or null when signed out.
   final String? Function() currentUserId;
 
   static const groupKeyPrefix = 'family_group_';
@@ -25,8 +21,6 @@ class FamilyLocalDatasource {
     required this.currentUserId,
   });
 
-  /// Null when nothing is cached. A cached "not in a group" is a
-  /// `Cached(null)`.
   Cached<MyGroup?>? readGroup() => _read(
     groupKeyPrefix,
     (data) => data == null ? null : myGroupFromJson(data),
@@ -76,7 +70,6 @@ class FamilyLocalDatasource {
         fetchedAt: DateTime.parse(stored['fetchedAt'] as String),
       );
     } on Object catch (e, s) {
-      // A corrupt entry is dropped; the next fetch writes a fresh one.
       appLogger.error('Dropping unreadable family cache $prefix', e, s);
       prefs.remove(key);
 

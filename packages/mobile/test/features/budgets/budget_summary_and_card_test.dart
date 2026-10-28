@@ -20,7 +20,7 @@ BudgetProgress _progress({required double spent, double limit = 500}) {
     percentage: spent / limit * 100,
     isOverBudget: spent > limit,
     name: 'Food',
-    // Half-open: October 1st up to (not including) November 1st.
+
     periodRange: DateTimeRange(
       start: DateTime(2026, 10),
       end: DateTime(2026, 11),

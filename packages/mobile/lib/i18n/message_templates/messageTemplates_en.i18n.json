@@ -46,5 +46,18 @@
     "empty": "No text messages on this phone yet. Senders show up here once you receive SMS.",
     "noMatch": "No senders match \"{query}\"."
   },
-  "create": "New SMS format"
+  "create": "New SMS format",
+  "watchlist": {
+    "title": "SMS Watchlist",
+    "subtitle": "Messages from these senders become transactions. Pause a sender to ignore it.",
+    "formats": {
+      "one": "{n} SMS format",
+      "other": "{n} SMS formats"
+    },
+    "paused": "Paused",
+    "toggle": "Read messages from {name}",
+    "empty": "No senders yet. Add one from Auto-import by teaching Expenzo a sample message.",
+    "addSender": "Choose senders",
+    "loadFailed": "Couldn't load the watchlist. Try again."
+  }
 }

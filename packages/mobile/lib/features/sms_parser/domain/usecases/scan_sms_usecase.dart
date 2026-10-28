@@ -15,6 +15,7 @@ import '../entities/sms_scan_page.dart';
 import '../entities/sms_scan_result_item.dart';
 import '../entities/sms_message.dart';
 import 'package:expense_tracker/core/error/failure_message.dart';
+import '../services/sms_source_id.dart';
 
 const _minimumRawBatchSize = 50;
 
@@ -62,7 +63,7 @@ class ScanSmsUseCase implements UseCase<SmsScanPage, ScanSmsParams> {
     required List<MessageSource> monitoredSources,
     required ParsingContext context,
   }) async {
-    final limit = params.limit ?? 10;
+    final limit = params.limit;
     final rawBatchSize = math.max(limit, _minimumRawBatchSize);
     final monitoredSourceByAddress = {
       for (final source in monitoredSources) source.contactId: source,
@@ -70,7 +71,7 @@ class ScanSmsUseCase implements UseCase<SmsScanPage, ScanSmsParams> {
     final startDate = _startOfDay(params.startDate);
     final endDate = _endOfDay(params.endDate);
 
-    var nextOffset = params.offset ?? 0;
+    var nextOffset = params.offset;
     var hasReachedMax = false;
     final collected = <SmsScanResultItem>[];
 
@@ -188,6 +189,10 @@ class ScanSmsUseCase implements UseCase<SmsScanPage, ScanSmsParams> {
           parsedTransaction: parsed,
           senderKey: message.address,
           senderLabel: source?.contactName ?? message.address,
+          legacySourceId: legacyScanSourceId(
+            address: message.address,
+            at: message.date,
+          ),
         ),
       );
 
@@ -246,20 +251,27 @@ class ScanSmsUseCase implements UseCase<SmsScanPage, ScanSmsParams> {
     return DateTime(date.year, date.month, date.day, 23, 59, 59, 999, 999);
   }
 
-  String _generateSourceId(SmsMessage message) {
-    final combined = '${message.address}_${message.date.toIso8601String()}';
-
-    return combined.hashCode.abs().toString();
-  }
+  String _generateSourceId(SmsMessage message) => smsSourceId(
+    address: message.address,
+    at: message.sentAt ?? message.date,
+    body: message.body,
+  );
 }
+
+const _defaultScanLimit = 10;
 
 class ScanSmsParams {
   final DateTime? startDate;
   final DateTime? endDate;
-  final int? offset;
-  final int? limit;
+  final int offset;
+  final int limit;
 
-  ScanSmsParams({this.startDate, this.endDate, this.offset, this.limit});
+  ScanSmsParams({
+    this.startDate,
+    this.endDate,
+    this.offset = 0,
+    this.limit = _defaultScanLimit,
+  });
 }
 
 class SmsScanFailure extends Failure {

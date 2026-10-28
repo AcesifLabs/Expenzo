@@ -19,13 +19,15 @@ import '../../domain/repositories/recurring_repository.dart';
 import '../bloc/recurring_bloc.dart';
 import '../bloc/recurring_event.dart';
 import '../bloc/recurring_state.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
+import 'package:expense_tracker/core/error/failure_message.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_error_state.dart';
 
 class RecurringFormPage extends StatefulWidget {
   final RecurringTransaction? recurring;
   final String? recurringId;
 
-  /// Preselected for a new item; an edited item keeps its own frequency.
   final RecurringFrequency defaultFrequency;
 
   const RecurringFormPage({
@@ -50,11 +52,10 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
   int? _dayOfMonth;
   var _isActive = true;
   var _isLoading = false;
+
+  String? _loadError;
   String? _categoryId;
 
-  /// The recurring transaction being edited, once loaded. Its schedule
-  /// (nextOccurrence) must survive the edit, or processing backfills
-  /// occurrences that were already created.
   RecurringTransaction? _original;
 
   bool get _isEditing => widget.recurring != null || widget.recurringId != null;
@@ -72,6 +73,14 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
     context.read<CategoryBloc>().add(const LoadCategories());
   }
 
+  void _retryLoad(String id) {
+    setState(() {
+      _loadError = null;
+      _isLoading = true;
+    });
+    unawaited(_loadRecurring(id));
+  }
+
   Future<void> _loadRecurring(String id) async {
     try {
       await di.featureDependenciesReady;
@@ -81,10 +90,13 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
       if (!mounted) return;
       result.fold(
         (failure) {
-          debugPrint(
+          appLogger.warning(
             'RecurringFormPage: Failed to load recurring: ${failure.message}',
           );
-          setState(() => _isLoading = false);
+          setState(() {
+            _isLoading = false;
+            _loadError = failureText(failure);
+          });
         },
         (recurring) {
           setState(() {
@@ -94,9 +106,13 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
         },
       );
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
-      debugPrint('RecurringFormPage: Failed to load recurring: $e');
-      if (mounted) setState(() => _isLoading = false);
+      appLogger.error('RecurringFormPage: Failed to load recurring', e, s);
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _loadError = t.common.errors.generic;
+        });
+      }
     }
   }
 
@@ -154,6 +170,11 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
     setState(() => _isActive = value);
   }
 
+  int? _dayOfMonthFor(RecurringFrequency frequency) => switch (frequency) {
+    RecurringFrequency.monthly || RecurringFrequency.yearly => _startDate.day,
+    RecurringFrequency.daily || RecurringFrequency.weekly => _dayOfMonth,
+  };
+
   void _submit() {
     final formState = _formKey.currentState;
     if (formState == null || !formState.validate()) return;
@@ -169,7 +190,7 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
       nextOccurrence: _original?.nextOccurrence ?? _startDate,
       isActive: _isActive,
       autoCreateExpense: _autoCreateExpense,
-      dayOfMonth: _dayOfMonth,
+      dayOfMonth: _dayOfMonthFor(_frequency),
     );
 
     if (_isEditing) {
@@ -253,6 +274,7 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
   Widget _buildFrequencyDropdown() {
     return DropdownButtonFormField<RecurringFrequency>(
       initialValue: _frequency,
+      isExpanded: true,
       decoration: InputDecoration(labelText: t.recurring.form.frequency),
       items: [
         for (final frequency in RecurringFrequency.values)
@@ -349,6 +371,17 @@ class _RecurringFormPageState extends State<RecurringFormPage> {
           title: _isEditing ? form.edit : form.create,
         ),
         body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+    final loadError = _loadError;
+    final recurringId = widget.recurringId;
+    if (loadError != null && recurringId != null) {
+      return Scaffold(
+        appBar: AppPageHeader(leading: const AppBackButton(), title: form.edit),
+        body: AppErrorState(
+          message: loadError,
+          onRetry: () => _retryLoad(recurringId),
+        ),
       );
     }
 

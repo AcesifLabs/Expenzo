@@ -15,9 +15,6 @@ import 'package:expense_tracker/shared/services/feedback_mailer.dart';
 import '../../data/services/app_review_service.dart';
 import '../../domain/rate_action.dart';
 
-/// Rate the app (design frame `RateAppScreen`): 4–5 stars ask the store for a
-/// review, 1–3 stars open the feedback email. Opened only from Help, so
-/// nothing is stored and there is no prompt to suppress.
 class RateAppPage extends StatefulWidget {
   const RateAppPage({super.key});
 
@@ -61,9 +58,11 @@ class _RateAppPageState extends State<RateAppPage> {
         ? rateT.tellUs
         : rateT.writeReview;
 
-    return SizedBox(
-      width: double.infinity,
-      height: AppSpacing.xxl,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(
+        minWidth: double.infinity,
+        minHeight: AppSpacing.xxl,
+      ),
       child: ElevatedButton(
         onPressed: stars == null || _busy ? null : _onPrimaryPressed,
         child: _busy
@@ -82,8 +81,6 @@ class _RateAppPageState extends State<RateAppPage> {
     final palette = context.palette;
     final textTheme = Theme.of(context).textTheme;
 
-    // Pushed above the app shell, so it needs its own themed Scaffold.
-    // Leaving mid-request is blocked: the request pops this page itself.
     return PopScope(
       canPop: !_busy,
       child: Scaffold(
@@ -139,8 +136,6 @@ class _RateAppPageState extends State<RateAppPage> {
   }
 }
 
-/// Five tappable stars; the first [stars] are filled (a selected state, the
-/// one place besides the selected tab where DESIGN.md allows Fill).
 class _StarRow extends StatelessWidget {
   final int? stars;
   final ValueChanged<int> onTap;

@@ -5,11 +5,8 @@ import '../../domain/entities/group_summary.dart';
 import '../../domain/entities/invite_code.dart';
 import '../../domain/entities/my_group.dart';
 
-/// JSON for the Family entities: the `/groups` API bodies and the
-/// on-device cache use the same shape.
 typedef Json = Map<String, Object?>;
 
-/// Null when the caller is in no group (`{"group": null, ...}`).
 MyGroup? myGroupFromJson(Json json) {
   final group = json['group'];
   final me = json['me'];
@@ -39,17 +36,7 @@ MyGroup? myGroupFromJson(Json json) {
   );
 }
 
-Json myGroupToJson(MyGroup? value) {
-  if (value == null) {
-    return {
-      'group': null,
-      'me': null,
-      'members': <Json>[],
-      'sharedBudgets': <Json>[],
-      'invite': null,
-    };
-  }
-
+Json myGroupToJson(MyGroup value) {
   return {
     'group': {
       'id': value.group.id,
@@ -162,7 +149,6 @@ SharedBudgetProgress _budgetFromJson(Json json) => SharedBudgetProgress(
   periodEnd: DateTime.parse(json['periodEnd'] as String),
 );
 
-/// Like `BudgetLocalDatasourceImpl._parsePeriod`: unknown reads as monthly.
 BudgetPeriod _period(String? value) {
   for (final period in BudgetPeriod.values) {
     if (period.name == value) return period;

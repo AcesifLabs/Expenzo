@@ -10,13 +10,7 @@ import '../bloc/settings_bloc.dart';
 import '../bloc/settings_event.dart';
 import '../bloc/settings_state.dart';
 
-/// Body for every settings page that reads SettingsBloc (SAAP-60 README, C5).
-///
-/// Handles the first build, keeps the last loaded values during a save, and
-/// shows a snackbar when a save fails. An async button on a settings page is
-/// disabled while its work runs (no double taps).
 class SettingsStateView extends StatefulWidget {
-  /// Shows a failed save's message. Also used by the main Settings list.
   static void showSaveFailed(BuildContext context, SettingsState state) {
     if (state is! SettingsError) return;
     ScaffoldMessenger.of(context)
@@ -43,7 +37,6 @@ class _SettingsStateViewState extends State<SettingsStateView> {
   }
 
   void _onStateChanged(BuildContext context, SettingsState state) {
-    // The builder reads state.settings itself, so no setState here.
     if (state is SettingsLoaded) {
       _lastLoaded = state.settings;
     } else if (_lastLoaded != null) {
@@ -58,12 +51,12 @@ class _SettingsStateViewState extends State<SettingsStateView> {
     return BlocConsumer<SettingsBloc, SettingsState>(
       listenWhen: (_, s) => s is SettingsLoaded || s is SettingsError,
       listener: _onStateChanged,
-      // A save's SettingsLoading would only rebuild the same content.
+
       buildWhen: (_, s) => s is! SettingsLoading || _lastLoaded == null,
       builder: (context, state) {
         final settings = state is SettingsLoaded ? state.settings : _lastLoaded;
         if (settings != null) return widget.builder(context, settings);
-        // Error with nothing loaded: offer a reload.
+
         if (state is! SettingsInitial && state is! SettingsLoading) {
           return AppEmptyState(
             icon: PiconsRegular.warningCircle,

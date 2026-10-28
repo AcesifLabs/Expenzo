@@ -15,7 +15,6 @@
       "thisYear": "গত বছর"
     }
   },
-  "greeting": "হ্যালো, {name}",
   "userFallback": "ব্যবহারকারী",
   "income": "আয়",
   "expense": "খরচ",
@@ -27,12 +26,7 @@
   },
   "noBudgets": "এখনো কোনো বাজেট নেই",
   "noTransactions": "এখনো কোনো লেনদেন নেই",
-  "menu": {
-    "profile": "প্রোফাইল",
-    "signIn": "সাইন ইন",
-    "settings": "সেটিংস",
-    "signOut": "সাইন আউট"
-  },
+  "settings": "সেটিংস",
   "budgetSpentOf": "{total}-এর মধ্যে {spent}",
   "trend": {
     "noPrevious": "{period}-এর সাথে তুলনা করার মতো খরচ নেই",

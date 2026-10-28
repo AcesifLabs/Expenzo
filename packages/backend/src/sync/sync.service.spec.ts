@@ -6,7 +6,6 @@ import { Category } from '../categories/entities/category.entity';
 import { Budget } from '../budgets/entities/budget.entity';
 import { MessageSource } from '../message-sources/entities/message-source.entity';
 import { ExpenseTemplate } from '../expense-templates/entities/expense-template.entity';
-import { ParsingRule } from '../parsing-rules/entities/parsing-rule.entity';
 import { RecurringTransaction } from '../recurring-transactions/entities/recurring-transaction.entity';
 import { PendingRecurring } from '../recurring-transactions/entities/pending-recurring.entity';
 import { Goal } from '../goals/entities/goal.entity';
@@ -17,7 +16,7 @@ import { SyncStatus } from './sync.types';
 import { BudgetPeriod } from '../common/enums/budget-period.enum';
 import { DEFAULT_BUDGET_NAME } from '../budgets/budgets.constants';
 
-// TypeORM entities are strict — mock data bypasses field requirements
+
 type AnyRepo = jest.Mocked<any>;
 
 describe('SyncService', () => {
@@ -46,7 +45,6 @@ describe('SyncService', () => {
         { provide: getRepositoryToken(Budget), useFactory: mockRepo },
         { provide: getRepositoryToken(MessageSource), useFactory: mockRepo },
         { provide: getRepositoryToken(ExpenseTemplate), useFactory: mockRepo },
-        { provide: getRepositoryToken(ParsingRule), useFactory: mockRepo },
         { provide: getRepositoryToken(RecurringTransaction), useFactory: mockRepo },
         { provide: getRepositoryToken(PendingRecurring), useFactory: mockRepo },
         { provide: getRepositoryToken(Goal), useFactory: mockRepo },
@@ -484,7 +482,6 @@ describe('SyncService', () => {
       [SyncTable.BUDGETS]: Budget,
       [SyncTable.MESSAGE_SOURCES]: MessageSource,
       [SyncTable.EXPENSE_TEMPLATES]: ExpenseTemplate,
-      [SyncTable.PARSING_RULES]: ParsingRule,
       [SyncTable.RECURRING_TRANSACTIONS]: RecurringTransaction,
       [SyncTable.PENDING_RECURRING]: PendingRecurring,
       [SyncTable.GOALS]: Goal,

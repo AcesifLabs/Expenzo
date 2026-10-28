@@ -1,9 +1,11 @@
 import 'package:expense_tracker/core/router/family_route.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
+import 'package:expense_tracker/core/error/failure_message.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_back_button.dart';
-import 'package:expense_tracker/shared/presentation/widgets/app_empty_state.dart';
+import 'package:expense_tracker/shared/presentation/widgets/app_error_state.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
+import 'package:expense_tracker/shared/presentation/widgets/offline_gate.dart';
 import 'package:expense_tracker/shared/presentation/widgets/shimmer_box.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,8 +19,6 @@ import '../helpers/family_failure_listener.dart';
 import '../widgets/family_create_group_view.dart';
 import '../widgets/family_dashboard_view.dart';
 
-/// Settings → Family group: the create view when not in a group, else the
-/// family dashboard.
 class FamilyHomePage extends StatelessWidget {
   const FamilyHomePage({super.key});
 
@@ -69,16 +69,18 @@ Widget _buildBody(
   if (loading) return const _FamilyLoading();
   if (group != null) return FamilyDashboardView(state: state, group: group);
   if (state.status == FamilyStatus.failure) {
-    return AppEmptyState(
-      icon: PiconsRegular.warning,
-      message: t.family.dashboard.loadFailed,
-      actionLabel: t.common.tryAgain,
-      onAction: () =>
+    final failure = state.failure;
+
+    return AppErrorState(
+      message: failure != null
+          ? failureText(failure)
+          : t.family.dashboard.loadFailed,
+      onRetry: () =>
           context.read<FamilyBloc>().add(const FamilyRefreshRequested()),
     );
   }
 
-  return const FamilyCreateGroupView();
+  return const OfflineGate(child: FamilyCreateGroupView());
 }
 
 class _FamilyLoading extends StatelessWidget {
@@ -92,10 +94,12 @@ class _FamilyLoading extends StatelessWidget {
         for (final height in const [140.0, 72.0, 72.0])
           Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.md),
-            child: ShimmerBox.rectangle(
-              width: double.infinity,
-              height: height,
-              borderRadius: AppSpacing.radiusCard,
+            child: ShimmerBox(
+              child: ShimmerBox.rectangle(
+                width: double.infinity,
+                height: height,
+                borderRadius: AppSpacing.radiusCard,
+              ),
             ),
           ),
       ],

@@ -6,11 +6,7 @@ import 'package:expense_tracker/core/theme/app_palette.dart';
 import '../../domain/entities/user.dart';
 import '../helpers/user_display.dart';
 
-/// The account's Google photo on brand mint (ADR 0003). The initial (or a
-/// person icon when signed out) sits underneath the photo, so it still shows
-/// when the photo can't load, e.g. offline.
 class UserAvatar extends StatelessWidget {
-  /// From this radius up the initial uses the large headline style.
   static const _largeRadius = 32.0;
 
   final User? user;

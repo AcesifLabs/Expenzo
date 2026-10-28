@@ -22,14 +22,8 @@ abstract class CategoryRepository {
     bool sortByUsage = false,
   });
 
-  /// Increments the usage count for a category by [id].
-  ///
-  /// Returns [Right(unit)] on success, [Left(CacheFailure)] on failure.
   Future<Either<CacheFailure, Unit>> incrementUsageCount(String id);
 
-  /// Searches categories by name.
-  ///
-  /// Returns [Right(List<Category>)] on success, [Left(CacheFailure)] on failure.
   Future<Either<CacheFailure, List<Category>>> searchCategories({
     required String query,
     RecordType? type,

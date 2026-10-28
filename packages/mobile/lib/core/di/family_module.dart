@@ -24,8 +24,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Family Group (SAAP-75). Everything is lazy, so nothing touches the
-/// network or SharedPreferences at startup.
 void initFamilyModule(GetIt getIt) {
   getIt.registerLazySingleton<FamilyRemoteDatasource>(
     () => FamilyRemoteDatasourceImpl(apiClient: getIt<ApiClient>()),
@@ -64,7 +62,7 @@ void initFamilyModule(GetIt getIt) {
   getIt.registerLazySingleton(() => RemoveMember(getIt<FamilyRepository>()));
   getIt.registerLazySingleton(() => LeaveGroup(getIt<FamilyRepository>()));
   getIt.registerLazySingleton(() => DeleteGroup(getIt<FamilyRepository>()));
-  // A factory: each Family route creates its own bloc.
+
   getIt.registerFactory(
     () => FamilyBloc(
       getMyGroup: getIt<GetMyGroup>(),
@@ -80,7 +78,7 @@ void initFamilyModule(GetIt getIt) {
       syncNow: getIt<SyncNow>(),
     ),
   );
-  // Run by SyncEngine after each sync cycle (see injection_container).
+
   getIt.registerLazySingleton(
     () => GroupRefreshPolicy(
       cachedGroup: () => getIt<FamilyRepository>().cachedGroup,

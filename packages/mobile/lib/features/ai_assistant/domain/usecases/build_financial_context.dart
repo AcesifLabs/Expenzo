@@ -10,8 +10,6 @@ import 'package:expense_tracker/features/reports/domain/usecases/get_category_br
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
-// Amounts are raw numbers for the model, not user-facing, so they skip
-// CurrencyFormatter and the Number format setting (SAAP-65).
 class BuildFinancialContext {
   final GetDashboardSummary getDashboardSummary;
   final GetSpendingInsights getSpendingInsights;
@@ -136,14 +134,12 @@ class BuildFinancialContext {
     });
   }
 
-  // percentChange is already a percentage; null means no earlier spending.
   String _describeChange(double? percentChange) {
     if (percentChange == null) return 'no spending in the previous period';
 
     return '${percentChange.toStringAsFixed(1)}%';
   }
 
-  /// The app language, named for the model.
   String _replyLanguage() => switch (LocaleSettings.currentLocale) {
     AppLocale.bn => 'Bangla (Bengali script)',
     AppLocale.en => 'English',

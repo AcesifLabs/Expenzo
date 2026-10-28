@@ -1,7 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:expense_tracker/core/api/token_storage.dart';
 import 'package:expense_tracker/core/database/app_database.dart';
-import 'package:expense_tracker/core/database/daos/pending_recurring_dao.dart';
 import 'package:expense_tracker/core/database/daos/sync_queue_dao.dart';
 import 'package:expense_tracker/features/recurring/data/datasources/recurring_local_datasource.dart';
 import 'package:expense_tracker/features/recurring/data/repositories/recurring_repository_impl.dart';
@@ -38,7 +37,6 @@ void initRecurringModule(GetIt getIt) {
   getIt.registerLazySingleton<RecurringRepository>(
     () => RecurringRepositoryImpl(
       localDatasource: getIt<RecurringLocalDatasource>(),
-      pendingRecurringDao: getIt<PendingRecurringDao>(),
       syncQueueDao: getIt<SyncQueueDao>(),
     ),
   );
@@ -71,7 +69,7 @@ void initRecurringModule(GetIt getIt) {
       getSettings: getIt<GetSettings>(),
       postDueRecurring: getIt<PostDueRecurring>(),
       isSignedIn: TokenStorage.hasToken,
-      // Auto-posted expenses raise budget alerts like a manual save.
+
       afterPost: () async {
         if (getIt.isRegistered<CheckBudgetAlerts>()) {
           await getIt<CheckBudgetAlerts>()();
@@ -82,7 +80,7 @@ void initRecurringModule(GetIt getIt) {
   getIt.registerLazySingleton<RecurringReminderLog>(
     () => SharedPrefsRecurringReminderLog(getIt<SharedPreferences>()),
   );
-  // NotificationService is registered by initBudgetModule, which runs first.
+
   getIt.registerLazySingleton(
     () => SendRecurringReminders(
       getRecurringList: getIt<GetRecurringList>(),

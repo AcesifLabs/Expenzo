@@ -17,10 +17,11 @@ import 'package:expense_tracker/features/data_wipe/presentation/pages/delete_all
 import 'package:expense_tracker/features/export/presentation/bloc/export_bloc.dart';
 import 'package:expense_tracker/features/export/presentation/bloc/export_state.dart';
 import 'package:expense_tracker/features/export/presentation/pages/export_data_page.dart';
-import 'package:expense_tracker/features/parsing_rules/domain/entities/parsing_rule.dart';
-import 'package:expense_tracker/features/parsing_rules/presentation/bloc/parsing_rules_bloc.dart';
-import 'package:expense_tracker/features/parsing_rules/presentation/bloc/parsing_rules_state.dart';
-import 'package:expense_tracker/features/parsing_rules/presentation/pages/rules_list_page.dart';
+import 'package:expense_tracker/features/message_templates/domain/entities/message_source.dart';
+import 'package:expense_tracker/features/message_templates/domain/entities/watched_sender.dart';
+import 'package:expense_tracker/features/message_templates/presentation/bloc/sms_watchlist_bloc.dart';
+import 'package:expense_tracker/features/message_templates/presentation/bloc/sms_watchlist_state.dart';
+import 'package:expense_tracker/features/message_templates/presentation/pages/sms_watchlist_page.dart';
 import 'package:expense_tracker/features/records/domain/usecases/get_category_record_counts.dart';
 import 'package:expense_tracker/features/recurring/application/recurring_auto_poster.dart';
 import 'package:expense_tracker/features/recurring/presentation/bloc/recurring_bloc.dart';
@@ -47,10 +48,6 @@ import 'factories/category_factory.dart';
 import 'factories/recurring_factory.dart';
 import 'factories/user_settings_factory.dart';
 
-/// The Settings list and every page it opens that the large-text overflow
-/// test covers, each with mocked blocs. Same contract as `core_screens.dart`:
-/// call the builders inside the test body.
-
 class MockRecurringBloc extends Mock implements RecurringBloc {}
 
 class MockAutoPoster extends Mock implements RecurringAutoPoster {}
@@ -58,7 +55,7 @@ class MockAutoPoster extends Mock implements RecurringAutoPoster {}
 class MockGetCategoryRecordCounts extends Mock
     implements GetCategoryRecordCounts {}
 
-class MockParsingRulesBloc extends Mock implements ParsingRulesBloc {}
+class MockSmsWatchlistBloc extends Mock implements SmsWatchlistBloc {}
 
 class MockExportBloc extends Mock implements ExportBloc {}
 
@@ -73,7 +70,6 @@ SettingsBloc _loadedSettingsBloc() {
   );
 }
 
-/// A settings page that only reads the app-wide SettingsBloc.
 Widget _withSettings(Widget view) {
   return BlocProvider<SettingsBloc>.value(
     value: _loadedSettingsBloc(),
@@ -81,7 +77,6 @@ Widget _withSettings(Widget view) {
   );
 }
 
-/// The named Settings pages, in Settings row order.
 Map<String, Widget Function()> get settingsScreens => {
   'Settings list': _settingsListScreen,
   'Default currency': () => _withSettings(const CurrencyView()),
@@ -91,16 +86,36 @@ Map<String, Widget Function()> get settingsScreens => {
   'Calendar': () => _withSettings(const CalendarView()),
   'Home page': () => _withSettings(const HomePageSettingsView()),
   'Notifications': _notificationsScreen,
-  'Recurring transactions': _recurringScreen,
+  'Recurring transactions': recurringScreen,
   'Sync': _syncScreen,
   'Export data': _exportScreen,
   'Delete all data': _deleteDataScreen,
-  'Matching rules': _matchingRulesScreen,
+  'SMS Watchlist': smsWatchlistScreen,
   'Language': () => _withSettings(const LanguageView()),
   'Categories': _categoriesScreen,
 };
 
-/// The busiest state: signed in, the last sync failed, banner showing.
+const settingsPages = {
+  'Settings list': 'settings/presentation/pages/settings_page.dart',
+  'Default currency': 'settings/presentation/pages/currency_page.dart',
+  'Number format': 'settings/presentation/pages/number_format_page.dart',
+  'Font size': 'settings/presentation/pages/font_size_page.dart',
+  'Appearance': 'settings/presentation/pages/appearance_page.dart',
+  'Calendar': 'settings/presentation/pages/calendar_page.dart',
+  'Home page': 'settings/presentation/pages/home_page_settings_page.dart',
+  'Notifications':
+      'settings/presentation/pages/notification_settings_page.dart',
+  'Recurring transactions':
+      'recurring/presentation/pages/recurring_list_page.dart',
+  'Sync': 'sync/presentation/pages/sync_settings_page.dart',
+  'Export data': 'export/presentation/pages/export_data_page.dart',
+  'Delete all data': 'data_wipe/presentation/pages/delete_all_data_page.dart',
+  'SMS Watchlist':
+      'message_templates/presentation/pages/sms_watchlist_page.dart',
+  'Language': 'settings/presentation/pages/language_page.dart',
+  'Categories': 'categories/presentation/pages/category_list_page.dart',
+};
+
 Widget _syncScreen() {
   return MultiBlocProvider(
     providers: [
@@ -185,7 +200,7 @@ Widget _notificationsScreen() {
   );
 }
 
-Widget _recurringScreen() {
+Widget recurringScreen({RecurringState? state}) {
   final autoPoster = MockAutoPoster();
   when(() => autoPoster.isReadyToPost()).thenAnswer((_) async => true);
   di.getIt.registerSingleton<RecurringAutoPoster>(autoPoster);
@@ -195,7 +210,8 @@ Widget _recurringScreen() {
       BlocProvider<RecurringBloc>.value(
         value: mockBloc<MockRecurringBloc, RecurringState>(
           MockRecurringBloc(),
-          RecurringLoaded([makeRecurring(id: 'rent', description: 'Rent')]),
+          state ??
+              RecurringLoaded([makeRecurring(id: 'rent', description: 'Rent')]),
         ),
       ),
       BlocProvider<SettingsBloc>.value(value: _loadedSettingsBloc()),
@@ -222,28 +238,32 @@ Widget _categoriesScreen() {
   );
 }
 
-Widget _matchingRulesScreen() {
+Widget smsWatchlistScreen({SmsWatchlistState? state}) {
   final now = DateTime(2026);
+  MessageSource source(String id, String name, {bool monitored = true}) =>
+      MessageSource(
+        id: id,
+        contactId: id.toUpperCase(),
+        contactName: name,
+        isMonitored: monitored,
+        createdAt: now,
+        updatedAt: now,
+      );
 
-  return BlocProvider<ParsingRulesBloc>.value(
-    value: mockBloc<MockParsingRulesBloc, ParsingRulesState>(
-      MockParsingRulesBloc(),
-      ParsingRulesLoaded(
-        rules: [
-          ParsingRule(
-            id: 'rule-1',
-            name: 'Bank debit alerts',
-            triggerWords: const ['debited'],
-            amountPattern: r'Tk ([\d,.]+)',
-            sourceType: SourceType.sms,
-            isEnabled: true,
-            priority: 1,
-            createdAt: now,
-            updatedAt: now,
+  return BlocProvider<SmsWatchlistBloc>.value(
+    value: mockBloc<MockSmsWatchlistBloc, SmsWatchlistState>(
+      MockSmsWatchlistBloc(),
+      state ??
+          SmsWatchlistReady(
+            senders: [
+              WatchedSender(source: source('bkash', 'bKash'), formatCount: 2),
+              WatchedSender(
+                source: source('citybank', 'City Bank', monitored: false),
+                formatCount: 1,
+              ),
+            ],
           ),
-        ],
-      ),
     ),
-    child: const RulesListPage(),
+    child: const Scaffold(body: SmsWatchlistView()),
   );
 }

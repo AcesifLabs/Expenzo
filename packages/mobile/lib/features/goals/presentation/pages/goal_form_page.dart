@@ -21,8 +21,6 @@ import '../bloc/goal_form_bloc.dart';
 import '../bloc/goal_form_event.dart';
 import '../bloc/goal_form_state.dart';
 
-/// Edits the goal with [goalId], or creates one when it is null (Task 22b).
-/// Manual values only (ADR 0009).
 class GoalFormPage extends StatefulWidget {
   final String? goalId;
 
@@ -45,7 +43,7 @@ class _GoalFormPageState extends State<GoalFormPage> {
   @override
   void initState() {
     super.initState();
-    // The bloc may already be ready when the page mounts.
+
     final state = context.read<GoalFormBloc>().state;
     final goal = state.goal;
     if (state.status == GoalFormStatus.ready && goal != null) _fill(goal);
@@ -105,7 +103,6 @@ class _GoalFormPageState extends State<GoalFormPage> {
     return amount == null || amount <= 0 ? t.goals.errors.targetPositive : null;
   }
 
-  /// Saved so far and monthly may be empty (0 / none).
   String? _validateOptional(String? value) {
     final text = (value ?? '').trim();
     if (text.isEmpty) return null;
@@ -125,8 +122,8 @@ class _GoalFormPageState extends State<GoalFormPage> {
       firstDate: AppConstants.pickerFirstDate,
       lastDate: DateTime(now.year + 10, now.month, now.day),
     );
-    // Cancel keeps the previous date.
-    if (picked != null) setState(() => _date = picked);
+
+    if (picked != null && mounted) setState(() => _date = picked);
   }
 
   void _clearDate() => setState(() => _date = null);
@@ -210,7 +207,7 @@ class _GoalFormPageState extends State<GoalFormPage> {
 
     return Column(
       children: [
-        Expanded(child: _fields(context)),
+        Expanded(child: _fields()),
         Padding(
           padding: const EdgeInsets.fromLTRB(
             AppSpacing.pageGutter,
@@ -218,9 +215,11 @@ class _GoalFormPageState extends State<GoalFormPage> {
             AppSpacing.pageGutter,
             AppSpacing.md,
           ),
-          child: SizedBox(
-            width: double.infinity,
-            height: AppSpacing.xxl,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minWidth: double.infinity,
+              minHeight: AppSpacing.xxl,
+            ),
             child: ElevatedButton(
               onPressed: state.isBusy ? null : () => _save(state),
               child: state.status == GoalFormStatus.saving
@@ -236,9 +235,8 @@ class _GoalFormPageState extends State<GoalFormPage> {
     );
   }
 
-  Widget _fields(BuildContext context) {
+  Widget _fields() {
     final formT = t.goals.form;
-    final textTheme = Theme.of(context).textTheme;
     final amountKeyboard = const TextInputType.numberWithOptions(decimal: true);
     final date = _date;
 
@@ -272,22 +270,12 @@ class _GoalFormPageState extends State<GoalFormPage> {
             ),
           ],
           const SizedBox(height: AppSpacing.md),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(formT.targetDate, style: textTheme.bodyLarge),
-            subtitle: Text(
-              date == null ? formT.noDate : DateFormat.yMMMd().format(date),
-            ),
-            trailing: date == null
-                ? null
-                : TextButton(
-                    onPressed: _clearDate,
-                    child: Text(formT.clearDate),
-                  ),
+          _TargetDateField(
+            date: date,
             onTap: () => unawaited(_pickDate()),
+            onClear: _clearDate,
           ),
-          const SizedBox(height: AppSpacing.sm),
-          // The suggestion follows the target and saved amounts as typed.
+          const SizedBox(height: AppSpacing.md),
           ListenableBuilder(
             listenable: Listenable.merge([_target, _saved]),
             builder: (context, _) => TextFormField(
@@ -339,6 +327,50 @@ class _GoalFormPageState extends State<GoalFormPage> {
           ],
           child: _body(context, state),
         ),
+      ),
+    );
+  }
+}
+
+class _TargetDateField extends StatelessWidget {
+  final DateTime? date;
+  final VoidCallback onTap;
+  final VoidCallback onClear;
+
+  const _TargetDateField({
+    required this.date,
+    required this.onTap,
+    required this.onClear,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final formT = t.goals.form;
+    final palette = context.palette;
+    final textTheme = Theme.of(context).textTheme;
+    final date = this.date;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
+      child: InputDecorator(
+        isEmpty: date == null,
+        decoration: InputDecoration(
+          labelText: formT.targetDate,
+          hintText: formT.pickDate,
+          floatingLabelBehavior: FloatingLabelBehavior.always,
+          prefixIcon: Icon(PiconsRegular.calendar, color: palette.brand),
+          suffixIcon: date == null
+              ? Icon(PiconsRegular.caretRight, color: palette.textSecondary)
+              : IconButton(
+                  icon: const Icon(PiconsRegular.x),
+                  tooltip: formT.clearDate,
+                  onPressed: onClear,
+                ),
+        ),
+        child: date == null
+            ? null
+            : Text(DateFormat.yMMMd().format(date), style: textTheme.bodyLarge),
       ),
     );
   }

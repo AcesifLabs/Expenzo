@@ -6,7 +6,6 @@ import 'package:expense_tracker/core/error/failures.dart';
 
 import 'data_wipe_test_harness.dart';
 
-/// `DataWipeRepositoryImpl.deleteAllData`: the order of the delete.
 void main() {
   late DataWipeHarness harness;
 
@@ -23,12 +22,15 @@ void main() {
   test(
     'signed out never calls the server, wipes local data and lifts the pause',
     () async {
-      expect(await harness.repository.deleteAllData(), const Right(unit));
+      expect(
+        await harness.repository.deleteAllData(),
+        const Right<Failure, Unit>(unit),
+      );
 
       verifyNever(() => harness.remote.clearSyncedData());
       expect(await harness.recordCount(), 0);
       expect(harness.calls.first, 'pauseSync');
-      // Resumed to lift the pause; without a token the engine stays idle.
+
       expect(harness.calls.last, 'resumeSync');
       expect(harness.calls, isNot(contains('resetSyncState')));
     },
@@ -77,7 +79,10 @@ void main() {
       harness.serverClears();
       harness.resetSyncError = StateError('secure storage');
 
-      expect(await harness.repository.deleteAllData(), const Right(unit));
+      expect(
+        await harness.repository.deleteAllData(),
+        const Right<Failure, Unit>(unit),
+      );
       expect(harness.calls.last, 'resumeSync');
 
       when(() => harness.remote.clearSyncedData()).thenThrow(StateError('x'));
@@ -89,7 +94,10 @@ void main() {
     harness.signedIn = true;
     harness.serverClears();
 
-    expect(await harness.repository.deleteAllData(), const Right(unit));
+    expect(
+      await harness.repository.deleteAllData(),
+      const Right<Failure, Unit>(unit),
+    );
     expect(harness.calls, [
       'pauseSync',
       'clearServer',

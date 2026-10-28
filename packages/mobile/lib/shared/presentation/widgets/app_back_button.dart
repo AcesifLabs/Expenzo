@@ -7,23 +7,11 @@ import 'package:expense_tracker/core/router/navigation_history.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
-/// Back control for every screen pushed above the app shell.
-///
-/// Pops to the previous page in [NavigationHistory]. When there is nothing
-/// to return to (e.g. the app was opened on a deep link) it falls back to
-/// the home tab.
-///
-/// Pass [overrideRoute] for screens that should skip their history and go
-/// straight to a root screen, e.g. `AppRootTab.budgets.location`. The
-/// override also applies to the system back gesture.
 class AppBackButton extends StatelessWidget {
   final String? overrideRoute;
   final Color? color;
   final double size;
 
-  /// Back caret for pages you navigated to. Pass a close icon only on
-  /// routes opened as full-screen dialogs (a short task started from a form,
-  /// such as choosing a category). Never show both (DESIGN.md, Components).
   final IconData icon;
 
   const AppBackButton({
@@ -50,9 +38,6 @@ class AppBackButton extends StatelessWidget {
     }
   }
 
-  // History is registered by AppRouter at app start; it is missing after a
-  // hot reload or in tests that build their own router, so the Navigator
-  // stack is the fallback.
   bool _historyCanGoBack() =>
       di.getIt.isRegistered<NavigationHistory>() &&
       di.getIt<NavigationHistory>().canGoBack;

@@ -5,10 +5,6 @@ import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
-/// A sample transaction of [amount] at the current text size.
-///
-/// Needs no scaling of its own: the app-wide Font size scale applies as
-/// soon as a size is picked, so this shows exactly what screens will show.
 class FontSizePreviewCard extends StatelessWidget {
   final double amount;
 
@@ -40,9 +36,7 @@ class FontSizePreviewCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              // Stays on one line and shrinks to share the row at the
-              // largest sizes.
-              Flexible(
+              Expanded(
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
                   alignment: AlignmentDirectional.centerEnd,

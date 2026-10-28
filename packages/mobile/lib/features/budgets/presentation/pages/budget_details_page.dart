@@ -192,6 +192,13 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
             color: _palette.textSecondary,
           ),
         ),
+        if (progress.rolloverAmount > 0)
+          Text(
+            strings.carriedOver(amount: fmt.format(progress.rolloverAmount)),
+            style: AppTypography.bodySmall.copyWith(
+              color: _palette.textSecondary,
+            ),
+          ),
       ],
     );
   }
@@ -216,10 +223,12 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          strings.used(percent: progress.percentage.toStringAsFixed(0)),
-          style: AppTypography.bodyMedium.copyWith(
-            color: _palette.textSecondary,
+        Flexible(
+          child: Text(
+            strings.used(percent: progress.percentage.toStringAsFixed(0)),
+            style: AppTypography.bodyMedium.copyWith(
+              color: _palette.textSecondary,
+            ),
           ),
         ),
         if (progress.isOverBudget)
@@ -449,10 +458,12 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ShimmerBox.rectangle(
-                width: double.infinity,
-                height: 180,
-                borderRadius: AppSpacing.radiusCard,
+              ShimmerBox(
+                child: ShimmerBox.rectangle(
+                  width: double.infinity,
+                  height: 180,
+                  borderRadius: AppSpacing.radiusCard,
+                ),
               ),
             ],
           ),

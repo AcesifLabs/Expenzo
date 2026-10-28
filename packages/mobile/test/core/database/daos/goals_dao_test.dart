@@ -62,15 +62,30 @@ void main() {
     expect((await dao.getActiveGoal())?.id, 'new');
   });
 
-  test('watchActiveGoal follows inserts and deletes', () async {
-    final ids = dao.watchActiveGoal().map((g) => g?.id);
-    final expectation = expectLater(ids, emitsInOrder([null, 'g-1', null]));
+  test(
+    'watchGoals lists every goal newest first and follows changes',
+    () async {
+      final ids = dao.watchGoals().map(
+        (rows) => rows.map((g) => g.id).toList(),
+      );
+      final expectation = expectLater(
+        ids,
+        emitsInOrder([
+          <String>[],
+          ['old'],
+          ['new', 'old'],
+          ['old'],
+        ]),
+      );
 
-    await pumpEventQueue();
-    await dao.insertGoal(goal('g-1'));
-    await pumpEventQueue();
-    await dao.deleteGoal('g-1');
+      await pumpEventQueue();
+      await dao.insertGoal(goal('old', createdAt: DateTime.utc(2026, 1, 1)));
+      await pumpEventQueue();
+      await dao.insertGoal(goal('new', createdAt: DateTime.utc(2026, 5, 1)));
+      await pumpEventQueue();
+      await dao.deleteGoal('new');
 
-    await expectation;
-  });
+      await expectation;
+    },
+  );
 }

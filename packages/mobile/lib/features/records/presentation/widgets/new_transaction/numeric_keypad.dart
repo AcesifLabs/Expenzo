@@ -83,8 +83,6 @@ class _NumericKeypadState extends State<NumericKeypad> {
     );
   }
 
-  /// Shows the user's decimal mark (',' with dot grouping) but always sends
-  /// '.', so the typed amount stays parseable.
   KeypadButton _buildDecimalButton(TextStyle style, Color btnColor) {
     return KeypadButton(
       color: btnColor,
@@ -119,8 +117,7 @@ class _NumericKeypadState extends State<NumericKeypad> {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    // surfaceHigh, not inputFill: in light mode inputFill is the sheet's own
-    // white, which made the keys invisible.
+
     final btnColor = palette.surfaceHigh;
     final backspaceColor = palette.surfaceHigh;
     final txtColor = widget.color.onSurface;

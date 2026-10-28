@@ -57,7 +57,7 @@ class SmsScanOptionsSheet extends StatelessWidget {
       child: Material(
         color: colors.surface,
         borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(AppSpacing.radiusCard),
+          top: Radius.circular(AppSpacing.radiusSheet),
         ),
         child: SingleChildScrollView(
           child: Column(

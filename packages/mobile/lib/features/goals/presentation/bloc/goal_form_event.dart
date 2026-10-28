@@ -9,7 +9,6 @@ sealed class GoalFormEvent extends Equatable {
   const GoalFormEvent();
 }
 
-/// Edit mode: load the goal with [id].
 class GoalFormLoaded extends GoalFormEvent {
   final String id;
 
@@ -19,7 +18,6 @@ class GoalFormLoaded extends GoalFormEvent {
   const GoalFormLoaded(this.id);
 }
 
-/// Create mode (Task 22b): an empty form.
 class GoalFormStartedNew extends GoalFormEvent {
   const GoalFormStartedNew();
 }

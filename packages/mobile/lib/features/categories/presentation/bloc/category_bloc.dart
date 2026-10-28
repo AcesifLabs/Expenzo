@@ -26,7 +26,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     required this.searchCategories,
   }) : super(const CategoryInitial()) {
     on<LoadCategories>(_onLoadCategories, transformer: restartable());
-    on<CreateCategoryEvent>(_onCreateCategory, transformer: sequential());
+    on<CreateCategoryEvent>(_onCreateCategory, transformer: droppable());
     on<UpdateCategoryEvent>(_onUpdateCategory, transformer: sequential());
     on<DeleteCategoryEvent>(_onDeleteCategory, transformer: sequential());
     on<SearchCategoriesEvent>(_onSearchCategories, transformer: restartable());

@@ -5,7 +5,6 @@ import 'package:expense_tracker/core/utils/budget_period_utils.dart';
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
 import '../repositories/budget_repository.dart';
 
-/// Loads expense records in the current period for a named budget.
 class GetBudgetTransactions {
   final BudgetRepository budgetRepository;
   final RecordRepository recordRepository;

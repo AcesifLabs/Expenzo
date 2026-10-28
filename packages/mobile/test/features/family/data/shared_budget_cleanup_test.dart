@@ -12,7 +12,6 @@ void main() {
   late AppDatabase db;
   late SharedBudgetCleanup cleanup;
 
-  // I am user-2; user-1 is the Admin who shared 'admins'.
   const mineRef = SharedBudgetRef(id: 'mine', name: 'Mine', ownerId: 'user-2');
   const adminsRef = SharedBudgetRef(
     id: 'admins',

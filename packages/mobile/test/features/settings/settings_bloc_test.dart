@@ -79,14 +79,14 @@ void main() {
     test('emits [SettingsLoading, SettingsError] on failure', () async {
       when(
         () => mockGetSettings(any()),
-      ).thenAnswer((_) async => Left(ServerFailure(message: 'Failed to load')));
+      ).thenAnswer((_) async => Left(CacheFailure(message: 'Failed to load')));
 
       final expected = [
         isA<SettingsLoading>(),
         isA<SettingsError>().having(
           (s) => s.message,
           'message',
-          t.common.errors.server,
+          t.common.errors.storage,
         ),
       ];
 
@@ -116,16 +116,16 @@ void main() {
         when(
           () => mockGetSettings(any()),
         ).thenAnswer((_) async => Right(testSettings));
-        when(() => mockUpdateSettings(any())).thenAnswer(
-          (_) async => Left(ServerFailure(message: 'Update failed')),
-        );
+        when(
+          () => mockUpdateSettings(any()),
+        ).thenAnswer((_) async => Left(CacheFailure(message: 'Update failed')));
 
         final expected = [
           isA<SettingsLoading>(),
           isA<SettingsError>().having(
             (s) => s.message,
             'message',
-            t.common.errors.server,
+            t.common.errors.storage,
           ),
           isA<SettingsLoading>(),
           isA<SettingsLoaded>().having(
@@ -147,7 +147,7 @@ void main() {
       ).thenAnswer((_) async => Right(testSettings));
       when(
         () => mockUpdateSettings(any()),
-      ).thenAnswer((_) async => Left(ServerFailure(message: 'Update failed')));
+      ).thenAnswer((_) async => Left(CacheFailure(message: 'Update failed')));
       bloc.add(UpdateSettingsEvent(testSettings.copyWith(theme: 'dark')));
       await bloc.stream.firstWhere((s) => s is SettingsLoaded);
 
@@ -253,6 +253,16 @@ void main() {
         expect(saved.recurringAutoCreate, isTrue);
         expect(saved.theme, 'light');
         expect(saved.defaultRecurringFrequency, 'monthly');
+      },
+    );
+
+    test(
+      'UpdateCrashReportsEnabled saves the switch and keeps other settings',
+      () async {
+        final saved = await savedAfter(const UpdateCrashReportsEnabled(false));
+
+        expect(saved.crashReportsEnabled, isFalse);
+        expect(saved.theme, 'light');
       },
     );
 

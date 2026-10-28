@@ -20,6 +20,10 @@ class SendMessage extends AiAssistantEvent {
   const SendMessage(this.text);
 }
 
+class RetryLastMessage extends AiAssistantEvent {
+  const RetryLastMessage();
+}
+
 class StreamTokenReceived extends AiAssistantEvent {
   final String token;
 
@@ -39,9 +43,10 @@ class CooldownExpired extends AiAssistantEvent {
 
 class StreamError extends AiAssistantEvent {
   final String message;
+  final String? prompt;
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [message, prompt];
 
-  const StreamError(this.message);
+  const StreamError(this.message, {this.prompt});
 }

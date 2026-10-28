@@ -25,9 +25,6 @@ import '../widgets/member_actions_sheet.dart';
 import '../widgets/member_avatar.dart';
 import '../widgets/role_badge.dart';
 
-/// Frame `FamilyMemberManagement`: members and their roles. Admins change
-/// roles, remove members, invite more and delete the group; everyone can
-/// leave.
 class FamilyMembersPage extends StatelessWidget {
   const FamilyMembersPage({super.key});
 
@@ -94,18 +91,25 @@ class _MembersBody extends StatelessWidget {
     myUserId: group.myUserId,
   );
 
-  void _openActions(BuildContext context, GroupMember member) {
+  void _openActions(BuildContext context, GroupMember member) =>
+      unawaited(_runActions(context, member));
+
+  Future<void> _runActions(BuildContext context, GroupMember member) async {
     final bloc = context.read<FamilyBloc>();
-    openMemberActions(
+    final decision = await showMemberActionsSheet(
       context,
       member: member,
       memberName: _name(member),
       actions: actionsFor(group: group, target: member),
-      onRoleChosen: (role) => bloc.add(
-        FamilyRoleChangeRequested(userId: member.userId, role: role),
-      ),
-      onRemove: () => bloc.add(FamilyMemberRemoveRequested(member.userId)),
     );
+    switch (decision) {
+      case MemberRoleChosen(:final role):
+        bloc.add(FamilyRoleChangeRequested(userId: member.userId, role: role));
+      case MemberRemoveConfirmed():
+        bloc.add(FamilyMemberRemoveRequested(member.userId));
+      case null:
+        break;
+    }
   }
 
   void _confirmLeave(BuildContext context) {
@@ -113,9 +117,13 @@ class _MembersBody extends StatelessWidget {
     unawaited(
       _confirm(
         context,
-        title: membersT.leaveTitle(name: group.group.name),
-        body: isLastMember(group) ? membersT.leaveLastBody : membersT.leaveBody,
-        action: membersT.leave,
+        copy: (
+          title: membersT.leaveTitle(name: group.group.name),
+          body: isLastMember(group)
+              ? membersT.leaveLastBody
+              : membersT.leaveBody,
+          action: membersT.leave,
+        ),
         event: const FamilyLeaveRequested(),
       ),
     );
@@ -126,9 +134,11 @@ class _MembersBody extends StatelessWidget {
     unawaited(
       _confirm(
         context,
-        title: membersT.deleteTitle(name: group.group.name),
-        body: membersT.deleteBody,
-        action: membersT.deleteGroup,
+        copy: (
+          title: membersT.deleteTitle(name: group.group.name),
+          body: membersT.deleteBody,
+          action: membersT.deleteGroup,
+        ),
         event: const FamilyDeleteRequested(),
       ),
     );
@@ -136,11 +146,10 @@ class _MembersBody extends StatelessWidget {
 
   Future<void> _confirm(
     BuildContext context, {
-    required String title,
-    required String body,
-    required String action,
+    required ({String title, String body, String action}) copy,
     required FamilyEvent event,
   }) async {
+    final (:title, :body, :action) = copy;
     final bloc = context.read<FamilyBloc>();
     final expense = context.palette.expense;
     final confirmed = await showDialog<bool>(
@@ -210,7 +219,6 @@ class _MembersBody extends StatelessWidget {
   }
 }
 
-/// The members in one card, oldest first, with dividers.
 class _MemberCard extends StatelessWidget {
   final MyGroup group;
   final bool busy;
@@ -287,10 +295,12 @@ class _MembersLoading extends StatelessWidget {
         for (var i = 0; i < 3; i++)
           Padding(
             padding: const EdgeInsets.only(top: AppSpacing.md),
-            child: ShimmerBox.rectangle(
-              width: double.infinity,
-              height: 56,
-              borderRadius: AppSpacing.radiusControl,
+            child: ShimmerBox(
+              child: ShimmerBox.rectangle(
+                width: double.infinity,
+                height: 56,
+                borderRadius: AppSpacing.radiusControl,
+              ),
             ),
           ),
       ],

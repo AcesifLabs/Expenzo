@@ -33,7 +33,7 @@ void main() {
 
   void pullReturns(List<Map<String, dynamic>> changes) =>
       when(
-        () => dio.get<dynamic>(
+        () => dio.get<Object?>(
           ApiConstants.syncPull,
           queryParameters: any(named: 'queryParameters'),
         ),
@@ -201,7 +201,7 @@ void main() {
 
     test('see a failed pull as not pulled', () async {
       when(
-        () => dio.get<dynamic>(
+        () => dio.get<Object?>(
           ApiConstants.syncPull,
           queryParameters: any(named: 'queryParameters'),
         ),
@@ -247,7 +247,7 @@ void main() {
     test('waits for a running cycle and skips its after-sync tasks', () async {
       final pull = Completer<Response<dynamic>>();
       when(
-        () => dio.get<dynamic>(
+        () => dio.get<Object?>(
           ApiConstants.syncPull,
           queryParameters: any(named: 'queryParameters'),
         ),
@@ -266,15 +266,18 @@ void main() {
       pull.complete(
         Response(
           requestOptions: RequestOptions(path: ApiConstants.syncPull),
-          data: {'changes': [], 'serverTime': '2026-10-11T00:00:00.000Z'},
+          data: {
+            'changes': <Object>[],
+            'serverTime': '2026-10-11T00:00:00.000Z',
+          },
         ),
       );
       await stopping;
       await started;
 
       expect(ran, isFalse);
-      verifyNever(() => dio.post<dynamic>(any(), data: any(named: 'data')));
-      // The interrupted start gave up instead of listening for triggers.
+      verifyNever(() => dio.post<Object?>(any(), data: any(named: 'data')));
+
       verifyNever(() => connectivity.onlineStream);
     });
 
@@ -291,7 +294,7 @@ void main() {
       await pumpEventQueue();
 
       verify(
-        () => dio.get<dynamic>(
+        () => dio.get<Object?>(
           ApiConstants.syncPull,
           queryParameters: any(named: 'queryParameters'),
         ),
@@ -306,7 +309,7 @@ void main() {
 
       await sync.start();
       verifyNever(
-        () => dio.get<dynamic>(
+        () => dio.get<Object?>(
           ApiConstants.syncPull,
           queryParameters: any(named: 'queryParameters'),
         ),
@@ -314,7 +317,7 @@ void main() {
 
       await sync.resume();
       verify(
-        () => dio.get<dynamic>(
+        () => dio.get<Object?>(
           ApiConstants.syncPull,
           queryParameters: any(named: 'queryParameters'),
         ),

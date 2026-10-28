@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import '../../domain/entities/chat_message.dart';
 
 const _cooldownSentinel = Object();
+const _failedPromptSentinel = Object();
 
 class AiAssistantState extends Equatable {
   final List<ChatMessage> messages;
@@ -11,6 +12,9 @@ class AiAssistantState extends Equatable {
   final DateTime? cooldownUntil;
   final String? error;
 
+  /// Prompt whose reply failed; set until a retry or a new message.
+  final String? failedPrompt;
+
   @override
   List<Object?> get props => [
     messages,
@@ -19,6 +23,7 @@ class AiAssistantState extends Equatable {
     isComposing,
     cooldownUntil,
     error,
+    failedPrompt,
   ];
 
   const AiAssistantState({
@@ -28,6 +33,7 @@ class AiAssistantState extends Equatable {
     this.isComposing = false,
     this.cooldownUntil,
     this.error,
+    this.failedPrompt,
   });
 
   AiAssistantState copyWith({
@@ -37,6 +43,7 @@ class AiAssistantState extends Equatable {
     bool? isComposing,
     Object? cooldownUntil = _cooldownSentinel,
     String? error,
+    Object? failedPrompt = _failedPromptSentinel,
   }) {
     return AiAssistantState(
       messages: messages ?? this.messages,
@@ -47,6 +54,9 @@ class AiAssistantState extends Equatable {
           ? this.cooldownUntil
           : cooldownUntil as DateTime?,
       error: error,
+      failedPrompt: identical(failedPrompt, _failedPromptSentinel)
+          ? this.failedPrompt
+          : failedPrompt as String?,
     );
   }
 }

@@ -1,8 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:expense_tracker/core/constants/budget_period.dart';
 
-/// Distinguishes "not passed" from "set to null" for [Budget.groupId] in
-/// [Budget.copyWith], the same way [Record.copyWith] does.
 class _BudgetSentinel {
   const _BudgetSentinel();
 }
@@ -19,7 +17,6 @@ class Budget extends Equatable {
   final double rolloverAmount;
   final bool isEnabled;
 
-  /// The Family Group this budget is shared into (a Shared Budget), or null.
   final String? groupId;
 
   bool get isShared => groupId != null;

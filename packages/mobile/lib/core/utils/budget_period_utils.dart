@@ -1,3 +1,4 @@
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/core/constants/budget_period.dart';
 
@@ -7,103 +8,89 @@ class BudgetPeriodUtils {
   static DateTimeRange calculateCurrentPeriod(
     DateTime startDate,
     BudgetPeriod period,
+  ) => calculatePeriodAt(startDate, period, clock.now());
+
+  static DateTimeRange calculatePeriodAt(
+    DateTime startDate,
+    BudgetPeriod period,
+    DateTime at,
   ) {
-    final now = DateTime.now();
     switch (period) {
       case BudgetPeriod.weekly:
-        return _calculateWeeklyPeriod(startDate, now);
+        return _weeklyPeriod(startDate, at);
       case BudgetPeriod.monthly:
-        return _calculateMonthlyPeriod(startDate, now);
+        return _monthlyPeriod(startDate, at);
       case BudgetPeriod.yearly:
-        return _calculateYearlyPeriod(startDate, now);
+        return _yearlyPeriod(startDate, at);
     }
   }
 
-  static DateTimeRange _calculateWeeklyPeriod(
+  static DateTimeRange previousPeriod(
     DateTime startDate,
-    DateTime now,
+    BudgetPeriod period,
+    DateTimeRange current,
   ) {
-    final diff = now.difference(startDate).inDays;
+    final start = current.start;
 
-    final offset = diff % 7;
-    final periodStart = DateTime(now.year, now.month, now.day - offset);
-    final periodEnd = DateTime(now.year, now.month, now.day - offset + 7);
-
-    return DateTimeRange(start: periodStart, end: periodEnd);
+    return calculatePeriodAt(
+      startDate,
+      period,
+      DateTime(start.year, start.month, start.day - 1),
+    );
   }
 
-  static DateTimeRange _calculateMonthlyPeriod(
-    DateTime startDate,
-    DateTime now,
-  ) {
-    final startDay = startDate.day;
-    final clampedStartDay = startDay.clamp(1, 28);
-    final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
-    final effectiveStartDay = startDay > daysInMonth ? daysInMonth : startDay;
+  static DateTimeRange _weeklyPeriod(DateTime startDate, DateTime at) {
+    final days = DateTime.utc(at.year, at.month, at.day)
+        .difference(
+          DateTime.utc(startDate.year, startDate.month, startDate.day),
+        )
+        .inDays;
+    final start = DateTime(at.year, at.month, at.day - days % 7);
 
-    DateTime periodStart;
-    final thisMonthStart = DateTime(now.year, now.month, effectiveStartDay);
-
-    if (now.isAtSameMomentAs(thisMonthStart) || now.isAfter(thisMonthStart)) {
-      periodStart = thisMonthStart;
-    } else {
-      final prevMonth = now.month == 1 ? 12 : now.month - 1;
-      final prevYear = now.month == 1 ? now.year - 1 : now.year;
-      final daysInPrevMonth = DateTime(prevYear, prevMonth + 1, 0).day;
-      final prevStartDay = startDay > daysInPrevMonth
-          ? daysInPrevMonth
-          : startDay;
-      periodStart = DateTime(prevYear, prevMonth, prevStartDay);
-    }
-
-    DateTime periodEnd;
-    if (periodStart.month == 12) {
-      final daysInNextMonth = DateTime(periodStart.year + 1, 2, 0).day;
-      final endDay = clampedStartDay > daysInNextMonth
-          ? daysInNextMonth
-          : clampedStartDay;
-      periodEnd = DateTime(periodStart.year + 1, 1, endDay);
-    } else {
-      final daysInNextMonth = DateTime(
-        periodStart.year,
-        periodStart.month + 2,
-        0,
-      ).day;
-      final endDay = clampedStartDay > daysInNextMonth
-          ? daysInNextMonth
-          : clampedStartDay;
-      periodEnd = DateTime(periodStart.year, periodStart.month + 1, endDay);
-    }
-
-    return DateTimeRange(start: periodStart, end: periodEnd);
+    return DateTimeRange(
+      start: start,
+      end: DateTime(start.year, start.month, start.day + 7),
+    );
   }
 
-  static DateTimeRange _calculateYearlyPeriod(
-    DateTime startDate,
-    DateTime now,
-  ) {
-    final startMonth = startDate.month;
-    final startDay = startDate.day;
-    final daysInMonth = DateTime(now.year, startMonth + 1, 0).day;
-    final effectiveStartDay = startDay > daysInMonth ? daysInMonth : startDay;
+  static DateTimeRange _monthlyPeriod(DateTime startDate, DateTime at) {
+    DateTime anchor(int year, int month) {
+      final first = DateTime(year, month);
 
-    final thisYearStart = DateTime(now.year, startMonth, effectiveStartDay);
-    final periodStartYear =
-        now.isAtSameMomentAs(thisYearStart) || now.isAfter(thisYearStart)
-        ? now.year
-        : now.year - 1;
+      return DateTime(
+        first.year,
+        first.month,
+        _clampDay(startDate.day, first.year, first.month),
+      );
+    }
 
-    final periodStart = DateTime(
-      periodStartYear,
-      startMonth,
-      effectiveStartDay,
+    final thisMonth = anchor(at.year, at.month);
+    final start = at.isBefore(thisMonth)
+        ? anchor(at.year, at.month - 1)
+        : thisMonth;
+
+    return DateTimeRange(
+      start: start,
+      end: anchor(start.year, start.month + 1),
+    );
+  }
+
+  static DateTimeRange _yearlyPeriod(DateTime startDate, DateTime at) {
+    DateTime anchor(int year) => DateTime(
+      year,
+      startDate.month,
+      _clampDay(startDate.day, year, startDate.month),
     );
 
-    final endYear = periodStartYear + 1;
-    final daysInEndMonth = DateTime(endYear, startMonth + 1, 0).day;
-    final endDay = startDay > daysInEndMonth ? daysInEndMonth : startDay;
-    final periodEnd = DateTime(endYear, startMonth, endDay);
+    final thisYear = anchor(at.year);
+    final start = at.isBefore(thisYear) ? anchor(at.year - 1) : thisYear;
 
-    return DateTimeRange(start: periodStart, end: periodEnd);
+    return DateTimeRange(start: start, end: anchor(start.year + 1));
+  }
+
+  static int _clampDay(int day, int year, int month) {
+    final lastDay = DateTime(year, month + 1, 0).day;
+
+    return day > lastDay ? lastDay : day;
   }
 }

@@ -15,7 +15,6 @@ enum GoalFormStatus {
 }
 
 class GoalFormState extends Equatable {
-  /// Null in create mode.
   final Goal? goal;
   final GoalFormStatus status;
   final String? errorText;
@@ -32,7 +31,6 @@ class GoalFormState extends Equatable {
     this.errorText,
   });
 
-  /// [errorText] is cleared unless given.
   GoalFormState copyWith({
     Goal? goal,
     GoalFormStatus? status,

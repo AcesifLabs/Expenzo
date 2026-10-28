@@ -3,13 +3,6 @@ import 'package:expense_tracker/core/database/daos/budget_dao.dart';
 import '../../domain/entities/my_group.dart';
 import '../../domain/usecases/get_my_group.dart';
 
-/// Refreshes `/groups/me` after a sync cycle, which runs after every local
-/// change, so not every time:
-/// - never for a user outside any group with no Shared Budgets on the phone;
-/// - at most once per [refreshInterval] otherwise.
-/// Shared Budgets with no cached group mean the user joined on another
-/// device; the refresh then learns the group. Family screens fetch on their
-/// own whenever they open.
 class GroupRefreshPolicy {
   final MyGroup? Function() cachedGroup;
   final BudgetDao budgetDao;

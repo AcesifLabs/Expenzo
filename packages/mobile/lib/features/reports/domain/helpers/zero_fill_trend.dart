@@ -2,12 +2,6 @@ import 'package:expense_tracker/core/utils/week_utils.dart';
 import '../entities/date_amount.dart';
 import '../entities/granularity.dart';
 
-/// Turns sparse spending totals into one bar per period across [range], so
-/// a single spending day draws as one bar among empty ones rather than a
-/// chart-wide block. Periods after [now] are left out.
-///
-/// [totals] keys must already be period starts for [granularity]. Weeks
-/// start on `WeekStart`, as in [periodStart].
 List<DateAmount> zeroFillTrend({
   required Map<DateTime, double> totals,
   required ({DateTime start, DateTime end}) range,
@@ -29,7 +23,6 @@ List<DateAmount> zeroFillTrend({
   return filled;
 }
 
-/// Weekly periods start on [firstWeekday], default `WeekStart`.
 DateTime periodStart(
   DateTime date,
   Granularity granularity, {
@@ -45,7 +38,6 @@ DateTime periodStart(
   }
 }
 
-// Calendar arithmetic (not Duration) so DST changes can't skip a day.
 DateTime _nextPeriod(DateTime date, Granularity granularity) {
   switch (granularity) {
     case Granularity.daily:

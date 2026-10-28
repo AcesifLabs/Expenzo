@@ -1,6 +1,5 @@
 import 'package:expense_tracker/core/error/failure_message.dart';
 import 'package:expense_tracker/core/error/failures.dart';
-import 'package:expense_tracker/features/message_templates/data/repositories/message_template_repository_impl.dart';
 import 'package:expense_tracker/features/sms_parser/domain/usecases/scan_sms_usecase.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -61,14 +60,10 @@ void main() {
     expect(failureText(hidden), isNot(contains('PlatformException')));
   });
 
-  test('SMS scan and database codes have their own text', () {
+  test('SMS scan code has its own text', () {
     expect(
       failureText(const SmsScanFailure(message: 'boom')),
       t.common.errors.smsScan,
-    );
-    expect(
-      failureText(const DatabaseFailure(message: 'locked')),
-      t.common.errors.storage,
     );
   });
 

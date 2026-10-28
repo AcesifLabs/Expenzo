@@ -21,10 +21,6 @@ import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:expense_tracker/features/categories/presentation/helpers/category_display_name.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
-/// Full-screen category picker matching the .pen design.
-///
-/// Returns the selected [Category] via [Navigator.pop] when a category
-/// is tapped, or `null` if the user presses the close button.
 class AllCategoriesPickerPage extends StatefulWidget {
   final RecordType type;
   final String? selectedId;
@@ -136,10 +132,7 @@ class _AllCategoriesPickerPageState extends State<AllCategoriesPickerPage> {
         0,
       ),
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.smd,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
         decoration: BoxDecoration(
           color: _palette.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
@@ -153,23 +146,29 @@ class _AllCategoriesPickerPageState extends State<AllCategoriesPickerPage> {
             ),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
-              child: TextField(
-                controller: _searchController,
-                onChanged: _debounceAndSearch,
-                style: AppTypography.bodyMedium.copyWith(
-                  color: _palette.textPrimary,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  minHeight: AppSpacing.minTapTarget,
                 ),
-                decoration: InputDecoration(
-                  hintText: t.records.picker.search,
-                  hintStyle: AppTypography.bodyMedium.copyWith(
-                    color: _palette.textSecondary,
+                child: TextField(
+                  textAlignVertical: TextAlignVertical.center,
+                  controller: _searchController,
+                  onChanged: _debounceAndSearch,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: _palette.textPrimary,
                   ),
-                  filled: false,
-                  border: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  isDense: true,
-                  contentPadding: EdgeInsets.zero,
+                  decoration: InputDecoration(
+                    hintText: t.records.picker.search,
+                    hintStyle: AppTypography.bodyMedium.copyWith(
+                      color: _palette.textSecondary,
+                    ),
+                    filled: false,
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.zero,
+                  ),
                 ),
               ),
             ),
@@ -311,7 +310,8 @@ class _AllCategoriesPickerPageState extends State<AllCategoriesPickerPage> {
       child: GestureDetector(
         onTap: _onAddNew,
         child: Container(
-          height: 48,
+          constraints: const BoxConstraints(minHeight: AppSpacing.minTapTarget),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
           decoration: BoxDecoration(
             color: _palette.surface,
             borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
@@ -322,9 +322,13 @@ class _AllCategoriesPickerPageState extends State<AllCategoriesPickerPage> {
             children: [
               Icon(PiconsRegular.plusCircle, size: 18, color: _palette.brand),
               const SizedBox(width: AppSpacing.sm),
-              Text(
-                t.records.picker.addCategory,
-                style: AppTypography.bodyMedium.copyWith(color: _palette.brand),
+              Flexible(
+                child: Text(
+                  t.records.picker.addCategory,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: _palette.brand,
+                  ),
+                ),
               ),
             ],
           ),

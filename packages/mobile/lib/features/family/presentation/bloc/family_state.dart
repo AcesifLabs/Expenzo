@@ -8,12 +8,10 @@ import '../../domain/entities/my_group.dart';
 
 enum FamilyStatus { initial, loading, ready, failure }
 
-/// What the last finished action was, so a screen can navigate or say so.
 enum FamilyAction {
   created,
   joined,
 
-  /// Joined while Sync is off on this device: no Shared Budgets until on.
   joinedSyncOff,
   invited,
   roleChanged,
@@ -21,25 +19,19 @@ enum FamilyAction {
   left,
   deleted,
 
-  /// The group went away while a screen showed it (removed or deleted).
   removedFromGroup,
 }
 
 class FamilyState extends Equatable {
   final FamilyStatus status;
 
-  /// The group as last fetched; a `Cached(null)` value is "not in a group".
   final Cached<MyGroup?>? group;
   final Cached<GroupSummary>? summary;
 
-  /// The summary could not be loaded although the group was (a group
-  /// cached before its summary ever was, and now offline).
   final Failure? summaryFailure;
 
-  /// The code made on this screen; [activeInviteAt] also uses the group's.
   final InviteCode? invite;
 
-  /// An action is running; screens disable their buttons.
   final bool busy;
   final Failure? failure;
   final FamilyAction? lastAction;
@@ -49,8 +41,6 @@ class FamilyState extends Equatable {
   bool get fromCache =>
       (group?.fromCache ?? false) || (summary?.fromCache ?? false);
 
-  /// The older fetch time of group and summary, when either is from the
-  /// cache ("Last updated …").
   DateTime? get lastUpdated {
     if (!fromCache) return null;
     final times = [?group?.fetchedAt, ?summary?.fetchedAt];
@@ -81,14 +71,12 @@ class FamilyState extends Equatable {
     this.lastAction,
   });
 
-  /// The Invite Code to show, unless it has expired by [now].
   InviteCode? activeInviteAt(DateTime now) {
     final invite = this.invite ?? myGroup?.invite;
 
     return invite == null || invite.isExpiredAt(now) ? null : invite;
   }
 
-  /// Nullable fields are kept unless passed; pass null to clear them.
   FamilyState copyWith({
     FamilyStatus? status,
     Object? group = _keep,
@@ -118,7 +106,6 @@ class FamilyState extends Equatable {
   }
 }
 
-/// Marks a [FamilyState.copyWith] argument that was not passed.
 class _Keep {
   const _Keep();
 }

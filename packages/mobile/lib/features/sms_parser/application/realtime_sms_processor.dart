@@ -18,7 +18,7 @@ class RealtimeSmsProcessor {
   final ParsingIsolateService _parsingIsolateService;
   final RecordRepository _recordRepository;
   final CreateRecordsFromParsedList _createRecordsFromParsedList;
-  final CheckBudgetAlerts? _checkBudgetAlerts;
+  final CheckBudgetAlerts _checkBudgetAlerts;
 
   StreamSubscription<IncomingSmsEvent>? _subscription;
   Future<void> _processingChain = Future<void>.value();
@@ -30,7 +30,7 @@ class RealtimeSmsProcessor {
     required ParsingIsolateService parsingIsolateService,
     required RecordRepository recordRepository,
     required CreateRecordsFromParsedList createRecordsFromParsedList,
-    CheckBudgetAlerts? checkBudgetAlerts,
+    required CheckBudgetAlerts checkBudgetAlerts,
   }) : _checkBudgetAlerts = checkBudgetAlerts,
        _listener = listener,
        _evaluateRules = evaluateRules,
@@ -141,7 +141,7 @@ class RealtimeSmsProcessor {
       }
 
       await _createRecordsFromParsedList(nonDuplicateResults);
-      await _checkBudgetAlerts?.call();
+      await _checkBudgetAlerts();
     } catch (error, stackTrace) {
       _logError('event processing failed', error, stackTrace);
 

@@ -29,7 +29,6 @@ void main() {
       db.recurringTransactions,
       db.messageSources,
       db.expenseTemplates,
-      db.parsingRules,
       db.syncQueue,
     ]) {
       expect(await rows(table), 0, reason: table.actualTableName);

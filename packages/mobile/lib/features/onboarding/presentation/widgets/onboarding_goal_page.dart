@@ -11,8 +11,6 @@ import '../bloc/onboarding_bloc.dart';
 import '../bloc/onboarding_event.dart';
 import 'onboarding_page_frame.dart';
 
-/// Step 4 (frame `OnboardingAddGoal`): a goal name and a target typed by
-/// hand (the price lookup is cut, ADR 0011). A goal is optional.
 class OnboardingGoalPage extends StatefulWidget {
   const OnboardingGoalPage({super.key});
 

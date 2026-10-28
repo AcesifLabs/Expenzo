@@ -1,10 +1,13 @@
 import 'dart:async';
 
+import 'package:clock/clock.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:picons/picons.dart';
+import 'package:expense_tracker/features/records/data/services/transaction_draft_store.dart';
 import 'package:expense_tracker/core/constants/app_constants.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/core/di/injection_container.dart' as di;
@@ -44,9 +47,6 @@ import 'package:expense_tracker/features/categories/presentation/helpers/categor
 import 'package:expense_tracker/features/budgets/presentation/helpers/budget_display_name.dart';
 import 'package:expense_tracker/features/budgets/presentation/helpers/budget_access_lookup.dart';
 
-/// Opens the transaction sheet to add a record, or to edit [record].
-///
-/// Returns true when something was saved or deleted.
 Future<bool> showTransactionSheet(
   BuildContext context, {
   Record? record,
@@ -70,7 +70,7 @@ Future<bool> showTransactionSheet(
       ),
     ),
   );
-  // The sheet filters categories by type; restore the full list.
+
   if (context.mounted) {
     context.read<CategoryBloc>().add(const LoadCategories());
   }
@@ -78,24 +78,18 @@ Future<bool> showTransactionSheet(
   return saved == true;
 }
 
-/// The one Record editor (docs/adr/0004): adds a record, or edits
-/// [initialRecord] when given. Pops `true` after a save or delete.
 class NewTransactionSheet extends StatefulWidget {
-  final RecurringRepository? recurringRepository;
+  final RecurringRepository recurringRepository;
 
-  /// The record to edit; null to add a new one.
   final Record? initialRecord;
 
-  /// Preselects a budget when adding from a budget's page.
   final String? initialBudgetId;
 
-  /// Opens the receipt camera as soon as the sheet appears (Home banner).
-  /// Ignored when editing.
   final bool startWithReceiptScan;
 
   const NewTransactionSheet({
     super.key,
-    this.recurringRepository,
+    required this.recurringRepository,
     this.initialRecord,
     this.initialBudgetId,
     this.startWithReceiptScan = false,
@@ -106,7 +100,10 @@ class NewTransactionSheet extends StatefulWidget {
 }
 
 class _NewTransactionSheetState extends State<NewTransactionSheet>
-    with TickerProviderStateMixin, TypewriterAnimationMixin {
+    with
+        TickerProviderStateMixin,
+        TypewriterAnimationMixin,
+        WidgetsBindingObserver {
   static List<String> get _expensePlaceholders =>
       t.records.sheet.placeholders.expense;
 
@@ -123,7 +120,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   var _labelError = false;
   var _categoryError = false;
   var _isSubmitting = false;
-  var _selectedDate = DateTime.now();
+  var _selectedDate = clock.now();
   var _isRecurring = false;
   Animation<double>? _routeAnimation;
   AnimationStatusListener? _routeSettledListener;
@@ -140,20 +137,27 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   void initState() {
     super.initState();
     _prefillFrom(widget.initialRecord);
+    if (!_isEditing) _restoreDraft();
     _selectedBudgetId ??= widget.initialBudgetId;
+    WidgetsBinding.instance.addObserver(this);
     _loadCategories();
     _loadBudgets();
     initTypewriter(
       _type == RecordType.expense ? _expensePlaceholders : _incomePlaceholders,
     );
     _noteCtrl.addListener(_onNoteChanged);
-    // A prefilled name needs no example names cycling behind it.
+
+    final prefilled = _noteCtrl.text.isNotEmpty;
     if (_isEditing) {
       pauseTypewriter();
     } else {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        startTypewriter();
+        if (prefilled) {
+          pauseTypewriter();
+        } else {
+          startTypewriter();
+        }
         if (widget.startWithReceiptScan) _openReceiptScanWhenSettled();
       });
     }
@@ -167,6 +171,39 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     _selectedCategoryId = record.categoryId;
     _selectedBudgetId = record.budgetId;
     _selectedDate = record.date;
+  }
+
+  TransactionDraftStore? get _draftStore =>
+      di.getIt.isRegistered<TransactionDraftStore>()
+      ? di.getIt<TransactionDraftStore>()
+      : null;
+
+  void _restoreDraft() {
+    final draft = _draftStore?.load();
+    if (draft == null) return;
+    _type = draft.type;
+    _amountText.value = draft.amountText;
+    _noteCtrl.text = draft.note;
+    _selectedCategoryId = draft.categoryId;
+    _selectedBudgetId = draft.budgetId;
+    _selectedDate = draft.date;
+  }
+
+  void _saveDraft() {
+    if (_isEditing ||
+        (_amountText.value.isEmpty && _noteCtrl.text.trim().isEmpty)) {
+      return;
+    }
+    unawaited(
+      _draftStore?.save((
+        type: _type,
+        amountText: _amountText.value,
+        note: _noteCtrl.text,
+        categoryId: _selectedCategoryId,
+        budgetId: _selectedBudgetId,
+        date: _selectedDate,
+      )),
+    );
   }
 
   void _onNoteChanged() {
@@ -190,8 +227,6 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     final result = await di.getIt<GetBudgets>()();
     if (!mounted) return;
     setState(() {
-      // A Viewer cannot add to Shared Budgets (CONTEXT.md Group Role). A
-      // record already linked to one keeps showing it as selected.
       _budgets = budgetAccess().assignable(
         result.getOrElse(() => <Budget>[]).where((b) => b.isEnabled).toList(),
       );
@@ -224,7 +259,6 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     );
     if (!mounted) return;
 
-    // An empty id means "No budget"; null means closed without choosing.
     if (picked != null) {
       setState(() => _selectedBudgetId = picked.isEmpty ? null : picked);
     }
@@ -257,7 +291,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
 
   void _appendDigit(String d) {
     final current = _amountText.value;
-    // Decimal places is display-only (SAAP-65); stored amounts keep cents.
+
     final digits = CurrencyFormatter.current.value.decimalDigits;
     if (d == '.' && (digits == 0 || current.contains('.'))) return;
 
@@ -316,14 +350,11 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
 
     setState(() => _isSubmitting = true);
 
-    final now = DateTime.now().toUtc();
+    final now = clock.now().toUtc();
     final finalAmount = _type == RecordType.expense ? -amount : amount;
     final budgetId = _type == RecordType.expense ? _selectedBudgetId : null;
     final original = widget.initialRecord;
 
-    // Editing keeps what this sheet doesn't show (id, source, createdAt).
-    // copyWith clears a field passed as null, so "no budget" (or switching
-    // to income) saves budgetId as null.
     final record = original != null
         ? original.copyWith(
             amount: finalAmount,
@@ -346,7 +377,6 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
             updatedAt: now,
           );
 
-    // Await the write so lists refresh against committed data after pop.
     final result = original != null
         ? await di.getIt<UpdateRecord>()(record)
         : await di.getIt<AddRecord>()(record);
@@ -365,8 +395,6 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     }, (_) => false);
     if (failed) return;
 
-    // The record is already saved, so close even if the repeat fails: staying
-    // open would invite a second tap and a duplicate record.
     if (_isRecurring && !_isEditing) {
       await _createRecurringTransaction(finalAmount);
     }
@@ -376,8 +404,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
 
   void _closeAfterChange() {
     if (!mounted) return;
-    // A loaded list already follows the records stream; reloading would
-    // throw away the Activity search, filters and scroll position.
+
     final records = context.read<RecordBloc>();
     if (records.state is! RecordLoaded) records.add(const LoadRecords());
     if (di.getIt.isRegistered<CheckBudgetAlerts>()) {
@@ -431,20 +458,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
 
   Future<bool> _createRecurringTransaction(double finalAmount) async {
     try {
-      final repo = widget.recurringRepository;
-      if (repo == null) {
-        if (mounted) {
-          ScaffoldMessenger.of(context)
-            ..clearSnackBars()
-            ..showSnackBar(
-              SnackBar(content: Text(t.records.sheet.repeatFailed)),
-            );
-        }
-
-        return false;
-      }
-
-      final result = await repo.createRecurring(
+      final result = await widget.recurringRepository.createRecurring(
         RecurringTransaction(
           description: _noteCtrl.text.trim(),
           amount: finalAmount,
@@ -459,14 +473,14 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
         ),
       );
 
-      // A failure comes back as a value, not an exception.
       return result.fold((failure) {
         throw StateError(failure.message);
       }, (_) => true);
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
-      debugPrint(
-        'NewTransactionSheet: Failed to create recurring transaction: $e',
+      appLogger.error(
+        'NewTransactionSheet: Failed to create recurring transaction',
+        e,
+        s,
       );
       if (mounted) {
         ScaffoldMessenger.of(context)
@@ -510,8 +524,6 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     );
   }
 
-  /// Opens the camera once the sheet has finished sliding in, so the two
-  /// route transitions do not overlap.
   void _openReceiptScanWhenSettled() {
     final animation = ModalRoute.of(context)?.animation;
     if (animation == null || animation.isCompleted) {
@@ -600,11 +612,10 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     return ValueListenableBuilder<String>(
       valueListenable: _amountText,
       builder: (_, val, _) {
-        // No sign on the empty "0": "-0" reads as a value.
         final isEmpty = val.isEmpty;
         final sign = _type == RecordType.expense ? '-' : '+';
         final symbol = CurrencyFormatter.current.value.symbol;
-        // The stored text keeps '.'; only the shown mark follows the setting.
+
         final shown = val.replaceAll('.', CurrencyFormatter.decimalSeparator);
 
         return Padding(
@@ -618,7 +629,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
             isEmpty ? '${symbol}0' : '$sign$symbol$shown',
             style: AppTypography.headlineLarge.copyWith(
               color: isEmpty
-                  ? Theme.of(context).colorScheme.onSurface.withAlpha(90)
+                  ? Theme.of(context).colorScheme.onSurfaceVariant
                   : _typeAccentColor,
               letterSpacing: -1,
             ),
@@ -771,7 +782,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       child: Row(
         children: [
           _buildDatePicker(colors, dateFmt),
-          // Repeating is set up when adding; editing changes one record.
+
           if (!_isEditing) ...[
             const SizedBox(width: AppSpacing.smd),
             Flexible(
@@ -796,7 +807,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       firstDate: AppConstants.pickerFirstDate,
       lastDate: DateTime(2100),
     );
-    if (picked != null) setState(() => _selectedDate = picked);
+    if (picked != null && mounted) setState(() => _selectedDate = picked);
   }
 
   Widget _buildAllCategoriesButton(ColorScheme colors) {
@@ -844,12 +855,16 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
     final noneOrEmpty = _budgetsLoading || _budgets.isEmpty;
     final selectedId = _selectedBudgetId;
     final isListed = _budgets.any((b) => b.id == selectedId);
-    // An edited record can point at a budget that is still loading, or that
-    // has since been disabled. Keep the link (it is saved unchanged) but only
-    // hand the dropdown a value it has an item for.
+
     final showInactiveLink =
         selectedId != null && !isListed && !_budgetsLoading;
     final sheetT = t.records.sheet;
+    if (noneOrEmpty && !showInactiveLink) {
+      return InputDecorator(
+        decoration: _buildBudgetFieldDecoration(colors),
+        child: _buildBudgetHint(colors),
+      );
+    }
 
     return InputDecorator(
       decoration: _buildBudgetFieldDecoration(colors),
@@ -889,9 +904,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
                 ),
               ),
           ],
-          onChanged: noneOrEmpty && !showInactiveLink
-              ? null
-              : _onBudgetSelected,
+          onChanged: _onBudgetSelected,
         ),
       ),
     );
@@ -924,7 +937,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   }
 
   Widget _buildBudgetHint(ColorScheme colors) {
-    final hintColor = colors.onSurface.withAlpha(120);
+    final hintColor = colors.onSurfaceVariant;
     final sheetT = t.records.sheet;
     final text = _budgetsLoading ? sheetT.loadingBudgets : sheetT.noBudget;
 
@@ -957,7 +970,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
         ),
         child: Text(
           t.records.sheet.noCategories,
-          style: TextStyle(color: colors.onSurface.withAlpha(80)),
+          style: TextStyle(color: colors.onSurfaceVariant),
         ),
       );
     }
@@ -1142,7 +1155,15 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) _saveDraft();
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+
+    if (!_isEditing) unawaited(_draftStore?.clear());
     _removeRouteSettledListener();
     _noteCtrl.removeListener(_onNoteChanged);
     _amountText.dispose();
@@ -1159,7 +1180,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
       onTap: () => FocusScope.of(context).unfocus(),
       onHorizontalDragEnd: _onHorizontalSwipe,
       behavior: HitTestBehavior.translucent,
-      // Keyboard dismissal and the type swipe both have explicit controls.
+
       excludeFromSemantics: true,
       child: Padding(
         padding: EdgeInsets.only(bottom: bottomInset),
@@ -1167,7 +1188,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
           decoration: BoxDecoration(
             color: colors.surface,
             borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(AppSpacing.radiusCard),
+              top: Radius.circular(AppSpacing.radiusSheet),
             ),
           ),
           child: SingleChildScrollView(
@@ -1231,7 +1252,6 @@ class _SubmitButton extends StatelessWidget {
     required this.onSubmit,
   });
 
-  // Styled by the app's ElevatedButton theme: the brand mint fill.
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -1239,12 +1259,11 @@ class _SubmitButton extends StatelessWidget {
       child: Align(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 320),
-          // A minimum, not a fixed height: the label may wrap at large text
-          // sizes.
+
           child: ConstrainedBox(
             constraints: const BoxConstraints(
               minWidth: double.infinity,
-              minHeight: 52,
+              minHeight: AppSpacing.fieldHeight,
             ),
             child: ElevatedButton(
               onPressed: isSubmitting ? null : () => unawaited(onSubmit()),
@@ -1362,12 +1381,12 @@ class _RecurringCheckbox extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: AppSpacing.xs),
-                // Wraps beside the date picker at large text sizes.
+
                 Flexible(
                   child: Text(
                     t.records.sheet.repeatMonthly,
                     style: AppTypography.bodyMedium.copyWith(
-                      color: mutedIconColor,
+                      color: colors.onSurfaceVariant,
                     ),
                   ),
                 ),

@@ -2,9 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import 'package:expense_tracker/i18n/strings.g.dart';
 
-/// One question on the FAQ screen, in the current language.
 class FaqEntry extends Equatable {
-  /// Stable across languages, e.g. `addTransaction`.
   final String id;
   final String question;
   final String answer;
@@ -19,8 +17,6 @@ class FaqEntry extends Equatable {
   });
 }
 
-/// Built on each call so it follows the current language. Full `t.` paths,
-/// not an alias: `slang analyze` only sees full paths (ADR 0007).
 List<FaqEntry> faqEntries() => [
   FaqEntry(
     id: 'addTransaction',
@@ -64,7 +60,6 @@ List<FaqEntry> faqEntries() => [
   ),
 ];
 
-/// Case-insensitive match on question or answer; a blank query returns all.
 List<FaqEntry> filterFaqEntries(List<FaqEntry> entries, String query) {
   final needle = query.trim().toLowerCase();
   if (needle.isEmpty) return entries;

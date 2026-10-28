@@ -44,8 +44,6 @@ class _RecordingSettings extends SettingsLocalDatasourceImpl {
   }
 }
 
-/// A repository over an in-memory database with seeded data, real settings
-/// in mock prefs, a mocked server and hooks that record their calls.
 class DataWipeHarness {
   final AppDatabase db = AppDatabase.forTesting(NativeDatabase.memory());
   final MockRemote remote = MockRemote();
@@ -55,10 +53,8 @@ class DataWipeHarness {
   bool signedIn = false;
   bool wipeFails = false;
 
-  /// Thrown by the cancel hook when set.
   Object? cancelError;
 
-  /// Thrown by the reset-sync-state hook when set.
   Object? resetSyncError;
 
   Future<void> setUp() async {
@@ -111,7 +107,6 @@ class DataWipeHarness {
 
   Future<int> userCount() async => (await db.select(db.users).get()).length;
 
-  /// Makes clearing the server succeed and records it.
   void serverClears() {
     when(() => remote.clearSyncedData()).thenAnswer((_) async {
       calls.add('clearServer');

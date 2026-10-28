@@ -20,7 +20,6 @@ class _MockSettingsBloc extends Mock implements SettingsBloc {}
 
 class _FakeSettingsEvent extends Fake implements SettingsEvent {}
 
-/// October 2026: the 1st is a Thursday.
 DateTime _today() => DateTime(2026, 10, 14);
 
 void main() {
@@ -42,7 +41,6 @@ void main() {
     UserSettings? settings,
     AppLocale locale = AppLocale.en,
   }) async {
-    // Tall enough to lay out the options and the whole month preview.
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 2.625;
     addTearDown(tester.view.reset);
@@ -63,7 +61,6 @@ void main() {
     matching: find.byIcon(PiconsRegular.checkCircle),
   );
 
-  /// Weekdays of the preview's leftmost column of dates.
   Set<int> firstColumnWeekdays(WidgetTester tester) {
     final preview = find.byType(CalendarMonthPreview);
     final localizations = MaterialLocalizations.of(

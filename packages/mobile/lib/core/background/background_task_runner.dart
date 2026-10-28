@@ -25,7 +25,6 @@ class BackgroundTaskDeps {
   });
 }
 
-/// Runs one background task by name, then re-arms it for its next time.
 class BackgroundTaskRunner {
   final BackgroundTaskDeps deps;
   final BackgroundTaskScheduler scheduler;
@@ -37,7 +36,6 @@ class BackgroundTaskRunner {
     this.clock = DateTime.now,
   });
 
-  /// False asks Workmanager to retry.
   Future<bool> run(String taskName) async {
     try {
       switch (taskName) {
@@ -60,7 +58,6 @@ class BackgroundTaskRunner {
   Future<void> _runWeeklySummary() async {
     final settings = await _loadSettings();
     if (settings.isEnabled(NotificationToggle.weeklySummary)) {
-      // applyBackgroundSettings has set the app language by now.
       final firstWeekday = settings
           .effectiveFirstDayOfWeek(LocaleSettings.currentLocale.languageCode)
           .weekday;

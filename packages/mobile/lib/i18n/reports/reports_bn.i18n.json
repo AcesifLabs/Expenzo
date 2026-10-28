@@ -23,9 +23,9 @@
     }
   },
   "title": "রিপোর্ট",
-  "askAi": "AI-কে জিজ্ঞেস করুন",
-  "last7Days": "গত ৭ দিন",
-  "last30Days": "গত ৩০ দিন",
+  "askAi": "Expie-কে জিজ্ঞেস করুন",
+  "last7Days": "গত 7 দিন",
+  "last30Days": "গত 30 দিন",
   "noCategoryData": "ক্যাটাগরির কোনো ডেটা নেই",
   "noTrendData": "এখনো প্রবণতার ডেটা নেই",
   "noSpending": "এখনো খরচের ডেটা নেই",

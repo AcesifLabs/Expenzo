@@ -16,8 +16,6 @@ import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
 import 'package:expense_tracker/shared/services/external_pages.dart';
 import 'package:expense_tracker/shared/services/feedback_mailer.dart';
 
-/// Help & Support: FAQ, Contact support, Rate the app, the legal pages and
-/// About, in one card (design frame `HelpMainMenu`).
 class HelpPage extends StatefulWidget {
   const HelpPage({super.key});
 
@@ -26,13 +24,10 @@ class HelpPage extends StatefulWidget {
 }
 
 class _HelpPageState extends State<HelpPage> {
-  /// While the mail app or the browser opens, a second tap does nothing.
   bool _busy = false;
 
   void _openTutorial() => context.push('/tutorial');
 
-  /// Reopens onboarding after a confirm. The flag stays true, so quitting
-  /// half-way never forces onboarding again.
   Future<void> _replaySetup() async {
     final replayT = t.support.help.replaySetup;
     final confirmed = await showDialog<bool>(
@@ -78,8 +73,6 @@ class _HelpPageState extends State<HelpPage> {
   void _onContactSupport() =>
       unawaited(_whileBusy(() => sendFeedback(context)));
 
-  /// Runs [action] unless one is already running. The check covers taps that
-  /// land before the rebuild that turns on the IgnorePointer.
   Future<void> _whileBusy(Future<Object?> Function() action) async {
     if (_busy) return;
     setState(() => _busy = true);
@@ -153,7 +146,6 @@ class _HelpPageState extends State<HelpPage> {
     final divider = Divider(height: 1, thickness: 1, color: palette.divider);
     final rows = _rows();
 
-    // Pushed above the app shell, so it needs its own themed Scaffold.
     return Scaffold(
       body: AppScaffold(
         title: t.support.help.title,
@@ -162,7 +154,7 @@ class _HelpPageState extends State<HelpPage> {
           padding: AppSpacing.pagePadding,
           children: [
             const SizedBox(height: AppSpacing.md),
-            // Built like SettingsSection's card; this page has no header.
+
             AppCard(
               backgroundColor: palette.surface,
               borderRadius: AppSpacing.radiusCard,

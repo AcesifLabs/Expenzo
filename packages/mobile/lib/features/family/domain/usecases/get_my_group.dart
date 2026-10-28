@@ -7,7 +7,6 @@ import '../entities/my_group.dart';
 import '../repositories/family_repository.dart';
 
 class GetMyGroupParams extends Params {
-  /// Return the cached group without a request when there is one.
   final bool preferCache;
 
   @override

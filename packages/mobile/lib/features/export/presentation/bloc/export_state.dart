@@ -4,7 +4,6 @@ import '../../domain/entities/export_request.dart';
 
 enum ExportStatus { idle, exporting, shared, empty, failed }
 
-/// The screen's choices and where the last export got to.
 class ExportState extends Equatable {
   final ExportRange range;
   final DateTime? customStart;
@@ -12,7 +11,6 @@ class ExportState extends Equatable {
   final Set<ExportContent> contents;
   final ExportStatus status;
 
-  /// Set for [ExportStatus.empty] and [ExportStatus.failed].
   final String? errorMessage;
 
   @override
@@ -34,7 +32,6 @@ class ExportState extends Equatable {
 
   bool get isExporting => status == ExportStatus.exporting;
 
-  /// Choices are fixed while an export runs, so its result matches them.
   bool get canExport => request.isValid && !isExporting;
 
   const ExportState({
@@ -50,7 +47,6 @@ class ExportState extends Equatable {
     this.errorMessage,
   });
 
-  /// [errorMessage] is replaced, not kept: leaving it out clears it.
   ExportState copyWith({
     ExportRange? range,
     DateTime? customStart,

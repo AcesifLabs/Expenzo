@@ -9,22 +9,14 @@ import 'package:expense_tracker/features/settings/domain/entities/user_settings.
 import 'package:expense_tracker/features/settings/domain/usecases/get_settings.dart';
 import '../../../../shared/services/notification_service.dart';
 
-/// Remembers which budget alerts were already sent.
 abstract class BudgetAlertLog {
   Future<bool> wasSent(String key);
 
-  /// Records [keys] as sent, in one write.
   Future<void> markSent(Iterable<String> keys);
 }
 
 enum BudgetAlertLevel { nearLimit, over }
 
-/// Sends a Budget Alert (CONTEXT.md) after records change.
-///
-/// Each budget gets at most one alert at 80% and one when it goes over, per
-/// budget period. Shared Budgets get none: their spending lives on the
-/// server (CONTEXT.md Budget Alert). Nothing is sent while the master switch is off; each level
-/// has its own toggle (Settings → Notifications).
 class CheckBudgetAlerts {
   static const nearLimitPercent = 80.0;
 
@@ -33,8 +25,6 @@ class CheckBudgetAlerts {
   final NotificationService notificationService;
   final BudgetAlertLog alertLog;
 
-  /// The previous check, so overlapping calls (a save while an SMS is being
-  /// imported) run one after another instead of both sending the same alert.
   Future<void> _previous = Future.value();
 
   CheckBudgetAlerts({
@@ -46,8 +36,7 @@ class CheckBudgetAlerts {
 
   Future<Either<Failure, Unit>> call() {
     final result = _previous.then((_) => _check());
-    // Only the ordering matters here; the result and any error reach the
-    // caller through [result].
+
     _previous = result.then(_ignore, onError: _ignore);
 
     return result;
@@ -64,7 +53,6 @@ class CheckBudgetAlerts {
     return null;
   }
 
-  /// One key per budget, period and level, so a new period alerts again.
   static String alertKey(BudgetProgress budget, BudgetAlertLevel level) {
     final period = budget.periodRange.start.toIso8601String();
 
@@ -80,8 +68,7 @@ class CheckBudgetAlerts {
               !settings.isEnabled(NotificationToggle.budgetNearLimit))) {
         return const Right(unit);
       }
-      // Without permission the alert would be dropped but still logged as
-      // sent; skip it so it goes out once the user allows notifications.
+
       if (!await notificationService.canNotify()) return const Right(unit);
 
       final progress = await getBudgetsWithProgress();
@@ -121,14 +108,12 @@ class CheckBudgetAlerts {
     );
     await alertLog.markSent([
       key,
-      // Going straight past 80% shouldn't send a second, older alert later.
+
       if (level == BudgetAlertLevel.over)
         alertKey(budget, BudgetAlertLevel.nearLimit),
     ]);
   }
 
-  /// The level to send under the user's toggles. With the over toggle off,
-  /// an over budget still gets the 80% heads-up if that toggle is on.
   static BudgetAlertLevel? _levelToSend(
     BudgetProgress budget,
     UserSettings settings,

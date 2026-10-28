@@ -43,7 +43,7 @@ export class Budget {
   @Column({ default: true })
   isEnabled: boolean;
 
-  /** Set when the budget is a Shared Budget of this Family Group (ADR 0008). */
+  
   @Column('uuid', { nullable: true })
   groupId: string | null;
 

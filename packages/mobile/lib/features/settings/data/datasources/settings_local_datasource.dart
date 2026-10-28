@@ -1,5 +1,6 @@
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:expense_tracker/core/constants/app_font_size.dart';
 import 'package:expense_tracker/core/constants/digit_grouping.dart';
 import 'package:expense_tracker/core/constants/first_day_of_week.dart';
@@ -14,9 +15,6 @@ abstract class SettingsLocalDatasource {
   Future<UserSettings> getSettings();
   Future<UserSettings> updateSettings(UserSettings settings);
 
-  /// Replaces the stored settings with the first-run defaults.
-  ///
-  /// Throws: [CacheException]
   Future<UserSettings> resetSettings();
 }
 
@@ -63,8 +61,6 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
       throw CacheException(message: e.toString());
     }
 
-    // With no stored settings, getSettings writes the defaults. Delete all
-    // data keeps onboarding done (ADR 0010, SAAP-74).
     final defaults = await getSettings();
 
     return updateSettings(defaults.copyWith(onboardingCompleted: true));
@@ -105,6 +101,7 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
       'homeTab': settings.homeTab.name,
       'syncEnabled': settings.syncEnabled,
       'onboardingCompleted': settings.onboardingCompleted,
+      'crashReportsEnabled': settings.crashReportsEnabled,
       'monthlyIncome': settings.monthlyIncome,
       'createdAt': settings.createdAt.toIso8601String(),
       'updatedAt': settings.updatedAt.toIso8601String(),
@@ -142,15 +139,15 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
       ),
       homeTab: AppRootTab.fromName(json['homeTab'] as String?),
       syncEnabled: json['syncEnabled'] as bool? ?? true,
-      // A missing key stays null on purpose: ResolveOnboardingStatus decides.
+
       onboardingCompleted: json['onboardingCompleted'] as bool?,
+      crashReportsEnabled: json['crashReportsEnabled'] as bool? ?? true,
       monthlyIncome: (json['monthlyIncome'] as num?)?.toDouble(),
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
   }
 
-  // Older versions stored only a free-text symbol (default '\$').
   String _currencyCodeFrom(Map<String, dynamic> json) {
     final code = json['currencyCode'];
     if (code is String) return code;
@@ -162,8 +159,6 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
     return CurrencyConfig.defaultCode;
   }
 
-  // Missing before SAAP-65; anything outside the allowed values reads as the
-  // default.
   int _decimalPlacesFrom(Map<String, dynamic> json) {
     final places = json['decimalPlaces'];
     if (places is int &&

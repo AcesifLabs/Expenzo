@@ -3,12 +3,10 @@ import 'package:expense_tracker/core/utils/money_format.dart';
 
 import 'budget_access_lookup.dart';
 
-/// [fallback] for a personal budget; the Family Group's Currency for one
-/// shared into [groupId] (CONTEXT.md Shared Budget).
 MoneyFormat budgetMoneyFormat(
   String? groupId, {
   required MoneyFormat fallback,
-  int? decimalDigits,
+  required int decimalDigits,
 }) {
   final currencyCode = budgetAccess().currencyFor(groupId);
 

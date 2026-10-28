@@ -21,7 +21,6 @@ class FamilyGroup extends Equatable {
 }
 
 class GroupMember extends Equatable {
-  /// The server user id (not the Firebase uid).
   final String userId;
   final String? displayName;
   final String? photoUrl;
@@ -39,16 +38,15 @@ class GroupMember extends Equatable {
     required this.joinedAt,
   });
 
-  GroupMember copyWith({GroupRole? role}) => GroupMember(
+  GroupMember copyWith({required GroupRole role}) => GroupMember(
     userId: userId,
     displayName: displayName,
     photoUrl: photoUrl,
-    role: role ?? this.role,
+    role: role,
     joinedAt: joinedAt,
   );
 }
 
-/// A budget shared into the group, and who owns it.
 class SharedBudgetRef extends Equatable {
   final String id;
   final String name;
@@ -64,20 +62,15 @@ class SharedBudgetRef extends Equatable {
   });
 }
 
-/// The signed-in user's Family Group, from `GET /groups/me`. "Not in a
-/// group" is a null `MyGroup?`, never an empty object.
 class MyGroup extends Equatable {
   final FamilyGroup group;
 
-  /// The caller's server user id; the phone only knows its Firebase uid.
   final String myUserId;
   final GroupRole myRole;
 
-  /// Oldest member first; avatar colours follow this order.
   final List<GroupMember> members;
   final List<SharedBudgetRef> sharedBudgets;
 
-  /// The active Invite Code, for Admins only.
   final InviteCode? invite;
 
   @override

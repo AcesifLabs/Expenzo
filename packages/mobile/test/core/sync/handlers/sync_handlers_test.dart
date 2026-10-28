@@ -19,16 +19,14 @@ void main() {
         expect(parseSyncAmount('75.25'), 75.25);
       });
 
-      test('returns 0.0 for invalid string', () {
-        expect(parseSyncAmount('invalid'), 0.0);
-      });
+      for (final value in <Object?>['invalid', null, true, 'NaN']) {
+        test('throws for $value', () {
+          expect(() => parseSyncAmount(value), throwsFormatException);
+        });
+      }
 
-      test('returns 0.0 for null', () {
-        expect(parseSyncAmount(null), 0.0);
-      });
-
-      test('returns 0.0 for non-numeric type', () {
-        expect(parseSyncAmount(true), 0.0);
+      test('rounds to 2 decimals', () {
+        expect(parseSyncAmount('12.345'), 12.35);
       });
     });
 
@@ -45,17 +43,11 @@ void main() {
         expect(parseSyncDate(date), date);
       });
 
-      test('returns now for invalid string', () {
-        final before = DateTime.now().subtract(const Duration(seconds: 1));
-        final result = parseSyncDate('invalid');
-        expect(result.isAfter(before), true);
-      });
-
-      test('returns now for null', () {
-        final before = DateTime.now().subtract(const Duration(seconds: 1));
-        final result = parseSyncDate(null);
-        expect(result.isAfter(before), true);
-      });
+      for (final value in <Object?>['invalid', null, 42]) {
+        test('throws for $value', () {
+          expect(() => parseSyncDate(value), throwsFormatException);
+        });
+      }
     });
 
     group('parseSyncString', () {
@@ -89,9 +81,10 @@ void main() {
       Map<String, dynamic> data, {
       bool Function()? keepLocal,
     }) =>
-        (RecordsSyncHandler(
-                  keepLocalBudgetLinks: keepLocal,
-                ).fromSyncPayload('r1', data)
+        ((keepLocal == null
+                        ? RecordsSyncHandler()
+                        : RecordsSyncHandler(keepLocalBudgetLinks: keepLocal))
+                    .fromSyncPayload('r1', data)
                 as RecordsCompanion)
             .budgetId;
 

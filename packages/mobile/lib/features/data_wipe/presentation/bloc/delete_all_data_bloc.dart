@@ -13,13 +13,11 @@ import '../../domain/usecases/get_local_data_summary.dart';
 import 'delete_all_data_event.dart';
 import 'delete_all_data_state.dart';
 
-/// Drives the Delete all data screen: counts, typed confirmation, delete.
 class DeleteAllDataBloc extends Bloc<DeleteAllDataEvent, DeleteAllDataState> {
   final GetLocalDataSummary getSummary;
   final DataWipeRepository repository;
   final DeleteAllData deleteAllData;
 
-  /// From the cached Family Group; no request, so the screen opens offline.
   final bool Function() isFamilyAdmin;
 
   DeleteAllDataBloc({
@@ -41,7 +39,7 @@ class DeleteAllDataBloc extends Bloc<DeleteAllDataEvent, DeleteAllDataState> {
     emit(state.copyWith(status: DeleteAllDataStatus.loading));
     final signedIn = await repository.isSignedIn();
     final summary = await getSummary(NoParams());
-    // A failed count only hides the numbers; the delete is never blocked.
+
     emit(
       DeleteAllDataState(
         summary: summary.fold((_) => null, (value) => value),
@@ -75,7 +73,6 @@ class DeleteAllDataBloc extends Bloc<DeleteAllDataEvent, DeleteAllDataState> {
     try {
       result = await deleteAllData(NoParams());
     } catch (e, s) {
-      // The screen blocks leaving while deleting; never stay there.
       appLogger.error('Delete all data threw', e, s);
       emit(
         state.copyWith(
@@ -97,7 +94,6 @@ class DeleteAllDataBloc extends Bloc<DeleteAllDataEvent, DeleteAllDataState> {
     );
   }
 
-  /// Network and server failures happen before anything local is touched.
   static String _messageFor(Failure failure) =>
       failure is NetworkFailure || failure is ServerFailure
       ? t.settings.deleteData.serverFailed

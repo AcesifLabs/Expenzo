@@ -1,8 +1,9 @@
+import 'package:expense_tracker/features/recurring/domain/entities/recurring_transaction.dart';
+import 'package:expense_tracker/core/error/failures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
-import 'package:expense_tracker/core/database/daos/pending_recurring_dao.dart';
 import 'package:expense_tracker/features/recurring/data/datasources/recurring_local_datasource.dart';
 import 'package:expense_tracker/features/recurring/data/repositories/recurring_repository_impl.dart';
 
@@ -11,20 +12,13 @@ import '../../support/factories/recurring_factory.dart';
 class MockRecurringLocalDatasource extends Mock
     implements RecurringLocalDatasource {}
 
-class MockPendingRecurringDao extends Mock implements PendingRecurringDao {}
-
 void main() {
   late MockRecurringLocalDatasource mockDatasource;
-  late MockPendingRecurringDao mockDao;
   late RecurringRepositoryImpl repository;
 
   setUp(() {
     mockDatasource = MockRecurringLocalDatasource();
-    mockDao = MockPendingRecurringDao();
-    repository = RecurringRepositoryImpl(
-      localDatasource: mockDatasource,
-      pendingRecurringDao: mockDao,
-    );
+    repository = RecurringRepositoryImpl(localDatasource: mockDatasource);
   });
 
   group('RecurringRepositoryImpl', () {
@@ -37,7 +31,7 @@ void main() {
 
         final result = await repository.getRecurringList();
 
-        expect(result, Right(recurrings));
+        expect(result, Right<Failure, List<RecurringTransaction>>(recurrings));
         verify(() => mockDatasource.getRecurringList()).called(1);
       });
 
@@ -65,7 +59,7 @@ void main() {
 
         final result = await repository.getRecurringById('rec-1');
 
-        expect(result, Right(recurring));
+        expect(result, Right<Failure, RecurringTransaction>(recurring));
       });
 
       test('returns Left when not found', () async {
@@ -88,7 +82,7 @@ void main() {
 
         final result = await repository.createRecurring(recurring);
 
-        expect(result, Right(recurring));
+        expect(result, Right<Failure, RecurringTransaction>(recurring));
         verify(() => mockDatasource.createRecurring(recurring)).called(1);
       });
 
@@ -113,7 +107,7 @@ void main() {
 
         final result = await repository.updateRecurring(recurring);
 
-        expect(result, Right(recurring));
+        expect(result, Right<Failure, RecurringTransaction>(recurring));
       });
     });
 
@@ -125,7 +119,7 @@ void main() {
 
         final result = await repository.deleteRecurring('rec-1');
 
-        expect(result, const Right(unit));
+        expect(result, const Right<Failure, Unit>(unit));
       });
     });
 
@@ -138,7 +132,10 @@ void main() {
 
         final result = await repository.getDueRecurring();
 
-        expect(result, Right(dueRecurrings));
+        expect(
+          result,
+          Right<Failure, List<RecurringTransaction>>(dueRecurrings),
+        );
       });
     });
 
@@ -151,7 +148,7 @@ void main() {
 
         final result = await repository.updateRecurringBatch(recurrings);
 
-        expect(result, const Right(unit));
+        expect(result, const Right<Failure, Unit>(unit));
       });
     });
   });

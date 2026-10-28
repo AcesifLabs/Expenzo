@@ -9,12 +9,6 @@ import '../../../records/domain/repositories/record_repository.dart';
 import '../entities/recurring_transaction.dart';
 import 'process_recurring.dart';
 
-/// Turns due recurring occurrences into Records. Used by "Process pending"
-/// and by auto-create on app open, so both post the same way.
-///
-/// Moving the dates forward and adding the Records happen in one database
-/// transaction: a failure or a killed app leaves both untouched, so an
-/// occurrence is never lost and never posted twice.
 class PostDueRecurring {
   final ProcessRecurring processRecurring;
   final RecordRepository recordRepository;
@@ -22,8 +16,6 @@ class PostDueRecurring {
   final GetCategories getCategories;
   final TransactionRunner transactionRunner;
 
-  /// The run in progress, so overlapping calls never post the same
-  /// occurrence twice.
   Future<Either<Failure, int>>? _inFlight;
   bool _inFlightAutomatic = false;
 
@@ -35,12 +27,6 @@ class PostDueRecurring {
     required this.transactionRunner,
   });
 
-  /// Returns how many Records were added. [automatic] posts only items
-  /// included in auto-create; a manual run posts every due item.
-  ///
-  /// A call joins a run in progress when that run covers it. A manual call
-  /// during an automatic run waits for it, then runs, so excluded items are
-  /// still posted.
   Future<Either<Failure, int>> call({bool automatic = false}) {
     final running = _inFlight;
     if (running != null) {
@@ -57,7 +43,6 @@ class PostDueRecurring {
   }
 
   Future<Either<Failure, int>> _run(bool automatic) async {
-    // Load types first: an income must not be posted as an expense.
     final categoriesResult = await getCategories(const GetCategoriesParams());
 
     return categoriesResult.fold(
@@ -93,8 +78,6 @@ class PostDueRecurring {
     return Right(records.length);
   }
 
-  /// Category usage only orders the pickers, so it is counted after the
-  /// commit and a failure is ignored.
   Future<void> _countCategoryUse(List<Record> records) async {
     for (final record in records) {
       final categoryId = record.categoryId;
@@ -104,12 +87,9 @@ class PostDueRecurring {
     }
   }
 
-  /// Throws on a failure so the transaction rolls back.
   static T _orThrow<T>(Either<Failure, T> result) =>
       result.fold((failure) => throw _RolledBack(failure), (value) => value);
 
-  /// An item's type is its category's; no category (or a deleted one) posts
-  /// as an expense.
   static Record _recordFor(
     RecurringTransaction recurring,
     Map<String, RecordType> typeById,

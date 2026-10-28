@@ -12,10 +12,8 @@ class DashboardTrendCard extends StatelessWidget {
   final String title;
   final double totalSpent;
 
-  /// Null when the previous period had no spending to compare with.
   final double? percentChange;
 
-  /// What the previous period is called, for example "last month".
   final String previousPeriodLabel;
   final List<DateAmount> trend;
 
@@ -28,7 +26,6 @@ class DashboardTrendCard extends StatelessWidget {
     required this.trend,
   });
 
-  // More spending reads as expense, less as a gain.
   Color _changeColor(AppPalette palette) {
     final change = percentChange ?? 0;
     if (change > 0) return palette.expense;
@@ -67,7 +64,6 @@ class DashboardTrendCard extends StatelessWidget {
       return List<double>.filled(amounts.length, 0.2);
     }
 
-    // Empty days keep a hairline so the timeline still reads.
     return amounts
         .map(
           (amount) => amount == 0 ? 0.0 : (amount / maxAmount).clamp(0.14, 1.0),
@@ -75,9 +71,6 @@ class DashboardTrendCard extends StatelessWidget {
         .toList();
   }
 
-  // Today's bar is highlighted; the rest stay quiet so one big day doesn't
-  // read as an alarm.
-  /// An empty day keeps a 2px stub so its slot stays visible.
   double _barHeight(double fraction) => fraction == 0 ? 2 : 48 * fraction;
 
   Color _barColor(ColorScheme colors, int index, int length, double height) {
@@ -168,7 +161,7 @@ class DashboardTrendCard extends StatelessWidget {
     final changeColor = _changeColor(context.palette);
 
     return AppCard(
-      borderRadius: AppSpacing.radiusControl,
+      borderRadius: AppSpacing.radiusCard,
       padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

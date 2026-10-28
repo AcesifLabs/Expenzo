@@ -133,7 +133,7 @@ void main() {
       final created = verify(
         () => budgets.createBudget(captureAny()),
       ).captured.cast<Budget>();
-      // 5000 - 1225 = 3775 -> 1887.50 / 1132.50 / 755.00
+
       expect(created.map((b) => b.amount), [1887.5, 1132.5, 755.0]);
       expect(created.map((b) => b.name), ['Needs', 'Wants', 'Savings']);
       expect(

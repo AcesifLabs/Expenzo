@@ -12,19 +12,15 @@ import '../../domain/repositories/family_repository.dart';
 import '../datasources/family_local_datasource.dart';
 import '../datasources/family_remote_datasource.dart';
 
-/// Called with the cached group before and the group after each change of
-/// what the phone knows (fetch, create, join, leave, removal). Drops
-/// Shared Budgets the phone should no longer have.
 typedef GroupFetchedHook =
     Future<void> Function({MyGroup? previous, MyGroup? current});
 
 class FamilyRepositoryImpl implements FamilyRepository {
   final FamilyRemoteDatasource remote;
   final FamilyLocalDatasource local;
-  final GroupFetchedHook? onGroupFetched;
+  final GroupFetchedHook onGroupFetched;
   final DateTime Function() clock;
 
-  /// Server error codes the user has their own text for.
   static const _familyCodes = {
     FailureCodes.alreadyInGroup,
     FailureCodes.currencyMismatch,
@@ -45,7 +41,7 @@ class FamilyRepositoryImpl implements FamilyRepository {
   FamilyRepositoryImpl({
     required this.remote,
     required this.local,
-    this.onGroupFetched,
+    required this.onGroupFetched,
     this.clock = DateTime.now,
   });
 
@@ -124,8 +120,7 @@ class FamilyRepositoryImpl implements FamilyRepository {
   Future<Either<Failure, InviteCode>> createInvite(String groupId) =>
       _request(() async {
         final invite = await remote.createInvite(groupId);
-        // Kept in the cached group, so reopening the Invite screen reuses
-        // this code instead of making a second one.
+
         final cached = local.readGroup();
         if (cached case Cached(value: final group?, :final fetchedAt)) {
           await local.writeGroup(group.copyWith(invite: invite), fetchedAt);
@@ -182,8 +177,6 @@ class FamilyRepositoryImpl implements FamilyRepository {
     return group;
   });
 
-  /// Runs [call]; a NOT_IN_GROUP answer means the caller was removed or the
-  /// group deleted, so the cached group is dropped.
   Future<Either<Failure, T>> _request<T>(Future<T> Function() call) async {
     try {
       return Right(await call());
@@ -200,11 +193,9 @@ class FamilyRepositoryImpl implements FamilyRepository {
     if (group == null || group.group.id != previous?.group.id) {
       await local.clearSummary();
     }
-    await onGroupFetched?.call(previous: previous, current: group);
+    await onGroupFetched(previous: previous, current: group);
   }
 
-  /// The cached summary of [groupId]; a summary is useless without the
-  /// cached group (roles, names), so then it is dropped.
   Cached<GroupSummary>? _cachedSummaryOf(String groupId) {
     final group = cachedGroup;
     final summary = local.readSummary();
@@ -217,8 +208,6 @@ class FamilyRepositoryImpl implements FamilyRepository {
     return summary?.value.groupId == groupId ? summary : null;
   }
 
-  /// Offline (no status) or a server fault: the cache still says the truth
-  /// as last known. A 4xx answer is a real "no".
   bool _canUseCache(ServerException e) {
     final status = e.statusCode;
 

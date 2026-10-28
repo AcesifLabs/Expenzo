@@ -1,14 +1,7 @@
+import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-// TODO: Migrate to blocTest<BudgetBloc, BudgetState>(...) when bloc_test dep
-// can be added (currently blocked by version conflicts). Example:
-//   blocTest<BudgetBloc, BudgetState>(
-//     'emits [BudgetLoading, BudgetLoaded]',
-//     build: () => bloc,
-//     act: (bloc) => bloc.add(LoadBudgets()),
-//     expect: () => [isA<BudgetLoading>(), isA<BudgetLoaded>()],
-//   );
 
 import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
@@ -80,114 +73,109 @@ void main() {
     bloc.close();
   });
 
+  final progress = BudgetProgress(
+    budgetId: 'budget-1',
+    name: 'Test Budget',
+    budgetAmount: 1000,
+    effectiveAmount: 1000,
+    spentAmount: 200,
+    rolloverAmount: 0,
+    percentage: 20,
+    isOverBudget: false,
+    periodRange: DateTimeRange(
+      start: DateTime(now.year, now.month, 1),
+      end: DateTime(now.year, now.month + 1, 0),
+    ),
+    period: BudgetPeriod.monthly,
+  );
+
+  void stubLoad({List<BudgetProgress> progressList = const []}) {
+    when(() => mockGetBudgets()).thenAnswer((_) async => Right([testBudget]));
+    when(
+      () => mockGetBudgetsWithProgress(limit: any(named: 'limit')),
+    ).thenAnswer((_) async => Right(progressList));
+  }
+
   group('LoadBudgets', () {
-    test(
-      'emits [BudgetLoading, BudgetLoaded] with progress when both succeed',
-      () async {
-        final progress = BudgetProgress(
-          budgetId: 'budget-1',
-          name: 'Test Budget',
-          budgetAmount: 1000,
-          effectiveAmount: 1000,
-          spentAmount: 200,
-          rolloverAmount: 0,
-          percentage: 20,
-          isOverBudget: false,
-          periodRange: DateTimeRange(
-            start: DateTime(now.year, now.month, 1),
-            end: DateTime(now.year, now.month + 1, 0),
-          ),
-          period: BudgetPeriod.monthly,
-        );
-
-        when(
-          () => mockGetBudgets(),
-        ).thenAnswer((_) async => Right([testBudget]));
-        when(
-          () => mockGetBudgetsWithProgress(limit: any(named: 'limit')),
-        ).thenAnswer((_) async => Right([progress]));
-
-        final expected = [
-          isA<BudgetLoading>(),
-          isA<BudgetLoaded>().having(
-            (s) => s.progressByBudgetId,
-            'progressByBudgetId',
-            {'budget-1': progress},
-          ),
-        ];
-
-        expectLater(bloc.stream, emitsInOrder(expected));
-        bloc.add(const LoadBudgets());
-      },
+    blocTest<BudgetBloc, BudgetState>(
+      'emits loading, then the budgets with their progress',
+      setUp: () => stubLoad(progressList: [progress]),
+      build: () => bloc,
+      act: (bloc) => bloc.add(const LoadBudgets()),
+      expect: () => [
+        isA<BudgetLoading>(),
+        isA<BudgetLoaded>().having(
+          (s) => s.progressByBudgetId,
+          'progressByBudgetId',
+          {'budget-1': progress},
+        ),
+      ],
     );
 
-    test('emits [BudgetLoading, BudgetError] when GetBudgets fails', () async {
-      when(
+    blocTest<BudgetBloc, BudgetState>(
+      'emits loading, then the storage message when loading fails',
+      setUp: () => when(
         () => mockGetBudgets(),
-      ).thenAnswer((_) async => Left(ServerFailure(message: 'Failed to load')));
-
-      final expected = [
+      ).thenAnswer((_) async => Left(CacheFailure(message: 'Failed to load'))),
+      build: () => bloc,
+      act: (bloc) => bloc.add(const LoadBudgets()),
+      expect: () => [
         isA<BudgetLoading>(),
         isA<BudgetError>().having(
           (s) => s.message,
           'message',
-          t.common.errors.server,
+          t.common.errors.storage,
         ),
-      ];
-
-      expectLater(bloc.stream, emitsInOrder(expected));
-      bloc.add(const LoadBudgets());
-    });
+      ],
+    );
   });
 
-  group('LoadBudgetTransactions', () {
-    test('emits loading then transactions on the loaded state', () async {
-      final progress = BudgetProgress(
-        budgetId: 'budget-1',
-        name: 'Test Budget',
-        budgetAmount: 1000,
-        effectiveAmount: 1000,
-        spentAmount: 200,
-        rolloverAmount: 0,
-        percentage: 20,
-        isOverBudget: false,
-        periodRange: DateTimeRange(
-          start: DateTime(now.year, now.month, 1),
-          end: DateTime(now.year, now.month + 1, 0),
-        ),
-        period: BudgetPeriod.monthly,
-      );
-
-      when(() => mockGetBudgets()).thenAnswer((_) async => Right([testBudget]));
-      when(
-        () => mockGetBudgetsWithProgress(limit: any(named: 'limit')),
-      ).thenAnswer((_) async => Right([progress]));
+  blocTest<BudgetBloc, BudgetState>(
+    'loading transactions marks the loaded state busy, then done',
+    setUp: () {
+      stubLoad(progressList: [progress]);
       when(
         () => mockGetBudgetTransactions('budget-1'),
       ).thenAnswer((_) async => const Right([]));
-
-      expectLater(
-        bloc.stream,
-        emitsInOrder([
-          isA<BudgetLoading>(),
-          isA<BudgetLoaded>(),
-          isA<BudgetLoaded>().having(
-            (s) => s.isLoadingTransactions,
-            'isLoadingTransactions',
-            true,
-          ),
-          isA<BudgetLoaded>().having(
-            (s) => s.isLoadingTransactions,
-            'isLoadingTransactions',
-            false,
-          ),
-        ]),
-      );
-
+    },
+    build: () => bloc,
+    act: (bloc) async {
       bloc.add(const LoadBudgets());
-      // Let the first load complete
-      await Future.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
       bloc.add(const LoadBudgetTransactions('budget-1'));
-    });
-  });
+    },
+    expect: () => [
+      isA<BudgetLoading>(),
+      isA<BudgetLoaded>(),
+      isA<BudgetLoaded>().having(
+        (s) => s.isLoadingTransactions,
+        'isLoadingTransactions',
+        true,
+      ),
+      isA<BudgetLoaded>().having(
+        (s) => s.isLoadingTransactions,
+        'isLoadingTransactions',
+        false,
+      ),
+    ],
+  );
+
+  blocTest<BudgetBloc, BudgetState>(
+    'a double tap on Create creates one budget',
+    setUp: () {
+      registerFallbackValue(testBudget);
+      when(() => mockCreateBudget(any())).thenAnswer((_) async {
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+
+        return Right(testBudget);
+      });
+      stubLoad();
+    },
+    build: () => bloc,
+    act: (bloc) => bloc
+      ..add(CreateBudgetEvent(testBudget))
+      ..add(CreateBudgetEvent(testBudget)),
+    wait: const Duration(milliseconds: 100),
+    verify: (_) => verify(() => mockCreateBudget(any())).called(1),
+  );
 }

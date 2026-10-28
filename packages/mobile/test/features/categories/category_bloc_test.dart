@@ -78,14 +78,14 @@ void main() {
     test('emits [CategoryLoading, CategoryError] on failure', () async {
       when(
         () => mockGetCategories(any()),
-      ).thenAnswer((_) async => Left(ServerFailure(message: 'Failed to load')));
+      ).thenAnswer((_) async => Left(CacheFailure(message: 'Failed to load')));
 
       final expected = [
         isA<CategoryLoading>(),
         isA<CategoryError>().having(
           (s) => s.message,
           'message',
-          t.common.errors.server,
+          t.common.errors.storage,
         ),
       ];
 
@@ -117,20 +117,38 @@ void main() {
     test('emits [CategoryLoading, CategoryError] on create failure', () async {
       when(
         () => mockCreateCategory(any()),
-      ).thenAnswer((_) async => Left(ServerFailure(message: 'Create failed')));
+      ).thenAnswer((_) async => Left(CacheFailure(message: 'Create failed')));
 
       final expected = [
         isA<CategoryLoading>(),
         isA<CategoryError>().having(
           (s) => s.message,
           'message',
-          t.common.errors.server,
+          t.common.errors.storage,
         ),
       ];
 
       expectLater(bloc.stream, emitsInOrder(expected));
       bloc.add(CreateCategoryEvent(testCategory));
     });
+  });
+
+  test('a double tap on Save creates one category', () async {
+    when(() => mockCreateCategory(any())).thenAnswer((_) async {
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+
+      return Right(testCategory);
+    });
+    when(
+      () => mockGetCategories(any()),
+    ).thenAnswer((_) async => Right([testCategory]));
+
+    bloc
+      ..add(CreateCategoryEvent(testCategory))
+      ..add(CreateCategoryEvent(testCategory));
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+
+    verify(() => mockCreateCategory(any())).called(1);
   });
 }
 

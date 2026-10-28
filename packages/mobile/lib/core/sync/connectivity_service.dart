@@ -31,6 +31,26 @@ class ConnectivityService {
     }
   }
 
+  Future<bool> hasNetworkLink() async {
+    try {
+      final results = await _connectivity.checkConnectivity();
+
+      return results.any((r) => r != ConnectivityResult.none);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static bool _isHealthy(Response<Object?> response) {
+    final status = response.statusCode ?? 0;
+    final body = response.data;
+
+    return status >= 200 &&
+        status < 300 &&
+        body is Map &&
+        body[ApiConstants.healthStatusKey] == ApiConstants.healthOk;
+  }
+
   Future<bool> _checkConnectivity(List<ConnectivityResult> results) async {
     if (results.isEmpty || results.contains(ConnectivityResult.none)) {
       _isOnline = false;
@@ -38,15 +58,16 @@ class ConnectivityService {
       return false;
     }
     try {
-      await _apiClient.dio
-          .get(
+      final response = await _apiClient.dio
+          .get<Object?>(
             ApiConstants.health,
             options: Options(validateStatus: (_) => true),
           )
           .timeout(const Duration(seconds: 5));
-      _isOnline = true;
 
-      return true;
+      _isOnline = _isHealthy(response);
+
+      return _isOnline;
     } catch (e) {
       _isOnline = false;
 

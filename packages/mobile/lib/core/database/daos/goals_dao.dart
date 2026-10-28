@@ -28,10 +28,9 @@ class GoalsDao extends DatabaseAccessor<AppDatabase> with _$GoalsDaoMixin {
     await (delete(goals)..where((g) => g.id.equals(id))).go();
   }
 
-  /// The goal the dashboard shows: the newest by createdAt, or null. A goal
-  /// stays active after it is reached, until it is deleted or a newer one is
-  /// added.
-  Stream<Goal?> watchActiveGoal() => _activeGoal().watchSingleOrNull();
+  /// Every goal, newest first.
+  Stream<List<Goal>> watchGoals() =>
+      (select(goals)..orderBy([(g) => OrderingTerm.desc(g.createdAt)])).watch();
 
   Future<Goal?> getActiveGoal() => _activeGoal().getSingleOrNull();
 

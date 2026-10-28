@@ -1,11 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart' as fsms;
-import 'package:expense_tracker/core/database/app_database.dart';
-import 'package:expense_tracker/core/database/daos/parsing_rule_dao.dart';
 import 'package:expense_tracker/core/database/daos/message_template_dao.dart';
-import 'package:expense_tracker/features/parsing_rules/domain/repositories/parsing_rules_repository.dart';
-import 'package:expense_tracker/features/parsing_rules/data/datasources/parsing_rules_local_datasource.dart';
-import 'package:expense_tracker/features/parsing_rules/data/repositories/parsing_rules_repository_impl.dart';
+import 'package:expense_tracker/core/database/daos/sync_queue_dao.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/services/parsing_isolate_service.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/usecases/evaluate_rules_use_case.dart';
 import 'package:expense_tracker/features/message_templates/domain/repositories/message_template_repository.dart';
@@ -15,7 +11,9 @@ import 'package:expense_tracker/features/message_templates/domain/usecases/get_m
 import 'package:expense_tracker/features/message_templates/domain/usecases/save_message_source.dart';
 import 'package:expense_tracker/features/message_templates/domain/usecases/get_templates_for_source.dart';
 import 'package:expense_tracker/features/message_templates/domain/usecases/save_template.dart';
+import 'package:expense_tracker/features/message_templates/domain/usecases/get_sms_watchlist.dart';
 import 'package:expense_tracker/features/message_templates/presentation/bloc/message_sources_bloc.dart';
+import 'package:expense_tracker/features/message_templates/presentation/bloc/sms_watchlist_bloc.dart';
 import 'package:expense_tracker/features/message_templates/presentation/bloc/contact_selector_bloc.dart';
 import 'package:expense_tracker/features/message_templates/presentation/bloc/sample_analyzer_bloc.dart';
 import 'package:expense_tracker/features/message_templates/presentation/bloc/template_editor_bloc.dart';
@@ -28,10 +26,6 @@ import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanne
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets_with_progress.dart';
 import 'package:expense_tracker/features/records/domain/usecases/create_records_from_parsed_list.dart';
-import 'package:expense_tracker/features/parsing_rules/domain/usecases/get_rules.dart';
-import 'package:expense_tracker/features/parsing_rules/domain/usecases/update_rule.dart';
-import 'package:expense_tracker/features/parsing_rules/domain/usecases/delete_rule.dart';
-import 'package:expense_tracker/features/parsing_rules/presentation/bloc/parsing_rules_bloc.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/check_budget_alerts.dart';
 
 void initParsingModule(GetIt getIt) {
@@ -44,33 +38,6 @@ void _initParsingInfrastructure(GetIt getIt) {
   getIt.registerLazySingleton<ParsingIsolateService>(
     () => ParsingIsolateService(),
   );
-  getIt.registerLazySingleton<ParsingRuleDao>(
-    () => ParsingRuleDao(getIt<AppDatabase>()),
-  );
-  getIt.registerLazySingleton<ParsingRulesLocalDatasource>(
-    () => ParsingRulesLocalDatasourceImpl(getIt<ParsingRuleDao>()),
-  );
-  getIt.registerLazySingleton<ParsingRulesRepository>(
-    () => ParsingRulesRepositoryImpl(
-      localDatasource: getIt<ParsingRulesLocalDatasource>(),
-    ),
-  );
-  // Settings → Matching rules.
-  getIt.registerLazySingleton(() => GetRules(getIt<ParsingRulesRepository>()));
-  getIt.registerLazySingleton(
-    () => UpdateRule(getIt<ParsingRulesRepository>()),
-  );
-  getIt.registerLazySingleton(
-    () => DeleteRule(getIt<ParsingRulesRepository>()),
-  );
-  getIt.registerFactory<ParsingRulesBloc>(
-    () => ParsingRulesBloc(
-      getRules: getIt<GetRules>(),
-      updateRule: getIt<UpdateRule>(),
-      deleteRuleUseCase: getIt<DeleteRule>(),
-      repository: getIt<ParsingRulesRepository>(),
-    ),
-  );
 }
 
 void _initMessageTemplates(GetIt getIt) {
@@ -78,8 +45,10 @@ void _initMessageTemplates(GetIt getIt) {
     () => MessageTemplateLocalDatasourceImpl(getIt<MessageTemplateDao>()),
   );
   getIt.registerLazySingleton<MessageTemplateRepository>(
-    () =>
-        MessageTemplateRepositoryImpl(getIt<MessageTemplateLocalDatasource>()),
+    () => MessageTemplateRepositoryImpl(
+      localDatasource: getIt<MessageTemplateLocalDatasource>(),
+      syncQueueDao: getIt<SyncQueueDao>(),
+    ),
   );
   getIt.registerLazySingleton(
     () => GetMessageSources(getIt<MessageTemplateRepository>()),
@@ -96,6 +65,15 @@ void _initMessageTemplates(GetIt getIt) {
   getIt.registerFactory<MessageSourcesBloc>(
     () => MessageSourcesBloc(
       getMessageSources: getIt<GetMessageSources>(),
+      saveMessageSource: getIt<SaveMessageSource>(),
+    ),
+  );
+  getIt.registerLazySingleton(
+    () => GetSmsWatchlist(getIt<MessageTemplateRepository>()),
+  );
+  getIt.registerFactory<SmsWatchlistBloc>(
+    () => SmsWatchlistBloc(
+      getSmsWatchlist: getIt<GetSmsWatchlist>(),
       saveMessageSource: getIt<SaveMessageSource>(),
     ),
   );
@@ -118,10 +96,7 @@ void _initMessageTemplates(GetIt getIt) {
 
 void _initSmsParsing(GetIt getIt) {
   getIt.registerLazySingleton(
-    () => EvaluateRulesUseCase(
-      getIt<ParsingRulesRepository>(),
-      getIt<MessageTemplateRepository>(),
-    ),
+    () => EvaluateRulesUseCase(getIt<MessageTemplateRepository>()),
   );
 
   getIt.registerLazySingleton<SmsLocalDatasource>(

@@ -42,7 +42,7 @@ class _RetroactiveScanDialogState extends State<RetroactiveScanDialog> {
   }
 
   Future<void> _runScan() async {
-    await Future.delayed(const Duration(seconds: 2));
+    await Future<void>.delayed(const Duration(seconds: 2));
 
     if (mounted) {
       setState(() {

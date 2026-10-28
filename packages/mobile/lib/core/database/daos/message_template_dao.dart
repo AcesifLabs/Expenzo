@@ -42,6 +42,12 @@ class MessageTemplateDao extends DatabaseAccessor<AppDatabase>
     )..where((t) => t.sourceId.equals(sourceId))).get();
   }
 
+  Future<ExpenseTemplate?> getTemplateById(String id) {
+    return (select(
+      expenseTemplates,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
+  }
+
   Future<List<ExpenseTemplate>> getAllTemplates() =>
       select(expenseTemplates).get();
 

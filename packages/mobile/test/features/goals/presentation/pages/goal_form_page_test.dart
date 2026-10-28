@@ -32,7 +32,7 @@ void main() {
       _MockGoalFormBloc(),
       state,
     );
-    // The page fills its fields when the bloc reports ready.
+
     when(() => bloc.stream).thenAnswer((_) => Stream.value(state));
     await tester.binding.setSurfaceSize(const Size(400, 1200));
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -90,7 +90,7 @@ void main() {
     final shown = find.textContaining('2027');
     expect(shown, findsOneWidget);
 
-    await tester.tap(find.text(t.goals.form.targetDate));
+    await tester.tap(shown);
     await tester.pumpAndSettle();
     Navigator.of(tester.element(find.byType(DatePickerDialog))).pop();
     await tester.pumpAndSettle();

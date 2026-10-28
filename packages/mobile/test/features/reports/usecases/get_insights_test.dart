@@ -43,7 +43,6 @@ SpendingInsights buildSpendingInsights({
   );
 }
 
-/// Daily points from Monday 2026-01-05 (Monday is the default first day).
 List<DateAmount> buildTrend(int days, {int startDay = 5}) {
   return List.generate(
     days,
@@ -198,8 +197,6 @@ void main() {
     });
 
     group('best savings week follows the first day of week', () {
-      // Jan 2026: the 4th is a Sunday, the 10th a Saturday. Twenty days
-      // from the 3rd, with the 11th-17th the cheapest Sunday week.
       final trend = [
         for (var day = 3; day <= 22; day++)
           DateAmount(
@@ -254,7 +251,6 @@ void main() {
       });
 
       test('no full week from the first day gives no insight', () {
-        // Seven days from a Monday hold no full Sunday-start week.
         expect(weekFor(DateTime.sunday, buildTrend(7)), isNull);
       });
     });

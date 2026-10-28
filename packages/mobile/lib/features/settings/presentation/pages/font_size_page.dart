@@ -22,7 +22,6 @@ class FontSizePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // SettingsBloc is an app-wide singleton; `create` would close it on pop.
     return BlocProvider.value(
       value: di.getIt<SettingsBloc>(),
       child: const Scaffold(body: FontSizeView()),
@@ -30,8 +29,6 @@ class FontSizePage extends StatelessWidget {
   }
 }
 
-/// The four text sizes, with a sample transaction at the current size.
-/// The design's Font family section was cut (docs/adr/0011).
 class FontSizeView extends StatelessWidget {
   const FontSizeView({super.key});
 

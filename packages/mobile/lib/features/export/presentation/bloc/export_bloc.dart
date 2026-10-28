@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/core/bloc/transformers.dart';
 import 'package:expense_tracker/core/error/failure_message.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
@@ -9,7 +10,6 @@ import '../../domain/usecases/export_data.dart';
 import 'export_event.dart';
 import 'export_state.dart';
 
-/// Holds the Export data screen's choices and runs export, then share.
 class ExportBloc extends Bloc<ExportEvent, ExportState> {
   final ExportData exportData;
   final FileShareService shareService;
@@ -77,14 +77,14 @@ class ExportBloc extends Bloc<ExportEvent, ExportState> {
       ),
       (file) async {
         try {
-          // Either outcome ends the same way: the file was produced.
           await shareService.shareFile(
             file.path,
             mimeType: file.mimeType,
             subject: t.settings.export.shareSubject,
           );
           emit(state.copyWith(status: ExportStatus.shared));
-        } catch (_) {
+        } catch (e, s) {
+          appLogger.error('Export share failed', e, s);
           emit(
             state.copyWith(
               status: ExportStatus.failed,

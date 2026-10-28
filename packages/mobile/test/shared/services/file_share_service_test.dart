@@ -33,7 +33,6 @@ void main() {
           .setMockMethodCallHandler(channel, (call) async {
             calls.add(call);
 
-            // share_plus reads an empty result as dismissed.
             return '';
           });
     });

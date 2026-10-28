@@ -14,8 +14,6 @@ import '../bloc/onboarding_bloc.dart';
 import '../bloc/onboarding_event.dart';
 import 'onboarding_page_frame.dart';
 
-/// Step 3 (frame `OnboardingBudgetCalc`): the fixed 50/30/20 split of what
-/// is left after recurring payments ("Drag to adjust" is cut, ADR 0011).
 class OnboardingBudgetPlanPage extends StatefulWidget {
   const OnboardingBudgetPlanPage({super.key});
 
@@ -139,8 +137,6 @@ class _ShareRow extends StatelessWidget {
   }
 }
 
-/// The donut with the monthly amount in the middle; one empty ring when
-/// there is nothing to split.
 class _PlanDonut extends StatelessWidget {
   static const _size = 180.0;
 

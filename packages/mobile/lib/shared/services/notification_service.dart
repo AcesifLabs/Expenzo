@@ -4,6 +4,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/features/reports/domain/entities/weekly_summary.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
 class NotificationService {
@@ -15,8 +16,6 @@ class NotificationService {
 
   static final NotificationService _instance = NotificationService._internal();
 
-  // Shown in Android's notification settings, in the language of the moment
-  // the channel was created or a notification was posted.
   static String get _channelName => t.notifications.channel.name;
   static String get _channelDescription => t.notifications.channel.description;
 
@@ -27,7 +26,7 @@ class NotificationService {
     if (_isInitialized) return;
 
     const androidSettings = AndroidInitializationSettings(
-      '@mipmap/ic_launcher',
+      '@mipmap/launcher_icon',
     );
     const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: true,
@@ -64,8 +63,6 @@ class NotificationService {
     }
   }
 
-  /// Whether the system will actually show our notifications. On Android 13+
-  /// that needs the runtime permission; other platforms report true.
   Future<bool> canNotify() async {
     if (!_isInitialized) await initialize();
     final android = _notifications
@@ -115,8 +112,6 @@ class NotificationService {
   }) async {
     final deepLink = 'expenso://budgets/$budgetId';
 
-    // isOver comes from CheckBudgetAlerts so the text matches the rule that
-    // fired: exactly at the limit is "used 100%", not "went over".
     final strings = t.notifications.budget;
     final body = isOver
         ? strings.over(budget: budgetName)
@@ -227,17 +222,12 @@ class NotificationService {
 
       return data['deepLink'] as String?;
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
-      if (kDebugMode) {
-        debugPrint('Failed to parse notification payload: $e');
-      }
+      appLogger.error('Notification payload is not a valid deep link', e, s);
 
       return null;
     }
   }
 
-  /// Recurring reminders get one id per item, so reminders sent in the same
-  /// second don't replace each other; the rest use the time.
   static int _idFor(NotificationType type, String? deepLink) {
     if (type == NotificationType.recurringDue && deepLink != null) {
       return deepLink.hashCode;

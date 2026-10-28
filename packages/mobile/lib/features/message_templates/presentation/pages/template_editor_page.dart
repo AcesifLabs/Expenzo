@@ -19,12 +19,6 @@ import '../widgets/template_editor_components.dart';
 import '../bloc/message_sources_bloc.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
-/// Words from an SMS that can identify its type, in message order.
-///
-/// Punctuation is trimmed only at the edges so "A/C" stays "A/C" and the word
-/// still matches the message text (templates match with `contains`). Plain
-/// numbers and amounts ("450.00", "9,550") are left out: they change between
-/// messages, so they can't identify one. Repeats are shown once.
 List<String> triggerWordCandidates(String body) {
   final edgePunctuation = RegExp(
     r'^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$',
@@ -46,11 +40,6 @@ class TemplateEditorPage extends StatelessWidget {
   final MessageSource source;
   final SmsMessage sampleMessage;
 
-  /// When provided, the page enters edit-mode: trigger word and amount
-  /// are pre-filled from this template, the AppBar title says
-  /// "Edit Template", the row id is preserved so save upserts the
-  /// existing row, and the post-save retroactive-scan dialog is
-  /// skipped. When null, the page is in create-mode.
   final ExpenseTemplate? existingTemplate;
 
   const TemplateEditorPage({
@@ -121,8 +110,6 @@ class _InteractiveTemplateBuilderState
     final body = widget.sampleMessage.body;
     _words = triggerWordCandidates(body);
 
-    // Matches optional currency prefix (Tk, Rs, USD, etc.) followed by a
-    // number with optional thousands-separator commas and decimal part.
     final numRegex = RegExp(
       r'(?:[A-Z]{2,4}[\s.]*|[$€£৳₹]\s*)?([\d][\d,]*\.\d+|[\d]+)',
       caseSensitive: false,
@@ -132,8 +119,6 @@ class _InteractiveTemplateBuilderState
     _applyExistingTemplatePrefill();
   }
 
-  /// In edit-mode, pre-select the previously chosen trigger word and
-  /// amount so the user can either accept or revise.
   void _applyExistingTemplatePrefill() {
     final existing = widget.existingTemplate;
     if (existing == null) return;
@@ -149,13 +134,8 @@ class _InteractiveTemplateBuilderState
           break;
         }
       }
-      // If the previous amount isn't in this message body (rare), leave
-      // _selectedAmount null so the user re-picks on Step 2.
     }
 
-    // Open at Step 3 (Review) in edit-mode so the user sees the live
-    // values they just loaded and can either accept or step back to
-    // adjust. Create-mode still opens at Step 1.
     _step = 3;
   }
 
@@ -180,8 +160,6 @@ class _InteractiveTemplateBuilderState
     final amount = _selectedAmount;
     if (trigger == null || amount == null) return;
 
-    // Currency prefix is optional so patterns like "Tk 1,000.00" or bare
-    // "1,000.00" both match.  Group 1 = amount, group 2 = decimal variant.
     const amountPattern =
         r'(?:[A-Z]{2,4}[\s.]*|[$€£৳₹]\s*)?([\d][\d,]*\.\d+|[\d]+)';
 
@@ -189,7 +167,6 @@ class _InteractiveTemplateBuilderState
     final now = DateTime.now();
 
     _savedTemplate = ExpenseTemplate(
-      // Preserve id in edit-mode so save upserts the same row.
       id: existing?.id ?? 'tmpl_${now.millisecondsSinceEpoch}',
       sourceId: widget.source.id,
       sampleMessage: widget.sampleMessage.body,
@@ -206,10 +183,12 @@ class _InteractiveTemplateBuilderState
 
     final saved = _savedTemplate;
     if (saved == null) return;
-    final monitoredSource = widget.source.copyWith(isMonitored: true);
-    context.read<TemplateEditorBloc>().add(
-      SaveTemplateEvent(saved, monitoredSource),
-    );
+    // A new format turns the sender on; editing one keeps a paused sender
+    // paused.
+    final source = existing == null
+        ? widget.source.copyWith(isMonitored: true)
+        : widget.source;
+    context.read<TemplateEditorBloc>().add(SaveTemplateEvent(saved, source));
   }
 
   Widget _buildStepScaffold({
@@ -290,7 +269,6 @@ class _InteractiveTemplateBuilderState
     );
   }
 
-  /// Says why the step's button is disabled, right above it.
   Widget _withHint({required String? hint, required Widget child}) {
     if (hint == null) return child;
 
@@ -538,8 +516,6 @@ class _InteractiveTemplateBuilderState
   ) async {
     final isEdit = widget.existingTemplate != null;
 
-    // Edit-mode skips the retroactive scan: editing doesn't generate
-    // new candidate messages. Create-mode keeps the existing flow.
     if (!isEdit) {
       await showRetroactiveScanDialog(context, widget.source, saved);
     }

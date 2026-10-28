@@ -54,7 +54,6 @@ Budget _budget(String id, String name) => Budget(
   updatedAt: _stamp,
 );
 
-/// Rows of [text] after the BOM.
 List<List<dynamic>> _rows(String text) {
   expect(text.startsWith('﻿'), isTrue, reason: 'missing UTF-8 BOM');
 

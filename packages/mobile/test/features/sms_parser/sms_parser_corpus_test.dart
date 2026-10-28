@@ -2,43 +2,35 @@ import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/features/message_templates/domain/repositories/message_template_repository.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/entities/evaluate_rules_params.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/entities/parsing_context.dart';
-import 'package:expense_tracker/features/parsing_rules/domain/entities/parsing_rule.dart';
-import 'package:expense_tracker/features/parsing_rules/domain/repositories/parsing_rules_repository.dart';
+import 'package:expense_tracker/features/message_templates/domain/entities/expense_template.dart';
+import 'package:expense_tracker/features/message_templates/domain/entities/message_source.dart';
 import 'package:expense_tracker/features/parsing_rules/domain/usecases/evaluate_rules_use_case.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 import 'sms_corpus_loader.dart';
 
-class MockRulesRepo extends Mock implements ParsingRulesRepository {}
-
 class MockTemplatesRepo extends Mock implements MessageTemplateRepository {}
 
 void main() {
   group('UAE bank SMS corpus', () {
     late List<CorpusWorkbook> corpus;
-    late MockRulesRepo rulesRepo;
     late MockTemplatesRepo templatesRepo;
     late EvaluateRulesUseCase useCase;
     late ParsingContext context;
 
     setUpAll(() async {
       corpus = await loadSmsCorpus();
-      rulesRepo = MockRulesRepo();
       templatesRepo = MockTemplatesRepo();
-      when(
-        () => rulesRepo.getRules(isEnabled: any(named: 'isEnabled')),
-      ).thenAnswer((_) async => Right(corpusRules()));
+      final sources = corpusSources(corpus);
       when(
         () => templatesRepo.getAllTemplates(),
-      ).thenAnswer((_) async => const Right([]));
+      ).thenAnswer((_) async => Right(corpusFormats(sources)));
       when(
         () => templatesRepo.getMessageSources(),
-      ).thenAnswer((_) async => const Right([]));
-      useCase = EvaluateRulesUseCase(rulesRepo, templatesRepo);
+      ).thenAnswer((_) async => Right(sources));
+      useCase = EvaluateRulesUseCase(templatesRepo);
 
-      // Pre-load the parse context once so the loop below doesn't
-      // pay 4500 context rebuilds.
       context = await useCase.loadContext();
     });
 
@@ -59,9 +51,6 @@ void main() {
 
     test('every fixture has a non-empty body and a sane row count', () {
       for (final wb in corpus) {
-        // the loader should yield one fixture per data row whose
-        // body came back non-empty. tableRowCount includes the
-        // header so we expect ≤ tableRowCount - 1.
         expect(
           wb.fixtures.length,
           lessThanOrEqualTo(wb.tableRowCount - 1),
@@ -96,8 +85,8 @@ void main() {
                   rawMessage: f.body,
                   sourceType: 'sms',
                   sourceId: f.sourceId,
-                  address: f.sender,
-                  messageDate: f.date,
+                  address: f.sender ?? '',
+                  messageDate: f.date ?? DateTime(2026),
                 ),
               );
             } catch (e) {
@@ -112,16 +101,6 @@ void main() {
 
     test('try/catch wrapper produces "<file> row N threw ..." on '
         'per-row failure (simulated)', () {
-      // Note: RuleEvaluator already has its own internal try/catch
-      // around `_evaluateRule` / `_evaluateTemplate`, so the per-row
-      // catch above *should* never fire under normal operation.
-      // This test pins down the exact shape of the fail() message
-      // that the loop would surface IF a future change ever let an
-      // exception escape that inner guard — so a regression that
-      // mangles the message format is caught.
-      //
-      // Deterministic target: the second fixture of the last
-      // workbook (every workbook in the corpus has ≥ 2 fixtures).
       final wb = corpus.last;
       if (wb.fixtures.length < 2) {
         fail('corpus too small for the simulated-throw shape test');
@@ -155,29 +134,17 @@ void main() {
 
     test('catastrophic-backtracking amountPattern does not escape '
         'as a per-row throw across a corpus slice', () async {
-      // Use the classic ReDoS pattern (.*)* as the amountPattern.
-      // The integration test (`regexTimeout_flow`) proved this is
-      // fenced by RuleEvaluator's internal try/catch (returns
-      // parseFailed: true). Here we re-verify under the corpus
-      // loop specifically: even on the worst fixture, the per-row
-      // catch in the bulk test should never fire.
-      final evilRepo = MockRulesRepo();
       final evilTemplatesRepo = MockTemplatesRepo();
-      when(
-        () => evilRepo.getRules(isEnabled: any(named: 'isEnabled')),
-      ).thenAnswer((_) async => Right(<ParsingRule>[catastrophicRule()]));
+      final sources = corpusSources(corpus);
       when(
         () => evilTemplatesRepo.getAllTemplates(),
-      ).thenAnswer((_) async => const Right([]));
+      ).thenAnswer((_) async => Right(catastrophicFormats(sources)));
       when(
         () => evilTemplatesRepo.getMessageSources(),
-      ).thenAnswer((_) async => const Right([]));
-      final evilUseCase = EvaluateRulesUseCase(evilRepo, evilTemplatesRepo);
+      ).thenAnswer((_) async => Right(sources));
+      final evilUseCase = EvaluateRulesUseCase(evilTemplatesRepo);
       final evilContext = await evilUseCase.loadContext();
 
-      // Slice to the first 3 fixtures per workbook so the
-      // catastrophic regex can't drive the runtime past the
-      // global test budget even if the guard ever regresses.
       var processed = 0;
       for (final wb in corpus) {
         for (final f in wb.fixtures.take(3)) {
@@ -188,21 +155,21 @@ void main() {
                 rawMessage: f.body,
                 sourceType: 'sms',
                 sourceId: f.sourceId,
-                address: f.sender,
-                messageDate: f.date,
+                address: f.sender ?? '',
+                messageDate: f.date ?? DateTime(2026),
               ),
             );
           } catch (e) {
             fail(
               '${wb.filename} row ${f.rowIndex} threw $e '
-              '(catastrophic rule guard regressed — '
+              '(catastrophic format guard regressed — '
               'per-row try/catch fired)',
             );
           }
           processed += 1;
         }
       }
-      // 7 workbooks × up-to-3 fixtures each.
+
       expect(processed, equals(21));
     }, timeout: const Timeout(Duration(minutes: 2)));
 
@@ -235,9 +202,6 @@ void main() {
       ];
 
       for (final c in positiveCases) {
-        // Locate the SMS in the corpus so we exercise the same
-        // evaluateWithPreloadedContext codepath used by the bulk
-        // pipeline test.
         SmsCorpusFixture? match;
         for (final wb in corpus) {
           for (final f in wb.fixtures) {
@@ -260,8 +224,8 @@ void main() {
             rawMessage: match!.body,
             sourceType: 'sms',
             sourceId: match.sourceId,
-            address: match.sender,
-            messageDate: match.date,
+            address: match.sender ?? '',
+            messageDate: match.date ?? DateTime(2026),
           ),
         );
 
@@ -277,16 +241,6 @@ void main() {
         );
       }
 
-      // Negative-subset: trigger word present, NO decimal numbers
-      // in the body. The parser must NOT extract an amount. This
-      // catches the regression class where the pipeline starts
-      // always returning a non-null amount (e.g. if someone adds a
-      // catch-all fallback in RuleEvaluator that fabricates a
-      // value).
-      //
-      // Bodies are synthetic (not in the corpus) — they exist
-      // precisely so that the regression guard doesn't depend on
-      // the corpus continuing to contain or not contain them.
       final negativeCases = <({String body, String trigger})>[
         (
           body:
@@ -315,6 +269,8 @@ void main() {
             rawMessage: n.body,
             sourceType: 'sms',
             sourceId: 'synthetic-neg:${n.trigger}',
+            address: corpus.first.fixtures.first.sender ?? '',
+            messageDate: DateTime(2026),
           ),
         );
 
@@ -331,48 +287,61 @@ void main() {
   });
 }
 
-List<ParsingRule> corpusRules() {
-  final ts = DateTime.utc(2026, 1, 1);
+final _ts = DateTime.utc(2026, 1, 1);
+
+/// Every corpus sender, watched.
+List<MessageSource> corpusSources(List<CorpusWorkbook> corpus) {
+  final senders = {
+    for (final wb in corpus)
+      for (final f in wb.fixtures) ?f.sender,
+  };
+
   return [
-    ParsingRule(
-      id: 'corpus_debit',
-      name: 'Corpus Debit',
-      triggerWords: const ['debited', 'withdrawn', 'trx. of', 'withdrawal'],
-      amountPattern: r'([\d,]+\.\d{2})',
-      sourceType: SourceType.sms,
-      isEnabled: true,
-      priority: 1,
-      createdAt: ts,
-      updatedAt: ts,
-    ),
-    ParsingRule(
-      id: 'corpus_credit',
-      name: 'Corpus Credit',
-      triggerWords: const ['credited', 'deposit', 'profit'],
-      amountPattern: r'([\d,]+\.\d{2})',
-      sourceType: SourceType.sms,
-      isEnabled: true,
-      priority: 2,
-      createdAt: ts,
-      updatedAt: ts,
-    ),
+    for (final sender in senders)
+      MessageSource(
+        id: 'src:$sender',
+        contactId: sender,
+        contactName: sender,
+        isMonitored: true,
+        createdAt: _ts,
+        updatedAt: _ts,
+      ),
   ];
 }
 
-/// Classic catastrophic-backtracking regex used by the resilience
-/// test. Syntactically valid (parsed without throwing) but a known
-/// ReDoS pattern — RuleEvaluator's internal fence must absorb it.
-ParsingRule catastrophicRule() {
-  final ts = DateTime.utc(2026, 1, 1);
-  return ParsingRule(
-    id: 'catastrophic',
-    name: 'Catastrophic ReDoS',
-    triggerWords: const ['debited', 'credited', 'withdrawn', 'trx. of'],
-    amountPattern: r'(.*)*',
-    sourceType: SourceType.sms,
-    isEnabled: true,
-    priority: 1,
-    createdAt: ts,
-    updatedAt: ts,
-  );
-}
+List<ExpenseTemplate> _formats(
+  List<MessageSource> sources,
+  List<String> triggers,
+  String amountPattern,
+) => [
+  for (final source in sources)
+    for (final trigger in triggers)
+      ExpenseTemplate(
+        id: '${source.id}:$trigger',
+        sourceId: source.id,
+        sampleMessage: trigger,
+        triggerWord: trigger,
+        amountPattern: amountPattern,
+        createdAt: _ts,
+        updatedAt: _ts,
+      ),
+];
+
+List<ExpenseTemplate> corpusFormats(List<MessageSource> sources) =>
+    _formats(sources, const [
+      'debited',
+      'withdrawn',
+      'trx. of',
+      'withdrawal',
+      'credited',
+      'deposit',
+      'profit',
+    ], r'([\d,]+\.\d{2})');
+
+List<ExpenseTemplate> catastrophicFormats(List<MessageSource> sources) =>
+    _formats(sources, const [
+      'debited',
+      'credited',
+      'withdrawn',
+      'trx. of',
+    ], r'(.*)*');

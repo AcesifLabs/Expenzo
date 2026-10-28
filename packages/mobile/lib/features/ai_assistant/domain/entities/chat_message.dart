@@ -7,6 +7,8 @@ class ChatMessage extends Equatable {
   final String content;
   final DateTime timestamp;
 
+  bool get isPendingReply => role == ChatRole.assistant && content.isEmpty;
+
   @override
   List<Object?> get props => [role, content, timestamp];
 

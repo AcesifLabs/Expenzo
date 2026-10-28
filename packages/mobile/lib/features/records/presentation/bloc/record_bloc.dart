@@ -9,6 +9,9 @@ import '../../domain/usecases/update_record.dart';
 import 'record_event.dart';
 import 'record_state.dart';
 import 'package:expense_tracker/core/error/failure_message.dart';
+import 'package:expense_tracker/core/error/failures.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
+import 'package:dartz/dartz.dart';
 
 const _pageSize = 50;
 
@@ -20,6 +23,8 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
   final RecordRepository recordRepository;
 
   StreamSubscription<List<Record>>? _recordsSubscription;
+
+  int _watchedLimit = _pageSize;
 
   RecordBloc({
     required this.getRecords,
@@ -38,6 +43,7 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     on<ApplyFilters>(_onApplyFilters, transformer: concurrent());
     on<ClearFilters>(_onClearFilters, transformer: concurrent());
     on<_RecordsUpdated>(_onRecordsUpdated, transformer: concurrent());
+    on<_RecordsWatchFailed>(_onRecordsWatchFailed, transformer: concurrent());
   }
 
   @override
@@ -47,14 +53,8 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     return super.close();
   }
 
-  bool _hasActiveFilters(RecordLoaded state) {
-    final catIds = state.filterCategoryIds;
-
-    return state.filterStartDate != null ||
-        state.filterEndDate != null ||
-        (catIds != null && catIds.isNotEmpty) ||
-        state.filterRecordType != null;
-  }
+  bool _hasActiveFilters(RecordLoaded state) =>
+      _isFiltered(_filterOf(state, limit: _pageSize));
 
   Future<void> _onLoadRecords(
     LoadRecords event,
@@ -62,14 +62,7 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
   ) async {
     emit(const RecordLoading());
 
-    await _recordsSubscription?.cancel();
-    _recordsSubscription = recordRepository
-        .watchRecords(limit: _pageSize)
-        .listen((records) {
-          if (!isClosed) {
-            add(_RecordsUpdated(records));
-          }
-        });
+    await _watch(const RecordFilter(limit: _pageSize));
 
     final result = await getRecords(const GetRecordsParams(limit: _pageSize));
     result.fold(
@@ -93,9 +86,16 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
       currentState.copyWith(
         records: records,
         total: records.length,
-        hasMore: records.length >= _pageSize,
+        hasMore: records.length >= _watchedLimit,
       ),
     );
+  }
+
+  void _onRecordsWatchFailed(
+    _RecordsWatchFailed event,
+    Emitter<RecordState> emit,
+  ) {
+    emit(RecordError(failureText(event.failure)));
   }
 
   Future<void> _onLoadMoreRecords(
@@ -116,11 +116,14 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
 
     if (_hasActiveFilters(currentState)) {
       await _loadMoreFiltered(currentState, emit);
-
-      return;
+    } else {
+      await _loadMoreUnfiltered(currentState, emit);
     }
 
-    await _loadMoreUnfiltered(currentState, emit);
+    final loaded = state;
+    if (loaded is RecordLoaded) {
+      await _watch(_filterOf(loaded, limit: _watchedLimit + _pageSize));
+    }
   }
 
   Future<void> _loadMoreFiltered(
@@ -233,20 +236,17 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     emit(const RecordLoading());
 
     await _recordsSubscription?.cancel();
-
-    final result = await recordRepository.getFilteredRecords(
-      RecordFilter(
-        startDate: event.startDate,
-        endDate: event.endDate,
-        categoryIds: event.categoryIds,
-        recordType: event.recordType,
-        limit: _pageSize,
-      ),
+    final filter = RecordFilter(
+      startDate: event.startDate,
+      endDate: event.endDate,
+      categoryIds: event.categoryIds,
+      recordType: event.recordType,
+      limit: _pageSize,
     );
 
-    result.fold((failure) => emit(RecordError(failureText(failure))), (
-      records,
-    ) {
+    final result = await recordRepository.getFilteredRecords(filter);
+
+    if (result case Right(value: final records)) {
       emit(
         RecordLoaded(
           records: records,
@@ -259,19 +259,52 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
           filterRecordType: event.recordType,
         ),
       );
-
-      _recordsSubscription = recordRepository
-          .watchRecords(limit: _pageSize)
-          .listen((updatedRecords) {
-            if (!isClosed) {
-              add(_RecordsUpdated(updatedRecords));
-            }
-          });
-    });
+      await _watch(filter);
+    } else if (result case Left(value: final failure)) {
+      emit(RecordError(failureText(failure)));
+    }
   }
 
   void _onClearFilters(ClearFilters event, Emitter<RecordState> emit) {
     add(const LoadRecords());
+  }
+
+  RecordFilter _filterOf(RecordLoaded state, {required int limit}) =>
+      RecordFilter(
+        startDate: state.filterStartDate,
+        endDate: state.filterEndDate,
+        categoryIds: state.filterCategoryIds,
+        recordType: state.filterRecordType,
+        limit: limit,
+      );
+
+  static bool _isFiltered(RecordFilter filter) {
+    final catIds = filter.categoryIds;
+
+    return filter.startDate != null ||
+        filter.endDate != null ||
+        (catIds != null && catIds.isNotEmpty) ||
+        filter.recordType != null;
+  }
+
+  Future<void> _watch(RecordFilter filter) async {
+    await _recordsSubscription?.cancel();
+    final limit = filter.limit ?? _pageSize;
+    _watchedLimit = limit;
+    final records = _isFiltered(filter)
+        ? recordRepository.watchFilteredRecords(filter)
+        : recordRepository.watchRecords(limit: limit);
+    _recordsSubscription = records.listen(
+      (records) {
+        if (!isClosed) add(_RecordsUpdated(records));
+      },
+      onError: (Object e, StackTrace s) {
+        appLogger.error('RecordBloc: watching records failed', e, s);
+        if (!isClosed) {
+          add(_RecordsWatchFailed(CacheFailure(message: e.toString())));
+        }
+      },
+    );
   }
 }
 
@@ -282,4 +315,13 @@ class _RecordsUpdated extends RecordEvent {
   List<Object?> get props => [records];
 
   const _RecordsUpdated(this.records);
+}
+
+class _RecordsWatchFailed extends RecordEvent {
+  final CacheFailure failure;
+
+  @override
+  List<Object?> get props => [failure];
+
+  const _RecordsWatchFailed(this.failure);
 }

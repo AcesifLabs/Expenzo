@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
+import 'package:expense_tracker/core/utils/money.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/database/app_database.dart' as db;
 import 'package:expense_tracker/core/database/daos/record_dao.dart';
@@ -25,7 +26,11 @@ abstract class RecordLocalDatasource {
 
   Future<bool> recordExistsBySourceId(String sourceId);
   Future<Set<String>> getExistingSourceIds(List<String> sourceIds);
-  Future<void> addRecordsBatch(List<rec.Record> records);
+  Future<Map<String, List<double>>> getAmountsBySourceIds(
+    List<String> sourceIds,
+  );
+
+  Future<Set<String>> addRecordsBatch(List<rec.Record> records);
   Future<List<rec.Record>> getRecordsByCategoryAndDateRange(
     String categoryId,
     DateTime start,
@@ -40,7 +45,6 @@ abstract class RecordLocalDatasource {
 
   Future<double> getTotalSpending(DateTime start, DateTime end);
 
-  /// Expense spend per budget over each budget's own [start, end) period.
   Future<Map<String, double>> getSpendingForBudgets(
     Map<String, ({DateTime start, DateTime end})> periods,
   );
@@ -51,10 +55,10 @@ abstract class RecordLocalDatasource {
 
   Future<List<rec.Record>> getFilteredRecords(RecordFilter filter);
 
-  /// Returns the number of records that reference [categoryId].
+  Stream<List<rec.Record>> watchFilteredRecords(RecordFilter filter);
+
   Future<int> getRecordCountByCategory(String categoryId);
 
-  /// Returns the number of records per category id.
   Future<Map<String, int>> getCategoryRecordCounts();
 }
 
@@ -125,7 +129,7 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
       final id = record.id ?? const Uuid().v4();
       final companion = db.RecordsCompanion(
         id: Value(id),
-        amount: Value(record.amount),
+        amount: Value(roundMoney(record.amount)),
         description: Value(record.description),
         date: Value(record.date),
         categoryId: Value(record.categoryId),
@@ -155,7 +159,7 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
       }
       final companion = db.RecordsCompanion(
         id: Value(recordId),
-        amount: Value(record.amount),
+        amount: Value(roundMoney(record.amount)),
         description: Value(record.description),
         date: Value(record.date),
         categoryId: Value(record.categoryId),
@@ -208,6 +212,18 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
   Future<Set<String>> getExistingSourceIds(List<String> sourceIds) async {
     try {
       return await recordDao.getExistingSourceIds(sourceIds);
+    } catch (e, s) {
+      appLogger.error('Record local datasource error', e, s);
+      throw CacheException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<Map<String, List<double>>> getAmountsBySourceIds(
+    List<String> sourceIds,
+  ) async {
+    try {
+      return await recordDao.getAmountsBySourceIds(sourceIds);
     } catch (e, s) {
       appLogger.error('Record local datasource error', e, s);
       throw CacheException(message: e.toString());
@@ -298,7 +314,7 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
   }
 
   @override
-  Future<void> addRecordsBatch(List<rec.Record> records) async {
+  Future<Set<String>> addRecordsBatch(List<rec.Record> records) async {
     try {
       final now = DateTime.now().toUtc();
       final companions = records.map((record) {
@@ -306,7 +322,7 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
 
         return db.RecordsCompanion(
           id: Value(id),
-          amount: Value(record.amount),
+          amount: Value(roundMoney(record.amount)),
           description: Value(record.description),
           date: Value(record.date),
           categoryId: Value(record.categoryId),
@@ -318,11 +334,21 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
           updatedAt: Value(now),
         );
       }).toList();
-      await recordDao.insertRecordsBatch(companions);
+
+      return await recordDao.insertRecordsBatch(companions);
     } catch (e, s) {
       appLogger.error('Record local datasource error', e, s);
       throw CacheException(message: e.toString());
     }
+  }
+
+  @override
+  Stream<List<rec.Record>> watchFilteredRecords(RecordFilter filter) {
+    return recordDao
+        .watchFilteredRecords(filter)
+        .map(
+          (records) => records.map<rec.Record>((e) => _mapToEntity(e)).toList(),
+        );
   }
 
   @override

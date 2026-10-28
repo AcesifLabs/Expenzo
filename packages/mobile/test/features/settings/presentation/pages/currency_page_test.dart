@@ -33,7 +33,6 @@ void main() {
     when(() => bloc.add(any())).thenReturn(null);
   });
 
-  /// The page pushed on top of a parent route, so `context.pop()` works.
   Future<void> pump(WidgetTester tester) async {
     final router = GoRouter(
       initialLocation: '/settings/currency',

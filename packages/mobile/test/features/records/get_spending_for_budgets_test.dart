@@ -37,7 +37,7 @@ void main() {
   }
 
   final start = DateTime(2026, 6, 1);
-  final end = DateTime(2026, 7, 1); // exclusive upper bound (next period start)
+  final end = DateTime(2026, 7, 1);
 
   test('sums only expenses linked to the given budget in the period', () async {
     await insert(
@@ -58,7 +58,7 @@ void main() {
       date: DateTime(2026, 6, 15),
       budgetId: 'b2',
     );
-    await insert(id: '4', amount: -10, date: DateTime(2026, 6, 15)); // unlinked
+    await insert(id: '4', amount: -10, date: DateTime(2026, 6, 15));
 
     final spend = (await dao.getSpendingForBudgets({
       'b1': (start: start, end: end),
@@ -125,7 +125,6 @@ void main() {
   });
 
   test('one query gives each budget its own period', () async {
-    // b1 is monthly (June); b2 is a week in mid-June.
     await insert(
       id: '1',
       amount: -40,

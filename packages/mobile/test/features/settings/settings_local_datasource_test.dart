@@ -135,6 +135,22 @@ void main() {
     expect((await datasource.getSettings()).recurringAutoCreate, isTrue);
   });
 
+  test('settings saved before crash reports existed load them on', () async {
+    final datasource = await datasourceWith(_storedSettings(code: 'BDT'));
+
+    expect((await datasource.getSettings()).crashReportsEnabled, isTrue);
+  });
+
+  test('turning crash reports off is saved and read back', () async {
+    final datasource = await datasourceWith(_storedSettings(code: 'BDT'));
+    final settings = await datasource.getSettings();
+    await datasource.updateSettings(
+      settings.copyWith(crashReportsEnabled: false),
+    );
+
+    expect((await datasource.getSettings()).crashReportsEnabled, isFalse);
+  });
+
   test('settings saved before notification toggles existed load weekly off '
       'and the other three on', () async {
     final datasource = await datasourceWith(_storedSettings(code: 'BDT'));

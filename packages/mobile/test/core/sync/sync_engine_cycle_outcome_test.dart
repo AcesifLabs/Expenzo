@@ -71,7 +71,7 @@ void main() {
     pull.complete(
       Response(
         requestOptions: RequestOptions(path: ApiConstants.syncPull),
-        data: {'changes': [], 'serverTime': '2026-10-15T00:00:00.000Z'},
+        data: {'changes': <Object>[], 'serverTime': '2026-10-15T00:00:00.000Z'},
       ),
     );
     await stopping;

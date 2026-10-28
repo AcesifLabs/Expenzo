@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:clock/clock.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,9 +13,7 @@ import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/core/utils/money_format.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:expense_tracker/features/goals/presentation/widgets/dashboard_goal_card.dart';
-import 'package:expense_tracker/features/auth/presentation/bloc/auth_event.dart';
 import 'package:expense_tracker/features/auth/presentation/bloc/auth_state.dart';
-import 'package:expense_tracker/features/auth/presentation/helpers/user_display.dart';
 import 'package:expense_tracker/features/auth/presentation/widgets/user_avatar.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budget_progress.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets_with_progress.dart';
@@ -24,7 +23,6 @@ import 'package:expense_tracker/features/dashboard/presentation/models/dashboard
 import 'package:expense_tracker/features/dashboard/presentation/widgets/balance_row.dart';
 import 'package:expense_tracker/features/dashboard/presentation/widgets/dashboard_section_header.dart';
 import 'package:expense_tracker/features/dashboard/presentation/widgets/dashboard_trend_card.dart';
-import 'package:expense_tracker/features/dashboard/presentation/widgets/menu_row.dart';
 import 'package:expense_tracker/features/dashboard/presentation/widgets/receipt_scan_banner.dart';
 import 'package:expense_tracker/features/records/domain/entities/record.dart';
 import 'package:expense_tracker/features/reports/domain/entities/date_amount.dart';
@@ -62,7 +60,6 @@ class DashboardPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // AuthBloc comes from ExpenzoApp so sign-in state is shared app-wide.
     return BlocProvider(
       create: (_) => di.getIt<DashboardBloc>(),
       child: DashboardView(
@@ -90,8 +87,7 @@ class _DashboardViewState extends State<DashboardView> {
   Future<DashboardSupplementaryData>? _supplementaryFuture;
   Future<List<DateAmount>>? _trendFuture;
   DateRange? _secondaryDateRange;
-  // Disables the scan banner while its sheet is open; a notifier so only the
-  // banner rebuilds.
+
   final _scanOpening = ValueNotifier<bool>(false);
 
   @override
@@ -175,7 +171,6 @@ class _DashboardViewState extends State<DashboardView> {
         .toList();
   }
 
-  /// Lets the recent activity rows show each record's category tile and name.
   Future<Map<String, cat.Category>> _loadCategoriesById() async {
     if (!di.getIt.isRegistered<GetCategories>()) return const {};
     final result = await di.getIt<GetCategories>()(const GetCategoriesParams());
@@ -227,10 +222,7 @@ class _DashboardViewState extends State<DashboardView> {
     return Future<void>.value();
   }
 
-  /// "Hi, Sam" when we know the name, otherwise today's date.
-  String _greeting(String? firstName) => firstName == null
-      ? DateFormat('EEEE, d MMMM').format(DateTime.now())
-      : t.dashboard.greeting(name: firstName);
+  String _todayLabel() => DateFormat('EEEE, d MMMM').format(clock.now());
 
   Widget _buildAvatarWidget(BuildContext context, AuthState authState) {
     final colors = Theme.of(context).colorScheme;
@@ -258,7 +250,7 @@ class _DashboardViewState extends State<DashboardView> {
 
   Widget _buildHeader(
     BuildContext context, {
-    required String greeting,
+    required String title,
     required Widget avatar,
   }) {
     final colors = Theme.of(context).colorScheme;
@@ -270,40 +262,34 @@ class _DashboardViewState extends State<DashboardView> {
         _horizontalPadding,
         AppSpacing.sm,
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  greeting,
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.headlineSmall.copyWith(
                     color: colors.onSurface,
                   ),
                 ),
-                ValueListenableBuilder<bool>(
-                  valueListenable: _scanOpening,
-                  builder: (_, opening, _) =>
-                      ReceiptScanBanner(onTap: opening ? null : _onScanTapped),
-                ),
-              ],
-            ),
+              ),
+              IconButton(
+                onPressed: () => context.push(SettingsRoute.rootLocation),
+                tooltip: t.dashboard.settings,
+                padding: EdgeInsets.zero,
+                icon: avatar,
+              ),
+            ],
           ),
-          PopupMenuButton<String>(
-            offset: const Offset(0, 48),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
-            ),
-            onSelected: (value) => _handleMenuAction(context, value),
-            itemBuilder: (context) => _buildMenuItems(context),
-            padding: EdgeInsets.zero,
-            icon: avatar,
+          ValueListenableBuilder<bool>(
+            valueListenable: _scanOpening,
+            builder: (_, opening, _) =>
+                ReceiptScanBanner(onTap: opening ? null : _onScanTapped),
           ),
         ],
       ),
@@ -473,7 +459,7 @@ class _DashboardViewState extends State<DashboardView> {
       ),
       _buildBudgetsSection(),
       const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
-      // Adds its own bottom gap only when shown.
+
       const SliverToBoxAdapter(child: DashboardGoalCard()),
       SliverPadding(
         padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
@@ -520,7 +506,7 @@ class _DashboardViewState extends State<DashboardView> {
                 horizontal: _horizontalPadding,
               ),
               child: AppCard(
-                borderRadius: AppSpacing.radiusControl,
+                borderRadius: AppSpacing.radiusCard,
                 padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
                 child: AppEmptyState(
                   icon: PiconsRegular.wallet,
@@ -535,17 +521,16 @@ class _DashboardViewState extends State<DashboardView> {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
             child: AppCard(
-              borderRadius: AppSpacing.radiusControl,
+              borderRadius: AppSpacing.radiusCard,
               padding: const EdgeInsets.all(AppSpacing.md),
               child: Column(
                 children: [
-                  for (var i = 0; i < data.budgetPreviews.length; i++) ...[
+                  for (final (i, preview) in data.budgetPreviews.indexed) ...[
                     _BudgetPreviewTile(
-                      preview: data.budgetPreviews[i],
+                      preview: preview,
                       currencyFmt: currencyFmt,
-                      onTap: () => context.push(
-                        '/budgets/${data.budgetPreviews[i].progress.budgetId}',
-                      ),
+                      onTap: () =>
+                          context.push('/budgets/${preview.progress.budgetId}'),
                     ),
                     if (i != data.budgetPreviews.length - 1)
                       const Padding(
@@ -578,7 +563,7 @@ class _DashboardViewState extends State<DashboardView> {
                 horizontal: _horizontalPadding,
               ),
               child: AppCard(
-                borderRadius: AppSpacing.radiusControl,
+                borderRadius: AppSpacing.radiusCard,
                 padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
                 child: AppEmptyState(
                   icon: PiconsRegular.receipt,
@@ -618,7 +603,7 @@ class _DashboardViewState extends State<DashboardView> {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
             child: AppCard(
-              borderRadius: AppSpacing.radiusControl,
+              borderRadius: AppSpacing.radiusCard,
               clipBehavior: Clip.antiAlias,
               child: Column(children: children),
             ),
@@ -817,49 +802,6 @@ class _DashboardViewState extends State<DashboardView> {
     return di.getIt<GetSpendingTrend>();
   }
 
-  // Theme and everything else live in Settings (docs/adr/0006).
-  List<PopupMenuEntry<String>> _buildMenuItems(BuildContext context) {
-    final isAuth = context.read<AuthBloc>().state is Authenticated;
-    final menu = t.dashboard.menu;
-
-    return [
-      if (isAuth)
-        PopupMenuItem(
-          value: 'profile',
-          child: MenuRow(icon: PiconsRegular.user, text: menu.profile),
-        )
-      else
-        PopupMenuItem(
-          value: 'sign_in',
-          child: MenuRow(icon: PiconsRegular.signIn, text: menu.signIn),
-        ),
-      PopupMenuItem(
-        value: 'settings',
-        child: MenuRow(icon: PiconsRegular.gear, text: menu.settings),
-      ),
-      if (isAuth) ...[
-        const PopupMenuDivider(),
-        PopupMenuItem(
-          value: 'sign_out',
-          child: MenuRow(icon: PiconsRegular.signOut, text: menu.signOut),
-        ),
-      ],
-    ];
-  }
-
-  void _handleMenuAction(BuildContext context, String value) {
-    switch (value) {
-      case 'profile':
-        context.push(SettingsRoute.profile.location);
-      case 'settings':
-        context.push(SettingsRoute.rootLocation);
-      case 'sign_in':
-        context.push('/login');
-      case 'sign_out':
-        context.read<AuthBloc>().add(const SignOutRequested());
-    }
-  }
-
   List<Widget> _buildContent(
     BuildContext context,
     DashboardState state,
@@ -884,10 +826,6 @@ class _DashboardViewState extends State<DashboardView> {
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, authState) {
-        final firstName = authState is Authenticated
-            ? userFirstName(authState.user)
-            : null;
-
         return BlocBuilder<DashboardBloc, DashboardState>(
           builder: (context, state) {
             final dateRange = state.dateRange ?? DateRange.thisMonth();
@@ -903,7 +841,7 @@ class _DashboardViewState extends State<DashboardView> {
                     SliverToBoxAdapter(
                       child: _buildHeader(
                         context,
-                        greeting: _greeting(firstName),
+                        title: _todayLabel(),
                         avatar: _buildAvatarWidget(context, authState),
                       ),
                     ),
@@ -990,7 +928,6 @@ class _BudgetPreviewTile extends StatelessWidget {
 }
 
 class _RecentTile extends StatelessWidget {
-  // Getters, not cached: DateFormat keeps the language it was created in.
   static DateFormat get _timeFormat => DateFormat('h:mm a');
   static DateFormat get _dayFormat => DateFormat('MMM d');
 
@@ -1009,7 +946,7 @@ class _RecentTile extends StatelessWidget {
   });
 
   String _timeLabel() {
-    final now = DateTime.now();
+    final now = clock.now();
     final today = DateTime(now.year, now.month, now.day);
     final date = DateTime(record.date.year, record.date.month, record.date.day);
     final difference = today.difference(date).inDays;
@@ -1029,7 +966,6 @@ class _RecentTile extends StatelessWidget {
       );
     }
 
-    // Uncategorized: a neutral tile so rows still line up.
     return Container(
       width: 40,
       height: 40,

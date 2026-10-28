@@ -9,11 +9,6 @@ import 'package:expense_tracker/core/utils/money_format.dart';
 import 'package:expense_tracker/core/theme/app_typography.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 
-/// A read-only record tile for dashboard summary lists.
-///
-/// Unlike [RecordCard] which supports interactive actions (onTap, onDelete),
-/// this widget is a lightweight, presentational tile optimized for use in
-/// dashboard recent-activity sections and other read-only contexts.
 class ReadOnlyRecordTile extends StatelessWidget {
   final Record record;
   final MoneyFormat? amountFormat;
@@ -21,7 +16,6 @@ class ReadOnlyRecordTile extends StatelessWidget {
   final double avatarRadius;
   final double iconSize;
 
-  // A getter, not cached: DateFormat keeps the language it was created in.
   static DateFormat get _dateFormat => DateFormat('MMM dd');
 
   const ReadOnlyRecordTile({
@@ -89,9 +83,8 @@ class ReadOnlyRecordTile extends StatelessWidget {
     );
   }
 
-  /// Stays on one line and shrinks to share the row at large text sizes.
   Widget _amountText(Color amtColor) {
-    return Flexible(
+    return Expanded(
       child: FittedBox(
         fit: BoxFit.scaleDown,
         alignment: AlignmentDirectional.centerEnd,
@@ -121,6 +114,7 @@ class ReadOnlyRecordTile extends StatelessWidget {
           _leadingIcon(amtColor),
           const SizedBox(width: AppSpacing.smd),
           _titleAndDate(colors),
+          const SizedBox(width: AppSpacing.smd),
           _amountText(amtColor),
         ],
       ),

@@ -7,20 +7,6 @@ import 'package:expense_tracker/i18n/strings.g.dart';
 void main() {
   setUpAll(() => LocaleSettings.setLocale(AppLocale.en));
 
-  group('userFirstName', () {
-    test('takes the first word of a full name', () {
-      expect(
-        userFirstName(const User(uid: 'u', displayName: 'Sam Rahman')),
-        'Sam',
-      );
-    });
-
-    test('is null for a blank name', () {
-      expect(userFirstName(const User(uid: 'u', displayName: '  ')), isNull);
-      expect(userFirstName(const User(uid: 'u')), isNull);
-    });
-  });
-
   group('userInitial', () {
     test('comes from the name', () {
       expect(userInitial(const User(uid: 'u', displayName: 'sam')), 'S');
@@ -35,7 +21,6 @@ void main() {
     });
 
     test('keeps a Bangla first letter as one grapheme', () {
-      // 'ক্ষ' is one grapheme cluster built from three code units.
       expect(userInitial(const User(uid: 'u', displayName: 'ক্ষমা')), 'ক্ষ');
     });
   });

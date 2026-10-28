@@ -1,15 +1,10 @@
-import 'dart:io';
-
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/foundation.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as p;
 
 import 'tables/records_table.dart';
 import 'tables/categories_table.dart';
 import 'tables/pending_recurring_table.dart';
-import 'tables/parsing_rules_table.dart';
 import 'tables/message_sources_table.dart';
 import 'tables/expense_templates_table.dart';
 import 'tables/budgets_table.dart';
@@ -19,20 +14,17 @@ import 'tables/sync_queue_table.dart';
 import 'tables/app_settings_table.dart';
 import 'tables/goals_table.dart';
 
-import '../constants/source_types.dart';
-import '../constants/record_type.dart';
-
 import 'daos/record_dao.dart';
 import 'daos/category_dao.dart';
 import 'daos/recurring_dao.dart';
 import 'daos/budget_dao.dart';
 import 'daos/pending_recurring_dao.dart';
-import 'daos/parsing_rule_dao.dart';
 import 'daos/message_template_dao.dart';
 import 'daos/user_dao.dart';
 import 'daos/sync_queue_dao.dart';
 import 'daos/goals_dao.dart';
 import 'package:expense_tracker/core/theme/category_palette.dart';
+import 'database_file.dart';
 
 part 'app_database.g.dart';
 
@@ -41,7 +33,6 @@ part 'app_database.g.dart';
     Records,
     Categories,
     PendingRecurring,
-    ParsingRules,
     MessageSources,
     ExpenseTemplates,
     Budgets,
@@ -57,7 +48,6 @@ part 'app_database.g.dart';
     RecurringDao,
     BudgetDao,
     PendingRecurringDao,
-    ParsingRuleDao,
     MessageTemplateDao,
     UserDao,
     SyncQueueDao,
@@ -68,7 +58,7 @@ class AppDatabase extends _$AppDatabase {
   Future<String>? _dbPathFuture;
 
   @override
-  int get schemaVersion => 19;
+  int get schemaVersion => 21;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -77,8 +67,12 @@ class AppDatabase extends _$AppDatabase {
       await _createFtsTable(customStatement);
       await _createFtsTriggers(customStatement);
     },
-    onUpgrade: (Migrator m, int from, int to) async {
-      await _runMigrations(m, from);
+
+    onUpgrade: (Migrator m, int from, int to) =>
+        transaction(() => _runMigrations(m, from)),
+    beforeOpen: (details) async {
+      await customStatement('PRAGMA journal_mode = WAL');
+      await customStatement('PRAGMA synchronous = NORMAL');
     },
   );
 
@@ -87,9 +81,6 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
   AppDatabase.forTesting(super.e);
 
-  /// Empties every table and the search index. [keepUsers] keeps the
-  /// signed-in user row, so the user stays signed in. [refill] runs in the
-  /// same transaction, so no one sees the tables empty in between.
   Future<void> clearAllTables({
     bool keepUsers = false,
     Future<void> Function()? refill,
@@ -97,9 +88,6 @@ class AppDatabase extends _$AppDatabase {
     await customStatement('PRAGMA foreign_keys = OFF');
     try {
       await transaction(() async {
-        // First: the per-record delete trigger then finds an empty index
-        // instead of scanning it once per record.
-        await customStatement('DELETE FROM expense_fts');
         for (final table in allTables) {
           if (keepUsers && table == users) continue;
           await delete(table).go();
@@ -111,11 +99,7 @@ class AppDatabase extends _$AppDatabase {
     }
   }
 
-  Future<String> _resolveDbPath() async {
-    final dir = await getApplicationDocumentsDirectory();
-
-    return p.join(dir.path, 'expenzo_db.sqlite');
-  }
+  Future<String> _resolveDbPath() async => (await databaseFile()).path;
 
   Future<void> _runMigrations(Migrator m, int from) async {
     final steps = <_MigrationStep>[
@@ -136,6 +120,8 @@ class AppDatabase extends _$AppDatabase {
       _MigrationStep(17, _migrateV17),
       _MigrationStep(18, () => _migrateV18(m)),
       _MigrationStep(19, () => _migrateV19(m)),
+      _MigrationStep(20, () => _migrateV20(m)),
+      _MigrationStep(21, _migrateV21),
     ];
 
     for (final step in steps) {
@@ -155,8 +141,8 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<void> _migrateToV5() async {
-    await _createFtsTable(customStatement);
-    await _createFtsTriggers(customStatement);
+    await _createLegacyFtsTable(customStatement);
+    await _createLegacyFtsTriggers(customStatement);
   }
 
   Future<void> _migrateToV6(Migrator m) async {
@@ -170,7 +156,7 @@ class AppDatabase extends _$AppDatabase {
     await customStatement("DROP TRIGGER IF EXISTS expenses_ai");
     await customStatement("DROP TRIGGER IF EXISTS expenses_ad");
     await customStatement("DROP TRIGGER IF EXISTS expenses_au");
-    await _createFtsTriggers(customStatement);
+    await _createLegacyFtsTriggers(customStatement);
   }
 
   Future<void> _migrateToV7(Migrator m) async {
@@ -283,21 +269,20 @@ class AppDatabase extends _$AppDatabase {
       INSERT INTO expense_fts (expense_id, description)
       SELECT id, description FROM records
     ''');
-    await _createFtsTriggers(customStatement);
+    await _createLegacyFtsTriggers(customStatement);
   }
 
   Future<void> _migrateV13() async {
     await customStatement('DROP TABLE IF EXISTS expense_fts');
-    await _createFtsTable(customStatement);
+    await _createLegacyFtsTable(customStatement);
     await customStatement('''
       INSERT INTO expense_fts (expense_id, description)
       SELECT id, description FROM records
     ''');
-    await _createFtsTriggers(customStatement);
+    await _createLegacyFtsTriggers(customStatement);
   }
 
   Future<void> _migrateV14() async {
-    // Remove duplicate category rows, keeping the most recently updated one
     await customStatement('''
       DELETE FROM categories
       WHERE rowid NOT IN (
@@ -324,12 +309,6 @@ class AppDatabase extends _$AppDatabase {
     }
   }
 
-  /// Moves untouched default categories to the new category palette.
-  ///
-  /// A default category is only recolored while it still has its old seed
-  /// color, so colors the user picked are kept. Each change is queued for
-  /// sync like a normal category edit, otherwise the next pull would restore
-  /// the old color. Rollback: `CategoryPalette.legacySeedColors`.
   Future<void> _migrateV17() async {
     for (final MapEntry(key: id, value: oldColor)
         in CategoryPalette.legacySeedColors.entries) {
@@ -363,7 +342,6 @@ class AppDatabase extends _$AppDatabase {
     }
   }
 
-  /// Adds savings goals (SAAP-74, ADR 0009).
   Future<void> _migrateV18(Migrator m) async {
     await m.createTable(goals);
     await customStatement(
@@ -371,14 +349,11 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
-  /// Marks Shared Budgets with their Family Group (SAAP-75, ADR 0008). No
-  /// index: the table holds tens of rows.
   Future<void> _migrateV19(Migrator m) async {
     await m.addColumn(budgets, budgets.groupId);
   }
 
   Future<void> _migrateV16() async {
-    // Rebuild budgets: drop category_id, add NOT NULL name (no backfill -> '').
     await customStatement('''
       CREATE TABLE budgets_new (
         id TEXT NOT NULL PRIMARY KEY,
@@ -409,14 +384,124 @@ class AppDatabase extends _$AppDatabase {
       'CREATE INDEX IF NOT EXISTS idx_budgets_user_id ON budgets (user_id)',
     );
 
-    // Add budget_id link to records (nullable; existing rows stay unlinked).
     await customStatement('ALTER TABLE records ADD COLUMN budget_id TEXT');
     await customStatement(
       'CREATE INDEX IF NOT EXISTS idx_records_budget_id ON records (budget_id)',
     );
   }
 
-  Future<void> _createFtsTable(Future<void> Function(String) executor) async {
+  // Matching rules were removed (ADR 0017): drop their table and any rule
+  // changes still waiting to sync.
+  Future<void> _migrateV21() async {
+    await customStatement(
+      "DELETE FROM sync_queue WHERE entity_table = 'parsing_rules'",
+    );
+    await customStatement('DROP INDEX IF EXISTS idx_parsing_rules_cat_id');
+    await customStatement('DROP TABLE IF EXISTS parsing_rules');
+  }
+
+  Future<void> _migrateV20(Migrator m) async {
+    await m.addColumn(syncQueue, syncQueue.attemptCount);
+    await m.addColumn(syncQueue, syncQueue.failedAt);
+
+    await customStatement('DROP TRIGGER IF EXISTS records_ai');
+    await customStatement('DROP TRIGGER IF EXISTS records_ad');
+    await customStatement('DROP TRIGGER IF EXISTS records_au');
+    await customStatement('DROP TABLE IF EXISTS expense_fts');
+
+    await _separateSourceIdCopies();
+
+    await customStatement('DROP INDEX IF EXISTS idx_records_source_id');
+    await customStatement('DROP INDEX IF EXISTS idx_records_category');
+    for (final index in allSchemaEntities.whereType<Index>()) {
+      final create = index.createStatementsByDialect[SqlDialect.sqlite] ?? '';
+
+      await customStatement(
+        create.replaceFirstMapped(
+          RegExp('CREATE (UNIQUE )?INDEX'),
+          (match) => 'CREATE ${match[1] ?? ''}INDEX IF NOT EXISTS',
+        ),
+      );
+    }
+
+    await _createFtsTable(customStatement);
+    await _createFtsTriggers(customStatement);
+    await customStatement(
+      "INSERT INTO expense_fts(expense_fts) VALUES ('rebuild')",
+    );
+  }
+
+  Future<void> _separateSourceIdCopies() async {
+    await customStatement("""
+      CREATE TEMP TABLE v20_copies AS
+      SELECT rid, id, amount = first_amount AND date = first_date
+          AND description = first_description AS identical
+      FROM (
+        SELECT rowid AS rid, id, amount, date, description,
+          FIRST_VALUE(amount) OVER copies AS first_amount,
+          FIRST_VALUE(date) OVER copies AS first_date,
+          FIRST_VALUE(description) OVER copies AS first_description,
+          ROW_NUMBER() OVER copies AS n
+        FROM records
+        WHERE source_id IS NOT NULL
+        WINDOW copies AS (PARTITION BY source, source_id ORDER BY rowid)
+      )
+      WHERE n > 1
+    """);
+    await customStatement("""
+      INSERT INTO sync_queue (entity_table, record_id, action, payload, created_at)
+      SELECT 'records', id, 'delete', '', CAST(strftime('%s', 'now') AS INTEGER)
+      FROM v20_copies WHERE identical
+    """);
+    await customStatement(
+      'DELETE FROM records WHERE rowid IN '
+      '(SELECT rid FROM v20_copies WHERE identical)',
+    );
+    await customStatement(
+      "UPDATE records SET source_id = source_id || '#' || rowid "
+      'WHERE rowid IN (SELECT rid FROM v20_copies WHERE NOT identical)',
+    );
+    await customStatement('DROP TABLE v20_copies');
+  }
+
+  Future<void> _createFtsTable(Future<void> Function(String) executor) =>
+      executor("""
+        CREATE VIRTUAL TABLE IF NOT EXISTS expense_fts USING fts5(
+          description,
+          content='records',
+          content_rowid='rowid'
+        )
+      """);
+
+  Future<void> _createFtsTriggers(
+    Future<void> Function(String) executor,
+  ) async {
+    await executor("""
+      CREATE TRIGGER IF NOT EXISTS records_ai AFTER INSERT ON records BEGIN
+        INSERT INTO expense_fts(rowid, description)
+        VALUES (new.rowid, new.description);
+      END;
+    """);
+    await executor("""
+      CREATE TRIGGER IF NOT EXISTS records_ad AFTER DELETE ON records BEGIN
+        INSERT INTO expense_fts(expense_fts, rowid, description)
+        VALUES ('delete', old.rowid, old.description);
+      END;
+    """);
+    await executor("""
+      CREATE TRIGGER IF NOT EXISTS records_au AFTER UPDATE ON records
+      WHEN old.description IS NOT new.description BEGIN
+        INSERT INTO expense_fts(expense_fts, rowid, description)
+        VALUES ('delete', old.rowid, old.description);
+        INSERT INTO expense_fts(rowid, description)
+        VALUES (new.rowid, new.description);
+      END;
+    """);
+  }
+
+  Future<void> _createLegacyFtsTable(
+    Future<void> Function(String) executor,
+  ) async {
     await executor('''
       CREATE VIRTUAL TABLE IF NOT EXISTS expense_fts USING fts5(
         expense_id UNINDEXED,
@@ -425,7 +510,7 @@ class AppDatabase extends _$AppDatabase {
     ''');
   }
 
-  Future<void> _createFtsTriggers(
+  Future<void> _createLegacyFtsTriggers(
     Future<void> Function(String) executor,
   ) async {
     await executor('''
@@ -459,8 +544,7 @@ class _MigrationStep {
 
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {
-    final dbFolder = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dbFolder.path, 'expenzo_db.sqlite'));
+    final file = await databaseFile();
 
     return NativeDatabase.createInBackground(file, logStatements: kDebugMode);
   });

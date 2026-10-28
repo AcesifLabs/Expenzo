@@ -3,9 +3,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:expense_tracker/core/logger/app_logger.dart';
 
-/// The installed app's version, e.g. `1.0.0` build `1`.
 class AppVersion extends Equatable {
-  /// Empty when the platform couldn't say.
   static const unknown = AppVersion(version: '', build: '');
 
   final String version;
@@ -21,8 +19,6 @@ class AppVersion extends Equatable {
 
 typedef PackageInfoLoader = Future<PackageInfo> Function();
 
-/// The installed version, or [AppVersion.unknown] when the platform call
-/// fails.
 Future<AppVersion> loadAppVersion({
   PackageInfoLoader load = PackageInfo.fromPlatform,
 }) async {

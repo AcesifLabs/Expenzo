@@ -75,7 +75,7 @@ class _ToggleTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fgColor = isActive ? activeColor : colors.onSurface.withAlpha(120);
+    final fgColor = isActive ? activeColor : colors.onSurfaceVariant;
 
     return Semantics(
       button: true,
@@ -98,8 +98,7 @@ class _ToggleTab extends StatelessWidget {
               color: isActive ? activeColor.withAlpha(32) : Colors.transparent,
               borderRadius: borderRadius,
             ),
-            // The toggle keeps its 48 dp height; at large text sizes the
-            // label shrinks to fit.
+
             child: Center(
               child: FittedBox(
                 fit: BoxFit.scaleDown,

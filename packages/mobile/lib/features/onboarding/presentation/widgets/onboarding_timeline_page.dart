@@ -1,3 +1,4 @@
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:picons/picons.dart';
@@ -16,8 +17,6 @@ import '../bloc/onboarding_state.dart';
 import 'onboarding_page_frame.dart';
 import 'setup_complete_card.dart';
 
-/// Step 5 (frame `OnboardingSavingsTimeline`): how fast to reach the goal,
-/// then the summary and Finish setup (Q24).
 class OnboardingTimelinePage extends StatelessWidget {
   static String? _subtitle(OnboardingDraft draft, GoalDraft goal) {
     final split = _split(draft);
@@ -49,7 +48,7 @@ class OnboardingTimelinePage extends StatelessWidget {
 
   Future<void> _pickDate(BuildContext context, GoalDraft goal) async {
     final bloc = context.read<OnboardingBloc>();
-    final now = DateTime.now();
+    final now = clock.now();
     final tomorrow = DateTime(now.year, now.month, now.day + 1);
     final picked = await showDatePicker(
       context: context,
@@ -57,7 +56,7 @@ class OnboardingTimelinePage extends StatelessWidget {
       firstDate: tomorrow,
       lastDate: DateTime(now.year + 10, now.month, now.day),
     );
-    // Cancel keeps the earlier choice, custom or not.
+
     if (picked != null) bloc.add(TimelineChosen(customDate: picked));
   }
 
@@ -76,7 +75,7 @@ class OnboardingTimelinePage extends StatelessWidget {
         ? null
         : customTimeline(
             target: goal.targetAmount,
-            from: DateTime.now(),
+            from: clock.now(),
             date: custom,
             savingsPerMonth: split.savings,
           );
@@ -238,9 +237,11 @@ class _FinishButton extends StatelessWidget {
       );
     }
 
-    return SizedBox(
-      width: double.infinity,
-      height: AppSpacing.xxl,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(
+        minWidth: double.infinity,
+        minHeight: AppSpacing.xxl,
+      ),
       child: ElevatedButton(
         onPressed: null,
         child: Semantics(

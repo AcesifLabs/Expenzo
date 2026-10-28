@@ -1,8 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:expense_tracker/core/constants/budget_period.dart';
 
-/// `GET /groups/:id/summary` (ADR 0008). Only Records linked to Shared
-/// Budgets count; there is no family income figure.
 class GroupSummary extends Equatable {
   final String groupId;
   final String currencyCode;
@@ -11,7 +9,6 @@ class GroupSummary extends Equatable {
   final double planned;
   final double monthSpent;
 
-  /// Highest spender first.
   final List<MemberSpending> members;
   final List<SharedBudgetProgress> sharedBudgets;
   final DateTime generatedAt;
@@ -73,12 +70,9 @@ class SharedBudgetProgress extends Equatable {
   final double effectiveAmount;
   final double spent;
 
-  /// The period the server counted; a summary from an earlier period must
-  /// not be shown for the current one.
   final DateTime periodStart;
   final DateTime periodEnd;
 
-  /// Spent as a share of [effectiveAmount]; 0 when nothing is planned.
   double get ratio => effectiveAmount > 0 ? spent / effectiveAmount : 0;
 
   @override

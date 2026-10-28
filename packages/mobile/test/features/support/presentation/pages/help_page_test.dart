@@ -9,7 +9,6 @@ import 'package:expense_tracker/i18n/strings.g.dart';
 import '../../../../support/pump_localized.dart';
 
 void main() {
-  /// Help & Support at its real location, with a stub page per Help route.
   Future<void> pumpHelp(WidgetTester tester) async {
     final router = GoRouter(
       initialLocation: SettingsRoute.help.location,

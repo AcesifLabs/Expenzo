@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:expense_tracker/features/records/data/services/transaction_draft_store.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:go_router/go_router.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/core/utils/number_display_format.dart';
@@ -168,6 +170,7 @@ void main() {
           MaterialApp(
             home: Scaffold(
               body: NewTransactionSheet(
+                recurringRepository: _MockRecurringRepository(),
                 initialRecord: record,
                 startWithReceiptScan: startWithReceiptScan,
               ),
@@ -221,7 +224,7 @@ void main() {
 
     await tester.tap(find.text('Income'));
     await tester.pump();
-    // The real bloc answers LoadCategories(type: income) with income ones.
+
     final incomeOnly = CategoryLoaded([salary], type: RecordType.income);
     when(() => categoryBloc.state).thenReturn(incomeOnly);
     categories.add(incomeOnly);
@@ -251,6 +254,80 @@ void main() {
     await tester.enterText(find.byType(TextField).first, 'Lunch');
     await tester.pump();
     expect(find.text('Add expense'), findsOneWidget);
+  });
+
+  group('draft', () {
+    late TransactionDraftStore drafts;
+
+    setUp(() async {
+      SharedPreferences.setMockInitialValues({});
+      drafts = TransactionDraftStore(await SharedPreferences.getInstance());
+      di.getIt.registerSingleton<TransactionDraftStore>(drafts);
+    });
+
+    tearDown(() => di.getIt.unregister<TransactionDraftStore>());
+
+    testWidgets('typed fields are kept when the app goes to the background', (
+      tester,
+    ) async {
+      await pumpSheet(tester);
+      for (final digit in ['4', '5']) {
+        await tester.tap(find.text(digit).first);
+      }
+      await tester.enterText(find.byType(TextField).first, 'Taxi');
+
+      void moveThrough(List<AppLifecycleState> states) {
+        for (final state in states) {
+          tester.binding.handleAppLifecycleStateChanged(state);
+        }
+      }
+
+      moveThrough(const [
+        AppLifecycleState.inactive,
+        AppLifecycleState.hidden,
+        AppLifecycleState.paused,
+      ]);
+      await tester.pump();
+
+      expect(drafts.load()?.amountText, '45');
+      expect(drafts.load()?.note, 'Taxi');
+      moveThrough(const [
+        AppLifecycleState.hidden,
+        AppLifecycleState.inactive,
+        AppLifecycleState.resumed,
+      ]);
+    });
+
+    testWidgets('a new sheet opens with the saved draft', (tester) async {
+      await drafts.save((
+        type: RecordType.expense,
+        amountText: '45',
+        note: 'Taxi',
+        categoryId: null,
+        budgetId: null,
+        date: DateTime(2026, 10, 24),
+      ));
+
+      await pumpSheet(tester);
+
+      expect(find.text('Taxi'), findsOneWidget);
+    });
+
+    testWidgets('closing the sheet drops the draft', (tester) async {
+      await drafts.save((
+        type: RecordType.expense,
+        amountText: '45',
+        note: 'Taxi',
+        categoryId: null,
+        budgetId: null,
+        date: DateTime(2026, 10, 24),
+      ));
+      await pumpSheet(tester);
+
+      await tester.pumpWidget(const SizedBox());
+
+      expect(drafts.load(), isNull);
+    });
   });
 
   testWidgets('delete asks first, then deletes the record', (tester) async {
@@ -333,8 +410,6 @@ void main() {
   });
 
   group('show all budgets', () {
-    // The picker itself is covered in all_budgets_picker_page_test.dart; here
-    // a stand-in page pops what the real one would.
     Future<Object?> pumpSheetWithPicker(
       WidgetTester tester, {
       required String? pickerResult,
@@ -343,7 +418,7 @@ void main() {
       tester.view.devicePixelRatio = 2.625;
       addTearDown(tester.view.reset);
       Object? pickerExtra;
-      // Saving closes the sheet, so it sits on a route above a blank root.
+
       final router = GoRouter(
         initialLocation: '/sheet',
         routes: [
@@ -354,7 +429,10 @@ void main() {
               GoRoute(
                 path: 'sheet',
                 builder: (_, _) => Scaffold(
-                  body: NewTransactionSheet(initialRecord: smsRecord),
+                  body: NewTransactionSheet(
+                    recurringRepository: _MockRecurringRepository(),
+                    initialRecord: smsRecord,
+                  ),
                 ),
               ),
               GoRoute(
@@ -429,7 +507,6 @@ void main() {
 
     setUp(() => recurring = _MockRecurringRepository());
 
-    // Hosts the sheet on a pushed route so it can close itself.
     Future<void> openSheet(WidgetTester tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 2.625;
@@ -468,7 +545,7 @@ void main() {
       await tester.tap(find.text('1').first);
       await tester.tap(find.text('2').first);
       await tester.enterText(find.byType(TextField).first, 'Internet');
-      // The hint text sits under the dropdown's tap target; tap the dropdown.
+
       await tester.tap(
         find.ancestor(
           of: find.text('Select a category'),
@@ -510,8 +587,7 @@ void main() {
       when(
         () => recurring.createRecurring(any()),
       ).thenAnswer((_) async => const Left(CacheFailure(message: 'db locked')));
-      // The sheet logs the expected failure; keep the test output clean.
-      // Restored in the body: Flutter checks it before tear-downs run.
+
       final originalDebugPrint = debugPrint;
       debugPrint = (_, {wrapWidth}) {};
       try {

@@ -1,3 +1,4 @@
+import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -15,6 +16,8 @@ import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanne
 import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanner_view_mode.dart';
 import '../../../support/factories/sms_scan_result_item_factory.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
+import 'package:expense_tracker/features/parsing_rules/domain/entities/parsed_transaction.dart';
+import 'package:expense_tracker/features/sms_parser/domain/entities/sms_scan_result_item.dart';
 
 class MockScanSmsUseCase extends Mock implements ScanSmsUseCase {}
 
@@ -31,6 +34,7 @@ void main() {
   late MockCreateRecordsFromParsedList mockCreateRecordsFromParsedList;
   late MockGetBudgetsWithProgress mockGetBudgetsWithProgress;
   late SmsScannerBloc bloc;
+  late MockRecordRepository recordRepository;
 
   setUpAll(() {
     registerFallbackValue(ScanSmsParams());
@@ -43,9 +47,13 @@ void main() {
     when(
       () => mockGetBudgetsWithProgress(),
     ).thenAnswer((_) async => const Right(<BudgetProgress>[]));
+    recordRepository = MockRecordRepository();
+    when(
+      () => recordRepository.getAmountsBySourceIds(any()),
+    ).thenAnswer((_) async => const Right(<String, List<double>>{}));
     bloc = SmsScannerBloc(
       scanSmsUseCase: mockScanSmsUseCase,
-      recordRepository: MockRecordRepository(),
+      recordRepository: recordRepository,
       createRecordsFromParsedList: mockCreateRecordsFromParsedList,
       getBudgetsWithProgress: mockGetBudgetsWithProgress,
     );
@@ -99,6 +107,112 @@ void main() {
       expect(captured.endDate, DateTime(2026, 7, 11));
       expect(captured.offset, 0);
       expect(captured.limit, 10);
+    });
+
+    blocTest<SmsScannerBloc, SmsScannerState>(
+      'a failed duplicate check stops the scan instead of showing every '
+      'message as new',
+      setUp: () {
+        when(() => mockScanSmsUseCase(any())).thenAnswer(
+          (_) async => Right(
+            SmsScanPage(
+              results: [makeSmsScanResultItem(sourceId: 'source-1')],
+              nextOffset: 25,
+              hasReachedMax: true,
+            ),
+          ),
+        );
+        when(
+          () => recordRepository.getExistingSourceIds(any()),
+        ).thenAnswer((_) async => const Left(CacheFailure(message: 'locked')));
+      },
+      build: () => bloc,
+      act: (bloc) => bloc.add(const StartScan(filterDuplicates: true)),
+      expect: () => [
+        isA<SmsScannerScanning>(),
+        isA<SmsScannerError>().having(
+          (s) => s.message,
+          'message',
+          t.common.errors.storage,
+        ),
+      ],
+    );
+
+    group('messages imported before v20 under their old id', () {
+      const legacy = SmsScanResultItem(
+        parsedTransaction: ParsedTransaction(
+          rawMessage: 'Debited Tk 500',
+          amount: 500,
+          sourceType: 'sms',
+          sourceId: 'BANK:1:abc',
+          confidenceScore: 0.9,
+          parseFailed: false,
+        ),
+        senderKey: 'BANK',
+        senderLabel: 'Bank',
+        legacySourceId: '12345',
+      );
+
+      void stubScan({
+        required Either<CacheFailure, Map<String, List<double>>> stored,
+      }) {
+        when(() => mockScanSmsUseCase(any())).thenAnswer(
+          (_) async => const Right(
+            SmsScanPage(results: [legacy], nextOffset: 1, hasReachedMax: true),
+          ),
+        );
+        when(
+          () => recordRepository.getExistingSourceIds(any()),
+        ).thenAnswer((_) async => const Right({}));
+        when(
+          () => recordRepository.getAmountsBySourceIds(any()),
+        ).thenAnswer((_) async => stored);
+      }
+
+      blocTest<SmsScannerBloc, SmsScannerState>(
+        'are not offered again',
+        setUp: () => stubScan(
+          stored: const Right({
+            '12345': [500.0],
+          }),
+        ),
+        build: () => bloc,
+        act: (bloc) => bloc.add(const StartScan(filterDuplicates: true)),
+        expect: () => [
+          isA<SmsScannerScanning>(),
+          isA<SmsScannerScanComplete>().having(
+            (s) => s.results,
+            'results',
+            isEmpty,
+          ),
+        ],
+      );
+
+      blocTest<SmsScannerBloc, SmsScannerState>(
+        'a different message sharing the old id is still offered',
+        setUp: () => stubScan(
+          stored: const Right({
+            '12345': [75.0],
+          }),
+        ),
+        build: () => bloc,
+        act: (bloc) => bloc.add(const StartScan(filterDuplicates: true)),
+        expect: () => [
+          isA<SmsScannerScanning>(),
+          isA<SmsScannerScanComplete>().having((s) => s.results, 'results', [
+            legacy,
+          ]),
+        ],
+      );
+
+      blocTest<SmsScannerBloc, SmsScannerState>(
+        'a failed old-id lookup is an error',
+        setUp: () =>
+            stubScan(stored: const Left(CacheFailure(message: 'locked'))),
+        build: () => bloc,
+        act: (bloc) => bloc.add(const StartScan(filterDuplicates: true)),
+        expect: () => [isA<SmsScannerScanning>(), isA<SmsScannerError>()],
+      );
     });
 
     test('emits error when scan use case fails', () async {
@@ -366,5 +480,32 @@ void main() {
       expect(successState.results, [scanItem]);
       expect(successState.submissionErrorMessage, isNull);
     });
+  });
+
+  test('a double tap on Save adds the selected expenses once', () async {
+    final item = makeSmsScanResultItem(sourceId: 'source-1');
+    registerFallbackValue(<ParsedTransaction>[]);
+    when(() => mockScanSmsUseCase(any())).thenAnswer(
+      (_) async => Right(
+        SmsScanPage(results: [item], nextOffset: 1, hasReachedMax: true),
+      ),
+    );
+    when(() => mockCreateRecordsFromParsedList(any())).thenAnswer((_) async {
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+
+      return const Right(
+        CreateRecordsResult(createdCount: 1, skippedDuplicates: 0, errors: []),
+      );
+    });
+    bloc.add(const StartScan());
+    await pumpEventQueue();
+
+    final save = CreateSelectedExpenses(transactions: [item.parsedTransaction]);
+    bloc
+      ..add(save)
+      ..add(save);
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+
+    verify(() => mockCreateRecordsFromParsedList(any())).called(1);
   });
 }

@@ -1,9 +1,7 @@
 import 'package:intl/intl.dart';
 import 'package:flutter/foundation.dart';
-import 'package:expense_tracker/core/constants/source_types.dart';
 import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/core/utils/regex_utils.dart';
-import '../entities/parsing_rule.dart';
 import '../entities/parsed_transaction.dart';
 import '../entities/evaluate_rules_params.dart';
 import '../entities/parsing_context.dart';
@@ -12,30 +10,13 @@ import '../../../message_templates/domain/entities/expense_template.dart';
 import '../../../message_templates/domain/entities/message_source.dart';
 
 class RuleEvaluator {
-  static String normalizeAmount(String amount) =>
-      amount_match_resolver.normalizeResolvedAmount(amount);
-
   static ParsedTransaction? evaluateWithContext(
     ParsingContext context,
     EvaluateRulesParams params,
   ) {
-    final templateResult = _evaluateTemplates(context, params);
-    if (templateResult != null) return templateResult;
-
-    return _evaluateRules(context, params);
+    return _evaluateTemplates(context, params);
   }
 
-  /// Resolves which regex match in [allMatches] corresponds to the
-  /// transaction amount in [rawMessage]. Each candidate is scored by
-  /// context: numbers immediately preceded by a masked account suffix
-  /// (`***1234`) or a balance keyword (`Avl Bal`, `Balance`) are penalized;
-  /// numbers with decimals adjacent to a currency/action keyword
-  /// (`BDT`, `Rs`, `debited`, etc.) are rewarded. The highest-scoring
-  /// candidate wins.
-  ///
-  /// If [selectedAmount] is provided, exact-match wins immediately —
-  /// scoring is only used as a fallback when no match normalizes to that
-  /// value. On a score tie, the leftmost candidate wins.
   @visibleForTesting
   static Match? resolveAmountMatch(
     List<Match> allMatches,
@@ -77,27 +58,6 @@ class RuleEvaluator {
     return null;
   }
 
-  static ParsedTransaction? _evaluateRules(
-    ParsingContext context,
-    EvaluateRulesParams params,
-  ) {
-    for (final rule in context.rules) {
-      final sourceTypeMatch = switch (rule.sourceType) {
-        SourceType.sms => params.sourceType == AppSourceType.sms,
-        SourceType.email => params.sourceType == AppSourceType.email,
-        SourceType.both => true,
-      };
-      if (!sourceTypeMatch) continue;
-
-      if (!rule.matchesTriggerWord(params.rawMessage)) continue;
-
-      final candidate = _evaluateRule(rule, params, context.regexCache);
-      if (candidate != null) return candidate;
-    }
-
-    return null;
-  }
-
   static ParsedTransaction? _evaluateTemplate(
     ExpenseTemplate template,
     EvaluateRulesParams params,
@@ -121,10 +81,8 @@ class RuleEvaluator {
       final amount = _extractAmount(amountMatch);
       if (amount == null) return null;
 
-      final messageDate = params.messageDate;
-      final description = messageDate != null
-          ? '${monitoredSource.contactName} - ${DateFormat('dd MMM yyyy \'at\' HH:mm').format(messageDate)}'
-          : template.descriptionPattern ?? 'Template Expense';
+      final description =
+          '${monitoredSource.contactName} - ${DateFormat('dd MMM yyyy \'at\' HH:mm').format(params.messageDate)}';
 
       return ParsedTransaction(
         rawMessage: params.rawMessage,
@@ -147,141 +105,9 @@ class RuleEvaluator {
   }
 
   static double? _extractAmount(Match amountMatch) {
-    // group(1) holds the numeric portion for both legacy and new patterns;
-    // fall back to group(0) for patterns without a capture group.
     final amountStr = amountMatch.group(1) ?? amountMatch.group(0);
     if (amountStr == null) return null;
 
-    final cleanAmount = normalizeAmount(amountStr);
-
-    return double.tryParse(cleanAmount);
-  }
-
-  static ParsedTransaction? _evaluateRule(
-    ParsingRule rule,
-    EvaluateRulesParams params,
-    Map<String, RegExp> regexCache,
-  ) {
-    try {
-      final regex =
-          regexCache[rule.amountPattern] ?? RegExp(rule.amountPattern);
-      final amountMatch = matchFirstWithBudget(regex, params.rawMessage);
-
-      if (amountMatch == null) return null;
-
-      final amount = _extractAmount(amountMatch);
-      final datePattern = rule.datePattern;
-      final date = datePattern != null
-          ? _extractDate(datePattern, params, regexCache)
-          : null;
-
-      final snippetStart = _calcSnippetStart(amountMatch.start);
-      final snippetEnd = _calcSnippetEnd(
-        amountMatch.end,
-        params.rawMessage.length,
-      );
-      final description = params.rawMessage
-          .substring(snippetStart, snippetEnd)
-          .trim();
-
-      final confidenceScore = _computeConfidenceScore(amount, date);
-
-      return ParsedTransaction(
-        rawMessage: params.rawMessage,
-        amount: amount,
-        date: date,
-        description: description,
-        categoryId: rule.categoryId,
-        sourceType: params.sourceType,
-        sourceId: params.sourceId,
-        confidenceScore: confidenceScore,
-        matchedRuleId: rule.id,
-        parseFailed: false,
-        parseError: null,
-      );
-    } catch (e, s) {
-      appLogger.error('Error evaluating with context', e, s);
-
-      return ParsedTransaction(
-        rawMessage: params.rawMessage,
-        amount: null,
-        date: null,
-        description: null,
-        categoryId: null,
-        sourceType: params.sourceType,
-        sourceId: params.sourceId,
-        confidenceScore: 0.0,
-        matchedRuleId: rule.id,
-        parseFailed: true,
-        parseError: e.toString(),
-      );
-    }
-  }
-
-  static DateTime? _extractDate(
-    String datePattern,
-    EvaluateRulesParams params,
-    Map<String, RegExp> regexCache,
-  ) {
-    final dateRegex = regexCache[datePattern] ?? RegExp(datePattern);
-    final dateMatch = matchFirstWithBudget(dateRegex, params.rawMessage);
-    if (dateMatch == null) return null;
-
-    return _parseDate(dateMatch.group(0) ?? '');
-  }
-
-  static int _calcSnippetStart(int matchStart) {
-    return matchStart > 20 ? matchStart - 20 : 0;
-  }
-
-  static int _calcSnippetEnd(int matchEnd, int messageLength) {
-    return matchEnd + 20 < messageLength ? matchEnd + 20 : messageLength;
-  }
-
-  static double _computeConfidenceScore(double? amount, DateTime? date) {
-    if (amount != null && date != null) return 1.0;
-    if (amount != null) return 0.9;
-
-    return 0.7;
-  }
-
-  static DateTime? _parseDate(String dateStr) {
-    final datePatterns = [
-      RegExp(r'(\d{2})/(\d{2})/(\d{4})'),
-      RegExp(r'(\d{2})-(\d{2})-(\d{4})'),
-      RegExp(r'(\d{4})/(\d{2})/(\d{2})'),
-      RegExp(r'(\d{4})-(\d{2})-(\d{2})'),
-    ];
-
-    for (final pattern in datePatterns) {
-      final match = pattern.firstMatch(dateStr);
-      if (match == null) continue;
-
-      final g1 = match.group(1);
-      final g2 = match.group(2);
-      final g3 = match.group(3);
-      if (g1 == null || g2 == null || g3 == null) continue;
-
-      final n1 = int.tryParse(g1);
-      final n2 = int.tryParse(g2);
-      final n3 = int.tryParse(g3);
-      if (n1 == null || n2 == null || n3 == null) continue;
-
-      return n1 > 31 ? _safeDateTime(n1, n2, n3) : _safeDateTime(n3, n1, n2);
-    }
-
-    return null;
-  }
-
-  static DateTime? _safeDateTime(int year, int month, int day) {
-    if (month < 1 || month > 12) return null;
-    if (day < 1 || day > 31) return null;
-    try {
-      return DateTime(year, month, day);
-    } catch (e) {
-      appLogger.error('Rule evaluation error', e);
-
-      return null;
-    }
+    return amount_match_resolver.parseResolvedAmount(amountStr);
   }
 }

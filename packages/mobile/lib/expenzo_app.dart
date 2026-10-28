@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:saropa_drift_advisor/saropa_drift_advisor.dart';
 import 'package:expense_tracker/core/constants/app_font_size.dart';
+import 'package:expense_tracker/core/logger/crash_reporter.dart';
 import 'package:expense_tracker/core/constants/first_day_of_week.dart';
 import 'package:expense_tracker/core/theme/currency_config.dart';
 import 'package:expense_tracker/core/theme/first_day_material_localizations.dart';
@@ -29,6 +30,7 @@ import 'package:expense_tracker/shared/services/feedback_mailer.dart';
 
 import 'core/background/background_task_scheduler.dart';
 import 'core/database/app_database.dart';
+import 'core/database/database_file.dart';
 import 'i18n/strings.g.dart';
 import 'core/di/injection_container.dart' as di;
 import 'core/lifecycle/bootstrap_service.dart';
@@ -48,16 +50,19 @@ import 'features/settings/presentation/bloc/settings_state.dart';
 import 'features/settings/presentation/helpers/first_settings.dart';
 import 'features/sms_parser/application/realtime_sms_processor.dart';
 import 'features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'shared/presentation/widgets/app_error_fallback.dart';
 
-/// App-open work, run in order: auto-post due recurring items (SAAP-63),
-/// then recurring reminders, so reminders see the advanced dates.
 Future<void> _runRecurringAppOpenWork() async {
-  if (di.getIt.isRegistered<RecurringAutoPoster>()) {
-    await di.getIt<RecurringAutoPoster>().runWhenReady();
-  }
-  if (di.getIt.isRegistered<SendRecurringReminders>()) {
-    await di.getIt<SendRecurringReminders>()(now: DateTime.now());
+  try {
+    if (di.getIt.isRegistered<RecurringAutoPoster>()) {
+      await di.getIt<RecurringAutoPoster>().runWhenReady();
+    }
+    if (di.getIt.isRegistered<SendRecurringReminders>()) {
+      await di.getIt<SendRecurringReminders>()(now: DateTime.now());
+    }
+  } catch (e, s) {
+    appLogger.error('Recurring app-open work failed', e, s);
   }
 }
 
@@ -71,7 +76,7 @@ class ExpenzoApp extends StatefulWidget {
 class _ExpenzoAppState extends State<ExpenzoApp> {
   final _navigatorKey = GlobalKey<NavigatorState>();
   final _themeModeNotifier = ValueNotifier<ThemeMode>(ThemeMode.system);
-  // Keeps the last value while settings reload, so text doesn't jump.
+
   final _fontScaleNotifier = ValueNotifier<double>(
     AppFontSize.defaultSize.scale,
   );
@@ -81,9 +86,6 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
         di.getIt<SyncEngine>().applyEnabled(enabled: enabled),
   );
 
-  // Keeps DateFormat and the language-default first day of week in step
-  // with `t`, including when slang follows an OS language change on its own
-  // in "Match device" mode.
   StreamSubscription<AppLocale>? _localeSubscription;
 
   @override
@@ -101,30 +103,27 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
   bool _error = false;
   String _errorRefId = '';
 
-  /// False until the first settings after a cold start re-arm background
-  /// work with fresh delays.
+  bool _databaseUnreadable = false;
+
   bool _backgroundArmed = false;
 
-  /// The last settings applied, so a language change can recompute the
-  /// first day of week while it is unset.
   UserSettings? _lastSettings;
 
   Future<void> _startInitialization() async {
     try {
-      await _initFirebase();
+      final firebase = _initFirebase();
       await di.initCriticalDependencies();
+
+      await di.getIt<AppDatabase>().customSelect('SELECT 1').get();
+      await firebase;
       if (!mounted) return;
-      // Before the first settings load, so it already sees the resolved
-      // onboarding flag. A failure leaves it null, which never redirects.
+
       await di.getIt<ResolveOnboardingStatus>()();
 
       if (kDebugMode) {
         await _startDriftDebugServer();
       }
 
-      // Settings live in SharedPreferences, so they load while the
-      // database seeds. The splash stays up until both finish, so the home
-      // tab is the first screen shown.
       final firstLoaded = _initSettingsWhenReady();
       await di.getIt<BootstrapService>().seedInitialData();
       _applyHomeTab(await firstLoaded);
@@ -138,16 +137,17 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
 
       unawaited(_tryStartRealtimeSmsProcessing());
 
-      // Feature deps no longer need the 500ms delay — the
-      // `featureDependenciesReady` getter is self-healing.
       await di.initFeatureDependencies();
       unawaited(_runRecurringAppOpenWork());
     } catch (e, stack) {
       debugPrint('App init failed: $e\n$stack');
+      final reference = AppErrorFallback.generateReferenceId();
+      unawaited(crashReporter.capture(e, stack, reference: reference));
       if (mounted) {
         setState(() {
           _error = true;
-          _errorRefId = AppErrorFallback.generateReferenceId();
+          _errorRefId = reference;
+          _databaseUnreadable = isDatabaseFileError(e);
         });
       }
     }
@@ -163,7 +163,7 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
       );
       debugPrint('Drift debug server ready on http://127.0.0.1:8642/');
     } catch (e, s) {
-      debugPrint('Drift debug server failed to start: $e\n$s');
+      appLogger.error('Drift debug server failed to start', e, s);
     }
   }
 
@@ -183,13 +183,10 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
         },
       );
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
-      debugPrint('Firebase init failed (non-fatal): $e');
+      appLogger.error('Firebase init failed (non-fatal)', e, s);
     }
   }
 
-  /// Loads settings and keeps applying them. Returns the first loaded
-  /// settings, or null if they failed or took too long.
   Future<UserSettings?> _initSettingsWhenReady() async {
     await di.criticalDependenciesReady;
     if (!mounted) return null;
@@ -205,11 +202,6 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
     return firstSettings(bloc.stream);
   }
 
-  /// Opens the chosen home tab. Called once per start, before the splash
-  /// ends; the settings listener above never navigates, so later changes
-  /// don't move the user. The router isn't mounted yet, so this reads and
-  /// sets the location it will open on (a deep link if the app was opened
-  /// from one).
   void _applyHomeTab(UserSettings? settings) {
     final router = _appRouter?.config;
     if (settings == null || router == null) return;
@@ -224,8 +216,7 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
     final onboardingChanged =
         _lastSettings?.onboardingCompleted != settings.onboardingCompleted;
     _lastSettings = settings;
-    // The router has no refresh listenable: re-run the onboarding redirect
-    // when the flag is first known or changes, as RefreshOnAuthChange does.
+
     if (onboardingChanged) _appRouter?.config.refresh();
     _themeModeNotifier.value = _themeModeFromString(settings.theme);
     _fontScaleNotifier.value = settings.fontSize.scale;
@@ -240,10 +231,9 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
     _applyWeekStart();
     unawaited(_applyBackgroundWork(settings));
     _syncSwitch.update(enabled: settings.syncEnabled);
+    unawaited(crashReporter.setEnabled(enabled: settings.crashReportsEnabled));
   }
 
-  /// Sets [WeekStart] from the last settings and the current app language.
-  /// Returns true when the day changed.
   bool _applyWeekStart() {
     final settings = _lastSettings;
     if (settings == null) return false;
@@ -258,7 +248,7 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
   void _onLocaleChanged(AppLocale locale) {
     Intl.defaultLocale = locale.languageTag;
     final settings = _lastSettings;
-    // The weekly summary day follows the first day of week.
+
     if (_applyWeekStart() && settings != null) {
       unawaited(_applyBackgroundWork(settings));
     }
@@ -271,7 +261,7 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
       _backgroundArmed = true;
       await di.getIt<BackgroundTaskScheduler>().apply(settings, force: force);
     } catch (e, s) {
-      debugPrint('Background work scheduling failed: $e\n$s');
+      appLogger.error('Background work scheduling failed', e, s);
     }
   }
 
@@ -288,8 +278,7 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
       if (!status.isGranted) return;
       await di.getIt<RealtimeSmsProcessor>().start();
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
-      debugPrint('Realtime SMS start skipped: $e');
+      appLogger.error('Realtime SMS start skipped', e, s);
     }
   }
 
@@ -301,7 +290,7 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
       _dispatchDelayedCategoryLoad();
       _dispatchDelayedRecordLoad();
     } catch (e, s) {
-      debugPrint('Initial loads dispatch failed: $e\n$s');
+      appLogger.error('Initial loads dispatch failed', e, s);
     }
   }
 
@@ -347,8 +336,7 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
                   create: (_) => di.getIt<SmsScannerBloc>(),
                 ),
               ],
-              // Re-run router redirects (sync conflict, login) when the
-              // signed-in state changes; AuthBloc exists only after init.
+
               child: RefreshOnAuthChange(
                 enabled: _initialized,
                 onAuthChanged: () => _appRouter?.config.refresh(),
@@ -356,6 +344,7 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
                   initialized: _initialized,
                   error: _error,
                   errorRefId: _errorRefId,
+                  databaseUnreadable: _databaseUnreadable,
                   onInitLoads: _dispatchInitialLoads,
                   child: child ?? const SizedBox.shrink(),
                 ),
@@ -376,10 +365,7 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
       onGenerateTitle: (context) => t.common.appName,
       locale: TranslationProvider.of(context).flutterLocale,
       supportedLocales: AppLocaleUtils.supportedLocales,
-      // Date pickers start their weeks on the first day of week. Set at the
-      // root on purpose: showDatePicker reads the navigator's localizations,
-      // so a narrower override wouldn't reach it. A change reloads them app
-      // wide, which is fine for a rarely changed setting.
+
       localizationsDelegates: [
         FirstDayMaterialLocalizationsDelegate(firstDay),
         ...GlobalMaterialLocalizations.delegates,
@@ -424,6 +410,7 @@ class _AppContent extends StatefulWidget {
     required this.initialized,
     required this.error,
     required this.errorRefId,
+    required this.databaseUnreadable,
     required this.onInitLoads,
   });
 
@@ -431,6 +418,7 @@ class _AppContent extends StatefulWidget {
   final bool initialized;
   final bool error;
   final String errorRefId;
+  final bool databaseUnreadable;
   final VoidCallback onInitLoads;
 
   @override
@@ -455,25 +443,14 @@ class _AppContentState extends State<_AppContent> with WidgetsBindingObserver {
       if (!status.isGranted) return;
       await di.getIt<RealtimeSmsProcessor>().drainPendingMessages();
     } catch (e, s) {
-      debugPrint('Error: $e\n$s');
-      debugPrint('Realtime SMS drain skipped: $e');
+      appLogger.error('Realtime SMS drain skipped', e, s);
     }
   }
 
-  // AppErrorFallback manages retry internally; this callback exists only
-  // to satisfy the VoidCallback contract.
-  void _handleRetry() {
-    return;
-  }
+  void _handleRetry() => unawaited(di.getIt<BootstrapService>().retry());
 
-  void _handleHardReset() {
-    unawaited(
-      di.getIt<BootstrapService>().hardReset().then((_) {
-        if (!mounted) return;
-        di.getIt<BootstrapService>().remountRoot();
-      }),
-    );
-  }
+  void _handleResetLocalData() =>
+      unawaited(di.getIt<BootstrapService>().resetLocalData());
 
   void _handleRestart() {
     di.getIt<BootstrapService>().restart();
@@ -519,7 +496,9 @@ class _AppContentState extends State<_AppContent> with WidgetsBindingObserver {
         onSendFeedback: () =>
             sendFeedback(context, errorReference: widget.errorRefId),
         onRetry: _handleRetry,
-        onHardReset: _handleHardReset,
+        onResetLocalData: widget.databaseUnreadable
+            ? _handleResetLocalData
+            : null,
         onRestart: _handleRestart,
       );
     }

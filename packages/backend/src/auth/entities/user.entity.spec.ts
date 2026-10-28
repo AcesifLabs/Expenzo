@@ -11,11 +11,11 @@ const loadEntities = (dir: string) => {
   }
 };
 
-// Shared rows that outlive the user who made them. A Family Group belongs to
-// all its members; the leave rules run before the account goes (Task 7).
+
+
 const KEPT_ON_DELETE = new Set(['Group.creator']);
 
-// Deleting the user row (DELETE /auth/account) must take every synced row with it.
+
 describe('User entity', () => {
   it('should cascade every relation to User on delete', () => {
     loadEntities(join(__dirname, '../..'));

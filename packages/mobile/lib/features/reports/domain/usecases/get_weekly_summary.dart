@@ -4,8 +4,6 @@ import 'package:expense_tracker/core/utils/week_utils.dart';
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
 import '../entities/weekly_summary.dart';
 
-/// Spending from the start of this week to [now], against the same span one
-/// week earlier, so a late summary still compares equal spans.
 class GetWeeklySummary {
   final RecordRepository repository;
 
@@ -13,7 +11,7 @@ class GetWeeklySummary {
 
   Future<Either<Failure, WeeklySummary>> call({
     required DateTime now,
-    int? firstWeekday,
+    required int firstWeekday,
   }) async {
     final weekStart = startOfWeek(now, firstWeekday: firstWeekday);
     final thisWeek = await repository.getTotalSpending(weekStart, now);

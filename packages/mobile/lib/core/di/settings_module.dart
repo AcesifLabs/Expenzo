@@ -36,8 +36,6 @@ void initSettingsModule(GetIt getIt) {
     ),
   );
 
-  // WipeLocalData comes from initDataWipeModule, which runs later; both are
-  // resolved at first use.
   getIt.registerLazySingleton(
     () => DeleteAccountAndData(
       authRepository: getIt<AuthRepository>(),

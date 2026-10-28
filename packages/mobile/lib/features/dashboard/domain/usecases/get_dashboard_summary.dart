@@ -21,12 +21,20 @@ class GetDashboardSummary implements UseCase<DashboardSummary, DateRange> {
   @override
   Future<Either<Failure, DashboardSummary>> call(DateRange dateRange) async {
     try {
-      final currentRecords = await _fetchRecords(dateRange);
-      final previousRecords = await _fetchRecords(dateRange.previousPeriod);
+      final currentResult = await _fetchRecords(dateRange);
+      final previousResult = await _fetchRecords(dateRange.previousPeriod);
+      final loadFailure = currentResult.fold<Failure?>(
+        (f) => f,
+        (_) => previousResult.fold((f) => f, (_) => null),
+      );
+      if (loadFailure != null) return Left(loadFailure);
+
+      final currentRecords = currentResult.getOrElse(() => const []);
+      final previousRecords = previousResult.getOrElse(() => const []);
 
       final totalIncome = _calculateByType(currentRecords, RecordType.income);
       final totalExpense = _calculateByType(currentRecords, RecordType.expense);
-      // "Spent" is expense-only — income is tracked separately
+
       final totalSpent = totalExpense;
       final previousPeriodTotal = _calculateByType(
         previousRecords,
@@ -43,9 +51,6 @@ class GetDashboardSummary implements UseCase<DashboardSummary, DateRange> {
         currentRecords,
       );
 
-      // Recent Activity = newest transactions inside the dashboard range, so
-      // the list agrees with the totals shown above it. [currentRecords] is
-      // already ordered by transaction date descending.
       final recentTransactions = currentRecords.take(5).toList();
 
       return Right(
@@ -62,19 +67,19 @@ class GetDashboardSummary implements UseCase<DashboardSummary, DateRange> {
     } catch (e, s) {
       appLogger.error('Error getting dashboard summary', e, s);
 
-      return Left(ServerFailure(message: e.toString()));
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
-  Future<List<Record>> _fetchRecords(DateRange dateRange) async {
-    final result = await recordRepository.getRecords(
+  Future<Either<CacheFailure, List<Record>>> _fetchRecords(
+    DateRange dateRange,
+  ) {
+    return recordRepository.getRecords(
       dateRange: DateTimeRange(
         start: dateRange.startDate,
         end: dateRange.endDate,
       ),
     );
-
-    return result.fold((failure) => [], (records) => records);
   }
 
   double _calculateTotal(List<Record> records) {

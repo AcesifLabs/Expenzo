@@ -10,11 +10,9 @@ import 'notification_toggle.dart';
 class UserSettings extends Equatable {
   final int? id;
 
-  /// ISO 4217 code, see `CurrencyConfig`.
   final String currencyCode;
   final int emailFetchLimit;
 
-  /// Master switch; the four toggles below only apply while it is on.
   final bool notificationsEnabled;
   final bool budgetOverAlertsEnabled;
   final bool budgetNearLimitAlertsEnabled;
@@ -22,45 +20,29 @@ class UserSettings extends Equatable {
   final bool recurringRemindersEnabled;
   final String theme;
 
-  /// 'system' follows the device language; otherwise a locale code ('en', 'bn').
   final String languageCode;
 
-  /// True once the user dismissed the Home "Set up auto-import" card.
   final bool autoImportPromptDismissed;
 
-  /// Frequency preselected for new recurring items: 'weekly', 'monthly'
-  /// or 'yearly' (a `RecurringFrequency` name).
   final String defaultRecurringFrequency;
 
-  /// When true, due recurring items become Records on app open/resume.
   final bool recurringAutoCreate;
 
-  /// Decimals shown in amounts, one of
-  /// [NumberDisplayFormat.allowedDecimalPlaces]. Display only: stored amounts
-  /// keep cents (SAAP-65).
   final int decimalPlaces;
   final DigitGrouping digitGrouping;
 
-  /// Multiplies the device text scale; see [AppFontSize].
   final AppFontSize fontSize;
 
-  /// Null until the user picks; read [effectiveFirstDayOfWeek] instead.
   final FirstDayOfWeek? firstDayOfWeek;
 
-  /// Root tab opened on cold start (SAAP-68).
   final AppRootTab homeTab;
 
-  /// Sync with the account on this device. Off stops sending and receiving;
-  /// changes still queue.
   final bool syncEnabled;
 
-  /// False until the user finishes or skips onboarding. Null only for
-  /// settings saved before onboarding existed; `ResolveOnboardingStatus`
-  /// replaces it on the next start.
   final bool? onboardingCompleted;
 
-  /// Monthly net income from onboarding, normalised to a month. Device-only
-  /// (ADR 0010).
+  final bool crashReportsEnabled;
+
   final double? monthlyIncome;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -87,6 +69,7 @@ class UserSettings extends Equatable {
     homeTab,
     syncEnabled,
     onboardingCompleted,
+    crashReportsEnabled,
     monthlyIncome,
     createdAt,
     updatedAt,
@@ -113,6 +96,7 @@ class UserSettings extends Equatable {
     this.homeTab = AppRootTab.home,
     this.syncEnabled = true,
     this.onboardingCompleted,
+    this.crashReportsEnabled = true,
     this.monthlyIncome,
     required this.createdAt,
     required this.updatedAt,
@@ -139,6 +123,7 @@ class UserSettings extends Equatable {
     AppRootTab? homeTab,
     bool? syncEnabled,
     bool? onboardingCompleted,
+    bool? crashReportsEnabled,
     double? monthlyIncome,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -169,18 +154,16 @@ class UserSettings extends Equatable {
       homeTab: homeTab ?? this.homeTab,
       syncEnabled: syncEnabled ?? this.syncEnabled,
       onboardingCompleted: onboardingCompleted ?? this.onboardingCompleted,
+      crashReportsEnabled: crashReportsEnabled ?? this.crashReportsEnabled,
       monthlyIncome: monthlyIncome ?? this.monthlyIncome,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 
-  /// The stored choice, else the default for [appLanguageCode] (the
-  /// resolved app language, never 'system').
   FirstDayOfWeek effectiveFirstDayOfWeek(String appLanguageCode) =>
       firstDayOfWeek ?? FirstDayOfWeek.defaultFor(appLanguageCode);
 
-  /// True when [toggle] is on and so is the master switch.
   bool isEnabled(NotificationToggle toggle) {
     if (!notificationsEnabled) return false;
 

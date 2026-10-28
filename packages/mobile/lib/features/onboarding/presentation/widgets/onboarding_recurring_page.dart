@@ -15,8 +15,6 @@ import '../bloc/onboarding_event.dart';
 import 'onboarding_page_frame.dart';
 import 'recurring_draft_sheet.dart';
 
-/// Step 2 (frame `OnboardingRecurring`): fixed expenses. None is a valid
-/// answer, so Continue is always on.
 class OnboardingRecurringPage extends StatelessWidget {
   const OnboardingRecurringPage({super.key});
 

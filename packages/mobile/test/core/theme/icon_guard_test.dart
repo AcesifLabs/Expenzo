@@ -2,9 +2,6 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
-/// Icon rule from DESIGN.md: Phosphor Regular everywhere, Fill only for a
-/// selected state. `AppRootTab.selectedIcon` holds the selected tab's Fill
-/// icons, and only the shell reads it; Rate the app fills the chosen stars.
 const _fillAllowlist = {
   'shared/presentation/widgets/app_shell.dart',
   'core/router/app_root_tab.dart',

@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:bloc_test/bloc_test.dart';
+
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -163,43 +165,37 @@ void main() {
     },
   );
 
-  test('an export failure shows a message and does not share', () async {
-    when(
+  blocTest<ExportBloc, ExportState>(
+    'an export failure shows the storage message and does not share',
+    setUp: () => when(
       () => exportData(any()),
-    ).thenAnswer((_) async => const Left(CacheFailure(message: 'disk full')));
+    ).thenAnswer((_) async => const Left(CacheFailure(message: 'disk full'))),
+    build: () => bloc,
+    act: (bloc) => bloc.add(const ExportRequested()),
+    expect: () => [
+      hasStatus(ExportStatus.exporting),
+      hasStatus(
+        ExportStatus.failed,
+      ).having((s) => s.errorMessage, 'errorMessage', t.common.errors.storage),
+    ],
+    verify: (_) => verifyNeverShared(),
+  );
 
-    final states = expectLater(
-      bloc.stream,
-      emitsInOrder([
-        hasStatus(ExportStatus.exporting),
-        hasStatus(
-          ExportStatus.failed,
-        ).having((s) => s.errorMessage, 'errorMessage', isNotEmpty),
-      ]),
-    );
-    bloc.add(const ExportRequested());
-    await states;
-    verifyNeverShared();
-  });
-
-  test('a share that throws ends in failed', () async {
-    when(() => exportData(any())).thenAnswer((_) async => const Right(file));
-    stubShare(() async => throw Exception('no activity'));
-
-    final states = expectLater(
-      bloc.stream,
-      emitsInOrder([
-        hasStatus(ExportStatus.exporting),
-        hasStatus(ExportStatus.failed).having(
-          (s) => s.errorMessage,
-          'errorMessage',
-          t.common.errors.generic,
-        ),
-      ]),
-    );
-    bloc.add(const ExportRequested());
-    await states;
-  });
+  blocTest<ExportBloc, ExportState>(
+    'a share that throws ends in failed',
+    setUp: () {
+      when(() => exportData(any())).thenAnswer((_) async => const Right(file));
+      stubShare(() async => throw Exception('no activity'));
+    },
+    build: () => bloc,
+    act: (bloc) => bloc.add(const ExportRequested()),
+    expect: () => [
+      hasStatus(ExportStatus.exporting),
+      hasStatus(
+        ExportStatus.failed,
+      ).having((s) => s.errorMessage, 'errorMessage', t.common.errors.generic),
+    ],
+  );
 
   test('a choice after a final status resets to idle', () async {
     when(

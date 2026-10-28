@@ -4,8 +4,8 @@ class EvaluateRulesParams extends Equatable {
   final String rawMessage;
   final String sourceType;
   final String sourceId;
-  final String? address;
-  final DateTime? messageDate;
+  final String address;
+  final DateTime messageDate;
 
   @override
   List<Object?> get props => [
@@ -20,7 +20,7 @@ class EvaluateRulesParams extends Equatable {
     required this.rawMessage,
     required this.sourceType,
     required this.sourceId,
-    this.address,
-    this.messageDate,
+    required this.address,
+    required this.messageDate,
   });
 }

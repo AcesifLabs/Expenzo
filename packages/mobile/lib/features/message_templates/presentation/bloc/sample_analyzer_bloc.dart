@@ -43,10 +43,6 @@ class SampleAnalyzerBloc
 
   @override
   Future<void> close() async {
-    // Await the watcher tear-down so any in-flight tick that lands
-    // while super.close() is draining still hits the
-    // `if (isClosed) return;` guard inside the listener rather than
-    // throwing on a closed bloc.
     await _templatesSubscription?.cancel();
     _templatesSubscription = null;
 
@@ -81,14 +77,6 @@ class SampleAnalyzerBloc
 
     await _templatesSubscription?.cancel();
 
-    // Single Drift subscription feeds both the initial snapshot AND
-    // live updates. While we are still in `SampleAnalyzerLoading`,
-    // ticks accumulate in `pendingInitialTick`; the first tick also
-    // resolves `initialTickCompleter` so the bloc can move forward
-    // only after Drift has at least emitted once. A Drift update
-    // that races past the `await smsDatasource.getSmsBatched(...)`
-    // suspend lands here and is folded into the first
-    // `SampleAnalyzerLoaded` so it is never silently dropped.
     var pendingInitialTick = const <ExpenseTemplate>[];
     final initialTickCompleter = Completer<void>();
 
@@ -135,10 +123,6 @@ class SampleAnalyzerBloc
 
       _currentOffset += messages.length;
     } catch (e, s) {
-      // Safety valve so a Drift tick that lands after this exception
-      // does not keep the completer forever awaiting. (The listener
-      // is still subscribed in `SampleAnalyzerError`; without this
-      // the closure would never be released.)
       if (!initialTickCompleter.isCompleted) {
         initialTickCompleter.complete();
       }
@@ -173,8 +157,6 @@ class SampleAnalyzerBloc
       _messages.addAll(messages);
       _messages.sort((a, b) => b.date.compareTo(a.date));
 
-      // `copyWith` preserves `templatesBySample`, `pendingDeletion`,
-      // and `lastError` automatically — no need to re-pass them.
       emit(
         currentState.copyWith(
           messages: List.from(_messages),
@@ -206,11 +188,6 @@ class SampleAnalyzerBloc
     try {
       await templateRepository.deleteTemplate(event.template.id);
     } catch (e, s) {
-      // Preserve Loaded state on save-failure so the user stays on the
-      // page; surface the failure via `lastError` (the Page shows it
-      // as a SnackBar). Only fall back to a global
-      // `SampleAnalyzerError` if there is no Loaded state to attach
-      // the message to.
       addError(e, s);
       final latest = state;
       if (latest is SampleAnalyzerLoaded) {
@@ -241,8 +218,6 @@ class SampleAnalyzerBloc
     );
 
     if (hasConflict) {
-      // Drop undo silently — another template is already parked on this
-      // sample. Don't double-insert.
       emit(currentState.copyWith(clearPendingDeletion: true));
 
       return;
@@ -361,20 +336,6 @@ class SampleAnalyzerBloc
   }
 }
 
-/// Internal event that ferries Drift watcher ticks back into the bloc
-/// through the same event queue as user-initiated events.
-///
-/// Why an event instead of calling `emit(...)` directly from the
-/// listener:
-///  - Drift's `select(...).watch()` emits on its own microtask. Calling
-///    `emit` from inside that callback would race with user handlers
-///    (e.g. `TemplateDeleted`) that are awaiting the same state.
-///    Routing through `bloc.add(...)` serializes watcher-driven
-///    `templatesBySample` updates alongside `LoadSamples`,
-///    `TemplateDeleted`, etc., so state transitions stay linear.
-///  - Tests can drive the watcher deterministically by calling
-///    `watcherController.add([...])` to simulate a Drift update
-///    without faking timers or `runAsync`.
 class _TemplatesUpdated extends SampleAnalyzerEvent {
   final List<ExpenseTemplate> templates;
 

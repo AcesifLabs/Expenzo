@@ -18,12 +18,9 @@ import 'package:expense_tracker/shared/presentation/widgets/app_page_header.dart
 import 'package:expense_tracker/shared/presentation/widgets/app_empty_state.dart';
 import 'package:expense_tracker/core/theme/app_typography.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
-import '../../../parsing_rules/presentation/widgets/transaction_list_skeleton.dart';
+import 'package:expense_tracker/shared/presentation/widgets/transaction_list_skeleton.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
-/// Returns true only when the keyboard transitioned from open to closed,
-/// i.e. the previous bottom view inset was positive and the current one is
-/// zero. Used to unfocus the search field once the keyboard collapses.
 bool keyboardJustCollapsed({
   required double previousBottomInset,
   required double currentBottomInset,
@@ -104,9 +101,9 @@ class _ContactSelectorViewState extends State<ContactSelectorView>
           updatedAt: DateTime.now(),
         );
 
-    await Navigator.of(
-      context,
-    ).push(SlidePageRoute(builder: (_) => SampleAnalyzerPage(source: source)));
+    await Navigator.of(context).push(
+      SlidePageRoute<void>(builder: (_) => SampleAnalyzerPage(source: source)),
+    );
     if (!mounted) return;
     context.read<MessageSourcesBloc>().add(LoadMessageSources());
   }
@@ -129,7 +126,7 @@ class _ContactSelectorViewState extends State<ContactSelectorView>
   }
 
   Widget _buildSearchField(ColorScheme colors) {
-    final surfaceDimAlpha = colors.onSurface.withAlpha(100);
+    final surfaceDimAlpha = colors.onSurfaceVariant;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, 0),
@@ -162,15 +159,15 @@ class _ContactSelectorViewState extends State<ContactSelectorView>
 
   Widget _buildContactItem(
     DeviceContact contact,
-    List<MessageSource> monitoredSources,
+    List<MessageSource> knownSources,
     ThemeData theme,
   ) {
     final colors = theme.colorScheme;
-    final existingSource = monitoredSources.cast<MessageSource?>().firstWhere(
+    final existingSource = knownSources.cast<MessageSource?>().firstWhere(
       (s) => s?.contactId == contact.address,
       orElse: () => null,
     );
-    final isMonitored = existingSource != null;
+    final isMonitored = existingSource?.isMonitored ?? false;
 
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -278,15 +275,13 @@ class _ContactSelectorViewState extends State<ContactSelectorView>
       contact.lastMessage,
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
-      style: AppTypography.bodyMedium.copyWith(
-        color: colors.onSurface.withAlpha(120),
-      ),
+      style: AppTypography.bodyMedium.copyWith(color: colors.onSurfaceVariant),
     );
   }
 
   Widget _buildContactList(
     List<DeviceContact> contacts,
-    List<MessageSource> monitoredSources,
+    List<MessageSource> knownSources,
     ThemeData theme, {
     required bool isLoadingMore,
   }) {
@@ -311,11 +306,9 @@ class _ContactSelectorViewState extends State<ContactSelectorView>
 
     return ListView.builder(
       controller: _scrollController,
-      // Without an explicit padding the list re-applies the status-bar inset,
-      // which the header above already accounts for. Keep the bottom inset so
-      // the last contact scrolls clear of the floating nav bar.
+
       padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
-      // The trailing spinner row only exists while a next page is loading.
+
       itemCount: filteredContacts.length + (isLoadingMore ? 1 : 0),
       itemBuilder: (context, index) {
         if (index >= filteredContacts.length) {
@@ -327,11 +320,7 @@ class _ContactSelectorViewState extends State<ContactSelectorView>
           );
         }
 
-        return _buildContactItem(
-          filteredContacts[index],
-          monitoredSources,
-          theme,
-        );
+        return _buildContactItem(filteredContacts[index], knownSources, theme);
       },
     );
   }
@@ -379,8 +368,10 @@ class _ContactSelectorViewState extends State<ContactSelectorView>
           Expanded(
             child: BlocBuilder<MessageSourcesBloc, MessageSourcesState>(
               builder: (context, sourcesState) {
-                final monitoredSources = sourcesState is MessageSourcesLoaded
-                    ? sourcesState.sources.where((s) => s.isMonitored).toList()
+                // Paused sources count too, so tapping a paused sender reuses
+                // its source instead of creating a duplicate.
+                final knownSources = sourcesState is MessageSourcesLoaded
+                    ? sourcesState.sources
                     : <MessageSource>[];
 
                 return BlocBuilder<ContactSelectorBloc, ContactSelectorState>(
@@ -398,7 +389,7 @@ class _ContactSelectorViewState extends State<ContactSelectorView>
                       ) =>
                         _buildContactList(
                           contacts,
-                          monitoredSources,
+                          knownSources,
                           theme,
                           isLoadingMore: isLoadingMore,
                         ),

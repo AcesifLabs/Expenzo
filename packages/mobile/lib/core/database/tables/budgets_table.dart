@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+@TableIndex(name: 'idx_budgets_user_id', columns: {#userId})
 class Budgets extends Table {
   TextColumn get id => text()();
   TextColumn get name => text()();
@@ -12,15 +13,10 @@ class Budgets extends Table {
   BoolColumn get isEnabled => boolean().withDefault(const Constant(true))();
   IntColumn get userId => integer().nullable()();
 
-  /// The Family Group this budget is shared into; null for a personal one.
   TextColumn get groupId => text().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 
   @override
   Set<Column> get primaryKey => {id};
-
-  Set<TableIndex> get indexes => {
-    const TableIndex(name: 'idx_budgets_user_id', columns: {#userId}),
-  };
 }

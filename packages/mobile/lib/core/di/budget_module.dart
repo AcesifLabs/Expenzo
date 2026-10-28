@@ -31,7 +31,7 @@ void initBudgetModule(GetIt getIt) {
   getIt.registerLazySingleton<BudgetRemoteDatasource>(
     () => BudgetRemoteDatasourceImpl(apiClient: getIt<ApiClient>()),
   );
-  // Run by SyncEngine after each sync cycle (see injection_container).
+
   getIt.registerLazySingleton<BudgetNameRepair>(
     () => BudgetNameRepair(
       budgetDao: getIt<BudgetDao>(),
@@ -62,7 +62,7 @@ void initBudgetModule(GetIt getIt) {
     () => GetBudgetsWithProgress(
       budgetRepository: getIt<BudgetRepository>(),
       recordRepository: getIt<RecordRepository>(),
-      // initFamilyModule runs after this module: resolved on each read.
+
       sharedSpent: sharedSpentFromSummary(
         () => getIt.isRegistered<FamilyRepository>()
             ? getIt<FamilyRepository>().cachedSummary
@@ -76,7 +76,7 @@ void initBudgetModule(GetIt getIt) {
       recordRepository: getIt<RecordRepository>(),
     ),
   );
-  // Budget alerts (Settings → Budget alerts).
+
   getIt.registerLazySingleton<NotificationService>(NotificationService.new);
   getIt.registerLazySingleton<BudgetAlertLog>(
     () => SharedPrefsBudgetAlertLog(getIt<SharedPreferences>()),

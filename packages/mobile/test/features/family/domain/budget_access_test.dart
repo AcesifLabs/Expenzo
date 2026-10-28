@@ -7,7 +7,6 @@ import '../../../support/factories/budget_factory.dart';
 import '../../../support/factories/family_factory.dart';
 
 void main() {
-  // I am user-2. bud-1 is the Admin's (user-1), bud-2 is mine.
   const adminsRef = SharedBudgetRef(
     id: 'bud-1',
     name: 'Groceries',

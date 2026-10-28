@@ -16,7 +16,6 @@ import '../../../support/pump_localized.dart';
 
 void main() {
   setUp(() {
-    // I am a Member (user-2); bud-1 is the Admin's Shared Budget.
     di.getIt.registerSingleton(
       BudgetAccess(
         currentGroup: () =>

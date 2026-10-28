@@ -34,7 +34,7 @@ export class GroupSummaryService {
   async getSummary(groupId: string, utcOffsetMinutes: number, now = new Date()): Promise<GroupSummaryResponse> {
     const group = await this.groupRepo.findOne({ where: { id: groupId } });
     if (!group) throw groupErrors.notInGroup();
-    // Current members only: a leaver's Records stop counting.
+    
     const memberIds = (await this.memberRepo.find({ where: { groupId } })).map((m) => m.userId);
     const budgets = await this.budgetRepo.find({ where: { groupId, isEnabled: true } });
     const periods = new Map(budgets.map((b) => [b.id, currentPeriod(b.startDate, b.period, now, utcOffsetMinutes)]));
@@ -71,7 +71,7 @@ export class GroupSummaryService {
     };
   }
 
-  /** One query for every budget window: expense Records linked to a Shared Budget. */
+  
   private async loadSpending(memberIds: string[], budgets: Budget[], windows: Period[]): Promise<SpendRow[]> {
     if (memberIds.length === 0 || budgets.length === 0) return [];
     const earliest = new Date(Math.min(...windows.map((w) => w.start.getTime())));

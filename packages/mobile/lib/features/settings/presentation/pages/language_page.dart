@@ -20,7 +20,6 @@ class LanguagePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // SettingsBloc is an app-wide singleton; `create` would close it on pop.
     return BlocProvider.value(
       value: di.getIt<SettingsBloc>(),
       child: const Scaffold(body: LanguageView()),
@@ -28,19 +27,15 @@ class LanguagePage extends StatelessWidget {
   }
 }
 
-/// Match device, English and বাংলা. Three options, so no search field.
 class LanguageView extends StatelessWidget {
   const LanguageView({super.key});
 
-  /// The app languages as (code, title). Language names are shown in their
-  /// own script, never translated. Also read by the Settings row subtitle.
   static List<(String, String)> get options => [
     ('system', t.settings.language.matchDevice),
     ('en', 'English'),
     ('bn', 'বাংলা'),
   ];
 
-  /// The title for [languageCode]; Match device for anything unknown.
   static String labelFor(String languageCode) {
     for (final (code, title) in options) {
       if (code == languageCode) return title;

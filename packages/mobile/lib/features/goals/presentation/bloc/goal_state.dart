@@ -5,47 +5,53 @@ import '../../domain/entities/goal.dart';
 enum GoalStatus { loading, ready, saving, error }
 
 class GoalState extends Equatable {
-  final Goal? goal;
+  /// Every goal, newest first.
+  final List<Goal> goals;
   final GoalStatus status;
   final String? errorText;
   final double? lastAdded;
 
-  /// Goes up on each saved contribution, so a listener fires even when the
-  /// same amount is added twice.
+  /// The goal the last contribution went to.
+  final Goal? lastAddedTo;
+
   final int contributionCount;
+
+  /// The goal the dashboard card shows.
+  Goal? get newest => goals.isEmpty ? null : goals.first;
 
   @override
   List<Object?> get props => [
-    goal,
+    goals,
     status,
     errorText,
     lastAdded,
+    lastAddedTo,
     contributionCount,
   ];
 
   const GoalState({
-    this.goal,
+    this.goals = const [],
     this.status = GoalStatus.loading,
     this.errorText,
     this.lastAdded,
+    this.lastAddedTo,
     this.contributionCount = 0,
   });
 
-  /// [goal] can be cleared with [clearGoal]; [errorText] is cleared unless
-  /// given.
   GoalState copyWith({
-    Goal? goal,
-    bool clearGoal = false,
+    List<Goal>? goals,
     GoalStatus? status,
     String? errorText,
     double? lastAdded,
+    Goal? lastAddedTo,
     int? contributionCount,
   }) {
     return GoalState(
-      goal: clearGoal ? null : goal ?? this.goal,
+      goals: goals ?? this.goals,
       status: status ?? this.status,
       errorText: errorText,
       lastAdded: lastAdded ?? this.lastAdded,
+      lastAddedTo: lastAddedTo ?? this.lastAddedTo,
       contributionCount: contributionCount ?? this.contributionCount,
     );
   }

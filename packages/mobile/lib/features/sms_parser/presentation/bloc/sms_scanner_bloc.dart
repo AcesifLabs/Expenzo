@@ -1,7 +1,8 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
+import 'package:dartz/dartz.dart' show Either, Left, Right;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/core/bloc/transformers.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
@@ -22,6 +23,8 @@ class SmsScannerBloc extends Bloc<SmsScannerEvent, SmsScannerState> {
   final CreateRecordsFromParsedList createRecordsFromParsedList;
   final GetBudgetsWithProgress getBudgetsWithProgress;
 
+  static const _amountTolerance = 0.005;
+
   SmsScannerBloc({
     required this.scanSmsUseCase,
     required this.recordRepository,
@@ -39,7 +42,7 @@ class SmsScannerBloc extends Bloc<SmsScannerEvent, SmsScannerState> {
     on<ClearResults>(_onClearResults, transformer: concurrent());
     on<CreateSelectedExpenses>(
       _onCreateSelectedExpenses,
-      transformer: concurrent(),
+      transformer: droppable(),
     );
   }
 
@@ -67,10 +70,17 @@ class SmsScannerBloc extends Bloc<SmsScannerEvent, SmsScannerState> {
           return;
         }
 
-        final finalResults = await _filterDuplicates(
+        final filtered = await _filterDuplicates(
           page.results,
           event.filterDuplicates,
         );
+        final lookupFailure = filtered.fold((f) => f, (_) => null);
+        if (lookupFailure != null) {
+          emit(SmsScannerError(message: failureText(lookupFailure)));
+
+          return;
+        }
+        final finalResults = filtered.getOrElse(() => const []);
 
         emit(
           SmsScannerScanComplete(
@@ -111,10 +121,17 @@ class SmsScannerBloc extends Bloc<SmsScannerEvent, SmsScannerState> {
     await result.fold(
       (failure) async => emit(SmsScannerError(message: failureText(failure))),
       (page) async {
-        final newFiltered = await _filterDuplicates(
+        final filtered = await _filterDuplicates(
           page.results,
           event.filterDuplicates,
         );
+        final lookupFailure = filtered.fold((f) => f, (_) => null);
+        if (lookupFailure != null) {
+          emit(SmsScannerError(message: failureText(lookupFailure)));
+
+          return;
+        }
+        final newFiltered = filtered.getOrElse(() => const []);
         final allResults = [...currentState.results, ...newFiltered];
 
         emit(
@@ -265,7 +282,7 @@ class SmsScannerBloc extends Bloc<SmsScannerEvent, SmsScannerState> {
       await getBudgetsWithProgress();
     } catch (e, s) {
       addError(e, s);
-      debugPrint('SmsScannerBloc: Failed to reload budgets: $e');
+      appLogger.error('SmsScannerBloc: Failed to reload budgets', e, s);
     }
   }
 
@@ -282,21 +299,38 @@ class SmsScannerBloc extends Bloc<SmsScannerEvent, SmsScannerState> {
     );
   }
 
-  Future<List<SmsScanResultItem>> _filterDuplicates(
+  Future<Either<Failure, List<SmsScanResultItem>>> _filterDuplicates(
     List<SmsScanResultItem> transactions,
     bool filterDuplicates,
   ) async {
-    if (!filterDuplicates || transactions.isEmpty) return transactions;
+    if (!filterDuplicates || transactions.isEmpty) return Right(transactions);
 
-    final sourceIds = transactions.map((t) => t.sourceId).toList();
-    final existingIdsResult = await recordRepository.getExistingSourceIds(
-      sourceIds,
+    final existing = await recordRepository.getExistingSourceIds([
+      for (final t in transactions) t.sourceId,
+    ]);
+    final unseen = existing.map(
+      (ids) => transactions.where((t) => !ids.contains(t.sourceId)).toList(),
     );
-    final existingIds = existingIdsResult.getOrElse(() => <String>{});
 
-    return transactions
-        .where((t) => !existingIds.contains(t.sourceId))
-        .toList();
+    return unseen.fold((failure) async => Left(failure), _withoutLegacyImports);
+  }
+
+  Future<Either<Failure, List<SmsScanResultItem>>> _withoutLegacyImports(
+    List<SmsScanResultItem> transactions,
+  ) async {
+    final legacyIds = [for (final t in transactions) t.legacySourceId];
+    if (legacyIds.isEmpty) return Right(transactions);
+    final stored = await recordRepository.getAmountsBySourceIds(legacyIds);
+
+    return stored.map(
+      (amounts) => transactions.where((t) {
+        final amount = t.parsedTransaction.amount?.abs();
+        final candidates = amounts[t.legacySourceId] ?? const <double>[];
+
+        return amount == null ||
+            !candidates.any((c) => (c - amount).abs() < _amountTolerance);
+      }).toList(),
+    );
   }
 
   SmsScannerScanComplete _buildFailureState(

@@ -14,24 +14,18 @@
       "thisYear": "last year"
     }
   },
-  "greeting": "Hi, {name}",
   "userFallback": "User",
   "income": "Income",
   "expense": "Expense",
   "sections": {
     "budgets": "Budgets",
-    "recentActivity": "Recent activity",
-    "spendingPatterns": "Spending patterns",
+    "recentActivity": "Recent Activity",
+    "spendingPatterns": "Spending Patterns",
     "seeAll": "See all"
   },
   "noBudgets": "No budgets yet",
   "noTransactions": "No transactions yet",
-  "menu": {
-    "profile": "Profile",
-    "signIn": "Sign in",
-    "settings": "Settings",
-    "signOut": "Sign out"
-  },
+  "settings": "Settings",
   "budgetSpentOf": "{spent} of {total}",
   "trend": {
     "noPrevious": "No spending {period} to compare",

@@ -1,7 +1,5 @@
 import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
-import 'package:expense_tracker/core/database/app_database.dart'
-    show PendingRecurringData;
 import '../entities/recurring_transaction.dart';
 
 abstract class RecurringRepository {
@@ -26,8 +24,4 @@ abstract class RecurringRepository {
   Stream<List<RecurringTransaction>> watchRecurringList();
 
   Future<Either<Failure, List<RecurringTransaction>>> getDueRecurring();
-
-  Stream<List<PendingRecurringData>> watchPendingRecurring();
-
-  Future<void> removePendingRecurring(String id);
 }

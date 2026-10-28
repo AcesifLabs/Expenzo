@@ -10,15 +10,11 @@ import '../bloc/family_bloc.dart';
 import '../bloc/family_event.dart';
 import '../bloc/family_state.dart';
 
-/// For every Family page's `BlocListener`: a new failure, or the group
-/// going away.
 bool familyStateNeedsListener(FamilyState previous, FamilyState current) =>
     (current.failure != null && current.failure != previous.failure) ||
     (current.lastAction == FamilyAction.removedFromGroup &&
         previous.lastAction != FamilyAction.removedFromGroup);
 
-/// Shows a failure, or leaves for Settings when signed out or no longer in
-/// the group.
 void handleFamilyState(BuildContext context, FamilyState state) {
   final messenger = ScaffoldMessenger.of(context)..clearSnackBars();
   final router = GoRouter.of(context);

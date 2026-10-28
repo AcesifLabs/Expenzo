@@ -31,7 +31,7 @@ class CategoryTypeToggle extends StatelessWidget {
               label: RecordType.expense.displayName,
               isActive: isExpense,
               activeColor: palette.expense,
-              activeFill: palette.expense.withAlpha(0x20),
+              activeFill: palette.expense.withAlpha(0x14),
               borderRadius: const BorderRadius.horizontal(
                 left: Radius.circular(AppSpacing.radiusControl),
               ),
@@ -43,7 +43,7 @@ class CategoryTypeToggle extends StatelessWidget {
               label: RecordType.income.displayName,
               isActive: !isExpense,
               activeColor: palette.income,
-              activeFill: palette.income.withAlpha(0x20),
+              activeFill: palette.income.withAlpha(0x14),
               borderRadius: const BorderRadius.horizontal(
                 right: Radius.circular(AppSpacing.radiusControl),
               ),
@@ -77,23 +77,29 @@ class _TabButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.palette;
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          vertical: AppSpacing.sm,
-          horizontal: AppSpacing.lg,
-        ),
-        decoration: BoxDecoration(
-          color: isActive ? activeFill : Colors.transparent,
-          borderRadius: borderRadius,
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: AppTypography.bodyMedium.copyWith(
-              color: isActive ? activeColor : palette.textSecondary,
-              fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+    return Semantics(
+      button: true,
+      selected: isActive,
+      inMutuallyExclusiveGroup: true,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          constraints: const BoxConstraints(minHeight: AppSpacing.minTapTarget),
+          padding: const EdgeInsets.symmetric(
+            vertical: AppSpacing.sm,
+            horizontal: AppSpacing.lg,
+          ),
+          decoration: BoxDecoration(
+            color: isActive ? activeFill : Colors.transparent,
+            borderRadius: borderRadius,
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: AppTypography.bodyMedium.copyWith(
+                color: isActive ? activeColor : palette.textSecondary,
+                fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+              ),
             ),
           ),
         ),

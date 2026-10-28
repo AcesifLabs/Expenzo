@@ -2,23 +2,13 @@ import 'package:csv/csv.dart';
 import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/core/database/app_database.dart';
 
-/// Builds the export CSV files from Drift rows.
-///
-/// A CSV is machine data, not UI: fixed English headers, ISO 8601 dates,
-/// Latin digits and names exactly as stored, never translated. Each file
-/// starts with a UTF-8 BOM so spreadsheets read Bangla text correctly.
-///
-/// Runs inside `Isolate.run`, where slang and intl are not set up, so it must
-/// not use `t`, `DateFormat` or the display-name helpers.
 class ExportCsvBuilder {
   static final _csv = Csv(addBom: true);
 
-  /// Leading characters that make spreadsheets read a cell as a formula.
   static const _formulaLeads = {'=', '+', '-', '@', '\t', '\r'};
 
   const ExportCsvBuilder();
 
-  /// [records] in the order to write them.
   String transactions(
     List<Record> records, {
     required Map<String, Category> categoriesById,
@@ -74,7 +64,6 @@ class ExportCsvBuilder {
     required String? budgetName,
     required String currencyCode,
   }) {
-    // Expenses are stored negative; `type` carries the direction.
     return [
       _isoDateTime(record.date),
       RecordType.fromDbValue(record.recordType).name,
@@ -108,18 +97,15 @@ class ExportCsvBuilder {
     ];
   }
 
-  /// Prefixes a quote so a spreadsheet shows [value] as text, not a formula.
   static String _safeCell(String value) {
     if (value.isEmpty || !_formulaLeads.contains(value[0])) return value;
 
     return "'$value";
   }
 
-  /// `yyyy-MM-dd`.
   static String _isoDate(DateTime date) =>
       '${_pad(date.year, 4)}-${_pad(date.month)}-${_pad(date.day)}';
 
-  /// `yyyy-MM-ddTHH:mm:ss` in local time, without an offset.
   static String _isoDateTime(DateTime date) =>
       '${_isoDate(date)}T${_pad(date.hour)}:${_pad(date.minute)}:'
       '${_pad(date.second)}';

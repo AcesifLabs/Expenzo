@@ -1,6 +1,5 @@
 import 'package:expense_tracker/features/sms_parser/domain/entities/incoming_sms_event.dart';
 
-/// Creates an [IncomingSmsEvent] for tests. All params optional with deterministic defaults.
 IncomingSmsEvent makeIncomingSmsEvent({
   String? address,
   String? body,

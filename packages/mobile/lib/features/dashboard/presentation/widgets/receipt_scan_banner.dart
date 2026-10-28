@@ -4,9 +4,7 @@ import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
-/// The "Scan a receipt" link under the Home greeting.
 class ReceiptScanBanner extends StatelessWidget {
-  /// Null while a scan is opening, which disables the banner.
   final VoidCallback? onTap;
 
   const ReceiptScanBanner({super.key, this.onTap});

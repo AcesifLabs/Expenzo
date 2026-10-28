@@ -59,6 +59,7 @@
       "monthly": "মাসিক বাজেট",
       "yearly": "বার্ষিক বাজেট"
     },
+    "carriedOver": "আগের সময় থেকে আসা {amount} সহ",
     "used": "{percent}% খরচ হয়েছে",
     "over": "বাজেট ছাড়িয়ে গেছে",
     "transactionsFailed": "লেনদেন লোড করা যায়নি",

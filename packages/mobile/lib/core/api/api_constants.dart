@@ -5,21 +5,13 @@ class ApiConstants {
   static const String login = '/auth/login';
   static const String deleteAccount = '/auth/account';
 
-  /// The 401 message the backend's `JwtStrategy.validate` gives a JWT whose
-  /// user was deleted (packages/backend/src/auth/strategies/jwt.strategy.ts).
   static const String deletedUserMessage = 'User no longer exists';
 
-  static const String records = '/records';
-  static const String recordsBulk = '/records/bulk';
+  static const String healthStatusKey = 'status';
+  static const String healthOk = 'ok';
+
   static const String recordBudgetLinks = '/records/budget-links';
-  static const String categories = '/categories';
-  static const String budgets = '/budgets';
   static const String budgetNames = '/budgets/names';
-  static const String messageSources = '/message-sources';
-  static const String expenseTemplates = '/expense-templates';
-  static const String parsingRules = '/parsing-rules';
-  static const String recurringTransactions = '/recurring-transactions';
-  static const String pendingRecurrings = '/pending-recurrings';
   static const String syncPush = '/sync/push';
   static const String syncPull = '/sync/pull';
   static const String syncSummary = '/sync/summary';
@@ -29,15 +21,10 @@ class ApiConstants {
   static const String groupsMe = '/groups/me';
   static const String groupsJoin = '/groups/join';
 
-  /// Returns the configured backend base URL.
-  ///
-  /// In debug mode, falls back to localhost if BACKEND_URL is missing.
-  /// In release/profile builds, throws a [StateError] if BACKEND_URL is
-  /// missing or not HTTPS, to prevent silent misconfiguration.
   static String get baseUrl {
     final value = dotenv.env['BACKEND_URL'];
     if (value == null || value.isEmpty || value == 'TBD') {
-      if (kDebugMode) {
+      if (!kReleaseMode) {
         return 'http://localhost:3000/api';
       }
       throw StateError(
@@ -46,7 +33,7 @@ class ApiConstants {
       );
     }
 
-    if (!kDebugMode && !value.startsWith('https://')) {
+    if (kReleaseMode && !value.startsWith('https://')) {
       throw StateError(
         'BACKEND_URL must use HTTPS in release builds. '
         'Got: ${value.split('://').first}://',
@@ -55,11 +42,6 @@ class ApiConstants {
 
     return value;
   }
-
-  static String categoryIncrementUsage(String id) =>
-      '/categories/$id/increment-usage';
-
-  static String budgetProgress(String id) => '/budgets/$id/progress';
 
   static String group(String id) => '/groups/$id';
 

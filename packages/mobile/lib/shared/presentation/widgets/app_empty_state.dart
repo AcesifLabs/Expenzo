@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
+import 'scrollable_center.dart';
 
-/// Says a list is empty and, with [actionLabel] and [onAction], offers the
-/// next step ("No budgets yet" + "New budget").
 class AppEmptyState extends StatelessWidget {
   final IconData icon;
   final String message;
@@ -22,27 +21,25 @@ class AppEmptyState extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
     final label = actionLabel;
 
-    return Center(
-      child: Padding(
-        padding: AppSpacing.pagePadding,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 56, color: colors.onSurfaceVariant),
-            const SizedBox(height: AppSpacing.smd),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyLarge?.copyWith(color: colors.onSurfaceVariant),
-            ),
-            if (label != null && onAction != null) ...[
-              const SizedBox(height: AppSpacing.md),
-              ElevatedButton(onPressed: onAction, child: Text(label)),
-            ],
+    return ScrollableCenter(
+      padding: AppSpacing.pagePadding,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 56, color: colors.onSurfaceVariant),
+          const SizedBox(height: AppSpacing.smd),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(color: colors.onSurfaceVariant),
+          ),
+          if (label != null && onAction != null) ...[
+            const SizedBox(height: AppSpacing.md),
+            ElevatedButton(onPressed: onAction, child: Text(label)),
           ],
-        ),
+        ],
       ),
     );
   }

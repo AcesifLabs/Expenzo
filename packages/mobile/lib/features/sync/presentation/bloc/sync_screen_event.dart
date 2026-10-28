@@ -7,12 +7,14 @@ abstract class SyncScreenEvent extends Equatable {
   const SyncScreenEvent();
 }
 
-/// Loads the overview; also the Retry after a failed load.
 class SyncScreenStarted extends SyncScreenEvent {
   const SyncScreenStarted();
 }
 
-/// "Sync now", and Retry after a failed sync.
 class SyncNowRequested extends SyncScreenEvent {
   const SyncNowRequested();
+}
+
+class FailedChangesRetryRequested extends SyncScreenEvent {
+  const FailedChangesRetryRequested();
 }

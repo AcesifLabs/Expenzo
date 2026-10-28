@@ -21,7 +21,6 @@ class CalendarPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // SettingsBloc is an app-wide singleton; `create` would close it on pop.
     return BlocProvider.value(
       value: di.getIt<SettingsBloc>(),
       child: const Scaffold(body: CalendarView()),
@@ -29,11 +28,7 @@ class CalendarPage extends StatelessWidget {
   }
 }
 
-/// First day of week, with this month as the pickers will show it. The
-/// design's Calendar type and Show week numbers rows were cut
-/// (docs/adr/0011).
 class CalendarView extends StatelessWidget {
-  /// Replaceable in tests, to pin the previewed month.
   final DateTime Function() clock;
 
   const CalendarView({super.key, this.clock = DateTime.now});

@@ -12,7 +12,6 @@ void main() {
   late _MockRecordRepository repository;
   late GetWeeklySummary getWeeklySummary;
 
-  // Sunday evening; the week started Monday Oct 12.
   final now = DateTime(2026, 10, 18, 20);
   final weekStart = DateTime(2026, 10, 12);
 
@@ -36,7 +35,10 @@ void main() {
   test('totals and percent change come from the repository', () async {
     totals(thisWeek: 1500, lastWeek: 1000);
 
-    final result = await getWeeklySummary(now: now);
+    final result = await getWeeklySummary(
+      now: now,
+      firstWeekday: DateTime.monday,
+    );
     final summary = result.getOrElse(() => throw StateError('Left'));
 
     expect(
@@ -53,7 +55,7 @@ void main() {
   test('both weeks use spans of equal length', () async {
     totals(thisWeek: 10, lastWeek: 10);
 
-    await getWeeklySummary(now: now);
+    await getWeeklySummary(now: now, firstWeekday: DateTime.monday);
 
     verify(() => repository.getTotalSpending(weekStart, now)).called(1);
     verify(
@@ -67,7 +69,10 @@ void main() {
   test('no spending last week gives no change', () async {
     totals(thisWeek: 200, lastWeek: 0);
 
-    final result = await getWeeklySummary(now: now);
+    final result = await getWeeklySummary(
+      now: now,
+      firstWeekday: DateTime.monday,
+    );
 
     expect(
       result.getOrElse(() => throw StateError('Left')).changePercent,
@@ -80,13 +85,15 @@ void main() {
       () => repository.getTotalSpending(any(), any()),
     ).thenAnswer((_) async => const Left(CacheFailure(message: 'db')));
 
-    final result = await getWeeklySummary(now: now);
+    final result = await getWeeklySummary(
+      now: now,
+      firstWeekday: DateTime.monday,
+    );
 
     expect(result.isLeft(), isTrue);
   });
 
   test('a Saturday start sums from the last Saturday', () async {
-    // Friday evening, the summary time for a Saturday start.
     final friday = DateTime(2026, 10, 16, 20);
     when(
       () => repository.getTotalSpending(DateTime(2026, 10, 10), friday),

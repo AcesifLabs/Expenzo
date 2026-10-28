@@ -44,7 +44,7 @@ describe('Group entities', () => {
   });
 });
 
-// Kept out of src/migrations: the TypeORM CLI loads every file there as a migration.
+
 describe('AddGroups migration', () => {
   const run = async (step: 'up' | 'down') => {
     const query = jest.fn();

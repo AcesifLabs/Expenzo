@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:expense_tracker/core/bloc/transformers.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
 import '../../../sms_parser/data/datasources/sms_local_datasource.dart';
+import '../../../sms_parser/domain/entities/sms_message.dart';
 import 'contact_selector_event.dart';
 import 'contact_selector_state.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
@@ -96,7 +97,7 @@ class ContactSelectorBloc
     }
   }
 
-  void _processMessages(List<dynamic> messages) {
+  void _processMessages(List<SmsMessage> messages) {
     for (final msg in messages) {
       if (!_contactsMap.containsKey(msg.address)) {
         _contactsMap[msg.address] = DeviceContact(

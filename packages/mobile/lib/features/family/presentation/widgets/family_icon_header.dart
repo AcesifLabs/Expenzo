@@ -2,8 +2,6 @@ import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:flutter/material.dart';
 
-/// The round icon, heading and body text at the top of the Create, Join and
-/// Invite screens.
 class FamilyIconHeader extends StatelessWidget {
   final IconData icon;
   final String heading;

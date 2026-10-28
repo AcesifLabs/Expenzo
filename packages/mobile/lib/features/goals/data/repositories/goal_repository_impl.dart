@@ -14,7 +14,6 @@ import '../../domain/entities/goal.dart';
 import '../../domain/repositories/goal_repository.dart';
 import '../datasources/goal_local_datasource.dart';
 
-/// Every write is saved locally and queued for `/sync/push` under `goals`.
 class GoalRepositoryImpl implements GoalRepository {
   final GoalLocalDatasource localDatasource;
   final SyncQueueDao? _syncQueueDao;
@@ -29,7 +28,7 @@ class GoalRepositoryImpl implements GoalRepository {
       _run(localDatasource.getActiveGoal);
 
   @override
-  Stream<Goal?> watchActiveGoal() => localDatasource.watchActiveGoal();
+  Stream<List<Goal>> watchGoals() => localDatasource.watchGoals();
 
   @override
   Future<Either<Failure, Goal>> getGoalById(String id) async {
@@ -76,7 +75,6 @@ class GoalRepositoryImpl implements GoalRepository {
     return unit;
   });
 
-  /// Field names match `GoalsSyncHandler.toSyncPayload`.
   Map<String, dynamic> _payload(Goal goal) => {
     'name': goal.name,
     'targetAmount': goal.targetAmount,
@@ -97,7 +95,6 @@ class GoalRepositoryImpl implements GoalRepository {
     }
   }
 
-  /// Awaited, like recurring items, so a write and its queue row don't drift.
   Future<void> _enqueueSync(
     String action,
     String id, [

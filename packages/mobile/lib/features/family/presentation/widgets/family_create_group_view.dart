@@ -18,8 +18,6 @@ import '../helpers/family_form_validators.dart';
 import 'family_bottom_button.dart';
 import 'family_icon_header.dart';
 
-/// Frame `FamilyCreateGroup`: shown on Settings → Family group when the
-/// user is in no group. The group's Currency is the user's.
 class FamilyCreateGroupView extends StatefulWidget {
   const FamilyCreateGroupView({super.key});
 
@@ -33,7 +31,6 @@ class _FamilyCreateGroupViewState extends State<FamilyCreateGroupView> {
   final _budget = TextEditingController();
 
   void _onCreated(BuildContext context, FamilyState _) {
-    // The Invite screen makes the first code when it opens.
     context.pushReplacement(FamilyRoute.invite.location);
   }
 
@@ -53,6 +50,53 @@ class _FamilyCreateGroupViewState extends State<FamilyCreateGroupView> {
 
   String? _validateBudget(String? value) => validateMonthlyBudget(value ?? '');
 
+  List<Widget> _buildFields(BuildContext context) {
+    final createT = t.family.create;
+    final palette = context.palette;
+    final textTheme = Theme.of(context).textTheme;
+    final currency = CurrencyFormatter.current.value;
+
+    return [
+      TextFormField(
+        controller: _name,
+        textCapitalization: TextCapitalization.words,
+        inputFormatters: [
+          LengthLimitingTextInputFormatter(AppConstants.groupNameMaxLength),
+        ],
+        decoration: InputDecoration(
+          labelText: createT.nameLabel,
+          hintText: createT.nameHint,
+        ),
+        validator: _validateName,
+      ),
+      const SizedBox(height: AppSpacing.md),
+      TextFormField(
+        controller: _budget,
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        decoration: InputDecoration(
+          labelText: createT.budgetLabel,
+          prefixText: currency.symbol,
+        ),
+        validator: _validateBudget,
+      ),
+      const SizedBox(height: AppSpacing.sm),
+      Text(
+        createT.currencyNote(code: currency.code),
+        style: textTheme.bodySmall?.copyWith(color: palette.textSecondary),
+      ),
+      const SizedBox(height: AppSpacing.md),
+      Center(
+        child: TextButton(
+          style: TextButton.styleFrom(
+            minimumSize: const Size(0, AppSpacing.minTapTarget),
+          ),
+          onPressed: _openJoin,
+          child: Text(createT.haveCode),
+        ),
+      ),
+    ];
+  }
+
   @override
   void dispose() {
     _name.dispose();
@@ -63,9 +107,6 @@ class _FamilyCreateGroupViewState extends State<FamilyCreateGroupView> {
   @override
   Widget build(BuildContext context) {
     final createT = t.family.create;
-    final palette = context.palette;
-    final textTheme = Theme.of(context).textTheme;
-    final currency = CurrencyFormatter.current.value;
 
     return BlocListener<FamilyBloc, FamilyState>(
       listenWhen: (a, b) =>
@@ -86,49 +127,7 @@ class _FamilyCreateGroupViewState extends State<FamilyCreateGroupView> {
                     heading: createT.heading,
                     body: createT.body,
                   ),
-                  TextFormField(
-                    controller: _name,
-                    textCapitalization: TextCapitalization.words,
-                    inputFormatters: [
-                      LengthLimitingTextInputFormatter(
-                        AppConstants.groupNameMaxLength,
-                      ),
-                    ],
-                    decoration: InputDecoration(
-                      labelText: createT.nameLabel,
-                      hintText: createT.nameHint,
-                    ),
-                    validator: _validateName,
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  TextFormField(
-                    controller: _budget,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    decoration: InputDecoration(
-                      labelText: createT.budgetLabel,
-                      prefixText: currency.symbol,
-                    ),
-                    validator: _validateBudget,
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    createT.currencyNote(code: currency.code),
-                    style: textTheme.bodySmall?.copyWith(
-                      color: palette.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  Center(
-                    child: TextButton(
-                      style: TextButton.styleFrom(
-                        minimumSize: const Size(0, AppSpacing.minTapTarget),
-                      ),
-                      onPressed: _openJoin,
-                      child: Text(createT.haveCode),
-                    ),
-                  ),
+                  ..._buildFields(context),
                 ],
               ),
             ),

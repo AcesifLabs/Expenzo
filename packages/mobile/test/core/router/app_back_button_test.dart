@@ -154,8 +154,7 @@ void main() {
 
   testWidgets('falls back to home when there is no history', (tester) async {
     await pumpApp(tester);
-    // A top-level route opened with go() has nothing below it, like a cold
-    // deep link.
+
     router.go('/solo');
     await tester.pumpAndSettle();
     expect(history.locations, ['/solo']);
@@ -169,7 +168,6 @@ void main() {
   testWidgets('pops via the Navigator when history is not registered', (
     tester,
   ) async {
-    // e.g. after a hot reload, before AppRouter has been rebuilt.
     di.getIt.unregister<NavigationHistory>();
     await pumpApp(tester);
     router.push('/a');
@@ -184,7 +182,6 @@ void main() {
     final first = AppRouter(navigatorKey: GlobalKey<NavigatorState>());
     expect(di.getIt<NavigationHistory>(), same(first.history));
 
-    // A remounted app root replaces the previous instance.
     final second = AppRouter(navigatorKey: GlobalKey<NavigatorState>());
     expect(di.getIt<NavigationHistory>(), same(second.history));
 

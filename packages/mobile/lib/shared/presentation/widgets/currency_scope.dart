@@ -1,12 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
 
-/// Rebuilds everything below it when the user's currency or number format
-/// changes.
-///
-/// Amounts are formatted with the static [CurrencyFormatter], which widgets
-/// don't subscribe to, so a change marks every element dirty once.
-/// State (scroll, forms, navigation) is kept because nothing is recreated.
 class CurrencyScope extends StatefulWidget {
   final Widget child;
 

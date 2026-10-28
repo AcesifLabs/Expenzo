@@ -2,15 +2,12 @@ import 'dart:math';
 
 import 'package:equatable/equatable.dart';
 
-/// Distinguishes "not provided" from "set to null" in [Goal.copyWith].
 class _GoalSentinel {
   const _GoalSentinel();
 }
 
 const _sentinel = _GoalSentinel();
 
-/// A savings target. Progress is [savedAmount], entered by hand; a Goal never
-/// reads Records or Budgets (ADR 0009).
 class Goal extends Equatable {
   final String? id;
   final String name;
@@ -22,7 +19,6 @@ class Goal extends Equatable {
 
   double get remaining => max(0, targetAmount - savedAmount);
 
-  /// Share of the target saved, 0 to 1.
   double get progress =>
       targetAmount <= 0 ? 0 : (savedAmount / targetAmount).clamp(0, 1);
 
@@ -49,8 +45,6 @@ class Goal extends Equatable {
     this.createdAt,
   });
 
-  /// Whole calendar months from [now] to [targetDate], never below 0; null
-  /// without a date.
   int? monthsLeft(DateTime now) {
     final date = targetDate;
     if (date == null) return null;
@@ -60,7 +54,6 @@ class Goal extends Equatable {
     return max(0, months);
   }
 
-  /// [targetDate] and [monthlyContribution] can be cleared by passing null.
   Goal copyWith({
     String? id,
     String? name,

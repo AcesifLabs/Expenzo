@@ -1,7 +1,3 @@
-/// Screens pushed from the Settings list, as children of `/settings`.
-///
-/// Both the route tree (`app_routes.dart`) and `context.push` read paths
-/// from here, so a rename can't leave a stale link.
 enum SettingsRoute {
   profile('profile'),
   family('family'),
@@ -15,17 +11,15 @@ enum SettingsRoute {
   notifications('notifications'),
   categories('categories'),
   autoImport('auto-import'),
-  matchingRules('matching-rules'),
+  smsWatchlist('sms-watchlist'),
   recurring('recurring'),
   sync('sync'),
   export('export'),
   deleteData('delete-data'),
   help('help');
 
-  /// The child segment under [rootPath].
   final String path;
 
-  /// The Settings list's own segment under `/`.
   static const rootPath = 'settings';
   static const rootLocation = '/$rootPath';
 

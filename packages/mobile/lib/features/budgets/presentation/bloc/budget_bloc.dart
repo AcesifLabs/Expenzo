@@ -27,7 +27,7 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
     required this.getBudgetTransactions,
   }) : super(BudgetInitial()) {
     on<LoadBudgets>(_onLoadBudgets, transformer: concurrent());
-    on<CreateBudgetEvent>(_onCreateBudget, transformer: sequential());
+    on<CreateBudgetEvent>(_onCreateBudget, transformer: droppable());
     on<UpdateBudgetEvent>(_onUpdateBudget, transformer: sequential());
     on<DeleteBudgetEvent>(_onDeleteBudget, transformer: sequential());
     on<LoadBudgetTransactions>(

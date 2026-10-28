@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/core/constants/budget_period.dart';
 
-/// Read-only summary of how much of a budget has been spent in the current
-/// period, expressed as an amount and a percentage.
 class BudgetProgress {
   final String budgetId;
   final double budgetAmount;
@@ -15,7 +13,6 @@ class BudgetProgress {
   final DateTimeRange periodRange;
   final BudgetPeriod period;
 
-  /// Set for a Shared Budget (its Family Group's id).
   final String? groupId;
 
   const BudgetProgress({

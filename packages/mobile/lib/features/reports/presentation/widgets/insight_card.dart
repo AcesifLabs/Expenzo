@@ -27,7 +27,7 @@ class InsightCard extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: palette.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

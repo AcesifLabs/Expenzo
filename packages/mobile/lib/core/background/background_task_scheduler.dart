@@ -6,22 +6,14 @@ import 'package:expense_tracker/i18n/strings.g.dart';
 import 'background_task_names.dart';
 import 'background_work.dart';
 
-/// Registers or cancels the weekly summary and recurring reminder work to
-/// match [UserSettings]. One-off tasks, re-armed after each run, keep the
-/// clock time; periodic work drifts.
 class BackgroundTaskScheduler {
   final BackgroundWork work;
   final DateTime Function() clock;
 
-  /// Replaces every computed delay; for tests and the manual device check.
   final Duration? fixedDelay;
 
-  /// The resolved app language, which picks the first day of week while
-  /// the setting is unset.
   final String Function() appLanguageCode;
 
-  /// The last applied toggles and summary week start, so unrelated setting
-  /// changes don't re-register work.
   ({bool weekly, bool recurring, int firstWeekday})? _applied;
 
   BackgroundTaskScheduler({
@@ -45,9 +37,6 @@ class BackgroundTaskScheduler {
     await _applyRecurring(on: wanted.recurring);
   }
 
-  /// After [taskName] ran: schedules its next run, or cancels it if its
-  /// toggle is now off. Leaves the other task alone; in the worker isolate
-  /// scheduling appends, so touching a pending task would queue a copy.
   Future<void> rearm(String taskName, UserSettings settings) async {
     if (!await work.ready) return;
     switch (taskName) {
@@ -63,7 +52,6 @@ class BackgroundTaskScheduler {
     }
   }
 
-  /// Cancels both; the next [apply] registers again.
   Future<void> cancelAll() async {
     if (!await work.ready) return;
     _applied = null;
@@ -74,7 +62,6 @@ class BackgroundTaskScheduler {
   int _firstWeekday(UserSettings settings) =>
       settings.effectiveFirstDayOfWeek(appLanguageCode()).weekday;
 
-  /// The summary goes out the evening before [firstWeekday].
   Future<void> _applyWeekly({required bool on, required int firstWeekday}) {
     if (!on) return work.cancel(BackgroundTaskNames.weeklySummary);
     final now = clock();

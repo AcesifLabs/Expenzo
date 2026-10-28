@@ -3,8 +3,6 @@ import 'recurring_frequency.dart';
 
 export 'recurring_frequency.dart';
 
-/// Sentinel value used to distinguish "not provided" from "set to null"
-/// in [RecurringTransaction.copyWith]. Do not compare to this directly.
 class _RecurringSentinel {
   const _RecurringSentinel();
 }
@@ -57,13 +55,6 @@ class RecurringTransaction extends Equatable {
       nextOccurrence.isBefore(DateTime.now()) ||
       nextOccurrence.isAtSameMomentAs(DateTime.now());
 
-  /// Creates a copy with updated fields.
-  ///
-  /// [endDate] and [dayOfMonth] use a sentinel pattern to distinguish
-  /// "not provided" from "set to null" (since both are nullable).
-  /// - Omitted or `const _sentinel()` → field is preserved unchanged.
-  /// - Explicitly passed `null` → field is cleared to `null`.
-  /// - Any other value → field is set to that value.
   RecurringTransaction copyWith({
     String? id,
     String? description,

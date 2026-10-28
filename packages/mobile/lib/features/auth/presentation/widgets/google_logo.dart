@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Google's multicolor "G" mark, drawn from the official sign-in button
-/// artwork (48×48 viewBox) so no image asset or SVG package is needed.
-/// Google's branding rules forbid recoloring or reshaping it.
 class GoogleLogo extends StatelessWidget {
   final double size;
 

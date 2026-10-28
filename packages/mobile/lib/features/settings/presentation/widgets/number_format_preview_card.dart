@@ -5,10 +5,6 @@ import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/core/utils/money_format.dart';
 
-/// [amount] as amounts look now, with and without the currency symbol.
-///
-/// Reads [CurrencyFormatter], which `CurrencyScope` rebuilds on every
-/// change, so a new setting shows here at once.
 class NumberFormatPreviewCard extends StatelessWidget {
   final double amount;
 

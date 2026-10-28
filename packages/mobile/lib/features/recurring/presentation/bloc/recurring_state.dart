@@ -38,7 +38,6 @@ class RecurringError extends RecurringState {
   const RecurringError(this.message);
 }
 
-/// Due items were posted; [created] may be 0.
 class RecurringProcessed extends RecurringState {
   final int created;
   final bool automatic;

@@ -4,10 +4,6 @@ import 'package:expense_tracker/core/api/api_constants.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
 
 abstract class DataWipeRemoteDatasource {
-  /// Deletes every row the signed-in account synced. Idempotent.
-  ///
-  /// Throws: [AuthException] on 401, [NetworkException] when the server
-  /// can't be reached, [ServerException] otherwise.
   Future<void> clearSyncedData();
 }
 
@@ -26,7 +22,7 @@ class DataWipeRemoteDatasourceImpl implements DataWipeRemoteDatasource {
   @override
   Future<void> clearSyncedData() async {
     try {
-      await apiClient.dio.delete(ApiConstants.syncClear);
+      await apiClient.dio.delete<Object?>(ApiConstants.syncClear);
     } on DioException catch (e) {
       throw _exceptionFor(e);
     } catch (e) {

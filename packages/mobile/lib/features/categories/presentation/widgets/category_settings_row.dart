@@ -8,8 +8,6 @@ import 'package:expense_tracker/shared/presentation/widgets/category_tile.dart';
 import '../../domain/entities/category.dart';
 import '../helpers/category_display_name.dart';
 
-/// One category on the category settings page: tile, name and its live
-/// transaction count. A null [recordCount] (counts not loaded) shows no count.
 class CategorySettingsRow extends StatelessWidget {
   final Category category;
   final int? recordCount;
@@ -43,8 +41,7 @@ class CategorySettingsRow extends StatelessWidget {
           category.displayName,
           style: textTheme.bodyMedium?.copyWith(color: palette.textPrimary),
         ),
-        // One line, at most a third of the row, shrinking at large text
-        // sizes: the tile's trailing slot can't grow taller than the row.
+
         trailing: count == null
             ? null
             : ConstrainedBox(

@@ -3,14 +3,9 @@ import 'package:expense_tracker/core/theme/category_palette.dart';
 import 'package:expense_tracker/core/utils/color_utils.dart';
 import 'app_icons.dart';
 
-/// A category's icon on its color tile (DESIGN.md, "Category palette").
-///
-/// The one way categories are drawn, so every list shows them the same.
 class CategoryTile extends StatelessWidget {
-  /// Stored category color, `#RRGGBB`.
   final String colorHex;
 
-  /// Category icon key, see [AppIcons.getCategoryIcon].
   final String iconKey;
   final double size;
 

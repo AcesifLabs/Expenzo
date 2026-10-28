@@ -5,8 +5,6 @@ import 'package:expense_tracker/features/records/data/datasources/record_remote_
 import 'package:expense_tracker/core/api/api_client.dart';
 import 'package:expense_tracker/core/api/api_constants.dart';
 import 'package:expense_tracker/core/error/exceptions.dart';
-import 'package:expense_tracker/core/constants/source_types.dart';
-import 'package:expense_tracker/core/constants/record_type.dart';
 
 class MockApiClient extends Mock implements ApiClient {}
 
@@ -31,306 +29,11 @@ void main() {
     datasource = RecordRemoteDatasourceImpl(apiClient: mockApiClient);
   });
 
-  group('RecordRemoteDatasourceImpl.getRecords', () {
-    test('parses amount from string (PostgreSQL decimal)', () async {
-      final mockResponse = Response(
-        requestOptions: RequestOptions(path: '/records'),
-        data: {
-          'data': [
-            {
-              'id': 'rec-1',
-              'amount': '42.50',
-              'description': 'Coffee',
-              'date': '2024-01-15T10:30:00Z',
-              'categoryId': 'cat-1',
-              'source': 'manual',
-              'sourceId': null,
-              'recordType': 'OUT',
-              'createdAt': '2024-01-15T10:30:00Z',
-              'updatedAt': '2024-01-15T12:00:00Z',
-            },
-          ],
-          'nextCursor': null,
-          'total': 1,
-        },
-        statusCode: 200,
-      );
-
-      when(
-        () =>
-            mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
-      ).thenAnswer((_) async => mockResponse);
-
-      final result = await datasource.getRecords(const RemoteRecordQuery());
-      expect(result.data.length, 1);
-      expect(result.data.first.amount, 42.50);
-    });
-
-    test('parses amount from number', () async {
-      final mockResponse = Response(
-        requestOptions: RequestOptions(path: '/records'),
-        data: {
-          'data': [
-            {
-              'id': 'rec-1',
-              'amount': 100,
-              'description': 'Test',
-              'date': '2024-01-15T10:30:00Z',
-              'recordType': 'IN',
-              'createdAt': '2024-01-15T10:30:00Z',
-              'updatedAt': '2024-01-15T10:30:00Z',
-            },
-          ],
-          'nextCursor': null,
-          'total': 1,
-        },
-        statusCode: 200,
-      );
-
-      when(
-        () =>
-            mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
-      ).thenAnswer((_) async => mockResponse);
-
-      final result = await datasource.getRecords(const RemoteRecordQuery());
-      expect(result.data.first.amount, 100.0);
-    });
-
-    test('handles null amount gracefully', () async {
-      final mockResponse = Response(
-        requestOptions: RequestOptions(path: '/records'),
-        data: {
-          'data': [
-            {
-              'id': 'rec-1',
-              'amount': null,
-              'description': 'Test',
-              'date': '2024-01-15T10:30:00Z',
-              'recordType': 'IN',
-              'createdAt': '2024-01-15T10:30:00Z',
-              'updatedAt': '2024-01-15T10:30:00Z',
-            },
-          ],
-          'nextCursor': null,
-          'total': 1,
-        },
-        statusCode: 200,
-      );
-
-      when(
-        () =>
-            mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
-      ).thenAnswer((_) async => mockResponse);
-
-      final result = await datasource.getRecords(const RemoteRecordQuery());
-      expect(result.data.first.amount, 0.0);
-    });
-
-    test('parses createdAt and updatedAt from ISO 8601', () async {
-      final mockResponse = Response(
-        requestOptions: RequestOptions(path: '/records'),
-        data: {
-          'data': [
-            {
-              'id': 'rec-1',
-              'amount': 10,
-              'description': 'Test',
-              'date': '2024-01-15T10:30:00Z',
-              'recordType': 'IN',
-              'createdAt': '2024-01-15T09:00:00Z',
-              'updatedAt': '2024-01-15T11:30:00Z',
-            },
-          ],
-          'nextCursor': null,
-          'total': 1,
-        },
-        statusCode: 200,
-      );
-
-      when(
-        () =>
-            mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
-      ).thenAnswer((_) async => mockResponse);
-
-      final result = await datasource.getRecords(const RemoteRecordQuery());
-      expect(result.data.first.createdAt, DateTime.utc(2024, 1, 15, 9, 0, 0));
-      expect(result.data.first.updatedAt, DateTime.utc(2024, 1, 15, 11, 30, 0));
-    });
-
-    test('parses source from string to ExpenseSource enum', () async {
-      final mockResponse = Response(
-        requestOptions: RequestOptions(path: '/records'),
-        data: {
-          'data': [
-            {
-              'id': 'rec-1',
-              'amount': 10,
-              'description': 'Test',
-              'date': '2024-01-15T10:30:00Z',
-              'source': 'sms',
-              'recordType': 'IN',
-              'createdAt': '2024-01-15T10:30:00Z',
-              'updatedAt': '2024-01-15T10:30:00Z',
-            },
-          ],
-          'nextCursor': null,
-          'total': 1,
-        },
-        statusCode: 200,
-      );
-
-      when(
-        () =>
-            mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
-      ).thenAnswer((_) async => mockResponse);
-
-      final result = await datasource.getRecords(const RemoteRecordQuery());
-      expect(result.data.first.source, ExpenseSource.sms);
-    });
-
-    test('defaults source to manual when null', () async {
-      final mockResponse = Response(
-        requestOptions: RequestOptions(path: '/records'),
-        data: {
-          'data': [
-            {
-              'id': 'rec-1',
-              'amount': 10,
-              'description': 'Test',
-              'date': '2024-01-15T10:30:00Z',
-              'source': null,
-              'recordType': 'IN',
-              'createdAt': '2024-01-15T10:30:00Z',
-              'updatedAt': '2024-01-15T10:30:00Z',
-            },
-          ],
-          'nextCursor': null,
-          'total': 1,
-        },
-        statusCode: 200,
-      );
-
-      when(
-        () =>
-            mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
-      ).thenAnswer((_) async => mockResponse);
-
-      final result = await datasource.getRecords(const RemoteRecordQuery());
-      expect(result.data.first.source, ExpenseSource.manual);
-    });
-
-    test('maps recordType IN to RecordType.income', () async {
-      final mockResponse = Response(
-        requestOptions: RequestOptions(path: '/records'),
-        data: {
-          'data': [
-            {
-              'id': 'rec-1',
-              'amount': 10,
-              'description': 'Test',
-              'date': '2024-01-15T10:30:00Z',
-              'recordType': 'IN',
-              'createdAt': '2024-01-15T10:30:00Z',
-              'updatedAt': '2024-01-15T10:30:00Z',
-            },
-          ],
-          'nextCursor': null,
-          'total': 1,
-        },
-        statusCode: 200,
-      );
-
-      when(
-        () =>
-            mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
-      ).thenAnswer((_) async => mockResponse);
-
-      final result = await datasource.getRecords(const RemoteRecordQuery());
-      expect(result.data.first.recordType, RecordType.income);
-    });
-
-    test('maps recordType OUT to RecordType.expense', () async {
-      final mockResponse = Response(
-        requestOptions: RequestOptions(path: '/records'),
-        data: {
-          'data': [
-            {
-              'id': 'rec-1',
-              'amount': 10,
-              'description': 'Test',
-              'date': '2024-01-15T10:30:00Z',
-              'recordType': 'OUT',
-              'createdAt': '2024-01-15T10:30:00Z',
-              'updatedAt': '2024-01-15T10:30:00Z',
-            },
-          ],
-          'nextCursor': null,
-          'total': 1,
-        },
-        statusCode: 200,
-      );
-
-      when(
-        () =>
-            mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
-      ).thenAnswer((_) async => mockResponse);
-
-      final result = await datasource.getRecords(const RemoteRecordQuery());
-      expect(result.data.first.recordType, RecordType.expense);
-    });
-
-    test('throws ServerException on DioException', () async {
-      when(
-        () =>
-            mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
-      ).thenThrow(
-        DioException(
-          requestOptions: RequestOptions(path: '/records'),
-          message: 'Network error',
-        ),
-      );
-
-      expect(
-        () => datasource.getRecords(const RemoteRecordQuery()),
-        throwsA(isA<ServerException>()),
-      );
-    });
-
-    test('returns correct nextCursor and total from response', () async {
-      final mockResponse = Response(
-        requestOptions: RequestOptions(path: '/records'),
-        data: {
-          'data': [
-            {
-              'id': 'rec-1',
-              'amount': 10,
-              'description': 'Test',
-              'date': '2024-01-15T10:30:00Z',
-              'recordType': 'IN',
-              'createdAt': '2024-01-15T10:30:00Z',
-              'updatedAt': '2024-01-15T10:30:00Z',
-            },
-          ],
-          'nextCursor': 'cursor-123',
-          'total': 100,
-        },
-        statusCode: 200,
-      );
-
-      when(
-        () =>
-            mockDio.get(any(), queryParameters: any(named: 'queryParameters')),
-      ).thenAnswer((_) async => mockResponse);
-
-      final result = await datasource.getRecords(const RemoteRecordQuery());
-      expect(result.nextCursor, 'cursor-123');
-      expect(result.total, 100);
-    });
-  });
-
   group('RecordRemoteDatasourceImpl.fillMissingBudgetLinks', () {
     test('posts id and budgetId pairs to the budget-links endpoint', () async {
-      when(() => mockDio.post(any(), data: any(named: 'data'))).thenAnswer(
+      when(
+        () => mockDio.post<Object?>(any(), data: any(named: 'data')),
+      ).thenAnswer(
         (_) async => Response(
           requestOptions: RequestOptions(path: ApiConstants.recordBudgetLinks),
           data: {'updated': 2},
@@ -344,7 +47,7 @@ void main() {
       ]);
 
       verify(
-        () => mockDio.post(
+        () => mockDio.post<Object?>(
           ApiConstants.recordBudgetLinks,
           data: {
             'links': [
@@ -357,7 +60,9 @@ void main() {
     });
 
     test('throws ServerException on DioException', () async {
-      when(() => mockDio.post(any(), data: any(named: 'data'))).thenThrow(
+      when(
+        () => mockDio.post<Object?>(any(), data: any(named: 'data')),
+      ).thenThrow(
         DioException(
           requestOptions: RequestOptions(path: ApiConstants.recordBudgetLinks),
         ),

@@ -67,7 +67,7 @@ void main() {
   Future<void> emit(WidgetTester tester, RecurringState state) async {
     when(() => recurringBloc.state).thenReturn(state);
     recurringStates.add(state);
-    // One frame delivers the state, the next shows its rebuild or snackbar.
+
     await tester.pump();
     await tester.pump();
   }

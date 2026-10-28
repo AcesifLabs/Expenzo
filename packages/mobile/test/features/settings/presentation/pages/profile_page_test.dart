@@ -68,7 +68,7 @@ void main() {
     final row = find.text(t.settings.deleteAccount);
     await tester.scrollUntilVisible(row, 100);
     await tester.tap(row, warnIfMissed: false);
-    // Fixed pumps: the busy state's progress bar never settles.
+
     await tester.pump(const Duration(milliseconds: 500));
   }
 

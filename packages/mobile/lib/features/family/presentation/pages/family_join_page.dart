@@ -6,6 +6,7 @@ import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_back_button.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_scaffold.dart';
+import 'package:expense_tracker/shared/presentation/widgets/offline_gate.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,8 +21,6 @@ import '../helpers/family_form_validators.dart';
 import '../widgets/family_bottom_button.dart';
 import '../widgets/family_icon_header.dart';
 
-/// Join a Family Group with an Invite Code (no design frame; same layout
-/// as Create).
 class FamilyJoinPage extends StatefulWidget {
   const FamilyJoinPage({super.key});
 
@@ -98,57 +97,59 @@ class _FamilyJoinPageState extends State<FamilyJoinPage> {
         body: AppScaffold(
           title: joinT.title,
           leading: const AppBackButton(),
-          child: Column(
-            children: [
-              Expanded(
-                child: ListView(
-                  padding: AppSpacing.pagePadding,
-                  children: [
-                    FamilyIconHeader(
-                      icon: PiconsRegular.ticket,
-                      heading: joinT.title,
-                      body: joinT.body,
-                    ),
-                    TextField(
-                      controller: _code,
-                      autofocus: true,
-                      maxLength: 6,
-                      textCapitalization: TextCapitalization.characters,
-                      textAlign: TextAlign.center,
-                      style: textTheme.headlineMedium?.copyWith(
-                        fontFeatures: AppTypography.tabularFigures,
-                        letterSpacing: AppSpacing.xs,
+          child: OfflineGate(
+            child: Column(
+              children: [
+                Expanded(
+                  child: ListView(
+                    padding: AppSpacing.pagePadding,
+                    children: [
+                      FamilyIconHeader(
+                        icon: PiconsRegular.ticket,
+                        heading: joinT.title,
+                        body: joinT.body,
                       ),
-                      inputFormatters: [_InviteCodeFormatter()],
-                      decoration: InputDecoration(
-                        labelText: joinT.codeLabel,
-                        errorText: _code.text.length == 6 && !_codeIsValid
-                            ? joinT.codeInvalid
-                            : null,
+                      TextField(
+                        controller: _code,
+                        autofocus: true,
+                        maxLength: 6,
+                        textCapitalization: TextCapitalization.characters,
+                        textAlign: TextAlign.center,
+                        style: textTheme.headlineMedium?.copyWith(
+                          fontFeatures: AppTypography.tabularFigures,
+                          letterSpacing: AppSpacing.xs,
+                        ),
+                        inputFormatters: [_InviteCodeFormatter()],
+                        decoration: InputDecoration(
+                          labelText: joinT.codeLabel,
+                          errorText: _code.text.length == 6 && !_codeIsValid
+                              ? joinT.codeInvalid
+                              : null,
+                        ),
+                        onChanged: _onCodeChanged,
                       ),
-                      onChanged: _onCodeChanged,
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(
-                      joinT.currencyNote(
-                        code: CurrencyFormatter.current.value.code,
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        joinT.currencyNote(
+                          code: CurrencyFormatter.current.value.code,
+                        ),
+                        style: textTheme.bodySmall?.copyWith(
+                          color: palette.textSecondary,
+                        ),
                       ),
-                      style: textTheme.bodySmall?.copyWith(
-                        color: palette.textSecondary,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              BlocSelector<FamilyBloc, FamilyState, bool>(
-                selector: (state) => state.busy,
-                builder: (context, busy) => FamilyBottomButton(
-                  label: joinT.submit,
-                  busy: busy,
-                  onPressed: _codeIsValid ? _submit : null,
+                BlocSelector<FamilyBloc, FamilyState, bool>(
+                  selector: (state) => state.busy,
+                  builder: (context, busy) => FamilyBottomButton(
+                    label: joinT.submit,
+                    busy: busy,
+                    onPressed: _codeIsValid ? _submit : null,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -156,7 +157,6 @@ class _FamilyJoinPageState extends State<FamilyJoinPage> {
   }
 }
 
-/// Upper-cases what is typed and drops spaces, so " rf4 xk2" reads RF4XK2.
 class _InviteCodeFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(

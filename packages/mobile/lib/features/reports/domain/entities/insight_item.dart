@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:expense_tracker/core/utils/category_display_name.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
-/// Semantic tone of an insight; the UI maps it to a palette color.
 enum InsightTone { warning, positive, info, investment }
 
 enum InsightKind {
@@ -15,25 +14,17 @@ enum InsightKind {
   budgetReminder,
 }
 
-/// One insight on the Reports tab.
-///
-/// Holds the facts only; [title] and [description] are built in the current
-/// app language each time they are read, so a language change needs no
-/// reload.
 class InsightItem extends Equatable {
   final IconData icon;
   final InsightTone tone;
   final InsightKind kind;
 
-  /// The highest spending day ([InsightKind.highestSpendingDay]).
   final DateTime? day;
 
-  /// Percent above the daily average, or the top category's share.
   final int? percent;
   final String? categoryId;
   final String? categoryName;
 
-  /// The lowest spending week ([InsightKind.bestSavingsWeek]).
   final DateTime? weekStart;
   final DateTime? weekEnd;
 

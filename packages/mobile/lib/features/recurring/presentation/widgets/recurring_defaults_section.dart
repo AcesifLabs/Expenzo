@@ -18,8 +18,6 @@ import '../../domain/helpers/default_frequency.dart';
 import '../bloc/recurring_bloc.dart';
 import '../bloc/recurring_event.dart';
 
-/// DEFAULT FREQUENCY and AUTO-CREATE on the Recurring screen. Expects a
-/// [SettingsBloc] and a [RecurringBloc] above it.
 class RecurringDefaultsSection extends StatelessWidget {
   const RecurringDefaultsSection({super.key});
 
@@ -45,9 +43,6 @@ class RecurringDefaultsSection extends StatelessWidget {
     );
   }
 
-  /// Turning it on also posts what is already due, instead of waiting for
-  /// the next app open. Before this session's first pull a signed-in device
-  /// waits: the after-sync hook posts once the dates are fresh.
   Future<void> _onAutoCreateChanged(BuildContext context, bool enabled) async {
     context.read<SettingsBloc>().add(UpdateRecurringAutoCreate(enabled));
     if (!enabled) return;

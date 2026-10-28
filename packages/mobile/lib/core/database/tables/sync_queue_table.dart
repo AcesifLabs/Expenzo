@@ -1,5 +1,17 @@
 import 'package:drift/drift.dart';
 
+@TableIndex.sql(
+  'CREATE INDEX idx_sync_queue_pending ON sync_queue (created_at) '
+  'WHERE synced_at IS NULL AND failed_at IS NULL',
+)
+@TableIndex.sql(
+  'CREATE INDEX idx_sync_queue_failed ON sync_queue (created_at) '
+  'WHERE failed_at IS NOT NULL AND synced_at IS NULL',
+)
+@TableIndex.sql(
+  'CREATE INDEX idx_sync_queue_record ON sync_queue '
+  '(entity_table, record_id, id)',
+)
 class SyncQueue extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get entityTable => text()();
@@ -8,4 +20,7 @@ class SyncQueue extends Table {
   TextColumn get payload => text()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get syncedAt => dateTime().nullable()();
+
+  IntColumn get attemptCount => integer().withDefault(const Constant(0))();
+  DateTimeColumn get failedAt => dateTime().nullable()();
 }

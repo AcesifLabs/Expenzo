@@ -3,22 +3,19 @@ import 'package:picons/picons.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_back_button.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_page_header.dart';
 
-/// The Reports header: the shared page header plus a labelled date-range
-/// button.
 class ReportsTopBar extends StatelessWidget {
   final String title;
 
-  /// The current range, shown on the date-range button ("Last 30 days").
   final String rangeLabel;
 
-  final ValueChanged<BuildContext>? onCalendar;
+  final ValueChanged<BuildContext> onCalendar;
   final bool showBackButton;
 
   const ReportsTopBar({
     super.key,
     required this.title,
     required this.rangeLabel,
-    this.onCalendar,
+    required this.onCalendar,
     this.showBackButton = true,
   });
 
@@ -32,9 +29,7 @@ class ReportsTopBar extends StatelessWidget {
       actions: [
         Builder(
           builder: (buttonContext) => TextButton.icon(
-            onPressed: onCalendar == null
-                ? null
-                : () => onCalendar(buttonContext),
+            onPressed: () => onCalendar(buttonContext),
             icon: const Icon(PiconsRegular.calendar, size: 20),
             label: Text(rangeLabel),
             style: TextButton.styleFrom(minimumSize: const Size(48, 48)),

@@ -39,8 +39,9 @@ class _LazyIndexedStackState extends State<LazyIndexedStack> {
   void didUpdateWidget(LazyIndexedStack oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.children.length != oldWidget.children.length) {
-      final newActivated = List<bool>.filled(widget.children.length, false);
+    final childCount = widget.children.length;
+    if (childCount != oldWidget.children.length) {
+      final newActivated = List<bool>.filled(childCount, false);
       for (var i = 0; i < _activated.length && i < newActivated.length; i++) {
         newActivated[i] = _activated[i];
       }

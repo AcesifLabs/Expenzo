@@ -14,6 +14,7 @@ import '../widgets/chat_input.dart';
 import '../widgets/suggestion_chip.dart';
 import '../widgets/typing_indicator.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
+import 'package:expense_tracker/shared/presentation/widgets/offline_gate.dart';
 
 class AiAssistantPage extends StatelessWidget {
   const AiAssistantPage({super.key});
@@ -69,6 +70,15 @@ class _AiAssistantContentState extends State<_AiAssistantContent> {
           SnackBar(
             content: Text(error),
             backgroundColor: context.palette.expense,
+            action: state.failedPrompt == null
+                ? null
+                : SnackBarAction(
+                    label: t.common.tryAgain,
+                    textColor: context.palette.onBrandFill,
+                    onPressed: () => context.read<AiAssistantBloc>().add(
+                      const RetryLastMessage(),
+                    ),
+                  ),
           ),
         );
     }
@@ -95,9 +105,12 @@ class _AiAssistantContentState extends State<_AiAssistantContent> {
             );
           }
 
+          final message = state.messages[index];
+          if (message.isPendingReply) return const SizedBox.shrink();
+
           return Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.smd),
-            child: ChatBubble(message: state.messages[index]),
+            child: ChatBubble(message: message),
           );
         },
       ),
@@ -107,19 +120,21 @@ class _AiAssistantContentState extends State<_AiAssistantContent> {
   Widget _buildSuggestionRow() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: _suggestions
-            .map(
-              (label) => Padding(
+
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            for (final label in _suggestions)
+              Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
                 child: SuggestionChip(
                   label: label,
                   onTap: () => _sendMessage(label),
                 ),
               ),
-            )
-            .toList(),
+          ],
+        ),
       ),
     );
   }
@@ -133,7 +148,7 @@ class _AiAssistantContentState extends State<_AiAssistantContent> {
         t.aiAssistant.disclaimer,
         textAlign: TextAlign.center,
         style: AppTypography.bodySmall.copyWith(
-          color: context.palette.textSecondary.withAlpha(0x60),
+          color: context.palette.textSecondary,
         ),
       ),
     );
@@ -160,32 +175,34 @@ class _AiAssistantContentState extends State<_AiAssistantContent> {
       backgroundColor: context.palette.bg,
       appBar: _buildHeader(),
       body: SafeArea(
-        child: BlocConsumer<AiAssistantBloc, AiAssistantState>(
-          listener: _listenForErrors,
-          builder: (context, state) {
-            return Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg,
-                AppSpacing.md,
-                AppSpacing.lg,
-                0,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildChatArea(state),
-                  _buildSuggestionRow(),
-                  ChatInput(
-                    controller: _controller,
-                    enabled: _isInputEnabled(state),
-                    onSend: () => _sendMessage(_controller.text),
-                    onSubmitted: _sendMessage,
-                  ),
-                  _buildDisclaimer(),
-                ],
-              ),
-            );
-          },
+        child: OfflineGate(
+          child: BlocConsumer<AiAssistantBloc, AiAssistantState>(
+            listener: _listenForErrors,
+            builder: (context, state) {
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  AppSpacing.md,
+                  AppSpacing.lg,
+                  0,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildChatArea(state),
+                    _buildSuggestionRow(),
+                    ChatInput(
+                      controller: _controller,
+                      enabled: _isInputEnabled(state),
+                      onSend: () => _sendMessage(_controller.text),
+                      onSubmitted: _sendMessage,
+                    ),
+                    _buildDisclaimer(),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );

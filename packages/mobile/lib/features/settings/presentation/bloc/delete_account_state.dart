@@ -5,7 +5,6 @@ enum DeleteAccountStatus { idle, deleting, deleted, failed }
 class DeleteAccountState extends Equatable {
   final DeleteAccountStatus status;
 
-  /// Set for [DeleteAccountStatus.failed].
   final String? errorMessage;
 
   @override

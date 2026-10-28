@@ -2,14 +2,14 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:expense_tracker/core/error/exceptions.dart';
 import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'groq_chat_completion.dart';
 import 'groq_vision_request.dart';
 
 class GroqDataSource {
-  static const visionModel = GroqVisionRequest.defaultModel;
   static const _endpoint = 'https://api.groq.com/openai/v1/chat/completions';
-  static const _model = 'llama-3.1-8b-instant';
+  static const _model = 'openai/gpt-oss-20b';
 
   final http.Client _client;
 
@@ -38,8 +38,9 @@ class GroqDataSource {
       ],
       'model': _model,
       'temperature': 1,
-      'max_completion_tokens': 1024,
+      'max_completion_tokens': 2048,
       'top_p': 1,
+      'reasoning_effort': 'low',
       'stream': true,
     });
 
@@ -60,7 +61,6 @@ class GroqDataSource {
         .transform(_parseSseLines());
   }
 
-  /// Non-streaming multimodal completion for receipt images.
   Future<String> completeWithImage(GroqVisionRequest request) async {
     final apiKey = _requireApiKey();
     appLogger.info(
@@ -95,9 +95,7 @@ class GroqDataSource {
         'model': request.model,
         'temperature': 0.1,
         'max_completion_tokens': 1024,
-        // Avoid response_format=json_object for vision: Groq often returns
-        // json_validate_failed with empty failed_generation on image inputs.
-        // Disable Qwen thinking tokens so the reply is plain JSON.
+        'response_format': {'type': 'json_object'},
         'reasoning_effort': 'none',
       }),
     );
@@ -107,8 +105,9 @@ class GroqDataSource {
         'Groq vision API error status=${response.statusCode} '
         'model=${request.model} body=${response.body}',
       );
-      throw Exception(
-        'Groq API error ${response.statusCode}: ${response.body}',
+      throw ServerException(
+        message: 'Groq API error: ${response.body}',
+        statusCode: response.statusCode,
       );
     }
 
@@ -155,6 +154,8 @@ class GroqDataSource {
       if (content != null && content.isNotEmpty) {
         sink.add(content);
       }
-    } catch (_) {}
+    } catch (e) {
+      appLogger.warning('Skipped an unreadable AI stream line', e);
+    }
   }
 }

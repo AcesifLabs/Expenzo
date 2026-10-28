@@ -65,14 +65,14 @@ void main() {
     test('emits [DashboardLoading, DashboardError] on failure', () async {
       when(
         () => mockGetDashboardSummary(any()),
-      ).thenAnswer((_) async => Left(ServerFailure(message: 'Failed to load')));
+      ).thenAnswer((_) async => Left(CacheFailure(message: 'Failed to load')));
 
       final expected = [
         isA<DashboardLoading>(),
         isA<DashboardError>().having(
           (s) => s.message,
           'message',
-          t.common.errors.server,
+          t.common.errors.storage,
         ),
       ];
 

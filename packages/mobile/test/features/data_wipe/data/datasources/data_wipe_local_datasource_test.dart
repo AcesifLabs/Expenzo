@@ -29,7 +29,6 @@ void main() {
       categories: 4,
       recurring: 1,
       templates: 1,
-      rules: 2,
       goals: 2,
     );
 
@@ -40,13 +39,12 @@ void main() {
         budgets: 2,
         categories: 4,
         recurring: 1,
-        smsRules: 3,
+        smsRules: 1,
         goals: 2,
       ),
     );
   });
 
-  // Goals are counted (0, not null) now that the goals handler exists.
   test('an empty database gives zeros, goals included', () async {
     final summary = await datasource.countData();
 

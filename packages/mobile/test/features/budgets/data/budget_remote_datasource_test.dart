@@ -21,7 +21,7 @@ void main() {
   });
 
   test('fillMissingNames posts id and name pairs', () async {
-    when(() => dio.post<dynamic>(any(), data: any(named: 'data'))).thenAnswer(
+    when(() => dio.post<Object?>(any(), data: any(named: 'data'))).thenAnswer(
       (_) async => Response(
         requestOptions: RequestOptions(path: ApiConstants.budgetNames),
         statusCode: 200,
@@ -33,7 +33,7 @@ void main() {
     ).fillMissingNames([(id: 'b1', name: 'Groceries')]);
 
     verify(
-      () => dio.post<dynamic>(
+      () => dio.post<Object?>(
         ApiConstants.budgetNames,
         data: {
           'names': [
@@ -45,7 +45,7 @@ void main() {
   });
 
   test('fillMissingNames reports a failed request as ServerException', () {
-    when(() => dio.post<dynamic>(any(), data: any(named: 'data'))).thenThrow(
+    when(() => dio.post<Object?>(any(), data: any(named: 'data'))).thenThrow(
       DioException(requestOptions: RequestOptions(path: '/budgets/names')),
     );
 

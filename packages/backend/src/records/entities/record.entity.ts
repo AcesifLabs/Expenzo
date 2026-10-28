@@ -31,10 +31,7 @@ export class Record {
   @Column('text', { nullable: true })
   categoryId: string;
 
-  /**
-   * The Budget this Record counts towards. No foreign key: a Record can point at
-   * a budget the server has not received yet, or at a Family Admin's Shared Budget.
-   */
+  
   @Column('text', { nullable: true })
   budgetId: string | null;
 

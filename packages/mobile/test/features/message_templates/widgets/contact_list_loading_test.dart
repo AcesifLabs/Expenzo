@@ -88,7 +88,6 @@ void main() {
   testWidgets('a list waiting on the next page shows no spinner', (
     tester,
   ) async {
-    // More pages exist, but nothing is being fetched right now.
     await pumpWith(tester, ContactSelectorLoaded(contacts: [_contact]));
 
     expect(find.byType(CircularProgressIndicator), findsNothing);

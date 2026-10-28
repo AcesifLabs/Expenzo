@@ -1,7 +1,6 @@
 import 'package:expense_tracker/core/constants/budget_period.dart';
 import 'package:expense_tracker/features/budgets/domain/entities/budget.dart';
 
-/// Creates a [Budget] for tests. All params optional with deterministic defaults.
 Budget makeBudget({
   String? id,
   String? name,

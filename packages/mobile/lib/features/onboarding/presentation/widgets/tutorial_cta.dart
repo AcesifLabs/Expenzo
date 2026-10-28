@@ -7,7 +7,6 @@ import 'package:expense_tracker/i18n/strings.g.dart';
 
 import 'onboarding_page_frame.dart';
 
-/// The last tutorial page (frame `TutorialCTA`).
 class TutorialCta extends StatelessWidget {
   final VoidCallback onStart;
 
@@ -23,29 +22,36 @@ class TutorialCta extends StatelessWidget {
       child: Column(
         children: [
           Expanded(
-            child: ListView(
-              children: [
-                const SizedBox(height: AppSpacing.xl),
-                Icon(
-                  PiconsRegular.checkCircle,
-                  size: AppSpacing.xxl,
-                  color: context.palette.accent,
-                ),
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  ctaT.title,
-                  textAlign: TextAlign.center,
-                  style: textTheme.headlineMedium,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  ctaT.body,
-                  textAlign: TextAlign.center,
-                  style: textTheme.bodyLarge?.copyWith(
-                    color: context.palette.textSecondary,
+            child: LayoutBuilder(
+              builder: (context, constraints) => SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        PiconsRegular.checkCircle,
+                        size: AppSpacing.xxl,
+                        color: context.palette.accent,
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      Text(
+                        ctaT.title,
+                        textAlign: TextAlign.center,
+                        style: textTheme.headlineMedium,
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        ctaT.body,
+                        textAlign: TextAlign.center,
+                        style: textTheme.bodyLarge?.copyWith(
+                          color: context.palette.textSecondary,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
+              ),
             ),
           ),
           OnboardingPrimaryButton(label: ctaT.start, onPressed: onStart),

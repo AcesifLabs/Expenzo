@@ -13,8 +13,6 @@ import '../bloc/onboarding_event.dart';
 import '../bloc/onboarding_state.dart';
 import 'onboarding_page_frame.dart';
 
-/// Step 1 (frame `OnboardingIncome`): monthly net income and how often it
-/// arrives.
 class OnboardingIncomePage extends StatefulWidget {
   const OnboardingIncomePage({super.key});
 
@@ -41,7 +39,7 @@ class _OnboardingIncomePageState extends State<OnboardingIncomePage>
   @override
   void initState() {
     super.initState();
-    // Back and Replay setup show the confirmed income again (as monthly).
+
     final income = context.read<OnboardingBloc>().state.draft.monthlyIncome;
     if (income != null) _fill(income);
   }
@@ -51,16 +49,12 @@ class _OnboardingIncomePageState extends State<OnboardingIncomePage>
     _parsed = parseAmountInput(_amount.text);
   }
 
-  /// Replay setup: the saved income arrives after the page is built. It
-  /// fills the field only if the user hasn't started typing.
   void _onStoredIncome(OnboardingState state) {
     final income = state.draft.monthlyIncome;
     if (income == null || _amount.text.isNotEmpty) return;
     setState(() => _fill(income));
   }
 
-  /// Kept while other pages show, so Back finds the amount and frequency
-  /// as typed.
   @override
   bool get wantKeepAlive => true;
 

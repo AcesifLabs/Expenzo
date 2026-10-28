@@ -196,7 +196,7 @@ void main() {
 
     expect(find.text('নোটিফিকেশন চালু রাখুন'), findsOneWidget);
     expect(find.text('80% সীমা'), findsOneWidget);
-    // Unset first day in Bangla is Saturday, so the summary is Friday.
+
     expect(find.textContaining('শুক্রবার সন্ধ্যায়'), findsOneWidget);
   });
 

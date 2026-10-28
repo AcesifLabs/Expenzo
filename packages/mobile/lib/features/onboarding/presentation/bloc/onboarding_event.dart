@@ -10,7 +10,6 @@ sealed class OnboardingEvent extends Equatable {
   const OnboardingEvent();
 }
 
-/// Prefills the saved income (Replay setup).
 class OnboardingStarted extends OnboardingEvent {
   const OnboardingStarted();
 }
@@ -66,7 +65,6 @@ class GoalSubmitted extends OnboardingEvent {
   const GoalSubmitted(this.name, this.target);
 }
 
-/// "No goal for now".
 class GoalDeclined extends OnboardingEvent {
   const GoalDeclined();
 }
@@ -81,7 +79,6 @@ class TimelineChosen extends OnboardingEvent {
   const TimelineChosen({this.months, this.customDate});
 }
 
-/// Back to the previous setup page (Q24).
 class OnboardingStepBack extends OnboardingEvent {
   const OnboardingStepBack();
 }
@@ -90,7 +87,6 @@ class OnboardingFinished extends OnboardingEvent {
   const OnboardingFinished();
 }
 
-/// Ends setup, keeping what was confirmed with Continue (Q24).
 class OnboardingSkipped extends OnboardingEvent {
   const OnboardingSkipped();
 }

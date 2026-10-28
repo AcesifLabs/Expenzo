@@ -11,11 +11,11 @@ import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 import '../widgets/google_logo.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
+import 'package:expense_tracker/shared/presentation/widgets/offline_gate.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
-  /// Back to the screen that opened sign-in; Home if opened directly.
   void _onAuthenticated(BuildContext context, AuthState _) {
     if (context.canPop()) {
       context.pop();
@@ -26,7 +26,6 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Uses the app-wide AuthBloc so signing in updates every screen.
     return BlocListener<AuthBloc, AuthState>(
       listenWhen: (previous, current) => current is Authenticated,
       listener: _onAuthenticated,
@@ -42,7 +41,6 @@ class LoginView extends StatelessWidget {
     context.read<AuthBloc>().add(const SignInWithGoogleRequested());
   }
 
-  /// Google's standard sign-in button: neutral fill, outline, official "G".
   Widget _buildSignInButton(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final background = isDark ? const Color(0xFF131314) : Colors.white;
@@ -69,9 +67,12 @@ class LoginView extends StatelessWidget {
           children: [
             const GoogleLogo(),
             const SizedBox(width: AppSpacing.smd),
-            Text(
-              t.auth.login.google,
-              style: AppTypography.labelLarge.copyWith(color: foreground),
+            Flexible(
+              child: Text(
+                t.auth.login.google,
+                textAlign: TextAlign.center,
+                style: AppTypography.labelLarge.copyWith(color: foreground),
+              ),
             ),
           ],
         ),
@@ -79,8 +80,6 @@ class LoginView extends StatelessWidget {
     );
   }
 
-  /// The app logo from `assets/images/logo.png`, or a placeholder mark if
-  /// the asset is missing.
   Widget _buildLogo(Color fallbackColor) {
     return Image.asset(
       'assets/images/logo.png',
@@ -102,46 +101,69 @@ class LoginView extends StatelessWidget {
     return Scaffold(
       backgroundColor: palette.bg,
       body: SafeArea(
-        child: Center(
-          child: Padding(
+        child: LayoutBuilder(
+          builder: (context, constraints) => SingleChildScrollView(
             padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: AppBackButton(),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight - AppSpacing.lg * 2,
+              ),
+              child: IntrinsicHeight(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Align(
+                      alignment: Alignment.centerLeft,
+                      child: AppBackButton(),
+                    ),
+                    const Spacer(),
+                    _buildLogo(primaryColor),
+                    const SizedBox(height: AppSpacing.lg),
+                    Text(
+                      t.common.appName,
+                      style: AppTypography.headlineLarge.copyWith(
+                        color: primaryColor,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      strings.pitch,
+                      textAlign: TextAlign.center,
+                      style: AppTypography.bodyLarge.copyWith(
+                        color: palette.textSecondary,
+                      ),
+                    ),
+                    const Spacer(),
+                    OfflineGate(
+                      child: Column(
+                        children: [
+                          if (state is AuthLoading)
+                            Column(
+                              children: [
+                                const CircularProgressIndicator(),
+                                const SizedBox(height: AppSpacing.md),
+                                Text(strings.signingIn),
+                              ],
+                            )
+                          else
+                            _buildSignInButton(context),
+                          if (state is AuthError) ...[
+                            const SizedBox(height: AppSpacing.md),
+                            Text(
+                              state.message,
+                              textAlign: TextAlign.center,
+                              style: AppTypography.bodyMedium.copyWith(
+                                color: palette.error,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xxl),
+                  ],
                 ),
-                const Spacer(),
-                _buildLogo(primaryColor),
-                const SizedBox(height: AppSpacing.lg),
-                Text(
-                  t.common.appName,
-                  style: AppTypography.headlineLarge.copyWith(
-                    color: primaryColor,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  strings.pitch,
-                  textAlign: TextAlign.center,
-                  style: AppTypography.bodyLarge.copyWith(
-                    color: palette.textSecondary,
-                  ),
-                ),
-                const Spacer(),
-                if (state is AuthLoading)
-                  Column(
-                    children: [
-                      CircularProgressIndicator(),
-                      SizedBox(height: AppSpacing.md),
-                      Text(strings.signingIn),
-                    ],
-                  )
-                else
-                  _buildSignInButton(context),
-                const SizedBox(height: AppSpacing.xxl),
-              ],
+              ),
             ),
           ),
         ),

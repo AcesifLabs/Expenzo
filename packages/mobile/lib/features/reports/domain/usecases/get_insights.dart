@@ -89,12 +89,10 @@ class GetInsights {
 
       return Right(items);
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to compute insights: $e'));
+      return Left(CacheFailure(message: 'Failed to compute insights: $e'));
     }
   }
 
-  /// The cheapest full calendar week (7 daily points from [firstWeekday]),
-  /// or null when [trend] holds none.
   _WeekRange? _findLowestWeek(List<DateAmount> trend, int firstWeekday) {
     if (trend.length < 7) return null;
 

@@ -24,6 +24,9 @@ void main() {
         await tester.pumpWidget(
           wrap(
             AppErrorFallback(
+              onRetry: () {},
+              onRestart: () {},
+              onSendFeedback: () {},
               fallbackContext: ctx,
               referenceId: 'ABC123',
               exception: _TestBoomException(secret),
@@ -38,6 +41,9 @@ void main() {
       await tester.pumpWidget(
         wrap(
           AppErrorFallback(
+            onRetry: () {},
+            onRestart: () {},
+            onSendFeedback: () {},
             fallbackContext: AppFallbackContext.build,
             referenceId: 'ABC123',
             exception: _TestBoomException(secret),
@@ -55,6 +61,7 @@ void main() {
       await tester.pumpWidget(
         wrap(
           AppErrorFallback(
+            onSendFeedback: () {},
             fallbackContext: AppFallbackContext.init,
             referenceId: 'ABC123',
             exception: _TestBoomException(secret),
@@ -73,6 +80,9 @@ void main() {
       await tester.pumpWidget(
         wrap(
           AppErrorFallback(
+            onRetry: () {},
+            onRestart: () {},
+            onSendFeedback: () {},
             fallbackContext: AppFallbackContext.init,
             referenceId: 'XYZ789',
           ),
@@ -88,6 +98,7 @@ void main() {
       await tester.pumpWidget(
         wrap(
           AppErrorFallback(
+            onSendFeedback: () {},
             fallbackContext: AppFallbackContext.init,
             referenceId: 'ABC123',
             onRetry: () => retry++,
@@ -102,20 +113,6 @@ void main() {
 
       expect(retry, 1);
       expect(restart, 1);
-    });
-
-    testWidgets('hides Send feedback when no handler is given', (tester) async {
-      await tester.pumpWidget(
-        wrap(
-          AppErrorFallback(
-            fallbackContext: AppFallbackContext.build,
-            referenceId: 'ABC123',
-            onRetry: () {},
-            onRestart: () {},
-          ),
-        ),
-      );
-      expect(find.text('Send feedback'), findsNothing);
     });
 
     testWidgets('Send feedback calls the handler', (tester) async {
@@ -135,27 +132,15 @@ void main() {
       expect(sent, 1);
     });
 
-    testWidgets('hides Close App when callback is not provided', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        wrap(
-          AppErrorFallback(
-            fallbackContext: AppFallbackContext.async,
-            referenceId: 'ABC123',
-            onRetry: () {},
-          ),
-        ),
-      );
-      expect(find.text('Close app'), findsNothing);
-    });
-
     testWidgets(
       'debug expander reveals exception runtimeType but never toString',
       (tester) async {
         await tester.pumpWidget(
           wrap(
             AppErrorFallback(
+              onRetry: () {},
+              onRestart: () {},
+              onSendFeedback: () {},
               fallbackContext: AppFallbackContext.init,
               referenceId: 'ABC123',
               exception: _TestBoomException(secret),
@@ -182,6 +167,9 @@ void main() {
       await tester.pumpWidget(
         wrap(
           AppErrorFallback(
+            onRetry: () {},
+            onRestart: () {},
+            onSendFeedback: () {},
             fallbackContext: AppFallbackContext.init,
             referenceId: 'ABC123',
             exception: _TestBoomException(secret),

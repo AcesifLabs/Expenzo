@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:expense_tracker/core/utils/money.dart';
 import 'package:drift/drift.dart';
 import '../../constants/record_type.dart';
 import '../app_database.dart';
@@ -35,6 +38,17 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
         .get();
   }
 
+  Future<List<Record>> getExpensesByDateRange(DateTime start, DateTime end) {
+    return (select(records)
+          ..where(
+            (t) =>
+                t.date.isBetweenValues(start, end) &
+                t.recordType.equals(RecordType.expense.dbValue),
+          )
+          ..orderBy([(t) => OrderingTerm.desc(t.date)]))
+        .get();
+  }
+
   Future<List<Record>> getRecordsByCategory(String categoryId) {
     return (select(records)
           ..where((t) => t.categoryId.equals(categoryId))
@@ -46,11 +60,17 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
     return into(records).insert(record);
   }
 
-  Future<void> insertRecordsBatch(List<RecordsCompanion> companions) async {
-    await transaction(() async {
-      for (final companion in companions) {
-        await into(records).insert(companion);
-      }
+  Future<Set<String>> insertRecordsBatch(
+    List<RecordsCompanion> companions,
+  ) async {
+    return transaction(() async {
+      final taken = await _existingIds(companions.map(_idOf).toList());
+      final fresh = companions.where((c) => !taken.contains(_idOf(c))).toList();
+      await batch(
+        (b) => b.insertAll(records, fresh, mode: InsertMode.insertOrIgnore),
+      );
+
+      return _existingIds(fresh.map(_idOf).toList());
     });
   }
 
@@ -74,7 +94,6 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
     return result.read(count) ?? 0;
   }
 
-  /// Number of records per category id; categories with no records are absent.
   Future<Map<String, int>> getCategoryRecordCounts() async {
     final count = records.id.count();
     final query = selectOnly(records)
@@ -93,7 +112,6 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
     return counts;
   }
 
-  /// Id and budget of every record linked to a budget.
   Future<List<({String id, String budgetId})>> getBudgetLinks() async {
     final query = selectOnly(records)
       ..addColumns([records.id, records.budgetId])
@@ -137,6 +155,32 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
         .toSet();
   }
 
+  Future<Map<String, List<double>>> getAmountsBySourceIds(
+    List<String> sourceIds,
+  ) async {
+    if (sourceIds.isEmpty) return {};
+
+    var match = records.sourceId.isIn(sourceIds);
+    for (final id in sourceIds) {
+      match =
+          match |
+          (records.sourceId.isBiggerOrEqualValue('$id#') &
+              records.sourceId.isSmallerThanValue('$id\$'));
+    }
+    final query = selectOnly(records)
+      ..addColumns([records.sourceId, records.amount])
+      ..where(match);
+    final amounts = <String, List<double>>{};
+    for (final row in await query.get()) {
+      final sourceId = row.read(records.sourceId);
+      final amount = row.read(records.amount);
+      if (sourceId == null || amount == null) continue;
+      (amounts[sourceId.split('#').first] ??= []).add(amount.abs());
+    }
+
+    return amounts;
+  }
+
   Future<List<Record>> getRecordsByCategoryAndDateRange(
     String categoryId,
     DateTime start,
@@ -156,45 +200,14 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
     String categoryId,
     DateTime start,
     DateTime end,
-  ) async {
-    final items =
-        await (select(records)..where(
-              (t) =>
-                  t.categoryId.equals(categoryId) &
-                  t.date.isBetweenValues(start, end) &
-                  t.recordType.equals(RecordType.expense.dbValue),
-            ))
-            .get();
-    double total = 0;
-    for (final item in items) {
-      total += item.amount.abs();
-    }
+  ) => _expenseTotal(
+    records.categoryId.equals(categoryId) &
+        records.date.isBetweenValues(start, end),
+  );
 
-    return total;
-  }
+  Future<double> getTotalSpending(DateTime start, DateTime end) =>
+      _expenseTotal(records.date.isBetweenValues(start, end));
 
-  Future<double> getTotalSpending(DateTime start, DateTime end) async {
-    final items =
-        await (select(records)..where(
-              (t) =>
-                  t.date.isBetweenValues(start, end) &
-                  t.recordType.equals(RecordType.expense.dbValue),
-            ))
-            .get();
-    double total = 0;
-    for (final item in items) {
-      total += item.amount.abs();
-    }
-
-    return total;
-  }
-
-  /// Expense spend per budget, each over its own half-open [start, end)
-  /// period, in one query instead of one per budget.
-  ///
-  /// The end bound is exclusive so a record dated exactly at the next period's
-  /// start is not double-counted across adjacent periods. Every requested
-  /// budget is in the result, with 0.0 when nothing was spent.
   Future<Map<String, double>> getSpendingForBudgets(
     Map<String, ({DateTime start, DateTime end})> periods,
   ) async {
@@ -220,7 +233,7 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
       final date = row.read(records.date);
       final period = periods[budgetId];
       if (budgetId == null || date == null || period == null) continue;
-      // The query window covers every budget; keep each row to its own one.
+
       if (date.isBefore(period.start) || !date.isBefore(period.end)) continue;
       sums[budgetId] = sums[budgetId]! + (row.read(records.amount) ?? 0);
     }
@@ -239,41 +252,32 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
         .get();
   }
 
-  Future<List<Record>> getFilteredRecords(RecordFilter filter) {
-    final q = select(records);
+  Future<List<Record>> getFilteredRecords(RecordFilter filter) =>
+      _filteredQuery(filter).get();
 
-    q.where((t) {
-      final dateFilter = _buildDateFilter(t, filter.startDate, filter.endDate);
-      Expression<bool> where = dateFilter;
+  Stream<List<Record>> watchFilteredRecords(RecordFilter filter) =>
+      _filteredQuery(filter).watch();
 
-      final catIds = filter.categoryIds;
-      if (catIds != null && catIds.isNotEmpty) {
-        where = where & t.categoryId.isIn(catIds);
-      }
-
-      final rt = filter.recordType;
-      if (rt != null && rt.isNotEmpty) {
-        where = where & t.recordType.equals(rt);
-      }
-
-      return where;
-    });
-
-    q.orderBy([(t) => OrderingTerm.desc(t.date)]);
-    final limit = filter.limit;
-    if (limit != null) q.limit(limit, offset: filter.offset);
-
-    return q.get();
-  }
-
-  Future<List<TypedResult>> getCategoryBreakdown(DateTime start, DateTime end) {
-    final amountSum = records.amount.sum();
+  Future<List<({String? categoryId, double total})>> getCategoryBreakdown(
+    DateTime start,
+    DateTime end,
+  ) async {
+    final total = records.amount.abs().sum();
     final query = selectOnly(records)
-      ..addColumns([records.categoryId, amountSum])
-      ..where(records.date.isBetweenValues(start, end))
+      ..addColumns([records.categoryId, total])
+      ..where(
+        records.date.isBetweenValues(start, end) &
+            records.recordType.equals(RecordType.expense.dbValue),
+      )
       ..groupBy([records.categoryId]);
 
-    return query.get();
+    return [
+      for (final row in await query.get())
+        (
+          categoryId: row.read(records.categoryId),
+          total: row.read(total) ?? 0.0,
+        ),
+    ];
   }
 
   Future<List<TypedResult>> getSpendingTrend(DateTime start, DateTime end) {
@@ -301,5 +305,65 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
     if (endDate != null) return t.date.isSmallerOrEqualValue(endDate);
 
     return const Constant(true);
+  }
+
+  Future<double> _expenseTotal(Expression<bool> filter) async {
+    final total = records.amount.abs().sum();
+    final row =
+        await (selectOnly(records)
+              ..addColumns([total])
+              ..where(
+                filter & records.recordType.equals(RecordType.expense.dbValue),
+              ))
+            .getSingle();
+
+    return roundMoney(row.read(total) ?? 0);
+  }
+
+  static String _idOf(RecordsCompanion row) => row.id.value;
+
+  Future<Set<String>> _existingIds(List<String> ids) async {
+    const chunk = 500;
+    final found = <String>{};
+    for (var i = 0; i < ids.length; i += chunk) {
+      final part = ids.sublist(i, min(i + chunk, ids.length));
+      final query = selectOnly(records)
+        ..addColumns([records.id])
+        ..where(records.id.isIn(part));
+      found.addAll(
+        (await query.get()).map((row) => row.read(records.id)).nonNulls,
+      );
+    }
+
+    return found;
+  }
+
+  SimpleSelectStatement<$RecordsTable, Record> _filteredQuery(
+    RecordFilter filter,
+  ) {
+    final q = select(records);
+
+    q.where((t) {
+      final dateFilter = _buildDateFilter(t, filter.startDate, filter.endDate);
+      Expression<bool> where = dateFilter;
+
+      final catIds = filter.categoryIds;
+      if (catIds != null && catIds.isNotEmpty) {
+        where = where & t.categoryId.isIn(catIds);
+      }
+
+      final rt = filter.recordType;
+      if (rt != null && rt.isNotEmpty) {
+        where = where & t.recordType.equals(rt);
+      }
+
+      return where;
+    });
+
+    q.orderBy([(t) => OrderingTerm.desc(t.date)]);
+    final limit = filter.limit;
+    if (limit != null) q.limit(limit, offset: filter.offset);
+
+    return q;
   }
 }
