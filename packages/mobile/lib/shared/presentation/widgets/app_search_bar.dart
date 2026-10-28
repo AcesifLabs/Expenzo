@@ -8,14 +8,14 @@ class AppSearchBar extends StatefulWidget {
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
 
-  final String? hintText;
+  final String hintText;
   final FocusNode? focusNode;
 
   const AppSearchBar({
     super.key,
     required this.controller,
     required this.onChanged,
-    this.hintText,
+    required this.hintText,
     this.focusNode,
   });
 
@@ -72,7 +72,7 @@ class _AppSearchBarState extends State<AppSearchBar> {
         focusNode: widget.focusNode,
         onChanged: widget.onChanged,
         decoration: InputDecoration(
-          hintText: widget.hintText ?? t.common.search,
+          hintText: widget.hintText,
           hintStyle: TextStyle(color: mutedColor),
           prefixIcon: Icon(
             PiconsRegular.magnifyingGlass,

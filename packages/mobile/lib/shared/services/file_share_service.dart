@@ -10,7 +10,7 @@ class FileShareService {
   Future<ShareOutcome> shareFile(
     String path, {
     required String mimeType,
-    String? subject,
+    required String subject,
   }) async {
     try {
       final result = await Share.shareXFiles([

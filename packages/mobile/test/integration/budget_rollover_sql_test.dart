@@ -24,6 +24,7 @@ void main() {
     database = db.AppDatabase.forTesting(NativeDatabase.memory());
     budgets = _MockBudgets();
     useCase = GetBudgetsWithProgress(
+      sharedSpent: (_, _) => null,
       budgetRepository: budgets,
       recordRepository: RecordRepositoryImpl(
         localDatasource: RecordLocalDatasourceImpl(

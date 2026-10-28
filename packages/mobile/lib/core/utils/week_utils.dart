@@ -21,13 +21,11 @@ DateTime startOfWeek(DateTime date, {int? firstWeekday}) {
   return DateTime(date.year, date.month, date.day - offset);
 }
 
-int summaryWeekday({int? firstWeekday}) {
-  final first = firstWeekday ?? WeekStart.weekday;
-
-  return first == DateTime.monday ? DateTime.sunday : first - 1;
+int summaryWeekday({required int firstWeekday}) {
+  return firstWeekday == DateTime.monday ? DateTime.sunday : firstWeekday - 1;
 }
 
-DateTime nextWeeklySummaryAt(DateTime now, {int? firstWeekday}) {
+DateTime nextWeeklySummaryAt(DateTime now, {required int firstWeekday}) {
   final weekday = summaryWeekday(firstWeekday: firstWeekday);
   final daysAhead = (weekday - now.weekday) % 7;
   final candidate = DateTime(
@@ -47,7 +45,7 @@ DateTime nextWeeklySummaryAt(DateTime now, {int? firstWeekday}) {
         );
 }
 
-DateTime lastWeeklySummaryAt(DateTime now, {int? firstWeekday}) {
+DateTime lastWeeklySummaryAt(DateTime now, {required int firstWeekday}) {
   final next = nextWeeklySummaryAt(now, firstWeekday: firstWeekday);
 
   return DateTime(

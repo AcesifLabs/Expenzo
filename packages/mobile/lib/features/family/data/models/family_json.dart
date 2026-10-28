@@ -36,17 +36,7 @@ MyGroup? myGroupFromJson(Json json) {
   );
 }
 
-Json myGroupToJson(MyGroup? value) {
-  if (value == null) {
-    return {
-      'group': null,
-      'me': null,
-      'members': <Json>[],
-      'sharedBudgets': <Json>[],
-      'invite': null,
-    };
-  }
-
+Json myGroupToJson(MyGroup value) {
   return {
     'group': {
       'id': value.group.id,

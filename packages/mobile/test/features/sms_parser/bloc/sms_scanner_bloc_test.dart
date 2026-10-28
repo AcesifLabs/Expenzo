@@ -48,6 +48,9 @@ void main() {
       () => mockGetBudgetsWithProgress(),
     ).thenAnswer((_) async => const Right(<BudgetProgress>[]));
     recordRepository = MockRecordRepository();
+    when(
+      () => recordRepository.getAmountsBySourceIds(any()),
+    ).thenAnswer((_) async => const Right(<String, List<double>>{}));
     bloc = SmsScannerBloc(
       scanSmsUseCase: mockScanSmsUseCase,
       recordRepository: recordRepository,

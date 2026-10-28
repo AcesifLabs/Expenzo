@@ -3,7 +3,7 @@ import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'app_page_header.dart';
 
 class AppScaffold extends StatelessWidget {
-  final String? title;
+  final String title;
   final String? subtitle;
   final List<Widget>? actions;
 
@@ -47,7 +47,7 @@ class AppScaffold extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               AppPageHeader(
-                title: title ?? '',
+                title: title,
                 subtitle: subtitle,
                 actions: actions,
                 leading: leading,
@@ -74,7 +74,7 @@ class AppScaffold extends StatelessWidget {
 }
 
 class _SliverBody extends StatelessWidget {
-  final String? title;
+  final String title;
   final String? subtitle;
   final List<Widget>? actions;
   final Widget? leading;
@@ -95,7 +95,7 @@ class _SliverBody extends StatelessWidget {
       slivers: [
         SliverToBoxAdapter(
           child: AppPageHeader(
-            title: title ?? '',
+            title: title,
             subtitle: subtitle,
             actions: actions,
             leading: leading,

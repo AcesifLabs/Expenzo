@@ -87,7 +87,6 @@ void main() {
 
     test('reads a null group as not in a group', () {
       expect(myGroupFromJson({'group': null, 'me': null}), isNull);
-      expect(myGroupFromJson(myGroupToJson(null)), isNull);
     });
 
     test('parses the summary with numbers and round trips', () {

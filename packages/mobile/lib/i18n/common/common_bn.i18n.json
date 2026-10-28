@@ -41,7 +41,6 @@
     "noMailApp": "কোনো ইমেইল অ্যাপ পাওয়া যায়নি। আমাদের লিখুন {email} ঠিকানায়।",
     "copyAddress": "ঠিকানা কপি করুন"
   },
-  "search": "খুঁজুন",
   "clearSearch": "খোঁজা মুছুন",
   "addTransaction": "লেনদেন যোগ করুন",
   "noTransactionsInPeriod": "এই সময়ে কোনো লেনদেন নেই",

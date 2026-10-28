@@ -7,7 +7,7 @@ class SmsScanResultItem extends Equatable {
   final String senderKey;
   final String senderLabel;
 
-  final String? legacySourceId;
+  final String legacySourceId;
 
   String get sourceId => parsedTransaction.sourceId;
 
@@ -23,6 +23,6 @@ class SmsScanResultItem extends Equatable {
     required this.parsedTransaction,
     required this.senderKey,
     required this.senderLabel,
-    this.legacySourceId,
+    required this.legacySourceId,
   });
 }

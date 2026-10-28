@@ -13,12 +13,12 @@ import 'package:expense_tracker/shared/presentation/widgets/scrollable_center.da
 
 class SmsPermissionGate extends StatefulWidget {
   final Widget child;
-  final ValueChanged<bool>? onPermissionChanged;
+  final ValueChanged<bool> onPermissionChanged;
 
   const SmsPermissionGate({
     super.key,
     required this.child,
-    this.onPermissionChanged,
+    required this.onPermissionChanged,
   });
 
   @override
@@ -38,7 +38,7 @@ class _SmsPermissionGateState extends State<SmsPermissionGate> {
   Future<void> _checkPermission() async {
     final status = await Permission.sms.status;
     final hasPermission = status.isGranted;
-    widget.onPermissionChanged?.call(hasPermission);
+    widget.onPermissionChanged(hasPermission);
     if (mounted) {
       setState(() {
         _hasPermission = hasPermission;
@@ -55,7 +55,7 @@ class _SmsPermissionGateState extends State<SmsPermissionGate> {
     setState(() => _isLoading = true);
     final status = await Permission.sms.request();
     final hasPermission = status.isGranted;
-    widget.onPermissionChanged?.call(hasPermission);
+    widget.onPermissionChanged(hasPermission);
     if (mounted) {
       setState(() {
         _hasPermission = hasPermission;

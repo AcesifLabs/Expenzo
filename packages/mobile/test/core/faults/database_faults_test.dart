@@ -140,6 +140,8 @@ void main() {
       await pumpLocalized(
         tester,
         AppErrorFallback(
+          onRestart: () {},
+          onSendFeedback: () {},
           fallbackContext: AppFallbackContext.init,
           referenceId: 'ABC123',
           onRetry: () {},
@@ -162,6 +164,8 @@ void main() {
       await pumpLocalized(
         tester,
         AppErrorFallback(
+          onRestart: () {},
+          onSendFeedback: () {},
           fallbackContext: AppFallbackContext.init,
           referenceId: 'ABC123',
           onRetry: () {},

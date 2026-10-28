@@ -47,6 +47,7 @@ import 'package:expense_tracker/features/settings/presentation/bloc/settings_sta
 import 'package:expense_tracker/features/settings/presentation/widgets/calendar_month_preview.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 import 'package:expense_tracker/features/goals/presentation/bloc/goal_bloc.dart';
+import 'package:expense_tracker/features/recurring/domain/repositories/recurring_repository.dart';
 import 'package:expense_tracker/features/goals/presentation/bloc/goal_state.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_shell.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_text_scale.dart';
@@ -98,6 +99,8 @@ B mockBloc<B extends BlocBase<S>, S>(B bloc, S state) {
 }
 
 class MockGoalBloc extends Mock implements GoalBloc {}
+
+class MockRecurringRepository extends Mock implements RecurringRepository {}
 
 const _permissionChannel = MethodChannel(
   'flutter.baseflow.com/permissions/methods',
@@ -352,7 +355,7 @@ Widget transactionSheetScreen() {
         ),
       ),
     ],
-    child: const NewTransactionSheet(),
+    child: NewTransactionSheet(recurringRepository: MockRecurringRepository()),
   );
 }
 

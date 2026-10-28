@@ -4,22 +4,21 @@ import 'package:expense_tracker/core/theme/app_spacing.dart';
 class AppBadge extends StatelessWidget {
   final String label;
   final IconData? icon;
-  final Color? color;
+  final Color color;
   final AppBadgeSize size;
 
   const AppBadge({
     super.key,
     required this.label,
     this.icon,
-    this.color,
+    required this.color,
     this.size = AppBadgeSize.normal,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final bgColor = (color ?? theme.colorScheme.primary).withAlpha(30);
-    final textColor = color ?? theme.colorScheme.primary;
+    final bgColor = color.withAlpha(30);
+    final textColor = color;
 
     final (
       double hPad,

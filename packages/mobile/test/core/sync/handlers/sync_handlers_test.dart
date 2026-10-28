@@ -81,9 +81,10 @@ void main() {
       Map<String, dynamic> data, {
       bool Function()? keepLocal,
     }) =>
-        (RecordsSyncHandler(
-                  keepLocalBudgetLinks: keepLocal,
-                ).fromSyncPayload('r1', data)
+        ((keepLocal == null
+                        ? RecordsSyncHandler()
+                        : RecordsSyncHandler(keepLocalBudgetLinks: keepLocal))
+                    .fromSyncPayload('r1', data)
                 as RecordsCompanion)
             .budgetId;
 

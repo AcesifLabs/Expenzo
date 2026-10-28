@@ -170,6 +170,7 @@ void main() {
           MaterialApp(
             home: Scaffold(
               body: NewTransactionSheet(
+                recurringRepository: _MockRecurringRepository(),
                 initialRecord: record,
                 startWithReceiptScan: startWithReceiptScan,
               ),
@@ -428,7 +429,10 @@ void main() {
               GoRoute(
                 path: 'sheet',
                 builder: (_, _) => Scaffold(
-                  body: NewTransactionSheet(initialRecord: smsRecord),
+                  body: NewTransactionSheet(
+                    recurringRepository: _MockRecurringRepository(),
+                    initialRecord: smsRecord,
+                  ),
                 ),
               ),
               GoRoute(

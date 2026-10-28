@@ -64,12 +64,15 @@ void main() {
     when(() => listener.messages).thenAnswer((_) => streamController.stream);
     when(() => listener.drainPendingMessages()).thenAnswer((_) async => []);
 
+    final noAlerts = MockCheckBudgetAlerts();
+    when(() => noAlerts()).thenAnswer((_) async => const Right(unit));
     processor = RealtimeSmsProcessor(
       listener: listener,
       evaluateRules: evaluateRules,
       parsingIsolateService: parsingIsolateService,
       recordRepository: recordRepository,
       createRecordsFromParsedList: createRecordsFromParsedList,
+      checkBudgetAlerts: noAlerts,
     );
   });
 

@@ -17,12 +17,12 @@ class GetBudgetsWithProgress {
   final BudgetRepository budgetRepository;
   final RecordRepository recordRepository;
 
-  final SharedSpentLookup? sharedSpent;
+  final SharedSpentLookup sharedSpent;
 
   GetBudgetsWithProgress({
     required this.budgetRepository,
     required this.recordRepository,
-    this.sharedSpent,
+    required this.sharedSpent,
   });
 
   Future<Either<Failure, List<BudgetProgress>>> call({int? limit}) async {
@@ -106,7 +106,7 @@ class GetBudgetsWithProgress {
     final localSpent = spent[id] ?? 0.0;
     final spentAmount = budget.groupId == null
         ? localSpent
-        : sharedSpent?.call(id, period.start) ?? localSpent;
+        : sharedSpent(id, period.start) ?? localSpent;
     final spentBefore = previousSpent[id];
 
     final rollover = spentBefore == null

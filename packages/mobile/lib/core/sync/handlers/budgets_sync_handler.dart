@@ -14,8 +14,7 @@ class BudgetsSyncHandler extends SyncTableHandler<$BudgetsTable, Budget> {
   @override
   String get tableName => 'budgets';
 
-  BudgetsSyncHandler({bool Function()? keepLocalNames})
-    : keepLocalNames = keepLocalNames ?? _never;
+  BudgetsSyncHandler({this.keepLocalNames = _never});
 
   @override
   TableInfo<$BudgetsTable, Budget> tableRef(AppDatabase db) => db.budgets;

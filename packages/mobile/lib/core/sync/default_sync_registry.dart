@@ -8,9 +8,13 @@ import 'handlers/expense_templates_sync_handler.dart';
 import 'handlers/recurring_transactions_sync_handler.dart';
 import 'handlers/pending_recurring_sync_handler.dart';
 
+bool _never() => false;
+
+bool _always() => true;
+
 SyncTableRegistry createDefaultSyncRegistry({
-  bool Function()? keepLocalBudgetNames,
-  bool Function()? keepLocalRecordBudgetLinks,
+  bool Function() keepLocalBudgetNames = _never,
+  bool Function() keepLocalRecordBudgetLinks = _always,
 }) {
   final registry = SyncTableRegistry();
   registry.register(

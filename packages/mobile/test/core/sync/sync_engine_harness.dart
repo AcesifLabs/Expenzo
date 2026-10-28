@@ -55,7 +55,7 @@ class SyncEngineHarness {
     apiClient: apiClient,
     connectivity: connectivity,
     registry: registry ?? SyncTableRegistry(),
-    isEnabled: isEnabled,
+    isEnabled: isEnabled ?? () async => true,
     stopTasks: stopTasks,
   );
 

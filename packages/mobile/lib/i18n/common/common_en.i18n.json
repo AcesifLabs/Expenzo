@@ -40,7 +40,6 @@
     "noMailApp": "No email app was found. Write to us at {email}.",
     "copyAddress": "Copy address"
   },
-  "search": "Search",
   "clearSearch": "Clear search",
   "addTransaction": "Add transaction",
   "noTransactionsInPeriod": "No transactions in this period",

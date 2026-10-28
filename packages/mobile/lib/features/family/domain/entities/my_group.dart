@@ -38,11 +38,11 @@ class GroupMember extends Equatable {
     required this.joinedAt,
   });
 
-  GroupMember copyWith({GroupRole? role}) => GroupMember(
+  GroupMember copyWith({required GroupRole role}) => GroupMember(
     userId: userId,
     displayName: displayName,
     photoUrl: photoUrl,
-    role: role ?? this.role,
+    role: role,
     joinedAt: joinedAt,
   );
 }

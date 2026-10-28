@@ -26,6 +26,7 @@ void main() {
     mockRecordRepository = MockRecordRepository();
     mockBudgetRepository = MockBudgetRepository();
     getBudgetsWithProgress = GetBudgetsWithProgress(
+      sharedSpent: (_, _) => null,
       budgetRepository: mockBudgetRepository,
       recordRepository: mockRecordRepository,
     );

@@ -18,7 +18,7 @@ typedef GroupFetchedHook =
 class FamilyRepositoryImpl implements FamilyRepository {
   final FamilyRemoteDatasource remote;
   final FamilyLocalDatasource local;
-  final GroupFetchedHook? onGroupFetched;
+  final GroupFetchedHook onGroupFetched;
   final DateTime Function() clock;
 
   static const _familyCodes = {
@@ -41,7 +41,7 @@ class FamilyRepositoryImpl implements FamilyRepository {
   FamilyRepositoryImpl({
     required this.remote,
     required this.local,
-    this.onGroupFetched,
+    required this.onGroupFetched,
     this.clock = DateTime.now,
   });
 
@@ -193,7 +193,7 @@ class FamilyRepositoryImpl implements FamilyRepository {
     if (group == null || group.group.id != previous?.group.id) {
       await local.clearSummary();
     }
-    await onGroupFetched?.call(previous: previous, current: group);
+    await onGroupFetched(previous: previous, current: group);
   }
 
   Cached<GroupSummary>? _cachedSummaryOf(String groupId) {

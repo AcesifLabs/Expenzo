@@ -48,7 +48,7 @@ void main() {
     final result = await GetBudgetsWithProgress(
       budgetRepository: budgets,
       recordRepository: records,
-      sharedSpent: lookup,
+      sharedSpent: lookup ?? (_, _) => null,
     )();
     final progress = result.getOrElse(() => const []);
 
@@ -71,6 +71,7 @@ void main() {
     final result = await GetBudgetsWithProgress(
       budgetRepository: budgets,
       recordRepository: records,
+      sharedSpent: (_, _) => null,
     )();
 
     final byId = {

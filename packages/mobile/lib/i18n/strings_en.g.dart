@@ -276,9 +276,6 @@ class Translations$common$en {
 	late final Translations$common$a11y$en a11y = Translations$common$a11y$en.internal(_root);
 	late final Translations$common$feedback$en feedback = Translations$common$feedback$en.internal(_root);
 
-	/// en: 'Search'
-	String get search => 'Search';
-
 	/// en: 'Clear search'
 	String get clearSearch => 'Clear search';
 
@@ -1523,9 +1520,6 @@ class Translations$enums$source$en {
 
 	/// en: 'Recurring'
 	String get recurring => 'Recurring';
-
-	/// en: 'Both'
-	String get both => 'Both';
 }
 
 // Path: enums.theme
@@ -4981,7 +4975,6 @@ extension on Translations {
 			'common.feedback.subject' => 'Expenzo feedback',
 			'common.feedback.noMailApp' => ({required Object email}) => 'No email app was found. Write to us at ${email}.',
 			'common.feedback.copyAddress' => 'Copy address',
-			'common.search' => 'Search',
 			'common.clearSearch' => 'Clear search',
 			'common.addTransaction' => 'Add transaction',
 			'common.noTransactionsInPeriod' => 'No transactions in this period',
@@ -5073,7 +5066,6 @@ extension on Translations {
 			'enums.source.sms' => 'SMS',
 			'enums.source.email' => 'Email',
 			'enums.source.recurring' => 'Recurring',
-			'enums.source.both' => 'Both',
 			'enums.theme.system' => 'Match device',
 			'enums.theme.light' => 'Light',
 			'enums.theme.dark' => 'Dark',
@@ -5300,10 +5292,10 @@ extension on Translations {
 			'onboarding.goal.title' => 'What are you saving for?',
 			'onboarding.goal.subtitle' => 'Set a savings goal and we\'ll help you track progress.',
 			'onboarding.goal.nameLabel' => 'Goal name',
-			_ => null,
-		} ?? switch (path) {
 			'onboarding.goal.nameHint' => 'e.g. New laptop',
 			'onboarding.goal.amountLabel' => 'Target amount',
+			_ => null,
+		} ?? switch (path) {
 			'onboarding.goal.notNow' => 'No goal for now',
 			'onboarding.timeline.title' => 'Pick your timeline',
 			'onboarding.timeline.canAfford' => ({required Object name, required Object months, required Object amount}) => 'You can afford ${name} in ${months} months saving ${amount}/month.',

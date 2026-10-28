@@ -85,8 +85,8 @@ void main() {
                   rawMessage: f.body,
                   sourceType: 'sms',
                   sourceId: f.sourceId,
-                  address: f.sender,
-                  messageDate: f.date,
+                  address: f.sender ?? '',
+                  messageDate: f.date ?? DateTime(2026),
                 ),
               );
             } catch (e) {
@@ -155,8 +155,8 @@ void main() {
                 rawMessage: f.body,
                 sourceType: 'sms',
                 sourceId: f.sourceId,
-                address: f.sender,
-                messageDate: f.date,
+                address: f.sender ?? '',
+                messageDate: f.date ?? DateTime(2026),
               ),
             );
           } catch (e) {
@@ -224,8 +224,8 @@ void main() {
             rawMessage: match!.body,
             sourceType: 'sms',
             sourceId: match.sourceId,
-            address: match.sender,
-            messageDate: match.date,
+            address: match.sender ?? '',
+            messageDate: match.date ?? DateTime(2026),
           ),
         );
 
@@ -269,7 +269,8 @@ void main() {
             rawMessage: n.body,
             sourceType: 'sms',
             sourceId: 'synthetic-neg:${n.trigger}',
-            address: corpus.first.fixtures.first.sender,
+            address: corpus.first.fixtures.first.sender ?? '',
+            messageDate: DateTime(2026),
           ),
         );
 

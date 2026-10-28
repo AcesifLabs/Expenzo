@@ -47,6 +47,14 @@ class SmsWatchlistView extends StatelessWidget {
     bloc.add(const SmsWatchlistLoadRequested());
   }
 
+  void _showToggleError(BuildContext context, SmsWatchlistState state) {
+    final error = (state as SmsWatchlistReady).toggleError;
+    if (error == null) return;
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(SnackBar(content: Text(error)));
+  }
+
   @override
   Widget build(BuildContext context) {
     final strings = t.messageTemplates.watchlist;
@@ -58,13 +66,7 @@ class SmsWatchlistView extends StatelessWidget {
       child: BlocConsumer<SmsWatchlistBloc, SmsWatchlistState>(
         listenWhen: (_, state) =>
             state is SmsWatchlistReady && state.toggleError != null,
-        listener: (context, state) {
-          final error = (state as SmsWatchlistReady).toggleError;
-          if (error == null) return;
-          ScaffoldMessenger.of(context)
-            ..clearSnackBars()
-            ..showSnackBar(SnackBar(content: Text(error)));
-        },
+        listener: _showToggleError,
         builder: (context, state) => switch (state) {
           SmsWatchlistLoading() => const Center(
             child: CircularProgressIndicator(),

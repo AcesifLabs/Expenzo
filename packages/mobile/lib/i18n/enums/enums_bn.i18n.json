@@ -3,7 +3,7 @@
   "recordType": { "income": "আয়", "expense": "খরচ" },
   "period": { "weekly": "সাপ্তাহিক", "monthly": "মাসিক", "yearly": "বার্ষিক" },
   "frequency": { "daily": "দৈনিক", "weekly": "সাপ্তাহিক", "biweekly": "প্রতি দুই সপ্তাহে", "monthly": "মাসিক", "yearly": "বার্ষিক" },
-  "source": { "manual": "নিজে যোগ করা", "sms": "SMS", "email": "ইমেইল", "recurring": "পুনরাবৃত্ত", "both": "দুটোই" },
+  "source": { "manual": "নিজে যোগ করা", "sms": "SMS", "email": "ইমেইল", "recurring": "পুনরাবৃত্ত" },
   "theme": { "system": "ডিভাইসের মতো", "light": "লাইট", "dark": "ডার্ক" },
   "digitGrouping": { "comma": "কমা দিয়ে আলাদা", "dot": "ডট দিয়ে আলাদা", "space": "ফাঁকা জায়গা দিয়ে আলাদা" },
   "fontSize": {

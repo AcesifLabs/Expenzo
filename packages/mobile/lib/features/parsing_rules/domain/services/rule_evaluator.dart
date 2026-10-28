@@ -81,10 +81,8 @@ class RuleEvaluator {
       final amount = _extractAmount(amountMatch);
       if (amount == null) return null;
 
-      final messageDate = params.messageDate;
-      final description = messageDate != null
-          ? '${monitoredSource.contactName} - ${DateFormat('dd MMM yyyy \'at\' HH:mm').format(messageDate)}'
-          : template.descriptionPattern ?? 'Template Expense';
+      final description =
+          '${monitoredSource.contactName} - ${DateFormat('dd MMM yyyy \'at\' HH:mm').format(params.messageDate)}';
 
       return ParsedTransaction(
         rawMessage: params.rawMessage,

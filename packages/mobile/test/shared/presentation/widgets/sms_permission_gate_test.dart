@@ -29,7 +29,12 @@ void main() {
   Future<void> pumpGateAndAllow(WidgetTester tester) async {
     await pumpLocalized(
       tester,
-      const Scaffold(body: SmsPermissionGate(child: Text('senders'))),
+      Scaffold(
+        body: SmsPermissionGate(
+          onPermissionChanged: (_) {},
+          child: const Text('senders'),
+        ),
+      ),
     );
     await tester.pumpAndSettle();
     await tester.tap(find.text(t.common.smsGate.allow));

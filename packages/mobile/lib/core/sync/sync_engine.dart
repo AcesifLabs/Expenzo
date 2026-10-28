@@ -116,7 +116,7 @@ class SyncEngine {
 
     List<SyncTask> stopTasks = const [],
 
-    Future<bool> Function()? isEnabled,
+    Future<bool> Function() isEnabled = _alwaysOn,
   }) : _syncQueueDao = syncQueueDao,
        _apiClient = apiClient,
        _connectivity = connectivity,
@@ -124,7 +124,7 @@ class SyncEngine {
        _afterSyncTasks = afterSyncTasks,
        _beforeLocalWipeTasks = beforeLocalWipeTasks,
        _stopTasks = stopTasks,
-       _isEnabled = isEnabled ?? _alwaysOn;
+       _isEnabled = isEnabled;
 
   Future<void> start() => _queued(_start);
 

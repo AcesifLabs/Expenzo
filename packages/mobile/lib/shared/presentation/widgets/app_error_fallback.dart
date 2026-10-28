@@ -18,12 +18,12 @@ class AppErrorFallback extends StatelessWidget {
   final Object? exception;
   final StackTrace? stack;
   final String Function(Object exception)? formatDebugType;
-  final VoidCallback? onRetry;
-  final VoidCallback? onRestart;
+  final VoidCallback onRetry;
+  final VoidCallback onRestart;
 
   final VoidCallback? onResetLocalData;
 
-  final VoidCallback? onSendFeedback;
+  final VoidCallback onSendFeedback;
 
   const AppErrorFallback({
     super.key,
@@ -32,10 +32,10 @@ class AppErrorFallback extends StatelessWidget {
     this.exception,
     this.stack,
     this.formatDebugType,
-    this.onRetry,
-    this.onRestart,
+    required this.onRetry,
+    required this.onRestart,
     this.onResetLocalData,
-    this.onSendFeedback,
+    required this.onSendFeedback,
   });
 
   String get _title {
@@ -104,7 +104,7 @@ class AppErrorFallback extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildActions(VoidCallback? onSendFeedback) {
+  List<Widget> _buildActions(VoidCallback onSendFeedback) {
     final resetLocalData = onResetLocalData;
 
     return [
@@ -113,25 +113,21 @@ class AppErrorFallback extends StatelessWidget {
         const SizedBox(height: AppSpacing.sm),
         _ResetLocalDataButton(onConfirmed: resetLocalData),
       ],
-      if (onRestart != null) ...[
-        const SizedBox(height: AppSpacing.sm),
-        _FallbackButton(
-          label: t.common.fallback.closeApp,
-          icon: PiconsRegular.power,
-          filled: false,
-          onTap: onRestart,
-        ),
-      ],
-      if (onSendFeedback != null) ...[
-        const SizedBox(height: AppSpacing.sm),
-        _FallbackButton(
-          label: t.common.sendFeedback,
-          icon: PiconsRegular.chatCircleText,
-          filled: false,
-          textOnly: true,
-          onTap: onSendFeedback,
-        ),
-      ],
+      const SizedBox(height: AppSpacing.sm),
+      _FallbackButton(
+        label: t.common.fallback.closeApp,
+        icon: PiconsRegular.power,
+        filled: false,
+        onTap: onRestart,
+      ),
+      const SizedBox(height: AppSpacing.sm),
+      _FallbackButton(
+        label: t.common.sendFeedback,
+        icon: PiconsRegular.chatCircleText,
+        filled: false,
+        textOnly: true,
+        onTap: onSendFeedback,
+      ),
     ];
   }
 
@@ -233,14 +229,14 @@ class _FallbackButton extends StatelessWidget {
   final IconData icon;
   final bool filled;
   final bool textOnly;
-  final VoidCallback? onTap;
+  final VoidCallback onTap;
 
   const _FallbackButton({
     required this.label,
     required this.icon,
     required this.filled,
     this.textOnly = false,
-    this.onTap,
+    required this.onTap,
   });
 
   (Color, Color, BorderSide?) _resolveStyle(ColorScheme scheme) {

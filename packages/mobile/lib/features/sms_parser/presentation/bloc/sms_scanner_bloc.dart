@@ -318,7 +318,7 @@ class SmsScannerBloc extends Bloc<SmsScannerEvent, SmsScannerState> {
   Future<Either<Failure, List<SmsScanResultItem>>> _withoutLegacyImports(
     List<SmsScanResultItem> transactions,
   ) async {
-    final legacyIds = [for (final t in transactions) ?t.legacySourceId];
+    final legacyIds = [for (final t in transactions) t.legacySourceId];
     if (legacyIds.isEmpty) return Right(transactions);
     final stored = await recordRepository.getAmountsBySourceIds(legacyIds);
 

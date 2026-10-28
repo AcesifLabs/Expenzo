@@ -18,7 +18,7 @@ void main() {
       WeekStart.current.value = FirstDayOfWeek.saturday;
 
       expect(startOfWeek(DateTime(2026, 10, 16, 21)), DateTime(2026, 10, 10));
-      expect(summaryWeekday(), DateTime.friday);
+      expect(summaryWeekday(firstWeekday: WeekStart.weekday), DateTime.friday);
     });
 
     test('apply reports whether the day changed', () {
@@ -83,7 +83,7 @@ void main() {
   });
 
   test('summaryWeekday is the day before the first weekday', () {
-    expect(summaryWeekday(), DateTime.sunday);
+    expect(summaryWeekday(firstWeekday: WeekStart.weekday), DateTime.sunday);
     expect(summaryWeekday(firstWeekday: DateTime.sunday), DateTime.saturday);
     expect(summaryWeekday(firstWeekday: DateTime.saturday), DateTime.friday);
   });
@@ -91,28 +91,40 @@ void main() {
   group('nextWeeklySummaryAt', () {
     test('Sunday before 20:00 gives the same Sunday', () {
       expect(
-        nextWeeklySummaryAt(DateTime(2026, 10, 18, 19, 59)),
+        nextWeeklySummaryAt(
+          DateTime(2026, 10, 18, 19, 59),
+          firstWeekday: DateTime.monday,
+        ),
         DateTime(2026, 10, 18, 20),
       );
     });
 
     test('Sunday at 20:00 gives next Sunday', () {
       expect(
-        nextWeeklySummaryAt(DateTime(2026, 10, 18, 20)),
+        nextWeeklySummaryAt(
+          DateTime(2026, 10, 18, 20),
+          firstWeekday: DateTime.monday,
+        ),
         DateTime(2026, 10, 25, 20),
       );
     });
 
     test('Sunday after 20:00 gives next Sunday', () {
       expect(
-        nextWeeklySummaryAt(DateTime(2026, 10, 18, 21)),
+        nextWeeklySummaryAt(
+          DateTime(2026, 10, 18, 21),
+          firstWeekday: DateTime.monday,
+        ),
         DateTime(2026, 10, 25, 20),
       );
     });
 
     test('midweek gives the coming Sunday', () {
       expect(
-        nextWeeklySummaryAt(DateTime(2026, 10, 14, 8)),
+        nextWeeklySummaryAt(
+          DateTime(2026, 10, 14, 8),
+          firstWeekday: DateTime.monday,
+        ),
         DateTime(2026, 10, 18, 20),
       );
     });
@@ -121,21 +133,30 @@ void main() {
   group('lastWeeklySummaryAt', () {
     test('on time gives the same Sunday 20:00', () {
       expect(
-        lastWeeklySummaryAt(DateTime(2026, 10, 18, 20, 5)),
+        lastWeeklySummaryAt(
+          DateTime(2026, 10, 18, 20, 5),
+          firstWeekday: DateTime.monday,
+        ),
         DateTime(2026, 10, 18, 20),
       );
     });
 
     test('after midnight gives the Sunday just past', () {
       expect(
-        lastWeeklySummaryAt(DateTime(2026, 10, 19, 1)),
+        lastWeeklySummaryAt(
+          DateTime(2026, 10, 19, 1),
+          firstWeekday: DateTime.monday,
+        ),
         DateTime(2026, 10, 18, 20),
       );
     });
 
     test('before Sunday 20:00 gives the previous Sunday', () {
       expect(
-        lastWeeklySummaryAt(DateTime(2026, 10, 18, 19)),
+        lastWeeklySummaryAt(
+          DateTime(2026, 10, 18, 19),
+          firstWeekday: DateTime.monday,
+        ),
         DateTime(2026, 10, 11, 20),
       );
     });

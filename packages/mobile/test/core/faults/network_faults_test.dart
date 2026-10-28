@@ -35,6 +35,7 @@ void main() {
       return FamilyRepositoryImpl(
         remote: FamilyRemoteDatasourceImpl(apiClient: apiClient),
         local: local,
+        onGroupFetched: ({previous, current}) async {},
         clock: () => now,
       );
     }

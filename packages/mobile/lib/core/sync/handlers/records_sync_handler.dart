@@ -11,8 +11,7 @@ class RecordsSyncHandler extends SyncTableHandler<$RecordsTable, Record> {
   @override
   String get tableName => 'records';
 
-  RecordsSyncHandler({bool Function()? keepLocalBudgetLinks})
-    : keepLocalBudgetLinks = keepLocalBudgetLinks ?? _always;
+  RecordsSyncHandler({this.keepLocalBudgetLinks = _always});
 
   @override
   TableInfo<$RecordsTable, Record> tableRef(AppDatabase db) => db.records;

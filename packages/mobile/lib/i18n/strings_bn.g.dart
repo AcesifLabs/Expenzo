@@ -201,7 +201,6 @@ class _Translations$common$bn extends Translations$common$en {
 	@override late final _Translations$common$dates$bn dates = _Translations$common$dates$bn._(_root);
 	@override late final _Translations$common$a11y$bn a11y = _Translations$common$a11y$bn._(_root);
 	@override late final _Translations$common$feedback$bn feedback = _Translations$common$feedback$bn._(_root);
-	@override String get search => 'খুঁজুন';
 	@override String get clearSearch => 'খোঁজা মুছুন';
 	@override String get addTransaction => 'লেনদেন যোগ করুন';
 	@override String get noTransactionsInPeriod => 'এই সময়ে কোনো লেনদেন নেই';
@@ -981,7 +980,6 @@ class _Translations$enums$source$bn extends Translations$enums$source$en {
 	@override String get sms => 'SMS';
 	@override String get email => 'ইমেইল';
 	@override String get recurring => 'পুনরাবৃত্ত';
-	@override String get both => 'দুটোই';
 }
 
 // Path: enums.theme
@@ -3185,7 +3183,6 @@ extension on TranslationsBn {
 			'common.feedback.subject' => 'Expenzo নিয়ে মতামত',
 			'common.feedback.noMailApp' => ({required Object email}) => 'কোনো ইমেইল অ্যাপ পাওয়া যায়নি। আমাদের লিখুন ${email} ঠিকানায়।',
 			'common.feedback.copyAddress' => 'ঠিকানা কপি করুন',
-			'common.search' => 'খুঁজুন',
 			'common.clearSearch' => 'খোঁজা মুছুন',
 			'common.addTransaction' => 'লেনদেন যোগ করুন',
 			'common.noTransactionsInPeriod' => 'এই সময়ে কোনো লেনদেন নেই',
@@ -3277,7 +3274,6 @@ extension on TranslationsBn {
 			'enums.source.sms' => 'SMS',
 			'enums.source.email' => 'ইমেইল',
 			'enums.source.recurring' => 'পুনরাবৃত্ত',
-			'enums.source.both' => 'দুটোই',
 			'enums.theme.system' => 'ডিভাইসের মতো',
 			'enums.theme.light' => 'লাইট',
 			'enums.theme.dark' => 'ডার্ক',
@@ -3504,10 +3500,10 @@ extension on TranslationsBn {
 			'onboarding.goal.title' => 'আপনি কীসের জন্য সঞ্চয় করছেন?',
 			'onboarding.goal.subtitle' => 'একটি সঞ্চয়ের লক্ষ্য ঠিক করুন, আমরা অগ্রগতি দেখতে সাহায্য করব।',
 			'onboarding.goal.nameLabel' => 'লক্ষ্যের নাম',
-			_ => null,
-		} ?? switch (path) {
 			'onboarding.goal.nameHint' => 'যেমন: নতুন ল্যাপটপ',
 			'onboarding.goal.amountLabel' => 'লক্ষ্য পরিমাণ',
+			_ => null,
+		} ?? switch (path) {
 			'onboarding.goal.notNow' => 'এখন কোনো লক্ষ্য নয়',
 			'onboarding.timeline.title' => 'সময়সীমা বাছুন',
 			'onboarding.timeline.canAfford' => ({required Object amount, required Object months, required Object name}) => 'মাসে ${amount} সঞ্চয় করলে ${months} মাসে ${name} কিনতে পারবেন।',

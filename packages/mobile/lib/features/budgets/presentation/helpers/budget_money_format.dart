@@ -6,7 +6,7 @@ import 'budget_access_lookup.dart';
 MoneyFormat budgetMoneyFormat(
   String? groupId, {
   required MoneyFormat fallback,
-  int? decimalDigits,
+  required int decimalDigits,
 }) {
   final currencyCode = budgetAccess().currencyFor(groupId);
 

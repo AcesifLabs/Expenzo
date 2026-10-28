@@ -79,7 +79,7 @@ Future<bool> showTransactionSheet(
 }
 
 class NewTransactionSheet extends StatefulWidget {
-  final RecurringRepository? recurringRepository;
+  final RecurringRepository recurringRepository;
 
   final Record? initialRecord;
 
@@ -89,7 +89,7 @@ class NewTransactionSheet extends StatefulWidget {
 
   const NewTransactionSheet({
     super.key,
-    this.recurringRepository,
+    required this.recurringRepository,
     this.initialRecord,
     this.initialBudgetId,
     this.startWithReceiptScan = false,
@@ -458,20 +458,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet>
 
   Future<bool> _createRecurringTransaction(double finalAmount) async {
     try {
-      final repo = widget.recurringRepository;
-      if (repo == null) {
-        if (mounted) {
-          ScaffoldMessenger.of(context)
-            ..clearSnackBars()
-            ..showSnackBar(
-              SnackBar(content: Text(t.records.sheet.repeatFailed)),
-            );
-        }
-
-        return false;
-      }
-
-      final result = await repo.createRecurring(
+      final result = await widget.recurringRepository.createRecurring(
         RecurringTransaction(
           description: _noteCtrl.text.trim(),
           amount: finalAmount,
