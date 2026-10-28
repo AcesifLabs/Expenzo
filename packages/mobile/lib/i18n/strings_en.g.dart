@@ -2008,11 +2008,11 @@ class Translations$goals$form$en {
 	/// en: 'Target date'
 	String get targetDate => 'Target date';
 
-	/// en: 'No date'
-	String get noDate => 'No date';
-
 	/// en: 'Clear date'
 	String get clearDate => 'Clear date';
+
+	/// en: 'Tap to set a target date'
+	String get pickDate => 'Tap to set a target date';
 
 	/// en: 'Monthly contribution'
 	String get monthly => 'Monthly contribution';
@@ -5184,8 +5184,8 @@ extension on Translations {
 			'goals.form.target' => 'Target amount',
 			'goals.form.saved' => 'Saved so far',
 			'goals.form.targetDate' => 'Target date',
-			'goals.form.noDate' => 'No date',
 			'goals.form.clearDate' => 'Clear date',
+			'goals.form.pickDate' => 'Tap to set a target date',
 			'goals.form.monthly' => 'Monthly contribution',
 			'goals.form.suggestMonthly' => ({required Object amount}) => 'Suggested: ${amount}/month',
 			'goals.form.deleteTitle' => 'Delete goal?',

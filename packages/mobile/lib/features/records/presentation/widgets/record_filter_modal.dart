@@ -109,7 +109,23 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
   }
 
   void _onTypeSelected(RecordType? type) {
-    setState(() => _recordType = type);
+    setState(() {
+      _recordType = type;
+      if (type == null) return;
+      final state = context.read<CategoryBloc>().state;
+      if (state is! CategoryLoaded) return;
+      final otherTypeIds = state.categories
+          .where((c) => c.type != type)
+          .map((c) => c.id);
+      _selectedCategoryIds.removeAll(otherTypeIds);
+    });
+  }
+
+  List<Category> _visibleCategories(List<Category> categories) {
+    final type = _recordType;
+    if (type == null) return categories;
+
+    return categories.where((c) => c.type == type).toList();
   }
 
   Color _chipLabelColor(ThemeData theme, bool selected) {
@@ -305,7 +321,7 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
       builder: (context, state) {
         if (state is! CategoryLoaded) return _buildCategoryDropdownLoading();
 
-        final categories = state.categories;
+        final categories = _visibleCategories(state.categories);
         if (categories.isEmpty) return _buildCategoryDropdownEmpty(theme);
 
         final selectedCount = _selectedCategoryIds.length;
@@ -315,7 +331,62 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
     );
   }
 
+  Widget _buildCategoryOption(Category cat, StateSetter setDialogState) {
+    return CheckboxListTile(
+      value: _selectedCategoryIds.contains(cat.id),
+      onChanged: (val) => _onCategoryToggle(cat, val, setDialogState),
+      dense: true,
+      visualDensity: VisualDensity.compact,
+      title: Row(
+        children: [
+          CategoryTile(colorHex: cat.color, iconKey: cat.emoji, size: 24),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(child: Text(cat.displayName)),
+        ],
+      ),
+      controlAffinity: ListTileControlAffinity.leading,
+    );
+  }
+
+  Widget _buildCategoryGroupHeader(ThemeData theme, RecordType type) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        AppSpacing.md,
+        AppSpacing.md,
+        AppSpacing.xs,
+      ),
+      child: Text(
+        type.displayName,
+        style: theme.textTheme.labelLarge?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _buildCategoryOptions(
+    ThemeData theme,
+    List<Category> categories,
+    StateSetter setDialogState,
+  ) {
+    final groups = [RecordType.expense, RecordType.income]
+        .map((type) => (type, categories.where((c) => c.type == type).toList()))
+        .where((group) => group.$2.isNotEmpty)
+        .toList();
+    final showHeaders = groups.length > 1;
+
+    return [
+      for (final (type, items) in groups) ...[
+        if (showHeaders) _buildCategoryGroupHeader(theme, type),
+        for (final cat in items) _buildCategoryOption(cat, setDialogState),
+      ],
+    ];
+  }
+
   void _showCategoryDialog(BuildContext context, List<Category> categories) {
+    final theme = Theme.of(context);
+
     showDialog<void>(
       context: context,
       builder: (dialogCtx) {
@@ -325,33 +396,13 @@ class _RecordFilterModalState extends State<RecordFilterModal> {
               title: Text(t.records.filter.categories),
               content: SizedBox(
                 width: double.maxFinite,
-                child: ListView.builder(
+                child: ListView(
                   shrinkWrap: true,
-                  itemCount: categories.length,
-                  itemBuilder: (_, i) {
-                    final cat = categories[i];
-                    final selected = _selectedCategoryIds.contains(cat.id);
-
-                    return CheckboxListTile(
-                      value: selected,
-                      onChanged: (val) =>
-                          _onCategoryToggle(cat, val, setDialogState),
-                      dense: true,
-                      visualDensity: VisualDensity.compact,
-                      title: Row(
-                        children: [
-                          CategoryTile(
-                            colorHex: cat.color,
-                            iconKey: cat.emoji,
-                            size: 24,
-                          ),
-                          const SizedBox(width: AppSpacing.sm),
-                          Text(cat.displayName),
-                        ],
-                      ),
-                      controlAffinity: ListTileControlAffinity.leading,
-                    );
-                  },
+                  children: _buildCategoryOptions(
+                    theme,
+                    categories,
+                    setDialogState,
+                  ),
                 ),
               ),
               actions: [

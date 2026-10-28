@@ -36,8 +36,7 @@ class FontSizePreviewCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-
-              Flexible(
+              Expanded(
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
                   alignment: AlignmentDirectional.centerEnd,

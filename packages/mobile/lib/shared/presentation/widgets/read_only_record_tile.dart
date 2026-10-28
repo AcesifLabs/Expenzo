@@ -84,7 +84,7 @@ class ReadOnlyRecordTile extends StatelessWidget {
   }
 
   Widget _amountText(Color amtColor) {
-    return Flexible(
+    return Expanded(
       child: FittedBox(
         fit: BoxFit.scaleDown,
         alignment: AlignmentDirectional.centerEnd,
@@ -114,6 +114,7 @@ class ReadOnlyRecordTile extends StatelessWidget {
           _leadingIcon(amtColor),
           const SizedBox(width: AppSpacing.smd),
           _titleAndDate(colors),
+          const SizedBox(width: AppSpacing.smd),
           _amountText(amtColor),
         ],
       ),

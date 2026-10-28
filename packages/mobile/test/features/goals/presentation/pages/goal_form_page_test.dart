@@ -90,7 +90,7 @@ void main() {
     final shown = find.textContaining('2027');
     expect(shown, findsOneWidget);
 
-    await tester.tap(find.text(t.goals.form.targetDate));
+    await tester.tap(shown);
     await tester.pumpAndSettle();
     Navigator.of(tester.element(find.byType(DatePickerDialog))).pop();
     await tester.pumpAndSettle();

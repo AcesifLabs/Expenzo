@@ -203,8 +203,7 @@ class _CardHeader extends StatelessWidget {
           ),
         ],
         const SizedBox(width: AppSpacing.sm),
-
-        Flexible(
+        Expanded(
           child: Text(
             daysLeft,
             style: textTheme.bodySmall?.copyWith(color: palette.textSecondary),

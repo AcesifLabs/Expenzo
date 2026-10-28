@@ -73,7 +73,7 @@ class RecordCard extends StatelessWidget {
   }
 
   Widget _buildAmount(AppPalette palette, bool isNegative) {
-    return Flexible(
+    return Expanded(
       child: FittedBox(
         fit: BoxFit.scaleDown,
         alignment: AlignmentDirectional.centerEnd,

@@ -207,7 +207,7 @@ class _GoalFormPageState extends State<GoalFormPage> {
 
     return Column(
       children: [
-        Expanded(child: _fields(context)),
+        Expanded(child: _fields()),
         Padding(
           padding: const EdgeInsets.fromLTRB(
             AppSpacing.pageGutter,
@@ -235,9 +235,8 @@ class _GoalFormPageState extends State<GoalFormPage> {
     );
   }
 
-  Widget _fields(BuildContext context) {
+  Widget _fields() {
     final formT = t.goals.form;
-    final textTheme = Theme.of(context).textTheme;
     final amountKeyboard = const TextInputType.numberWithOptions(decimal: true);
     final date = _date;
 
@@ -271,22 +270,12 @@ class _GoalFormPageState extends State<GoalFormPage> {
             ),
           ],
           const SizedBox(height: AppSpacing.md),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(formT.targetDate, style: textTheme.bodyLarge),
-            subtitle: Text(
-              date == null ? formT.noDate : DateFormat.yMMMd().format(date),
-            ),
-            trailing: date == null
-                ? null
-                : TextButton(
-                    onPressed: _clearDate,
-                    child: Text(formT.clearDate),
-                  ),
+          _TargetDateField(
+            date: date,
             onTap: () => unawaited(_pickDate()),
+            onClear: _clearDate,
           ),
-          const SizedBox(height: AppSpacing.sm),
-
+          const SizedBox(height: AppSpacing.md),
           ListenableBuilder(
             listenable: Listenable.merge([_target, _saved]),
             builder: (context, _) => TextFormField(
@@ -338,6 +327,50 @@ class _GoalFormPageState extends State<GoalFormPage> {
           ],
           child: _body(context, state),
         ),
+      ),
+    );
+  }
+}
+
+class _TargetDateField extends StatelessWidget {
+  final DateTime? date;
+  final VoidCallback onTap;
+  final VoidCallback onClear;
+
+  const _TargetDateField({
+    required this.date,
+    required this.onTap,
+    required this.onClear,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final formT = t.goals.form;
+    final palette = context.palette;
+    final textTheme = Theme.of(context).textTheme;
+    final date = this.date;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
+      child: InputDecorator(
+        isEmpty: date == null,
+        decoration: InputDecoration(
+          labelText: formT.targetDate,
+          hintText: formT.pickDate,
+          floatingLabelBehavior: FloatingLabelBehavior.always,
+          prefixIcon: Icon(PiconsRegular.calendar, color: palette.brand),
+          suffixIcon: date == null
+              ? Icon(PiconsRegular.caretRight, color: palette.textSecondary)
+              : IconButton(
+                  icon: const Icon(PiconsRegular.x),
+                  tooltip: formT.clearDate,
+                  onPressed: onClear,
+                ),
+        ),
+        child: date == null
+            ? null
+            : Text(DateFormat.yMMMd().format(date), style: textTheme.bodyLarge),
       ),
     );
   }

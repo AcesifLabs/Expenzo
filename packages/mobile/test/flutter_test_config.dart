@@ -8,9 +8,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:talker/talker.dart';
 import 'package:expense_tracker/core/logger/app_logger.dart';
+import 'package:expense_tracker/i18n/plural_resolvers.dart';
 
 Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   appLogger.configure(settings: TalkerSettings(useConsoleLogs: false));
+  registerPluralResolvers();
   if (const bool.fromEnvironment('LEAK_TRACKING')) {
     LeakTesting.enable();
     LeakTesting.settings = LeakTesting.settings.withIgnored(

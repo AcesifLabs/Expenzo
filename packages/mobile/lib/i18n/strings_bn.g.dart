@@ -1249,8 +1249,8 @@ class _Translations$goals$form$bn extends Translations$goals$form$en {
 	@override String get target => 'লক্ষ্য পরিমাণ';
 	@override String get saved => 'এ পর্যন্ত সঞ্চয়';
 	@override String get targetDate => 'লক্ষ্যের তারিখ';
-	@override String get noDate => 'কোনো তারিখ নেই';
 	@override String get clearDate => 'তারিখ মুছুন';
+	@override String get pickDate => 'লক্ষ্যের তারিখ বেছে নিতে চাপুন';
 	@override String get monthly => 'মাসিক জমা';
 	@override String suggestMonthly({required Object amount}) => 'প্রস্তাবিত: মাসে ${amount}';
 	@override String get deleteTitle => 'লক্ষ্য মুছবেন?';
@@ -3392,8 +3392,8 @@ extension on TranslationsBn {
 			'goals.form.target' => 'লক্ষ্য পরিমাণ',
 			'goals.form.saved' => 'এ পর্যন্ত সঞ্চয়',
 			'goals.form.targetDate' => 'লক্ষ্যের তারিখ',
-			'goals.form.noDate' => 'কোনো তারিখ নেই',
 			'goals.form.clearDate' => 'তারিখ মুছুন',
+			'goals.form.pickDate' => 'লক্ষ্যের তারিখ বেছে নিতে চাপুন',
 			'goals.form.monthly' => 'মাসিক জমা',
 			'goals.form.suggestMonthly' => ({required Object amount}) => 'প্রস্তাবিত: মাসে ${amount}',
 			'goals.form.deleteTitle' => 'লক্ষ্য মুছবেন?',
