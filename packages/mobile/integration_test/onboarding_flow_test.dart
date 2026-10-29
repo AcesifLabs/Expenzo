@@ -97,7 +97,7 @@ void main() {
     await _tapText(tester, t.onboarding.common.skip);
     await _settle(tester, 3);
 
-    final names = t.onboarding.budgetNames;
+    final names = t.budgets.plan.names;
     for (final name in [names.needs, names.wants, names.savings]) {
       expect(find.text(name), findsWidgets, reason: name);
     }

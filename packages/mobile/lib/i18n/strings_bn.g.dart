@@ -110,6 +110,7 @@ class _Translations$budgets$bn extends Translations$budgets$en {
 	@override late final _Translations$budgets$form$bn form = _Translations$budgets$form$bn._(_root);
 	@override late final _Translations$budgets$details$bn details = _Translations$budgets$details$bn._(_root);
 	@override late final _Translations$budgets$picker$bn picker = _Translations$budgets$picker$bn._(_root);
+	@override late final _Translations$budgets$plan$bn plan = _Translations$budgets$plan$bn._(_root);
 	@override String get sharedBadge => 'শেয়ার করা';
 }
 
@@ -361,7 +362,6 @@ class _Translations$onboarding$bn extends Translations$onboarding$en {
 	final TranslationsBn _root; // ignore: unused_field
 
 	// Translations
-	@override late final _Translations$onboarding$budgetNames$bn budgetNames = _Translations$onboarding$budgetNames$bn._(_root);
 	@override late final _Translations$onboarding$common$bn common = _Translations$onboarding$common$bn._(_root);
 	@override late final _Translations$onboarding$income$bn income = _Translations$onboarding$income$bn._(_root);
 	@override late final _Translations$onboarding$recurring$bn recurring = _Translations$onboarding$recurring$bn._(_root);
@@ -744,6 +744,40 @@ class _Translations$budgets$picker$bn extends Translations$budgets$picker$en {
 	@override String get previousBudgetHint => 'বর্তমান সংযোগ রাখুন';
 	@override String progress({required Object period, required Object spent, required Object limit}) => '${period} · ${spent} / ${limit}';
 	@override String get empty => 'কোনো সক্রিয় বাজেট নেই';
+}
+
+// Path: budgets.plan
+class _Translations$budgets$plan$bn extends Translations$budgets$plan$en {
+	_Translations$budgets$plan$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'বাজেট পরিকল্পনা';
+	@override String get rowSubtitle => 'আয় ও মাসিক বাজেট';
+	@override String get editPlan => 'পরিকল্পনা বদলান';
+	@override String get income => 'মাসিক আয়';
+	@override late final _Translations$budgets$plan$names$bn names = _Translations$budgets$plan$names$bn._(_root);
+	@override String perMonth({required Object amount}) => '${amount}/মাস';
+	@override String toPlan({required Object amount}) => 'নিয়মিত খরচের পরে মাসে ${amount}';
+	@override String remaining({required Object amount}) => 'ভাগ করার বাকি ${amount}';
+	@override String overBy({required Object amount}) => '${amount} বেশি';
+	@override String get name => 'নাম';
+	@override String get amount => 'পরিমাণ';
+	@override String get addBudget => 'বাজেট যোগ করুন';
+	@override String removeBudget({required Object name}) => '${name} সরান';
+	@override String get removeUnnamed => 'বাজেট সরান';
+	@override String get suggestSplit => 'ভাগ করার পরামর্শ';
+	@override String nameTooLong({required Object max}) => '${max} অক্ষর বা তার কম ব্যবহার করুন';
+	@override String get nameDuplicate => 'অন্য একটি বাজেটের এই নাম আছে';
+	@override String get amountPositive => '0-এর বেশি একটি পরিমাণ লিখুন';
+	@override String chartLabel({required Object entries}) => 'বাজেট পরিকল্পনা: ${entries}';
+	@override String get deleteTitle => 'বাজেট মুছবেন?';
+	@override String deleteBody({required Object names}) => 'সংরক্ষণ করলে এই বাজেটগুলো মুছে যাবে: ${names}। এদের খরচগুলো থাকবে, কোনো বাজেট ছাড়া।';
+	@override String get saved => 'বাজেট পরিকল্পনা সংরক্ষিত হয়েছে';
+	@override String get saveFailed => 'সব পরিবর্তন সংরক্ষণ করা যায়নি। এখন যা সংরক্ষিত আছে তা দেখানো হচ্ছে।';
+	@override String get loadFailed => 'আপনার বাজেট পরিকল্পনা লোড করা যায়নি।';
+	@override String get empty => 'এখনো কোনো মাসিক বাজেট নেই। পরিকল্পনা শুরু করতে একটি যোগ করুন।';
 }
 
 // Path: categories.settings
@@ -1449,18 +1483,6 @@ class _Translations$notifications$syncError$bn extends Translations$notification
 	@override String get title => 'সিঙ্কে সমস্যা';
 }
 
-// Path: onboarding.budgetNames
-class _Translations$onboarding$budgetNames$bn extends Translations$onboarding$budgetNames$en {
-	_Translations$onboarding$budgetNames$bn._(TranslationsBn root) : this._root = root, super.internal(root);
-
-	final TranslationsBn _root; // ignore: unused_field
-
-	// Translations
-	@override String get needs => 'প্রয়োজন';
-	@override String get wants => 'চাহিদা';
-	@override String get savings => 'সঞ্চয়';
-}
-
 // Path: onboarding.common
 class _Translations$onboarding$common$bn extends Translations$onboarding$common$en {
 	_Translations$onboarding$common$bn._(TranslationsBn root) : this._root = root, super.internal(root);
@@ -1513,13 +1535,10 @@ class _Translations$onboarding$plan$bn extends Translations$onboarding$plan$en {
 
 	// Translations
 	@override String get title => 'আপনার বাজেট পরিকল্পনা';
-	@override String get subtitle => 'আপনার আয়ের ভিত্তিতে আমরা এই 50/30/20 ভাগের পরামর্শ দিচ্ছি।';
-	@override String perMonth({required Object amount}) => '${amount}/মাস';
-	@override String share({required Object percent}) => '${percent}%';
-	@override String get createBudgets => 'এগুলো মাসিক বাজেট হিসেবে তৈরি করুন';
-	@override String get noIncome => 'পরিকল্পনা দেখতে প্রথম ধাপে আপনার আয় যোগ করুন।';
-	@override String get noRoom => 'আপনার নিয়মিত পেমেন্টে পুরো আয় চলে যায়, তাই ভাগ করার মতো কিছু বাকি নেই।';
-	@override String chartLabel({required Object needs, required Object wants, required Object savings}) => 'প্রয়োজন ${needs}, চাহিদা ${wants}, সঞ্চয় ${savings}';
+	@override String get subtitle => 'নিয়মিত খরচের পরে যা থাকে, তার 50/30/20 ভাগ আমরা পরামর্শ দিচ্ছি। যেকোনো নাম বা পরিমাণ বদলাতে পারেন।';
+	@override String get noIncome => 'ভাগের পরামর্শ পেতে প্রথম ধাপে আপনার আয় যোগ করুন, অথবা নিচে পরিমাণ লিখুন।';
+	@override String get noRoom => 'নিয়মিত খরচে আপনার পুরো আয় চলে যায়। তবুও নিচে পরিমাণ লিখতে পারেন।';
+	@override String get skip => 'এখন বাজেট বাদ দিন';
 }
 
 // Path: onboarding.goal
@@ -2350,6 +2369,18 @@ class _Translations$budgets$details$periodBudget$bn extends Translations$budgets
 	@override String get yearly => 'বার্ষিক বাজেট';
 }
 
+// Path: budgets.plan.names
+class _Translations$budgets$plan$names$bn extends Translations$budgets$plan$names$en {
+	_Translations$budgets$plan$names$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get needs => 'প্রয়োজন';
+	@override String get wants => 'চাহিদা';
+	@override String get savings => 'সঞ্চয়';
+}
+
 // Path: categories.settings.sections
 class _Translations$categories$settings$sections$bn extends Translations$categories$settings$sections$en {
 	_Translations$categories$settings$sections$bn._(TranslationsBn root) : this._root = root, super.internal(root);
@@ -3124,6 +3155,33 @@ extension on TranslationsBn {
 			'budgets.picker.previousBudgetHint' => 'বর্তমান সংযোগ রাখুন',
 			'budgets.picker.progress' => ({required Object period, required Object spent, required Object limit}) => '${period} · ${spent} / ${limit}',
 			'budgets.picker.empty' => 'কোনো সক্রিয় বাজেট নেই',
+			'budgets.plan.title' => 'বাজেট পরিকল্পনা',
+			'budgets.plan.rowSubtitle' => 'আয় ও মাসিক বাজেট',
+			'budgets.plan.editPlan' => 'পরিকল্পনা বদলান',
+			'budgets.plan.income' => 'মাসিক আয়',
+			'budgets.plan.names.needs' => 'প্রয়োজন',
+			'budgets.plan.names.wants' => 'চাহিদা',
+			'budgets.plan.names.savings' => 'সঞ্চয়',
+			'budgets.plan.perMonth' => ({required Object amount}) => '${amount}/মাস',
+			'budgets.plan.toPlan' => ({required Object amount}) => 'নিয়মিত খরচের পরে মাসে ${amount}',
+			'budgets.plan.remaining' => ({required Object amount}) => 'ভাগ করার বাকি ${amount}',
+			'budgets.plan.overBy' => ({required Object amount}) => '${amount} বেশি',
+			'budgets.plan.name' => 'নাম',
+			'budgets.plan.amount' => 'পরিমাণ',
+			'budgets.plan.addBudget' => 'বাজেট যোগ করুন',
+			'budgets.plan.removeBudget' => ({required Object name}) => '${name} সরান',
+			'budgets.plan.removeUnnamed' => 'বাজেট সরান',
+			'budgets.plan.suggestSplit' => 'ভাগ করার পরামর্শ',
+			'budgets.plan.nameTooLong' => ({required Object max}) => '${max} অক্ষর বা তার কম ব্যবহার করুন',
+			'budgets.plan.nameDuplicate' => 'অন্য একটি বাজেটের এই নাম আছে',
+			'budgets.plan.amountPositive' => '0-এর বেশি একটি পরিমাণ লিখুন',
+			'budgets.plan.chartLabel' => ({required Object entries}) => 'বাজেট পরিকল্পনা: ${entries}',
+			'budgets.plan.deleteTitle' => 'বাজেট মুছবেন?',
+			'budgets.plan.deleteBody' => ({required Object names}) => 'সংরক্ষণ করলে এই বাজেটগুলো মুছে যাবে: ${names}। এদের খরচগুলো থাকবে, কোনো বাজেট ছাড়া।',
+			'budgets.plan.saved' => 'বাজেট পরিকল্পনা সংরক্ষিত হয়েছে',
+			'budgets.plan.saveFailed' => 'সব পরিবর্তন সংরক্ষণ করা যায়নি। এখন যা সংরক্ষিত আছে তা দেখানো হচ্ছে।',
+			'budgets.plan.loadFailed' => 'আপনার বাজেট পরিকল্পনা লোড করা যায়নি।',
+			'budgets.plan.empty' => 'এখনো কোনো মাসিক বাজেট নেই। পরিকল্পনা শুরু করতে একটি যোগ করুন।',
 			'budgets.sharedBadge' => 'শেয়ার করা',
 			'categories.uncategorized' => 'ক্যাটাগরি নেই',
 			'categories.defaults.default_in_salary' => 'বেতন',
@@ -3501,15 +3559,14 @@ extension on TranslationsBn {
 			'notifications.autoImport.summaryTitle' => 'SMS থেকে লেনদেন যোগ হয়েছে',
 			'notifications.autoImport.summary' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n, one: 'SMS থেকে ${n}টি লেনদেন যোগ হয়েছে', other: 'SMS থেকে ${n}টি লেনদেন যোগ হয়েছে', ), 
 			'notifications.syncError.title' => 'সিঙ্কে সমস্যা',
-			'onboarding.budgetNames.needs' => 'প্রয়োজন',
-			'onboarding.budgetNames.wants' => 'চাহিদা',
-			'onboarding.budgetNames.savings' => 'সঞ্চয়',
 			'onboarding.common.skip' => 'এড়িয়ে যান',
 			'onboarding.common.continueLabel' => 'চালিয়ে যান',
 			'onboarding.common.stepOf' => ({required Object current, required Object total}) => 'ধাপ ${current}/${total}',
 			'onboarding.income.title' => 'চলুন আপনার বাজেট সাজাই',
 			'onboarding.income.subtitle' => 'প্রথমে আপনার মাসিক আয় জানান, যাতে আমরা আপনার জন্য মানানসই একটি বাজেট তৈরি করতে পারি।',
 			'onboarding.income.amountLabel' => 'মাসিক নিট আয়',
+			_ => null,
+		} ?? switch (path) {
 			'onboarding.income.amountInvalid' => 'সর্বোচ্চ 9,999,999,999.99 পর্যন্ত পরিমাণ লিখুন।',
 			'onboarding.income.frequencyLabel' => 'আয়ের ব্যবধান',
 			'onboarding.income.frequency.monthly' => 'মাসিক',
@@ -3528,15 +3585,10 @@ extension on TranslationsBn {
 			'onboarding.recurring.sheet.amount' => 'পরিমাণ',
 			'onboarding.recurring.sheet.frequency' => 'পুনরাবৃত্তি',
 			'onboarding.plan.title' => 'আপনার বাজেট পরিকল্পনা',
-			'onboarding.plan.subtitle' => 'আপনার আয়ের ভিত্তিতে আমরা এই 50/30/20 ভাগের পরামর্শ দিচ্ছি।',
-			'onboarding.plan.perMonth' => ({required Object amount}) => '${amount}/মাস',
-			'onboarding.plan.share' => ({required Object percent}) => '${percent}%',
-			'onboarding.plan.createBudgets' => 'এগুলো মাসিক বাজেট হিসেবে তৈরি করুন',
-			'onboarding.plan.noIncome' => 'পরিকল্পনা দেখতে প্রথম ধাপে আপনার আয় যোগ করুন।',
-			'onboarding.plan.noRoom' => 'আপনার নিয়মিত পেমেন্টে পুরো আয় চলে যায়, তাই ভাগ করার মতো কিছু বাকি নেই।',
-			_ => null,
-		} ?? switch (path) {
-			'onboarding.plan.chartLabel' => ({required Object needs, required Object wants, required Object savings}) => 'প্রয়োজন ${needs}, চাহিদা ${wants}, সঞ্চয় ${savings}',
+			'onboarding.plan.subtitle' => 'নিয়মিত খরচের পরে যা থাকে, তার 50/30/20 ভাগ আমরা পরামর্শ দিচ্ছি। যেকোনো নাম বা পরিমাণ বদলাতে পারেন।',
+			'onboarding.plan.noIncome' => 'ভাগের পরামর্শ পেতে প্রথম ধাপে আপনার আয় যোগ করুন, অথবা নিচে পরিমাণ লিখুন।',
+			'onboarding.plan.noRoom' => 'নিয়মিত খরচে আপনার পুরো আয় চলে যায়। তবুও নিচে পরিমাণ লিখতে পারেন।',
+			'onboarding.plan.skip' => 'এখন বাজেট বাদ দিন',
 			'onboarding.goal.title' => 'আপনি কীসের জন্য সঞ্চয় করছেন?',
 			'onboarding.goal.subtitle' => 'একটি সঞ্চয়ের লক্ষ্য ঠিক করুন, আমরা অগ্রগতি দেখতে সাহায্য করব।',
 			'onboarding.goal.nameLabel' => 'লক্ষ্যের নাম',

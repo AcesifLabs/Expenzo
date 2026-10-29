@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:expense_tracker/core/error/failures.dart';
+import 'package:expense_tracker/core/utils/currency_formatter.dart';
+import 'package:expense_tracker/features/budgets/domain/entities/plan_row.dart';
 import 'package:expense_tracker/features/onboarding/domain/entities/income_frequency.dart';
 import 'package:expense_tracker/features/onboarding/domain/entities/onboarding_draft.dart';
 import 'package:expense_tracker/features/onboarding/domain/entities/onboarding_result.dart';
@@ -29,7 +31,7 @@ void main() {
       ),
     ),
     RecurringSubmitted(),
-    BudgetPlanSubmitted(true),
+    BudgetPlanSubmitted(suggestedRows),
     GoalSubmitted('Laptop', 1999),
   ];
 
@@ -50,6 +52,41 @@ void main() {
     expect(mark(t.onboarding.timeline.fit.tooExpensive), findsOneWidget);
     expect(mark(t.onboarding.timeline.fit.slow), findsOneWidget);
     expect(mark(t.onboarding.timeline.fit.affordable), findsNWidgets(2));
+  });
+
+  List<OnboardingEvent> withRows(List<PlanRow> rows) => [
+    for (final event in draftEvents)
+      event is BudgetPlanSubmitted ? BudgetPlanSubmitted(rows) : event,
+  ];
+
+  String canAfford(int months, double amount) =>
+      t.onboarding.timeline.canAfford(
+        name: 'Laptop',
+        months: months,
+        amount: CurrencyFormatter.format(amount),
+      );
+
+  testWidgets('a renamed Savings row still sets the savings', (tester) async {
+    await pumpOnboardingWidget(
+      tester,
+      const OnboardingTimelinePage(),
+      events: withRows([
+        suggestedRows.first,
+        suggestedRows.last.copyWith(name: 'Rainy day', amount: 2000),
+      ]),
+    );
+
+    expect(find.text(canAfford(1, 2000)), findsOneWidget);
+  });
+
+  testWidgets('without a Savings row it uses what is left', (tester) async {
+    await pumpOnboardingWidget(
+      tester,
+      const OnboardingTimelinePage(),
+      events: withRows([suggestedRows.first]),
+    );
+
+    expect(find.text(canAfford(3, 3775 - 1887.5)), findsOneWidget);
   });
 
   testWidgets('choosing 3 months shows the summary with the goal', (

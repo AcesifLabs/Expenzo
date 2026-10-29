@@ -14,10 +14,15 @@ import 'package:expense_tracker/features/budgets/domain/usecases/update_budget.d
 import 'package:expense_tracker/features/budgets/domain/usecases/delete_budget.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets_with_progress.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budget_transactions.dart';
+import 'package:expense_tracker/features/budgets/domain/usecases/get_budget_plan.dart';
+import 'package:expense_tracker/features/budgets/domain/usecases/save_budget_plan.dart';
+import 'package:expense_tracker/features/recurring/domain/repositories/recurring_repository.dart';
+import 'package:expense_tracker/features/settings/domain/repositories/settings_repository.dart';
 import 'package:expense_tracker/features/family/data/services/shared_spent_lookup.dart';
 import 'package:expense_tracker/features/family/domain/repositories/family_repository.dart';
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
 import 'package:expense_tracker/features/budgets/presentation/bloc/budget_bloc.dart';
+import 'package:expense_tracker/features/budgets/presentation/bloc/budget_plan_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:expense_tracker/features/budgets/data/services/shared_prefs_budget_alert_log.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/check_budget_alerts.dart';
@@ -76,6 +81,7 @@ void initBudgetModule(GetIt getIt) {
       recordRepository: getIt<RecordRepository>(),
     ),
   );
+  _initBudgetPlan(getIt);
 
   getIt.registerLazySingleton<NotificationService>(NotificationService.new);
   getIt.registerLazySingleton<BudgetAlertLog>(
@@ -97,6 +103,28 @@ void initBudgetModule(GetIt getIt) {
       deleteBudget: getIt<DeleteBudget>(),
       getBudgetsWithProgress: getIt<GetBudgetsWithProgress>(),
       getBudgetTransactions: getIt<GetBudgetTransactions>(),
+    ),
+  );
+}
+
+void _initBudgetPlan(GetIt getIt) {
+  getIt.registerLazySingleton(
+    () => GetBudgetPlan(
+      budgetRepository: getIt<BudgetRepository>(),
+      recurringRepository: getIt<RecurringRepository>(),
+      settingsRepository: getIt<SettingsRepository>(),
+    ),
+  );
+  getIt.registerLazySingleton(
+    () => SaveBudgetPlan(
+      budgetRepository: getIt<BudgetRepository>(),
+      settingsRepository: getIt<SettingsRepository>(),
+    ),
+  );
+  getIt.registerFactory<BudgetPlanBloc>(
+    () => BudgetPlanBloc(
+      getBudgetPlan: getIt<GetBudgetPlan>(),
+      saveBudgetPlan: getIt<SaveBudgetPlan>(),
     ),
   );
 }

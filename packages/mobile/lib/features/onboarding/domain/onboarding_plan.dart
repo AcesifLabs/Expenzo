@@ -1,5 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:expense_tracker/core/constants/app_constants.dart';
+import 'package:expense_tracker/core/utils/money.dart';
+import 'package:expense_tracker/features/budgets/domain/budget_plan.dart';
+import 'package:expense_tracker/features/budgets/domain/entities/plan_row.dart';
 import 'package:expense_tracker/features/recurring/domain/helpers/next_occurrence.dart';
 
 import 'entities/onboarding_draft.dart';
@@ -7,47 +10,16 @@ import 'entities/onboarding_draft.dart';
 double recurringMonthlyTotal(List<RecurringDraft> items) =>
     items.fold(0, (sum, item) => sum + item.monthlyAmount);
 
-class BudgetSplit extends Equatable {
-  static const empty = BudgetSplit(base: 0, needs: 0, wants: 0, savings: 0);
+/// Income left after recurring payments, the amount the plan splits.
+double planBaseFor(OnboardingDraft draft) {
+  final income = draft.monthlyIncome;
 
-  final double base;
-  final double needs;
-  final double wants;
-  final double savings;
-
-  bool get isEmpty => base <= 0;
-
-  @override
-  List<Object?> get props => [base, needs, wants, savings];
-
-  const BudgetSplit({
-    required this.base,
-    required this.needs,
-    required this.wants,
-    required this.savings,
-  });
+  return income == null ? 0 : income - recurringMonthlyTotal(draft.recurring);
 }
 
-BudgetSplit budgetSplitFor({
-  required double? monthlyIncome,
-  required double recurringTotal,
-}) {
-  if (monthlyIncome == null || recurringTotal >= monthlyIncome) {
-    return BudgetSplit.empty;
-  }
-  final base = _cents(monthlyIncome - recurringTotal);
-  final wants = _cents(base * AppConstants.wantsShare);
-  final savings = _cents(base * AppConstants.savingsShare);
-
-  return BudgetSplit(
-    base: base,
-    needs: _cents(base - wants - savings),
-    wants: wants,
-    savings: savings,
-  );
-}
-
-double _cents(double amount) => (amount * 100).roundToDouble() / 100;
+/// The rows the user submitted, or the suggestion before they have.
+List<PlanRow> planRowsFor(OnboardingDraft draft) =>
+    draft.budgetRows ?? suggestedPlanRows(planBaseFor(draft));
 
 enum TimelineFit { affordable, tooExpensive, slow }
 
@@ -105,7 +77,7 @@ TimelineOption _option({
   required int months,
   required double savingsPerMonth,
 }) {
-  final monthly = _cents(target / months);
+  final monthly = roundMoney(target / months);
   final last = AppConstants.goalTimelineMonths.last;
   final TimelineFit fit;
   if (savingsPerMonth <= 0) {

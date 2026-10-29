@@ -26,60 +26,132 @@ void main() {
     const RecurringSubmitted(),
   ];
 
-  SwitchListTile toggle(WidgetTester tester) =>
-      tester.widget<SwitchListTile>(find.byType(SwitchListTile));
+  Finder field(String text) => find.widgetWithText(TextField, text);
 
-  testWidgets('shows the three shares of what is left', (tester) async {
+  Future<void> tapContinue(WidgetTester tester) async {
+    await tester.tap(find.byType(ElevatedButton).last);
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('suggests the three shares of what is left', (tester) async {
     await pumpOnboardingWidget(
       tester,
       const OnboardingBudgetPlanPage(),
       events: draft(income: 5000, recurring: 1225),
     );
 
-    for (final amount in [1887.5, 1132.5, 755.0]) {
-      expect(
-        find.textContaining(CurrencyFormatter.format(amount)),
-        findsOneWidget,
-        reason: '$amount',
-      );
+    for (final text in ['Needs', 'Wants', 'Savings', '1887.50', '1132.50']) {
+      expect(field(text), findsOneWidget, reason: text);
     }
     expect(
       find.text(
-        t.onboarding.plan.perMonth(amount: CurrencyFormatter.format(3775)),
+        t.budgets.plan.perMonth(amount: CurrencyFormatter.format(3775)),
       ),
       findsOneWidget,
     );
   });
 
-  testWidgets('turning off budgets then Continue submits false', (
-    tester,
-  ) async {
+  testWidgets('edits reach the draft on Continue', (tester) async {
     final bloc = await pumpOnboardingWidget(
       tester,
       const OnboardingBudgetPlanPage(),
       events: draft(income: 5000, recurring: 1225),
     );
 
-    await tester.tap(find.byType(SwitchListTile));
+    await tester.enterText(field('Wants'), 'Fun');
     await tester.pump();
-    await tester.tap(find.byType(ElevatedButton).last);
+    await tester.tap(find.byTooltip('Remove Needs'));
     await tester.pumpAndSettle();
+    await tapContinue(tester);
 
-    expect(bloc.state.draft.createBudgets, isFalse);
+    final rows = bloc.state.draft.budgetRows;
+    expect(rows?.map((r) => r.name), ['Fun', 'Savings']);
+    expect(rows?.last.isSavings, isTrue);
     expect(bloc.state.step, 3);
   });
 
-  testWidgets('without income it explains and disables the switch', (
+  testWidgets('untouched rows follow an income changed after Continue', (
     tester,
   ) async {
-    await pumpOnboardingWidget(
+    final bloc = await pumpOnboardingWidget(
+      tester,
+      const OnboardingBudgetPlanPage(),
+      events: draft(income: 5000),
+    );
+
+    await tapContinue(tester);
+    bloc.add(const IncomeSubmitted(6000, IncomeFrequency.monthly));
+    await tester.pumpAndSettle();
+
+    expect(field('3000'), findsOneWidget);
+    await tapContinue(tester);
+    expect(bloc.state.draft.budgetRows?.map((r) => r.amount), [
+      3000,
+      1800,
+      1200,
+    ]);
+  });
+
+  testWidgets('edited rows survive an income change', (tester) async {
+    final bloc = await pumpOnboardingWidget(
+      tester,
+      const OnboardingBudgetPlanPage(),
+      events: draft(income: 5000),
+    );
+
+    await tester.enterText(field('2500'), '2000');
+    await tester.pump();
+    bloc.add(const IncomeSubmitted(6000, IncomeFrequency.monthly));
+    await tester.pumpAndSettle();
+
+    expect(field('2000'), findsOneWidget);
+    expect(field('3000'), findsNothing);
+  });
+
+  testWidgets('a duplicate name blocks Continue', (tester) async {
+    final bloc = await pumpOnboardingWidget(
+      tester,
+      const OnboardingBudgetPlanPage(),
+      events: draft(income: 5000),
+    );
+
+    await tester.enterText(field('Wants'), 'needs');
+    await tester.pump();
+    await tapContinue(tester);
+
+    expect(find.text(t.budgets.plan.nameDuplicate), findsNWidgets(2));
+    expect(bloc.state.draft.budgetRows, isNull);
+    expect(bloc.state.step, 2);
+  });
+
+  testWidgets('Skip submits no budgets', (tester) async {
+    final bloc = await pumpOnboardingWidget(
+      tester,
+      const OnboardingBudgetPlanPage(),
+      events: draft(income: 5000),
+    );
+
+    await tester.ensureVisible(find.text(t.onboarding.plan.skip));
+    await tester.tap(find.text(t.onboarding.plan.skip));
+    await tester.pumpAndSettle();
+
+    expect(bloc.state.draft.budgetRows, isEmpty);
+    expect(bloc.state.step, 3);
+  });
+
+  testWidgets('without income it explains and leaves rows at 0', (
+    tester,
+  ) async {
+    final bloc = await pumpOnboardingWidget(
       tester,
       const OnboardingBudgetPlanPage(),
       events: draft(),
     );
 
     expect(find.text(t.onboarding.plan.noIncome), findsOneWidget);
-    expect(toggle(tester).onChanged, isNull);
+    await tapContinue(tester);
+
+    expect(bloc.state.draft.budgetRows?.map((r) => r.amount), [0, 0, 0]);
   });
 
   testWidgets('recurring using all income shows the no-room note', (
@@ -92,6 +164,5 @@ void main() {
     );
 
     expect(find.text(t.onboarding.plan.noRoom), findsOneWidget);
-    expect(toggle(tester).onChanged, isNull);
   });
 }

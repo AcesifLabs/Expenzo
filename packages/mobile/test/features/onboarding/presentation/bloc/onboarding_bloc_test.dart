@@ -16,6 +16,8 @@ import 'package:expense_tracker/features/recurring/domain/entities/recurring_fre
 import 'package:expense_tracker/features/settings/domain/entities/user_settings.dart';
 import 'package:expense_tracker/features/settings/domain/usecases/get_settings.dart';
 
+import '../widgets/onboarding_test_harness.dart' show suggestedRows;
+
 class _MockComplete extends Mock implements CompleteOnboarding {}
 
 class _MockGetSettings extends Mock implements GetSettings {}
@@ -200,7 +202,7 @@ void main() {
     final state = await after([
       const IncomeSubmitted(5000, IncomeFrequency.monthly),
       const RecurringSubmitted(),
-      const BudgetPlanSubmitted(true),
+      const BudgetPlanSubmitted(suggestedRows),
       const GoalSubmitted('Laptop', 1999),
       const OnboardingStepBack(),
       const GoalDeclined(),

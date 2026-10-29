@@ -12,6 +12,7 @@ enum SettingsRoute {
   categories('categories'),
   autoImport('auto-import'),
   smsWatchlist('sms-watchlist'),
+  budgetPlan('budget-plan'),
   recurring('recurring'),
   sync('sync'),
   export('export'),

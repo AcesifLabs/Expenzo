@@ -222,10 +222,17 @@ class SettingsView extends StatelessWidget {
     final syncT = settingsT.sync;
     final exportT = settingsT.export;
     final deleteDataT = settingsT.deleteData;
+    final planT = t.budgets.plan;
 
     return SettingsSection(
       title: settingsT.sections.dataBudget,
       children: [
+        SettingsTile(
+          icon: PiconsRegular.chartPieSlice,
+          title: planT.title,
+          subtitle: planT.rowSubtitle,
+          onTap: () => context.push(SettingsRoute.budgetPlan.location),
+        ),
         SettingsTile(
           icon: PiconsRegular.repeat,
           title: recurringT.title,

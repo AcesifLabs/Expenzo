@@ -1,11 +1,12 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:expense_tracker/core/constants/app_constants.dart';
 import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
-import 'package:expense_tracker/core/utils/currency_formatter.dart';
+import 'package:expense_tracker/features/budgets/domain/budget_plan.dart';
+import 'package:expense_tracker/features/budgets/domain/entities/plan_row.dart';
+import 'package:expense_tracker/features/budgets/presentation/widgets/budget_plan_editor.dart';
+import 'package:expense_tracker/features/budgets/presentation/widgets/plan_donut.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
 import '../../domain/entities/onboarding_draft.dart';
@@ -24,169 +25,101 @@ class OnboardingBudgetPlanPage extends StatefulWidget {
 
 class _OnboardingBudgetPlanPageState extends State<OnboardingBudgetPlanPage>
     with AutomaticKeepAliveClientMixin {
-  var _createBudgets = true;
+  final _editor = GlobalKey<BudgetPlanEditorState>();
+  List<PlanRow>? _rows;
+  double? _seededBase;
+  var _edited = false;
 
   @override
   bool get wantKeepAlive => true;
 
-  void _onSwitch(bool value) => setState(() => _createBudgets = value);
+  /// Follows the suggestion while the user hasn't touched it, so income
+  /// changed on an earlier step still shows up here, even after a
+  /// Continue. Rows restored from the draft count as the user's own.
+  List<PlanRow> _rowsFor(OnboardingDraft draft, double base) {
+    final rows = _rows;
+    if (rows == null) {
+      final submitted = draft.budgetRows;
+      _edited = submitted != null;
+      _seededBase = base;
 
-  List<Widget> _shareRows(BuildContext context, BudgetSplit split) {
-    final palette = context.palette;
-    final names = t.onboarding.budgetNames;
-    final rows = [
-      (names.needs, AppConstants.needsShare, split.needs, palette.accent),
-      (names.wants, AppConstants.wantsShare, split.wants, palette.brand),
-      (names.savings, AppConstants.savingsShare, split.savings, palette.info),
-    ];
+      return _rows = submitted ?? suggestedPlanRows(base);
+    }
+    if (_edited || _seededBase == base) return rows;
+    _seededBase = base;
 
-    return [
-      for (final (name, share, amount, color) in rows)
-        _ShareRow(name: name, share: share, amount: amount, color: color),
-    ];
+    return _rows = suggestedPlanRows(base);
   }
+
+  void _onChanged(List<PlanRow> rows) => setState(() {
+    _rows = rows;
+    _edited = true;
+  });
+
+  void _onContinue(List<PlanRow> rows) {
+    if (validatePlan(rows, allowZero: true).isNotEmpty) {
+      _editor.currentState?.revealErrors();
+
+      return;
+    }
+    context.read<OnboardingBloc>().add(BudgetPlanSubmitted(rows));
+  }
+
+  void _onSkip() =>
+      context.read<OnboardingBloc>().add(const BudgetPlanSubmitted([]));
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
     final planT = t.onboarding.plan;
+    final palette = context.palette;
+    final textTheme = Theme.of(context).textTheme;
     final draft = context.select<OnboardingBloc, OnboardingDraft>(
       (bloc) => bloc.state.draft,
     );
-    final split = budgetSplitFor(
-      monthlyIncome: draft.monthlyIncome,
-      recurringTotal: recurringMonthlyTotal(draft.recurring),
-    );
-    final create = _createBudgets && !split.isEmpty;
+    final base = planBaseFor(draft);
+    final rows = _rowsFor(draft, base);
 
     return OnboardingPageFrame(
       title: planT.title,
       subtitle: planT.subtitle,
-      onContinue: () =>
-          context.read<OnboardingBloc>().add(BudgetPlanSubmitted(create)),
+      onContinue: () => _onContinue(rows),
       body: [
-        Center(child: _PlanDonut(split: split)),
-        if (split.isEmpty) ...[
+        Center(
+          child: PlanDonut(rows: rows, base: base),
+        ),
+        if (base <= 0) ...[
           const SizedBox(height: AppSpacing.md),
           Text(
             draft.monthlyIncome == null ? planT.noIncome : planT.noRoom,
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: context.palette.textSecondary,
-            ),
+            style: textTheme.bodyMedium?.copyWith(color: palette.textSecondary),
           ),
         ],
         const SizedBox(height: AppSpacing.lg),
-        ..._shareRows(context, split),
-        const SizedBox(height: AppSpacing.md),
-        SwitchListTile(
-          contentPadding: EdgeInsets.zero,
-          title: Text(planT.createBudgets),
-          value: create,
-          onChanged: split.isEmpty ? null : _onSwitch,
+        BudgetPlanEditor(
+          key: _editor,
+          rows: rows,
+          base: base,
+          allowZero: true,
+          onChanged: _onChanged,
         ),
-      ],
-    );
-  }
-}
-
-class _ShareRow extends StatelessWidget {
-  final String name;
-  final double share;
-  final double amount;
-  final Color color;
-
-  const _ShareRow({
-    required this.name,
-    required this.share,
-    required this.amount,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final percent = t.onboarding.plan.share(percent: (share * 100).round());
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(child: Text(name, style: textTheme.bodyLarge)),
-              Text(
-                '$percent · ${CurrencyFormatter.format(amount)}',
-                style: textTheme.bodyMedium,
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton(
+            style: TextButton.styleFrom(
+              minimumSize: const Size(0, AppSpacing.minTapTarget),
+            ),
+            onPressed: _onSkip,
+            child: Text(
+              planT.skip,
+              style: textTheme.labelLarge?.copyWith(
+                color: palette.textSecondary,
               ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusControl),
-            child: LinearProgressIndicator(
-              value: share,
-              color: color,
-              backgroundColor: context.palette.progressTrack,
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PlanDonut extends StatelessWidget {
-  static const _size = 180.0;
-
-  static PieChartSectionData _section(double value, Color color) =>
-      PieChartSectionData(value: value, color: color, radius: 28, title: '');
-
-  final BudgetSplit split;
-
-  const _PlanDonut({required this.split});
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.palette;
-    final planT = t.onboarding.plan;
-    final sections = split.isEmpty
-        ? [_section(1, palette.progressTrack)]
-        : [
-            _section(split.needs, palette.accent),
-            _section(split.wants, palette.brand),
-            _section(split.savings, palette.info),
-          ];
-
-    return Semantics(
-      label: planT.chartLabel(
-        needs: CurrencyFormatter.format(split.needs),
-        wants: CurrencyFormatter.format(split.wants),
-        savings: CurrencyFormatter.format(split.savings),
-      ),
-      child: ExcludeSemantics(
-        child: SizedBox.square(
-          dimension: _size,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              PieChart(
-                PieChartData(
-                  centerSpaceRadius: 60,
-                  sectionsSpace: split.isEmpty ? 0 : 2,
-                  sections: sections,
-                ),
-              ),
-              Text(
-                planT.perMonth(amount: CurrencyFormatter.format(split.base)),
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-            ],
-          ),
         ),
-      ),
+      ],
     );
   }
 }

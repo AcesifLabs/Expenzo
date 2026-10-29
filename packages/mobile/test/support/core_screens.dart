@@ -18,6 +18,12 @@ import 'package:expense_tracker/features/budgets/domain/entities/budget_progress
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets.dart';
 import 'package:expense_tracker/features/budgets/presentation/bloc/budget_bloc.dart';
 import 'package:expense_tracker/features/budgets/presentation/bloc/budget_state.dart';
+import 'package:expense_tracker/features/budgets/domain/entities/budget_plan_snapshot.dart';
+import 'package:expense_tracker/features/budgets/domain/entities/plan_row.dart';
+import 'package:expense_tracker/features/budgets/presentation/bloc/budget_plan_bloc.dart';
+import 'package:expense_tracker/features/budgets/presentation/bloc/budget_plan_event.dart';
+import 'package:expense_tracker/features/budgets/presentation/bloc/budget_plan_state.dart';
+import 'package:expense_tracker/features/budgets/presentation/pages/budget_plan_page.dart';
 import 'package:expense_tracker/features/budgets/presentation/pages/budget_details_page.dart';
 import 'package:expense_tracker/features/budgets/presentation/pages/budget_form_page.dart';
 import 'package:expense_tracker/features/budgets/presentation/pages/budget_list_page.dart';
@@ -62,6 +68,8 @@ class MockRecordBloc extends Mock implements RecordBloc {}
 class MockCategoryBloc extends Mock implements CategoryBloc {}
 
 class MockBudgetBloc extends Mock implements BudgetBloc {}
+
+class MockBudgetPlanBloc extends Mock implements BudgetPlanBloc {}
 
 class MockReportsBloc extends Mock implements ReportsBloc {}
 
@@ -267,6 +275,33 @@ Widget budgetsScreen({BudgetState? state}) {
           ),
     ),
     child: const BudgetListView(),
+  );
+}
+
+Widget budgetPlanScreen({BudgetPlanState? state}) {
+  final food = makeBudget(id: 'b1', name: 'Food', amount: 1000);
+  final rent = makeBudget(id: 'b2', name: 'Rent', amount: 2500);
+  final bloc = mockBloc<MockBudgetPlanBloc, BudgetPlanState>(
+    MockBudgetPlanBloc(),
+    state ??
+        BudgetPlanEditing(
+          stored: BudgetPlanSnapshot(
+            monthlyIncome: 5000,
+            recurringTotal: 500,
+            budgets: [food, rent],
+          ),
+          income: 5000,
+          rows: const [
+            PlanRow(key: 'b1', budgetId: 'b1', name: 'Food', amount: 1000),
+            PlanRow(key: 'b2', budgetId: 'b2', name: 'Rent', amount: 2500),
+          ],
+        ),
+  );
+  when(() => bloc.add(const BudgetPlanLoadRequested())).thenReturn(null);
+
+  return BlocProvider<BudgetPlanBloc>.value(
+    value: bloc,
+    child: const BudgetPlanPage(),
   );
 }
 

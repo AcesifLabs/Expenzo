@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
-import 'package:expense_tracker/core/constants/budget_period.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/logger/app_logger.dart';
+import 'package:expense_tracker/features/budgets/domain/budget_plan.dart';
 import 'package:expense_tracker/features/budgets/domain/entities/budget.dart';
 import 'package:expense_tracker/features/budgets/domain/repositories/budget_repository.dart';
 import 'package:expense_tracker/features/goals/domain/entities/goal.dart';
@@ -10,7 +10,6 @@ import 'package:expense_tracker/features/recurring/domain/entities/recurring_tra
 import 'package:expense_tracker/features/recurring/domain/helpers/next_occurrence.dart';
 import 'package:expense_tracker/features/recurring/domain/repositories/recurring_repository.dart';
 import 'package:expense_tracker/features/settings/domain/repositories/settings_repository.dart';
-import 'package:expense_tracker/i18n/strings.g.dart';
 
 import '../entities/onboarding_draft.dart';
 import '../entities/onboarding_result.dart';
@@ -40,9 +39,9 @@ class CompleteOnboarding {
     hadErrors = recurringCount < draft.recurring.length;
     var budgetsCreated = false;
     if (!hadErrors) {
-      budgetsCreated = await _saveBudgets(draft, at);
-      hadErrors =
-          draft.createBudgets && !budgetsCreated && !_split(draft).isEmpty;
+      final budgets = diffPlan(const [], draft.budgetRows ?? const [], at);
+      budgetsCreated = await _saveBudgets(budgets.toCreate);
+      hadErrors = budgets.toCreate.isNotEmpty && !budgetsCreated;
     }
     String? goalName;
     final goal = draft.goal;
@@ -82,29 +81,13 @@ class CompleteOnboarding {
     return saved;
   }
 
-  Future<bool> _saveBudgets(OnboardingDraft draft, DateTime at) async {
-    final split = _split(draft);
-    if (!draft.createBudgets || split.isEmpty) return false;
-    final names = t.onboarding.budgetNames;
-    final shares = {
-      names.needs: split.needs,
-      names.wants: split.wants,
-      names.savings: split.savings,
-    };
-    for (final MapEntry(key: name, value: amount) in shares.entries) {
-      if (amount <= 0) continue;
-      final result = await budgetRepository.createBudget(
-        Budget(
-          name: name,
-          amount: amount,
-          period: BudgetPeriod.monthly,
-          startDate: DateTime(at.year, at.month, 1),
-        ),
-      );
+  Future<bool> _saveBudgets(List<Budget> budgets) async {
+    for (final budget in budgets) {
+      final result = await budgetRepository.createBudget(budget);
       if (_failed(result, 'budget')) return false;
     }
 
-    return true;
+    return budgets.isNotEmpty;
   }
 
   Future<String?> _saveGoal(GoalDraft draft, DateTime at) async {
@@ -150,11 +133,6 @@ class CompleteOnboarding {
       return saved.map((_) => unit);
     });
   }
-
-  BudgetSplit _split(OnboardingDraft draft) => budgetSplitFor(
-    monthlyIncome: draft.monthlyIncome,
-    recurringTotal: recurringMonthlyTotal(draft.recurring),
-  );
 
   bool _failed(Either<Failure, Object?> result, String what) =>
       result.fold((f) {

@@ -71,7 +71,7 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
   }
 
   void _onPlan(BudgetPlanSubmitted event, Emitter<OnboardingState> emit) {
-    emit(_advance(state.draft.copyWith(createBudgets: event.createBudgets)));
+    emit(_advance(state.draft.copyWith(budgetRows: event.rows)));
   }
 
   void _onGoal(GoalSubmitted event, Emitter<OnboardingState> emit) {

@@ -7,7 +7,6 @@ import 'package:expense_tracker/i18n/strings.g.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
 
 import '../../domain/entities/onboarding_draft.dart';
-import '../../domain/onboarding_plan.dart';
 
 class SetupCompleteCard extends StatelessWidget {
   final OnboardingDraft draft;
@@ -19,12 +18,7 @@ class SetupCompleteCard extends StatelessWidget {
     final palette = context.palette;
     final textTheme = Theme.of(context).textTheme;
     final completeT = t.onboarding.complete;
-    final budgets =
-        draft.createBudgets &&
-        !budgetSplitFor(
-          monthlyIncome: draft.monthlyIncome,
-          recurringTotal: recurringMonthlyTotal(draft.recurring),
-        ).isEmpty;
+    final budgets = (draft.budgetRows ?? const []).any((r) => r.amount > 0);
     final recurring = draft.recurring.length;
     final goal = draft.goal;
 

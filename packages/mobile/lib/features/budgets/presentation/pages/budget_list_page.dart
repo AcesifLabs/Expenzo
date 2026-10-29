@@ -10,6 +10,7 @@ import 'package:expense_tracker/features/budgets/domain/usecases/get_budget_prog
 import 'package:expense_tracker/features/budgets/domain/entities/budget.dart';
 import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_page_header.dart';
+import 'package:expense_tracker/core/router/settings_route.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 import '../bloc/budget_bloc.dart';
 import '../bloc/budget_event.dart';
@@ -90,6 +91,11 @@ class _BudgetListViewState extends State<BudgetListView> {
       title: t.budgets.title,
       subtitle: t.budgets.subtitle,
       actions: [
+        IconButton(
+          tooltip: t.budgets.plan.editPlan,
+          icon: const Icon(PiconsRegular.chartPieSlice),
+          onPressed: () => _navigateToPlan(context),
+        ),
         TextButton.icon(
           icon: const Icon(PiconsRegular.plus, size: 18),
           label: Text(t.common.newBudget),
@@ -218,6 +224,13 @@ class _BudgetListViewState extends State<BudgetListView> {
 
   Future<void> _navigateToCreate(BuildContext context) async {
     final result = await context.push<bool>('/budgets/new');
+    if (result == true && context.mounted) {
+      context.read<BudgetBloc>().add(const LoadBudgets());
+    }
+  }
+
+  Future<void> _navigateToPlan(BuildContext context) async {
+    final result = await context.push<bool>(SettingsRoute.budgetPlan.location);
     if (result == true && context.mounted) {
       context.read<BudgetBloc>().add(const LoadBudgets());
     }

@@ -13,6 +13,14 @@ abstract class BudgetLocalDatasource {
 
   Future<List<Record>> deleteBudget(String id);
   Stream<List<domain.Budget>> watchBudgets();
+
+  /// Writes a whole Budget Plan save in one transaction. Returns the
+  /// records unlinked from the deleted budgets.
+  Future<List<Record>> applyPlanChanges({
+    required List<String> deleteIds,
+    required List<domain.Budget> updates,
+    required List<domain.Budget> creates,
+  });
 }
 
 class BudgetLocalDatasourceImpl implements BudgetLocalDatasource {
@@ -88,6 +96,28 @@ class BudgetLocalDatasourceImpl implements BudgetLocalDatasource {
     return budgetDao.watchAllBudgets().map(
       (budgets) => budgets.map(_mapToEntity).toList(),
     );
+  }
+
+  @override
+  Future<List<Record>> applyPlanChanges({
+    required List<String> deleteIds,
+    required List<domain.Budget> updates,
+    required List<domain.Budget> creates,
+  }) {
+    return budgetDao.transaction(() async {
+      final unlinked = <Record>[];
+      for (final id in deleteIds) {
+        unlinked.addAll(await budgetDao.deleteBudgetAndUnlinkRecords(id));
+      }
+      for (final budget in updates) {
+        await updateBudget(budget);
+      }
+      for (final budget in creates) {
+        await createBudget(budget);
+      }
+
+      return unlinked;
+    });
   }
 
   domain.Budget _mapToEntity(Budget b) {

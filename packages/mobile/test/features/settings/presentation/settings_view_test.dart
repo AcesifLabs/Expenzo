@@ -311,6 +311,31 @@ void main() {
     expect(top('Sync'), lessThan(top('Export data')));
   });
 
+  testWidgets('budget plan opens the Data & budget section', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(400, 3000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpSettings(tester);
+
+    double top(String text) => tester.getTopLeft(find.text(text)).dy;
+
+    expect(find.text('Income and monthly budgets'), findsOneWidget);
+    expect(top('Budget plan'), lessThan(top('Recurring transactions')));
+  });
+
+  testWidgets('the budget plan row opens /settings/budget-plan', (
+    tester,
+  ) async {
+    await pumpSettingsRouter(tester, child: 'budget-plan');
+
+    await tester.scrollUntilVisible(find.text('Budget plan'), 200);
+    await tester.ensureVisible(find.text('Budget plan'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Budget plan'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('budget-plan-page'), findsOneWidget);
+  });
+
   testWidgets('the sync row opens /settings/sync', (tester) async {
     await pumpSettingsRouter(tester, child: 'sync');
 
