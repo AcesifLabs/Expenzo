@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
 import 'package:expense_tracker/core/logger/app_logger.dart';
+import 'package:expense_tracker/core/utils/future_chain.dart';
 import 'package:expense_tracker/features/budgets/domain/entities/budget_progress.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets_with_progress.dart';
 import 'package:expense_tracker/features/settings/domain/entities/notification_toggle.dart';
@@ -37,7 +38,7 @@ class CheckBudgetAlerts {
   Future<Either<Failure, Unit>> call() {
     final result = _previous.then((_) => _check());
 
-    _previous = result.then(_ignore, onError: _ignore);
+    _previous = result.then(ignoreOutcome, onError: ignoreOutcome);
 
     return result;
   }
@@ -129,6 +130,4 @@ class CheckBudgetAlerts {
       _ => null,
     };
   }
-
-  static Object? _ignore([Object? _]) => null;
 }

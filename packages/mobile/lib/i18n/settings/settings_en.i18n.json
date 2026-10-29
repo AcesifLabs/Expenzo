@@ -26,16 +26,17 @@
   },
   "notifications": {
     "title": "Notifications",
-    "rowSubtitle": "{n} of 4 on",
+    "rowSubtitle": "{n} of {total} on",
     "rowSubtitleOff": "Off",
     "sections": {
       "general": "General",
       "budgetAlerts": "Budget alerts",
-      "recurring": "Recurring transactions"
+      "recurring": "Recurring transactions",
+      "autoImport": "Auto-import"
     },
     "master": {
       "title": "Allow notifications",
-      "subtitle": "Budget alerts, weekly summary and reminders"
+      "subtitle": "Budget alerts, weekly summary, reminders and auto-imported transactions"
     },
     "blocked": {
       "title": "Notifications are blocked",
@@ -56,6 +57,10 @@
     "reminders": {
       "title": "Reminder alerts",
       "subtitle": "Get reminded a day before recurring transactions"
+    },
+    "autoImport": {
+      "title": "Auto-imported transactions",
+      "subtitle": "When a transaction is added from an SMS"
     }
   },
   "autoImportSubtitle": "Turn bank and payment messages into transactions",

@@ -216,6 +216,24 @@ class _NotificationSettingsViewState extends State<NotificationSettingsView> {
     );
   }
 
+  Widget _autoImportSection(UserSettings settings) {
+    final notificationsT = t.settings.notifications;
+    final autoImportT = notificationsT.autoImport;
+
+    return SettingsSection(
+      title: notificationsT.sections.autoImport,
+      children: [
+        SettingsSwitchTile(
+          icon: PiconsRegular.chatText,
+          title: autoImportT.title,
+          subtitle: autoImportT.subtitle,
+          value: settings.autoImportAlertsEnabled,
+          onChanged: _toggleHandler(settings, NotificationToggle.autoImport),
+        ),
+      ],
+    );
+  }
+
   Widget _buildBody(BuildContext _, UserSettings settings) {
     return ListView(
       padding: AppSpacing.pagePadding,
@@ -223,6 +241,7 @@ class _NotificationSettingsViewState extends State<NotificationSettingsView> {
         _generalSection(settings),
         _budgetSection(settings),
         _recurringSection(settings),
+        _autoImportSection(settings),
       ],
     );
   }

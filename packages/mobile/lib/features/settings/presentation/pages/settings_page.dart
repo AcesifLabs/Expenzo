@@ -60,7 +60,10 @@ class SettingsView extends StatelessWidget {
     }
     final on = NotificationToggle.values.where(settings.isEnabled).length;
 
-    return notificationsT.rowSubtitle(n: on);
+    return notificationsT.rowSubtitle(
+      n: on,
+      total: NotificationToggle.values.length,
+    );
   }
 
   void _openCurrency(BuildContext context) {

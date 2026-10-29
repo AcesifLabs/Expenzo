@@ -350,6 +350,7 @@ class _Translations$notifications$bn extends Translations$notifications$en {
 	@override late final _Translations$notifications$recurringDue$bn recurringDue = _Translations$notifications$recurringDue$bn._(_root);
 	@override late final _Translations$notifications$weeklySummary$bn weeklySummary = _Translations$notifications$weeklySummary$bn._(_root);
 	@override late final _Translations$notifications$scan$bn scan = _Translations$notifications$scan$bn._(_root);
+	@override late final _Translations$notifications$autoImport$bn autoImport = _Translations$notifications$autoImport$bn._(_root);
 	@override late final _Translations$notifications$syncError$bn syncError = _Translations$notifications$syncError$bn._(_root);
 }
 
@@ -1365,7 +1366,7 @@ class _Translations$notifications$channel$bn extends Translations$notifications$
 
 	// Translations
 	@override String get name => 'অ্যাপের নোটিফিকেশন';
-	@override String get description => 'বাজেট সতর্কতা, সাপ্তাহিক সারাংশ, পুনরাবৃত্ত রিমাইন্ডার ও স্ক্যানের ফলাফল';
+	@override String get description => 'বাজেট সতর্কতা, সাপ্তাহিক সারাংশ, পুনরাবৃত্ত রিমাইন্ডার, স্ক্যানের ফলাফল ও স্বয়ংক্রিয় ইমপোর্ট করা লেনদেন';
 }
 
 // Path: notifications.budget
@@ -1417,6 +1418,24 @@ class _Translations$notifications$scan$bn extends Translations$notifications$sca
 	@override String found({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n,
 		one: '${n}টি নতুন খরচ পাওয়া গেছে',
 		other: '${n}টি নতুন খরচ পাওয়া গেছে',
+	);
+}
+
+// Path: notifications.autoImport
+class _Translations$notifications$autoImport$bn extends Translations$notifications$autoImport$en {
+	_Translations$notifications$autoImport$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get expenseTitle => 'খরচ যোগ হয়েছে';
+	@override String get incomeTitle => 'আয় যোগ হয়েছে';
+	@override String body({required Object amount, required Object description}) => '${amount} · ${description}';
+	@override String bodyFromSender({required Object sender, required Object amount}) => '${sender} থেকে ${amount}';
+	@override String get summaryTitle => 'SMS থেকে লেনদেন যোগ হয়েছে';
+	@override String summary({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n,
+		one: 'SMS থেকে ${n}টি লেনদেন যোগ হয়েছে',
+		other: 'SMS থেকে ${n}টি লেনদেন যোগ হয়েছে',
 	);
 }
 
@@ -1796,7 +1815,7 @@ class _Translations$settings$notifications$bn extends Translations$settings$noti
 
 	// Translations
 	@override String get title => 'নোটিফিকেশন';
-	@override String rowSubtitle({required Object n}) => '4টির মধ্যে ${n}টি চালু';
+	@override String rowSubtitle({required Object total, required Object n}) => '${total}টির মধ্যে ${n}টি চালু';
 	@override String get rowSubtitleOff => 'বন্ধ';
 	@override late final _Translations$settings$notifications$sections$bn sections = _Translations$settings$notifications$sections$bn._(_root);
 	@override late final _Translations$settings$notifications$master$bn master = _Translations$settings$notifications$master$bn._(_root);
@@ -1805,6 +1824,7 @@ class _Translations$settings$notifications$bn extends Translations$settings$noti
 	@override late final _Translations$settings$notifications$nearLimit$bn nearLimit = _Translations$settings$notifications$nearLimit$bn._(_root);
 	@override late final _Translations$settings$notifications$weekly$bn weekly = _Translations$settings$notifications$weekly$bn._(_root);
 	@override late final _Translations$settings$notifications$reminders$bn reminders = _Translations$settings$notifications$reminders$bn._(_root);
+	@override late final _Translations$settings$notifications$autoImport$bn autoImport = _Translations$settings$notifications$autoImport$bn._(_root);
 }
 
 // Path: settings.recurring
@@ -2603,6 +2623,7 @@ class _Translations$settings$notifications$sections$bn extends Translations$sett
 	@override String get general => 'সাধারণ';
 	@override String get budgetAlerts => 'বাজেট সতর্কতা';
 	@override String get recurring => 'পুনরাবৃত্ত লেনদেন';
+	@override String get autoImport => 'স্বয়ংক্রিয় ইমপোর্ট';
 }
 
 // Path: settings.notifications.master
@@ -2613,7 +2634,7 @@ class _Translations$settings$notifications$master$bn extends Translations$settin
 
 	// Translations
 	@override String get title => 'নোটিফিকেশন চালু রাখুন';
-	@override String get subtitle => 'বাজেট সতর্কতা, সাপ্তাহিক সারাংশ ও রিমাইন্ডার';
+	@override String get subtitle => 'বাজেট সতর্কতা, সাপ্তাহিক সারাংশ, রিমাইন্ডার ও স্বয়ংক্রিয় ইমপোর্ট';
 }
 
 // Path: settings.notifications.blocked
@@ -2669,6 +2690,17 @@ class _Translations$settings$notifications$reminders$bn extends Translations$set
 	// Translations
 	@override String get title => 'রিমাইন্ডার';
 	@override String get subtitle => 'পুনরাবৃত্ত লেনদেনের এক দিন আগে মনে করিয়ে দিন';
+}
+
+// Path: settings.notifications.autoImport
+class _Translations$settings$notifications$autoImport$bn extends Translations$settings$notifications$autoImport$en {
+	_Translations$settings$notifications$autoImport$bn._(TranslationsBn root) : this._root = root, super.internal(root);
+
+	final TranslationsBn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'স্বয়ংক্রিয় ইমপোর্ট করা লেনদেন';
+	@override String get subtitle => 'SMS থেকে কোনো লেনদেন যোগ হলে';
 }
 
 // Path: settings.appearanceScreen.sections
@@ -3448,7 +3480,7 @@ extension on TranslationsBn {
 			'messageTemplates.watchlist.addSender' => 'প্রেরক বেছে নিন',
 			'messageTemplates.watchlist.loadFailed' => 'ওয়াচলিস্ট লোড করা যায়নি। আবার চেষ্টা করুন।',
 			'notifications.channel.name' => 'অ্যাপের নোটিফিকেশন',
-			'notifications.channel.description' => 'বাজেট সতর্কতা, সাপ্তাহিক সারাংশ, পুনরাবৃত্ত রিমাইন্ডার ও স্ক্যানের ফলাফল',
+			'notifications.channel.description' => 'বাজেট সতর্কতা, সাপ্তাহিক সারাংশ, পুনরাবৃত্ত রিমাইন্ডার, স্ক্যানের ফলাফল ও স্বয়ংক্রিয় ইমপোর্ট করা লেনদেন',
 			'notifications.budget.title' => 'বাজেট সতর্কতা',
 			'notifications.budget.over' => ({required Object budget}) => 'আপনার "${budget}" বাজেট ছাড়িয়ে গেছে।',
 			'notifications.budget.used' => ({required Object budget, required Object percent}) => 'আপনার "${budget}" বাজেটের ${percent}% খরচ হয়েছে।',
@@ -3462,6 +3494,12 @@ extension on TranslationsBn {
 			'notifications.scan.smsTitle' => 'SMS স্ক্যান শেষ',
 			'notifications.scan.emailTitle' => 'ইমেইল স্ক্যান শেষ',
 			'notifications.scan.found' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n, one: '${n}টি নতুন খরচ পাওয়া গেছে', other: '${n}টি নতুন খরচ পাওয়া গেছে', ), 
+			'notifications.autoImport.expenseTitle' => 'খরচ যোগ হয়েছে',
+			'notifications.autoImport.incomeTitle' => 'আয় যোগ হয়েছে',
+			'notifications.autoImport.body' => ({required Object amount, required Object description}) => '${amount} · ${description}',
+			'notifications.autoImport.bodyFromSender' => ({required Object sender, required Object amount}) => '${sender} থেকে ${amount}',
+			'notifications.autoImport.summaryTitle' => 'SMS থেকে লেনদেন যোগ হয়েছে',
+			'notifications.autoImport.summary' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n, one: 'SMS থেকে ${n}টি লেনদেন যোগ হয়েছে', other: 'SMS থেকে ${n}টি লেনদেন যোগ হয়েছে', ), 
 			'notifications.syncError.title' => 'সিঙ্কে সমস্যা',
 			'onboarding.budgetNames.needs' => 'প্রয়োজন',
 			'onboarding.budgetNames.wants' => 'চাহিদা',
@@ -3496,14 +3534,14 @@ extension on TranslationsBn {
 			'onboarding.plan.createBudgets' => 'এগুলো মাসিক বাজেট হিসেবে তৈরি করুন',
 			'onboarding.plan.noIncome' => 'পরিকল্পনা দেখতে প্রথম ধাপে আপনার আয় যোগ করুন।',
 			'onboarding.plan.noRoom' => 'আপনার নিয়মিত পেমেন্টে পুরো আয় চলে যায়, তাই ভাগ করার মতো কিছু বাকি নেই।',
+			_ => null,
+		} ?? switch (path) {
 			'onboarding.plan.chartLabel' => ({required Object needs, required Object wants, required Object savings}) => 'প্রয়োজন ${needs}, চাহিদা ${wants}, সঞ্চয় ${savings}',
 			'onboarding.goal.title' => 'আপনি কীসের জন্য সঞ্চয় করছেন?',
 			'onboarding.goal.subtitle' => 'একটি সঞ্চয়ের লক্ষ্য ঠিক করুন, আমরা অগ্রগতি দেখতে সাহায্য করব।',
 			'onboarding.goal.nameLabel' => 'লক্ষ্যের নাম',
 			'onboarding.goal.nameHint' => 'যেমন: নতুন ল্যাপটপ',
 			'onboarding.goal.amountLabel' => 'লক্ষ্য পরিমাণ',
-			_ => null,
-		} ?? switch (path) {
 			'onboarding.goal.notNow' => 'এখন কোনো লক্ষ্য নয়',
 			'onboarding.timeline.title' => 'সময়সীমা বাছুন',
 			'onboarding.timeline.canAfford' => ({required Object amount, required Object months, required Object name}) => 'মাসে ${amount} সঞ্চয় করলে ${months} মাসে ${name} কিনতে পারবেন।',
@@ -3687,13 +3725,14 @@ extension on TranslationsBn {
 			'settings.sections.dataBudget' => 'ডেটা ও বাজেট',
 			'settings.sections.general' => 'সাধারণ',
 			'settings.notifications.title' => 'নোটিফিকেশন',
-			'settings.notifications.rowSubtitle' => ({required Object n}) => '4টির মধ্যে ${n}টি চালু',
+			'settings.notifications.rowSubtitle' => ({required Object total, required Object n}) => '${total}টির মধ্যে ${n}টি চালু',
 			'settings.notifications.rowSubtitleOff' => 'বন্ধ',
 			'settings.notifications.sections.general' => 'সাধারণ',
 			'settings.notifications.sections.budgetAlerts' => 'বাজেট সতর্কতা',
 			'settings.notifications.sections.recurring' => 'পুনরাবৃত্ত লেনদেন',
+			'settings.notifications.sections.autoImport' => 'স্বয়ংক্রিয় ইমপোর্ট',
 			'settings.notifications.master.title' => 'নোটিফিকেশন চালু রাখুন',
-			'settings.notifications.master.subtitle' => 'বাজেট সতর্কতা, সাপ্তাহিক সারাংশ ও রিমাইন্ডার',
+			'settings.notifications.master.subtitle' => 'বাজেট সতর্কতা, সাপ্তাহিক সারাংশ, রিমাইন্ডার ও স্বয়ংক্রিয় ইমপোর্ট',
 			'settings.notifications.blocked.title' => 'নোটিফিকেশন বন্ধ করা আছে',
 			'settings.notifications.blocked.action' => 'সেটিংস খুলুন',
 			'settings.notifications.over.title' => 'বাজেট ছাড়ানোর সতর্কতা',
@@ -3704,6 +3743,8 @@ extension on TranslationsBn {
 			'settings.notifications.weekly.subtitle' => ({required Object day}) => '${day} সন্ধ্যায়: এই সপ্তাহের খরচ, গত সপ্তাহের তুলনায়',
 			'settings.notifications.reminders.title' => 'রিমাইন্ডার',
 			'settings.notifications.reminders.subtitle' => 'পুনরাবৃত্ত লেনদেনের এক দিন আগে মনে করিয়ে দিন',
+			'settings.notifications.autoImport.title' => 'স্বয়ংক্রিয় ইমপোর্ট করা লেনদেন',
+			'settings.notifications.autoImport.subtitle' => 'SMS থেকে কোনো লেনদেন যোগ হলে',
 			'settings.autoImportSubtitle' => 'ব্যাংক ও পেমেন্টের মেসেজ থেকে লেনদেন তৈরি করুন',
 			'settings.smsWatchlist' => 'SMS ওয়াচলিস্ট',
 			'settings.smsWatchlistSubtitle' => 'যেসব প্রেরকের মেসেজ Expenzo পড়ে',

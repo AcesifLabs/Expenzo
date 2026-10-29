@@ -152,7 +152,7 @@ void main() {
   });
 
   test('settings saved before notification toggles existed load weekly off '
-      'and the other three on', () async {
+      'and the other four on', () async {
     final datasource = await datasourceWith(_storedSettings(code: 'BDT'));
     final settings = await datasource.getSettings();
 
@@ -160,6 +160,7 @@ void main() {
     expect(settings.budgetNearLimitAlertsEnabled, isTrue);
     expect(settings.weeklySummaryEnabled, isFalse);
     expect(settings.recurringRemindersEnabled, isTrue);
+    expect(settings.autoImportAlertsEnabled, isTrue);
   });
 
   test('each notification toggle is saved and read back', () async {
@@ -171,6 +172,7 @@ void main() {
         budgetNearLimitAlertsEnabled: false,
         weeklySummaryEnabled: true,
         recurringRemindersEnabled: false,
+        autoImportAlertsEnabled: false,
       ),
     );
     final reloaded = await datasource.getSettings();
@@ -179,6 +181,7 @@ void main() {
     expect(reloaded.budgetNearLimitAlertsEnabled, isFalse);
     expect(reloaded.weeklySummaryEnabled, isTrue);
     expect(reloaded.recurringRemindersEnabled, isFalse);
+    expect(reloaded.autoImportAlertsEnabled, isFalse);
   });
 
   test('settings saved before number format existed load 2 places and '

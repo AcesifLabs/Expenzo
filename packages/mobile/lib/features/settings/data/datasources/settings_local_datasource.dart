@@ -89,6 +89,7 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
       'budgetNearLimitAlertsEnabled': settings.budgetNearLimitAlertsEnabled,
       'weeklySummaryEnabled': settings.weeklySummaryEnabled,
       'recurringRemindersEnabled': settings.recurringRemindersEnabled,
+      'autoImportAlertsEnabled': settings.autoImportAlertsEnabled,
       'theme': settings.theme,
       'languageCode': settings.languageCode,
       'autoImportPromptDismissed': settings.autoImportPromptDismissed,
@@ -120,6 +121,7 @@ class SettingsLocalDatasourceImpl implements SettingsLocalDatasource {
       weeklySummaryEnabled: json['weeklySummaryEnabled'] as bool? ?? false,
       recurringRemindersEnabled:
           json['recurringRemindersEnabled'] as bool? ?? true,
+      autoImportAlertsEnabled: json['autoImportAlertsEnabled'] as bool? ?? true,
       theme: json['theme'] as String,
       languageCode: json['languageCode'] as String? ?? 'system',
       autoImportPromptDismissed:

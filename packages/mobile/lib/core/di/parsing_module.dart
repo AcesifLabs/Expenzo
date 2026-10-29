@@ -20,6 +20,7 @@ import 'package:expense_tracker/features/message_templates/presentation/bloc/tem
 import 'package:expense_tracker/features/sms_parser/data/datasources/sms_local_datasource.dart';
 import 'package:expense_tracker/features/sms_parser/data/services/method_channel_realtime_sms_listener.dart';
 import 'package:expense_tracker/features/sms_parser/domain/services/realtime_sms_listener.dart';
+import 'package:expense_tracker/features/sms_parser/domain/usecases/notify_auto_imported_records.dart';
 import 'package:expense_tracker/features/sms_parser/domain/usecases/scan_sms_usecase.dart';
 import 'package:expense_tracker/features/sms_parser/application/realtime_sms_processor.dart';
 import 'package:expense_tracker/features/sms_parser/presentation/bloc/sms_scanner_bloc.dart';
@@ -27,6 +28,8 @@ import 'package:expense_tracker/features/records/domain/repositories/record_repo
 import 'package:expense_tracker/features/budgets/domain/usecases/get_budgets_with_progress.dart';
 import 'package:expense_tracker/features/records/domain/usecases/create_records_from_parsed_list.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/check_budget_alerts.dart';
+import 'package:expense_tracker/features/settings/domain/usecases/get_settings.dart';
+import 'package:expense_tracker/shared/services/notification_service.dart';
 
 void initParsingModule(GetIt getIt) {
   _initParsingInfrastructure(getIt);
@@ -122,6 +125,12 @@ void _initSmsParsing(GetIt getIt) {
     () => MethodChannelRealtimeSmsListener(),
   );
   getIt.registerLazySingleton(
+    () => NotifyAutoImportedRecords(
+      getSettings: getIt<GetSettings>(),
+      notificationService: getIt<NotificationService>(),
+    ),
+  );
+  getIt.registerLazySingleton(
     () => RealtimeSmsProcessor(
       listener: getIt<RealtimeSmsListener>(),
       evaluateRules: getIt<EvaluateRulesUseCase>(),
@@ -129,6 +138,7 @@ void _initSmsParsing(GetIt getIt) {
       recordRepository: getIt<RecordRepository>(),
       createRecordsFromParsedList: getIt<CreateRecordsFromParsedList>(),
       checkBudgetAlerts: getIt<CheckBudgetAlerts>(),
+      notifyAutoImportedRecords: getIt<NotifyAutoImportedRecords>(),
     ),
   );
 }

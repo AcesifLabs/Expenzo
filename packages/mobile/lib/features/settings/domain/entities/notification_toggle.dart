@@ -3,4 +3,5 @@ enum NotificationToggle {
   budgetNearLimit,
   weeklySummary,
   recurringReminders,
+  autoImport,
 }

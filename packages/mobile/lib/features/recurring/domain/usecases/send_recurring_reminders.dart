@@ -3,6 +3,7 @@ import 'package:expense_tracker/core/constants/app_constants.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
 import 'package:expense_tracker/core/logger/app_logger.dart';
+import 'package:expense_tracker/core/utils/future_chain.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/features/settings/domain/entities/notification_toggle.dart';
 import 'package:expense_tracker/features/settings/domain/usecases/get_settings.dart';
@@ -39,7 +40,7 @@ class SendRecurringReminders {
 
   Future<Either<Failure, int>> call({required DateTime now}) {
     final result = _previous.then((_) => _send(now));
-    _previous = result.then(_ignore, onError: _ignore);
+    _previous = result.then(ignoreOutcome, onError: ignoreOutcome);
 
     return result;
   }
@@ -96,6 +97,4 @@ class SendRecurringReminders {
 
     return !now.isBefore(reminderAt(due)) && now.isBefore(dueDayStart);
   }
-
-  static Object? _ignore([Object? _]) => null;
 }
