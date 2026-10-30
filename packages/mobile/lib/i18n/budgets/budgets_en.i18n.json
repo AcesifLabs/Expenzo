@@ -79,5 +79,36 @@
     "progress": "{period} · {spent} / {limit}",
     "empty": "No active budgets"
   },
+  "plan": {
+    "title": "Budget plan",
+    "rowSubtitle": "Income and monthly budgets",
+    "editPlan": "Edit plan",
+    "income": "Monthly income",
+    "names": {
+      "needs": "Needs",
+      "wants": "Wants",
+      "savings": "Savings"
+    },
+    "perMonth": "{amount}/mo",
+    "toPlan": "{amount} a month after recurring payments",
+    "remaining": "{amount} left to assign",
+    "overBy": "Over by {amount}",
+    "name": "Name",
+    "amount": "Amount",
+    "addBudget": "Add budget",
+    "removeBudget": "Remove {name}",
+    "removeUnnamed": "Remove budget",
+    "suggestSplit": "Suggest split",
+    "nameTooLong": "Use {max} characters or fewer",
+    "nameDuplicate": "Another budget has this name",
+    "amountPositive": "Enter an amount above 0",
+    "chartLabel": "Budget plan: {entries}",
+    "deleteTitle": "Delete budgets?",
+    "deleteBody": "Saving deletes these budgets: {names}. Their expenses stay, without a budget.",
+    "saved": "Budget plan saved",
+    "saveFailed": "Couldn't save every change. Showing what's stored now.",
+    "loadFailed": "Couldn't load your budget plan.",
+    "empty": "No monthly budgets yet. Add one to start your plan."
+  },
   "sharedBadge": "Shared"
 }

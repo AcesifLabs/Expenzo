@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:expense_tracker/core/error/usecase.dart';
+import 'package:expense_tracker/features/budgets/domain/entities/plan_row.dart';
 import 'package:expense_tracker/features/onboarding/domain/entities/onboarding_draft.dart';
 import 'package:expense_tracker/features/onboarding/domain/entities/onboarding_result.dart';
 import 'package:expense_tracker/features/onboarding/domain/usecases/complete_onboarding.dart';
@@ -16,6 +17,13 @@ import 'package:expense_tracker/features/settings/presentation/bloc/settings_sta
 
 import '../../../../support/core_screens.dart';
 import '../../../../support/pump_localized.dart';
+
+/// The 50/30/20 rows for 5,000 income and 1,225 recurring.
+const suggestedRows = [
+  PlanRow(key: 'needs', name: 'Needs', amount: 1887.5),
+  PlanRow(key: 'wants', name: 'Wants', amount: 1132.5),
+  PlanRow(key: 'savings', name: 'Savings', amount: 755, isSavings: true),
+];
 
 class MockCompleteOnboarding extends Mock implements CompleteOnboarding {}
 

@@ -4,6 +4,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:expense_tracker/core/constants/budget_period.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/features/budgets/domain/entities/budget.dart';
+import 'package:expense_tracker/features/budgets/domain/entities/plan_row.dart';
 import 'package:expense_tracker/features/budgets/domain/repositories/budget_repository.dart';
 import 'package:expense_tracker/features/goals/domain/entities/goal.dart';
 import 'package:expense_tracker/features/goals/domain/repositories/goal_repository.dart';
@@ -15,6 +16,9 @@ import 'package:expense_tracker/features/recurring/domain/repositories/recurring
 import 'package:expense_tracker/features/settings/domain/entities/user_settings.dart';
 import 'package:expense_tracker/features/settings/domain/repositories/settings_repository.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
+
+import '../../presentation/widgets/onboarding_test_harness.dart'
+    show suggestedRows;
 
 class _MockRecurring extends Mock implements RecurringRepository {}
 
@@ -55,7 +59,7 @@ void main() {
   const fullDraft = OnboardingDraft(
     monthlyIncome: 5000,
     recurring: [rent, netflix],
-    createBudgets: true,
+    budgetRows: suggestedRows,
     goal: GoalDraft(name: 'Laptop', targetAmount: 1999, months: 3),
   );
 
@@ -160,23 +164,58 @@ void main() {
     expect(savedSettings().onboardingCompleted, isTrue);
   });
 
-  test('budgets off creates none', () async {
-    await complete(const OnboardingDraft(monthlyIncome: 5000), now: now);
+  test('skipped budgets create none', () async {
+    await complete(
+      const OnboardingDraft(monthlyIncome: 5000, budgetRows: []),
+      now: now,
+    );
 
     verifyNever(() => budgets.createBudget(any()));
   });
 
-  test('income below the recurring total creates no budgets', () async {
-    await complete(
+  test('rows at 0 are skipped and names are trimmed', () async {
+    final result = await complete(
       const OnboardingDraft(
-        monthlyIncome: 1000,
-        recurring: [rent],
-        createBudgets: true,
+        budgetRows: [
+          PlanRow(key: 'a', name: ' Food ', amount: 300),
+          PlanRow(key: 'b', name: 'Empty', amount: 0),
+        ],
+      ),
+      now: now,
+    );
+
+    final created =
+        verify(() => budgets.createBudget(captureAny())).captured.single
+            as Budget;
+    expect(created.name, 'Food');
+    expect(created.period, BudgetPeriod.monthly);
+    expect(result.fold((_) => null, (r) => r.budgetsCreated), isTrue);
+  });
+
+  test('only zero rows create nothing and report no errors', () async {
+    final result = await complete(
+      const OnboardingDraft(
+        budgetRows: [PlanRow(key: 'b', name: 'Empty', amount: 0)],
       ),
       now: now,
     );
 
     verifyNever(() => budgets.createBudget(any()));
+    expect(result.fold((_) => null, (r) => r.hadErrors), isFalse);
+  });
+
+  test('a failed budget marks errors and skips the goal', () async {
+    when(
+      () => budgets.createBudget(any()),
+    ).thenAnswer((_) async => const Left(CacheFailure(message: 'disk')));
+
+    final result = await complete(fullDraft, now: now);
+
+    expect(
+      result.fold((_) => null, (r) => r),
+      const OnboardingResult(recurringCount: 2, hadErrors: true),
+    );
+    verifyNever(() => goals.createGoal(any()));
   });
 
   test('recurring items start next period with auto-create on', () async {
@@ -188,22 +227,6 @@ void main() {
     expect(item.nextOccurrence, DateTime(2026, 11, 24));
     expect(item.autoCreateExpense, isTrue);
     expect(item.isDue(), isFalse);
-  });
-
-  test('budget names follow the app language', () async {
-    LocaleSettings.setLocaleSync(AppLocale.bn);
-
-    await complete(fullDraft, now: now);
-
-    final created = verify(
-      () => budgets.createBudget(captureAny()),
-    ).captured.cast<Budget>();
-    expect(created.map((b) => b.name), [
-      t.onboarding.budgetNames.needs,
-      t.onboarding.budgetNames.wants,
-      t.onboarding.budgetNames.savings,
-    ]);
-    expect(created.first.name, 'প্রয়োজন');
   });
 
   test('a failed goal still marks onboarding done, with errors', () async {

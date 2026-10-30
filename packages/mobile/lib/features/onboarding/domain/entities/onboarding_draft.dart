@@ -1,17 +1,14 @@
 import 'package:equatable/equatable.dart';
+import 'package:expense_tracker/features/budgets/domain/entities/plan_row.dart';
 import 'package:expense_tracker/features/recurring/domain/entities/recurring_frequency.dart';
+import 'package:expense_tracker/features/recurring/domain/helpers/monthly_equivalent.dart';
 
 class RecurringDraft extends Equatable {
   final String description;
   final double amount;
   final RecurringFrequency frequency;
 
-  double get monthlyAmount => switch (frequency) {
-    RecurringFrequency.daily => amount * 365 / 12,
-    RecurringFrequency.weekly => amount * 52 / 12,
-    RecurringFrequency.monthly => amount,
-    RecurringFrequency.yearly => amount / 12,
-  };
+  double get monthlyAmount => monthlyEquivalent(amount, frequency);
 
   @override
   List<Object?> get props => [description, amount, frequency];
@@ -50,30 +47,33 @@ class GoalDraft extends Equatable {
 class OnboardingDraft extends Equatable {
   final double? monthlyIncome;
   final List<RecurringDraft> recurring;
-  final bool createBudgets;
+
+  /// The plan step's rows. Null until that step is submitted; empty when
+  /// the user skipped budgets.
+  final List<PlanRow>? budgetRows;
   final GoalDraft? goal;
 
   @override
-  List<Object?> get props => [monthlyIncome, recurring, createBudgets, goal];
+  List<Object?> get props => [monthlyIncome, recurring, budgetRows, goal];
 
   const OnboardingDraft({
     this.monthlyIncome,
     this.recurring = const [],
-    this.createBudgets = false,
+    this.budgetRows,
     this.goal,
   });
 
   OnboardingDraft copyWith({
     double? monthlyIncome,
     List<RecurringDraft>? recurring,
-    bool? createBudgets,
+    List<PlanRow>? budgetRows,
     GoalDraft? goal,
     bool clearGoal = false,
   }) {
     return OnboardingDraft(
       monthlyIncome: monthlyIncome ?? this.monthlyIncome,
       recurring: recurring ?? this.recurring,
-      createBudgets: createBudgets ?? this.createBudgets,
+      budgetRows: budgetRows ?? this.budgetRows,
       goal: clearGoal ? null : goal ?? this.goal,
     );
   }

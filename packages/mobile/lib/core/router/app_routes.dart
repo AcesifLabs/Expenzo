@@ -21,6 +21,8 @@ import 'package:expense_tracker/features/budgets/presentation/bloc/budget_event.
 import 'package:expense_tracker/features/budgets/presentation/pages/all_budgets_picker_page.dart';
 import 'package:expense_tracker/features/budgets/presentation/pages/budget_details_page.dart';
 import 'package:expense_tracker/features/budgets/presentation/pages/budget_form_page.dart';
+import 'package:expense_tracker/features/budgets/presentation/bloc/budget_plan_bloc.dart';
+import 'package:expense_tracker/features/budgets/presentation/pages/budget_plan_page.dart';
 import 'package:expense_tracker/features/categories/presentation/bloc/category_bloc.dart';
 import 'package:expense_tracker/features/categories/presentation/pages/category_form_page.dart';
 import 'package:expense_tracker/features/categories/presentation/pages/category_list_page.dart';
@@ -133,6 +135,13 @@ GoRoute _buildSettingsRoute() {
       _settingsPage(SettingsRoute.categories, const CategoryListPage()),
       _settingsPage(SettingsRoute.autoImport, const AutoImportPage()),
       _settingsPage(SettingsRoute.smsWatchlist, const SmsWatchlistPage()),
+      GoRoute(
+        path: SettingsRoute.budgetPlan.path,
+        builder: (_, _) => BlocProvider(
+          create: (_) => di.getIt<BudgetPlanBloc>(),
+          child: const BudgetPlanPage(),
+        ),
+      ),
       GoRoute(
         path: SettingsRoute.recurring.path,
 

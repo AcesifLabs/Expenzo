@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:expense_tracker/features/budgets/domain/entities/plan_row.dart';
 import 'package:expense_tracker/features/onboarding/domain/entities/income_frequency.dart';
 import 'package:expense_tracker/features/onboarding/domain/entities/onboarding_draft.dart';
 import 'package:expense_tracker/features/onboarding/domain/onboarding_plan.dart';
@@ -23,40 +24,29 @@ void main() {
     expect(draft(RecurringFrequency.yearly).monthlyAmount, 10);
   });
 
+  const rent = RecurringDraft(
+    description: 'Rent',
+    amount: 1225,
+    frequency: RecurringFrequency.monthly,
+  );
+
   test('the design numbers: 5,000 income, 1,225 recurring', () {
-    final split = budgetSplitFor(monthlyIncome: 5000, recurringTotal: 1225);
+    const draft = OnboardingDraft(monthlyIncome: 5000, recurring: [rent]);
 
-    expect(
-      split,
-      const BudgetSplit(base: 3775, needs: 1887.5, wants: 1132.5, savings: 755),
-    );
+    expect(planBaseFor(draft), 3775);
+    expect(planRowsFor(draft).map((r) => r.amount), [1887.5, 1132.5, 755]);
   });
 
-  test('shares always add up to the base after rounding', () {
-    for (final income in [1000.0, 3333.33, 1234.57, 99.99]) {
-      final split = budgetSplitFor(monthlyIncome: income, recurringTotal: 0);
-
-      expect(
-        cents(split.needs + split.wants + split.savings),
-        split.base,
-        reason: '$income',
-      );
-    }
+  test('no income gives a base of 0', () {
+    expect(planBaseFor(const OnboardingDraft(recurring: [rent])), 0);
   });
 
-  test('no income, or recurring using all of it, gives the empty split', () {
-    expect(
-      budgetSplitFor(monthlyIncome: null, recurringTotal: 0).isEmpty,
-      isTrue,
-    );
-    expect(
-      budgetSplitFor(monthlyIncome: 1000, recurringTotal: 1000).isEmpty,
-      isTrue,
-    );
-    expect(
-      budgetSplitFor(monthlyIncome: 1000, recurringTotal: 1500),
-      BudgetSplit.empty,
-    );
+  test('submitted rows win over the suggestion', () {
+    const rows = [PlanRow(key: 'k', name: 'Food', amount: 10)];
+    const draft = OnboardingDraft(monthlyIncome: 5000, budgetRows: rows);
+
+    expect(planRowsFor(draft), rows);
+    expect(planRowsFor(draft.copyWith(budgetRows: const [])), isEmpty);
   });
 
   test('the design timeline: 1,999 with 755 savings', () {

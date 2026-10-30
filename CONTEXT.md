@@ -153,6 +153,14 @@ The list of every Goal, newest first, reached from "See all" on the dashboard go
 
 The one-time, skippable setup shown on first launch: income, recurring payments, a suggested 50/30/20 budget plan, a savings Goal and a short tutorial. It writes real settings, recurring transactions, budgets and a Goal.
 
+## Budget Plan
+
+The user's monthly income together with every personal (not shared) monthly budget. Setup suggests a 50/30/20 split of income minus recurring bills into Needs, Wants and Savings rows, which the user can rename, change, remove or add to. After setup it is edited from Settings → Budget plan or the Budgets tab. Weekly, yearly and shared budgets are not part of it.
+
+## Plan Row
+
+One budget inside the Budget Plan editor: a name and a monthly amount. A row may map to an existing budget (edited on save), be new (created on save), or be removed (deleted on save after a confirm). The suggested Savings row keeps its identity when renamed, and the goal timeline in setup reads its amount.
+
 ## Display Preferences
 
 Device-local choices: theme, currency, number format, font size, first day of week, home page, notification toggles, recurring defaults and the Sync switch. Stored on the device only, never synced (ADR 0010). Delete all data resets them, except that Onboarding is not shown again.

@@ -7,7 +7,9 @@ import 'package:expense_tracker/core/database/app_database.dart' as db;
 import 'package:expense_tracker/core/database/daos/sync_queue_dao.dart';
 import 'package:expense_tracker/features/budgets/data/datasources/budget_local_datasource.dart';
 import 'package:expense_tracker/features/budgets/data/repositories/budget_repository_impl.dart';
+import 'package:expense_tracker/core/constants/budget_period.dart';
 import 'package:expense_tracker/features/budgets/domain/entities/budget.dart';
+import 'package:expense_tracker/features/budgets/domain/entities/plan_changes.dart';
 
 import '../../support/factories/budget_factory.dart';
 
@@ -38,6 +40,9 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(_BudgetFake());
+    registerFallbackValue(
+      <({String tableName, String recordId, String action, String payload})>[],
+    );
   });
 
   setUp(() {
@@ -224,6 +229,85 @@ void main() {
           }
         },
       );
+    });
+
+    group('applyPlanChanges', () {
+      final kept = makeBudget(id: 'budget-1', name: 'Rent');
+      final gone = makeBudget(id: 'budget-2', name: 'Gone');
+      final added = Budget(
+        name: 'Travel',
+        amount: 200,
+        period: BudgetPeriod.monthly,
+        startDate: DateTime(2026, 10),
+      );
+      final changes = PlanChanges(
+        toCreate: [added],
+        toUpdate: [kept],
+        toDelete: [gone],
+      );
+
+      void stubWrite(Future<List<db.Record>> Function() answer) => when(
+        () => mockDatasource.applyPlanChanges(
+          deleteIds: any(named: 'deleteIds'),
+          updates: any(named: 'updates'),
+          creates: any(named: 'creates'),
+        ),
+      ).thenAnswer((_) => answer());
+
+      setUp(() {
+        when(() => mockSyncDao.enqueueAll(any())).thenAnswer((_) async {});
+      });
+
+      test('writes once and queues every change in one batch', () async {
+        stubWrite(() async => [_record('r1')]);
+
+        final result = await repository.applyPlanChanges(changes);
+
+        expect(result, const Right<Failure, Unit>(unit));
+        final written =
+            verify(
+                  () => mockDatasource.applyPlanChanges(
+                    deleteIds: ['budget-2'],
+                    updates: [kept],
+                    creates: captureAny(named: 'creates'),
+                  ),
+                ).captured.single
+                as List<Budget>;
+        expect(written.single.id, isNotNull);
+        final queued =
+            verify(() => mockSyncDao.enqueueAll(captureAny())).captured.single
+                as List<
+                  ({
+                    String tableName,
+                    String recordId,
+                    String action,
+                    String payload,
+                  })
+                >;
+        expect(queued.map((c) => (c.tableName, c.recordId, c.action)), [
+          ('budgets', 'budget-2', 'delete'),
+          ('budgets', 'budget-1', 'update'),
+          ('budgets', written.single.id, 'insert'),
+          ('records', 'r1', 'update'),
+        ]);
+        verifyNever(
+          () => mockSyncDao.enqueue(
+            tableName: any(named: 'tableName'),
+            recordId: any(named: 'recordId'),
+            action: any(named: 'action'),
+            payload: any(named: 'payload'),
+          ),
+        );
+      });
+
+      test('a failed write queues nothing', () async {
+        stubWrite(() async => throw const CacheException(message: 'DB error'));
+
+        final result = await repository.applyPlanChanges(changes);
+
+        expect(result.isLeft(), isTrue);
+        verifyNever(() => mockSyncDao.enqueueAll(any()));
+      });
     });
   });
 }

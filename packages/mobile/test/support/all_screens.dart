@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:expense_tracker/features/goals/presentation/bloc/goal_state.dart';
+import 'package:expense_tracker/features/budgets/presentation/bloc/budget_plan_state.dart';
 import 'package:expense_tracker/features/budgets/presentation/bloc/budget_state.dart';
 import 'package:expense_tracker/features/dashboard/domain/entities/date_range.dart';
 import 'package:expense_tracker/features/dashboard/presentation/bloc/dashboard_state.dart';
@@ -95,6 +96,15 @@ List<ScreenCase> get allScreens => [
   ScreenCase(
     'Budgets (error)',
     () => budgetsScreen(state: const BudgetError(_error)),
+  ),
+  const ScreenCase(
+    'Budget plan',
+    budgetPlanScreen,
+    page: 'budgets/presentation/pages/budget_plan_page.dart',
+  ),
+  ScreenCase(
+    'Budget plan (error)',
+    () => budgetPlanScreen(state: const BudgetPlanLoadFailed(_error)),
   ),
   const ScreenCase(
     'Budget details',

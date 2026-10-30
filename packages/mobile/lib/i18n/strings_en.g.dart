@@ -135,6 +135,7 @@ class Translations$budgets$en {
 	late final Translations$budgets$form$en form = Translations$budgets$form$en.internal(_root);
 	late final Translations$budgets$details$en details = Translations$budgets$details$en.internal(_root);
 	late final Translations$budgets$picker$en picker = Translations$budgets$picker$en.internal(_root);
+	late final Translations$budgets$plan$en plan = Translations$budgets$plan$en.internal(_root);
 
 	/// en: 'Shared'
 	String get sharedBadge => 'Shared';
@@ -477,7 +478,6 @@ class Translations$onboarding$en {
 	final Translations _root; // ignore: unused_field
 
 	// Translations
-	late final Translations$onboarding$budgetNames$en budgetNames = Translations$onboarding$budgetNames$en.internal(_root);
 	late final Translations$onboarding$common$en common = Translations$onboarding$common$en.internal(_root);
 	late final Translations$onboarding$income$en income = Translations$onboarding$income$en.internal(_root);
 	late final Translations$onboarding$recurring$en recurring = Translations$onboarding$recurring$en.internal(_root);
@@ -1132,6 +1132,89 @@ class Translations$budgets$picker$en {
 
 	/// en: 'No active budgets'
 	String get empty => 'No active budgets';
+}
+
+// Path: budgets.plan
+class Translations$budgets$plan$en {
+	Translations$budgets$plan$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Budget plan'
+	String get title => 'Budget plan';
+
+	/// en: 'Income and monthly budgets'
+	String get rowSubtitle => 'Income and monthly budgets';
+
+	/// en: 'Edit plan'
+	String get editPlan => 'Edit plan';
+
+	/// en: 'Monthly income'
+	String get income => 'Monthly income';
+
+	late final Translations$budgets$plan$names$en names = Translations$budgets$plan$names$en.internal(_root);
+
+	/// en: '{amount}/mo'
+	String perMonth({required Object amount}) => '${amount}/mo';
+
+	/// en: '{amount} a month after recurring payments'
+	String toPlan({required Object amount}) => '${amount} a month after recurring payments';
+
+	/// en: '{amount} left to assign'
+	String remaining({required Object amount}) => '${amount} left to assign';
+
+	/// en: 'Over by {amount}'
+	String overBy({required Object amount}) => 'Over by ${amount}';
+
+	/// en: 'Name'
+	String get name => 'Name';
+
+	/// en: 'Amount'
+	String get amount => 'Amount';
+
+	/// en: 'Add budget'
+	String get addBudget => 'Add budget';
+
+	/// en: 'Remove {name}'
+	String removeBudget({required Object name}) => 'Remove ${name}';
+
+	/// en: 'Remove budget'
+	String get removeUnnamed => 'Remove budget';
+
+	/// en: 'Suggest split'
+	String get suggestSplit => 'Suggest split';
+
+	/// en: 'Use {max} characters or fewer'
+	String nameTooLong({required Object max}) => 'Use ${max} characters or fewer';
+
+	/// en: 'Another budget has this name'
+	String get nameDuplicate => 'Another budget has this name';
+
+	/// en: 'Enter an amount above 0'
+	String get amountPositive => 'Enter an amount above 0';
+
+	/// en: 'Budget plan: {entries}'
+	String chartLabel({required Object entries}) => 'Budget plan: ${entries}';
+
+	/// en: 'Delete budgets?'
+	String get deleteTitle => 'Delete budgets?';
+
+	/// en: 'Saving deletes these budgets: {names}. Their expenses stay, without a budget.'
+	String deleteBody({required Object names}) => 'Saving deletes these budgets: ${names}. Their expenses stay, without a budget.';
+
+	/// en: 'Budget plan saved'
+	String get saved => 'Budget plan saved';
+
+	/// en: 'Couldn't save every change. Showing what's stored now.'
+	String get saveFailed => 'Couldn\'t save every change. Showing what\'s stored now.';
+
+	/// en: 'Couldn't load your budget plan.'
+	String get loadFailed => 'Couldn\'t load your budget plan.';
+
+	/// en: 'No monthly budgets yet. Add one to start your plan.'
+	String get empty => 'No monthly budgets yet. Add one to start your plan.';
 }
 
 // Path: categories.settings
@@ -2349,24 +2432,6 @@ class Translations$notifications$syncError$en {
 	String get title => 'Sync error';
 }
 
-// Path: onboarding.budgetNames
-class Translations$onboarding$budgetNames$en {
-	Translations$onboarding$budgetNames$en.internal(this._root);
-
-	final Translations _root; // ignore: unused_field
-
-	// Translations
-
-	/// en: 'Needs'
-	String get needs => 'Needs';
-
-	/// en: 'Wants'
-	String get wants => 'Wants';
-
-	/// en: 'Savings'
-	String get savings => 'Savings';
-}
-
 // Path: onboarding.common
 class Translations$onboarding$common$en {
 	Translations$onboarding$common$en.internal(this._root);
@@ -2454,26 +2519,17 @@ class Translations$onboarding$plan$en {
 	/// en: 'Your budget plan'
 	String get title => 'Your budget plan';
 
-	/// en: 'Based on your income, we suggest this 50/30/20 split.'
-	String get subtitle => 'Based on your income, we suggest this 50/30/20 split.';
+	/// en: 'We suggest a 50/30/20 split of what's left after recurring payments. Change any name or amount.'
+	String get subtitle => 'We suggest a 50/30/20 split of what\'s left after recurring payments. Change any name or amount.';
 
-	/// en: '{amount}/mo'
-	String perMonth({required Object amount}) => '${amount}/mo';
+	/// en: 'Add your income on the first step for a suggested split, or type amounts below.'
+	String get noIncome => 'Add your income on the first step for a suggested split, or type amounts below.';
 
-	/// en: '{percent}%'
-	String share({required Object percent}) => '${percent}%';
+	/// en: 'Your recurring payments use all of your income. You can still set amounts below.'
+	String get noRoom => 'Your recurring payments use all of your income. You can still set amounts below.';
 
-	/// en: 'Create these as monthly budgets'
-	String get createBudgets => 'Create these as monthly budgets';
-
-	/// en: 'Add your income on the first step to see a plan.'
-	String get noIncome => 'Add your income on the first step to see a plan.';
-
-	/// en: 'Your recurring payments use all of your income, so there is nothing left to split.'
-	String get noRoom => 'Your recurring payments use all of your income, so there is nothing left to split.';
-
-	/// en: 'Needs {needs}, wants {wants}, savings {savings}'
-	String chartLabel({required Object needs, required Object wants, required Object savings}) => 'Needs ${needs}, wants ${wants}, savings ${savings}';
+	/// en: 'Skip budgets for now'
+	String get skip => 'Skip budgets for now';
 }
 
 // Path: onboarding.goal
@@ -3898,6 +3954,24 @@ class Translations$budgets$details$periodBudget$en {
 	String get yearly => 'Yearly budget';
 }
 
+// Path: budgets.plan.names
+class Translations$budgets$plan$names$en {
+	Translations$budgets$plan$names$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Needs'
+	String get needs => 'Needs';
+
+	/// en: 'Wants'
+	String get wants => 'Wants';
+
+	/// en: 'Savings'
+	String get savings => 'Savings';
+}
+
 // Path: categories.settings.sections
 class Translations$categories$settings$sections$en {
 	Translations$categories$settings$sections$en.internal(this._root);
@@ -4934,6 +5008,33 @@ extension on Translations {
 			'budgets.picker.previousBudgetHint' => 'Keep the current link',
 			'budgets.picker.progress' => ({required Object period, required Object spent, required Object limit}) => '${period} · ${spent} / ${limit}',
 			'budgets.picker.empty' => 'No active budgets',
+			'budgets.plan.title' => 'Budget plan',
+			'budgets.plan.rowSubtitle' => 'Income and monthly budgets',
+			'budgets.plan.editPlan' => 'Edit plan',
+			'budgets.plan.income' => 'Monthly income',
+			'budgets.plan.names.needs' => 'Needs',
+			'budgets.plan.names.wants' => 'Wants',
+			'budgets.plan.names.savings' => 'Savings',
+			'budgets.plan.perMonth' => ({required Object amount}) => '${amount}/mo',
+			'budgets.plan.toPlan' => ({required Object amount}) => '${amount} a month after recurring payments',
+			'budgets.plan.remaining' => ({required Object amount}) => '${amount} left to assign',
+			'budgets.plan.overBy' => ({required Object amount}) => 'Over by ${amount}',
+			'budgets.plan.name' => 'Name',
+			'budgets.plan.amount' => 'Amount',
+			'budgets.plan.addBudget' => 'Add budget',
+			'budgets.plan.removeBudget' => ({required Object name}) => 'Remove ${name}',
+			'budgets.plan.removeUnnamed' => 'Remove budget',
+			'budgets.plan.suggestSplit' => 'Suggest split',
+			'budgets.plan.nameTooLong' => ({required Object max}) => 'Use ${max} characters or fewer',
+			'budgets.plan.nameDuplicate' => 'Another budget has this name',
+			'budgets.plan.amountPositive' => 'Enter an amount above 0',
+			'budgets.plan.chartLabel' => ({required Object entries}) => 'Budget plan: ${entries}',
+			'budgets.plan.deleteTitle' => 'Delete budgets?',
+			'budgets.plan.deleteBody' => ({required Object names}) => 'Saving deletes these budgets: ${names}. Their expenses stay, without a budget.',
+			'budgets.plan.saved' => 'Budget plan saved',
+			'budgets.plan.saveFailed' => 'Couldn\'t save every change. Showing what\'s stored now.',
+			'budgets.plan.loadFailed' => 'Couldn\'t load your budget plan.',
+			'budgets.plan.empty' => 'No monthly budgets yet. Add one to start your plan.',
 			'budgets.sharedBadge' => 'Shared',
 			'categories.uncategorized' => 'Uncategorized',
 			'categories.defaults.default_in_salary' => 'Salary',
@@ -5311,15 +5412,14 @@ extension on Translations {
 			'notifications.autoImport.summaryTitle' => 'Transactions added from SMS',
 			'notifications.autoImport.summary' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} transaction added from SMS', other: '${n} transactions added from SMS', ), 
 			'notifications.syncError.title' => 'Sync error',
-			'onboarding.budgetNames.needs' => 'Needs',
-			'onboarding.budgetNames.wants' => 'Wants',
-			'onboarding.budgetNames.savings' => 'Savings',
 			'onboarding.common.skip' => 'Skip',
 			'onboarding.common.continueLabel' => 'Continue',
 			'onboarding.common.stepOf' => ({required Object current, required Object total}) => 'Step ${current} of ${total}',
 			'onboarding.income.title' => 'Let\'s set up your budget',
 			'onboarding.income.subtitle' => 'First, tell us about your monthly income so we can create a budget that works for you.',
 			'onboarding.income.amountLabel' => 'Monthly net income',
+			_ => null,
+		} ?? switch (path) {
 			'onboarding.income.amountInvalid' => 'Enter an amount up to 9,999,999,999.99.',
 			'onboarding.income.frequencyLabel' => 'Income frequency',
 			'onboarding.income.frequency.monthly' => 'Monthly',
@@ -5338,15 +5438,10 @@ extension on Translations {
 			'onboarding.recurring.sheet.amount' => 'Amount',
 			'onboarding.recurring.sheet.frequency' => 'Repeats',
 			'onboarding.plan.title' => 'Your budget plan',
-			'onboarding.plan.subtitle' => 'Based on your income, we suggest this 50/30/20 split.',
-			'onboarding.plan.perMonth' => ({required Object amount}) => '${amount}/mo',
-			'onboarding.plan.share' => ({required Object percent}) => '${percent}%',
-			'onboarding.plan.createBudgets' => 'Create these as monthly budgets',
-			'onboarding.plan.noIncome' => 'Add your income on the first step to see a plan.',
-			'onboarding.plan.noRoom' => 'Your recurring payments use all of your income, so there is nothing left to split.',
-			_ => null,
-		} ?? switch (path) {
-			'onboarding.plan.chartLabel' => ({required Object needs, required Object wants, required Object savings}) => 'Needs ${needs}, wants ${wants}, savings ${savings}',
+			'onboarding.plan.subtitle' => 'We suggest a 50/30/20 split of what\'s left after recurring payments. Change any name or amount.',
+			'onboarding.plan.noIncome' => 'Add your income on the first step for a suggested split, or type amounts below.',
+			'onboarding.plan.noRoom' => 'Your recurring payments use all of your income. You can still set amounts below.',
+			'onboarding.plan.skip' => 'Skip budgets for now',
 			'onboarding.goal.title' => 'What are you saving for?',
 			'onboarding.goal.subtitle' => 'Set a savings goal and we\'ll help you track progress.',
 			'onboarding.goal.nameLabel' => 'Goal name',

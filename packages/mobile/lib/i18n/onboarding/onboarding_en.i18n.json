@@ -1,9 +1,4 @@
 {
-  "budgetNames": {
-    "needs": "Needs",
-    "wants": "Wants",
-    "savings": "Savings"
-  },
   "common": {
     "skip": "Skip",
     "continueLabel": "Continue",
@@ -39,13 +34,10 @@
   },
   "plan": {
     "title": "Your budget plan",
-    "subtitle": "Based on your income, we suggest this 50/30/20 split.",
-    "perMonth": "{amount}/mo",
-    "share": "{percent}%",
-    "createBudgets": "Create these as monthly budgets",
-    "noIncome": "Add your income on the first step to see a plan.",
-    "noRoom": "Your recurring payments use all of your income, so there is nothing left to split.",
-    "chartLabel": "Needs {needs}, wants {wants}, savings {savings}"
+    "subtitle": "We suggest a 50/30/20 split of what's left after recurring payments. Change any name or amount.",
+    "noIncome": "Add your income on the first step for a suggested split, or type amounts below.",
+    "noRoom": "Your recurring payments use all of your income. You can still set amounts below.",
+    "skip": "Skip budgets for now"
   },
   "goal": {
     "title": "What are you saving for?",

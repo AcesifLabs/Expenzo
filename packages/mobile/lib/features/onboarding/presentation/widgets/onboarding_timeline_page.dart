@@ -6,6 +6,7 @@ import 'package:picons/picons.dart';
 import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
+import 'package:expense_tracker/features/budgets/domain/budget_plan.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
 
@@ -19,16 +20,13 @@ import 'setup_complete_card.dart';
 
 class OnboardingTimelinePage extends StatelessWidget {
   static String? _subtitle(OnboardingDraft draft, GoalDraft goal) {
-    final split = _split(draft);
-    if (split.isEmpty) return null;
+    if (planBaseFor(draft) <= 0) return null;
+    final perMonth = _savings(draft);
     final timelineT = t.onboarding.timeline;
     final fastest = fastestAffordableMonths(
-      timelineOptions(
-        target: goal.targetAmount,
-        savingsPerMonth: split.savings,
-      ),
+      timelineOptions(target: goal.targetAmount, savingsPerMonth: perMonth),
     );
-    final savings = CurrencyFormatter.format(split.savings);
+    final savings = CurrencyFormatter.format(perMonth);
 
     return fastest == null
         ? timelineT.cannotAfford(amount: savings)
@@ -39,10 +37,8 @@ class OnboardingTimelinePage extends StatelessWidget {
           );
   }
 
-  static BudgetSplit _split(OnboardingDraft draft) => budgetSplitFor(
-    monthlyIncome: draft.monthlyIncome,
-    recurringTotal: recurringMonthlyTotal(draft.recurring),
-  );
+  static double _savings(OnboardingDraft draft) =>
+      planSavings(planBaseFor(draft), planRowsFor(draft));
 
   const OnboardingTimelinePage({super.key});
 
@@ -65,10 +61,11 @@ class OnboardingTimelinePage extends StatelessWidget {
     OnboardingDraft draft,
     GoalDraft goal,
   ) {
-    final split = _split(draft);
+    final savings = _savings(draft);
+    final hasBase = planBaseFor(draft) > 0;
     final options = timelineOptions(
       target: goal.targetAmount,
-      savingsPerMonth: split.savings,
+      savingsPerMonth: savings,
     );
     final custom = goal.customDate;
     final customOption = custom == null
@@ -77,7 +74,7 @@ class OnboardingTimelinePage extends StatelessWidget {
             target: goal.targetAmount,
             from: clock.now(),
             date: custom,
-            savingsPerMonth: split.savings,
+            savingsPerMonth: savings,
           );
     final bloc = context.read<OnboardingBloc>();
     final timelineT = t.onboarding.timeline;
@@ -87,7 +84,7 @@ class OnboardingTimelinePage extends StatelessWidget {
         _TimelineCard(
           title: timelineT.months(n: option.months),
           option: option,
-          showMark: !split.isEmpty,
+          showMark: hasBase,
           selected: custom == null && goal.months == option.months,
           onTap: () => bloc.add(TimelineChosen(months: option.months)),
         ),
@@ -99,7 +96,7 @@ class OnboardingTimelinePage extends StatelessWidget {
             : '${timelineT.custom} · ${timelineT.months(n: customOption.months)}',
         subtitle: customOption == null ? timelineT.customHint : null,
         option: customOption,
-        showMark: !split.isEmpty,
+        showMark: hasBase,
         selected: customOption != null,
         onTap: () => _pickDate(context, goal),
       ),

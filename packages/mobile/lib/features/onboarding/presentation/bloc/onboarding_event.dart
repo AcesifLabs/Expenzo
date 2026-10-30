@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import 'package:expense_tracker/features/budgets/domain/entities/plan_row.dart';
+
 import '../../domain/entities/income_frequency.dart';
 import '../../domain/entities/onboarding_draft.dart';
 
@@ -47,12 +49,12 @@ class RecurringSubmitted extends OnboardingEvent {
 }
 
 class BudgetPlanSubmitted extends OnboardingEvent {
-  final bool createBudgets;
+  final List<PlanRow> rows;
 
   @override
-  List<Object?> get props => [createBudgets];
+  List<Object?> get props => [rows];
 
-  const BudgetPlanSubmitted(this.createBudgets);
+  const BudgetPlanSubmitted(this.rows);
 }
 
 class GoalSubmitted extends OnboardingEvent {
