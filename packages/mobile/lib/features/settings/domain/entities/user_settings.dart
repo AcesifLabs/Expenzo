@@ -7,6 +7,24 @@ import 'package:expense_tracker/core/utils/number_display_format.dart';
 
 import 'notification_toggle.dart';
 
+typedef _NotificationOverrides = ({
+  bool? master,
+  bool? budgetOver,
+  bool? budgetNearLimit,
+  bool? weeklySummary,
+  bool? recurringReminders,
+  bool? autoImport,
+});
+
+typedef _NotificationFlags = ({
+  bool master,
+  bool budgetOver,
+  bool budgetNearLimit,
+  bool weeklySummary,
+  bool recurringReminders,
+  bool autoImport,
+});
+
 class UserSettings extends Equatable {
   final int? id;
 
@@ -18,6 +36,7 @@ class UserSettings extends Equatable {
   final bool budgetNearLimitAlertsEnabled;
   final bool weeklySummaryEnabled;
   final bool recurringRemindersEnabled;
+  final bool autoImportAlertsEnabled;
   final String theme;
 
   final String languageCode;
@@ -57,6 +76,7 @@ class UserSettings extends Equatable {
     budgetNearLimitAlertsEnabled,
     weeklySummaryEnabled,
     recurringRemindersEnabled,
+    autoImportAlertsEnabled,
     theme,
     languageCode,
     autoImportPromptDismissed,
@@ -84,6 +104,7 @@ class UserSettings extends Equatable {
     this.budgetNearLimitAlertsEnabled = true,
     this.weeklySummaryEnabled = false,
     this.recurringRemindersEnabled = true,
+    this.autoImportAlertsEnabled = true,
     required this.theme,
     this.languageCode = 'system',
     this.autoImportPromptDismissed = false,
@@ -111,6 +132,7 @@ class UserSettings extends Equatable {
     bool? budgetNearLimitAlertsEnabled,
     bool? weeklySummaryEnabled,
     bool? recurringRemindersEnabled,
+    bool? autoImportAlertsEnabled,
     String? theme,
     String? languageCode,
     bool? autoImportPromptDismissed,
@@ -128,18 +150,25 @@ class UserSettings extends Equatable {
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
+    final notifications = _notificationsWith((
+      master: notificationsEnabled,
+      budgetOver: budgetOverAlertsEnabled,
+      budgetNearLimit: budgetNearLimitAlertsEnabled,
+      weeklySummary: weeklySummaryEnabled,
+      recurringReminders: recurringRemindersEnabled,
+      autoImport: autoImportAlertsEnabled,
+    ));
+
     return UserSettings(
       id: id ?? this.id,
       currencyCode: currencyCode ?? this.currencyCode,
       emailFetchLimit: emailFetchLimit ?? this.emailFetchLimit,
-      notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
-      budgetOverAlertsEnabled:
-          budgetOverAlertsEnabled ?? this.budgetOverAlertsEnabled,
-      budgetNearLimitAlertsEnabled:
-          budgetNearLimitAlertsEnabled ?? this.budgetNearLimitAlertsEnabled,
-      weeklySummaryEnabled: weeklySummaryEnabled ?? this.weeklySummaryEnabled,
-      recurringRemindersEnabled:
-          recurringRemindersEnabled ?? this.recurringRemindersEnabled,
+      notificationsEnabled: notifications.master,
+      budgetOverAlertsEnabled: notifications.budgetOver,
+      budgetNearLimitAlertsEnabled: notifications.budgetNearLimit,
+      weeklySummaryEnabled: notifications.weeklySummary,
+      recurringRemindersEnabled: notifications.recurringReminders,
+      autoImportAlertsEnabled: notifications.autoImport,
       theme: theme ?? this.theme,
       languageCode: languageCode ?? this.languageCode,
       autoImportPromptDismissed:
@@ -172,6 +201,7 @@ class UserSettings extends Equatable {
       NotificationToggle.budgetNearLimit => budgetNearLimitAlertsEnabled,
       NotificationToggle.weeklySummary => weeklySummaryEnabled,
       NotificationToggle.recurringReminders => recurringRemindersEnabled,
+      NotificationToggle.autoImport => autoImportAlertsEnabled,
     };
   }
 
@@ -189,6 +219,22 @@ class UserSettings extends Equatable {
       NotificationToggle.recurringReminders => copyWith(
         recurringRemindersEnabled: enabled,
       ),
+      NotificationToggle.autoImport => copyWith(
+        autoImportAlertsEnabled: enabled,
+      ),
     };
+  }
+
+  _NotificationFlags _notificationsWith(_NotificationOverrides overrides) {
+    return (
+      master: overrides.master ?? notificationsEnabled,
+      budgetOver: overrides.budgetOver ?? budgetOverAlertsEnabled,
+      budgetNearLimit:
+          overrides.budgetNearLimit ?? budgetNearLimitAlertsEnabled,
+      weeklySummary: overrides.weeklySummary ?? weeklySummaryEnabled,
+      recurringReminders:
+          overrides.recurringReminders ?? recurringRemindersEnabled,
+      autoImport: overrides.autoImport ?? autoImportAlertsEnabled,
+    );
   }
 }

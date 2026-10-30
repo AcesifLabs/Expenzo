@@ -10,6 +10,7 @@ import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 import 'package:expense_tracker/shared/presentation/widgets/scrollable_center.dart';
+import 'package:expense_tracker/shared/services/notification_permission.dart';
 
 class SmsPermissionGate extends StatefulWidget {
   final Widget child;
@@ -65,6 +66,7 @@ class _SmsPermissionGateState extends State<SmsPermissionGate> {
 
     if (status.isGranted) {
       unawaited(_startRealtimeProcessor());
+      unawaited(requestAutoImportPermissionIfNeeded());
     }
 
     if (!status.isGranted && status.isPermanentlyDenied && mounted) {

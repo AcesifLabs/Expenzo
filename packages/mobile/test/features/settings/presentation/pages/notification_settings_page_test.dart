@@ -70,15 +70,16 @@ void main() {
     ),
   );
 
-  testWidgets('renders four toggles with stored values, weekly off by '
+  testWidgets('renders five toggles with stored values, weekly off by '
       'default', (tester) async {
     await pump(tester);
 
-    expect(find.byType(Switch), findsNWidgets(5));
+    expect(find.byType(Switch), findsNWidgets(6));
     expect(switchFor(tester, 'Over budget alert').value, isTrue);
     expect(switchFor(tester, '80% threshold').value, isTrue);
     expect(switchFor(tester, 'Weekly summary').value, isFalse);
     expect(switchFor(tester, 'Reminder alerts').value, isTrue);
+    expect(switchFor(tester, 'Auto-imported transactions').value, isTrue);
     expect(
       find.text("Sunday evening: this week's spending compared with last week"),
       findsOneWidget,
@@ -108,7 +109,7 @@ void main() {
     ).called(1);
   });
 
-  testWidgets('master off disables the four toggles', (tester) async {
+  testWidgets('master off disables the five toggles', (tester) async {
     await pump(
       tester,
       settings: makeUserSettings(
@@ -122,6 +123,7 @@ void main() {
       '80% threshold',
       'Weekly summary',
       'Reminder alerts',
+      'Auto-imported transactions',
     ]) {
       expect(switchFor(tester, title).onChanged, isNull, reason: title);
     }

@@ -1,7 +1,7 @@
 {
   "channel": {
     "name": "App notifications",
-    "description": "Budget alerts, weekly summary, recurring reminders and scan results"
+    "description": "Budget alerts, weekly summary, recurring reminders, scan results and auto-imported transactions"
   },
   "budget": {
     "title": "Budget alert",
@@ -25,6 +25,17 @@
     "found": {
       "one": "{n} new expense found",
       "other": "{n} new expenses found"
+    }
+  },
+  "autoImport": {
+    "expenseTitle": "Expense added",
+    "incomeTitle": "Income added",
+    "body": "{amount} · {description}",
+    "bodyFromSender": "{amount} from {sender}",
+    "summaryTitle": "Transactions added from SMS",
+    "summary": {
+      "one": "{n} transaction added from SMS",
+      "other": "{n} transactions added from SMS"
     }
   },
   "syncError": {

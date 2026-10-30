@@ -2,7 +2,7 @@
   "@@i18n-review": "Machine-drafted Bangla. Needs native review before release.",
   "channel": {
     "name": "অ্যাপের নোটিফিকেশন",
-    "description": "বাজেট সতর্কতা, সাপ্তাহিক সারাংশ, পুনরাবৃত্ত রিমাইন্ডার ও স্ক্যানের ফলাফল"
+    "description": "বাজেট সতর্কতা, সাপ্তাহিক সারাংশ, পুনরাবৃত্ত রিমাইন্ডার, স্ক্যানের ফলাফল ও স্বয়ংক্রিয় ইমপোর্ট করা লেনদেন"
   },
   "budget": {
     "title": "বাজেট সতর্কতা",
@@ -26,6 +26,17 @@
     "found": {
       "one": "{n}টি নতুন খরচ পাওয়া গেছে",
       "other": "{n}টি নতুন খরচ পাওয়া গেছে"
+    }
+  },
+  "autoImport": {
+    "expenseTitle": "খরচ যোগ হয়েছে",
+    "incomeTitle": "আয় যোগ হয়েছে",
+    "body": "{amount} · {description}",
+    "bodyFromSender": "{sender} থেকে {amount}",
+    "summaryTitle": "SMS থেকে লেনদেন যোগ হয়েছে",
+    "summary": {
+      "one": "SMS থেকে {n}টি লেনদেন যোগ হয়েছে",
+      "other": "SMS থেকে {n}টি লেনদেন যোগ হয়েছে"
     }
   },
   "syncError": {

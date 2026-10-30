@@ -466,6 +466,7 @@ class Translations$notifications$en {
 	late final Translations$notifications$recurringDue$en recurringDue = Translations$notifications$recurringDue$en.internal(_root);
 	late final Translations$notifications$weeklySummary$en weeklySummary = Translations$notifications$weeklySummary$en.internal(_root);
 	late final Translations$notifications$scan$en scan = Translations$notifications$scan$en.internal(_root);
+	late final Translations$notifications$autoImport$en autoImport = Translations$notifications$autoImport$en.internal(_root);
 	late final Translations$notifications$syncError$en syncError = Translations$notifications$syncError$en.internal(_root);
 }
 
@@ -2224,8 +2225,8 @@ class Translations$notifications$channel$en {
 	/// en: 'App notifications'
 	String get name => 'App notifications';
 
-	/// en: 'Budget alerts, weekly summary, recurring reminders and scan results'
-	String get description => 'Budget alerts, weekly summary, recurring reminders and scan results';
+	/// en: 'Budget alerts, weekly summary, recurring reminders, scan results and auto-imported transactions'
+	String get description => 'Budget alerts, weekly summary, recurring reminders, scan results and auto-imported transactions';
 }
 
 // Path: notifications.budget
@@ -2303,6 +2304,36 @@ class Translations$notifications$scan$en {
 	String found({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
 		one: '${n} new expense found',
 		other: '${n} new expenses found',
+	);
+}
+
+// Path: notifications.autoImport
+class Translations$notifications$autoImport$en {
+	Translations$notifications$autoImport$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Expense added'
+	String get expenseTitle => 'Expense added';
+
+	/// en: 'Income added'
+	String get incomeTitle => 'Income added';
+
+	/// en: '{amount} · {description}'
+	String body({required Object amount, required Object description}) => '${amount} · ${description}';
+
+	/// en: '{amount} from {sender}'
+	String bodyFromSender({required Object amount, required Object sender}) => '${amount} from ${sender}';
+
+	/// en: 'Transactions added from SMS'
+	String get summaryTitle => 'Transactions added from SMS';
+
+	/// en: '(one) {{n} transaction added from SMS} (other) {{n} transactions added from SMS}'
+	String summary({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: '${n} transaction added from SMS',
+		other: '${n} transactions added from SMS',
 	);
 }
 
@@ -2971,8 +3002,8 @@ class Translations$settings$notifications$en {
 	/// en: 'Notifications'
 	String get title => 'Notifications';
 
-	/// en: '{n} of 4 on'
-	String rowSubtitle({required Object n}) => '${n} of 4 on';
+	/// en: '{n} of {total} on'
+	String rowSubtitle({required Object n, required Object total}) => '${n} of ${total} on';
 
 	/// en: 'Off'
 	String get rowSubtitleOff => 'Off';
@@ -2984,6 +3015,7 @@ class Translations$settings$notifications$en {
 	late final Translations$settings$notifications$nearLimit$en nearLimit = Translations$settings$notifications$nearLimit$en.internal(_root);
 	late final Translations$settings$notifications$weekly$en weekly = Translations$settings$notifications$weekly$en.internal(_root);
 	late final Translations$settings$notifications$reminders$en reminders = Translations$settings$notifications$reminders$en.internal(_root);
+	late final Translations$settings$notifications$autoImport$en autoImport = Translations$settings$notifications$autoImport$en.internal(_root);
 }
 
 // Path: settings.recurring
@@ -4243,6 +4275,9 @@ class Translations$settings$notifications$sections$en {
 
 	/// en: 'Recurring transactions'
 	String get recurring => 'Recurring transactions';
+
+	/// en: 'Auto-import'
+	String get autoImport => 'Auto-import';
 }
 
 // Path: settings.notifications.master
@@ -4256,8 +4291,8 @@ class Translations$settings$notifications$master$en {
 	/// en: 'Allow notifications'
 	String get title => 'Allow notifications';
 
-	/// en: 'Budget alerts, weekly summary and reminders'
-	String get subtitle => 'Budget alerts, weekly summary and reminders';
+	/// en: 'Budget alerts, weekly summary, reminders and auto-imported transactions'
+	String get subtitle => 'Budget alerts, weekly summary, reminders and auto-imported transactions';
 }
 
 // Path: settings.notifications.blocked
@@ -4333,6 +4368,21 @@ class Translations$settings$notifications$reminders$en {
 
 	/// en: 'Get reminded a day before recurring transactions'
 	String get subtitle => 'Get reminded a day before recurring transactions';
+}
+
+// Path: settings.notifications.autoImport
+class Translations$settings$notifications$autoImport$en {
+	Translations$settings$notifications$autoImport$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Auto-imported transactions'
+	String get title => 'Auto-imported transactions';
+
+	/// en: 'When a transaction is added from an SMS'
+	String get subtitle => 'When a transaction is added from an SMS';
 }
 
 // Path: settings.appearanceScreen.sections
@@ -5240,7 +5290,7 @@ extension on Translations {
 			'messageTemplates.watchlist.addSender' => 'Choose senders',
 			'messageTemplates.watchlist.loadFailed' => 'Couldn\'t load the watchlist. Try again.',
 			'notifications.channel.name' => 'App notifications',
-			'notifications.channel.description' => 'Budget alerts, weekly summary, recurring reminders and scan results',
+			'notifications.channel.description' => 'Budget alerts, weekly summary, recurring reminders, scan results and auto-imported transactions',
 			'notifications.budget.title' => 'Budget alert',
 			'notifications.budget.over' => ({required Object budget}) => 'You went over your "${budget}" budget.',
 			'notifications.budget.used' => ({required Object percent, required Object budget}) => 'You have used ${percent}% of your "${budget}" budget.',
@@ -5254,6 +5304,12 @@ extension on Translations {
 			'notifications.scan.smsTitle' => 'SMS scan complete',
 			'notifications.scan.emailTitle' => 'Email scan complete',
 			'notifications.scan.found' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} new expense found', other: '${n} new expenses found', ), 
+			'notifications.autoImport.expenseTitle' => 'Expense added',
+			'notifications.autoImport.incomeTitle' => 'Income added',
+			'notifications.autoImport.body' => ({required Object amount, required Object description}) => '${amount} · ${description}',
+			'notifications.autoImport.bodyFromSender' => ({required Object amount, required Object sender}) => '${amount} from ${sender}',
+			'notifications.autoImport.summaryTitle' => 'Transactions added from SMS',
+			'notifications.autoImport.summary' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} transaction added from SMS', other: '${n} transactions added from SMS', ), 
 			'notifications.syncError.title' => 'Sync error',
 			'onboarding.budgetNames.needs' => 'Needs',
 			'onboarding.budgetNames.wants' => 'Wants',
@@ -5288,14 +5344,14 @@ extension on Translations {
 			'onboarding.plan.createBudgets' => 'Create these as monthly budgets',
 			'onboarding.plan.noIncome' => 'Add your income on the first step to see a plan.',
 			'onboarding.plan.noRoom' => 'Your recurring payments use all of your income, so there is nothing left to split.',
+			_ => null,
+		} ?? switch (path) {
 			'onboarding.plan.chartLabel' => ({required Object needs, required Object wants, required Object savings}) => 'Needs ${needs}, wants ${wants}, savings ${savings}',
 			'onboarding.goal.title' => 'What are you saving for?',
 			'onboarding.goal.subtitle' => 'Set a savings goal and we\'ll help you track progress.',
 			'onboarding.goal.nameLabel' => 'Goal name',
 			'onboarding.goal.nameHint' => 'e.g. New laptop',
 			'onboarding.goal.amountLabel' => 'Target amount',
-			_ => null,
-		} ?? switch (path) {
 			'onboarding.goal.notNow' => 'No goal for now',
 			'onboarding.timeline.title' => 'Pick your timeline',
 			'onboarding.timeline.canAfford' => ({required Object name, required Object months, required Object amount}) => 'You can afford ${name} in ${months} months saving ${amount}/month.',
@@ -5479,13 +5535,14 @@ extension on Translations {
 			'settings.sections.dataBudget' => 'Data & budget',
 			'settings.sections.general' => 'General',
 			'settings.notifications.title' => 'Notifications',
-			'settings.notifications.rowSubtitle' => ({required Object n}) => '${n} of 4 on',
+			'settings.notifications.rowSubtitle' => ({required Object n, required Object total}) => '${n} of ${total} on',
 			'settings.notifications.rowSubtitleOff' => 'Off',
 			'settings.notifications.sections.general' => 'General',
 			'settings.notifications.sections.budgetAlerts' => 'Budget alerts',
 			'settings.notifications.sections.recurring' => 'Recurring transactions',
+			'settings.notifications.sections.autoImport' => 'Auto-import',
 			'settings.notifications.master.title' => 'Allow notifications',
-			'settings.notifications.master.subtitle' => 'Budget alerts, weekly summary and reminders',
+			'settings.notifications.master.subtitle' => 'Budget alerts, weekly summary, reminders and auto-imported transactions',
 			'settings.notifications.blocked.title' => 'Notifications are blocked',
 			'settings.notifications.blocked.action' => 'Open settings',
 			'settings.notifications.over.title' => 'Over budget alert',
@@ -5496,6 +5553,8 @@ extension on Translations {
 			'settings.notifications.weekly.subtitle' => ({required Object day}) => '${day} evening: this week\'s spending compared with last week',
 			'settings.notifications.reminders.title' => 'Reminder alerts',
 			'settings.notifications.reminders.subtitle' => 'Get reminded a day before recurring transactions',
+			'settings.notifications.autoImport.title' => 'Auto-imported transactions',
+			'settings.notifications.autoImport.subtitle' => 'When a transaction is added from an SMS',
 			'settings.autoImportSubtitle' => 'Turn bank and payment messages into transactions',
 			'settings.smsWatchlist' => 'SMS Watchlist',
 			'settings.smsWatchlistSubtitle' => 'Senders Expenzo reads',

@@ -105,6 +105,12 @@ The senders whose SMS the app reads to create Records: every sender with at leas
 
 _Avoid_: listeners, monitored sources (in user-facing text)
 
+## Auto-import Notification
+
+A notification sent when Auto-import creates a Record from an SMS: one per Record, or one summary when a single drain of queued SMS creates several. Has its own switch under Settings → Notifications, below the master switch. Not sent for duplicates or messages that fail to parse.
+
+_Avoid_: SMS alert, push notification (it is local)
+
 ## Transaction Sheet
 
 The keypad bottom sheet used both to add and to edit a Record. It is the only Record editor.

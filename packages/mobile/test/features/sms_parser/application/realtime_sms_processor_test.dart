@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart';
+import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/features/budgets/domain/usecases/check_budget_alerts.dart';
 import 'package:expense_tracker/features/message_templates/domain/entities/message_source.dart';
@@ -11,8 +12,10 @@ import 'package:expense_tracker/features/parsing_rules/domain/usecases/evaluate_
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
 import 'package:expense_tracker/features/records/domain/usecases/create_records_from_parsed_list.dart';
 import 'package:expense_tracker/features/sms_parser/application/realtime_sms_processor.dart';
+import 'package:expense_tracker/features/sms_parser/domain/entities/auto_imported_record.dart';
 import 'package:expense_tracker/features/sms_parser/domain/entities/incoming_sms_event.dart';
 import 'package:expense_tracker/features/sms_parser/domain/services/realtime_sms_listener.dart';
+import 'package:expense_tracker/features/sms_parser/domain/usecases/notify_auto_imported_records.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -29,9 +32,13 @@ class MockCreateRecordsFromParsedList extends Mock
 
 class MockCheckBudgetAlerts extends Mock implements CheckBudgetAlerts {}
 
+class MockNotifyAutoImportedRecords extends Mock
+    implements NotifyAutoImportedRecords {}
+
 void main() {
   setUpAll(() {
     registerFallbackValue(const ParsingContext(templates: [], sources: []));
+    registerFallbackValue(<AutoImportedRecord>[]);
   });
 
   late MockRealtimeSmsListener listener;
@@ -39,6 +46,7 @@ void main() {
   late MockParsingIsolateService parsingIsolateService;
   late MockRecordRepository recordRepository;
   late MockCreateRecordsFromParsedList createRecordsFromParsedList;
+  late MockNotifyAutoImportedRecords notifyAutoImportedRecords;
   late StreamController<IncomingSmsEvent> streamController;
   late RealtimeSmsProcessor processor;
 
@@ -57,6 +65,8 @@ void main() {
     parsingIsolateService = MockParsingIsolateService();
     recordRepository = MockRecordRepository();
     createRecordsFromParsedList = MockCreateRecordsFromParsedList();
+    notifyAutoImportedRecords = MockNotifyAutoImportedRecords();
+    when(() => notifyAutoImportedRecords(any())).thenAnswer((_) async {});
     streamController = StreamController<IncomingSmsEvent>.broadcast();
 
     when(() => listener.start()).thenAnswer((_) async {});
@@ -73,6 +83,7 @@ void main() {
       recordRepository: recordRepository,
       createRecordsFromParsedList: createRecordsFromParsedList,
       checkBudgetAlerts: noAlerts,
+      notifyAutoImportedRecords: notifyAutoImportedRecords,
     );
   });
 
@@ -581,6 +592,7 @@ void main() {
         recordRepository: recordRepository,
         createRecordsFromParsedList: createRecordsFromParsedList,
         checkBudgetAlerts: checkBudgetAlerts,
+        notifyAutoImportedRecords: notifyAutoImportedRecords,
       );
       when(() => evaluateRules.loadContext()).thenAnswer(
         (_) async => ParsingContext(templates: [], sources: [monitoredSource]),
@@ -641,6 +653,202 @@ void main() {
       await alertingProcessor.start();
 
       verifyNever(() => checkBudgetAlerts());
+    });
+
+    test('are not checked when creating the records fails', () async {
+      when(
+        () => recordRepository.getExistingSourceIds(any()),
+      ).thenAnswer((_) async => const Right(<String>{}));
+      when(
+        () => createRecordsFromParsedList(any()),
+      ).thenAnswer((_) async => const Left(CacheFailure(message: 'db failed')));
+
+      await alertingProcessor.start();
+
+      verifyNever(() => checkBudgetAlerts());
+    });
+  });
+
+  group('auto-import notifications', () {
+    ParsedTransaction parsedFor(
+      IncomingSmsEvent event, {
+      double? amount = 120,
+      String? description = 'Debited',
+    }) => ParsedTransaction(
+      rawMessage: event.body,
+      amount: amount,
+      date: event.receivedAt,
+      description: description,
+      categoryId: 'cat-1',
+      sourceType: 'sms',
+      sourceId: event.sourceId,
+      confidenceScore: 0.95,
+      matchedRuleId: 'rule-1',
+      parseFailed: false,
+    );
+
+    IncomingSmsEvent eventAt(int hour, {String address = 'VK-BANK'}) =>
+        IncomingSmsEvent(
+          address: address,
+          body: 'debited at $hour',
+          receivedAt: DateTime.utc(2026, 5, 26, hour),
+        );
+
+    void parseEachEventAs({double? amount = 120, String? description}) {
+      when(
+        () => parsingIsolateService.parseMessages(
+          messages: any(named: 'messages'),
+          context: any(named: 'context'),
+          sourceType: any(named: 'sourceType'),
+        ),
+      ).thenAnswer((invocation) async {
+        final input =
+            (invocation.namedArguments[#messages] as List<ParseMessageInput>)
+                .single;
+
+        return [
+          ParsedTransaction(
+            rawMessage: input.body,
+            amount: amount,
+            date: input.date,
+            description: description,
+            categoryId: 'cat-1',
+            sourceType: 'sms',
+            sourceId: input.sourceId,
+            confidenceScore: 0.95,
+            matchedRuleId: 'rule-1',
+            parseFailed: false,
+          ),
+        ];
+      });
+    }
+
+    setUp(() {
+      when(() => evaluateRules.loadContext()).thenAnswer(
+        (_) async => ParsingContext(templates: [], sources: [monitoredSource]),
+      );
+      when(
+        () => recordRepository.getExistingSourceIds(any()),
+      ).thenAnswer((_) async => const Right(<String>{}));
+      when(() => createRecordsFromParsedList(any())).thenAnswer(
+        (_) async => const Right(
+          CreateRecordsResult(
+            createdCount: 1,
+            skippedDuplicates: 0,
+            errors: [],
+          ),
+        ),
+      );
+    });
+
+    test('a live SMS that adds a record notifies with that record', () async {
+      final event = eventAt(10, address: ' VK-BANK ');
+      final notified = Completer<List<AutoImportedRecord>>();
+      when(() => notifyAutoImportedRecords(any())).thenAnswer((
+        invocation,
+      ) async {
+        notified.complete(
+          invocation.positionalArguments.single as List<AutoImportedRecord>,
+        );
+      });
+      parseEachEventAs(description: 'Daraz payment');
+
+      await processor.start();
+      streamController.add(event);
+
+      expect(await notified.future, [
+        AutoImportedRecord(
+          sourceId: event.sourceId,
+          amount: 120,
+          description: 'Daraz payment',
+          sender: 'VK-BANK',
+          recordType: RecordType.expense,
+        ),
+      ]);
+    });
+
+    test('a drain notifies once with every record it added', () async {
+      parseEachEventAs();
+      when(
+        () => listener.drainPendingMessages(),
+      ).thenAnswer((_) async => [eventAt(9), eventAt(10), eventAt(11)]);
+
+      await processor.start();
+
+      final captured = verify(
+        () => notifyAutoImportedRecords(captureAny()),
+      ).captured;
+      expect(captured, hasLength(1));
+      expect(captured.single, hasLength(3));
+    });
+
+    test('a drain that adds nothing does not notify', () async {
+      final event = eventAt(10);
+      when(
+        () => parsingIsolateService.parseMessages(
+          messages: any(named: 'messages'),
+          context: any(named: 'context'),
+          sourceType: any(named: 'sourceType'),
+        ),
+      ).thenAnswer((_) async => [parsedFor(event)]);
+      when(
+        () => recordRepository.getExistingSourceIds(any()),
+      ).thenAnswer((_) async => Right(<String>{event.sourceId}));
+      when(
+        () => listener.drainPendingMessages(),
+      ).thenAnswer((_) async => [event, eventAt(11, address: 'AX-FOO')]);
+
+      await processor.start();
+
+      verifyNever(() => notifyAutoImportedRecords(any()));
+    });
+
+    test('a failed record insert does not notify', () async {
+      parseEachEventAs();
+      when(
+        () => createRecordsFromParsedList(any()),
+      ).thenAnswer((_) async => const Left(CacheFailure(message: 'db failed')));
+      when(
+        () => listener.drainPendingMessages(),
+      ).thenAnswer((_) async => [eventAt(10)]);
+
+      await processor.start();
+
+      verifyNever(() => notifyAutoImportedRecords(any()));
+    });
+
+    test(
+      'records skipped as duplicates at insert time are not notified',
+      () async {
+        parseEachEventAs();
+        when(() => createRecordsFromParsedList(any())).thenAnswer(
+          (_) async => const Right(
+            CreateRecordsResult(
+              createdCount: 0,
+              skippedDuplicates: 1,
+              errors: [],
+            ),
+          ),
+        );
+        when(
+          () => listener.drainPendingMessages(),
+        ).thenAnswer((_) async => [eventAt(10)]);
+
+        await processor.start();
+
+        verifyNever(() => notifyAutoImportedRecords(any()));
+      },
+    );
+
+    test('a parsed result without an amount is not notified', () async {
+      parseEachEventAs(amount: null);
+      when(
+        () => listener.drainPendingMessages(),
+      ).thenAnswer((_) async => [eventAt(10)]);
+
+      await processor.start();
+
+      verifyNever(() => notifyAutoImportedRecords(any()));
     });
   });
 }

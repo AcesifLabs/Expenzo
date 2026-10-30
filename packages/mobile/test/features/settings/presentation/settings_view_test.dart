@@ -108,7 +108,7 @@ void main() {
     expect(find.byType(SwitchListTile), findsNothing);
   });
 
-  testWidgets('the notifications row shows 3 of 4 on with defaults', (
+  testWidgets('the notifications row shows 4 of 5 on with defaults', (
     tester,
   ) async {
     when(
@@ -118,7 +118,7 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await pumpSettings(tester);
 
-    expect(find.text('3 of 4 on'), findsOneWidget);
+    expect(find.text('4 of 5 on'), findsOneWidget);
   });
 
   testWidgets('the notifications row opens /settings/notifications', (

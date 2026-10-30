@@ -15,11 +15,12 @@ void main() {
     updatedAt: DateTime(2026),
   );
 
-  test('defaults: weekly summary off, the other three on', () {
+  test('defaults: weekly summary off, the other four on', () {
     expect(base.budgetOverAlertsEnabled, isTrue);
     expect(base.budgetNearLimitAlertsEnabled, isTrue);
     expect(base.weeklySummaryEnabled, isFalse);
     expect(base.recurringRemindersEnabled, isTrue);
+    expect(base.autoImportAlertsEnabled, isTrue);
   });
 
   test('isEnabled follows each toggle while the master switch is on', () {
@@ -27,6 +28,7 @@ void main() {
     expect(base.isEnabled(NotificationToggle.budgetNearLimit), isTrue);
     expect(base.isEnabled(NotificationToggle.weeklySummary), isFalse);
     expect(base.isEnabled(NotificationToggle.recurringReminders), isTrue);
+    expect(base.isEnabled(NotificationToggle.autoImport), isTrue);
   });
 
   test(
@@ -42,6 +44,25 @@ void main() {
       }
     },
   );
+
+  test('copyWith with no arguments keeps every field', () {
+    final custom = makeUserSettings(
+      notificationsEnabled: false,
+      weeklySummaryEnabled: true,
+      autoImportAlertsEnabled: false,
+    );
+
+    expect(custom.copyWith(), custom);
+  });
+
+  test('copyWith changes one notification field and keeps the rest', () {
+    final changed = base.copyWith(autoImportAlertsEnabled: false);
+
+    expect(changed.autoImportAlertsEnabled, isFalse);
+    expect(changed.notificationsEnabled, base.notificationsEnabled);
+    expect(changed.budgetOverAlertsEnabled, base.budgetOverAlertsEnabled);
+    expect(changed.weeklySummaryEnabled, base.weeklySummaryEnabled);
+  });
 
   test('withToggle changes only the matching field', () {
     expect(
@@ -59,6 +80,10 @@ void main() {
     expect(
       base.withToggle(NotificationToggle.recurringReminders, false),
       base.copyWith(recurringRemindersEnabled: false),
+    );
+    expect(
+      base.withToggle(NotificationToggle.autoImport, false),
+      base.copyWith(autoImportAlertsEnabled: false),
     );
   });
 

@@ -1,14 +1,17 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:expense_tracker/core/constants/record_type.dart';
 import 'package:expense_tracker/core/constants/source_types.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
 import 'package:expense_tracker/features/reports/domain/entities/weekly_summary.dart';
+import 'package:expense_tracker/features/sms_parser/domain/entities/auto_imported_record.dart';
 import 'package:expense_tracker/core/logger/app_logger.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 
 class NotificationService {
   static const String _channelId = 'app_notifications';
+  static const String _scheme = 'expenso';
 
   final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
@@ -91,12 +94,15 @@ class NotificationService {
       importance: Importance.high,
       priority: Priority.high,
       tag: tag,
+      visibility: type == NotificationType.autoImport
+          ? NotificationVisibility.private
+          : null,
     );
 
     final notificationDetails = NotificationDetails(android: androidDetails);
 
     await _notifications.show(
-      _idFor(type, deepLink),
+      idFor(type, deepLink),
       title,
       body,
       notificationDetails,
@@ -110,7 +116,7 @@ class NotificationService {
     required double percentage,
     required bool isOver,
   }) async {
-    final deepLink = 'expenso://budgets/$budgetId';
+    final deepLink = '$_scheme://budgets/$budgetId';
 
     final strings = t.notifications.budget;
     final body = isOver
@@ -132,7 +138,7 @@ class NotificationService {
     required String recurringId,
     required String description,
   }) async {
-    final deepLink = 'expenso://recurring/$recurringId';
+    final deepLink = '$_scheme://recurring/$recurringId';
 
     await showNotification(
       title: t.notifications.recurringDue.title,
@@ -147,7 +153,7 @@ class NotificationService {
       title: t.notifications.weeklySummary.title,
       body: weeklySummaryBody(summary),
       type: NotificationType.weeklySummary,
-      deepLink: 'expenso://reports',
+      deepLink: '$_scheme://reports',
     );
   }
 
@@ -156,7 +162,7 @@ class NotificationService {
     required String sourceType,
   }) async {
     final isSms = sourceType == ExpenseSource.sms.name;
-    final deepLink = isSms ? 'expenso://scan/sms' : 'expenso://scan/email';
+    final deepLink = isSms ? '$_scheme://scan/sms' : '$_scheme://scan/email';
     final strings = t.notifications.scan;
 
     await showNotification(
@@ -164,6 +170,29 @@ class NotificationService {
       body: strings.found(n: foundCount),
       type: NotificationType.scanComplete,
       deepLink: deepLink,
+    );
+  }
+
+  Future<void> showAutoImportedRecord(AutoImportedRecord record) async {
+    await showNotification(
+      title: autoImportedRecordTitle(record.recordType),
+      body: autoImportedRecordBody(
+        amount: record.amount,
+        description: record.description,
+        sender: record.sender,
+      ),
+      type: NotificationType.autoImport,
+      deepLink: autoImportedRecordLink(record.sourceId),
+    );
+  }
+
+  Future<void> showAutoImportSummary({required int count}) async {
+    final strings = t.notifications.autoImport;
+
+    await showNotification(
+      title: strings.summaryTitle,
+      body: strings.summary(n: count),
+      type: NotificationType.autoImport,
     );
   }
 
@@ -201,6 +230,51 @@ class NotificationService {
         : strings.down(amount: amount, percent: shown);
   }
 
+  @visibleForTesting
+  static String autoImportedRecordTitle(RecordType type) {
+    final strings = t.notifications.autoImport;
+
+    return type == RecordType.income
+        ? strings.incomeTitle
+        : strings.expenseTitle;
+  }
+
+  // The SMS source id is not a record id and holds characters such as '|'
+  // and spaces, so it goes in an encoded query parameter, not the path.
+  @visibleForTesting
+  static String autoImportedRecordLink(String sourceId) => Uri(
+    scheme: _scheme,
+    host: 'records',
+    queryParameters: {'sourceId': sourceId},
+  ).toString();
+
+  @visibleForTesting
+  static String autoImportedRecordBody({
+    required double amount,
+    required String? description,
+    required String sender,
+  }) {
+    final strings = t.notifications.autoImport;
+    final formatted = CurrencyFormatter.format(amount.abs());
+    final trimmed = description?.trim();
+
+    return trimmed == null || trimmed.isEmpty
+        ? strings.bodyFromSender(amount: formatted, sender: sender)
+        : strings.body(amount: formatted, description: trimmed);
+  }
+
+  @visibleForTesting
+  static int idFor(NotificationType type, String? deepLink) {
+    final perItem =
+        type == NotificationType.recurringDue ||
+        type == NotificationType.autoImport;
+    if (perItem && deepLink != null) {
+      return deepLink.hashCode;
+    }
+
+    return DateTime.now().millisecondsSinceEpoch ~/ 1000;
+  }
+
   static void _onNotificationTapped(NotificationResponse response) {
     final payload = response.payload;
     if (payload == null) return;
@@ -228,14 +302,6 @@ class NotificationService {
     }
   }
 
-  static int _idFor(NotificationType type, String? deepLink) {
-    if (type == NotificationType.recurringDue && deepLink != null) {
-      return deepLink.hashCode;
-    }
-
-    return DateTime.now().millisecondsSinceEpoch ~/ 1000;
-  }
-
   String _getTagForType(NotificationType type) {
     switch (type) {
       case NotificationType.budgetAlert:
@@ -248,6 +314,8 @@ class NotificationService {
         return 'scan_complete';
       case NotificationType.weeklySummary:
         return 'weekly_summary';
+      case NotificationType.autoImport:
+        return 'auto_import';
       case NotificationType.general:
         return 'general';
     }
@@ -260,5 +328,6 @@ enum NotificationType {
   syncError,
   scanComplete,
   weeklySummary,
+  autoImport,
   general,
 }

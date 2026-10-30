@@ -27,6 +27,7 @@ import 'package:expense_tracker/core/router/refresh_on_auth_change.dart';
 import 'package:expense_tracker/core/sync/sync_engine.dart';
 import 'package:expense_tracker/core/sync/sync_switch_watcher.dart';
 import 'package:expense_tracker/shared/services/feedback_mailer.dart';
+import 'package:expense_tracker/shared/services/notification_permission.dart';
 
 import 'core/background/background_task_scheduler.dart';
 import 'core/database/app_database.dart';
@@ -277,6 +278,7 @@ class _ExpenzoAppState extends State<ExpenzoApp> {
       final status = await Permission.sms.status;
       if (!status.isGranted) return;
       await di.getIt<RealtimeSmsProcessor>().start();
+      unawaited(requestAutoImportPermissionIfNeeded());
     } catch (e, s) {
       appLogger.error('Realtime SMS start skipped', e, s);
     }
