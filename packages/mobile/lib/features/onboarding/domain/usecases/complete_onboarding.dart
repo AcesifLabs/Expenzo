@@ -97,7 +97,6 @@ class CompleteOnboarding {
             target: draft.targetAmount,
             from: at,
             date: custom,
-            savingsPerMonth: 0,
           ).months
         : draft.months;
     final result = await goalRepository.createGoal(

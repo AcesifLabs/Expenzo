@@ -157,6 +157,31 @@ class RecordRepositoryImpl implements RecordRepository {
   }
 
   @override
+  Future<Either<CacheFailure, Set<String>>> deleteRecords(
+    List<String> ids,
+  ) async {
+    try {
+      final deleted = await localDatasource.deleteRecords(ids);
+      final syncQueueDao = _syncQueueDao;
+      if (syncQueueDao != null && deleted.isNotEmpty) {
+        await syncQueueDao.enqueueAll([
+          for (final id in deleted)
+            (tableName: 'records', recordId: id, action: 'delete', payload: ''),
+        ]);
+        SyncEventBus().trigger();
+      }
+
+      return Right(deleted);
+    } on CacheException catch (e) {
+      return Left(e.toFailure());
+    } catch (e, s) {
+      appLogger.error('RecordRepositoryImpl.deleteRecords failed', e, s);
+
+      return Left(CacheFailure(message: e.toString()));
+    }
+  }
+
+  @override
   Stream<List<Record>> watchRecords({int? limit, int? offset}) {
     return localDatasource.watchRecords(limit: limit, offset: offset);
   }

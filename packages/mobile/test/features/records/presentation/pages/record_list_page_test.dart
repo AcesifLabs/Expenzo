@@ -11,7 +11,6 @@ import 'package:expense_tracker/features/categories/domain/usecases/search_categ
 import 'package:expense_tracker/features/categories/domain/usecases/update_category.dart';
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
 import 'package:expense_tracker/features/records/domain/usecases/add_record.dart';
-import 'package:expense_tracker/features/records/domain/usecases/delete_record.dart';
 import 'package:expense_tracker/features/records/domain/usecases/get_records.dart';
 import 'package:expense_tracker/features/records/domain/usecases/update_record.dart';
 import 'package:expense_tracker/features/records/presentation/bloc/record_bloc.dart';
@@ -27,8 +26,6 @@ class _MockGetRecords extends Mock implements GetRecords {}
 class _MockAddRecord extends Mock implements AddRecord {}
 
 class _MockUpdateRecord extends Mock implements UpdateRecord {}
-
-class _MockDeleteRecord extends Mock implements DeleteRecord {}
 
 class _MockRecordRepository extends Mock implements RecordRepository {}
 
@@ -48,11 +45,11 @@ class _TestRecordBloc extends RecordBloc {
         getRecords: _MockGetRecords(),
         addRecord: _MockAddRecord(),
         updateRecord: _MockUpdateRecord(),
-        deleteRecord: _MockDeleteRecord(),
         recordRepository: _MockRecordRepository(),
       );
 
   List<Record> _records;
+  List<Record> _deleted = const [];
   var loadRequests = 0;
 
   void seed() => _emitLoaded();
@@ -64,8 +61,16 @@ class _TestRecordBloc extends RecordBloc {
 
   @override
   void add(RecordEvent event) {
-    if (event is DeleteRecordEvent) {
-      _records = _records.where((r) => r.id != event.id).toList();
+    if (event is DeleteRecordsEvent) {
+      _deleted = event.records;
+      _records = _records.where((r) => !_deleted.contains(r)).toList();
+      _emitLoaded();
+
+      return;
+    }
+    if (event is RestoreDeletedRecords) {
+      _records = [..._records, ..._deleted];
+      _deleted = const [];
       _emitLoaded();
 
       return;
@@ -109,8 +114,24 @@ Widget _wrap(RecordBloc recordBloc, CategoryBloc categoryBloc) {
   );
 }
 
-Future<void> _swipeAway(WidgetTester tester, String id) async {
-  await tester.drag(find.byKey(Key('record_$id')), const Offset(-600, 0));
+Future<_TestRecordBloc> _pumpList(WidgetTester tester) async {
+  final bloc = _TestRecordBloc([
+    makeRecord(id: 'rec-1', description: 'Coffee'),
+    makeRecord(id: 'rec-2', description: 'Lunch'),
+    makeRecord(id: 'rec-3', description: 'Taxi'),
+  ]);
+  addTearDown(bloc.close);
+  final categoryBloc = _TestCategoryBloc();
+  addTearDown(categoryBloc.close);
+  await tester.pumpWidget(_wrap(bloc, categoryBloc));
+  bloc.seed();
+  await tester.pump();
+
+  return bloc;
+}
+
+Future<void> _longPress(WidgetTester tester, String text) async {
+  await tester.longPress(find.text(text));
   await tester.pumpAndSettle();
 }
 
@@ -120,54 +141,89 @@ Future<void> _dismissSnackBar(WidgetTester tester) async {
 }
 
 void main() {
-  group('RecordListView delete SnackBar', () {
-    testWidgets('a burst of deletes shows one SnackBar, not a queue', (
-      tester,
-    ) async {
-      final bloc = _TestRecordBloc([
-        makeRecord(id: 'rec-1', description: 'Coffee'),
-        makeRecord(id: 'rec-2', description: 'Lunch'),
-      ]);
-      addTearDown(bloc.close);
-      final categoryBloc = _TestCategoryBloc();
-      addTearDown(categoryBloc.close);
+  group('RecordListView selection', () {
+    testWidgets('swiping a card no longer deletes it', (tester) async {
+      await _pumpList(tester);
 
-      await tester.pumpWidget(_wrap(bloc, categoryBloc));
-      bloc.seed();
-      await tester.pump();
+      await tester.drag(find.text('Coffee'), const Offset(-600, 0));
+      await tester.pumpAndSettle();
 
-      await _swipeAway(tester, 'rec-1');
-      await _swipeAway(tester, 'rec-2');
-
-      expect(find.text('Record deleted'), findsOneWidget);
-
-      await _dismissSnackBar(tester);
-
+      expect(find.text('Coffee'), findsOneWidget);
       expect(find.byType(SnackBar), findsNothing);
     });
 
-    testWidgets('a single delete still shows the SnackBar with Undo', (
+    testWidgets('long-press selects, tap toggles, header shows the count', (
       tester,
     ) async {
-      final bloc = _TestRecordBloc([
-        makeRecord(id: 'rec-1', description: 'Coffee'),
-      ]);
-      addTearDown(bloc.close);
-      final categoryBloc = _TestCategoryBloc();
-      addTearDown(categoryBloc.close);
+      await _pumpList(tester);
 
-      await tester.pumpWidget(_wrap(bloc, categoryBloc));
-      bloc.seed();
-      await tester.pump();
+      await _longPress(tester, 'Coffee');
+      expect(find.text('1 selected'), findsOneWidget);
+      expect(find.text('Activity'), findsNothing);
+      expect(find.text('Filter'), findsNothing);
 
-      await _swipeAway(tester, 'rec-1');
+      await tester.tap(find.text('Lunch'));
+      await tester.pumpAndSettle();
+      expect(find.text('2 selected'), findsOneWidget);
 
-      expect(find.text('Record deleted'), findsOneWidget);
-      expect(find.text('Undo'), findsOneWidget);
+      await tester.tap(find.text('Coffee'));
+      await tester.pumpAndSettle();
+      expect(find.text('1 selected'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Clear selection'));
+      await tester.pumpAndSettle();
+      expect(find.text('Activity'), findsOneWidget);
+    });
+
+    testWidgets('select all, delete, then Undo restores the records', (
+      tester,
+    ) async {
+      await _pumpList(tester);
+
+      await _longPress(tester, 'Coffee');
+      await tester.tap(find.byTooltip('Select all'));
+      await tester.pumpAndSettle();
+      expect(find.text('3 selected'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Delete'));
+      await tester.pumpAndSettle();
+      expect(find.text('Coffee'), findsNothing);
+      expect(find.text('Taxi'), findsNothing);
+      expect(find.text('3 records deleted'), findsOneWidget);
+      expect(find.text('Activity'), findsOneWidget);
+
+      await tester.tap(find.text('Undo'));
+      await tester.pumpAndSettle();
+      expect(find.text('Coffee'), findsOneWidget);
+      expect(find.text('Lunch'), findsOneWidget);
+      expect(find.text('Taxi'), findsOneWidget);
+    });
+
+    testWidgets('system back clears the selection first', (tester) async {
+      await _pumpList(tester);
+
+      await _longPress(tester, 'Coffee');
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+
+      expect(find.text('1 selected'), findsNothing);
+      expect(find.text('Activity'), findsOneWidget);
+    });
+
+    testWidgets('deleting one selected record says 1 record deleted', (
+      tester,
+    ) async {
+      await _pumpList(tester);
+
+      await _longPress(tester, 'Lunch');
+      await tester.tap(find.byTooltip('Delete'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Lunch'), findsNothing);
+      expect(find.text('Coffee'), findsOneWidget);
+      expect(find.text('1 record deleted'), findsOneWidget);
 
       await _dismissSnackBar(tester);
-
-      expect(find.byType(SnackBar), findsNothing);
     });
   });
 

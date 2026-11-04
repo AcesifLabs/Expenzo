@@ -22,6 +22,7 @@ abstract class RecordLocalDatasource {
   Future<rec.Record> addRecord(rec.Record record);
   Future<rec.Record> updateRecord(rec.Record record);
   Future<void> deleteRecord(String id);
+  Future<Set<String>> deleteRecords(List<String> ids);
   Stream<List<rec.Record>> watchRecords({int? limit, int? offset});
 
   Future<bool> recordExistsBySourceId(String sourceId);
@@ -183,6 +184,16 @@ class RecordLocalDatasourceImpl implements RecordLocalDatasource {
   Future<void> deleteRecord(String id) async {
     try {
       await recordDao.deleteRecord(id);
+    } catch (e, s) {
+      appLogger.error('Record local datasource error', e, s);
+      throw CacheException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<Set<String>> deleteRecords(List<String> ids) async {
+    try {
+      return await recordDao.deleteRecords(ids);
     } catch (e, s) {
       appLogger.error('Record local datasource error', e, s);
       throw CacheException(message: e.toString());

@@ -22,7 +22,16 @@
     "noMatches": "No transactions match your search or filters.",
     "empty": "No transactions yet",
     "scrollForMore": "Scroll for more",
-    "deleted": "Record deleted"
+    "deleted": {
+      "one": "{n} record deleted",
+      "other": "{n} records deleted"
+    },
+    "selected": {
+      "one": "{n} selected",
+      "other": "{n} selected"
+    },
+    "selectAll": "Select all",
+    "clearSelection": "Clear selection"
   },
   "picker": {
     "title": "Choose category",

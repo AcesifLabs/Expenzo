@@ -98,6 +98,25 @@ void main() {
     expect(find.textContaining('2027'), findsOneWidget);
   });
 
+  testWidgets('picking a new date and saving sends that date', (tester) async {
+    await pumpForm(tester, ready(goal), goalId: 'g-1');
+
+    await tester.tap(find.textContaining('2027'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Next month'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('15'));
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(t.common.save));
+    await tester.pump();
+
+    final saved = verify(
+      () => bloc.add(captureAny()),
+    ).captured.whereType<GoalFormSaved>().single;
+    expect(saved.goal.targetDate, DateTime(2027, 2, 15));
+  });
+
   testWidgets('delete asks first; Cancel sends nothing', (tester) async {
     await pumpForm(tester, ready(goal), goalId: 'g-1');
 

@@ -55,7 +55,7 @@ class _AppShellState extends State<AppShell> {
         child: Container(
           height: NavBarMetrics.height,
           decoration: BoxDecoration(
-            color: colors.surface.withAlpha(240),
+            color: colors.surface,
             borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
             boxShadow: [
               BoxShadow(

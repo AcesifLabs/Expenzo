@@ -21,6 +21,9 @@ object SmsEventStore {
         eventSink = sink
     }
 
+    /** True while a running Flutter engine is listening for live SMS events. */
+    fun hasListener(): Boolean = eventSink != null
+
     fun appendEvent(context: Context, payload: Map<String, Any>, fromReceiver: Boolean = false) {
         val payloadJson = JSONObject(payload).toString()
         val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)

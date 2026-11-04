@@ -50,20 +50,13 @@
   },
   "timeline": {
     "title": "সময়সীমা বাছুন",
-    "canAfford": "মাসে {amount} সঞ্চয় করলে {months} মাসে {name} কিনতে পারবেন।",
-    "cannotAfford": "মাসে {amount} সঞ্চয় দিয়ে এগুলো হবে না। আরও পরের একটি নিজস্ব তারিখ বাছুন।",
     "months": {
       "one": "{n} মাস",
       "other": "{n} মাস"
     },
     "perMonth": "{amount}/মাস",
     "custom": "নিজস্ব",
-    "customHint": "নিজে ঠিক করুন",
-    "fit": {
-      "affordable": "আপনার সঞ্চয়ে হবে",
-      "tooExpensive": "আপনার সঞ্চয়ের চেয়ে বেশি",
-      "slow": "অনেক সময় লাগবে"
-    }
+    "customHint": "নিজে ঠিক করুন"
   },
   "complete": {
     "title": "সেটআপ সম্পন্ন!",

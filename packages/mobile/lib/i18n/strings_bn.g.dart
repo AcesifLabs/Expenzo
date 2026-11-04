@@ -1564,8 +1564,6 @@ class _Translations$onboarding$timeline$bn extends Translations$onboarding$timel
 
 	// Translations
 	@override String get title => 'সময়সীমা বাছুন';
-	@override String canAfford({required Object amount, required Object months, required Object name}) => 'মাসে ${amount} সঞ্চয় করলে ${months} মাসে ${name} কিনতে পারবেন।';
-	@override String cannotAfford({required Object amount}) => 'মাসে ${amount} সঞ্চয় দিয়ে এগুলো হবে না। আরও পরের একটি নিজস্ব তারিখ বাছুন।';
 	@override String months({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n,
 		one: '${n} মাস',
 		other: '${n} মাস',
@@ -1573,7 +1571,6 @@ class _Translations$onboarding$timeline$bn extends Translations$onboarding$timel
 	@override String perMonth({required Object amount}) => '${amount}/মাস';
 	@override String get custom => 'নিজস্ব';
 	@override String get customHint => 'নিজে ঠিক করুন';
-	@override late final _Translations$onboarding$timeline$fit$bn fit = _Translations$onboarding$timeline$fit$bn._(_root);
 }
 
 // Path: onboarding.complete
@@ -1646,7 +1643,16 @@ class _Translations$records$list$bn extends Translations$records$list$en {
 	@override String get noMatches => 'আপনার খোঁজ বা ফিল্টারের সাথে মেলে এমন কোনো লেনদেন নেই।';
 	@override String get empty => 'এখনো কোনো লেনদেন নেই';
 	@override String get scrollForMore => 'আরও দেখতে স্ক্রল করুন';
-	@override String get deleted => 'রেকর্ড মুছে ফেলা হয়েছে';
+	@override String deleted({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n,
+		one: '${n}টি রেকর্ড মুছে ফেলা হয়েছে',
+		other: '${n}টি রেকর্ড মুছে ফেলা হয়েছে',
+	);
+	@override String selected({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n,
+		one: '${n}টি বাছাই করা হয়েছে',
+		other: '${n}টি বাছাই করা হয়েছে',
+	);
+	@override String get selectAll => 'সব বাছুন';
+	@override String get clearSelection => 'বাছাই বাতিল করুন';
 }
 
 // Path: records.picker
@@ -2484,18 +2490,6 @@ class _Translations$onboarding$recurring$sheet$bn extends Translations$onboardin
 	@override String get nameHint => 'যেমন: ভাড়া';
 	@override String get amount => 'পরিমাণ';
 	@override String get frequency => 'পুনরাবৃত্তি';
-}
-
-// Path: onboarding.timeline.fit
-class _Translations$onboarding$timeline$fit$bn extends Translations$onboarding$timeline$fit$en {
-	_Translations$onboarding$timeline$fit$bn._(TranslationsBn root) : this._root = root, super.internal(root);
-
-	final TranslationsBn _root; // ignore: unused_field
-
-	// Translations
-	@override String get affordable => 'আপনার সঞ্চয়ে হবে';
-	@override String get tooExpensive => 'আপনার সঞ্চয়ের চেয়ে বেশি';
-	@override String get slow => 'অনেক সময় লাগবে';
 }
 
 // Path: onboarding.tutorial.dashboard
@@ -3596,15 +3590,10 @@ extension on TranslationsBn {
 			'onboarding.goal.amountLabel' => 'লক্ষ্য পরিমাণ',
 			'onboarding.goal.notNow' => 'এখন কোনো লক্ষ্য নয়',
 			'onboarding.timeline.title' => 'সময়সীমা বাছুন',
-			'onboarding.timeline.canAfford' => ({required Object amount, required Object months, required Object name}) => 'মাসে ${amount} সঞ্চয় করলে ${months} মাসে ${name} কিনতে পারবেন।',
-			'onboarding.timeline.cannotAfford' => ({required Object amount}) => 'মাসে ${amount} সঞ্চয় দিয়ে এগুলো হবে না। আরও পরের একটি নিজস্ব তারিখ বাছুন।',
 			'onboarding.timeline.months' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n, one: '${n} মাস', other: '${n} মাস', ), 
 			'onboarding.timeline.perMonth' => ({required Object amount}) => '${amount}/মাস',
 			'onboarding.timeline.custom' => 'নিজস্ব',
 			'onboarding.timeline.customHint' => 'নিজে ঠিক করুন',
-			'onboarding.timeline.fit.affordable' => 'আপনার সঞ্চয়ে হবে',
-			'onboarding.timeline.fit.tooExpensive' => 'আপনার সঞ্চয়ের চেয়ে বেশি',
-			'onboarding.timeline.fit.slow' => 'অনেক সময় লাগবে',
 			'onboarding.complete.title' => 'সেটআপ সম্পন্ন!',
 			'onboarding.complete.budgets' => 'বাজেট তৈরি হয়েছে',
 			'onboarding.complete.recurring' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n, one: '${n}টি নিয়মিত পেমেন্ট', other: '${n}টি নিয়মিত পেমেন্ট', ), 
@@ -3657,7 +3646,10 @@ extension on TranslationsBn {
 			'records.list.noMatches' => 'আপনার খোঁজ বা ফিল্টারের সাথে মেলে এমন কোনো লেনদেন নেই।',
 			'records.list.empty' => 'এখনো কোনো লেনদেন নেই',
 			'records.list.scrollForMore' => 'আরও দেখতে স্ক্রল করুন',
-			'records.list.deleted' => 'রেকর্ড মুছে ফেলা হয়েছে',
+			'records.list.deleted' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n, one: '${n}টি রেকর্ড মুছে ফেলা হয়েছে', other: '${n}টি রেকর্ড মুছে ফেলা হয়েছে', ), 
+			'records.list.selected' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('bn'))(n, one: '${n}টি বাছাই করা হয়েছে', other: '${n}টি বাছাই করা হয়েছে', ), 
+			'records.list.selectAll' => 'সব বাছুন',
+			'records.list.clearSelection' => 'বাছাই বাতিল করুন',
 			'records.picker.title' => 'ক্যাটাগরি বেছে নিন',
 			'records.picker.search' => 'ক্যাটাগরি খুঁজুন',
 			'records.picker.noneFound' => 'কোনো ক্যাটাগরি পাওয়া যায়নি',

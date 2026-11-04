@@ -38,7 +38,7 @@ void applyBackgroundSettings(UserSettings settings) {
   WeekStart.apply(settings.effectiveFirstDayOfWeek(locale.languageCode));
 }
 
-Future<bool> _runInBackground(String task, Map<String, dynamic>? _) async {
+Future<bool> _runInBackground(String task, Map<String, dynamic>? input) async {
   try {
     registerPluralResolvers();
     await initializeDateFormatting();
@@ -53,7 +53,7 @@ Future<bool> _runInBackground(String task, Map<String, dynamic>? _) async {
     final settings = result.fold((_) => null, (s) => s);
     if (settings != null) applyBackgroundSettings(settings);
 
-    return di.getIt<BackgroundTaskRunner>().run(task);
+    return di.getIt<BackgroundTaskRunner>().run(task, input: input);
   } catch (e, s) {
     appLogger.error('Background setup for $task failed', e, s);
 

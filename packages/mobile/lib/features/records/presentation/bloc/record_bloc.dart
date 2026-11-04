@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:expense_tracker/core/bloc/transformers.dart';
 import '../../domain/repositories/record_repository.dart';
 import '../../domain/usecases/add_record.dart';
-import '../../domain/usecases/delete_record.dart';
 import '../../domain/usecases/get_records.dart';
 import '../../domain/usecases/update_record.dart';
 import 'record_event.dart';
@@ -19,25 +18,25 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
   final GetRecords getRecords;
   final AddRecord addRecord;
   final UpdateRecord updateRecord;
-  final DeleteRecord deleteRecord;
   final RecordRepository recordRepository;
 
   StreamSubscription<List<Record>>? _recordsSubscription;
 
   int _watchedLimit = _pageSize;
 
+  List<Record> _lastDeleted = const [];
+
   RecordBloc({
     required this.getRecords,
     required this.addRecord,
     required this.updateRecord,
-    required this.deleteRecord,
     required this.recordRepository,
   }) : super(const RecordInitial()) {
     on<LoadRecords>(_onLoadRecords, transformer: sequential());
     on<LoadMoreRecords>(_onLoadMoreRecords, transformer: sequential());
     on<AddRecordEvent>(_onAddRecord, transformer: sequential());
     on<UpdateRecordEvent>(_onUpdateRecord, transformer: sequential());
-    on<DeleteRecordEvent>(_onDeleteRecord, transformer: sequential());
+    on<RecordBulkEvent>(_onBulkEvent, transformer: sequential());
     on<RefreshRecords>(_onRefreshRecords, transformer: concurrent());
     on<SearchRecords>(_onSearchRecords, transformer: concurrent());
     on<ApplyFilters>(_onApplyFilters, transformer: concurrent());
@@ -203,12 +202,32 @@ class RecordBloc extends Bloc<RecordEvent, RecordState> {
     );
   }
 
-  Future<void> _onDeleteRecord(
-    DeleteRecordEvent event,
+  Future<void> _onBulkEvent(RecordBulkEvent event, Emitter<RecordState> emit) =>
+      switch (event) {
+        DeleteRecordsEvent(:final records) => _deleteRecords(records, emit),
+        RestoreDeletedRecords() => _restoreDeleted(emit),
+      };
+
+  Future<void> _deleteRecords(
+    List<Record> records,
     Emitter<RecordState> emit,
   ) async {
-    final result = await deleteRecord(event.id);
+    _lastDeleted = const [];
+    final ids = records.map((r) => r.id).nonNulls.toList();
+    if (ids.isEmpty) return;
+    final result = await recordRepository.deleteRecords(ids);
+    result.fold((failure) => emit(RecordError(failureText(failure))), (
+      deleted,
+    ) {
+      _lastDeleted = records.where((r) => deleted.contains(r.id)).toList();
+    });
+  }
 
+  Future<void> _restoreDeleted(Emitter<RecordState> emit) async {
+    final records = _lastDeleted;
+    _lastDeleted = const [];
+    if (records.isEmpty) return;
+    final result = await recordRepository.addRecordsBatch(records);
     result.fold(
       (failure) => emit(RecordError(failureText(failure))),
       (_) => null,

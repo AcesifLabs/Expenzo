@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:expense_tracker/core/error/failures.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
-import 'package:expense_tracker/features/budgets/domain/entities/plan_row.dart';
+import 'package:expense_tracker/core/utils/money.dart';
 import 'package:expense_tracker/features/onboarding/domain/entities/income_frequency.dart';
 import 'package:expense_tracker/features/onboarding/domain/entities/onboarding_draft.dart';
 import 'package:expense_tracker/features/onboarding/domain/entities/onboarding_result.dart';
@@ -37,10 +37,7 @@ void main() {
 
   Finder months(int n) => find.text(t.onboarding.timeline.months(n: n));
 
-  Finder mark(String label) =>
-      find.byWidgetPredicate((w) => w is Icon && w.semanticLabel == label);
-
-  testWidgets('only "1 month" is marked as more than the savings', (
+  testWidgets('lists 3 to 15 months at target / months, then Custom', (
     tester,
   ) async {
     await pumpOnboardingWidget(
@@ -49,44 +46,37 @@ void main() {
       events: draftEvents,
     );
 
-    expect(mark(t.onboarding.timeline.fit.tooExpensive), findsOneWidget);
-    expect(mark(t.onboarding.timeline.fit.slow), findsOneWidget);
-    expect(mark(t.onboarding.timeline.fit.affordable), findsNWidgets(2));
-  });
-
-  List<OnboardingEvent> withRows(List<PlanRow> rows) => [
-    for (final event in draftEvents)
-      event is BudgetPlanSubmitted ? BudgetPlanSubmitted(rows) : event,
-  ];
-
-  String canAfford(int months, double amount) =>
-      t.onboarding.timeline.canAfford(
-        name: 'Laptop',
-        months: months,
-        amount: CurrencyFormatter.format(amount),
+    expect(months(1), findsNothing);
+    for (final n in [3, 6, 9, 12, 15]) {
+      expect(months(n), findsOneWidget);
+      expect(
+        find.text(
+          t.onboarding.timeline.perMonth(
+            amount: CurrencyFormatter.format(roundMoney(1999 / n)),
+          ),
+        ),
+        findsOneWidget,
       );
-
-  testWidgets('a renamed Savings row still sets the savings', (tester) async {
-    await pumpOnboardingWidget(
-      tester,
-      const OnboardingTimelinePage(),
-      events: withRows([
-        suggestedRows.first,
-        suggestedRows.last.copyWith(name: 'Rainy day', amount: 2000),
-      ]),
-    );
-
-    expect(find.text(canAfford(1, 2000)), findsOneWidget);
+    }
+    expect(find.text(t.onboarding.timeline.custom), findsOneWidget);
   });
 
-  testWidgets('without a Savings row it uses what is left', (tester) async {
+  testWidgets('shows no affordability marks or savings subtitle', (
+    tester,
+  ) async {
     await pumpOnboardingWidget(
       tester,
       const OnboardingTimelinePage(),
-      events: withRows([suggestedRows.first]),
+      events: draftEvents,
     );
 
-    expect(find.text(canAfford(3, 3775 - 1887.5)), findsOneWidget);
+    expect(
+      find.byWidgetPredicate(
+        (w) => w is Icon && (w.semanticLabel?.isNotEmpty ?? false),
+      ),
+      findsNothing,
+    );
+    expect(find.textContaining('afford'), findsNothing);
   });
 
   testWidgets('choosing 3 months shows the summary with the goal', (

@@ -13,7 +13,6 @@ import 'package:expense_tracker/features/categories/presentation/bloc/category_e
 import 'package:expense_tracker/features/records/data/datasources/record_local_datasource.dart';
 import 'package:expense_tracker/features/records/data/repositories/record_repository_impl.dart';
 import 'package:expense_tracker/features/records/domain/usecases/add_record.dart';
-import 'package:expense_tracker/features/records/domain/usecases/delete_record.dart';
 import 'package:expense_tracker/features/records/domain/usecases/get_records.dart';
 import 'package:expense_tracker/features/records/domain/usecases/update_record.dart';
 import 'package:expense_tracker/features/records/presentation/bloc/record_bloc.dart';
@@ -73,7 +72,6 @@ void main() {
       getRecords: GetRecords(repository),
       addRecord: AddRecord(repository, _MockCategoryRepository()),
       updateRecord: UpdateRecord(repository),
-      deleteRecord: DeleteRecord(repository),
       recordRepository: repository,
     );
   });

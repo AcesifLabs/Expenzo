@@ -6,6 +6,7 @@ const _fillAllowlist = {
   'shared/presentation/widgets/app_shell.dart',
   'core/router/app_root_tab.dart',
   'features/support/presentation/pages/rate_app_page.dart',
+  'features/records/presentation/widgets/record_card.dart',
 };
 
 Iterable<(String, String)> _libFiles() sync* {
@@ -40,7 +41,8 @@ void main() {
     expect(
       _offenders(RegExp(r'PiconsFill\.'), allow: _fillAllowlist),
       isEmpty,
-      reason: 'PiconsFill is only for a selected state (tab, rating stars).',
+      reason:
+          'PiconsFill is only for a selected state (tab, rating stars, selected record).',
     );
   });
 }

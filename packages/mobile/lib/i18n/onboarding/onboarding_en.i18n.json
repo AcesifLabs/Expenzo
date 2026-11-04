@@ -49,20 +49,13 @@
   },
   "timeline": {
     "title": "Pick your timeline",
-    "canAfford": "You can afford {name} in {months} months saving {amount}/month.",
-    "cannotAfford": "Your savings of {amount}/month don't cover these. Pick a later custom date.",
     "months": {
       "one": "{n} month",
       "other": "{n} months"
     },
     "perMonth": "{amount}/mo",
     "custom": "Custom",
-    "customHint": "Set your own",
-    "fit": {
-      "affordable": "Fits your savings",
-      "tooExpensive": "More than your savings",
-      "slow": "Takes a long time"
-    }
+    "customHint": "Set your own"
   },
   "complete": {
     "title": "Setup complete!",

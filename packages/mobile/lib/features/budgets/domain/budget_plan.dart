@@ -54,17 +54,6 @@ double planTotal(List<PlanRow> rows) =>
 double planRemaining(double base, List<PlanRow> rows) =>
     roundMoney(base - planTotal(rows));
 
-/// The savings a goal can count on: the suggested Savings row if the user
-/// kept it, otherwise whatever no row claims.
-double planSavings(double base, List<PlanRow> rows) {
-  for (final row in rows) {
-    if (row.isSavings) return row.amount;
-  }
-  final remaining = planRemaining(base, rows);
-
-  return remaining > 0 ? remaining : 0;
-}
-
 /// Scales every row so they keep their proportions and add up to [base].
 /// Rows that are all 0 share it evenly. The largest row takes the
 /// rounding, so no row can go below 0.

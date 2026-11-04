@@ -34,13 +34,24 @@ class UpdateRecordEvent extends RecordEvent {
   const UpdateRecordEvent(this.record);
 }
 
-class DeleteRecordEvent extends RecordEvent {
-  final String id;
+/// Bulk delete and its undo. They share one queue so an undo always runs
+/// after the delete it reverses has finished.
+sealed class RecordBulkEvent extends RecordEvent {
+  const RecordBulkEvent();
+}
+
+class DeleteRecordsEvent extends RecordBulkEvent {
+  final List<Record> records;
 
   @override
-  List<Object?> get props => [id];
+  List<Object?> get props => [records];
 
-  const DeleteRecordEvent(this.id);
+  const DeleteRecordsEvent(this.records);
+}
+
+/// Re-adds the records the last [DeleteRecordsEvent] actually deleted.
+class RestoreDeletedRecords extends RecordBulkEvent {
+  const RestoreDeletedRecords();
 }
 
 class RefreshRecords extends RecordEvent {

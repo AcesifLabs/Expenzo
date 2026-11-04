@@ -7,7 +7,7 @@ class AppConstants {
   static const double wantsShare = 0.3;
   static const double savingsShare = 0.2;
 
-  static const List<int> goalTimelineMonths = [1, 3, 6, 12];
+  static const List<int> goalTimelineMonths = [3, 6, 9, 12, 15];
 
   static final DateTime pickerFirstDate = DateTime(2000);
   static const String displayDateFormat = 'MMM dd, yyyy';

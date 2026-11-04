@@ -13,18 +13,30 @@ import 'package:expense_tracker/i18n/strings.g.dart';
 class RecordCard extends StatelessWidget {
   final Record record;
   final VoidCallback onTap;
-  final VoidCallback onDelete;
+  final VoidCallback? onLongPress;
+  final bool selected;
   final CategoryInfo? categoryInfo;
 
   const RecordCard({
     super.key,
     required this.record,
     required this.onTap,
-    required this.onDelete,
+    this.onLongPress,
+    this.selected = false,
     this.categoryInfo,
   });
 
   Widget _buildLeading(AppPalette palette) {
+    if (selected) {
+      return SizedBox.square(
+        dimension: AppSpacing.iconTile,
+        child: Icon(
+          PiconsFill.checkCircle,
+          size: AppSpacing.xl,
+          color: palette.brand,
+        ),
+      );
+    }
     final iconKey = categoryInfo?.emoji;
     final colorHex = categoryInfo?.color;
     if (iconKey != null && iconKey.isNotEmpty && colorHex != null) {
@@ -97,23 +109,27 @@ class RecordCard extends StatelessWidget {
     final palette = context.palette;
     final isNegative = record.amount < 0;
 
-    return AppCard(
-      onTap: onTap,
-      dismissibleKey: Key('record_${record.id}'),
-      onDismissed: onDelete,
-      margin: EdgeInsets.zero,
-      padding: const EdgeInsets.symmetric(
-        vertical: AppSpacing.smd,
-        horizontal: AppSpacing.md,
-      ),
-      child: Row(
-        children: [
-          _buildLeading(palette),
-          const SizedBox(width: AppSpacing.smd),
-          _buildInfo(palette),
-          const SizedBox(width: AppSpacing.smd),
-          _buildAmount(palette, isNegative),
-        ],
+    return Semantics(
+      selected: selected,
+      child: AppCard(
+        key: Key('record_${record.id}'),
+        onTap: onTap,
+        onLongPress: onLongPress,
+        borderColor: selected ? palette.brand : null,
+        margin: EdgeInsets.zero,
+        padding: const EdgeInsets.symmetric(
+          vertical: AppSpacing.smd,
+          horizontal: AppSpacing.md,
+        ),
+        child: Row(
+          children: [
+            _buildLeading(palette),
+            const SizedBox(width: AppSpacing.smd),
+            _buildInfo(palette),
+            const SizedBox(width: AppSpacing.smd),
+            _buildAmount(palette, isNegative),
+          ],
+        ),
       ),
     );
   }
