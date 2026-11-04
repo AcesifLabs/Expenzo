@@ -6,6 +6,8 @@ import 'package:expense_tracker/features/reports/domain/usecases/get_weekly_summ
 import 'package:expense_tracker/features/settings/domain/entities/notification_toggle.dart';
 import 'package:expense_tracker/features/settings/domain/entities/user_settings.dart';
 import 'package:expense_tracker/features/settings/domain/usecases/get_settings.dart';
+import 'package:expense_tracker/features/sms_parser/application/realtime_sms_processor.dart';
+import 'package:expense_tracker/features/sms_parser/data/mappers/incoming_sms_event_mapper.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 import 'package:expense_tracker/shared/services/notification_service.dart';
 import 'background_task_names.dart';
@@ -16,12 +18,14 @@ class BackgroundTaskDeps {
   final GetWeeklySummary getWeeklySummary;
   final SendRecurringReminders sendRecurringReminders;
   final NotificationService notificationService;
+  final RealtimeSmsProcessor smsProcessor;
 
   const BackgroundTaskDeps({
     required this.getSettings,
     required this.getWeeklySummary,
     required this.sendRecurringReminders,
     required this.notificationService,
+    required this.smsProcessor,
   });
 }
 
@@ -36,13 +40,15 @@ class BackgroundTaskRunner {
     this.clock = DateTime.now,
   });
 
-  Future<bool> run(String taskName) async {
+  Future<bool> run(String taskName, {Map<String, dynamic>? input}) async {
     try {
       switch (taskName) {
         case BackgroundTaskNames.weeklySummary:
           await _runWeeklySummary();
         case BackgroundTaskNames.recurringReminders:
           await _runRecurringReminders();
+        case BackgroundTaskNames.smsImport:
+          await _runSmsImport(input);
         default:
           return false;
       }
@@ -77,6 +83,15 @@ class BackgroundTaskRunner {
     final settings = await _loadSettings();
     await deps.sendRecurringReminders(now: clock());
     await scheduler.rearm(BackgroundTaskNames.recurringReminders, settings);
+  }
+
+  /// A failed parse is not retried here: the message stays in the native
+  /// pending queue and is drained on the next app open.
+  Future<void> _runSmsImport(Map<String, dynamic>? input) async {
+    if (input == null || input.isEmpty) return;
+    await deps.smsProcessor.importInBackground(
+      mapIncomingSmsEventPayload(input),
+    );
   }
 
   Future<UserSettings> _loadSettings() async {

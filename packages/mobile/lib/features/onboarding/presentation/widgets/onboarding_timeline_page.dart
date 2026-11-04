@@ -1,12 +1,10 @@
 import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:picons/picons.dart';
 
 import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:expense_tracker/core/utils/currency_formatter.dart';
-import 'package:expense_tracker/features/budgets/domain/budget_plan.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 import 'package:expense_tracker/shared/presentation/widgets/app_card.dart';
 
@@ -19,27 +17,6 @@ import 'onboarding_page_frame.dart';
 import 'setup_complete_card.dart';
 
 class OnboardingTimelinePage extends StatelessWidget {
-  static String? _subtitle(OnboardingDraft draft, GoalDraft goal) {
-    if (planBaseFor(draft) <= 0) return null;
-    final perMonth = _savings(draft);
-    final timelineT = t.onboarding.timeline;
-    final fastest = fastestAffordableMonths(
-      timelineOptions(target: goal.targetAmount, savingsPerMonth: perMonth),
-    );
-    final savings = CurrencyFormatter.format(perMonth);
-
-    return fastest == null
-        ? timelineT.cannotAfford(amount: savings)
-        : timelineT.canAfford(
-            name: goal.name,
-            months: fastest,
-            amount: savings,
-          );
-  }
-
-  static double _savings(OnboardingDraft draft) =>
-      planSavings(planBaseFor(draft), planRowsFor(draft));
-
   const OnboardingTimelinePage({super.key});
 
   Future<void> _pickDate(BuildContext context, GoalDraft goal) async {
@@ -56,17 +33,8 @@ class OnboardingTimelinePage extends StatelessWidget {
     if (picked != null) bloc.add(TimelineChosen(customDate: picked));
   }
 
-  List<Widget> _options(
-    BuildContext context,
-    OnboardingDraft draft,
-    GoalDraft goal,
-  ) {
-    final savings = _savings(draft);
-    final hasBase = planBaseFor(draft) > 0;
-    final options = timelineOptions(
-      target: goal.targetAmount,
-      savingsPerMonth: savings,
-    );
+  List<Widget> _options(BuildContext context, GoalDraft goal) {
+    final options = timelineOptions(target: goal.targetAmount);
     final custom = goal.customDate;
     final customOption = custom == null
         ? null
@@ -74,7 +42,6 @@ class OnboardingTimelinePage extends StatelessWidget {
             target: goal.targetAmount,
             from: clock.now(),
             date: custom,
-            savingsPerMonth: savings,
           );
     final bloc = context.read<OnboardingBloc>();
     final timelineT = t.onboarding.timeline;
@@ -84,7 +51,6 @@ class OnboardingTimelinePage extends StatelessWidget {
         _TimelineCard(
           title: timelineT.months(n: option.months),
           option: option,
-          showMark: hasBase,
           selected: custom == null && goal.months == option.months,
           onTap: () => bloc.add(TimelineChosen(months: option.months)),
         ),
@@ -96,7 +62,6 @@ class OnboardingTimelinePage extends StatelessWidget {
             : '${timelineT.custom} · ${timelineT.months(n: customOption.months)}',
         subtitle: customOption == null ? timelineT.customHint : null,
         option: customOption,
-        showMark: hasBase,
         selected: customOption != null,
         onTap: () => _pickDate(context, goal),
       ),
@@ -116,9 +81,8 @@ class OnboardingTimelinePage extends StatelessWidget {
       title: goal == null
           ? t.onboarding.complete.title
           : t.onboarding.timeline.title,
-      subtitle: goal == null ? null : _subtitle(draft, goal),
       body: [
-        if (goal != null) ..._options(context, draft, goal),
+        if (goal != null) ..._options(context, goal),
         if (chosen) ...[
           const SizedBox(height: AppSpacing.md),
           SetupCompleteCard(draft: draft),
@@ -136,29 +100,9 @@ class OnboardingTimelinePage extends StatelessWidget {
 }
 
 class _TimelineCard extends StatelessWidget {
-  static Widget _mark(AppPalette palette, TimelineFit fit) {
-    final fitT = t.onboarding.timeline.fit;
-    final (icon, color, label) = switch (fit) {
-      TimelineFit.affordable => (
-        PiconsRegular.checkCircle,
-        palette.brand,
-        fitT.affordable,
-      ),
-      TimelineFit.tooExpensive => (
-        PiconsRegular.xCircle,
-        palette.expense,
-        fitT.tooExpensive,
-      ),
-      TimelineFit.slow => (PiconsRegular.warning, palette.warning, fitT.slow),
-    };
-
-    return Icon(icon, color: color, semanticLabel: label);
-  }
-
   final String title;
   final String? subtitle;
   final TimelineOption? option;
-  final bool showMark;
   final bool selected;
   final VoidCallback onTap;
 
@@ -166,7 +110,6 @@ class _TimelineCard extends StatelessWidget {
     required this.title,
     this.subtitle,
     required this.option,
-    required this.showMark,
     required this.selected,
     required this.onTap,
   });
@@ -193,25 +136,21 @@ class _TimelineCard extends StatelessWidget {
         borderColor: selected ? palette.brand : null,
         padding: AppSpacing.paddingMd,
         onTap: onTap,
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: textTheme.bodyLarge),
-                  if (detail != null)
-                    Text(
-                      detail,
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: palette.textSecondary,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            if (option != null && showMark) _mark(palette, option.fit),
-          ],
+        child: SizedBox(
+          width: double.infinity,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: textTheme.bodyLarge),
+              if (detail != null)
+                Text(
+                  detail,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: palette.textSecondary,
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

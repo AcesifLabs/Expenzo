@@ -45,12 +45,18 @@ void main() {
     createdAt: savedNow,
   );
 
+  // Saved before the receipt whatever day of the month the test runs on.
   final inMonthNewer = buildRecord(
     id: 'in-2',
     date: thisMonth.startDate.add(const Duration(days: 2)),
+    createdAt: savedNow.subtract(const Duration(hours: 1)),
   );
 
-  final inMonthOlder = buildRecord(id: 'in-1', date: thisMonth.startDate);
+  final inMonthOlder = buildRecord(
+    id: 'in-1',
+    date: thisMonth.startDate,
+    createdAt: savedNow.subtract(const Duration(hours: 2)),
+  );
 
   void stubGetRecords(List<Record> currentMonth) {
     when(

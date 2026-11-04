@@ -84,6 +84,17 @@ class RecordDao extends DatabaseAccessor<AppDatabase> with _$RecordDaoMixin {
     return (delete(records)..where((t) => t.id.equals(id))).go();
   }
 
+  /// Deletes every row in [ids] in one statement and returns the ids that
+  /// existed, so callers can tell which ones were actually removed.
+  Future<Set<String>> deleteRecords(List<String> ids) {
+    return transaction(() async {
+      final existing = await _existingIds(ids);
+      await (delete(records)..where((t) => t.id.isIn(existing))).go();
+
+      return existing;
+    });
+  }
+
   Future<int> getRecordCountByCategory(String categoryId) async {
     final count = countAll();
     final query = selectOnly(records)

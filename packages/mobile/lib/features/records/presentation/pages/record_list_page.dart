@@ -17,6 +17,7 @@ import 'package:expense_tracker/shared/presentation/widgets/app_search_bar.dart'
 import 'package:expense_tracker/shared/presentation/widgets/app_empty_state.dart';
 import 'package:expense_tracker/shared/presentation/widgets/shimmer_box.dart';
 import 'package:expense_tracker/features/records/presentation/widgets/new_transaction_sheet.dart';
+import 'package:expense_tracker/core/theme/app_palette.dart';
 import 'package:expense_tracker/core/theme/app_spacing.dart';
 import 'package:expense_tracker/core/theme/app_typography.dart';
 import '../../domain/entities/record.dart';
@@ -59,6 +60,12 @@ class RecordListView extends StatefulWidget {
 class _RecordListViewState extends State<RecordListView> {
   final _scrollController = ScrollController();
   final _searchCtrl = TextEditingController();
+
+  /// Selected record ids. A notifier so a toggle rebuilds only the header
+  /// and the cards, not the grouped list.
+  final _selection = ValueNotifier<Set<String>>(const {});
+
+  bool get _selecting => _selection.value.isNotEmpty;
 
   @override
   void initState() {
@@ -163,11 +170,15 @@ class _RecordListViewState extends State<RecordListView> {
                         itemBuilder: (context, index) {
                           final record = group.records[index];
 
-                          return RecordCard(
-                            record: record,
-                            onTap: () => _navigateToForm(context, record),
-                            onDelete: () => _handleDelete(context, record),
-                            categoryInfo: _resolveCategory(record, catState),
+                          return ValueListenableBuilder(
+                            valueListenable: _selection,
+                            builder: (context, selected, _) => RecordCard(
+                              record: record,
+                              selected: selected.contains(record.id),
+                              onTap: () => _onCardTap(context, record),
+                              onLongPress: () => _toggleSelected(record),
+                              categoryInfo: _resolveCategory(record, catState),
+                            ),
                           );
                         },
                       ),
@@ -249,29 +260,85 @@ class _RecordListViewState extends State<RecordListView> {
     unawaited(showTransactionSheet(context, record: record));
   }
 
-  void _onUndoDelete(Record record) {
-    if (!mounted) return;
-    context.read<RecordBloc>().add(AddRecordEvent(record));
+  void _onCardTap(BuildContext context, Record record) {
+    if (_selecting) {
+      _toggleSelected(record);
+
+      return;
+    }
+    _navigateToForm(context, record);
   }
 
-  void _handleDelete(BuildContext context, Record record) {
+  void _toggleSelected(Record record) {
+    final id = record.id;
+    if (id == null) return;
+    final next = {..._selection.value};
+    if (!next.remove(id)) next.add(id);
+    _selection.value = next;
+  }
+
+  List<Record> get _currentRecords =>
+      _extractListState(context.read<RecordBloc>().state).$1;
+
+  void _selectAll() {
+    _selection.value = {
+      ..._selection.value,
+      ..._currentRecords.map((r) => r.id).nonNulls,
+    };
+  }
+
+  void _clearSelection() => _selection.value = const {};
+
+  void _onPopInvoked(bool didPop, Object? _) {
+    if (!didPop) _clearSelection();
+  }
+
+  void _pruneSelection(BuildContext _, RecordState state) {
+    if (state is! RecordLoaded || !_selecting) return;
+    final present = state.filteredRecords.map((r) => r.id).toSet();
+    final selected = _selection.value;
+    if (selected.every(present.contains)) return;
+    _selection.value = selected.where(present.contains).toSet();
+  }
+
+  void _deleteSelected(BuildContext context) {
     final bloc = context.read<RecordBloc>();
-    final recordId = record.id;
-    if (recordId == null) return;
-    bloc.add(DeleteRecordEvent(recordId));
+    final selected = _selection.value;
+    final deleted = _currentRecords
+        .where((r) => selected.contains(r.id))
+        .toList();
+    bloc.add(DeleteRecordsEvent(deleted));
+    _clearSelection();
 
     ScaffoldMessenger.of(context)
       ..clearSnackBars()
       ..showSnackBar(
         SnackBar(
-          content: Text(t.records.list.deleted),
+          content: Text(t.records.list.deleted(n: deleted.length)),
           duration: AppConstants.undoSnackbarDuration,
           action: SnackBarAction(
             label: t.common.undo,
-            onPressed: () => _onUndoDelete(record),
+            onPressed: () => bloc.add(const RestoreDeletedRecords()),
           ),
         ),
       );
+  }
+
+  List<Widget> _selectionActions(BuildContext context) {
+    final listT = t.records.list;
+
+    return [
+      IconButton(
+        icon: const Icon(PiconsRegular.checks),
+        tooltip: listT.selectAll,
+        onPressed: _selectAll,
+      ),
+      IconButton(
+        icon: Icon(PiconsRegular.trash, color: context.palette.expense),
+        tooltip: t.common.delete,
+        onPressed: () => _deleteSelected(context),
+      ),
+    ];
   }
 
   void Function({
@@ -335,30 +402,12 @@ class _RecordListViewState extends State<RecordListView> {
     );
   }
 
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    _searchCtrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildBody(bool selecting, Widget list) {
     final listT = t.records.list;
 
-    return AppScaffold(
-      title: listT.title,
-      subtitle: listT.subtitle,
-      actions: [
-        TextButton.icon(
-          onPressed: () => _showFilterModal(context),
-          icon: const Icon(PiconsRegular.funnel, size: 20),
-          label: Text(listT.filter),
-          style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
-        ),
-      ],
-      child: Column(
-        children: [
+    return Column(
+      children: [
+        if (!selecting)
           Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.lg,
@@ -371,19 +420,71 @@ class _RecordListViewState extends State<RecordListView> {
                   context.read<RecordBloc>().add(SearchRecords(v)),
             ),
           ),
-          Expanded(
-            child: GestureDetector(
-              onTap: () => FocusScope.of(context).unfocus(),
-              behavior: HitTestBehavior.translucent,
+        Expanded(
+          child: GestureDetector(
+            onTap: () => FocusScope.of(context).unfocus(),
+            behavior: HitTestBehavior.translucent,
 
-              excludeFromSemantics: true,
-              child: Scrollbar(
-                controller: _scrollController,
-                child: _buildRecordsList(),
-              ),
-            ),
+            excludeFromSemantics: true,
+            child: list,
           ),
-        ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildScaffold(Set<String> selected, Widget list) {
+    final listT = t.records.list;
+    final selecting = selected.isNotEmpty;
+
+    return PopScope(
+      canPop: !selecting,
+      onPopInvokedWithResult: _onPopInvoked,
+      child: AppScaffold(
+        title: selecting ? listT.selected(n: selected.length) : listT.title,
+        subtitle: selecting ? null : listT.subtitle,
+        leading: selecting
+            ? IconButton(
+                icon: const Icon(PiconsRegular.x),
+                tooltip: listT.clearSelection,
+                onPressed: _clearSelection,
+              )
+            : null,
+        actions: selecting
+            ? _selectionActions(context)
+            : [
+                TextButton.icon(
+                  onPressed: () => _showFilterModal(context),
+                  icon: const Icon(PiconsRegular.funnel, size: 20),
+                  label: Text(listT.filter),
+                  style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
+                ),
+              ],
+        child: _buildBody(selecting, list),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _searchCtrl.dispose();
+    _selection.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<RecordBloc, RecordState>(
+      listener: _pruneSelection,
+      child: ValueListenableBuilder(
+        valueListenable: _selection,
+        builder: (context, selected, list) =>
+            _buildScaffold(selected, list ?? const SizedBox.shrink()),
+        child: Scrollbar(
+          controller: _scrollController,
+          child: _buildRecordsList(),
+        ),
       ),
     );
   }

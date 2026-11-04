@@ -74,6 +74,9 @@ android {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+    // Same version the workmanager plugin uses; SmsImportScheduler enqueues
+    // its BackgroundWorker directly.
+    implementation("androidx.work:work-runtime:2.10.2")
     androidTestUtil("androidx.test:orchestrator:1.5.1")
 }
 

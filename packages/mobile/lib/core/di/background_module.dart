@@ -5,6 +5,7 @@ import 'package:expense_tracker/core/background/background_work.dart';
 import 'package:expense_tracker/features/recurring/domain/usecases/send_recurring_reminders.dart';
 import 'package:expense_tracker/features/reports/domain/usecases/get_weekly_summary.dart';
 import 'package:expense_tracker/features/settings/domain/usecases/get_settings.dart';
+import 'package:expense_tracker/features/sms_parser/application/realtime_sms_processor.dart';
 import 'package:expense_tracker/shared/services/notification_service.dart';
 
 const Duration? _debugDelay = bool.fromEnvironment('EXPENZO_BG_TEST_DELAY')
@@ -26,6 +27,7 @@ void initBackgroundModule(GetIt getIt) {
         getWeeklySummary: getIt<GetWeeklySummary>(),
         sendRecurringReminders: getIt<SendRecurringReminders>(),
         notificationService: getIt<NotificationService>(),
+        smsProcessor: getIt<RealtimeSmsProcessor>(),
       ),
       scheduler: getIt<BackgroundTaskScheduler>(),
     ),

@@ -767,6 +767,41 @@ void main() {
       ]);
     });
 
+    test(
+      'a background import parses and notifies without starting the listener',
+      () async {
+        parseEachEventAs(description: 'Daraz payment');
+        final event = eventAt(10);
+
+        await processor.importInBackground(event);
+
+        verifyNever(() => listener.start());
+        verify(() => createRecordsFromParsedList(any())).called(1);
+        final notified =
+            verify(
+                  () => notifyAutoImportedRecords(captureAny()),
+                ).captured.single
+                as List<AutoImportedRecord>;
+        expect(notified.single.sourceId, event.sourceId);
+      },
+    );
+
+    test(
+      'a background import of an already imported SMS does nothing',
+      () async {
+        parseEachEventAs();
+        final event = eventAt(10);
+        when(
+          () => recordRepository.getExistingSourceIds(any()),
+        ).thenAnswer((_) async => Right(<String>{event.sourceId}));
+
+        await processor.importInBackground(event);
+
+        verifyNever(() => createRecordsFromParsedList(any()));
+        verifyNever(() => notifyAutoImportedRecords(any()));
+      },
+    );
+
     test('a drain notifies once with every record it added', () async {
       parseEachEventAs();
       when(

@@ -26,6 +26,9 @@ abstract class RecordRepository {
 
   Future<Either<CacheFailure, Unit>> deleteRecord(String id);
 
+  /// Deletes [ids] together and returns the ids that were actually removed.
+  Future<Either<CacheFailure, Set<String>>> deleteRecords(List<String> ids);
+
   Stream<List<Record>> watchRecords({int? limit, int? offset});
 
   Stream<List<Record>> watchFilteredRecords(RecordFilter filter);

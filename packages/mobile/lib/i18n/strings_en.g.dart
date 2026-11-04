@@ -2570,12 +2570,6 @@ class Translations$onboarding$timeline$en {
 	/// en: 'Pick your timeline'
 	String get title => 'Pick your timeline';
 
-	/// en: 'You can afford {name} in {months} months saving {amount}/month.'
-	String canAfford({required Object name, required Object months, required Object amount}) => 'You can afford ${name} in ${months} months saving ${amount}/month.';
-
-	/// en: 'Your savings of {amount}/month don't cover these. Pick a later custom date.'
-	String cannotAfford({required Object amount}) => 'Your savings of ${amount}/month don\'t cover these. Pick a later custom date.';
-
 	/// en: '(one) {{n} month} (other) {{n} months}'
 	String months({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
 		one: '${n} month',
@@ -2590,8 +2584,6 @@ class Translations$onboarding$timeline$en {
 
 	/// en: 'Set your own'
 	String get customHint => 'Set your own';
-
-	late final Translations$onboarding$timeline$fit$en fit = Translations$onboarding$timeline$fit$en.internal(_root);
 }
 
 // Path: onboarding.complete
@@ -2724,8 +2716,23 @@ class Translations$records$list$en {
 	/// en: 'Scroll for more'
 	String get scrollForMore => 'Scroll for more';
 
-	/// en: 'Record deleted'
-	String get deleted => 'Record deleted';
+	/// en: '(one) {{n} record deleted} (other) {{n} records deleted}'
+	String deleted({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: '${n} record deleted',
+		other: '${n} records deleted',
+	);
+
+	/// en: '(one) {{n} selected} (other) {{n} selected}'
+	String selected({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: '${n} selected',
+		other: '${n} selected',
+	);
+
+	/// en: 'Select all'
+	String get selectAll => 'Select all';
+
+	/// en: 'Clear selection'
+	String get clearSelection => 'Clear selection';
 }
 
 // Path: records.picker
@@ -4125,24 +4132,6 @@ class Translations$onboarding$recurring$sheet$en {
 	String get frequency => 'Repeats';
 }
 
-// Path: onboarding.timeline.fit
-class Translations$onboarding$timeline$fit$en {
-	Translations$onboarding$timeline$fit$en.internal(this._root);
-
-	final Translations _root; // ignore: unused_field
-
-	// Translations
-
-	/// en: 'Fits your savings'
-	String get affordable => 'Fits your savings';
-
-	/// en: 'More than your savings'
-	String get tooExpensive => 'More than your savings';
-
-	/// en: 'Takes a long time'
-	String get slow => 'Takes a long time';
-}
-
 // Path: onboarding.tutorial.dashboard
 class Translations$onboarding$tutorial$dashboard$en {
 	Translations$onboarding$tutorial$dashboard$en.internal(this._root);
@@ -5449,15 +5438,10 @@ extension on Translations {
 			'onboarding.goal.amountLabel' => 'Target amount',
 			'onboarding.goal.notNow' => 'No goal for now',
 			'onboarding.timeline.title' => 'Pick your timeline',
-			'onboarding.timeline.canAfford' => ({required Object name, required Object months, required Object amount}) => 'You can afford ${name} in ${months} months saving ${amount}/month.',
-			'onboarding.timeline.cannotAfford' => ({required Object amount}) => 'Your savings of ${amount}/month don\'t cover these. Pick a later custom date.',
 			'onboarding.timeline.months' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} month', other: '${n} months', ), 
 			'onboarding.timeline.perMonth' => ({required Object amount}) => '${amount}/mo',
 			'onboarding.timeline.custom' => 'Custom',
 			'onboarding.timeline.customHint' => 'Set your own',
-			'onboarding.timeline.fit.affordable' => 'Fits your savings',
-			'onboarding.timeline.fit.tooExpensive' => 'More than your savings',
-			'onboarding.timeline.fit.slow' => 'Takes a long time',
 			'onboarding.complete.title' => 'Setup complete!',
 			'onboarding.complete.budgets' => 'Budget created',
 			'onboarding.complete.recurring' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} recurring payment', other: '${n} recurring payments', ), 
@@ -5510,7 +5494,10 @@ extension on Translations {
 			'records.list.noMatches' => 'No transactions match your search or filters.',
 			'records.list.empty' => 'No transactions yet',
 			'records.list.scrollForMore' => 'Scroll for more',
-			'records.list.deleted' => 'Record deleted',
+			'records.list.deleted' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} record deleted', other: '${n} records deleted', ), 
+			'records.list.selected' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} selected', other: '${n} selected', ), 
+			'records.list.selectAll' => 'Select all',
+			'records.list.clearSelection' => 'Clear selection',
 			'records.picker.title' => 'Choose category',
 			'records.picker.search' => 'Search categories',
 			'records.picker.noneFound' => 'No categories found',

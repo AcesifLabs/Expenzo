@@ -31,7 +31,7 @@ class SmsBroadcastReceiver : BroadcastReceiver() {
                 "body" to combinedBody,
                 "timestamp" to messages.first().timestampMillis
             )
-            SmsEventStore.appendEvent(context, payload, fromReceiver = true)
+            deliver(context, payload)
             return
         }
 
@@ -41,7 +41,18 @@ class SmsBroadcastReceiver : BroadcastReceiver() {
                 "body" to (message.displayMessageBody ?: ""),
                 "timestamp" to message.timestampMillis
             )
-            SmsEventStore.appendEvent(context, payload, fromReceiver = true)
+            deliver(context, payload)
+        }
+    }
+
+    /**
+     * Queues the message, then makes sure something parses it now: the live
+     * Dart listener if the app is running, otherwise a background job.
+     */
+    private fun deliver(context: Context, payload: Map<String, Any>) {
+        SmsEventStore.appendEvent(context, payload, fromReceiver = true)
+        if (!SmsEventStore.hasListener()) {
+            SmsImportScheduler.enqueue(context, payload)
         }
     }
 

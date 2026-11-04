@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:picons/picons.dart';
-import 'package:expense_tracker/core/theme/app_spacing.dart';
 
 class AppCard extends StatelessWidget {
   final Widget child;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
-  final Key? dismissibleKey;
-  final VoidCallback? onDismissed;
   final Color? backgroundColor;
   final Color? borderColor;
   final EdgeInsetsGeometry? padding;
@@ -20,8 +16,6 @@ class AppCard extends StatelessWidget {
     required this.child,
     this.onTap,
     this.onLongPress,
-    this.dismissibleKey,
-    this.onDismissed,
     this.backgroundColor,
     this.borderColor,
     this.padding,
@@ -29,18 +23,6 @@ class AppCard extends StatelessWidget {
     this.borderRadius,
     this.clipBehavior = Clip.none,
   });
-
-  Widget _buildDismissibleBackground(ColorScheme colors, double radius) {
-    return Container(
-      alignment: Alignment.centerRight,
-      padding: const EdgeInsets.only(right: AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: colors.error,
-        borderRadius: BorderRadius.circular(radius),
-      ),
-      child: Icon(PiconsRegular.trash, color: colors.onError),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +44,7 @@ class AppCard extends StatelessWidget {
         ? Padding(padding: localPadding, child: child)
         : child;
 
-    Widget inner = Container(
+    final inner = Container(
       decoration: BoxDecoration(
         color: backgroundColor ?? theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(radius),
@@ -78,18 +60,6 @@ class AppCard extends StatelessWidget {
         ),
       ),
     );
-
-    final localDismissibleKey = dismissibleKey;
-    final localOnDismissed = onDismissed;
-    if (localDismissibleKey != null && localOnDismissed != null) {
-      inner = Dismissible(
-        key: localDismissibleKey,
-        direction: DismissDirection.endToStart,
-        onDismissed: (_) => localOnDismissed(),
-        background: _buildDismissibleBackground(theme.colorScheme, radius),
-        child: inner,
-      );
-    }
 
     final localMargin = margin;
     if (localMargin != null) {

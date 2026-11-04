@@ -61,7 +61,6 @@ void initRecordModule(GetIt getIt) {
       getRecords: getIt<GetRecords>(),
       addRecord: getIt<AddRecord>(),
       updateRecord: getIt<UpdateRecord>(),
-      deleteRecord: getIt<DeleteRecord>(),
       recordRepository: getIt<RecordRepository>(),
     ),
   );

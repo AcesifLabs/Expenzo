@@ -12,6 +12,8 @@ import 'package:expense_tracker/features/reports/domain/entities/weekly_summary.
 import 'package:expense_tracker/features/reports/domain/usecases/get_weekly_summary.dart';
 import 'package:expense_tracker/features/settings/domain/entities/user_settings.dart';
 import 'package:expense_tracker/features/settings/domain/usecases/get_settings.dart';
+import 'package:expense_tracker/features/sms_parser/application/realtime_sms_processor.dart';
+import 'package:expense_tracker/features/sms_parser/domain/entities/incoming_sms_event.dart';
 import 'package:expense_tracker/i18n/strings.g.dart';
 import 'package:expense_tracker/shared/services/notification_service.dart';
 
@@ -28,6 +30,8 @@ class _MockNotificationService extends Mock implements NotificationService {}
 
 class _MockScheduler extends Mock implements BackgroundTaskScheduler {}
 
+class _MockSmsProcessor extends Mock implements RealtimeSmsProcessor {}
+
 void main() {
   final now = DateTime(2026, 10, 18, 20);
   final summary = WeeklySummary(
@@ -41,12 +45,16 @@ void main() {
   late _MockSendRecurringReminders sendReminders;
   late _MockNotificationService notifications;
   late _MockScheduler scheduler;
+  late _MockSmsProcessor smsProcessor;
   late BackgroundTaskRunner runner;
 
   setUpAll(() {
     registerFallbackValue(NoParams());
     registerFallbackValue(makeUserSettings());
     registerFallbackValue(summary);
+    registerFallbackValue(
+      IncomingSmsEvent(address: '', body: '', receivedAt: DateTime(2026)),
+    );
   });
 
   setUp(() {
@@ -55,12 +63,15 @@ void main() {
     sendReminders = _MockSendRecurringReminders();
     notifications = _MockNotificationService();
     scheduler = _MockScheduler();
+    smsProcessor = _MockSmsProcessor();
+    when(() => smsProcessor.importInBackground(any())).thenAnswer((_) async {});
     runner = BackgroundTaskRunner(
       deps: BackgroundTaskDeps(
         getSettings: getSettings,
         getWeeklySummary: getWeeklySummary,
         sendRecurringReminders: sendReminders,
         notificationService: notifications,
+        smsProcessor: smsProcessor,
       ),
       scheduler: scheduler,
       clock: () => now,
@@ -137,6 +148,7 @@ void main() {
           getWeeklySummary: getWeeklySummary,
           sendRecurringReminders: sendReminders,
           notificationService: notifications,
+          smsProcessor: smsProcessor,
         ),
         scheduler: scheduler,
         clock: () => DateTime(2026, 10, 19, 1),
@@ -196,6 +208,7 @@ void main() {
         getWeeklySummary: getWeeklySummary,
         sendRecurringReminders: sendReminders,
         notificationService: notifications,
+        smsProcessor: smsProcessor,
       ),
       scheduler: scheduler,
       clock: () => DateTime(2026, 10, 17, 21),
@@ -227,6 +240,7 @@ void main() {
         getWeeklySummary: getWeeklySummary,
         sendRecurringReminders: sendReminders,
         notificationService: notifications,
+        smsProcessor: smsProcessor,
       ),
       scheduler: scheduler,
       clock: () => DateTime(2026, 10, 16, 21),
@@ -241,5 +255,50 @@ void main() {
         firstWeekday: DateTime.saturday,
       ),
     ).called(1);
+  });
+
+  group('sms import', () {
+    test('parses the message the receiver handed over', () async {
+      final ok = await runner.run(
+        BackgroundTaskNames.smsImport,
+        input: {
+          'sender': 'MyBank',
+          'body': 'Tk 500 spent at Shop',
+          'timestamp': 1793520000000,
+        },
+      );
+
+      expect(ok, isTrue);
+      final event =
+          verify(
+                () => smsProcessor.importInBackground(captureAny()),
+              ).captured.single
+              as IncomingSmsEvent;
+      expect(event.address, 'MyBank');
+      expect(event.body, 'Tk 500 spent at Shop');
+      expect(
+        event.receivedAt,
+        DateTime.fromMillisecondsSinceEpoch(1793520000000, isUtc: true),
+      );
+      verifyNever(() => scheduler.rearm(any(), any()));
+    });
+
+    test('with no input it does nothing and still succeeds', () async {
+      expect(await runner.run(BackgroundTaskNames.smsImport), isTrue);
+      verifyNever(() => smsProcessor.importInBackground(any()));
+    });
+
+    test('a processor error reports failure', () async {
+      when(
+        () => smsProcessor.importInBackground(any()),
+      ).thenThrow(StateError('db closed'));
+
+      final ok = await runner.run(
+        BackgroundTaskNames.smsImport,
+        input: {'sender': 'MyBank', 'body': 'x', 'timestamp': 1},
+      );
+
+      expect(ok, isFalse);
+    });
   });
 }

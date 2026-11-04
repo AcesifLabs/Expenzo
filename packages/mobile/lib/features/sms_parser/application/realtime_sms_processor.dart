@@ -87,6 +87,11 @@ class RealtimeSmsProcessor {
     await _afterImport(imported);
   }
 
+  /// Parses one message delivered to a background job while the app was
+  /// closed. Notifies and checks budgets like the live path.
+  Future<void> importInBackground(IncomingSmsEvent event) =>
+      _processAndNotify(event);
+
   Future<void> stop() async {
     _isStarted = false;
     await _subscription?.cancel();

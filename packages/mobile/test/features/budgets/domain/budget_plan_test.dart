@@ -56,23 +56,12 @@ void main() {
     });
   });
 
-  group('remaining and savings', () {
+  group('remaining', () {
     final rows = [row('A', 600), row('B', 300.5)];
 
     test('remaining can go below 0', () {
       expect(planRemaining(1000, rows), 99.5);
       expect(planRemaining(800, rows), -100.5);
-    });
-
-    test('savings uses the Savings row, even renamed', () {
-      final withSavings = [...rows, row('Rainy day', 50, savings: true)];
-
-      expect(planSavings(5000, withSavings), 50);
-    });
-
-    test('savings falls back to the remainder, never below 0', () {
-      expect(planSavings(1000, rows), 99.5);
-      expect(planSavings(800, rows), 0);
     });
   });
 

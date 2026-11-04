@@ -7,7 +7,6 @@ import 'package:expense_tracker/features/records/presentation/bloc/record_event.
 import 'package:expense_tracker/features/records/presentation/bloc/record_state.dart';
 import 'package:expense_tracker/features/records/domain/repositories/record_repository.dart';
 import 'package:expense_tracker/features/records/domain/usecases/add_record.dart';
-import 'package:expense_tracker/features/records/domain/usecases/delete_record.dart';
 import 'package:expense_tracker/features/records/domain/usecases/get_records.dart';
 import 'package:expense_tracker/features/records/domain/usecases/update_record.dart';
 import 'package:expense_tracker/core/error/failures.dart';
@@ -21,8 +20,6 @@ class MockGetRecords extends Mock implements GetRecords {}
 class MockAddRecord extends Mock implements AddRecord {}
 
 class MockUpdateRecord extends Mock implements UpdateRecord {}
-
-class MockDeleteRecord extends Mock implements DeleteRecord {}
 
 class FakeGetRecordsParams extends Fake implements GetRecordsParams {}
 
@@ -54,7 +51,6 @@ void main() {
   late MockGetRecords mockGetRecords;
   late MockAddRecord mockAddRecord;
   late MockUpdateRecord mockUpdateRecord;
-  late MockDeleteRecord mockDeleteRecord;
   late RecordBloc bloc;
 
   late StreamController<List<Record>> allRecords;
@@ -70,7 +66,6 @@ void main() {
     mockGetRecords = MockGetRecords();
     mockAddRecord = MockAddRecord();
     mockUpdateRecord = MockUpdateRecord();
-    mockDeleteRecord = MockDeleteRecord();
 
     allRecords = StreamController<List<Record>>.broadcast();
     filteredRecords = StreamController<List<Record>>.broadcast();
@@ -85,7 +80,6 @@ void main() {
       getRecords: mockGetRecords,
       addRecord: mockAddRecord,
       updateRecord: mockUpdateRecord,
-      deleteRecord: mockDeleteRecord,
       recordRepository: mockRepo,
     );
   });
